@@ -1,1 +1,0 @@
-const scroll = new SmoothScroll('.dcnav a[href*="#"]');
