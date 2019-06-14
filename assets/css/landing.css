@@ -1,0 +1,131 @@
+@font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Lora Regular'), local('Lora-Regular'), url(https://fonts.gstatic.com/s/lora/v13/0QIvMX1D_JOuMwf7I-NP.woff2) format('woff2');
+    unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 300;
+    src: local('Montserrat Light'), local('Montserrat-Light'), url(https://fonts.gstatic.com/s/montserrat/v13/JTURjIg1_i6t8kCHKm45_cJD3gTD_u50.woff2) format('woff2');
+    unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Lora', serif;
+    background: white;
+    color: black;
+    height: 100vh;
+    line-height: 1.6;
+}
+
+p, a, h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    text-transform: uppercase;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+}
+
+section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    height: 100vh;
+    scroll-snap-align: center;
+}
+
+.dcnav {
+    position: fixed;
+    top: 0;
+    display: inline-block;
+    width: 100%;
+    height: 60px;
+    background: transparent;
+}
+
+.dcnav ul {
+    list-style: none;
+    width: 100%;
+    justify-content: center;
+}
+
+.dcnav ul li {
+    display: inline-block;
+    float: left;
+    margin: 0 1rem;
+    padding: 1rem;
+}
+
+.dcnav ul li a {
+    text-decoration: none;
+    text-transform: uppercase;
+    color: black;
+}
+
+.dcnav ul li a:hover {
+    color: skyblue;
+}
+
+section h1 {
+    font-size: 4rem;
+}
+
+article {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    padding: 1rem;
+    text-align: center;
+    transform: translate(-50%, -50%);
+}
+
+.left-half {
+    background-color: white;
+    float: left;
+    width: 50%;
+    height: 100%;
+}
+.pn .right-half {
+    background: url("../../images/pn/trex.jpg") no-repeat center;
+    background-size: cover;
+    float: left;
+    width: 50%;
+    height: 100%;
+}
+.dl .right-half {
+    background: url("../../images/dl/code.png") no-repeat center;
+    background-size: cover;
+    float: left;
+    width: 50%;
+    height: 100%;
+}
+.gh .right-half {
+    background: url("../../images/gh/gradle.png") no-repeat center;
+    background-size: contain;
+    float: left;
+    width: 50%;
+    height: 100%;
+}
+
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    color: black;
+}
