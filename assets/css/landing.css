@@ -95,7 +95,6 @@ section article p {
     height: 90vh;
     position: absolute;
     bottom: 0;
-    z-index: -10;
 }
 
 section {
@@ -128,6 +127,10 @@ article {
     height: 100%;
 }
 
+.dc .left-half img {
+    width: 20px;
+}
+
 .pn .right-half {
     background: url("../../images/pn/trex.jpg") no-repeat center;
     background-size: cover;
@@ -158,27 +161,41 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .container {
+        width: 100%;
+        height: 100%;
+        scroll-snap-type: none;
+    }
+
     .left-half  {
         width: 100%;
     }
+
     .pn .left-half {
         background: url("../../images/pn/trex.jpg") no-repeat center;
         color: white;
     }
     .dl .left-half {
-        background: url("../../images/dl/code.png") no-repeat center;
+        /* Adds shading to the image to darken it. */
+        background: linear-gradient(
+                rgba(0, 0, 0, 0.7),
+                rgba(0, 0, 0, 0.7)),
+        url("../../images/dl/dl-mobile.jpg") no-repeat center;
+        background-size: cover;
         color: white;
     }
 
     .gh .left-half {
-        background: url("../../images/gh/gradle.png") no-repeat center;
+        background: gray;
         color: white;
     }
     .right-half {
+        /* Get rid of pictures in mobile */
         display: none;
     }
 
     .dcnav {
+        /* Get rid of nav in mobile */
         display: none;
     }
 }
