@@ -1,74 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<link href="https://fonts.googleapis.com/css?family=Lora:400,700|Montserrat:300" rel="stylesheet">
-	<link rel="stylesheet" href="assets/css/landing.css">
-	<title>DumbCode</title>
-</head>
-<body>
-	<div class="container">
-		<section class="dc" id="DumbCode">
-				<nav class="dcnav">
-					<ul>
-						<li><a href="#DumbCode" id="dcnav">DumbCode</a></li>
-						<li><a href="#ProjectNublar" id="pnnav">Project Nublar</a></li>
-						<li><a href="#DumbLibrary" id="dlnav">DumbLibrary</a></li>
-						<li><a href="#GradleHook" id="ghnav">GradleHook</a></li>
-					</ul>
-				</nav>
-				<div class="left-half">
-					<article>
-						<h1>DumbCode</h1>
-						<p>Welcome to the DumbCode website!</p>
-						<p>We are a Minecraft modding group that loves to bring</p>
-						<p>new experiences into the world of Minecraft</p>
-						<a href="https://github.com/Dumb-Code"><img src="images/icons/github.png"></a>
-						<a href="https://twitter.com/DumbCodeMC"><img src="images/icons/twitter.png"></a>
-					</article>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>DumbCode</title>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" />
+		<link rel="stylesheet" href="css/landing.css" />
+		<script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+		<script src="scripts/navigation.js"></script>
+	</head>
+	<body>
+
+
+		<section class="hero is-fullheight is-mobile is-dark">
+
+			<nav class="navbar is-mobile is-marginless heading has-text-weight-bold" role="navigation" aria-label="main navigation">
+			  <div class="navbar-brand">
+			    <a class="navbar-item" href="/">
+			      <img src="/images/dclogo.svg" width="48" height="28">DUMBCODE
+			    </a>
+
+			    <div class="divider" style="width: 6rem"></div>
+
+			    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+			      <span aria-hidden="true"></span>
+			      <span aria-hidden="true"></span>
+			      <span aria-hidden="true"></span>
+			    </a>
+			  </div>
+
+			  <div id="navbarBasicExample" class="navbar-menu is-fullhd">
+			    <div class="navbar-start">
+			      <a class="navbar-item center" href="#home">HOME</a>
+			      <a class="navbar-item center" href="#projectnublar">PROJECT NUBLAR</a>
+			      <a class="navbar-item center" href="#dumblibrary">DUMB LIBRARY</a>
+			      <a class="navbar-item center" href="#gradlehook">GRADLEHOOK</a>
+			    </div>
+			  </div>
+			</nav>
+
+      <div id="home" class="hero-body center">
+          <div class="container" style="text-align: center;">
+							<div class="title is-1">DUMB::CODE</div>
+							<div class="subtitle is-5">Welcome to the DumbCode website!<br>weare a minecraft modding group that loves to bring<br>new experiences into the world of minecraft!</div>
+          </div>
+      </div>
+
+		</section>
+
+		<div id="projectnublar" class="hero is-fullheight is-mobile is-dark" style="background-image: url('images/pn/trex.jpg'); background-size: cover;">
+			<div class="hero-body">
+				<div class="container is-overlay" style="text-align: center;">
+					<h1 class="title is-1">Project: Nublar</h1>
+					<h3 class="subtitle is-5">A Minecraft mod created to add Dinosaurs to Minecraft.</h3>
 				</div>
-				<div class="right-half">
+			</div>
+		</div>
+
+		<div id="dumblibrary" class="hero is-fullheight is-mobile is-dark" style="background-image: url('images/dl/code.png');">
+			<div class="hero-body">
+				<div class="container is-overlay" style="text-align: center;">
+					<h1 class="title is-1">DumbLibrary</h1>
+					<h3 class="subtitle is-5">This is an open source minecraft modding library that adds a variety of custom tools that modders all over the world are free to use, including us!</h3>
 				</div>
-			</section>
-		<section class="pn" id="ProjectNublar">
-			<div class="left-half">
-				<article>
-					<h1>Project: Nublar</h1>
-					<p>A minecraft mod created to add dinosaurs to Minecraft</p>
-				</article>
 			</div>
-			<div class="right-half">
+		</div>
+
+		<div id="gradlehook" class="hero is-fullheight is-mobile is-dark" style="background-image: url('images/gh/gradle.png')">
+			<div class="hero-body">
+				<div class="container is-overlay" style="text-align: center;">
+					<h1 class="title is-1">GradleHook</h1>
+					<h3 class="subtitle is-5">GradleHook is a gradle plugin that adds a task named "PostRequest" that sends the new build to a webhook of the user's choice.</h3>
+				</div>
 			</div>
-		</section>
-		<section class="dl" id="DumbLibrary">
-			<div class="left-half">
-				<article>
-					<h1>DumbLibrary</h1>
-					<p>This is an open source Minecraft modding</p>
-					<p>library that adds a variety of custom tools</p>
-					<p>that modders all over the world are free to use, including us!</p>
-				</article>
-			</div>
-			<div class="right-half">
-			</div>
-		</section>
-		<section class="gh" id="GradleHook">
-			<div class="left-half">
-				<article>
-					<h1>GradleHook</h1>
-					<p>GradleHook is a gradle plugin that adds a task named</p>
-					<p>"postRequest" that sends the new build to a webhook</p>
-					<p>of the users choice.</p>
-				</article>
-			</div>
-			<div class="right-half">
-			</div>
-		</section>
-		<footer>
-			<p>© 2019 DumbLibrary</p>
-		</footer>
-	</div>
-</body>
+		</div>
+
+    <div class="is-divider"></div>
+
+    <footer class="section has-background-black-ter">
+        <div class="container is-dark">
+            <div class="columns">
+                <div class="column">
+                    <div class="notification has-background-grey-dark has-text-light" style="min-height: 13rem;">
+                        <img class="image is-96x96" style="float:left; margin-right: 2rem;" src="images/dclogo.png">
+                        <h1 class="title is-size-4">DumbCode</h1>
+                        Dedicated to bringing the greatest Minecraft mods to our community since 2018.
+												<form action="https://twitter.com/DumbCodeMC">
+                            <br>
+                            <input class="button is-fullwidth is-primary" type="submit" value="Twitter" />
+                        </form>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="notification has-background-grey-dark has-text-light" style="min-height: 13rem;">
+                        <h1 class="title is-size-4">More Info</h1>
+                        For additional information or concerns please direct questions or issues to our GitHub issue trackers.
+                        <form action="https://github.com/Dumb-Code">
+                            <br>
+                            <input class="button is-fullwidth is-dark" type="submit" value="GitHub" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+	</body>
 </html>
