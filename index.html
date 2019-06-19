@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DumbCode</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" />
   <link rel="stylesheet" href="css/landing.css" />
-  <link href="slick/slick.css" rel="stylesheet" type="text/css"/>
-  <link href="slick/slick-theme.css" rel="stylesheet" type="text/css"/>
   <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
   <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
   <script src="scripts/navigation.js"></script>
 </head>
-
-<body class="is-dark" style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
+<body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
 
 
 <section class="hero is-fullheight is-mobile is-dark">
@@ -57,14 +53,9 @@
 
 </section>
 
-<div class="hero is-fullheight is-mobile is-dark" id="projectnublar">
-  <script src="scripts/pnbackground.js"></script>
-  <script>
-    window.onload = setBackground;
-    window.addEventListener("resize", setBackground);
-  </script>
+<div class="hero is-fullheight is-mobile is-dark" id="projectnublar" style="background-size: cover;">
   <div class="hero-body">
-    <div class="container is-dark" style="text-align: center;">
+    <div class="container is-overlay" style="text-align: center;">
       <h1 class="title is-1 is-size-3-mobile">Project: Nublar</h1>
       <h3 class="subtitle is-5 is-size-6-mobile">A Minecraft mod created to add Dinosaurs to Minecraft.</h3>
     </div>
@@ -122,8 +113,4 @@
 </footer>
 
 </body>
-<script>
-  bulmaCarousel.attach('#pn-carousel');
-</script>
-
 </html>
