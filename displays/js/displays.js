@@ -123,7 +123,7 @@ function setupTexture() {
 
 function parseTBLModel(model) {
 
-    JSZipUtils.getBinaryContent('assets/dino.tbl', function(err, data) {
+    JSZipUtils.getBinaryContent('assets/dinosaur.tbl', function(err, data) {
         if(err) {
             throw err; // or handle err
         }
