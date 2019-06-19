@@ -1,7 +1,3 @@
-#projectnublar {
-    background-image: url('../images/pn/trex.jpg');
-}
-
 #dumblibrary {
   background-image: url('../images/dl/code.png');
 }
@@ -10,13 +6,21 @@
   background-image: url('../images/gh/gradle.png');
 }
 
-@media only screen and (max-width: 720px) {
-    #projectnublar {
-        background-image: url('../images/pn/trexm.jpg');
-    }
-
+@media only screen and (max-width: 800px) {
   #gradlehook {
     background-image: url('../images/gh/gradle.png');
     background-size: cover;
   }
+}
+
+#projectnublar {
+    background-color: black;
+    -webkit-transition: opacity .2s ease-in-out;
+    -moz-transition: opacity .2s ease-in-out;
+    -o-transition: opacity .2s ease-in-out;
+    transition: opacity .2s ease-in-out;
+}
+
+#projectnublar.transparent {
+    opacity: 0;
 }
