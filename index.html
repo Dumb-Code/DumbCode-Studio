@@ -6,9 +6,11 @@
 		<title>DumbCode</title>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" />
 		<link rel="stylesheet" href="css/landing.css" />
+		<link rel="stylesheet" href="css/carousel.css" />
         <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
 		<script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
 		<script src="scripts/navigation.js"></script>
+		<script src="scripts/carousel.js"></script>
 	</head>
     <body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
 
@@ -49,9 +51,20 @@
 
 		</section>
 
-		<div id="projectnublar" class="hero is-fullheight is-mobile is-dark" style="background-size: cover;">
+		<div id="projectnublar" class="hero is-fullheight is-mobile is-dark has-carousel" style="margin 100px;">
+			<div id="pn-carousel" class="hero-carousel has-text-black" data-loop="true" data-autoplay="true" style="width: 100%;">
+				<div class="item-1 is-mobile" style="height: 100%;">
+					<div id="pn1" class="pn-image is-mobile">test1<br>test</div>
+				</div>
+				<div class="item-2 is-mobile" style="height: 100%;">
+					<div id="pn2" class="pn-image is-mobile">test2</div>
+				</div>
+				<div class="item-3 is-mobile" style="height: 100%;">
+					<div id="pn3" class="pn-image is-mobile">test3</div>
+				</div>
+			</div>
 			<div class="hero-body">
-				<div class="container is-overlay" style="text-align: center;">
+				<div class="container" style="text-align: center;">
 					<h1 class="title is-1 is-size-3-mobile">Project: Nublar</h1>
 					<h3 class="subtitle is-5 is-size-6-mobile">A Minecraft mod created to add Dinosaurs to Minecraft.</h3>
 				</div>
@@ -107,4 +120,7 @@
     </footer>
 
 	</body>
+	<script>
+		bulmaCarousel.attach('#pn-carousel');
+	</script>
 </html>
