@@ -1,5 +1,4 @@
 var camera, scene, renderer;
-var composer;
 
 var mainCubeGroup, textureMap;
 
@@ -29,8 +28,6 @@ function init() {
     setupControls()
 
     setupScene()
-
-    setupCompositor()
 
     setupTexture()
 
@@ -71,21 +68,12 @@ function setupRenderer() {
 function setupScene() {
     scene = new THREE.Scene();
 	scene.background = new THREE.Color( 0xaaaaaa );
-
 	scene.add( new THREE.HemisphereLight() );
 
     var dirLight = new THREE.DirectionalLight()
-    dirLight.position.set( 1.25, 1.5, 1 )
-    dirLight.target.position.set( -1, -1, -1 )
+    dirLight.position.set( -1.25, 1.5, 1 )
+    dirLight.target.position.set( 1, -1, -1 )
     scene.add( dirLight );
-}
-
-function setupCompositor() {
-    composer = new THREE.EffectComposer( renderer );
-	var ssaoPass = new THREE.SSAOPass( scene, camera, window.innerWidth, window.innerHeight );
-	ssaoPass.kernelRadius = 16;
-	composer.addPass( ssaoPass );
-
 }
 
 function onWindowResize() {
@@ -103,7 +91,7 @@ function animate() {
 }
 
 function render() {
-	composer.render();
+	renderer.render( scene, camera );
 }
 
 function setupTexture() {
@@ -161,7 +149,6 @@ function parseCube(cubeJson) {
         color: 0xAAAAAA,
 		map: textureMap,
 		transparent: true,
-		alphaTest: 0.5,
 		side: THREE.FrontSide
 	} );
 
@@ -217,7 +204,6 @@ function getUV(offsetX, offsetY, w, h, d, dat) {
             xDist = d
         }
         offX += xDist
-
 
         putUVData(uvdata, texBottomOrder[texh], minX, minY, xDist, h)
 
