@@ -1,48 +1,34 @@
 var currentSlide = 0;
 const maxSlides = 4;
-var timer = setInterval(setBackground, 4000);
-var numSlides = document.getElementsByClassName('slide').size;
+var timer = setInterval(updateCarousels, 4000);
 const element = document.getElementById("projectnublar")
 
-function setImage() {
-    switch (currentSlide) {
-        case 0:
-            if (document.documentElement.clientWidth > 960) {
-                element.style.background = "url('images/pn/trex.jpg')";
-            } else {
-                element.style.background = "url('images/pn/trexm.jpg')";
-            }
-            break;
-        case 1:
-            if (document.documentElement.clientWidth > 960) {
-                element.style.background = "url('images/dl/code.png')";
-            } else {
-                element.style.background = "url('images/dl/code.png')";
-            }
-            break;
-        case 2:
-            if (document.documentElement.clientWidth > 960) {
-                element.style.background = "url('images/pn/trex.jpg')";
-            } else {
-                element.style.background = "url('images/pn/trexm.jpg')";
-            }
-            break;
-        case 3:
-            if (document.documentElement.clientWidth > 960) {
-                element.style.background = "url('images/dl/code.png')";
-            } else {
-                element.style.background = "url('images/dl/code.png')";
-            }
-            break;
-    }
-    element.style.backgroundSize = "cover";
-    element.classList.toggle("transparent");
-    currentSlide++;
-    currentSlide = (currentSlide === maxSlides) ? 0 : currentSlide;
+function startCarousel() {
+  setBackground();
+  setIndicators();
 }
 
-function unsetImage() {
-    element.classList.toggle("transparent");
+function updateCarousels() {
+  setBackground();
+  updateIndicators();
+}
+
+function setBackground() {
+    element.style.transition = "all .8s";
+    swapImage();
+}
+
+function setIndicators() {
+  var bubbles = "";
+  var currentBubble = "";
+  for (var i = 0; i < maxSlides; i++) {
+    currentBubble = (i === currentSlide) ? "⬤" : "⭘";
+    bubbles = bubbles + currentBubble;
+  }
+  var bubbleTextElement = document.createElement("div");
+  bubbleTextElement.setAttribute('id', "bubbles");
+  bubbleTextElement.appendChild(document.createTextNode(bubbles));
+  element.appendChild(bubbleTextElement);
 }
 
 function swapImage() {
@@ -50,7 +36,42 @@ function swapImage() {
     setTimeout(setImage, 200);
 }
 
-function setBackground() {
-    element.style.transition = "all .8s";
-    swapImage();
+function updateIndicators() {
+  element.removeChild(document.getElementById("bubbles"));
+  setIndicators();
+}
+
+function unsetImage() {
+    element.classList.toggle("transparent");
+}
+
+function setImage() {
+    switch (currentSlide) {
+        case 0:
+        //The trex image isnt great for all devices so above this width we swap it with an edited version
+            if (document.documentElement.clientWidth > 960) {
+                element.style.background = "url('images/pn/trex.jpg')";
+            } else {
+                element.style.background = "url('images/pn/trexm.jpg')";
+            }
+            break;
+        case 1:
+            element.style.background = "url('images/dl/code.png')";
+            break;
+        case 2:
+        //The trex image isnt great for all devices so above this width we swap it with an edited version
+            if (document.documentElement.clientWidth > 960) {
+                element.style.background = "url('images/pn/trex.jpg')";
+            } else {
+                element.style.background = "url('images/pn/trexm.jpg')";
+            }
+            break;
+        case 3:
+            element.style.background = "url('images/dl/code.png')";
+            break;
+    }
+    element.style.backgroundSize = "cover";
+    element.classList.toggle("transparent");
+    currentSlide++;
+    currentSlide = (currentSlide === maxSlides) ? 0 : currentSlide;
 }
