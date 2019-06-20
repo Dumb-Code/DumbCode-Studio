@@ -14,13 +14,13 @@
 }
 
 #projectnublar {
-    background-color: black;
-    -webkit-transition: opacity .2s ease-in-out;
-    -moz-transition: opacity .2s ease-in-out;
-    -o-transition: opacity .2s ease-in-out;
-    transition: opacity .2s ease-in-out;
+    -webkit-transition: brightness .2s ease-in-out;
+    -moz-transition: brightness .2s ease-in-out;
+    -o-transition: brightness .2s ease-in-out;
+    transition: brightness .2s ease-in-out;
 }
 
 #projectnublar.transparent {
-    opacity: 0;
+    -webkit-filter: brightness(0%);
+    filter: brightness(0%);
 }

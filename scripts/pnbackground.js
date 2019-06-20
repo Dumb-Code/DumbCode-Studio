@@ -37,6 +37,8 @@ function setImage() {
     }
     element.style.backgroundSize = "cover";
     element.classList.toggle("transparent");
+    currentSlide++;
+    currentSlide = (currentSlide === maxSlides) ? 0 : currentSlide;
 }
 
 function unsetImage() {
@@ -51,6 +53,4 @@ function swapImage() {
 function setBackground() {
     element.style.transition = "all .8s";
     swapImage();
-    currentSlide++;
-    currentSlide = (currentSlide === maxSlides) ? 0 : currentSlide;
 }
