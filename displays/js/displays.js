@@ -74,28 +74,30 @@ function setupScene() {
     dirLight.position.set( -1.25, 1.5, 1 )
     dirLight.target.position.set( 1, -1, -1 )
     scene.add( dirLight );
-	
-    setupWireframeFloor()
+
+    setupWireFrame()
 }
 
-function setupWireframeFloor() {
+function setupWireFrame() {
     var geometry = new THREE.Geometry();
-    geometry.vertices.push(new THREE.Vector3( - 500, 0, 0 ) );
-    geometry.vertices.push(new THREE.Vector3( 500, 0, 0 ) );
+    geometry.vertices.push(new THREE.Vector3( - 15, 0 ) );
+    geometry.vertices.push(new THREE.Vector3( 15, 0 ) );
 
     linesMaterial = new THREE.LineBasicMaterial( { color: 0x787878, opacity: .2, linewidth: .1 } );
 
-    for ( var i = 0; i <= 20; i ++ ) {
+    for ( var i = 0; i <= 30; i ++ ) {
 
         var line = new THREE.Line( geometry, linesMaterial );
-        line.position.z = ( i * 50 ) - 500;
+        line.position.z =  i  - 15
+        line.position.y = -1.5
         scene.add( line );
 
         var line = new THREE.Line( geometry, linesMaterial );
-        line.position.x = ( i * 50 ) - 500;
+        line.position.x = i - 15
         line.rotation.y = 90 * Math.PI / 180;
+        line.position.y = -1.5
         scene.add( line );
-    }	
+    }
 }
 
 function onWindowResize() {
@@ -104,7 +106,6 @@ function onWindowResize() {
 	camera.aspect = width / height;
 	camera.updateProjectionMatrix();
 	renderer.setSize( width, height );
-	composer.setSize( width, height );
 }
 
 function animate() {
@@ -255,5 +256,4 @@ function putUVData(uvdata, facingindex, minU, minV, uSize, vSize) {
         uvdata[index + 1] = v[vertex] / texHeight
     }
 }
-
 
