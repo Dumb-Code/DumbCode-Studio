@@ -1,0 +1,255 @@
+{
+  "members": [
+    {
+      "name": "Bob Mowzie",
+      "username": "Bob Mowzie",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "programmer"
+      ],
+      "projects": [
+        "dl"
+      ]
+    },
+    {
+      "name": "BuzzFeed Vice News",
+      "username": "N1E1",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "textureartist",
+        "builder"
+      ],
+      "projects": [
+        "pn",
+        "todm"
+      ]
+    },
+    {
+      "name": "Bastion",
+      "username": "Bastion",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler"
+      ],
+      "projects": [
+        "pn"
+      ]
+    },
+    {
+      "name": "Dom",
+      "username": "Diictodom",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler",
+        "textureartist"
+      ],
+      "projects": [
+        "pn"
+      ]
+    },
+    {
+      "name": "Geggy",
+      "username": "Geggy",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "programmer"
+      ],
+      "projects": [
+        "dl",
+        "pn"
+      ]
+    },
+    {
+      "name": "Mazikeen",
+      "username": "Mazikeen",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "builder"
+      ],
+      "projects": [
+        "pn"
+      ]
+    },
+    {
+      "name": "Harv",
+      "username": "TheHarvNut",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler"
+      ],
+      "projects": [
+        "pn",
+        "todm"
+      ]
+    },
+    {
+      "name": "Igrek",
+      "username": "Igrek",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "textureartist"
+      ],
+      "projects": [
+        "pn"
+      ]
+    },
+    {
+      "name": "Wyn Price",
+      "username": "Price1",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "programmer",
+        "webdeveloper"
+      ],
+      "projects": [
+        "pn",
+        "todm",
+        "dl"
+      ]
+    },
+    {
+      "name": "Brandon Davis",
+      "username": "NeusFear",
+      "uuid": "d95a0f06-0e0b-4208-8542-e694726048e2",
+      "roles": [
+        "webdeveloper",
+        "modeler",
+        "textureartist",
+        "builder"
+      ],
+      "projects": [
+        "pn",
+        "todm"
+      ]
+    },
+    {
+      "name": "MVCinnyq",
+      "username": "MVCinnyq",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler",
+        "textureartist"
+      ],
+      "projects": [
+        "todm"
+      ]
+    },
+    {
+      "name": "noonyeyz",
+      "username": "noonyeyz",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "builder",
+        "textureartist"
+      ],
+      "projects": [
+        "pn"
+      ]
+    },
+    {
+      "name": "Cody",
+      "username": "CodyRex",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler",
+        "textureartist"
+      ],
+      "projects": [
+        "todm",
+        "pn"
+      ]
+    },
+    {
+      "name": "Hyper",
+      "username": "Hyper-Ionic",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "animator",
+        "builder"
+      ],
+      "projects": [
+        "todm",
+        "pn"
+      ]
+    },
+    {
+      "name": "Wolfgank",
+      "username": "Wolfgank",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler",
+        "textureartist",
+        "animator",
+        "builder"
+      ],
+      "projects": [
+        "todm",
+        "pn"
+      ]
+    },
+    {
+      "name": "Cucho",
+      "username": "Cucho",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "conceptartist"
+      ],
+      "projects": [
+        "todm",
+        "pn"
+      ]
+    },
+    {
+      "name": "Brownboiiwonder",
+      "username": "Brownboiiwonder",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler"
+      ],
+      "projects": [
+        "todm",
+        "pn",
+        "dl"
+      ]
+    },
+    {
+      "name": "Jack",
+      "username": "JTGhawk137",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "programmer",
+        "webdeveloper"
+      ],
+      "projects": [
+        "todm",
+        "pn",
+        "dl"
+      ]
+    },
+    {
+      "name": "Xav",
+      "username": "jglrxavpok",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "programmer"
+      ],
+      "projects": [
+        "pn",
+        "dl"
+      ]
+    },
+    {
+      "name": "makijyakumusic ",
+      "username": "makijyakumusic ",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "textureartist",
+        "builder"
+      ],
+      "projects": [
+        "todm",
+        "pn"
+      ]
+    }
+  ]
+}

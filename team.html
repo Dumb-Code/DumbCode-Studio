@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
   <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
   <script src="scripts/navigation.js"></script>
+  <script src="scripts/teams.js"></script>
 </head>
 
 <body class="has-background-dark" style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
@@ -45,47 +46,20 @@
     <div class="hero-body container is-dark" style="text-align: center;">
       <div class="title">Our Team</div>
       <div class="subtitle">DumbCode is made up of many members from all over the world! Here is a place to get to know some of them.</div>
+      <p class="subtitle" id="test"></p>
+      <script>
+          window.onLoad = initTeams();
+      </script>
     </div>
   </section>
 
   <section class="container is-dark">
     <div class="tile is-ancestor">
       <div class="tile">
-        <div class="tile is-parent is-vertical">
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Wyn Price</p>
-            <p class="subtitle is-6">Developer</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Jack</p>
-            <p class="subtitle is-6">Developer</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Geggy</p>
-            <p class="subtitle is-6">Developer</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Bob Mowzie</p>
-            <p class="subtitle is-6">Developer</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Xav</p>
-            <p class="subtitle is-6">Developer</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/d95a0f06-0e0b-4208-8542-e694726048e2" alt="NeusFear"></figure>
-            <p class="title is-4">NeusFear</p>
-            <p class="subtitle is-6">Developer</p>
-          </article>
-        </div>
+        <div id="programmer" class="tile is-parent is-vertical"></div>
         <div class="tile is-parent">
           <article class="tile is-child notification is-danger">
-            <p class="title">Developers</p>
+            <p class="title">Programmers</p>
             <p class="subtitle is-6">What do they do?</p>
             <div class="content">
               Some sort of long thing about developers
@@ -97,22 +71,7 @@
 
     <div class="tile is-ancestor">
       <div class="tile">
-        <div class="tile is-parent is-vertical">
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Jack</p>
-            <p class="subtitle is-6">Web Developer</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/d95a0f06-0e0b-4208-8542-e694726048e2" alt="NeusFear"></figure>
-            <p class="title is-4">NeusFear</p>
-            <p class="subtitle is-6">Web Developer</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Wyn Price</p>
-            <p class="subtitle is-6">Web Developer</p>
-          </article>
+        <div id="webdeveloper" class="tile is-parent is-vertical">
         </div>
         <div class="tile is-parent">
           <article class="tile is-child notification is-danger">
@@ -128,13 +87,7 @@
 
     <div class="tile is-ancestor">
       <div class="tile">
-        <div class="tile is-parent is-vertical">
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Chucho</p>
-            <p class="subtitle is-6">Concept Artist</p>
-          </article>
-        </div>
+        <div id="conceptartist" class="tile is-parent is-vertical"></div>
         <div class="tile is-parent">
           <article class="tile is-child notification is-warning">
             <p class="title">Concept Artist</p>
@@ -149,48 +102,7 @@
 
     <div class="tile is-ancestor">
       <div class="tile">
-        <div class="tile is-parent is-vertical">
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">BrownBoiWonder</p>
-            <p class="subtitle is-6">Modeler</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Cody</p>
-            <p class="subtitle is-6">Modeler</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">TheHarvNut</p>
-            <p class="subtitle is-6">Modeler</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Bastion</p>
-            <p class="subtitle is-6">Modeler</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Wolfgank</p>
-            <p class="subtitle is-6">Modeler</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">MCVinnyq</p>
-            <p class="subtitle is-6">Modeler</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Diictodom</p>
-            <p class="subtitle is-6">Modeler</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/d95a0f06-0e0b-4208-8542-e694726048e2" alt="NeusFear"></figure>
-            <p class="title is-4">NeusFear</p>
-            <p class="subtitle is-6">Modeler</p>
-          </article>
-        </div>
+        <div id="modeler" class="tile is-parent is-vertical"></div>
         <div class="tile is-parent">
           <article class="tile is-child notification is-primary">
             <p class="title">Modelers</p>
@@ -205,53 +117,7 @@
 
     <div class="tile is-ancestor">
       <div class="tile">
-        <div class="tile is-parent is-vertical">
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Noonyeyz</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Sindavar</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">whoeverTfBuzzFeedIs</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Diictodom</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Igrek</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">MCVinnyq</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Cody</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">WolfGank</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/d95a0f06-0e0b-4208-8542-e694726048e2" alt="NeusFear"></figure>
-            <p class="title is-4">NeusFear</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-        </div>
+        <div id="textureartist" class="tile is-parent is-vertical"></div>
         <div class="tile is-parent">
           <article class="tile is-child notification is-success">
             <p class="title">Texture Artists</p>
@@ -266,18 +132,7 @@
 
     <div class="tile is-ancestor">
       <div class="tile">
-        <div class="tile is-parent is-vertical">
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Hyper-Ionic</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Wolfgank</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-        </div>
+        <div id="animator" class="tile is-parent is-vertical"></div>
         <div class="tile is-parent">
           <article class="tile is-child notification is-success">
             <p class="title">Animators</p>
@@ -292,18 +147,7 @@
 
     <div class="tile is-ancestor">
       <div class="tile">
-        <div class="tile is-parent is-vertical">
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7" alt="NeusFear"></figure>
-            <p class="title is-4">Mazikeen</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-          <article class="tile is-child notification is-dark has-background-black-ter">
-            <figure class="image is-48x48" style="float:left; margin-right: 20px;"><img class="is-rounded" src="https://crafatar.com/avatars/d95a0f06-0e0b-4208-8542-e694726048e2" alt="NeusFear"></figure>
-            <p class="title is-4">NeusFear</p>
-            <p class="subtitle is-6">Texture Artist</p>
-          </article>
-        </div>
+        <div id="builder" class="tile is-parent is-vertical"></div>
         <div class="tile is-parent">
           <article class="tile is-child notification is-success">
             <p class="title">Builders</p>
