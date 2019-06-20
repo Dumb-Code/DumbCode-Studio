@@ -67,7 +67,7 @@ function setupRenderer() {
 
 function setupScene() {
     scene = new THREE.Scene();
-	scene.background = new THREE.Color( 0xaaaaaa );
+    // scene.background = new THREE.Color( 0xaaaaaa );
 	scene.add( new THREE.HemisphereLight() );
 
     var dirLight = new THREE.DirectionalLight()

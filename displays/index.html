@@ -3,30 +3,88 @@
 <head>
     <meta charset=utf-8>
     <title>Dumbcode</title>
-    <style>
-			body { margin: 0; }
-			canvas { width: 100%; height: 100% }
-		</style>
+    <link href="../css/display.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
 </head>
-<body>
-<script src="https://threejs.org/build/three.js"></script>
-<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-<script src="https://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
+<body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
+
+<section class="is-fullheight is-mobile">
+    <nav aria-label="main navigation" class="navbar is-dark is-mobile is-marginless heading has-text-weight-bold"
+         role="navigation" style="z-index: 1">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                <img class="is-size-3-mobile" height="48" src="../images/dclogo.svg" width="48">DUMBCODE
+            </a>
+
+            <div class="divider" style="width: 6rem"></div>
+
+            <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navbarBasicExample"
+               role="button">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div class="navbar-menu is-fullhd" id="navbarBasicExample">
+            <div class="navbar-start">
+                <a class="navbar-item center" href="../index.html">HOME</a>
+                <a class="navbar-item center" href="../#projectnublar">PROJECT NUBLAR</a>
+                <a class="navbar-item center" href="../#dumblibrary">DUMB LIBRARY</a>
+                <a class="navbar-item center" href="../#gradlehook">GRADLEHOOK</a>
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">
+                        More
+                    </a>
+
+                    <div class="navbar-dropdown is-hoverable">
+                        <a class="navbar-item is-size-7" href="index.html">Model Viewer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navbar-end">
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Edit</a>
+                <div class="navbar-dropdown is-right">
+                    <a class="navbar-item">
+                        <label class="checkbox">
+                            <input type="checkbox">
+                            Male Texture
+                        </label>
+                    </a>
+                    <a class="navbar-item">
+                        <label class="checkbox">
+                            <input type="checkbox">
+                            Water background
+                        </label>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script src="https://threejs.org/build/three.js"></script>
+    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
 
 
-<script src="https://threejs.org/examples/js/shaders/SSAOShader.js"></script>
+    <script src="https://threejs.org/examples/js/shaders/SSAOShader.js"></script>
 
-<script src="https://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://threejs.org/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="https://threejs.org/examples/js/postprocessing/SSAOPass.js"></script>
-<script src="https://threejs.org/examples/js/shaders/CopyShader.js"></script>
-<script src="https://threejs.org/examples/js/math/SimplexNoise.js"></script>
+    <script src="https://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://threejs.org/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://threejs.org/examples/js/postprocessing/SSAOPass.js"></script>
+    <script src="https://threejs.org/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://threejs.org/examples/js/math/SimplexNoise.js"></script>
 
-<script src="https://threejs.org/examples/js/WebGL.js"></script>
+    <script src="https://threejs.org/examples/js/WebGL.js"></script>
 
-<script src="js/jszip.js"></script>
-<script src="js/jszip-utils.js"></script>
+    <script src="js/jszip.js"></script>
+    <script src="js/jszip-utils.js"></script>
 
-<script src="js/displays.js"></script>
+    <script src="js/displays.js"></script>
+</section>
 </body>
 </html>
