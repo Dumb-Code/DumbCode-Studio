@@ -79,6 +79,7 @@ function setupMouseOver() {
     style.paddingRight = "5px"
     style.paddingLeft = "5px"
 
+    style.textTransform = "none"
     document.body.appendChild(textDiv);
 }
 
