@@ -1,8 +1,14 @@
-var camera, scene, renderer;
+var camera, scene, renderer, controls;
 
-var mainCubeGroup, textureMap;
+var container
+
+var mainCubeGroup, textureMap, textDiv;
 
 var texWidth, texHeight;
+
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2(-5, -5);
+var rawMouse = new THREE.Vector2();
 
 var uvMap = new Map()
 
@@ -15,6 +21,9 @@ function init() {
     //This can then lead into playing animations maybe?
 //    var dinosaur = getValue("dinosaur", "tyrannosaurus")
 //    var pose = getValue("pose", "idle")
+
+    container = document.createElement( 'div' );
+    document.body.appendChild( container );
 
 	setupRenderer()
 
@@ -31,7 +40,11 @@ function init() {
 
     setupTexture()
 
+    setupMouseOver()
+
 	window.addEventListener( 'resize', onWindowResize, false );
+	document.addEventListener( 'mousemove', onMouseMove, false );
+
 }
 
 function getValue(key, fallback) {
@@ -48,9 +61,30 @@ function setupCamera() {
     camera.lookAt(0, 0, 0)
 }
 
+function setupMouseOver() {
+    textDiv = document.createElement('div');
+    var style = textDiv.style
+
+    style.position = 'absolute';
+
+    style.backgroundColor = "black";
+    style.color = "white";
+
+    style.fontFamily = "Charcoal,sans-serif";
+
+    style.borderRadius = "20px"
+
+    style.paddingTop = "2px"
+    style.paddingBottom = "2px"
+    style.paddingRight = "5px"
+    style.paddingLeft = "5px"
+
+    document.body.appendChild(textDiv);
+}
+
 function setupControls() {
 //    Set the controls
-    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
     controls.addEventListener( 'change', render )
     controls.enablePan = false //Locks the camera onto the center point. Maybe we can enable this to allow full movement
 }
@@ -62,7 +96,7 @@ function setupRenderer() {
     });
     renderer.setClearColor(0x000000, 0);
     renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
+    container.appendChild( renderer.domElement );
 }
 
 function setupScene() {
@@ -83,7 +117,7 @@ function setupWireFrame() {
     geometry.vertices.push(new THREE.Vector3( - 15, 0 ) );
     geometry.vertices.push(new THREE.Vector3( 15, 0 ) );
 
-    linesMaterial = new THREE.LineBasicMaterial( { color: 0x787878, opacity: .2, linewidth: .1 } );
+    var linesMaterial = new THREE.LineBasicMaterial( { color: 0x787878, opacity: .2, linewidth: .1 } );
 
     for ( var i = 0; i <= 30; i ++ ) {
 
@@ -92,7 +126,7 @@ function setupWireFrame() {
         line.position.y = -1.5
         scene.add( line );
 
-        var line = new THREE.Line( geometry, linesMaterial );
+        line = new THREE.Line( geometry, linesMaterial );
         line.position.x = i - 15
         line.rotation.y = 90 * Math.PI / 180;
         line.position.y = -1.5
@@ -108,12 +142,45 @@ function onWindowResize() {
 	renderer.setSize( width, height );
 }
 
+function onMouseMove( event ) {
+    rawMouse.x = event.clientX
+    rawMouse.y = event.clientY
+
+    var rect = container.getBoundingClientRect()
+	mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+	mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+}
+
+
 function animate() {
+
+    var style = textDiv.style
+
+    var divRect = textDiv.getBoundingClientRect()
+
+    style.left = rawMouse.x - divRect.width/2 + "px"
+    style.top = rawMouse.y - 35 + "px"
+
 	requestAnimationFrame( animate );
 	render();
 }
 
 function render() {
+
+    raycaster.setFromCamera( mouse, camera );
+
+    if(mainCubeGroup) {
+        var intersects = raycaster.intersectObjects( mainCubeGroup.children, true );
+        if(intersects.length > 0) {
+            var inter = intersects[0]
+            textDiv.innerHTML = inter.object.cubeName
+            textDiv.style.display = "block"
+        } else {
+            textDiv.style.display = "none"
+        }
+    }
+
 	renderer.render( scene, camera );
 }
 
@@ -126,6 +193,7 @@ function setupTexture() {
         parseTBLModel("nada") //todo: have model name here. Infer it from the document
     })
 }
+
 
 
 
@@ -191,7 +259,9 @@ function parseCube(cubeJson) {
 
     var cube = new THREE.Mesh( geometry, material )
     cube.position.set( dimensions[0] / 2 + offset[0], dimensions[1] / 2 + offset[1], dimensions[2] / 2 + offset[2] )
+    cube.cubeName = cubeJson.name
     internalGroup.add( cube )
+
 
     group.position.set(position[0], position[1], position[2])
 
@@ -201,6 +271,7 @@ function parseCube(cubeJson) {
     for(var child in cubeJson.children) {
         group.add(parseCube(cubeJson.children[child]))
     }
+
 
     return group
 }
