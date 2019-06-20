@@ -74,6 +74,28 @@ function setupScene() {
     dirLight.position.set( -1.25, 1.5, 1 )
     dirLight.target.position.set( 1, -1, -1 )
     scene.add( dirLight );
+	
+    setupWireframeFloor()
+}
+
+function setupWireframeFloor() {
+    var geometry = new THREE.Geometry();
+    geometry.vertices.push(new THREE.Vector3( - 500, 0, 0 ) );
+    geometry.vertices.push(new THREE.Vector3( 500, 0, 0 ) );
+
+    linesMaterial = new THREE.LineBasicMaterial( { color: 0x787878, opacity: .2, linewidth: .1 } );
+
+    for ( var i = 0; i <= 20; i ++ ) {
+
+        var line = new THREE.Line( geometry, linesMaterial );
+        line.position.z = ( i * 50 ) - 500;
+        scene.add( line );
+
+        var line = new THREE.Line( geometry, linesMaterial );
+        line.position.x = ( i * 50 ) - 500;
+        line.rotation.y = 90 * Math.PI / 180;
+        scene.add( line );
+    }	
 }
 
 function onWindowResize() {
