@@ -2,7 +2,7 @@ var camera, scene, renderer, controls;
 
 var container
 
-var mainCubeGroup, textureMap, textDiv;
+var mainCubeGroup, gridGroup, textureMap, textDiv;
 
 var texWidth, texHeight;
 
@@ -110,29 +110,36 @@ function setupScene() {
     dirLight.target.position.set( 1, -1, -1 )
     scene.add( dirLight );
 
-    setupWireFrame()
+    setupGrid()
 }
 
-function setupWireFrame() {
+function setupGrid() {
     var geometry = new THREE.Geometry();
     geometry.vertices.push(new THREE.Vector3( - 15, 0 ) );
     geometry.vertices.push(new THREE.Vector3( 15, 0 ) );
 
     var linesMaterial = new THREE.LineBasicMaterial( { color: 0x787878, opacity: .2, linewidth: .1 } );
 
+
+    gridGroup = new THREE.Group()
+
     for ( var i = 0; i <= 30; i ++ ) {
 
         var line = new THREE.Line( geometry, linesMaterial );
         line.position.z =  i  - 15
         line.position.y = -1.5
-        scene.add( line );
+        gridGroup.add( line );
 
         line = new THREE.Line( geometry, linesMaterial );
         line.position.x = i - 15
         line.rotation.y = 90 * Math.PI / 180;
         line.position.y = -1.5
-        scene.add( line );
+        gridGroup.add( line );
     }
+
+    scene.add( gridGroup )
+
+    gridToggle()
 }
 
 function onWindowResize() {
@@ -327,5 +334,10 @@ function putUVData(uvdata, facingindex, minU, minV, uSize, vSize) {
         uvdata[index] = u[vertex] / texWidth
         uvdata[index + 1] = v[vertex] / texHeight
     }
+}
+
+
+function gridToggle() {
+    gridGroup.visible = document.getElementById('grid').checked
 }
 
