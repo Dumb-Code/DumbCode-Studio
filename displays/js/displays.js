@@ -1,6 +1,7 @@
 var camera, scene, renderer, controls;
 
 var container
+var mouseDown = false
 
 var mainCubeGroup, gridGroup, textureMap, textDiv;
 
@@ -42,9 +43,11 @@ function init() {
 
     setupMouseOver()
 
-	window.addEventListener( 'resize', onWindowResize, false );
-	document.addEventListener( 'mousemove', onMouseMove, false );
+    window.addEventListener( 'resize', onWindowResize, false );
+    document.addEventListener( 'mousemove', onMouseMove, false );
 
+    document.addEventListener( 'mousedown', onMouseDown, false );
+    document.addEventListener( 'mouseup', onMouseUp, false );
 }
 
 function getValue(key, fallback) {
@@ -143,11 +146,11 @@ function setupGrid() {
 }
 
 function onWindowResize() {
-	var width = window.innerWidth;
-	var height = window.innerHeight;
-	camera.aspect = width / height;
-	camera.updateProjectionMatrix();
-	renderer.setSize( width, height );
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize( width, height );
 }
 
 function onMouseMove( event ) {
@@ -155,9 +158,17 @@ function onMouseMove( event ) {
     rawMouse.y = event.clientY
 
     var rect = container.getBoundingClientRect()
-	mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-	mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
 
+}
+
+function onMouseDown( event ) {
+   mouseDown = true
+}
+
+function onMouseUp( event ) {
+   mouseDown = false
 }
 
 
@@ -170,8 +181,8 @@ function animate() {
     style.left = rawMouse.x - divRect.width/2 + "px"
     style.top = rawMouse.y - 35 + "px"
 
-	requestAnimationFrame( animate );
-	render();
+    requestAnimationFrame( animate );
+    render();
 }
 
 function render() {
@@ -180,7 +191,7 @@ function render() {
 
     if(mainCubeGroup) {
         var intersects = raycaster.intersectObjects( mainCubeGroup.children, true );
-        if(intersects.length > 0) {
+        if(intersects.length > 0 && !mouseDown) {
             var inter = intersects[0]
             textDiv.innerHTML = inter.object.cubeName
             textDiv.style.display = "block"
@@ -340,4 +351,3 @@ function putUVData(uvdata, facingindex, minU, minV, uSize, vSize) {
 function gridToggle() {
     gridGroup.visible = document.getElementById('grid').checked
 }
-
