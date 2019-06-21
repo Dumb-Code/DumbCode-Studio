@@ -106,6 +106,7 @@ function fillRoles(json) {
             throw new Error("Unknown social type: " + key)
         }
         var img = document.createElement("img") //The image for this social media
+        img.style.marginLeft = "5px"
         img.className = clas
         img.src = "images/icons/" + key + ".svg"
 
