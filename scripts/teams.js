@@ -12,52 +12,50 @@ function initTeams() {
 }
 
 function parseRoles(json) {
-  var sectionContainer = document.getElementById( "role-container" )
+  var sectionContainer = document.getElementById( "role-container" ) //The role container
   console.log(sectionContainer)
   json.roles.forEach(role => {
-      var outerDiv = document.createElement("div")
+      var outerDiv = document.createElement("div") //The outer outer div
       outerDiv.className = "tile is-ancestor"
       sectionContainer.appendChild( outerDiv )
 
-      var innerDiv = document.createElement("div")
+      var innerDiv = document.createElement("div") //The outer div. Contains all the text, plus the members div
       innerDiv.className = "tile"
       outerDiv.appendChild( innerDiv )
 
-      var parentInnerDiv = document.createElement("div")
+      var parentInnerDiv = document.createElement("div") //The div contains all the text
       parentInnerDiv.className = "tile is-parent"
       innerDiv.appendChild( parentInnerDiv )
 
-      var article = document.createElement("article")
+      var article = document.createElement("article") //The arigle used to contain all the information
       article.className = "tile is-child notification is-dark"
       parentInnerDiv.appendChild ( article )
 
 
-
       if(role.img) {
-        article.style.backgroundImage = "url('images/" + role.img + "')"
+        article.style.backgroundImage = "url('images/" + role.img + "')" //Adds a background
         article.style.backgroundSize = "cover"
       } else {
-        article.className += " has-background-black-ter"
+        article.className += " has-background-black-ter" //Adds a default background
       }
 
 
-      var titleP = document.createElement( "p" )
+      var titleP = document.createElement( "p" ) //The p element containing the role title
       titleP.className = "title"
       titleP.innerHTML = role.title
       article.appendChild( titleP )
 
-      var whatDoTheyDoP = document.createElement( "p" )
+      var whatDoTheyDoP = document.createElement( "p" ) //The p element containing the text "What do they do?"
       whatDoTheyDoP.className = "subtitle is-6"
       whatDoTheyDoP.innerHTML = "What do they do?"
       article.appendChild( whatDoTheyDoP )
 
-      var contentDiv = document.createElement( "div" )
+      var contentDiv = document.createElement( "div" ) //The div used to hold the description text for this role
       contentDiv.innerHTML = role.content
       article.appendChild( contentDiv )
 
 
-
-      var membersDiv = document.createElement( "div" )
+      var membersDiv = document.createElement( "div" ) //The div used to hold the members information. This is what #fillRoles adds to
       membersDiv.id = role.id
       membersDiv.className = "tile is-parent is-vertical"
       innerDiv.appendChild( membersDiv )
