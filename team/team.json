@@ -32,8 +32,8 @@
       ],
       "social": {
         "discord": "Brownboiiwonder#0357",
-        "twitter": "unset",
-        "github": "unset",
+        "twitter": "https://twitter.com/brownwinterbois",
+        "github": "https://github.com/BrownBoiiWonder",
         "website": "unset"
       }
     },
@@ -233,7 +233,7 @@
     },
     {
       "name": "Diictodom",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "uuid": "bda74283-a941-4690-89a4-05a47130b41d",
       "roles": [
         "modeler",
         "textureartist"
@@ -243,7 +243,7 @@
       ],
       "social": {
         "discord": "Diictodom#1661",
-        "twitter": "unset",
+        "twitter": "https://twitter.com/Diictodom",
         "github": "unset",
         "website": "unset"
       }
