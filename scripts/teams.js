@@ -87,6 +87,7 @@ function fillRoles(json) {
     var socialMediaP = document.createElement("p") //The p element for the member's name
     socialMediaP.className = "title is-4"
     socialMediaP.innerHTML = member.name
+    socialMediaP.style.paddingTop = "10px"
     article.appendChild( socialMediaP )
 
     //Go through all the social media
