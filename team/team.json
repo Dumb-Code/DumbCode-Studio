@@ -296,7 +296,7 @@
       }
     },
     {
-      "name": "JTGhawk137",
+      "name": "Jack Goldsworth",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "programmer",
@@ -309,9 +309,9 @@
       ],
       "social": {
         "discord": "Jack | JTGhawk137#4033",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
+        "twitter": "https://twitter.com/JackGoldsworth",
+        "github": "https://github.com/JackGoldsworth",
+        "website": "http://jackgoldsworth.me"
       }
     },
     {
