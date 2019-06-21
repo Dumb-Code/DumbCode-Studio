@@ -130,7 +130,8 @@
       "name": "Hyperion",
       "uuid": "13d60612-a851-4945-bf88-4183dd281d7a",
       "roles": [
-        "builder"
+        "builder",
+        "animator"
       ],
       "projects": [
         "todm",
