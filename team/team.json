@@ -1,141 +1,8 @@
 {
   "members": [
     {
-      "name": "Bob Mowzie",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
-      "roles": [
-        "programmer"
-      ],
-      "projects": [
-        "dl"
-      ],
-      "social": {
-        "discord": "Bob Mowzie#2676",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
-      }
-    },
-    {
-      "name": "N1E1",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
-      "roles": [
-        "textureartist",
-        "builder"
-      ],
-      "projects": [
-        "pn",
-        "todm"
-      ],
-      "social": {
-        "discord": "N1E1#0001",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
-      }
-    },
-    {
-      "name": "Bastion",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
-      "roles": [
-        "modeler"
-      ],
-      "projects": [
-        "pn"
-      ],
-      "social": {
-        "discord": "Bastion14#6413",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
-      }
-    },
-    {
-      "name": "Diictodom",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
-      "roles": [
-        "modeler",
-        "textureartist"
-      ],
-      "projects": [
-        "pn"
-      ],
-      "social": {
-        "discord": "Diictodom#1661",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
-      }
-    },
-    {
-      "name": "Geggy",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
-      "roles": [
-        "programmer"
-      ],
-      "projects": [
-        "dl",
-        "pn"
-      ],
-      "social": {
-        "discord": "Gegy#1000",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
-      }
-    },
-    {
-      "name": "Mazikeen",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
-      "roles": [
-        "builder"
-      ],
-      "projects": [
-        "pn"
-      ],
-      "social": {
-        "discord": "Mazikeen#7846",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
-      }
-    },
-    {
-      "name": "TheHarvNut",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
-      "roles": [
-        "modeler"
-      ],
-      "projects": [
-        "pn",
-        "todm"
-      ],
-      "social": {
-        "discord": "TheHarvNut#6659",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
-      }
-    },
-    {
-      "name": "Igrek",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
-      "roles": [
-        "textureartist"
-      ],
-      "projects": [
-        "pn"
-      ],
-      "social": {
-        "discord": "Igrek#5723",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
-      }
-    },
-    {
       "name": "Wyn Price",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "uuid": "c8262759-972c-4505-a0f9-95a303eafdb2",
       "roles": [
         "programmer",
         "webdeveloper"
@@ -148,6 +15,60 @@
       "social": {
         "discord": "Wyn Price#0001",
         "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
+    },
+    {
+      "name": "Brownboiiwonder",
+      "uuid": "8803f3ac-1ed0-412a-ab44-844981af6e8b",
+      "roles": [
+        "modeler"
+      ],
+      "projects": [
+        "todm",
+        "pn",
+        "dl"
+      ],
+      "social": {
+        "discord": "Brownboiiwonder#0357",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
+    },
+    {
+      "name": "Jack Goldsworth",
+      "uuid": "54201149-1f1f-498b-98ca-50f66951a68f",
+      "roles": [
+        "programmer",
+        "webdeveloper"
+      ],
+      "projects": [
+        "todm",
+        "pn",
+        "dl"
+      ],
+      "social": {
+        "discord": "Jack | JTGhawk137#4033",
+        "twitter": "https://twitter.com/JackGoldsworth",
+        "github": "https://github.com/JackGoldsworth",
+        "website": "http://jackgoldsworth.me"
+      }
+    },
+    {
+      "name": "Geggy",
+      "uuid": "c3ed4d52-fb4f-4964-ba1b-9cda2453741e",
+      "roles": [
+        "programmer"
+      ],
+      "projects": [
+        "dl",
+        "pn"
+      ],
+      "social": {
+        "discord": "Gegy#1000",
+        "twitter": "https://twitter.com/gegy1000",
         "github": "unset",
         "website": "unset"
       }
@@ -172,34 +93,16 @@
       }
     },
     {
-      "name": "MVCinnyq",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "name": "Mazikeen",
+      "uuid": "bdbfb7e6-103b-4534-b0b3-be224b48fb86",
       "roles": [
-        "modeler",
-        "textureartist"
-      ],
-      "projects": [
-        "todm"
-      ],
-      "social": {
-        "discord": "MCVinnyq#7463",
-        "twitter": "unset",
-        "github": "unset",
-        "website": "unset"
-      }
-    },
-    {
-      "name": "noonyeyz",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
-      "roles": [
-        "builder",
-        "textureartist"
+        "builder"
       ],
       "projects": [
         "pn"
       ],
       "social": {
-        "discord": "noonyeyz#9053",
+        "discord": "Mazikeen#7846",
         "twitter": "unset",
         "github": "unset",
         "website": "unset"
@@ -224,8 +127,8 @@
       }
     },
     {
-      "name": "Hyper-Ionic",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "name": "Hyperion",
+      "uuid": "13d60612-a851-4945-bf88-4183dd281d7a",
       "roles": [
         "builder"
       ],
@@ -235,7 +138,7 @@
       ],
       "social": {
         "discord": "Hyper-Ionic#5603",
-        "twitter": "unset",
+        "twitter": "https://twitter.com/Alpha_Hyperion",
         "github": "unset",
         "website": "unset"
       }
@@ -278,40 +181,137 @@
       }
     },
     {
-      "name": "Brownboiiwonder",
+      "name": "Bastion",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "modeler"
       ],
       "projects": [
-        "todm",
-        "pn",
-        "dl"
+        "pn"
       ],
       "social": {
-        "discord": "Brownboiiwonder#0357",
+        "discord": "Bastion14#6413",
         "twitter": "unset",
         "github": "unset",
         "website": "unset"
       }
     },
     {
-      "name": "Jack Goldsworth",
+      "name": "N1E1",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
-        "programmer",
-        "webdeveloper"
+        "textureartist",
+        "builder"
       ],
       "projects": [
-        "todm",
         "pn",
+        "todm"
+      ],
+      "social": {
+        "discord": "N1E1#0001",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
+    },
+    {
+      "name": "TheHarvNut",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler"
+      ],
+      "projects": [
+        "pn",
+        "todm"
+      ],
+      "social": {
+        "discord": "TheHarvNut#6659",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
+    },
+    {
+      "name": "Diictodom",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler",
+        "textureartist"
+      ],
+      "projects": [
+        "pn"
+      ],
+      "social": {
+        "discord": "Diictodom#1661",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
+    },
+    {
+      "name": "Igrek",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "textureartist"
+      ],
+      "projects": [
+        "pn"
+      ],
+      "social": {
+        "discord": "Igrek#5723",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
+    },
+    {
+      "name": "Bob Mowzie",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "programmer"
+      ],
+      "projects": [
         "dl"
       ],
       "social": {
-        "discord": "Jack | JTGhawk137#4033",
-        "twitter": "https://twitter.com/JackGoldsworth",
-        "github": "https://github.com/JackGoldsworth",
-        "website": "http://jackgoldsworth.me"
+        "discord": "Bob Mowzie#2676",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
+    },
+    {
+      "name": "MVCinnyq",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "modeler",
+        "textureartist"
+      ],
+      "projects": [
+        "todm"
+      ],
+      "social": {
+        "discord": "MCVinnyq#7463",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
+    },
+    {
+      "name": "noonyeyz",
+      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "roles": [
+        "builder",
+        "textureartist"
+      ],
+      "projects": [
+        "pn"
+      ],
+      "social": {
+        "discord": "noonyeyz#9053",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
       }
     },
     {
@@ -344,6 +344,22 @@
       ],
       "social": {
         "discord": "makijyakumusic | Sindavar#5861",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
+    },
+    {
+      "name": "RaptorWhisperer ",
+      "uuid": "7e25384a-49b9-4467-bd94-655c666e78c7",
+      "roles": [
+        "thanks"
+      ],
+      "projects": [
+        "pn"
+      ],
+      "social": {
+        "discord": "unset",
         "twitter": "unset",
         "github": "unset",
         "website": "unset"
