@@ -1,13 +1,16 @@
 #projectnublar {
     background-image: url('../images/pn/trex.jpg');
+    background-size: cover;
 }
 
 #dumblibrary {
   background-image: url('../images/dl/code.png');
+  background-size: cover;
 }
 
 #gradlehook {
   background-image: url('../images/gh/gradle.png');
+  background-size: cover;
 }
 
 @media only screen and (max-width: 720px) {
