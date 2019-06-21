@@ -1,4 +1,49 @@
 {
+  "roles": [
+    {
+      "id": "programmer", "title": "Programmers", "img": "dl/code.png",
+      "content": "Developers are the code wizzards of DumbCode mods!<br><br>Their main objective is to manage the logic required by a mod, or project. In our mods the developers are also responsible for incorperating the rest of the teams' art into a public facing piece of what you, the player's consume."
+    },
+    {
+      "id": "webdeveloper", "title": "Web Developers", "img": "ws/html.png",
+      "content": "Web developers are the members of the team that are responsible for managing the codebase for the websites. They are also tasked with making the site look good to everyone, on all divices!"
+    },
+    {
+      "id": "conceptartist", "title": "Concept Artist", "img": "ca/trike.png",
+      "content": "Most of the art starts with the concept artist. They perfect the proportions and styles of almost every asset that the rest of our artists create!"
+    },
+    {
+      "id": "modeler", "title": "Modelers", "img": "m/rex.png",
+      "content": "The seccond step to creating a resource for our mods is modeling. Modelers take the concept art and turn it into a 3D minecraft interpretation!<br><br> Modelers model anything from plants, machines, to even our Project:Nublar mod's dinosaurs! Without a doubt modelers are an important piece to making our DumbCode mods come to life."
+    },
+    {
+      "id": "textureartist", "title": "Texture Artists", "img": "t/photoshop.png",
+      "content": "The third step to bringing assets to the public is texturing! Our texture artists take what the concept artist imagined and paint it onto the models (kind of). Thier job is to make the models believable to the players, and stylize the assets to the mod's appeal."
+    },
+    {
+      "id": "animator", "title": "Animators", "img": "a/rexpose.png",
+      "content": "The final step of asset creation is Animating. Our animators work hard to turn normal minecraft mobs into living breating creatures that you can experience in game. They make eating, attacking, and sometimes sleeping animations to the creatures so they feel alive when you see one before you."
+    },
+    {
+      "id": "builder", "title": "Builders", "img": "pn/trexm.jpg",
+      "content": "Builders have a special job in our team too. They have 2 main jobs. Create structures that generate in game for the players to experience, and to make sets for our mod showcases! Follow our twitter? then you've probably seen the sets that our builders have made already."
+    },
+    {
+      "id": "thanks", "title": "Special Thanks",
+      "content": "These people have contributed to the team's progress, but have moved on to other things. We want to give them some recognition anyways. Thanks guys!"
+    }
+  ],
+  "social": {
+    "twitter": "link",
+    "github": "link",
+    "website": "link",
+    "discord": "tooltip"
+  },
+  "teams": {
+    "dl": { "name": "dumb-library", "color": "#ffdd57" },
+    "pn": { "name": "project: nublar", "color": "#00d1b2" },
+    "todm": { "name": "Todm", "color": "#ff3860" }
+  },
   "members": [
     {
       "name": "Wyn Price",
