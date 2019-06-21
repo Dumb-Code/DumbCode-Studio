@@ -333,8 +333,8 @@
       }
     },
     {
-      "name": "makijyakumusic ",
-      "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
+      "name": "Sindavar ",
+      "uuid": "0f864ea7-1710-4114-b156-2d4a99fce461",
       "roles": [
         "textureartist",
         "builder"
@@ -345,7 +345,7 @@
       ],
       "social": {
         "discord": "makijyakumusic | Sindavar#5861",
-        "twitter": "unset",
+        "twitter": "https://mobile.twitter.com/khervaularchive",
         "github": "unset",
         "website": "unset"
       }
