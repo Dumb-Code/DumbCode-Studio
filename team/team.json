@@ -2,18 +2,22 @@
   "members": [
     {
       "name": "Bob Mowzie",
-      "username": "Bob Mowzie",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "programmer"
       ],
       "projects": [
         "dl"
-      ]
+      ],
+      "social": {
+        "discord": "Bob Mowzie#2676",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
-      "name": "BuzzFeed Vice News",
-      "username": "N1E1",
+      "name": "N1E1",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "textureartist",
@@ -22,22 +26,32 @@
       "projects": [
         "pn",
         "todm"
-      ]
+      ],
+      "social": {
+        "discord": "N1E1#0001",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "Bastion",
-      "username": "Bastion",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "modeler"
       ],
       "projects": [
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "Bastion14#6413",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
-      "name": "Dom",
-      "username": "Diictodom",
+      "name": "Diictodom",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "modeler",
@@ -45,11 +59,16 @@
       ],
       "projects": [
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "Diictodom#1661",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "Geggy",
-      "username": "Geggy",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "programmer"
@@ -57,22 +76,32 @@
       "projects": [
         "dl",
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "Gegy#1000",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "Mazikeen",
-      "username": "Mazikeen",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "builder"
       ],
       "projects": [
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "Mazikeen#7846",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
-      "name": "Harv",
-      "username": "TheHarvNut",
+      "name": "TheHarvNut",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "modeler"
@@ -80,22 +109,32 @@
       "projects": [
         "pn",
         "todm"
-      ]
+      ],
+      "social": {
+        "discord": "TheHarvNut#6659",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "Igrek",
-      "username": "Igrek",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "textureartist"
       ],
       "projects": [
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "Igrek#5723",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "Wyn Price",
-      "username": "Price1",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "programmer",
@@ -105,11 +144,16 @@
         "pn",
         "todm",
         "dl"
-      ]
+      ],
+      "social": {
+        "discord": "Wyn Price#0001",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
-      "name": "Brandon Davis",
-      "username": "NeusFear",
+      "name": "NeusFear",
       "uuid": "d95a0f06-0e0b-4208-8542-e694726048e2",
       "roles": [
         "webdeveloper",
@@ -118,13 +162,17 @@
         "builder"
       ],
       "projects": [
-        "pn",
-        "todm"
-      ]
+        "pn"
+      ],
+      "social": {
+        "discord": "NeusFear#5173",
+        "twitter": "https://twitter.com/Bran_D0ne",
+        "github": "https://github.com/NeusFear/",
+        "website": "https://pleodia.com/"
+      }
     },
     {
       "name": "MVCinnyq",
-      "username": "MVCinnyq",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "modeler",
@@ -132,11 +180,16 @@
       ],
       "projects": [
         "todm"
-      ]
+      ],
+      "social": {
+        "discord": "MCVinnyq#7463",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "noonyeyz",
-      "username": "noonyeyz",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "builder",
@@ -144,11 +197,16 @@
       ],
       "projects": [
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "noonyeyz#9053",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
-      "name": "Cody",
-      "username": "CodyRex",
+      "name": "CodyRex",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "modeler",
@@ -157,24 +215,33 @@
       "projects": [
         "todm",
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "Cody#6692",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
-      "name": "Hyper",
-      "username": "Hyper-Ionic",
+      "name": "Hyper-Ionic",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
-        "animator",
         "builder"
       ],
       "projects": [
         "todm",
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "Hyper-Ionic#5603",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "Wolfgank",
-      "username": "Wolfgank",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "modeler",
@@ -185,11 +252,16 @@
       "projects": [
         "todm",
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "Wolfgank#6575",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "Cucho",
-      "username": "Cucho",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "conceptartist"
@@ -197,11 +269,16 @@
       "projects": [
         "todm",
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "Cucho boi#5280",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "Brownboiiwonder",
-      "username": "Brownboiiwonder",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "modeler"
@@ -210,11 +287,16 @@
         "todm",
         "pn",
         "dl"
-      ]
+      ],
+      "social": {
+        "discord": "Brownboiiwonder#0357",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
-      "name": "Jack",
-      "username": "JTGhawk137",
+      "name": "JTGhawk137",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "programmer",
@@ -224,11 +306,16 @@
         "todm",
         "pn",
         "dl"
-      ]
+      ],
+      "social": {
+        "discord": "Jack | JTGhawk137#4033",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
-      "name": "Xav",
-      "username": "jglrxavpok",
+      "name": "jglrxavpok",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "programmer"
@@ -236,11 +323,16 @@
       "projects": [
         "pn",
         "dl"
-      ]
+      ],
+      "social": {
+        "discord": "jglrxavpok#9395",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     },
     {
       "name": "makijyakumusic ",
-      "username": "makijyakumusic ",
       "uuid": "8667ba71-b85a-4004-af54-457a9734eed7",
       "roles": [
         "textureartist",
@@ -249,7 +341,13 @@
       "projects": [
         "todm",
         "pn"
-      ]
+      ],
+      "social": {
+        "discord": "makijyakumusic | Sindavar#5861",
+        "twitter": "unset",
+        "github": "unset",
+        "website": "unset"
+      }
     }
   ]
 }
