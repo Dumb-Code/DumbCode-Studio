@@ -1,3 +1,4 @@
+    
 var camera, scene, renderer, controls;
 
 var container
@@ -272,7 +273,9 @@ function parseCube(cubeJson) {
     var position = cubeJson.position
     var rotation = cubeJson.rotation
 
-    var geometry = new THREE.BoxBufferGeometry( dimensions[0], dimensions[1], dimensions[2] );
+    var padding = 0.0000001
+    var geometry = new THREE.BoxBufferGeometry( dimensions[0] + padding , dimensions[1] + padding , dimensions[2] + padding );
+
 
     geometry.addAttribute("uv", new THREE.BufferAttribute(new Float32Array(getUV(cubeJson.txOffset[0], cubeJson.txOffset[1], dimensions[0], dimensions[1], dimensions[2], geometry.getAttribute("uv"))), 2))
 
