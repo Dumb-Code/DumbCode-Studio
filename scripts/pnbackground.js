@@ -1,5 +1,5 @@
 var currentSlide = 0;
-const maxSlides = 4;
+const maxSlides = 2;
 var timer = setInterval(updateCarousels, 4000);
 const element = document.getElementById("projectnublar")
 
@@ -56,18 +56,12 @@ function setImage() {
             }
             break;
         case 1:
-            element.style.background = "url('images/dl/code.png')";
-            break;
-        case 2:
-        //The trex image isnt great for all devices so above this width we swap it with an edited version
+        //The dilo image isnt great for all devices so above this width we swap it with an edited version
             if (document.documentElement.clientWidth > 960) {
-                element.style.background = "url('images/pn/trex.jpg')";
+                element.style.background = "url('images/pn/dilo.png')";
             } else {
-                element.style.background = "url('images/pn/trexm.jpg')";
+                element.style.background = "url('images/pn/dilom.png')";
             }
-            break;
-        case 3:
-            element.style.background = "url('images/dl/code.png')";
             break;
     }
     element.style.backgroundSize = "cover";
