@@ -11,61 +11,57 @@
 <body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
 
 <section class="is-fullheight is-mobile">
-    <nav aria-label="main navigation" class="navbar is-dark is-mobile is-marginless heading has-text-weight-bold"
-         role="navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="/">
-                <img class="is-size-3-mobile" height="48" src="../images/dclogo.svg" width="48">DUMBCODE
-            </a>
+  <nav aria-label="main navigation" class="navbar is-dark is-mobile is-marginless heading has-text-weight-bold"
+       role="navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="../">
+        <img class="is-size-3-mobile" height="48" src="../images/dclogo.svg" width="48">DUMBCODE
+      </a>
 
-            <div class="divider" style="width: 6rem"></div>
+      <div class="divider" style="width: 6rem"></div>
 
-            <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navbarBasicExample"
-               role="button">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
+      <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navbarBasicExample" role="button">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+
+    <div class="navbar-menu is-fullhd" id="navbarBasicExample">
+      <div class="navbar-start">
+        <a class="navbar-item center" href="index.html">HOME</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">More</a>
+          <div class="navbar-dropdown is-hoverable has-background-black">
+            <a class="navbar-item center is-size-7 has-text-light" href="/">MODEL VIEWER</a>
+            <a class="navbar-item center is-size-7 has-text-light" href="../team.html">ABOUT US</a>
+          </div>
         </div>
-
-        <div class="navbar-menu is-fullhd" id="navbarBasicExample">
-            <div class="navbar-start">
-                <a class="navbar-item center" href="../index.html">HOME</a>
-                <a class="navbar-item center" href="../index.html#projectnublar">PROJECT NUBLAR</a>
-                <a class="navbar-item center" href="../index.html#dumblibrary">DUMB LIBRARY</a>
-                <a class="navbar-item center" href="../index.html#gradlehook">GRADLEHOOK</a>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">
-                        More
-                    </a>
-
-                    <div class="navbar-dropdown is-hoverable">
-                        <a class="navbar-item is-size-7" href="">Model Viewer</a>
-                    </div>
-                </div>
+      </div>
+      </div>
+    </div>
+    <div class="navbar-end is-hidden-touch">
+        <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">Edit</a>
+            <div class="navbar-dropdown is-right">
+                <a class="navbar-item">
+                    <label class="checkbox">
+                        <input type="checkbox">
+                        Male Texture
+                    </label>
+                </a>
+                <a class="navbar-item">
+                    <label class="checkbox">
+                        <input type="checkbox">
+                        Water background
+                    </label>
+                </a>
             </div>
         </div>
+    </div>
+</nav>
 
-        <div class="navbar-end is-hidden-touch">
-            <div class="navbar-item has-dropdown is-hoverable">
-                <a class="navbar-link">Edit</a>
-                <div class="navbar-dropdown is-right">
-                    <a class="navbar-item">
-                        <label class="checkbox">
-                            <input type="checkbox">
-                            Male Texture
-                        </label>
-                    </a>
-                    <a class="navbar-item">
-                        <label class="checkbox">
-                            <input type="checkbox">
-                            Water background
-                        </label>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
+
 
     <script src="https://threejs.org/build/three.js"></script>
     <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>

@@ -17,15 +17,17 @@
 <body class="has-background-dark" style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
   <section class="hero is-medium is-mobile is-dark">
 
-    <nav aria-label="main navigation" class="navbar is-mobile is-marginless heading has-text-weight-bold" role="navigation">
+    <nav aria-label="main navigation" class="navbar is-dark is-mobile is-marginless heading has-text-weight-bold"
+         role="navigation">
       <div class="navbar-brand">
-        <a class="navbar-item" href="/">
+        <a class="navbar-item" href="../">
           <img class="is-size-3-mobile" height="48" src="images/dclogo.svg" width="48">DUMBCODE
         </a>
 
         <div class="divider" style="width: 6rem"></div>
 
-        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navbarBasicExample" role="button">
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navbarBasicExample"
+           role="button">
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
@@ -34,10 +36,15 @@
 
       <div class="navbar-menu is-fullhd" id="navbarBasicExample">
         <div class="navbar-start">
-          <a class="navbar-item center" href="#home">HOME</a>
-          <a class="navbar-item center" href="#projectnublar">PROJECT NUBLAR</a>
-          <a class="navbar-item center" href="#dumblibrary">DUMB LIBRARY</a>
-          <a class="navbar-item center" href="#gradlehook">GRADLEHOOK</a>
+          <a class="navbar-item center" href="index.html">HOME</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">More</a>
+            <div class="navbar-dropdown is-hoverable has-background-black">
+              <a class="navbar-item center is-size-7 has-text-light" href="displays/index.html">MODEL VIEWER</a>
+              <a class="navbar-item center is-size-7 has-text-light" href="/">ABOUT US</a>
+            </div>
+          </div>
+        </div>
         </div>
       </div>
     </nav>
