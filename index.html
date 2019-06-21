@@ -35,16 +35,19 @@
     <div class="navbar-menu is-fullhd" id="navbarBasicExample">
       <div class="navbar-start">
         <a class="navbar-item center" href="/">HOME</a>
-        <a class="navbar-item center" href="#projectnublar">PROJECT NUBLAR</a>
-        <a class="navbar-item center" href="#dumblibrary">DUMB LIBRARY</a>
-        <a class="navbar-item center" href="#gradlehook">GRADLEHOOK</a>
         <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link">
-            More
-          </a>
-
-          <div class="navbar-dropdown is-hoverable">
-            <a class="navbar-item is-size-7" href="displays/index.html">Model Viewer</a>
+          <a class="navbar-link">Projects</a>
+          <div class="navbar-dropdown is-hoverable has-background-black">
+            <a class="navbar-item center is-size-7 has-text-light" href="#projectnublar">PROJECT NUBLAR</a>
+            <a class="navbar-item center is-size-7 has-text-light" href="#dumblibrary">DUMB LIBRARY</a>
+            <a class="navbar-item center is-size-7 has-text-light" href="#gradlehook">GRADLEHOOK</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">More</a>
+          <div class="navbar-dropdown is-hoverable has-background-black">
+            <a class="navbar-item center is-size-7 has-text-light" href="displays/index.html">MODEL VIEWER</a>
+            <a class="navbar-item center is-size-7 has-text-light" href="team.html">ABOUT US</a>
           </div>
         </div>
       </div>
@@ -64,7 +67,12 @@
 
 </section>
 
-<div class="hero is-fullheight is-mobile is-dark" id="projectnublar" style="background-size: cover;">
+<div class="hero is-fullheight is-mobile is-dark" id="projectnublar" style="text-align: center; padding: 10px; margin: -1px;">
+  <script src="scripts/pnbackground.js"></script>
+  <script>
+    window.onload = startCarousel;
+    window.addEventListener("resize", updateCarousels);
+  </script>
   <div class="hero-body">
     <div class="container is-overlay" style="text-align: center;">
       <h1 class="title is-1 is-size-3-mobile">Project: Nublar</h1>

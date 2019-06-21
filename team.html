@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>DumbCode</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet" />
+  <link href="css/author.css" rel="stylesheet" />
+  <link href="css/tooltips.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+  <script src="scripts/navigation.js"></script>
+  <script src="scripts/teams.js"></script>
+</head>
+
+<body class="has-background-dark" style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
+  <section class="hero is-medium is-mobile is-dark">
+
+    <nav aria-label="main navigation" class="navbar is-dark is-mobile is-marginless heading has-text-weight-bold"
+         role="navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="../">
+          <img class="is-size-3-mobile" height="48" src="images/dclogo.svg" width="48">DUMBCODE
+        </a>
+
+        <div class="divider" style="width: 6rem"></div>
+
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navbarBasicExample"
+           role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div class="navbar-menu is-fullhd" id="navbarBasicExample">
+        <div class="navbar-start">
+          <a class="navbar-item center" href="index.html">HOME</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">More</a>
+            <div class="navbar-dropdown is-hoverable has-background-black">
+              <a class="navbar-item center is-size-7 has-text-light" href="displays/index.html">MODEL VIEWER</a>
+              <a class="navbar-item center is-size-7 has-text-light" href="/">ABOUT US</a>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Heading Body -->
+    <div class="hero-body container is-dark" style="text-align: center;">
+      <div class="title">Our Team</div>
+      <div class="subtitle">DumbCode is made up of many members from all over the world! Here is a place to get to know some of them.</div>
+      <p class="subtitle" id="test"></p>
+      <script>
+          window.onLoad = initTeams();
+      </script>
+    </div>
+  </section>
+
+  <section id="role-container" class="container is-dark"></section>
+
+  <br>
+
+  <footer class="section has-background-black-ter">
+    <div class="container is-dark">
+      <div class="columns">
+        <div class="column">
+          <div class="notification has-background-grey-dark has-text-light" style="min-height: 13rem;">
+            <img class="image is-96x96" src="images/dclogo.svg" style="float:left; margin-right: 2rem;">
+            <h1 class="title is-size-4">DumbCode</h1>
+            Dedicated to bringing the greatest Minecraft mods to our community since 2018.
+            <form action="https://twitter.com/DumbCodeMC">
+              <br>
+              <input class="button is-fullwidth is-primary" type="submit" value="Twitter" />
+            </form>
+          </div>
+        </div>
+        <div class="column">
+          <div class="notification has-background-grey-dark has-text-light" style="min-height: 13rem;">
+            <h1 class="title is-size-4">More Info</h1>
+            For additional information or concerns please direct questions or issues to our GitHub issue
+            trackers.
+            <form action="https://github.com/Dumb-Code">
+              <br>
+              <input class="button is-fullwidth is-dark" type="submit" value="GitHub" />
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>
