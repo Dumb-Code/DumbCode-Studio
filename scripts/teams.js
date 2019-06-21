@@ -101,7 +101,7 @@ function fillRoles(json) {
         } else if(json.social[key] == "tooltip"){
           element = document.createElement("div") //Create the tooltip element
           element.className = "is-pulled-right tooltip is-tooltip-left"
-          element.dataTooltip = member.social.discord
+          element.dataset.tooltip = member.social.discord
         } else {
             throw new Error("Unknown social type: " + key)
         }
@@ -120,7 +120,7 @@ function fillRoles(json) {
 
       var div = document.createElement("div") //The div containing the tag
       div.className = "tag has-addons is-dark"
-      div.style.marginRight = "3px"
+      div.style.marginRight = "5px"
       article.appendChild( div )
 
       var colorSpan = document.createElement("span") //The span for holding the project color
@@ -132,6 +132,7 @@ function fillRoles(json) {
       nameSpan.className = "tag is-dark"
       nameSpan.innerHTML = projectInfo.name
       div.appendChild( nameSpan )
+
     })
 
     member.roles.forEach(role => {
