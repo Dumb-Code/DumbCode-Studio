@@ -64,7 +64,12 @@
 
 </section>
 
-<div class="hero is-fullheight is-mobile is-dark" id="projectnublar" style="background-size: cover;">
+<div class="hero is-fullheight is-mobile is-dark" id="projectnublar" style="text-align: center; padding: 10px; margin: -1px;">
+  <script src="scripts/pnbackground.js"></script>
+  <script>
+    window.onload = startCarousel;
+    window.addEventListener("resize", updateCarousels);
+  </script>
   <div class="hero-body">
     <div class="container is-overlay" style="text-align: center;">
       <h1 class="title is-1 is-size-3-mobile">Project: Nublar</h1>

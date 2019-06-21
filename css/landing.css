@@ -20,3 +20,15 @@
     background-size: cover;
   }
 }
+
+#projectnublar {
+    -webkit-transition: brightness .2s ease-in-out;
+    -moz-transition: brightness .2s ease-in-out;
+    -o-transition: brightness .2s ease-in-out;
+    transition: brightness .2s ease-in-out;
+}
+
+#projectnublar.transparent {
+    -webkit-filter: brightness(0%);
+    filter: brightness(0%);
+}
