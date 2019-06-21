@@ -18,6 +18,7 @@ function parseRoles(json) {
       var outerDiv = document.createElement("div") //The outer outer div
       outerDiv.className = "tile is-ancestor"
       sectionContainer.appendChild( outerDiv )
+      sectionContainer.appendChild( document.createElement( "br" ) )
 
       var innerDiv = document.createElement("div") //The outer div. Contains all the text, plus the members div
       innerDiv.className = "tile"
