@@ -258,9 +258,6 @@ function getPixels(img) {
     var context = canvas.getContext('2d')
     context.drawImage(img, 0, 0, img.width, img.height);
 
-    console.log(texWidth)
-    console.log(texHeight)
-
     mWidth = img.width
     mHeight = img.height
 
@@ -272,13 +269,7 @@ function checkAllCulled() {
     allCubes.forEach(cube => {
 
         var p = [ 1, 1, 1, 1, 1, 1 ]; // planes px,nx, py,ny, pz,nz  -> 0 hide, 1 show
-//        for(var index = 0; index < 6; index ++ ) {
-//            var offset = index * 4
-//            var pixelData = context.getImageData(rawUV[offset + 0], rawUV[offset + 1], rawUV[offset + 2], rawUV[offset + 3]).data;
-//            console.log(pixelData)
-//        }
         var index = [];
-
 
         for(var face = 0; face < 6; face++) {
             var tex = femalePixels
@@ -348,7 +339,6 @@ function parseTBLModel(model) {
                 dummyGroup.add (mainCubeGroup)
                 scene.add (dummyGroup)
 
-                console.log(texWidth)
                 checkAllCulled()
 
             }, function error(e) {
@@ -436,7 +426,7 @@ function getUV(rawData, offsetX, offsetY, w, h, d) {
         if(texb == 0) { //up
             putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY+d, -w, -d)
         } else { //Down
-            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY, -w, d)
+            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower-w, offsetY, w, d) //todo: double triple quadruple check that this isn't flipped on the x axis. If so, just chang the uv accordingly
         }
     }
 
