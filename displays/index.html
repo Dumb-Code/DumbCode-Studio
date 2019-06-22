@@ -29,7 +29,15 @@
 
     <div class="navbar-menu is-fullhd" id="navbarBasicExample">
       <div class="navbar-start">
-        <a class="navbar-item center" href="index.html">HOME</a>
+        <a class="navbar-item center" href="../index.html">HOME</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link">Projects</a>
+              <div class="navbar-dropdown is-hoverable has-background-black">
+                  <a class="navbar-item center is-size-7 has-text-light" href="../index.html#projectnublar">PROJECT NUBLAR</a>
+                  <a class="navbar-item center is-size-7 has-text-light" href="../index.html#dumblibrary">DUMB LIBRARY</a>
+                  <a class="navbar-item center is-size-7 has-text-light" href="../index.html#gradlehook">GRADLEHOOK</a>
+              </div>
+          </div>
         <div class="navbar-item has-dropdown is-hoverable">
           <a class="navbar-link">More</a>
           <div class="navbar-dropdown is-hoverable has-background-black">
@@ -37,28 +45,22 @@
             <a class="navbar-item center is-size-7 has-text-light" href="../team.html">ABOUT US</a>
           </div>
         </div>
-        <div class="navbar-end is-hidden-touch">
             <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link">Edit</a>
-                <div class="navbar-dropdown is-right">
-                    <a class="navbar-item">
-                        <label class="checkbox">
-                            <input type="checkbox">
-                            Male Texture
-                        </label>
-                    </a>
-                    <a class="navbar-item">
-                        <label class="checkbox">
-                            <input type="checkbox">
-                            Water background
-                        </label>
-                    </a>
-                    <a class="navbar-item">
-                        <label class="checkbox">
-                            <input id="grid" type="checkbox" onclick="gridToggle();" checked>
-                            Display Grid
-                        </label>
-                    </a>
+                <div class="navbar-dropdown is-hoverable has-background-black">
+                        <a class="navbar-item has-text-light">
+                            <label class="checkbox">
+                                <input type="checkbox">
+                                Male Texture
+                            </label>
+                        </a>
+                        <a class="navbar-item has-text-light">
+                            <label class="checkbox">
+                                <input id="grid" type="checkbox" onclick="gridToggle();" checked>
+                                Display Grid
+                            </label>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
