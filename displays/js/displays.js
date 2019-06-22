@@ -4,15 +4,21 @@ var camera, scene, renderer, controls;
 var container
 var mouseDown = false
 
-var mainCubeGroup, gridGroup, textureMap, textDiv;
+var mainCubeGroup, gridGroup, textDiv;
+var allCubes = []
 
-var texWidth, texHeight;
+var texWidth, texHeight, mWidth, mHeight, material, inVisMat;
 
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2(-5, -5);
 var rawMouse = new THREE.Vector2();
 
 var uvMap = new Map()
+
+var dinosaur
+
+var maleTexture, femaleTexture, malePixels, femalePixels
+var isMale = true
 
 init();
 animate();
@@ -21,7 +27,7 @@ function init() {
 
     //TODO: when we are public again, this is going to be used to get the dinosaur / pose / pose index to render
     //This can then lead into playing animations maybe?
-//    var dinosaur = getValue("dinosaur", "tyrannosaurus")
+    dinosaur = getValue("dinosaur", "trex")
 //    var pose = getValue("pose", "idle")
 
     container = document.createElement( 'div' );
@@ -43,6 +49,7 @@ function init() {
     setupTexture()
 
     setupMouseOver()
+
 
     window.addEventListener( 'resize', onWindowResize, false );
     document.addEventListener( 'mousemove', onMouseMove, false );
@@ -205,24 +212,117 @@ function render() {
 }
 
 function setupTexture() {
-    new THREE.TextureLoader().load("assets/male_adult.png", function( texture ) {
-        texture.flipY = false
-        texture.magFilter = THREE.NearestFilter;
-        texture.minFilter = THREE.LinearMipMapLinearFilter;
-        textureMap = texture;
-        parseTBLModel("nada") //todo: have model name here. Infer it from the document
+    new THREE.TextureLoader().load("assets/" + dinosaur + "/female.png", function( fTexture ) {
+            fTexture.flipY = false
+            fTexture.magFilter = THREE.NearestFilter;
+            fTexture.minFilter = THREE.LinearMipMapLinearFilter;
+            femaleTexture = fTexture
+
+
+            new THREE.TextureLoader().load("assets/" + dinosaur + "/male.png", function( mTexture ) {
+                mTexture.flipY = false
+                mTexture.magFilter = THREE.NearestFilter;
+                mTexture.minFilter = THREE.LinearMipMapLinearFilter;
+                maleTexture = mTexture
+
+
+                material = new THREE.MeshLambertMaterial( {
+                    color: 0xAAAAAA,
+                	map: mTexture,
+                	transparent: true,
+                	side: THREE.DoubleSide,
+                } )
+
+                inVisMat = new THREE.MeshLambertMaterial( {
+                    color: 0xAAAAAA,
+                	side: THREE.DoubleSide,
+                	transparent: true,
+                	opacity: 0
+                } )
+
+                parseTBLModel("nada") //todo: have model name here. Infer it from the document
+
+                malePixels = getPixels(mTexture.image)
+                femalePixels = getPixels(fTexture.image)
+            })
+
+
+        })
+
+}
+
+function getPixels(img) {
+    var canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var context = canvas.getContext('2d')
+    context.drawImage(img, 0, 0, img.width, img.height);
+
+    console.log(texWidth)
+    console.log(texHeight)
+
+    mWidth = img.width
+    mHeight = img.height
+
+    return context
+}
+
+function checkAllCulled() {
+
+    allCubes.forEach(cube => {
+
+        var p = [ 1, 1, 1, 1, 1, 1 ]; // planes px,nx, py,ny, pz,nz  -> 0 hide, 1 show
+//        for(var index = 0; index < 6; index ++ ) {
+//            var offset = index * 4
+//            var pixelData = context.getImageData(rawUV[offset + 0], rawUV[offset + 1], rawUV[offset + 2], rawUV[offset + 3]).data;
+//            console.log(pixelData)
+//        }
+        var index = [];
+
+
+        for(var face = 0; face < 6; face++) {
+            var tex = femalePixels
+            if(isMale) {
+                tex = malePixels
+            }
+
+
+            if(!shouldBuild(tex, cube.rawUV[face*4], cube.rawUV[face*4+1], cube.rawUV[face*4+2], cube.rawUV[face*4+3])) {
+                p[face] = 0
+            }
+
+        }
+
+         if ( p[0] === 1 ) index.push( 0, 2, 1, 2, 3, 1 );
+         if ( p[1] === 1 ) index.push( 4, 6, 5, 6, 7, 5 );
+         if ( p[2] === 1 ) index.push( 8, 10, 9, 10, 11, 9 )
+         if ( p[3] === 1 ) index.push( 12, 14, 13, 14, 15, 13 );
+         if ( p[4] === 1 ) index.push( 16, 18, 17, 18, 19, 17 );
+         if ( p[5] === 1 ) index.push( 20, 22, 21, 22, 23, 21 );
+
+         cube.setIndex( index )
     })
 }
 
-
-
+function shouldBuild(tex, x, y, dx, dy) {
+    if(dx * dy <= 0) {
+        return false
+    }
+    var data = tex.getImageData(x / texWidth * mWidth, y / texHeight * mHeight, dx / texWidth * mWidth, dy / texHeight * mHeight).data
+    for(var index = 0; index < data.length; index+=4) {
+        if(data[index+3] != 0) { //Maybe add a threshold
+            return true
+        }
+    }
+    return false
+}
 
 
 
 
 function parseTBLModel(model) {
 
-    JSZipUtils.getBinaryContent('assets/dinosaur.tbl', function(err, data) {
+    JSZipUtils.getBinaryContent('assets/' + dinosaur + '/model.tbl', function(err, data) {
         if(err) {
             throw err; // or handle err
         }
@@ -248,6 +348,9 @@ function parseTBLModel(model) {
                 dummyGroup.add (mainCubeGroup)
                 scene.add (dummyGroup)
 
+                console.log(texWidth)
+                checkAllCulled()
+
             }, function error(e) {
                 console.log(e)
             })
@@ -256,12 +359,6 @@ function parseTBLModel(model) {
 }
 
 function parseCube(cubeJson) {
-    var material = new THREE.MeshLambertMaterial( {
-        color: 0xAAAAAA,
-		map: textureMap,
-		transparent: true,
-		side: THREE.FrontSide
-	} );
 
     var group = new THREE.Group();
 
@@ -273,13 +370,24 @@ function parseCube(cubeJson) {
     var position = cubeJson.position
     var rotation = cubeJson.rotation
 
-    var padding = 0.0000001
-    var geometry = new THREE.BoxBufferGeometry( dimensions[0] + padding , dimensions[1] + padding , dimensions[2] + padding );
+    var padding = 0.001
+
+    var geometry = new THREE.BoxBufferGeometry( dimensions[0] + padding, dimensions[1] + padding , dimensions[2] + padding);
 
 
-    geometry.addAttribute("uv", new THREE.BufferAttribute(new Float32Array(getUV(cubeJson.txOffset[0], cubeJson.txOffset[1], dimensions[0], dimensions[1], dimensions[2], geometry.getAttribute("uv"))), 2))
+    var rawUV = new Array(6 * 4)
+
+    var uv = getUV(rawUV, cubeJson.txOffset[0], cubeJson.txOffset[1], dimensions[0], dimensions[1], dimensions[2])
+
+
+    geometry.addAttribute("uv", new THREE.BufferAttribute(new Float32Array(uv), 2))
 
     var cube = new THREE.Mesh( geometry, material )
+
+    allCubes.push(geometry)
+
+    geometry.rawUV = rawUV
+
     cube.position.set( dimensions[0] / 2 + offset[0], dimensions[1] / 2 + offset[1], dimensions[2] / 2 + offset[2] )
     cube.cubeName = cubeJson.name
     internalGroup.add( cube )
@@ -294,11 +402,10 @@ function parseCube(cubeJson) {
         group.add(parseCube(cubeJson.children[child]))
     }
 
-
     return group
 }
 
-function getUV(offsetX, offsetY, w, h, d, dat) {
+function getUV(rawData, offsetX, offsetY, w, h, d) {
 
     //Uv data goes west, east, down, up, south north
 
@@ -321,16 +428,15 @@ function getUV(offsetX, offsetY, w, h, d, dat) {
         }
         offX += xDist
 
-        putUVData(uvdata, texBottomOrder[texh], minX, minY, xDist, h)
-
+        putUVData(rawData, uvdata, texBottomOrder[texh], minX, minY, xDist, h)
     }
 
     for(var texb = 0; texb < texUpperOrder.length; texb++) {
         var minXLower = offsetX + d + w * texb + w
         if(texb == 0) { //up
-            putUVData(uvdata, texUpperOrder[texb], minXLower, offsetY+d, -w, -d)
+            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY+d, -w, -d)
         } else { //Down
-            putUVData(uvdata, texUpperOrder[texb], minXLower, offsetY, -w, d)
+            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY, -w, d)
         }
     }
 
@@ -338,7 +444,7 @@ function getUV(offsetX, offsetY, w, h, d, dat) {
     return uvdata
 }
 
-function putUVData(uvdata, facingindex, minU, minV, uSize, vSize) {
+function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize) {
     //1 0 1 0
     //1 1 0 0
     var u = [minU + uSize, minU, minU + uSize, minU]
@@ -348,9 +454,24 @@ function putUVData(uvdata, facingindex, minU, minV, uSize, vSize) {
         uvdata[index] = u[vertex] / texWidth
         uvdata[index + 1] = v[vertex] / texHeight
     }
+    rawData[facingindex*4+0] = minU
+    rawData[facingindex*4+1] = minV
+    rawData[facingindex*4+2] = uSize
+    rawData[facingindex*4+3] = vSize
 }
 
 
 function gridToggle() {
     gridGroup.visible = document.getElementById('grid').checked
+}
+
+function genderToggle() {
+    if(isMale) {
+        material.map = femaleTexture
+    } else {
+        material.map = maleTexture
+    }
+    isMale = !isMale
+    material.needsUpdate = true
+    checkAllCulled()
 }
