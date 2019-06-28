@@ -20,13 +20,15 @@ var dinosaur
 var maleTexture
 var femaleTexture
 
-var currentTexture = maleTexture
+var currentTexture
 var isMale = true
 
 function init() {
 
     maleTexture = new DinosaurTexture()
     femaleTexture = new DinosaurTexture()
+
+    currentTexture = maleTexture
 
     //TODO: when we are public again, this is going to be used to get the dinosaur / pose / pose index to render
     //This can then lead into playing animations maybe?
@@ -463,7 +465,11 @@ class DinosaurTexture {
     setup( img ) {
         var canvas = document.createElement('canvas');
         this.width = img.width;
-        this.height = this.height;
+        this.height = img.height;
+
+        canvas.width = this.width
+        canvas.height = this.height
+
         this.pixels = canvas.getContext('2d')
         this.pixels.drawImage(img, 0, 0, this.width, img.height);
 
