@@ -17,13 +17,16 @@ var uvMap = new Map()
 
 var dinosaur
 
-var maleTexture, femaleTexture, malePixels, femalePixels
+var maleTexture
+var femaleTexture
+
+var currentTexture = maleTexture
 var isMale = true
 
-init();
-animate();
-
 function init() {
+
+    maleTexture = new DinosaurTexture()
+    femaleTexture = new DinosaurTexture()
 
     //TODO: when we are public again, this is going to be used to get the dinosaur / pose / pose index to render
     //This can then lead into playing animations maybe?
@@ -216,14 +219,14 @@ function setupTexture() {
             fTexture.flipY = false
             fTexture.magFilter = THREE.NearestFilter;
             fTexture.minFilter = THREE.LinearMipMapLinearFilter;
-            femaleTexture = fTexture
+            femaleTexture.texture = fTexture
 
 
             new THREE.TextureLoader().load("assets/" + dinosaur + "/male.png", function( mTexture ) {
                 mTexture.flipY = false
                 mTexture.magFilter = THREE.NearestFilter;
                 mTexture.minFilter = THREE.LinearMipMapLinearFilter;
-                maleTexture = mTexture
+                maleTexture.texture = mTexture
 
 
                 material = new THREE.MeshLambertMaterial( {
@@ -242,8 +245,9 @@ function setupTexture() {
 
                 parseTBLModel("nada") //todo: have model name here. Infer it from the document
 
-                malePixels = getPixels(mTexture.image)
-                femalePixels = getPixels(fTexture.image)
+                //todo: move this to it's own inner class method
+                maleTexture.setup(mTexture.image)
+                femaleTexture.setup(fTexture.image)
             })
 
 
@@ -251,34 +255,16 @@ function setupTexture() {
 
 }
 
-function getPixels(img) {
-    var canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    var context = canvas.getContext('2d')
-    context.drawImage(img, 0, 0, img.width, img.height);
-
-    mWidth = img.width
-    mHeight = img.height
-
-    return context
-}
-
 function checkAllCulled() {
-
     allCubes.forEach(cube => {
 
         var p = [ 1, 1, 1, 1, 1, 1 ]; // planes px,nx, py,ny, pz,nz  -> 0 hide, 1 show
         var index = [];
 
         for(var face = 0; face < 6; face++) {
-            var tex = femalePixels
-            if(isMale) {
-                tex = malePixels
-            }
 
 
-            if(!shouldBuild(tex, cube.rawUV[face*4], cube.rawUV[face*4+1], cube.rawUV[face*4+2], cube.rawUV[face*4+3])) {
+            if(!shouldBuild(cube.rawUV[face*4], cube.rawUV[face*4+1], cube.rawUV[face*4+2], cube.rawUV[face*4+3], cube)) {
                 p[face] = 0
             }
 
@@ -295,11 +281,12 @@ function checkAllCulled() {
     })
 }
 
-function shouldBuild(tex, x, y, dx, dy) {
+function shouldBuild(x, y, dx, dy, cube) {
     if(dx * dy <= 0) {
         return false
     }
-    var data = tex.getImageData(x / texWidth * mWidth, y / texHeight * mHeight, dx / texWidth * mWidth, dy / texHeight * mHeight).data
+    //Move the getImageData to the DinosaurTexture class?
+    var data = currentTexture.pixels.getImageData(x / texWidth * currentTexture.width, y / texHeight * currentTexture.height, dx / texWidth * currentTexture.width, dy / texHeight * currentTexture.height).data
     for(var index = 0; index < data.length; index+=4) {
         if(data[index+3] != 0) { //Maybe add a threshold
             return true
@@ -374,6 +361,7 @@ function parseCube(cubeJson) {
 
     var cube = new THREE.Mesh( geometry, material )
 
+    geometry.cubeName = cubeJson.name
     allCubes.push(geometry)
 
     geometry.rawUV = rawUV
@@ -456,12 +444,32 @@ function gridToggle() {
 }
 
 function genderToggle() {
+
     if(isMale) {
-        material.map = femaleTexture
+        currentTexture = femaleTexture
     } else {
-        material.map = maleTexture
+        currentTexture = maleTexture
     }
     isMale = !isMale
+
+
+    material.map = currentTexture.texture
     material.needsUpdate = true
-    checkAllCulled()
+
+    checkAllCulled() //todo: cache this on the class?
 }
+
+class DinosaurTexture {
+    setup( img ) {
+        var canvas = document.createElement('canvas');
+        this.width = img.width;
+        this.height = this.height;
+        this.pixels = canvas.getContext('2d')
+        this.pixels.drawImage(img, 0, 0, this.width, img.height);
+
+    }
+}
+
+
+init();
+animate();
