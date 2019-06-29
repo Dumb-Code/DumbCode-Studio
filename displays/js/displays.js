@@ -301,19 +301,11 @@ function parseTBLModel(model) {
             throw err; // or handle err
         }
 
-        JSZip.loadAsync(data).then(function (zip) {
-            zip.file("model.json").async("string")
-            .then(function success(content) {
+        TBLModel.loadModel(data, model => {
+            tabulaModel = model
+            scene.add (model.createModel( material, allCubes,  animationMap))
+        })
 
-                tabulaModel = new TBLModel(content)
-
-                scene.add (tabulaModel.createModel( material, [],  new Map()))
-
-
-            }, function error(e) {
-                console.log(e)
-            })
-        });
     });
 }
 

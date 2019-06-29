@@ -193,3 +193,11 @@ function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize, texWi
     rawData[facingindex*4+3] = vSize
 }
 
+
+TBLModel.loadModel = function(data, success) {
+    JSZip.loadAsync(data).then(function (zip) {
+        zip.file("model.json").async("string")
+        .then(content => { success(new TBLModel(content)) })
+    });
+}
+
