@@ -4,10 +4,12 @@ var camera, scene, renderer, controls;
 var container
 var mouseDown = false
 
-var mainCubeGroup, gridGroup, textDiv;
+var gridGroup, textDiv;
 var allCubes = []
 
-var texWidth, texHeight, mWidth, mHeight, material, inVisMat;
+var tabulaModel
+
+var material;
 
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2(-5, -5);
@@ -202,8 +204,8 @@ function render() {
 
     raycaster.setFromCamera( mouse, camera );
 
-    if(mainCubeGroup) {
-        var intersects = raycaster.intersectObjects( mainCubeGroup.children, true );
+    if(tabulaModel.modelCache) {
+        var intersects = raycaster.intersectObjects( tabulaModel.modelCache.children , true );
         if(intersects.length > 0 && !mouseDown) {
             var inter = intersects[0]
             textDiv.innerHTML = inter.object.cubeName
@@ -238,12 +240,7 @@ function setupTexture() {
                 	side: THREE.DoubleSide,
                 } )
 
-                inVisMat = new THREE.MeshLambertMaterial( {
-                    color: 0xAAAAAA,
-                	side: THREE.DoubleSide,
-                	transparent: true,
-                	opacity: 0
-                } )
+
 
                 parseTBLModel("nada") //todo: have model name here. Infer it from the document
 
@@ -288,7 +285,7 @@ function shouldBuild(x, y, dx, dy, cube) {
         return false
     }
     //Move the getImageData to the DinosaurTexture class?
-    var data = currentTexture.pixels.getImageData(x / texWidth * currentTexture.width, y / texHeight * currentTexture.height, dx / texWidth * currentTexture.width, dy / texHeight * currentTexture.height).data
+    var data = currentTexture.pixels.getImageData(x / tabulaModel.texWidth * currentTexture.width, y / tabulaModel.texHeight * currentTexture.height, dx / tabulaModel.texWidth * currentTexture.width, dy / tabulaModel.texHeight * currentTexture.height).data
     for(var index = 0; index < data.length; index+=4) {
         if(data[index+3] != 0) { //Maybe add a threshold
             return true
@@ -296,9 +293,6 @@ function shouldBuild(x, y, dx, dy, cube) {
     }
     return false
 }
-
-
-
 
 function parseTBLModel(model) {
 
@@ -311,133 +305,16 @@ function parseTBLModel(model) {
             zip.file("model.json").async("string")
             .then(function success(content) {
 
-                var jobj = JSON.parse(content)
+                tabulaModel = new TBLModel(content)
 
-                mainCubeGroup = new THREE.Group();
+                scene.add (tabulaModel.createModel( material, [],  new Map()))
 
-                texWidth = jobj.textureWidth
-                texHeight = jobj.textureHeight
-
-
-                for (var cube in jobj.cubes) {
-                    mainCubeGroup.add(parseCube(jobj.cubes[cube]))
-                }
-
-                var dummyGroup = new THREE.Group();
-                dummyGroup.scale.set(-1/16, -1/16, 1/16)
-                dummyGroup.add (mainCubeGroup)
-                scene.add (dummyGroup)
-
-                checkAllCulled()
 
             }, function error(e) {
                 console.log(e)
             })
         });
     });
-}
-
-function parseCube(cubeJson) {
-
-    var group = new THREE.Group();
-
-    var internalGroup = new THREE.Group();
-    group.add(internalGroup)
-
-    var dimensions = cubeJson.dimensions
-    var offset = cubeJson.offset
-    var position = cubeJson.position
-    var rotation = cubeJson.rotation
-
-    var padding = 0.001
-
-    var geometry = new THREE.BoxBufferGeometry( dimensions[0] + padding, dimensions[1] + padding , dimensions[2] + padding);
-
-
-    var rawUV = new Array(6 * 4)
-
-    var uv = getUV(rawUV, cubeJson.txOffset[0], cubeJson.txOffset[1], dimensions[0], dimensions[1], dimensions[2])
-
-
-    geometry.addAttribute("uv", new THREE.BufferAttribute(new Float32Array(uv), 2))
-
-    var cube = new THREE.Mesh( geometry, material )
-
-    geometry.cubeName = cubeJson.name
-    allCubes.push(geometry)
-
-    geometry.rawUV = rawUV
-
-    cube.position.set( dimensions[0] / 2 + offset[0], dimensions[1] / 2 + offset[1], dimensions[2] / 2 + offset[2] )
-    cube.cubeName = cubeJson.name
-    internalGroup.add( cube )
-
-
-    group.position.set(position[0], position[1], position[2])
-
-    group.rotation.order = "ZYX"
-    group.rotation.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180)
-
-    for(var child in cubeJson.children) {
-        group.add(parseCube(cubeJson.children[child]))
-    }
-
-    return group
-}
-
-function getUV(rawData, offsetX, offsetY, w, h, d) {
-
-    //Uv data goes west, east, down, up, south north
-
-    //6 -> 6 faces
-    //4 -> 4 vertices per face
-    //2 -> 2 data per vertex (u, v)
-    var uvdata = new Array(6 * 4 * 2)
-
-    var texBottomOrder = [ 1, 5, 0, 4 ]
-    var texUpperOrder = [3, 2]
-
-    var offX = 0
-    for(var texh = 0; texh < texBottomOrder.length; texh++) {
-        var minX = offsetX + offX
-        var minY = offsetY + d
-
-        var xDist = w;
-        if (texh % 2 == 0) {
-            xDist = d
-        }
-        offX += xDist
-
-        putUVData(rawData, uvdata, texBottomOrder[texh], minX, minY, xDist, h)
-    }
-
-    for(var texb = 0; texb < texUpperOrder.length; texb++) {
-        var minXLower = offsetX + d + w * texb + w
-        if(texb == 0) { //up
-            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY+d, -w, -d)
-        } else { //Down
-            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower-w, offsetY, w, d) //todo: double triple quadruple check that this isn't flipped on the x axis. If so, just chang the uv accordingly
-        }
-    }
-
-
-    return uvdata
-}
-
-function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize) {
-    //1 0 1 0
-    //1 1 0 0
-    var u = [minU + uSize, minU, minU + uSize, minU]
-    var v = [minV + vSize, minV + vSize, minV, minV]
-    for(var vertex = 0; vertex < 4; vertex++) {
-        var index = (facingindex * 4 + vertex) * 2
-        uvdata[index] = u[vertex] / texWidth
-        uvdata[index + 1] = v[vertex] / texHeight
-    }
-    rawData[facingindex*4+0] = minU
-    rawData[facingindex*4+1] = minV
-    rawData[facingindex*4+2] = uSize
-    rawData[facingindex*4+3] = vSize
 }
 
 
