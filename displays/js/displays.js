@@ -1,5 +1,5 @@
     
-var camera, scene, renderer, controls;
+var camera, scene, renderer, controls, clock;
 
 var container
 var mouseDown = false
@@ -26,9 +26,6 @@ var maleTexture
 var femaleTexture
 var currentTexture
 var isMale = true
-
-
-var poseindex = 0; //todo: remove, this is just for testing
 
 function init() {
 
@@ -82,6 +79,8 @@ function setupCamera() {
     camera = new THREE.PerspectiveCamera( 65, window.innerWidth / window.innerHeight, 0.1, 700 );
     camera.position.set(-3.745472848477101, 0.9616311452213426, -4.53288230701089)
     camera.lookAt(0, 0, 0)
+
+    clock = new THREE.Clock()
 }
 
 function setupMouseOver() {
@@ -184,10 +183,6 @@ function onMouseMove( event ) {
 }
 
 function onMouseDown( event ) {
-   if(animationHandler) {
-       poseindex += 1
-       animationHandler.setPoseIndex(poseindex)
-   }
    mouseDown = true
 }
 
@@ -205,6 +200,8 @@ function animate() {
     style.left = rawMouse.x - divRect.width/2 + "px" //todo: make it so if there isn't anything selected, don't move this
     style.top = rawMouse.y - 35 + "px"
 
+
+    animationHandler.animate( clock.getDelta() )
     requestAnimationFrame( animate );
     render();
 }

@@ -5,7 +5,7 @@ class TBLModel {
 
     //rootGroup
 
-    //allCubes
+    //cubeMap
 
     constructor(content) {
 
@@ -14,7 +14,7 @@ class TBLModel {
         this.texWidth = jobj.textureWidth
         this.texHeight = jobj.textureHeight
 
-        this.allCubes = []
+        this.cubeMap = new Map()
         this.rootGroup = parseGroupJson(jobj, this)
 
 
@@ -97,7 +97,7 @@ class Cube {
         this.children = children
         this.tbl = tbl
 
-        this.tbl.allCubes.push( this )
+        tbl.cubeMap.set(this.name, this)
     }
 
     createGroup( material, allCubes, animationMap ) {
