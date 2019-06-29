@@ -1,5 +1,6 @@
 class AnimationHandler {
 
+    //inertia
     //animationMap
     //increments
 
@@ -11,6 +12,8 @@ class AnimationHandler {
 
 
     constructor(animationMap) {
+        this.inertia = false
+
         this.animationMap = animationMap
         this.increments = []
         this.compoundTime = 0
@@ -102,6 +105,11 @@ class AnimationHandler {
             this.incrementPose()
             percentageDone = 0
         }
+
+        if(this.inertia) {
+            percentageDone = Math.sin(Math.PI * (percentageDone - 0.5)) * 0.5 + 0.5
+        }
+
         for(var [name, entry] of animationMap.entries()) {
 
             var rotation = this.interpolate(this.previousIncrement.rotationMap.get(name), this.currentIncrement.rotationMap.get(name), percentageDone)
@@ -134,6 +142,11 @@ class AnimationHandler {
         this.previousIncrement = this.currentIncrement
         this.currentIncrement = this.increments[this.poseIndex]
 
+    }
+
+
+    toggleInertia() {
+        this.inertia = !this.inertia;
     }
 
 

@@ -50,13 +50,13 @@
                     <div class="navbar-dropdown is-hoverable has-background-black">
                         <a class="navbar-item has-text-light">
                             <label class="checkbox">
-                                <input type="checkbox" onclick="genderToggle();" checked>
+                                <input type="checkbox" onclick="genderToggle()" checked>
                                 Male Texture
                             </label>
                         </a>
                         <a class="navbar-item has-text-light">
                             <label class="checkbox">
-                                <input id="grid" type="checkbox" onclick="gridToggle();" checked>
+                                <input id="grid" type="checkbox" onclick="gridToggle()" checked>
                                 Display Grid
                             </label>
                         </a>
@@ -72,7 +72,15 @@
                 <div class="navbar-item has-dropdown is-hoverable">
                     <a class="navbar-link">Animation</a>
                     <div class="navbar-dropdown is-hoverable has-background-black">
-                        <input id="animations-files" type="file" onchange="animationHandler.onAnimationFileChange(this.files)" multiple/>
+                        <a class="navbar-item has-text-light">
+                            <input id="animations-files" type="file" onchange="animationHandler.onAnimationFileChange(this.files)" multiple>
+                        </a>
+                        <a class="navbar-item has-text-light">
+                            <label class="checkbox">
+                                <input id="intertia" type="checkbox" onclick="animationHandler.toggleInertia()">
+                                Intertia
+                            </label>
+                        </a>
                     </div>
                 </div>
             </div>
