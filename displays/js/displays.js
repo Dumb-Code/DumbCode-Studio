@@ -193,7 +193,7 @@ function animate() {
 
     var divRect = textDiv.getBoundingClientRect()
 
-    style.left = rawMouse.x - divRect.width/2 + "px"
+    style.left = rawMouse.x - divRect.width/2 + "px" //todo: make it so if there isn't anything selected, don't move this
     style.top = rawMouse.y - 35 + "px"
 
     requestAnimationFrame( animate );
