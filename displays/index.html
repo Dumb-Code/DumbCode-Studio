@@ -69,6 +69,12 @@
                         <a class="navbar-item center is-size-7 has-text-light" href="?dinosaur=dilo">DILO</a>
                     </div>
                 </div>
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">Animation</a>
+                    <div class="navbar-dropdown is-hoverable has-background-black">
+                        <input id="animations-files" type="file" onchange="animationHandler.onAnimationFileChange(this.files)" multiple/>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -95,6 +101,7 @@
     <script src="js/jszip.js"></script>
     <script src="js/jszip-utils.js"></script>
 
+    <script src="js/animations.js"></script>
     <script src="js/tbl_loader.js"></script>
     <script src="js/displays.js"></script>
 </section>

@@ -6,6 +6,7 @@ var mouseDown = false
 
 var gridGroup, textDiv;
 var allCubes = []
+var animationMap = new Map()
 
 var tabulaModel
 
@@ -19,11 +20,15 @@ var uvMap = new Map()
 
 var dinosaur
 
+var animationHandler = new AnimationHandler(animationMap)
+
 var maleTexture
 var femaleTexture
-
 var currentTexture
 var isMale = true
+
+
+var poseindex = 0; //todo: remove, this is just for testing
 
 function init() {
 
@@ -179,6 +184,10 @@ function onMouseMove( event ) {
 }
 
 function onMouseDown( event ) {
+   if(animationHandler) {
+       poseindex += 1
+       animationHandler.setPoseIndex(poseindex)
+   }
    mouseDown = true
 }
 
@@ -204,7 +213,7 @@ function render() {
 
     raycaster.setFromCamera( mouse, camera );
 
-    if(tabulaModel.modelCache) {
+    if(tabulaModel) {
         var intersects = raycaster.intersectObjects( tabulaModel.modelCache.children , true );
         if(intersects.length > 0 && !mouseDown) {
             var inter = intersects[0]
