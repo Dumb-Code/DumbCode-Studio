@@ -1,7 +1,4 @@
-import { Raycaster, Vector2, PerspectiveCamera, Clock, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, Geometry, Vector3, LineBasicMaterial, Group, Line, TextureLoader, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide } from "three";
-import { OrbitControls } from "three-orbitcontrols"
-
-
+    
 var camera, scene, renderer, controls, clock;
 
 var container
@@ -15,9 +12,9 @@ var tabulaModel
 
 var material;
 
-var raycaster = new Raycaster();
-var mouse = new Vector2(-5, -5);
-var rawMouse = new Vector2();
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2(-5, -5);
+var rawMouse = new THREE.Vector2();
 
 var uvMap = new Map()
 
@@ -79,11 +76,11 @@ function getValue(key, fallback) {
 }
 
 function setupCamera() {
-    camera = new PerspectiveCamera( 65, window.innerWidth / window.innerHeight, 0.1, 700 );
+    camera = new THREE.PerspectiveCamera( 65, window.innerWidth / window.innerHeight, 0.1, 700 );
     camera.position.set(-3.745472848477101, 0.9616311452213426, -4.53288230701089)
     camera.lookAt(0, 0, 0)
 
-    clock = new Clock()
+    clock = new THREE.Clock()
 }
 
 function setupMouseOver() {
@@ -110,14 +107,14 @@ function setupMouseOver() {
 
 function setupControls() {
 //    Set the controls
-    controls = new OrbitControls( camera, renderer.domElement );
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
     controls.addEventListener( 'change', render )
     controls.enablePan = false //Locks the camera onto the center point. Maybe we can enable this to allow full movement
 }
 
 function setupRenderer() {
     //Set up the renderer
-    renderer = new WebGLRenderer({
+    renderer = new THREE.WebGLRenderer({
         alpha: true
     });
     renderer.setClearColor(0x000000, 0);
@@ -126,11 +123,11 @@ function setupRenderer() {
 }
 
 function setupScene() {
-    scene = new Scene();
-    scene.background = new Color( 0xaaaaaa );
-    scene.add( new HemisphereLight() );
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color( 0xaaaaaa );
+    scene.add( new THREE.HemisphereLight() );
 
-    var dirLight = new DirectionalLight()
+    var dirLight = new THREE.DirectionalLight()
     dirLight.position.set( -1.25, 1.5, 1 )
     dirLight.target.position.set( 1, -1, -1 )
     scene.add( dirLight );
@@ -139,23 +136,23 @@ function setupScene() {
 }
 
 function setupGrid() {
-    var geometry = new Geometry();
-    geometry.vertices.push(new Vector3( - 15, 0 ) );
-    geometry.vertices.push(new Vector3( 15, 0 ) );
+    var geometry = new THREE.Geometry();
+    geometry.vertices.push(new THREE.Vector3( - 15, 0 ) );
+    geometry.vertices.push(new THREE.Vector3( 15, 0 ) );
 
-    var linesMaterial = new LineBasicMaterial( { color: 0x787878, opacity: .2, linewidth: .1 } );
+    var linesMaterial = new THREE.LineBasicMaterial( { color: 0x787878, opacity: .2, linewidth: .1 } );
 
 
-    gridGroup = new Group()
+    gridGroup = new THREE.Group()
 
     for ( var i = 0; i <= 30; i ++ ) {
 
-        var line = new Line( geometry, linesMaterial );
+        var line = new THREE.Line( geometry, linesMaterial );
         line.position.z =  i  - 15
         line.position.y = -1.5
         gridGroup.add( line );
 
-        line = new Line( geometry, linesMaterial );
+        line = new THREE.Line( geometry, linesMaterial );
         line.position.x = i - 15
         line.rotation.y = 90 * Math.PI / 180;
         line.position.y = -1.5
@@ -228,25 +225,25 @@ function render() {
 }
 
 function setupTexture() {
-    new TextureLoader().load("assets/" + dinosaur + "/female.png", function( fTexture ) {
+    new THREE.TextureLoader().load("assets/" + dinosaur + "/female.png", function( fTexture ) {
             fTexture.flipY = false
-            fTexture.magFilter = NearestFilter;
-            fTexture.minFilter = LinearMipMapLinearFilter;
+            fTexture.magFilter = THREE.NearestFilter;
+            fTexture.minFilter = THREE.LinearMipMapLinearFilter;
             femaleTexture.texture = fTexture
 
 
-            new TextureLoader().load("assets/" + dinosaur + "/male.png", function( mTexture ) {
+            new THREE.TextureLoader().load("assets/" + dinosaur + "/male.png", function( mTexture ) {
                 mTexture.flipY = false
-                mTexture.magFilter = NearestFilter;
-                mTexture.minFilter = LinearMipMapLinearFilter;
+                mTexture.magFilter = THREE.NearestFilter;
+                mTexture.minFilter = THREE.LinearMipMapLinearFilter;
                 maleTexture.texture = mTexture
 
 
-                material = new MeshLambertMaterial( {
+                material = new THREE.MeshLambertMaterial( {
                     color: 0xAAAAAA,
                 	map: mTexture,
                 	transparent: true,
-                	side: DoubleSide,
+                	side: THREE.DoubleSide,
                 } )
 
 
@@ -303,10 +300,19 @@ function shouldBuild(x, y, dx, dy, cube) {
     return false
 }
 
-async function parseTBLModel(model) {
-    let data = await fetch(`assets/${dinosaur}/model.tbl`)
-    tabulaModel = await TBLModel.loadModel(data)
-    scene.add (tabulaModel.createModel( material, allCubes,  animationMap))
+function parseTBLModel(model) {
+
+    JSZipUtils.getBinaryContent('assets/' + dinosaur + '/model.tbl', function(err, data) {
+        if(err) {
+            throw err; // or handle err
+        }
+
+        TBLModel.loadModel(data, model => {
+            tabulaModel = model
+            scene.add (model.createModel( material, allCubes,  animationMap))
+        })
+
+    });
 }
 
 

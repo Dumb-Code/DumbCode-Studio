@@ -20,11 +20,9 @@ class AnimationHandler {
         this.poseIndex = 0
     }
 
-    /**
-     * 
-     * @param {FileList} files 
-     */
     onAnimationFileChange(files) {
+
+
         var tblFiles = []
         var infoFile
 
@@ -48,7 +46,7 @@ class AnimationHandler {
             return
         }
 
-        //reset this objects stuff
+
         this.increments = []
         this.currentIncrement = null
         this.previousIncrement = null
@@ -56,26 +54,14 @@ class AnimationHandler {
         this.compoundTime = 0
 
 
-        const readFile = file => {
-            return new Promise((resolve, reject) => {
-                reader.onload = event => resolve(event.target.result)
-                reader.onerror = error => reject(error)
-                reader.readAsText(file)
-              })
-        }
-
         var posesMap = new Map()
-        const loadFiles = async() => {
-            for (const file of tblFiles) {
-                let data = await readFile(file)
-                let model = await TBLModel.loadModel(data)
-
-                posesMap.set(file.name, model)
+        tblFiles.forEach(file => {
+            var poseReader = new FileReader()
+            poseReader.onload = e => {
+                 TBLModel.loadModel(e.target.result, model => posesMap.set( file.name, model ))
             }
-        }
-
-
-        loadFiles()
+            poseReader.readAsBinaryString(file)
+        })
 
 
         var info
