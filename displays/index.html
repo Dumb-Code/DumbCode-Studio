@@ -50,13 +50,13 @@
                     <div class="navbar-dropdown is-hoverable has-background-black">
                         <a class="navbar-item has-text-light">
                             <label class="checkbox">
-                                <input type="checkbox" onclick="genderToggle()" checked>
+                                <input id="toggle-checkbox" type="checkbox" onclick="setGender(this)" checked>
                                 Male Texture
                             </label>
                         </a>
                         <a class="navbar-item has-text-light">
                             <label class="checkbox">
-                                <input id="grid" type="checkbox" onclick="gridToggle()" checked>
+                                <input id="grid" type="checkbox" onclick="setGrid(this)" checked>
                                 Display Grid
                             </label>
                         </a>
@@ -73,11 +73,11 @@
                     <a class="navbar-link">Animation</a>
                     <div class="navbar-dropdown is-hoverable has-background-black">
                         <a class="navbar-item has-text-light">
-                            <input id="animations-files" type="file" onchange="animationHandler.onAnimationFileChange(this.files)" multiple>
+                            <input id="animations-files" type="file" onchange="onAnimationFileChange(this.files)" multiple>
                         </a>
                         <a class="navbar-item has-text-light">
                             <label class="checkbox">
-                                <input id="intertia" type="checkbox" onclick="animationHandler.toggleInertia()" checked>
+                                <input id="intertia" type="checkbox" onclick="setInertia(this)" checked>
                                 Intertia
                             </label>
                         </a>
@@ -91,27 +91,11 @@
 
 
 
-    <script src="https://threejs.org/build/three.js"></script>
-    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
-
-
-    <script src="https://threejs.org/examples/js/shaders/SSAOShader.js"></script>
-
-    <script src="https://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://threejs.org/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://threejs.org/examples/js/postprocessing/SSAOPass.js"></script>
-    <script src="https://threejs.org/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://threejs.org/examples/js/math/SimplexNoise.js"></script>
-
-    <script src="https://threejs.org/examples/js/WebGL.js"></script>
-
     <script src="js/jszip.js"></script>
-    <script src="js/jszip-utils.js"></script>
 
-    <script src="js/animations.js"></script>
-    <script src="js/tbl_loader.js"></script>
-    <script src="js/displays.js"></script>
+    <script type="module" src="js/animations.js"></script>
+    <script type="module" src="js/tbl_loader.js"></script>
+    <script type="module" src="js/displays.js"></script>
 </section>
 </body>
 </html>

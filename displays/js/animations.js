@@ -1,4 +1,6 @@
-class AnimationHandler {
+import { TBLModel } from './tbl_loader.js'
+
+export class AnimationHandler {
 
     //inertia
     //animationMap
@@ -23,11 +25,11 @@ class AnimationHandler {
     onAnimationFileChange(files) {
 
 
-        var tblFiles = []
-        var infoFile
+        let tblFiles = []
+        let infoFile
 
-        for (var i = 0; i < files.length; i++) {
-            var file = files.item(i)
+        for (let i = 0; i < files.length; i++) {
+            let file = files.item(i)
             if(file.name.endsWith(".tbl")) {
                 tblFiles.push(file)
             }
@@ -47,51 +49,39 @@ class AnimationHandler {
         }
 
 
-        this.increments = []
         this.currentIncrement = null
         this.previousIncrement = null
         this.poseIndex = 0
         this.compoundTime = 0
 
 
-        var posesMap = new Map()
-        tblFiles.forEach(file => {
-            var poseReader = new FileReader()
-            poseReader.onload = e => {
-                 TBLModel.loadModel(e.target.result, model => posesMap.set( file.name, model ))
-            }
-            poseReader.readAsBinaryString(file)
-        })
-
-
-        var info
-        var fileReader = new FileReader()
-        fileReader.onload = e => {
-            info = JSON.parse(e.target.result)
+        const readFile = file => {
+            return new Promise((resolve, reject) => {
+                let reader = new FileReader()
+                reader.onload = event => resolve(event.target.result)
+                reader.onerror = error => reject(error)
+                reader.readAsBinaryString(file)
+              })
         }
-        fileReader.readAsBinaryString(infoFile)
 
-        setTimeout(() => {
+        
+        const loadFiles = async() => {
+        
+            let promiseFiles = tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))
+            let result = await Promise.all([...promiseFiles, readFile(infoFile)])
 
-            while(!info && posesMap.size != files.length) {
-                //wait
-            }
+            let info = JSON.parse(result.pop())
+            let baseTime = info.base_time / 20
 
-            var baseTime = info.base_time / 20 //from ticks to seconds todo: overrides
-
-            var poses = Array.from(posesMap.entries())
-            poses.sort()
-
-            poses.forEach(entry => {
-                this.increments.push( new ModelIncrement(entry[1].cubeMap, baseTime) )
-            })
-
-            console.log("Animations Uploaded")
+            result.sort((a, b) => a.fileName.localeCompare(b.fileName))
+            this.increments = result.map(model => new ModelIncrement(model.cubeMap, baseTime))
 
             this.currentIncrement = this.increments[0]
             this.incrementPose()
 
-        }, 0)
+        }
+
+        loadFiles()
     }
 
 
@@ -100,7 +90,7 @@ class AnimationHandler {
             return
         }
         this.compoundTime += deltaTime
-        var percentageDone = this.compoundTime / this.currentIncrement.time
+        let percentageDone = this.compoundTime / this.currentIncrement.time
         if(percentageDone > 1) {
             this.incrementPose()
             percentageDone = 0
@@ -110,19 +100,19 @@ class AnimationHandler {
             percentageDone = Math.sin(Math.PI * (percentageDone - 0.5)) * 0.5 + 0.5
         }
 
-        for(var [name, entry] of animationMap.entries()) {
+        for(let [name, entry] of this.animationMap.entries()) {
 
-            var rotation = this.interpolate(this.previousIncrement.rotationMap.get(name), this.currentIncrement.rotationMap.get(name), percentageDone)
+            let rotation = this.interpolate(this.previousIncrement.rotationMap.get(name), this.currentIncrement.rotationMap.get(name), percentageDone)
             entry.rotation.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180)
 
-            var rotationPoint = this.interpolate(this.previousIncrement.rotationPointMap.get(name), this.currentIncrement.rotationPointMap.get(name), percentageDone)
+            let rotationPoint = this.interpolate(this.previousIncrement.rotationPointMap.get(name), this.currentIncrement.rotationPointMap.get(name), percentageDone)
             entry.position.set(rotationPoint[0], rotationPoint[1], rotationPoint[2])
 
         }
     }
 
     interpolate(prev, next, alpha) {
-        var out = new Array(3)
+        let out = new Array(3)
 
         out[0] = prev[0] + (next[0] - prev[0]) * alpha
         out[1] = prev[1] + (next[1] - prev[1]) * alpha
@@ -143,13 +133,6 @@ class AnimationHandler {
         this.currentIncrement = this.increments[this.poseIndex]
 
     }
-
-
-    toggleInertia() {
-        this.inertia = !this.inertia;
-    }
-
-
 }
 
 class ModelIncrement {
@@ -164,7 +147,7 @@ class ModelIncrement {
         this.rotationMap = new Map()
         this.rotationPointMap = new Map()
 
-        for(var [name, cube] of poseMap.entries()) {
+        for(let [name, cube] of poseMap.entries()) {
             this.rotationMap.set( name, cube.rotation )
             this.rotationPointMap.set( name, cube.rotationPoint )
         }
@@ -173,4 +156,3 @@ class ModelIncrement {
     //add up delta time calls, then just do simple interpolation
 
 }
-

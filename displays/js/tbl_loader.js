@@ -1,21 +1,25 @@
-class TBLModel {
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material } from "./three.js";
 
-    //texWidth
-    //texHeight
+export class TBLModel {
 
-    //rootGroup
+    texWidth
+    texHeight
 
-    //cubeMap
+    rootGroup
+
+    cubeMap
 
     constructor(content) {
 
-        var jobj = JSON.parse(content)
+        let jobj = JSON.parse(content)
 
         this.texWidth = jobj.textureWidth
         this.texHeight = jobj.textureHeight
 
         this.cubeMap = new Map()
         this.rootGroup = parseGroupJson(jobj, this)
+
+        this.checkedCulled = new Map()
 
 
     }
@@ -25,14 +29,13 @@ class TBLModel {
             return this.modelCache
         }
 
-        var mainCubeGroup = this.rootGroup.createGroup(material, allCubes, animationMap)
+        let mainCubeGroup = this.rootGroup.createGroup(material, allCubes, animationMap)
 
-        this.modelCache = new THREE.Group();
+        this.modelCache = new Group();
         this.modelCache.scale.set(-1/16, -1/16, 1/16)
         this.modelCache.add(mainCubeGroup)
 
         return this.modelCache
-
     }
 }
 
@@ -51,7 +54,7 @@ class CubeGroup {
 
     createGroup( material, allCubes, animationMap ) {
 
-        var group = new THREE.Group();
+        let group = new Group();
 
         this.cubeGroups.forEach(child => { group.add(child.createGroup(material, allCubes, animationMap)) })
         this.cubeList.forEach(cube => { group.add(cube.createGroup(material, allCubes, animationMap)) })
@@ -63,8 +66,8 @@ class CubeGroup {
 
 function parseGroupJson(json, tbl) {
 
-     var cubeList = []
-     var childGroups = []
+     let cubeList = []
+     let childGroups = []
 
 
      json.cubes.forEach(cube => { childGroups.push(parseCubeJson(cube, tbl)) })
@@ -100,21 +103,22 @@ class Cube {
         tbl.cubeMap.set(this.name, this)
     }
 
+  
     createGroup( material, allCubes, animationMap ) {
-        var group = new THREE.Group();
-        var internalGroup = new THREE.Group();
+        let group = new Group();
+        let internalGroup = new Group();
         group.add(internalGroup)
 
-        var padding = 0.001
-        var geometry = new THREE.BoxBufferGeometry( this.dimension[0] + padding, this.dimension[1] + padding , this.dimension[2] + padding);
+        let padding = 0.001
+        let geometry = new BoxBufferGeometry( this.dimension[0] + padding, this.dimension[1] + padding , this.dimension[2] + padding);
         allCubes.push(geometry)
 
-        var rawUV = new Array(6 * 4)
-        var uv = getUV(rawUV, this.textureoffset[0], this.textureoffset[1], this.dimension[0], this.dimension[1], this.dimension[2], this.tbl.texWidth, this.tbl.texHeight)
-        geometry.addAttribute("uv", new THREE.BufferAttribute(new Float32Array(uv), 2))
+        let rawUV = new Array(6 * 4)
+        let uv = getUV(rawUV, this.textureoffset[0], this.textureoffset[1], this.dimension[0], this.dimension[1], this.dimension[2], this.tbl.texWidth, this.tbl.texHeight)
+        geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uv), 2))
         geometry.rawUV = rawUV
 
-        var cube = new THREE.Mesh( geometry, material )
+        let cube = new Mesh( geometry, material )
         cube.position.set( this.dimension[0] / 2 + this.offset[0], this.dimension[1] / 2 + this.offset[1], this.dimension[2] / 2 + this.offset[2] )
         cube.cubeName = this.name
         internalGroup.add( cube )
@@ -133,7 +137,7 @@ class Cube {
 }
 
 function parseCubeJson(json, tbl) {
-    var children = []
+    let children = []
     json.children.forEach(child => { children.push( parseCubeJson( child, tbl ) ) })
     return new Cube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, children, tbl)
 }
@@ -145,17 +149,17 @@ function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight) {
     //6 -> 6 faces
     //4 -> 4 vertices per face
     //2 -> 2 data per vertex (u, v)
-    var uvdata = new Array(6 * 4 * 2)
+    let uvdata = new Array(6 * 4 * 2)
 
-    var texBottomOrder = [ 1, 5, 0, 4 ]
-    var texUpperOrder = [3, 2]
+    let texBottomOrder = [ 1, 5, 0, 4 ]
+    let texUpperOrder = [3, 2]
 
-    var offX = 0
-    for(var texh = 0; texh < texBottomOrder.length; texh++) {
-        var minX = offsetX + offX
-        var minY = offsetY + d
+    let offX = 0
+    for(let texh = 0; texh < texBottomOrder.length; texh++) {
+        let minX = offsetX + offX
+        let minY = offsetY + d
 
-        var xDist = w;
+        let xDist = w;
         if (texh % 2 == 0) {
             xDist = d
         }
@@ -164,8 +168,8 @@ function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight) {
         putUVData(rawData, uvdata, texBottomOrder[texh], minX, minY, xDist, h, texWidth, texHeight)
     }
 
-    for(var texb = 0; texb < texUpperOrder.length; texb++) {
-        var minXLower = offsetX + d + w * texb + w
+    for(let texb = 0; texb < texUpperOrder.length; texb++) {
+        let minXLower = offsetX + d + w * texb + w
         if(texb == 0) { //up
             putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY+d, -w, -d, texWidth, texHeight)
         } else { //Down
@@ -180,10 +184,10 @@ function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight) {
 function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize, texWidth, texHeight) {
     //1 0 1 0
     //1 1 0 0
-    var u = [minU + uSize, minU, minU + uSize, minU]
-    var v = [minV + vSize, minV + vSize, minV, minV]
-    for(var vertex = 0; vertex < 4; vertex++) {
-        var index = (facingindex * 4 + vertex) * 2
+    let u = [minU + uSize, minU, minU + uSize, minU]
+    let v = [minV + vSize, minV + vSize, minV, minV]
+    for(let vertex = 0; vertex < 4; vertex++) {
+        let index = (facingindex * 4 + vertex) * 2
         uvdata[index] = u[vertex] / texWidth
         uvdata[index + 1] = v[vertex] / texHeight
     }
@@ -194,10 +198,12 @@ function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize, texWi
 }
 
 
-TBLModel.loadModel = function(data, success) {
-    JSZip.loadAsync(data).then(function (zip) {
-        zip.file("model.json").async("string")
-        .then(content => { success(new TBLModel(content)) })
-    });
+TBLModel.loadModel = async(data, name = "") => {
+    let zip = await JSZip.loadAsync(data)
+    let jsonContent = await zip.file("model.json").async("string")
+    let model = new TBLModel(jsonContent);
+    if(name) {
+        model.fileName = name
+    }
+    return model
 }
-

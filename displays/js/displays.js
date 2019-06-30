@@ -1,31 +1,45 @@
-    
-var camera, scene, renderer, controls, clock;
+import { Raycaster, Vector2, PerspectiveCamera, Clock, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, Geometry, Vector3, LineBasicMaterial, Group, Line, TextureLoader, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide } from "./three.js";
+import { OrbitControls } from './orbit_controls.js'
+import { AnimationHandler } from './animations.js'
+import { TBLModel } from './tbl_loader.js'
 
-var container
-var mouseDown = false
+let camera, scene, renderer, controls, clock;
 
-var gridGroup, textDiv;
-var allCubes = []
-var animationMap = new Map()
+let container
+let mouseDown = false
 
-var tabulaModel
+let gridGroup, textDiv;
+let allCubes = []
+let animationMap = new Map()
 
-var material;
+let tabulaModel
 
-var raycaster = new THREE.Raycaster();
-var mouse = new THREE.Vector2(-5, -5);
-var rawMouse = new THREE.Vector2();
+let material;
 
-var uvMap = new Map()
+let raycaster = new Raycaster();
+let mouse = new Vector2(-5, -5);
+let rawMouse = new Vector2();
 
-var dinosaur
+let dinosaur
 
-var animationHandler = new AnimationHandler(animationMap)
+let animationHandler = new AnimationHandler(animationMap)
 
-var maleTexture
-var femaleTexture
-var currentTexture
-var isMale = true
+let maleTexture
+let femaleTexture
+let currentTexture
+let isMale = true
+
+//Export things 
+window.onAnimationFileChange = files => animationHandler.onAnimationFileChange(files)
+window.setInertia = elem => animationHandler.inertia = elem.checked
+window.setGrid = elem => gridGroup.visible = elem.checked
+window.setGender = elem => {
+    isMale = elem.checked
+    currentTexture = isMale ? maleTexture : femaleTexture
+    material.map = currentTexture.texture
+    material.needsUpdate = true
+    checkAllCulled()
+}
 
 function init() {
 
@@ -37,7 +51,7 @@ function init() {
     //TODO: when we are public again, this is going to be used to get the dinosaur / pose / pose index to render
     //This can then lead into playing animations maybe?
     dinosaur = getValue("dinosaur", "trex")
-//    var pose = getValue("pose", "idle")
+//    let pose = getValue("pose", "idle")
 
     container = document.createElement( 'div' );
     document.body.appendChild( container );
@@ -47,7 +61,9 @@ function init() {
 	if ( ! renderer.extensions.get( 'WEBGL_depth_texture' ) ) {
 		document.querySelector( '#error' ).style.display = 'block';
 		return;
-	}
+    }
+    
+    clock = new Clock()
 
     setupCamera()
 
@@ -55,7 +71,7 @@ function init() {
 
     setupScene()
 
-    setupTexture()
+    loadAssets()
 
     setupMouseOver()
 
@@ -68,7 +84,7 @@ function init() {
 }
 
 function getValue(key, fallback) {
-    var matcher = window.location.href.match(new RegExp(key + "=([^&]+)"))
+    let matcher = window.location.href.match(new RegExp(key + "=([^&]+)"))
     if(matcher == null || matcher.length == 1) {
         return fallback
     }
@@ -76,16 +92,14 @@ function getValue(key, fallback) {
 }
 
 function setupCamera() {
-    camera = new THREE.PerspectiveCamera( 65, window.innerWidth / window.innerHeight, 0.1, 700 );
+    camera = new PerspectiveCamera( 65, window.innerWidth / window.innerHeight, 0.1, 700 );
     camera.position.set(-3.745472848477101, 0.9616311452213426, -4.53288230701089)
     camera.lookAt(0, 0, 0)
-
-    clock = new THREE.Clock()
 }
 
 function setupMouseOver() {
     textDiv = document.createElement('div');
-    var style = textDiv.style
+    let style = textDiv.style
 
     style.position = 'absolute';
 
@@ -107,14 +121,14 @@ function setupMouseOver() {
 
 function setupControls() {
 //    Set the controls
-    controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls = new OrbitControls( camera, renderer.domElement );
     controls.addEventListener( 'change', render )
     controls.enablePan = false //Locks the camera onto the center point. Maybe we can enable this to allow full movement
 }
 
 function setupRenderer() {
     //Set up the renderer
-    renderer = new THREE.WebGLRenderer({
+    renderer = new WebGLRenderer({
         alpha: true
     });
     renderer.setClearColor(0x000000, 0);
@@ -123,11 +137,11 @@ function setupRenderer() {
 }
 
 function setupScene() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0xaaaaaa );
-    scene.add( new THREE.HemisphereLight() );
+    scene = new Scene();
+    scene.background = new Color( 0xaaaaaa );
+    scene.add( new HemisphereLight() );
 
-    var dirLight = new THREE.DirectionalLight()
+    let dirLight = new DirectionalLight()
     dirLight.position.set( -1.25, 1.5, 1 )
     dirLight.target.position.set( 1, -1, -1 )
     scene.add( dirLight );
@@ -136,23 +150,23 @@ function setupScene() {
 }
 
 function setupGrid() {
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push(new THREE.Vector3( - 15, 0 ) );
-    geometry.vertices.push(new THREE.Vector3( 15, 0 ) );
+    let geometry = new Geometry();
+    geometry.vertices.push(new Vector3( - 15, 0 ) );
+    geometry.vertices.push(new Vector3( 15, 0 ) );
 
-    var linesMaterial = new THREE.LineBasicMaterial( { color: 0x787878, opacity: .2, linewidth: .1 } );
+    let linesMaterial = new LineBasicMaterial( { color: 0x787878, opacity: .2, linewidth: .1 } );
 
 
-    gridGroup = new THREE.Group()
+    gridGroup = new Group()
 
-    for ( var i = 0; i <= 30; i ++ ) {
+    for ( let i = 0; i <= 30; i ++ ) {
 
-        var line = new THREE.Line( geometry, linesMaterial );
+        let line = new Line( geometry, linesMaterial );
         line.position.z =  i  - 15
         line.position.y = -1.5
         gridGroup.add( line );
 
-        line = new THREE.Line( geometry, linesMaterial );
+        line = new Line( geometry, linesMaterial );
         line.position.x = i - 15
         line.rotation.y = 90 * Math.PI / 180;
         line.position.y = -1.5
@@ -161,12 +175,11 @@ function setupGrid() {
 
     scene.add( gridGroup )
 
-    gridToggle()
 }
 
 function onWindowResize() {
-    var width = window.innerWidth;
-    var height = window.innerHeight;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize( width, height );
@@ -176,7 +189,7 @@ function onMouseMove( event ) {
     rawMouse.x = event.clientX
     rawMouse.y = event.clientY
 
-    var rect = container.getBoundingClientRect()
+    let rect = container.getBoundingClientRect()
     mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
 
@@ -193,9 +206,9 @@ function onMouseUp( event ) {
 
 function animate() {
 
-    var style = textDiv.style
+    let style = textDiv.style
 
-    var divRect = textDiv.getBoundingClientRect()
+    let divRect = textDiv.getBoundingClientRect()
 
     style.left = rawMouse.x - divRect.width/2 + "px" //todo: make it so if there isn't anything selected, don't move this
     style.top = rawMouse.y - 35 + "px"
@@ -211,9 +224,9 @@ function render() {
     raycaster.setFromCamera( mouse, camera );
 
     if(tabulaModel) {
-        var intersects = raycaster.intersectObjects( tabulaModel.modelCache.children , true );
+        let intersects = raycaster.intersectObjects( tabulaModel.modelCache.children , true );
         if(intersects.length > 0 && !mouseDown) {
-            var inter = intersects[0]
+            let inter = intersects[0]
             textDiv.innerHTML = inter.object.cubeName
             textDiv.style.display = "block"
         } else {
@@ -224,66 +237,73 @@ function render() {
 	renderer.render( scene, camera );
 }
 
-function setupTexture() {
-    new THREE.TextureLoader().load("assets/" + dinosaur + "/female.png", function( fTexture ) {
-            fTexture.flipY = false
-            fTexture.magFilter = THREE.NearestFilter;
-            fTexture.minFilter = THREE.LinearMipMapLinearFilter;
-            femaleTexture.texture = fTexture
-
-
-            new THREE.TextureLoader().load("assets/" + dinosaur + "/male.png", function( mTexture ) {
-                mTexture.flipY = false
-                mTexture.magFilter = THREE.NearestFilter;
-                mTexture.minFilter = THREE.LinearMipMapLinearFilter;
-                maleTexture.texture = mTexture
-
-
-                material = new THREE.MeshLambertMaterial( {
-                    color: 0xAAAAAA,
-                	map: mTexture,
-                	transparent: true,
-                	side: THREE.DoubleSide,
-                } )
-
-
-
-                parseTBLModel("nada") //todo: have model name here. Infer it from the document
-
-                //todo: move this to it's own inner class method
-                maleTexture.setup(mTexture.image)
-                femaleTexture.setup(fTexture.image)
-            })
-
-
+function getTexture(location) {
+    return new Promise(resolve => {
+        new TextureLoader().load(location, tex => {
+            tex.flipY = false
+            tex.magFilter = NearestFilter;
+            tex.minFilter = LinearMipMapLinearFilter;
+            resolve(tex)
         })
+    })
+}
+
+async function loadAssets() {
+    let femaleTex = getTexture(`assets/${dinosaur}/female.png`)
+    let maleTex = getTexture(`assets/${dinosaur}/male.png`)
+    
+    let result = await Promise.all([femaleTex, maleTex])
+    femaleTexture.texture = result[0]
+    maleTexture.texture = result[1]
+    
+    material = new MeshLambertMaterial( {
+        color: 0xAAAAAA,
+        map: maleTexture.texture,
+        transparent: true,
+        side: DoubleSide,
+    } )
+
+    tabulaModel = await parseTBLModel() 
+    scene.add (tabulaModel.createModel( material, allCubes,  animationMap))
+
+
+    maleTexture.setup()
+    femaleTexture.setup()
+
+    checkAllCulled()
+
 
 }
 
 function checkAllCulled() {
+    let cacheMap = currentTexture.cullCache
+    if(!cacheMap) {
+        cacheMap = new Map()
+    }
     allCubes.forEach(cube => {
 
-        var p = [ 1, 1, 1, 1, 1, 1 ]; // planes px,nx, py,ny, pz,nz  -> 0 hide, 1 show
-        var index = [];
+        let index
 
-        for(var face = 0; face < 6; face++) {
-
-
-            if(!shouldBuild(cube.rawUV[face*4], cube.rawUV[face*4+1], cube.rawUV[face*4+2], cube.rawUV[face*4+3], cube)) {
-                p[face] = 0
+        if(cacheMap.has(cube.uuid)) {
+            index = cacheMap.get(cube.uuid)
+        } else {
+            let planes = [ 1, 1, 1, 1, 1, 1 ]
+            index = []
+            for(let face = 0; face < 6; face++) {
+                if(!shouldBuild(cube.rawUV[face*4], cube.rawUV[face*4+1], cube.rawUV[face*4+2], cube.rawUV[face*4+3], cube)) {
+                    planes[face] = 0
+                }
             }
-
+            for(let i = 0; i < planes.length; i++) {
+                if(planes[i] === 1) {
+                    index.push(...[0, 2, 1, 2, 3, 1].map(v => i*4 + v))
+                }
+            }
         }
-
-         if ( p[0] === 1 ) index.push( 0, 2, 1, 2, 3, 1 );
-         if ( p[1] === 1 ) index.push( 4, 6, 5, 6, 7, 5 );
-         if ( p[2] === 1 ) index.push( 8, 10, 9, 10, 11, 9 )
-         if ( p[3] === 1 ) index.push( 12, 14, 13, 14, 15, 13 );
-         if ( p[4] === 1 ) index.push( 16, 18, 17, 18, 19, 17 );
-         if ( p[5] === 1 ) index.push( 20, 22, 21, 22, 23, 21 );
-
-         cube.setIndex( index )
+        cacheMap.set(cube.uuid, index)
+        cube.setIndex(index)
     })
+    currentTexture.cullCache = cacheMap
 }
 
 function shouldBuild(x, y, dx, dy, cube) {
@@ -291,8 +311,8 @@ function shouldBuild(x, y, dx, dy, cube) {
         return false
     }
     //Move the getImageData to the DinosaurTexture class?
-    var data = currentTexture.pixels.getImageData(x / tabulaModel.texWidth * currentTexture.width, y / tabulaModel.texHeight * currentTexture.height, dx / tabulaModel.texWidth * currentTexture.width, dy / tabulaModel.texHeight * currentTexture.height).data
-    for(var index = 0; index < data.length; index+=4) {
+    let data = currentTexture.pixels.getImageData(x / tabulaModel.texWidth * currentTexture.width, y / tabulaModel.texHeight * currentTexture.height, dx / tabulaModel.texWidth * currentTexture.width, dy / tabulaModel.texHeight * currentTexture.height).data
+    for(let index = 0; index < data.length; index+=4) {
         if(data[index+3] != 0) { //Maybe add a threshold
             return true
         }
@@ -300,53 +320,25 @@ function shouldBuild(x, y, dx, dy, cube) {
     return false
 }
 
-function parseTBLModel(model) {
+async function parseTBLModel() {
+    let response = await fetch(`assets/${dinosaur}/model.tbl`)
+    let data = await response.blob()
+    return await TBLModel.loadModel(data)
 
-    JSZipUtils.getBinaryContent('assets/' + dinosaur + '/model.tbl', function(err, data) {
-        if(err) {
-            throw err; // or handle err
-        }
-
-        TBLModel.loadModel(data, model => {
-            tabulaModel = model
-            scene.add (model.createModel( material, allCubes,  animationMap))
-        })
-
-    });
 }
 
-
-function gridToggle() {
-    gridGroup.visible = document.getElementById('grid').checked
-}
-
-function genderToggle() {
-
-    if(isMale) {
-        currentTexture = femaleTexture
-    } else {
-        currentTexture = maleTexture
-    }
-    isMale = !isMale
-
-
-    material.map = currentTexture.texture
-    material.needsUpdate = true
-
-    checkAllCulled() //todo: cache this on the class?
-}
 
 class DinosaurTexture {
-    setup( img ) {
-        var canvas = document.createElement('canvas');
-        this.width = img.width;
-        this.height = img.height;
+    setup() {
+        let canvas = document.createElement('canvas');
+        this.width = this.texture.image.width;
+        this.height = this.texture.image.height;
 
         canvas.width = this.width
         canvas.height = this.height
 
         this.pixels = canvas.getContext('2d')
-        this.pixels.drawImage(img, 0, 0, this.width, img.height);
+        this.pixels.drawImage(this.texture.image, 0, 0, this.width, this.height);
 
     }
 }

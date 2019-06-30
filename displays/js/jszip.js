@@ -1019,7 +1019,7 @@ exports.generateWorker = function (zip, options, comment) {
  * Representation a of zip file in js
  * @constructor
  */
-function JSZip() {
+ function JSZip() {
     // if this constructor is used without `new`, it adds `new` before itself:
     if(!(this instanceof JSZip)) {
         return new JSZip();
