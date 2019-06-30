@@ -12,3 +12,6 @@ out
 *.iws
 *.iml
 .idea
+
+/node_modules
+

@@ -1,3 +1,5 @@
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material } from "three";
+
 class TBLModel {
 
     //texWidth
@@ -27,7 +29,7 @@ class TBLModel {
 
         var mainCubeGroup = this.rootGroup.createGroup(material, allCubes, animationMap)
 
-        this.modelCache = new THREE.Group();
+        this.modelCache = new Group();
         this.modelCache.scale.set(-1/16, -1/16, 1/16)
         this.modelCache.add(mainCubeGroup)
 
@@ -51,7 +53,7 @@ class CubeGroup {
 
     createGroup( material, allCubes, animationMap ) {
 
-        var group = new THREE.Group();
+        var group = new Group();
 
         this.cubeGroups.forEach(child => { group.add(child.createGroup(material, allCubes, animationMap)) })
         this.cubeList.forEach(cube => { group.add(cube.createGroup(material, allCubes, animationMap)) })
@@ -101,20 +103,20 @@ class Cube {
     }
 
     createGroup( material, allCubes, animationMap ) {
-        var group = new THREE.Group();
-        var internalGroup = new THREE.Group();
+        var group = new Group();
+        var internalGroup = new Group();
         group.add(internalGroup)
 
         var padding = 0.001
-        var geometry = new THREE.BoxBufferGeometry( this.dimension[0] + padding, this.dimension[1] + padding , this.dimension[2] + padding);
+        var geometry = new BoxBufferGeometry( this.dimension[0] + padding, this.dimension[1] + padding , this.dimension[2] + padding);
         allCubes.push(geometry)
 
         var rawUV = new Array(6 * 4)
         var uv = getUV(rawUV, this.textureoffset[0], this.textureoffset[1], this.dimension[0], this.dimension[1], this.dimension[2], this.tbl.texWidth, this.tbl.texHeight)
-        geometry.addAttribute("uv", new THREE.BufferAttribute(new Float32Array(uv), 2))
+        geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uv), 2))
         geometry.rawUV = rawUV
 
-        var cube = new THREE.Mesh( geometry, material )
+        var cube = new Mesh( geometry, material )
         cube.position.set( this.dimension[0] / 2 + this.offset[0], this.dimension[1] / 2 + this.offset[1], this.dimension[2] / 2 + this.offset[2] )
         cube.cubeName = this.name
         internalGroup.add( cube )
@@ -194,10 +196,10 @@ function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize, texWi
 }
 
 
-TBLModel.loadModel = function(data, success) {
-    JSZip.loadAsync(data).then(function (zip) {
-        zip.file("model.json").async("string")
-        .then(content => { success(new TBLModel(content)) })
-    });
+TBLModel.loadModel = async(data) => {
+    let zip = await JSZip.loadAsync(data)
+    let jsonContent = await zip.file("model.json").async("string")
+
+    return new TBLModel(content);
 }
 
