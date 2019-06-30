@@ -89,9 +89,9 @@ class AnimationHandler {
             console.log("Animations Uploaded")
 
             this.currentIncrement = this.increments[0]
-            this.previousIncrement = this.increments[0]
+            this.incrementPose()
 
-        }, 5000)
+        }, 0)
     }
 
 
