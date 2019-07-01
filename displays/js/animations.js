@@ -49,12 +49,6 @@ export class AnimationHandler {
         }
 
 
-        this.currentIncrement = null
-        this.previousIncrement = null
-        this.poseIndex = 0
-        this.compoundTime = 0
-
-
         const readFile = file => {
             return new Promise((resolve, reject) => {
                 let reader = new FileReader()
@@ -76,14 +70,18 @@ export class AnimationHandler {
             result.sort((a, b) => a.fileName.localeCompare(b.fileName))
             this.increments = result.map(model => new ModelIncrement(model.cubeMap, baseTime))
 
-            this.currentIncrement = this.increments[0]
-            this.incrementPose()
-
+            this.reset()
         }
 
         loadFiles()
     }
 
+    reset() {
+        this.poseIndex = this.increments.length
+        this.compoundTime = 0
+        this.currentIncrement = this.increments[this.poseIndex - 1]
+        this.incrementPose()
+    }
 
     animate(deltaTime) {
         if(!this.currentIncrement) {

@@ -4,14 +4,28 @@
     <meta charset=utf-8>
     <title>Dumbcode</title>
     <link href="../css/display.css" rel="stylesheet">
+    <link href="../css/tooltip.css" rel="stylesheet">
     <link href="css/editor.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
     <script src="../scripts/navigation.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
     <script src="js/jszip.js"></script>
+    <script src="js/gif.js"></script>
+
     <script type="module" src="js/displays.js"></script>
     <script type="module" src="js/editor.js"></script>
+
+    <style>
+    .disable-select {
+         user-select: none; /* supported by Chrome and Opera */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+    }
+</style>
 </head>
 <body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
 
@@ -78,9 +92,6 @@
                     <a class="navbar-link">Animation</a>
                     <div class="navbar-dropdown is-hoverable has-background-black">
                         <a class="navbar-item has-text-light">
-                            <input id="animations-files" type="file" onchange="onAnimationFileChange(this.files)" multiple>
-                        </a>
-                        <a class="navbar-item has-text-light">
                             <label class="checkbox">
                                 <input id="intertia" type="checkbox" onclick="setInertia(this)" checked>
                                 Intertia
@@ -95,9 +106,56 @@
     <div id="display-div"></div>
     <div class="editor-container" id="editor-container">
             <div class="editor" id="editor">
-                    EDITOR
+                <h5 class="title is-5" style="text-align: center">DumbCode Animation Editor</h5>
+                <div class="toplayer-columns columns">
+                    <div class="column" >
+                        Col1
+                    </div>
+                    <div class="column">
+                        Col2
+                    </div>
+                    <div class="column">
+                        Col3
+                    </div>
+                    <div class="column">
+                        Col4
+                    </div>
+                    <div class="column">
+                        <div class="file is-dark">
+                            <label class="file-label">
+                                <input class="file-input" type="file" onchange="onAnimationFileChange(this.files)" multiple>
+                                <span class="file-cta">
+                                    <span class="file-icon">
+                                        <i class="fas fa-upload"></i>
+                                    </span>
+                                    <span class="file-label" style="text-transform: none">
+                                        Choose files...
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="buttons has-addons">
+                            <a class="button is-dark" onclick="createGif([...document.getElementsByClassName('fps-radio')].find(elem => elem.checked).getAttribute('fps'))">Download as GIF</a>
+                        </div>
+                        <div class="control">
+                            <span>FPS:</span>
+                            <label class="radio">
+                                <input class="fps-radio" type="radio" name="fps" fps="30" checked>30
+                            </label>
+                            <label class="radio">
+                                <input class="fps-radio" type="radio" name="fps" fps="45">45
+                            </label>
+                            <label class="radio">
+                                <input class="fps-radio" type="radio" name="fps" fps="60">60
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
-    </div>
-</section>
+        </div>
+    </section>
 </body>
 </html>

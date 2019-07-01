@@ -3,7 +3,6 @@
     border-top-style: solid;
     border-color: #555;
     border-width: 15px;
-
     cursor: n-resize;
 }
 
@@ -13,8 +12,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    padding-left: 16px;
-    padding-right: 16px;
+    padding: 16px;
 
-    cursor: default;
+    cursor: initial;
+}
+
+.toplayer-columns .column {
+    text-align: center
 }
