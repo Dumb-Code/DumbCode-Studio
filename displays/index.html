@@ -4,6 +4,7 @@
     <meta charset=utf-8>
     <title>Dumbcode</title>
     <link href="../css/display.css" rel="stylesheet">
+    <link href="../css/tooltips.css" rel="stylesheet" />
     <link href="css/editor.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
@@ -135,8 +136,10 @@
                         </div>
                     </div>
                     <div class="column">
-                        <div class="buttons has-addons">
-                            <a class="button is-dark" onclick="downloadGif(this)">Download as GIF</a>
+                            <div class="buttons has-addons is-tooltip-top" data-tooltip="">
+                                <a class="button is-dark" style="text-transform: none" onclick="downloadGif(this)">
+                                    Download as GIF
+                                </a>
                         </div>
                         <div class="control">
                             <span>FPS:</span>

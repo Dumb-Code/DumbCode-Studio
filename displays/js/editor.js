@@ -5,9 +5,13 @@ const panel = document.getElementById("editor");
 const canvasContainer = document.getElementById("display-div");
 
 window.downloadGif = async(elem) => {
-    elem.classList.toggle('is-loading', true)
+    elem.classList.toggle("is-loading", true)
+    elem.parentNode.classList.toggle("tooltip", true)
 
-    let blob = await createGif([...document.getElementsByClassName('fps-radio')].find(elem => elem.checked).getAttribute('fps'))
+    elem.parentNode.dataset.tooltip = "Recording..."
+    let blob = await createGif([...document.getElementsByClassName('fps-radio')].find(elem => elem.checked).getAttribute('fps'), p => {
+        elem.parentNode.dataset.tooltip = Math.round(p * 100) + "%"
+    })
 
     if(blob) {
         let url = URL.createObjectURL(blob)
@@ -16,6 +20,8 @@ window.downloadGif = async(elem) => {
         a.download = "dinosaur.gif" //todo: name from model?
         a.click() 
     }
+
+    elem.parentNode.classList.toggle("tooltip", false)
     elem.classList.toggle('is-loading', false)    
 }
 

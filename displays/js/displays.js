@@ -326,7 +326,7 @@ async function parseTBLModel() {
 
 }
 
-export async function createGif(fps) {
+export async function createGif(fps, progressCallback = undefined) {
     return new Promise(resolve => {
         if(!animationHandler.currentIncrement) {
             resolve(undefined)
@@ -382,7 +382,11 @@ export async function createGif(fps) {
             }
         
             scene.add(tabulaModel.modelCache)
-            gif.on('finished', resolve);
+            
+            gif.on("finished", resolve);
+            if(progressCallback) {
+                gif.on("progress", progressCallback)
+            }
             gif.render();
         }, 0)
 
