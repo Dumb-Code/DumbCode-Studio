@@ -4,9 +4,14 @@
     <meta charset=utf-8>
     <title>Dumbcode</title>
     <link href="../css/display.css" rel="stylesheet">
+    <link href="css/editor.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
     <script src="../scripts/navigation.js"></script>
+
+    <script src="js/jszip.js"></script>
+    <script type="module" src="js/displays.js"></script>
+    <script type="module" src="js/editor.js"></script>
 </head>
 <body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
 
@@ -84,18 +89,15 @@
                     </div>
                 </div>
             </div>
-
         </div>
         </div>
     </nav>
-
-
-
-    <script src="js/jszip.js"></script>
-
-    <script type="module" src="js/animations.js"></script>
-    <script type="module" src="js/tbl_loader.js"></script>
-    <script type="module" src="js/displays.js"></script>
+    <div id="display-div"></div>
+    <div class="editor-container" id="editor-container">
+            <div class="editor" id="editor">
+                    EDITOR
+            </div>
+    </div>
 </section>
 </body>
 </html>

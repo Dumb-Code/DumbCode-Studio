@@ -113,7 +113,9 @@ export class AnimationHandler {
 
     interpolate(prev, next, alpha) {
         let out = new Array(3)
-
+        if(!prev || !next) {
+            return out
+        }
         out[0] = prev[0] + (next[0] - prev[0]) * alpha
         out[1] = prev[1] + (next[1] - prev[1]) * alpha
         out[2] = prev[2] + (next[2] - prev[2]) * alpha

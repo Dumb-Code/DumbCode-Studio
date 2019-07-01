@@ -53,9 +53,8 @@ function init() {
     dinosaur = getValue("dinosaur", "trex")
 //    let pose = getValue("pose", "idle")
 
-    container = document.createElement( 'div' );
-    document.body.appendChild( container );
-
+    container = document.getElementById( 'display-div' );
+    
 	setupRenderer()
 
 	if ( ! renderer.extensions.get( 'WEBGL_depth_texture' ) ) {
@@ -132,7 +131,7 @@ function setupRenderer() {
         alpha: true
     });
     renderer.setClearColor(0x000000, 0);
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize( container.clientWidth, container.clientHeight );
     container.appendChild( renderer.domElement );
 }
 
@@ -177,9 +176,9 @@ function setupGrid() {
 
 }
 
-function onWindowResize() {
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+export function onWindowResize() {
+    let width = container.clientWidth;
+    let height = container.clientHeight;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize( width, height );
