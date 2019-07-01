@@ -275,7 +275,7 @@ async function loadAssets() {
 
 }
 
-function checkAllCulled() {
+async function checkAllCulled() {
     let cacheMap = currentTexture.cullCache
     if(!cacheMap) {
         cacheMap = new Map()
