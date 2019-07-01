@@ -1,8 +1,23 @@
-import { onWindowResize } from "./displays.js"
+import { onWindowResize, createGif } from "./displays.js"
 
 const container = document.getElementById("editor-container")
 const panel = document.getElementById("editor");
 const canvasContainer = document.getElementById("display-div");
+
+window.downloadGif = async(elem) => {
+    elem.classList.toggle('is-loading', true)
+
+    let blob = await createGif([...document.getElementsByClassName('fps-radio')].find(elem => elem.checked).getAttribute('fps'))
+
+    if(blob) {
+        let url = URL.createObjectURL(blob)
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = "dinosaur.gif" //todo: name from model?
+        a.click() 
+    }
+    elem.classList.toggle('is-loading', false)    
+}
 
 let clickY; //Used to track what part of the border has been clicked
 function resize(e) {

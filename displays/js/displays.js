@@ -33,7 +33,6 @@ let isMale = true
 window.onAnimationFileChange = files => animationHandler.onAnimationFileChange(files)
 window.setInertia = elem => animationHandler.inertia = elem.checked
 window.setGrid = elem => gridGroup.visible = elem.checked
-window.createGif = (fps) => createGif(fps)
 window.setGender = elem => {
     isMale = elem.checked
     currentTexture = isMale ? maleTexture : femaleTexture
@@ -327,69 +326,67 @@ async function parseTBLModel() {
 
 }
 
-async function createGif(fps) {
-    if(!animationHandler.currentIncrement) {
-        return
-    }
-
-    let width = container.clientWidth
-    let height = container.clientHeight
-
-    let gif = new GIF({
-        workers: 2,
-        quality: 10,
-        width: width,
-        height: height,
-        workerScript: "./js/gif.worker.js",
-        transparent: 0x000000
-    });
-
-    let dummyRenderer = new WebGLRenderer({
-        alpha:true
-    });
-
-    dummyRenderer.setClearColor(0x000000, 0);
-    dummyRenderer.setSize( width, height );
-
-    let dummyScene = setupScene()
-    dummyScene.background = null
-    dummyScene.add(tabulaModel.modelCache)
-
-    let dummyCamera = camera.clone()
-    animationHandler.reset()
-    
-    let started = false
-    let delay = 1 / fps //1 / fps
-
-    console.log("started")
-    while(true) {
-        if(animationHandler.poseIndex == 1) {
-            started = true
+export async function createGif(fps) {
+    return new Promise(resolve => {
+        if(!animationHandler.currentIncrement) {
+            resolve(undefined)
+            return
         }
-        if(animationHandler.poseIndex == 0 && started) {
-            break
-        }
-        animationHandler.animate(delay)
-
-        dummyRenderer.render( dummyScene, dummyCamera )
-        gif.addFrame(dummyRenderer.domElement, {copy: true, delay: delay * 1000})
-
-    }
-    console.log("ended")
-
-    scene.add(tabulaModel.modelCache)
-
-
-    gif.on('finished', function(blob) {
-      console.log(blob)
-      let url = URL.createObjectURL(blob)
-      let a = document.createElement("a");
-      a.href = url;
-      a.download = "dinosaur.gif"
-      a.click()
-    });
     
-    gif.render();
+        let width = window.innerWidth
+        let height = window.innerHeight
+    
+        let gif = new GIF({
+            workers: 2,
+            quality: 10,
+            width: width,
+            height: height,
+            workerScript: "./js/gif.worker.js",
+            transparent: 0x000000
+        });
+    
+        let dummyRenderer = new WebGLRenderer({
+            alpha:true
+        });
+    
+        dummyRenderer.setClearColor(0x000000, 0);
+        dummyRenderer.setSize( width, height );
+    
+        let dummyScene = setupScene()
+        dummyScene.background = null
+        dummyScene.add(tabulaModel.modelCache)
+    
+        let dummyCamera = camera.clone()
+
+        dummyCamera.aspect = width / height;
+        dummyCamera.updateProjectionMatrix();
+
+        animationHandler.reset()
+        
+        let started = false
+        let delay = 1 / fps
+    
+        setTimeout(() => {
+            while(true) {
+                if(animationHandler.poseIndex == 1) {
+                    started = true
+                }
+                if(animationHandler.poseIndex == 0 && started) {
+                    break
+                }
+                animationHandler.animate(delay)
+        
+                dummyRenderer.render( dummyScene, dummyCamera )
+                gif.addFrame(dummyRenderer.domElement, {copy: true, delay: delay * 1000})
+        
+            }
+        
+            scene.add(tabulaModel.modelCache)
+            gif.on('finished', resolve);
+            gif.render();
+        }, 0)
+
+    })
 }
 
 
