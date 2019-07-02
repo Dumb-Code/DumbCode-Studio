@@ -85,11 +85,12 @@ class Cube {
     //rotation
     //scale
     //textureoffset
+    //mcScale
     //children
 
     //tbl
 
-    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, children, tbl) {
+    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, mcScale, children, tbl) {
         this.name = name
         this.dimension = dimension
         this.rotationPoint = rotationPoint
@@ -97,6 +98,7 @@ class Cube {
         this.rotation = rotation
         this.scale = scale
         this.textureoffset = textureoffset
+        this.mcScale = mcScale
         this.children = children
         this.tbl = tbl
 
@@ -110,7 +112,7 @@ class Cube {
         group.add(internalGroup)
 
         let padding = 0.001
-        let geometry = new BoxBufferGeometry( this.dimension[0] + padding, this.dimension[1] + padding , this.dimension[2] + padding);
+        let geometry = new BoxBufferGeometry((this.dimension[0] + padding) + this.mcScale*2, (this.dimension[1] + padding) + this.mcScale*2, (this.dimension[2] + padding) + this.mcScale*2);
         allCubes.push(geometry)
 
         let rawUV = new Array(6 * 4)
@@ -139,7 +141,7 @@ class Cube {
 function parseCubeJson(json, tbl) {
     let children = []
     json.children.forEach(child => { children.push( parseCubeJson( child, tbl ) ) })
-    return new Cube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, children, tbl)
+    return new Cube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, tbl)
 }
 
 function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight) {
