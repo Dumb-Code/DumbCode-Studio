@@ -44,6 +44,8 @@ class CubeGroup {
     //cubeList
     //childGroups
 
+    //modelGroup
+
     constructor(cubes, cubeGroups) {
 
        this.cubeList = cubes
@@ -54,12 +56,12 @@ class CubeGroup {
 
     createGroup( material, allCubes, animationMap ) {
 
-        let group = new Group();
+        this.modelGroup = new Group();
 
-        this.cubeGroups.forEach(child => { group.add(child.createGroup(material, allCubes, animationMap)) })
-        this.cubeList.forEach(cube => { group.add(cube.createGroup(material, allCubes, animationMap)) })
+        this.cubeGroups.forEach(child => { this.modelGroup.add(child.createGroup(material, allCubes, animationMap)) })
+        this.cubeList.forEach(cube => { this.modelGroup.add(cube.createGroup(material, allCubes, animationMap)) })
 
-        return group
+        return this.modelGroup
 
     }
 }
@@ -90,6 +92,8 @@ class Cube {
 
     //tbl
 
+    //cubeGroup
+
     constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, mcScale, children, tbl) {
         this.name = name
         this.dimension = dimension
@@ -107,9 +111,9 @@ class Cube {
 
   
     createGroup( material, allCubes, animationMap ) {
-        let group = new Group();
+        this.cubeGroup = new Group();
         let internalGroup = new Group();
-        group.add(internalGroup)
+        this.cubeGroup.add(internalGroup)
 
         let padding = 0.001
         let geometry = new BoxBufferGeometry((this.dimension[0] + padding) + this.mcScale*2, (this.dimension[1] + padding) + this.mcScale*2, (this.dimension[2] + padding) + this.mcScale*2);
@@ -120,20 +124,20 @@ class Cube {
         geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uv), 2))
         geometry.rawUV = rawUV
 
-        let cube = new Mesh( geometry, material )
+        let cube = new Mesh( geometry, material)
         cube.position.set( this.dimension[0] / 2 + this.offset[0], this.dimension[1] / 2 + this.offset[1], this.dimension[2] / 2 + this.offset[2] )
-        cube.cubeName = this.name
+        cube.tabulaCube = this
         internalGroup.add( cube )
 
-        group.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
-        group.rotation.order = "ZYX"
-        group.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)
+        this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
+        this.cubeGroup.rotation.order = "ZYX"
+        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)
 
-        animationMap.set(this.name, group)
+        animationMap.set(this.name, this.cubeGroup)
 
-        this.children.forEach(child => { group.add(child.createGroup(material, allCubes, animationMap)) })
+        this.children.forEach(child => this.cubeGroup.add(child.createGroup(material, allCubes, animationMap)))
 
-        return group
+        return this.cubeGroup
     }
 
 }

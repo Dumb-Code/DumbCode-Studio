@@ -5,11 +5,18 @@
     <title>Dumbcode</title>
     <link href="../css/display.css" rel="stylesheet">
     <link href="../css/tooltips.css" rel="stylesheet" />
+    <link href="../css/cool-checkboxes.css" rel="stylesheet"/>
     <link href="css/editor.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
     <script src="../scripts/navigation.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- used for modal veiwing of the settings page -->
+    <script src="https://bulma.io/vendor/clipboard-1.7.1.min.js"></script>
+    <script src="https://bulma.io/vendor/js.cookie-2.1.4.min.js"></script>
+    <script src="https://bulma.io/lib/main.js?v=201907050846"></script>
 
     <script src="js/jszip.js"></script>
     <script src="js/gif.js"></script>
@@ -24,6 +31,23 @@
         -khtml-user-select: none; /* Konqueror HTML */
         -moz-user-select: none; /* Firefox */
         -ms-user-select: none; /* Internet Explorer/Edge */
+    }
+
+    .settings-entry:not(.entry-top) {
+        padding-top: 40px;
+    }
+
+    .settings-entry {
+        padding-bottom: 15px;
+        border-style: none;
+        border-bottom-style: solid;
+        border-width: 1px;
+        border-color: #181818
+    }
+
+    .settings-entry-field {
+        padding-top: 5px;
+        padding-bottom: 5px;
     }
 </style>
 </head>
@@ -64,41 +88,6 @@
                         <a class="navbar-item center is-size-7 has-text-light" href="../team.html">ABOUT US</a>
                     </div>
                 </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">Edit</a>
-                    <div class="navbar-dropdown is-hoverable has-background-black">
-                        <a class="navbar-item has-text-light">
-                            <label class="checkbox">
-                                <input id="toggle-checkbox" type="checkbox" onclick="setGender(this)" checked>
-                                Male Texture
-                            </label>
-                        </a>
-                        <a class="navbar-item has-text-light">
-                            <label class="checkbox">
-                                <input id="grid" type="checkbox" onclick="setGrid(this)" checked>
-                                Display Grid
-                            </label>
-                        </a>
-                    </div>
-                </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">Dinosaur</a>
-                    <div class="navbar-dropdown is-hoverable has-background-black">
-                        <a class="navbar-item center is-size-7 has-text-light" href="?dinosaur=trex">TREX</a>
-                        <a class="navbar-item center is-size-7 has-text-light" href="?dinosaur=dilo">DILO</a>
-                    </div>
-                </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">Animation</a>
-                    <div class="navbar-dropdown is-hoverable has-background-black">
-                        <a class="navbar-item has-text-light">
-                            <label class="checkbox">
-                                <input id="intertia" type="checkbox" onclick="setInertia(this)" checked>
-                                Intertia
-                            </label>
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
         </div>
@@ -112,7 +101,84 @@
                         Col1
                     </div>
                     <div class="column">
-                        Col2
+                        <button class="button is-dark modal-button" data-target="modal-settings" aria-haspopup="true">Settings</button>
+                        <div class="modal" id="modal-settings" style="text-transform: none">
+                                <div class="modal-background"></div>
+                                <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+                                    <div style="padding-bottom: 20px">
+                                        <button class="modal-close" aria-label="close" style="position: absolute"></button>
+                                    </div>
+                                    <div class="settings-entry entry-top">
+                                        <div class="field">
+                                            <h5 class="title is-5" style="color: whitesmoke">Scene Settings</h5>
+                                            <div class="settings-entry-field">
+                                                <label>Dinosaur:</label>
+                                                <div class="select is-small">
+                                                    <select onchange="setupEverythingDinosaur(this.value)">
+                                                        <option value="trex">Trex</option>
+                                                        <option value="dilo">Dilo</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="settings-entry-field">
+                                                <label>Texture:</label>
+                                                <div class="select is-small">
+                                                    <select onchange="setGender(this)">
+                                                        <option value="male">Male</option>
+                                                        <option value="female">Female</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="settings-entry-field">
+                                                <label>Display Grid:</label>
+                                                <div class="b-checkbox is-inline">
+                                                    <input id="checkbox-grid" class="styled" type="checkbox" onclick="setGrid(this)" checked>
+                                                    <label for="checkbox-grid"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="settings-entry">
+                                        <div class="field settings-entry-field">
+                                            <h5 class="title is-5" style="color: whitesmoke">Animation Settings</h5>
+
+                                            <label>Use Inertia:</label>
+                                            <div class="b-checkbox is-inline">
+                                                <input id="checkbox-inertia" class="styled" type="checkbox" onclick="setInertia(this)" checked>
+                                                <label for="checkbox-inertia"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="settings-entry">
+                                        <div class="field settings-entry-field">
+                                            <h5 class="title is-5" style="color: whitesmoke">Export Settings</h5>
+                                            <div class="control">
+                                                <span> GIF FPS:</span>
+                                                <div class="b-checkbox is-circular is-inline">
+                                                    <input class="fps-radio" id="checkbox-fps-30" type="radio" name="fps" fps="30" checked>
+                                                    <label for="checkbox-fps-30">
+                                                        30
+                                                    </label>
+                                                </div>
+                                                <div class="b-checkbox is-circular is-inline">
+                                                    <input class="fps-radio" id="checkbox-fps-45" type="radio" name="fps" fps="45">
+                                                    <label for="checkbox-fps-45">
+                                                        45
+                                                    </label>
+                                                </div>
+                                                <div class="b-checkbox is-circular is-inline">
+                                                    <input class="fps-radio" id="checkbox-fps-30" type="radio" name="fps" fps="60">
+                                                    <label for="checkbox-fps-30">
+                                                        60
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>            
                     </div>
                     <div class="column">
                         Col3
@@ -140,18 +206,6 @@
                                 <a class="button is-dark" style="text-transform: none" onclick="downloadGif(this)">
                                     Download as GIF
                                 </a>
-                        </div>
-                        <div class="control">
-                            <span>FPS:</span>
-                            <label class="radio">
-                                <input class="fps-radio" type="radio" name="fps" fps="30" checked>30
-                            </label>
-                            <label class="radio">
-                                <input class="fps-radio" type="radio" name="fps" fps="45">45
-                            </label>
-                            <label class="radio">
-                                <input class="fps-radio" type="radio" name="fps" fps="60">60
-                            </label>
                         </div>
                     </div>
                 </div>

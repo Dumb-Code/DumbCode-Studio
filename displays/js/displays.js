@@ -3,7 +3,13 @@ import { OrbitControls } from './orbit_controls.js'
 import { AnimationHandler } from './animations.js'
 import { TBLModel } from './tbl_loader.js'
 
-let camera, scene, renderer, controls, clock;
+//BIG OLD TODO:
+// - Abstract this so everything isn't static, and have everything controled outwards. 
+//   This is to allow for the `editor.js` to just import this and change all the models and texture stuff
+//   This is eventually to allow for easy model veiwing that isn't animation editor.
+
+export let camera
+let scene, renderer, controls, clock;
 
 let container
 let mouseDown = false
@@ -14,13 +20,16 @@ let animationMap = new Map()
 
 let tabulaModel
 
-let material;
+let material, highlightMaterial, selectedMaterial;
+let allMaterials
 
 let raycaster = new Raycaster();
 let mouse = new Vector2(-5, -5);
+let mouseClickDown = new Vector2(-5, -5)
 let rawMouse = new Vector2();
 
-let dinosaur
+let intersected
+let selected
 
 let animationHandler = new AnimationHandler(animationMap)
 
@@ -33,25 +42,19 @@ let isMale = true
 window.onAnimationFileChange = files => animationHandler.onAnimationFileChange(files)
 window.setInertia = elem => animationHandler.inertia = elem.checked
 window.setGrid = elem => gridGroup.visible = elem.checked
+window.setupEverythingDinosaur = dino => setupEverythingDinosaur(dino)
 window.setGender = elem => {
-    isMale = elem.checked
+    isMale = elem.value == "male"
+    console.log(isMale)
     currentTexture = isMale ? maleTexture : femaleTexture
-    material.map = currentTexture.texture
-    material.needsUpdate = true
+    allMaterials.forEach(mat => {
+        mat.map = currentTexture.texture; 
+        mat.needsUpdate = true 
+    })
     checkAllCulled()
 }
 
 function init() {
-
-    maleTexture = new DinosaurTexture()
-    femaleTexture = new DinosaurTexture()
-
-    currentTexture = maleTexture
-
-    //TODO: when we are public again, this is going to be used to get the dinosaur / pose / pose index to render
-    //This can then lead into playing animations maybe?
-    dinosaur = getValue("dinosaur", "trex")
-//    let pose = getValue("pose", "idle")
 
     container = document.getElementById( 'display-div' );
     
@@ -72,9 +75,9 @@ function init() {
 
     setupGrid()
 
-    loadAssets()
-
     setupMouseOver()
+
+    setupEverythingDinosaur("trex")
 
 
     window.addEventListener( 'resize', onWindowResize, false );
@@ -84,12 +87,19 @@ function init() {
     document.addEventListener( 'mouseup', onMouseUp, false );
 }
 
-function getValue(key, fallback) {
-    let matcher = window.location.href.match(new RegExp(key + "=([^&]+)"))
-    if(matcher == null || matcher.length == 1) {
-        return fallback
+function setupEverythingDinosaur(dino) {
+
+    if(tabulaModel) {
+        tabulaModel.modelCache.children = []
     }
-    return matcher[1]
+
+    maleTexture = new DinosaurTexture()
+    femaleTexture = new DinosaurTexture()
+
+    currentTexture = maleTexture
+
+
+    loadAssets(dino)
 }
 
 function setupCamera() {
@@ -197,10 +207,22 @@ function onMouseMove( event ) {
 
 function onMouseDown( event ) {
    mouseDown = true
+   mouseClickDown.x = event.clientX
+   mouseClickDown.y = event.clientY
 }
 
 function onMouseUp( event ) {
    mouseDown = false
+   let xMove = Math.abs(mouseClickDown.x - event.clientX)
+   let yMove = Math.abs(mouseClickDown.y - event.clientY)
+
+   if(intersected && (xMove < 5 || yMove < 5)) {
+       if(selected) {
+            selected.material = material
+       }
+       selected = intersected
+       selected.material = selectedMaterial
+   }
 }
 
 
@@ -219,17 +241,32 @@ function animate() {
 }
 
 function render() {
-
     raycaster.setFromCamera( mouse, camera );
 
     if(tabulaModel) {
         let intersects = raycaster.intersectObjects( tabulaModel.modelCache.children , true );
-        if(intersects.length > 0 && !mouseDown) {
-            let inter = intersects[0]
-            textDiv.innerHTML = inter.object.cubeName
-            textDiv.style.display = "block"
-        } else {
-            textDiv.style.display = "none"
+        if(!mouseDown && !document.getElementById("modal-settings").classList.contains("is-active")) {
+            if(intersects.length > 0) {
+                if(intersected != intersects[0].object) {
+                    if(intersected && intersected != selected) {
+                        intersected.material = material
+                    }
+        
+                    intersected = intersects[0].object
+                    textDiv.innerHTML = intersected.tabulaCube.name
+                    
+                    if(intersected != selected) {
+                        intersected.material = highlightMaterial
+                    } 
+                } 
+                textDiv.style.display = "block"
+            } else {
+                if(intersected && intersected != selected) {
+                    intersected.material = material
+                    intersected = null
+                }
+                textDiv.style.display = "none"
+            }
         }
     }
 
@@ -247,7 +284,7 @@ function getTexture(location) {
     })
 }
 
-async function loadAssets() {
+async function loadAssets(dinosaur) {
     let femaleTex = getTexture(`assets/${dinosaur}/female.png`)
     let maleTex = getTexture(`assets/${dinosaur}/male.png`)
     
@@ -262,7 +299,15 @@ async function loadAssets() {
         side: DoubleSide,
     } )
 
-    tabulaModel = await parseTBLModel() 
+    highlightMaterial = material.clone()
+    highlightMaterial.emissive.setHex( 0xFF0000 )
+
+    selectedMaterial = material.clone()
+    selectedMaterial.emissive.setHex( 0x0000FF )
+
+    allMaterials = [material, highlightMaterial, selectedMaterial]
+
+    tabulaModel = await parseTBLModel(dinosaur) 
     scene.add (tabulaModel.createModel( material, allCubes,  animationMap))
 
 
@@ -319,7 +364,7 @@ function shouldBuild(x, y, dx, dy, cube) {
     return false
 }
 
-async function parseTBLModel() {
+async function parseTBLModel(dinosaur) {
     let response = await fetch(`assets/${dinosaur}/model.tbl`)
     let data = await response.blob()
     return await TBLModel.loadModel(data)
