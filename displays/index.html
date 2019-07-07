@@ -33,9 +33,6 @@
         -ms-user-select: none; /* Internet Explorer/Edge */
     }
 
-    .settings-entry:not(.entry-top) {
-        padding-top: 40px;
-    }
 
     .settings-entry {
         padding-bottom: 15px;
@@ -48,6 +45,70 @@
     .settings-entry-field {
         padding-top: 5px;
         padding-bottom: 5px;
+    }
+
+    .editor-slider {
+        width: 100%
+    }
+
+    .input-rotation-slider {
+        -webkit-appearance: none;  
+        appearance: none;
+        min-width: 50%;
+        height: 15px;
+        background: #d3d3d3; 
+        outline: none; 
+        opacity: 0.7; 
+        -webkit-transition: .2s;
+        transition: opacity .2s;
+    }
+
+    .input-rotation-slider:hover {
+        opacity: 1; 
+    }
+
+    .input-rotation-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 15px;
+        height: 15px;
+        background: #4CAF50; 
+        cursor: pointer; 
+    }
+
+    .input-rotation-slider::-moz-range-thumb {
+        width: 15px; 
+        height: 15px; 
+        background: #4CAF50;
+        cursor: pointer;
+    }
+
+    .input-rotation-slider:not(.is-active) {
+        background: #535353; 
+    }
+
+    .input-rotation-slider:not(.is-active)::-webkit-slider-thumb {
+        background: #707070;
+    }
+
+    .input-rotation-slider:not(.is-active)::-moz-range-thumb {
+        background: #707070;
+    }
+
+    .editor-text-value {
+        width: 50%;
+        height: 20px;
+    }
+
+    .editor-entry {
+        padding-top: 2px;
+        padding-bottom: 2px;
+        height: 32px;
+    }
+
+    .input-rotation {
+        width: 50px;
+        height: 20px;
     }
 </style>
 </head>
@@ -105,6 +166,7 @@
                         <div class="modal" id="modal-settings" style="text-transform: none">
                                 <div class="modal-background"></div>
                                 <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+                                    <h3 class="title is-3" style="color: whitesmoke">Settings</h3>
                                     <div style="padding-bottom: 20px">
                                         <button class="modal-close" aria-label="close" style="position: absolute"></button>
                                     </div>
@@ -209,7 +271,41 @@
                         </div>
                     </div>
                 </div>
-                
+                <div class="toplayer-columns columns">
+                    <div class="column" >
+                        Rotation
+                        <div class="editor-slider editor-entry">
+                            X: 
+                            <input axis="0" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+                            <input axis="0" class="input is-small editor-require-selected input-rotation" type="text" placeholder="X" oninput="setRotation(this)" disabled>
+                        </div>
+                        <div class="editor-slider editor-entry">
+                            Y: 
+                            <input axis="1" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+                            <input axis="1" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Y" oninput="setRotation(this)" disabled>
+                        </div>
+                        <div class="editor-slider editor-entry">
+                            Z: 
+                            <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+                            <input axis="2" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Z" oninput="setRotation(this)" disabled>
+                        </div>
+                    </div>
+                    <div class="column">
+                        Position
+                        <div class="editor-entry">
+                            X: <input axis="0" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="X Position" oninput="setPosition(this)" disabled>
+                        </div>
+                        <div class="editor-entry">
+                            Y: <input axis="1" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="Y Position" oninput="setPosition(this)" disabled>
+                        </div>
+                        <div class="editor-entry">
+                            Z: <input axis="2" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="Z Position" oninput="setPosition(this)" disabled>
+                        </div>
+                    </div>
+                    <div class="column" >
+                        Playback Settings?
+                    </div>
+                </div>
             </div>
         </div>
     </section>

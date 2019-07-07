@@ -112,8 +112,6 @@ class Cube {
   
     createGroup( material, allCubes, animationMap ) {
         this.cubeGroup = new Group();
-        let internalGroup = new Group();
-        this.cubeGroup.add(internalGroup)
 
         let padding = 0.001
         let geometry = new BoxBufferGeometry((this.dimension[0] + padding) + this.mcScale*2, (this.dimension[1] + padding) + this.mcScale*2, (this.dimension[2] + padding) + this.mcScale*2);
@@ -127,7 +125,8 @@ class Cube {
         let cube = new Mesh( geometry, material)
         cube.position.set( this.dimension[0] / 2 + this.offset[0], this.dimension[1] / 2 + this.offset[1], this.dimension[2] / 2 + this.offset[2] )
         cube.tabulaCube = this
-        internalGroup.add( cube )
+        this.cubeGroup.tabulaCube = this
+        this.cubeGroup.add( cube )
 
         this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
         this.cubeGroup.rotation.order = "ZYX"

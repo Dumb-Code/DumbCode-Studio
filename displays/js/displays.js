@@ -2,6 +2,7 @@ import { Raycaster, Vector2, PerspectiveCamera, Clock, WebGLRenderer, Scene, Col
 import { OrbitControls } from './orbit_controls.js'
 import { AnimationHandler } from './animations.js'
 import { TBLModel } from './tbl_loader.js'
+import { setSelected } from './editor.js'
 
 //BIG OLD TODO:
 // - Abstract this so everything isn't static, and have everything controled outwards. 
@@ -220,6 +221,7 @@ function onMouseUp( event ) {
        if(selected) {
             selected.material = material
        }
+       setSelected(intersected.parent)
        selected = intersected
        selected.material = selectedMaterial
    }
@@ -227,13 +229,12 @@ function onMouseUp( event ) {
 
 
 function animate() {
-
-    let style = textDiv.style
-
-    let divRect = textDiv.getBoundingClientRect()
-
-    style.left = rawMouse.x - divRect.width/2 + "px" //todo: make it so if there isn't anything selected, don't move this
-    style.top = rawMouse.y - 35 + "px"
+    if(intersected) {
+        let style = textDiv.style
+        let divRect = textDiv.getBoundingClientRect()
+        style.left = rawMouse.x - divRect.width/2 + "px"
+        style.top = rawMouse.y - 35 + "px"
+    }
 
     animationHandler.animate( clock.getDelta() )
     requestAnimationFrame( animate );
