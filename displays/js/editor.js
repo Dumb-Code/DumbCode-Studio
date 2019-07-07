@@ -43,8 +43,7 @@ function init() {
 
     //Set up the controls
     controls = new OrbitControls(camera, renderer.domElement);
-    // this.controls.addEventListener('change', this.render)
-    controls.enablePan = false //Locks the camera onto the center point. Maybe we can enable this to allow full movement
+    controls.addEventListener('change', () => display.render())
 
     display.setup(canvasContainer, renderer, camera, createScene())
     setupDinosaur("trex")
