@@ -369,6 +369,28 @@ window.setGender = elem => {
     display.checkAllCulled(currentTexture)
 }
 
+window.addValue = elem => {
+    if(selected) {
+        let axis = elem.getAttribute("axis")
+        new ButtonSpeed().setupfor(elem, () => {
+            let poss = selected.tabulaCube.rotationPoint
+            poss[axis] += 0.1
+            setPosition(poss)
+        })
+    }
+}
+
+window.subtractValue = elem => {
+    if(selected) {
+        let axis = elem.getAttribute("axis")
+        new ButtonSpeed().setupfor(elem, () => {
+            let poss = selected.tabulaCube.rotationPoint
+            poss[axis] -= 0.1
+            setPosition(poss)
+        })
+    }
+}
+
 window.addEventListener( 'resize', onWindowResize, false );
 window.addEventListener( 'resize', () => setHeights(panelHeight), false );
 document.addEventListener( 'mousemove', onMouseMove, false );
@@ -443,3 +465,38 @@ class DinosaurTexture {
     }
 }
 
+class ButtonSpeed {
+
+    setupfor(element, callback) {
+        this.element = element;
+        this.callback = callback
+
+        this.mouseStillDown = true
+        this.timeout = 500; //todo?
+
+        this.mouseUp = e => {
+            this.mouseStillDown = false
+            clearInterval(this.interval)
+            document.removeEventListener("mouseup", this.mouseUp)
+        }
+
+        document.addEventListener("mouseup", this.mouseUp )
+        this.tick()
+    }
+
+    tick() {
+        if(!this.mouseStillDown) {
+            return;
+        }
+
+        this.callback()
+
+        if(this.timeout > 1) {
+            this.timeout -= 75
+        }
+        clearInterval(this.interval)
+        this.interval = setInterval(() => this.tick(), this.timeout)
+
+    }
+
+}

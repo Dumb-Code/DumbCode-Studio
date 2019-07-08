@@ -111,6 +111,14 @@
         height: 20px;
     }
 
+    .button-small {
+        width: 20px;
+        height: 20px;
+        font-size: 1rem;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+
     #editor-mouseover {
         position: absolute; 
         background-color: black; 
@@ -319,13 +327,22 @@
                     <div class="column">
                         Position
                         <div class="editor-entry">
-                            X: <input axis="0" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="X Position" onfocusout="setPosition(this)" disabled>
+                            X: 
+                            <a axis="0" class="button is-dark button-small" onmousedown="subtractValue(this)">-</a>
+                            <input axis="0" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="X Position" onfocusout="setPosition(this)" disabled>
+                            <a axis="0" class="button is-dark button-small" onmousedown="addValue(this)">+</a>
                         </div>
                         <div class="editor-entry">
-                            Y: <input axis="1" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="Y Position" onfocusout="setPosition(this)" disabled>
+                            Y: 
+                            <a axis="1" class="button is-dark button-small" onmousedown="addValue(this)">-</a>
+                            <input axis="1" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="Y Position" onfocusout="setPosition(this)" disabled>
+                            <a axis="1" class="button is-dark button-small" onmousedown="subtractValue(this)">+</a>
                         </div>
                         <div class="editor-entry">
-                            Z: <input axis="2" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="Z Position" onfocusout="setPosition(this)" disabled>
+                            Z: 
+                            <a axis="2" class="button is-dark button-small" onmousedown="subtractValue(this)">-</a>
+                            <input axis="2" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="Z Position" onfocusout="setPosition(this)" disabled>
+                            <a axis="2" class="button is-dark button-small" onmousedown="addValue(this)">+</a>
                         </div>
                     </div>
                     <div class="column" >
