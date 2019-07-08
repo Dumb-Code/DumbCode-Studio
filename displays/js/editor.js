@@ -2,6 +2,7 @@ import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, Hem
 import { TBLModel } from "./tbl_loader.js";
 import { DinosaurDisplay } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
+import { KeyframeManger } from './keyframe_manager.js'
 
 const container = document.getElementById("editor-container")
 const panel = document.getElementById("editor");
@@ -28,7 +29,10 @@ let isMale = true
 let clickY; //Used to track what part of the border has been clicked
 let panelHeight
 
+let manager
+
 function init() {
+    manager = new KeyframeManger(document.getElementById("keyframe-board"))
     //Set up the renderer
     let renderer = new WebGLRenderer({
         alpha: true

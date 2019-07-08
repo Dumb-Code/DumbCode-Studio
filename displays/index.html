@@ -119,6 +119,19 @@
         padding-bottom: 0px;
     }
 
+    #keyframe-board {
+        height: 150px;
+        margin-left: 10px;
+        margin-right: 10px;
+        background: repeating-linear-gradient( 
+            90deg,
+            #7a7a7a 0px,
+            #7a7a7a 20px,
+            #525252 20px,
+            #525252 40px);
+	    background-size: 40px 
+    }
+
     #editor-mouseover {
         position: absolute; 
         background-color: black; 
@@ -129,6 +142,7 @@
         text-transform: none; 
         display: none;
     }
+    
 </style>
 </head>
 <body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
@@ -348,6 +362,8 @@
                     <div class="column" >
                         Playback Settings?
                     </div>
+                </div>
+                <div id="keyframe-board">
                 </div>
             </div>
         </div>
