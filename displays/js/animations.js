@@ -1,5 +1,4 @@
 import { TBLModel } from './tbl_loader.js'
-import { Vector3 } from './three.js';
 
 export class AnimationHandler {
 
@@ -16,11 +15,11 @@ export class AnimationHandler {
         this.animationMap = animationMap
 
         for(let [name, cube] of this.animationMap.entries()) {
-            this.defaultAnimationMap.set(name, {rot: cube.rotation, pos: cube.position})
+            this.defaultAnimationMap.set(name, {rot: cube.rotation.toArray(), pos: cube.position.toArray()})
         }
 
         window.playKeyframes = () => {
-            this.playstate.ticks = 0
+            this.reset()
         }
     }
 
@@ -71,11 +70,11 @@ export class AnimationHandler {
 
             let startTime = 0;
             for(let pose of result) {
-                startTime += baseTime; //todo: time overrides ???
-                let keyframe = new KeyFrame(this.animationMap, this.defaultAnimationMap)
+                let keyframe = new KeyFrame(this.animationMap)
 
                 keyframe.startTime = startTime
                 keyframe.duration = baseTime
+
                 pose.cubeMap.forEach(poseCube => {
                     let mainCube = this.tbl.cubeMap.get(poseCube.name)
                     if(!this.arrEqual(poseCube.rotationPoint, mainCube.rotationPoint)) {
@@ -87,9 +86,12 @@ export class AnimationHandler {
                 })
 
                 computeIfAbsent(this.keyframes, startTime, ()=>[]).push(keyframe)
+
+                startTime += baseTime; //todo: time overrides ???
+
             }
-            this.reset()
             this.keyframesDirty()
+            this.reset()
         })()
     }
 
@@ -99,21 +101,22 @@ export class AnimationHandler {
 
     reset() {
         this.playstate.ticks = 0;
+
+        this.defaultAnimationMap.forEach((data, name) => {
+            let cube = this.animationMap.get(name)
+
+            cube.position.fromArray(data.pos)
+            cube.rotation.fromArray(data.rot)
+        })
     }
 
     animate(deltaTime) {
         this.playstate.onFrame(deltaTime)
 
-        this.defaultAnimationMap.forEach((data, name) => {
-            let cube = this.animationMap.get(name)
-            
-            cube.position.set(data.pos.x, data.pos.y, data.pos.z)
-            cube.rotation.set(data.rot.x, data.rot.y, data.rot.z)
-        })
-
         for(let kflist of this.keyframes.values()) {
             kflist.forEach(kf => kf.animate(this.playstate.ticks))
         }
+        
     }
 
     keyframesDirty() {
@@ -121,7 +124,7 @@ export class AnimationHandler {
             kflist.forEach(kf => kf.setup = false)
         }
 
-        let sortedTimes = new Array(...this.keyframes.keys()).sort();
+        let sortedTimes = new Array(...this.keyframes.keys()).sort((a, b) => a - b);
 
         let setupKeyframes = []
         for(let time of sortedTimes) {
@@ -135,6 +138,7 @@ export class AnimationHandler {
     }
 }
 
+
 class KeyFrame {
     startTime = 0; 
     duration = 0;
@@ -146,14 +150,15 @@ class KeyFrame {
 
     setup = false
 
-    constructor(animationMap, defaultAnimationMap) {
-        this.animationMap = animationMap
-        this.defaultAnimationMap = defaultAnimationMap
+    percentageDone
+
+    constructor(cubeMap) {
+        this.cubeMap = cubeMap
     }
 
     doSetup() {
         this.setup = true
-        for(let [cubename, entry] of this.animationMap.entries()) {
+        for(let [cubename, entry] of this.cubeMap.entries()) {
             this.fromRotationMap.set(cubename, [entry.rotation.x, entry.rotation.y, entry.rotation.z].map(r => r * 180/Math.PI))
             this.fromRotationPointMap.set(cubename, entry.position.toArray())
         }
@@ -164,45 +169,35 @@ class KeyFrame {
             return
         }
         
-        let percentageDone = (ticks - this.startTime) / this.duration
-        if(percentageDone < 0) {
+        this.percentageDone = (ticks - this.startTime) / this.duration
+        if(this.percentageDone < 0 || this.percentageDone > 1) {
             return
         }
-        if(percentageDone > 1) {
-            percentageDone = 1
+
+
+        for(let key of this.cubeMap.keys()) {
+            let cube = this.cubeMap.get(key);
+            if(this.rotationMap.has(key)) {
+                let irot = this.interpolate(this.fromRotationMap.get(key), this.rotationMap.get(key))
+                cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
+            }
+
+            if(this.rotationPointMap.has(key)) {
+                let ipos = this.interpolate(this.fromRotationPointMap.get(key), this.rotationPointMap.get(key))
+                cube.position.set(ipos[0], ipos[1], ipos[2])
+            }
+
         }
-
-        //TODO: only set axis if there is something to set. IE check with main model
-        for(let [cubename, rotation] of this.rotationMap.entries()) {
-            let data = this.defaultAnimationMap.get(cubename)
-            let cube = this.animationMap.get(cubename);
-            let irot = this.interpolate(this.fromRotationMap.get(cubename), rotation, percentageDone)
-
-            cube.rotation.x += irot[0] * Math.PI / 180 - data.rot.x
-            cube.rotation.y += irot[1] * Math.PI / 180 - data.rot.y
-            cube.rotation.z += irot[2] * Math.PI / 180 - data.rot.z
-        }
-
-        for(let [cubename, position] of this.rotationPointMap.entries()) {
-            let data = this.defaultAnimationMap.get(cubename)
-            let cube = this.animationMap.get(cubename);
-            let ipos = this.interpolate(this.fromRotationPointMap.get(cubename), position, percentageDone)
-
-            cube.position.x += ipos[0] - data.pos.x
-            cube.position.y += ipos[1] - data.pos.y
-            cube.position.z += ipos[2] - data.pos.z
-
-        }   
     }
 
-    interpolate(prev, next, alpha) {
+    interpolate(prev, next) {
         let out = new Array(3)
         if(!prev || !next) {
             return out
         }
-        out[0] = prev[0] + (next[0] - prev[0]) * alpha
-        out[1] = prev[1] + (next[1] - prev[1]) * alpha
-        out[2] = prev[2] + (next[2] - prev[2]) * alpha
+        out[0] = prev[0] + (next[0] - prev[0]) * this.percentageDone
+        out[1] = prev[1] + (next[1] - prev[1]) * this.percentageDone
+        out[2] = prev[2] + (next[2] - prev[2]) * this.percentageDone
     
         return out
     }
@@ -211,7 +206,7 @@ class KeyFrame {
 class PlayState {
     ticks;
     onFrame(deltaTime) {
-        this.ticks += deltaTime * 10    //t-p-s
+        this.ticks += deltaTime * 20 //t-p-s
     }
 }
 
