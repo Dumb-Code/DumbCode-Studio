@@ -29,10 +29,9 @@ let isMale = true
 let clickY; //Used to track what part of the border has been clicked
 let panelHeight
 
-let manager
+let manager = new KeyframeManger(document.getElementById("keyframe-board"))
 
 function init() {
-    manager = new KeyframeManger(document.getElementById("keyframe-board"))
     //Set up the renderer
     let renderer = new WebGLRenderer({
         alpha: true

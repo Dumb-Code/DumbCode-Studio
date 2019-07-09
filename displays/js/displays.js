@@ -14,7 +14,7 @@ export class DinosaurDisplay {
 
     tbl;
 
-    animationHandler = new AnimationHandler(this.animationMap)
+    animationHandler;
 
 
     setup(container, renderer, camera, scene) {
@@ -60,12 +60,14 @@ export class DinosaurDisplay {
         this.animationMap.clear()
         this.tbl = model
         this.scene.add(model.createModel(material, this.allCubes, this.animationMap))
-        
+        this.animationHandler = new AnimationHandler(this.tbl, this.animationMap)
         this.checkAllCulled(texture)
     }
 
     display() {
-        this.animationHandler.animate(this.clock.getDelta())
+        if(this.animationHandler) {
+            this.animationHandler.animate(this.clock.getDelta())
+        }
         this.render()
     }
 
