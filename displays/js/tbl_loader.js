@@ -37,6 +37,10 @@ export class TBLModel {
 
         return this.modelCache
     }
+
+    resetAnimations() {
+        this.rootGroup.resetAnimations()
+    }
 }
 
 class CubeGroup {
@@ -50,8 +54,6 @@ class CubeGroup {
 
        this.cubeList = cubes
        this.cubeGroups = cubeGroups
-
-
     }
 
     createGroup( material, allCubes, animationMap ) {
@@ -62,7 +64,11 @@ class CubeGroup {
         this.cubeList.forEach(cube => { this.modelGroup.add(cube.createGroup(material, allCubes, animationMap)) })
 
         return this.modelGroup
+    }
 
+    resetAnimations() {
+        this.cubeGroups.forEach(child => child.resetAnimations())
+        this.cubeList.forEach(child => child.resetAnimations())
     }
 }
 
@@ -138,6 +144,12 @@ class Cube {
 
         return this.cubeGroup
     }
+
+    resetAnimations() {
+        this.children.forEach(child => child.resetAnimations())
+
+        this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
+        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)    }
 
 }
 

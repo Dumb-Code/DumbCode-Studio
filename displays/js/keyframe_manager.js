@@ -7,59 +7,88 @@ const resolution = 10
 export class KeyframeManger {
 
     keyframes = [];
-
     lables = new Map()
+    hoveredKeyframe
+    display
 
     constructor(keyframeBoard) {
         this.board = keyframeBoard
 
         const createContainer = (classname, parent = this.board) => {
             let div = document.createElement("div")
+            div.draggable = false
             div.className = classname
             parent.appendChild(div)
             return div
         }
-
+        
+        this.playbackMarker = createContainer("keyframe-playback-marker")
         this.labelBoard = createContainer("keyframe-board-labels")
         this.entryBoard = createContainer("keyframe-board-entries")
-        this.playbackMarker = createContainer("keyframe-playback-marker",  this.entryBoard)
 
         this.scroll = 0
 
         this.updateLables()
 
         let mouseMove = e => {
-            this.scroll -= e.screenX - this.xHold
-            this.scroll = this.scroll < 0 ? 0 : this.scroll
-            this.xHold = e.screenX
-            this.updateScroll()
+            if(e.shiftKey) {
+                if(!this.hoveredKeyframe) {
+                    return
+                }
+                let pixelDiff = e.screenX - this.xHold
+                this.xHold = e.screenX
+                this.hoveredKeyframe.startTime += pixelDiff / pixelsPerTick
+                this.updateKeyFrame(this.hoveredKeyframe)
+                this.display.animationHandler.keyframesDirty()
+            } else {
+                this.scroll -= e.screenX - this.xHold
+                this.scroll = this.scroll < 0 ? 0 : this.scroll
+                this.xHold = e.screenX
+                this.updateScroll()
+            }
         }
-        keyframeBoard.addEventListener("mousedown", e => {
+
+        let markerMouseMove = e => {
+            let off = e.clientX - this.entryBoard.getBoundingClientRect().x
+            let ticks = off / pixelsPerTick
+            this.display.animationHandler.playstate.ticks = ticks + this.scroll / pixelsPerTick
+            this.ensureFramePosition()
+        }
+        this.entryBoard.addEventListener("mousedown", e => {
             this.xHold = e.screenX
-            keyframeBoard.addEventListener("mousemove", mouseMove, false);
+            this.entryBoard.addEventListener("mousemove", mouseMove, false);
+        }, false);
+
+        this.playbackMarker.addEventListener("mousedown", e => {
+            document.addEventListener("mousemove", markerMouseMove, false);
         }, false);
         
         document.addEventListener("mouseup", () => {
-            keyframeBoard.removeEventListener("mousemove", mouseMove, false)
+            this.entryBoard.removeEventListener("mousemove", mouseMove, false)
+            document.removeEventListener("mousemove", markerMouseMove, false)
         }, false);
 
         document.addEventListener("resize", () => this.updateScroll())
     }
 
     updateScroll() {
-        this.board.style.backgroundPositionX = -this.scroll + "px"
+        this.entryBoard.style.backgroundPositionX = -this.scroll + "px"
         this.updateLables()
-        this.updateKeyframes()
+        this.keyframes.forEach(kf => this.updateKeyFrame(kf))
     }
 
     setup(keyframes) {
-        this.keyframes.forEach(this.board.removeChild)
+        this.keyframes.forEach(kf => this.board.removeChild(kf))
 
         this.keyframes = keyframes
-        this.updateKeyframes()
+        this.keyframes.forEach(kf => this.updateKeyFrame(kf))
     }
 
-    ensureFramePosition(ticks) {
+    ensureFramePosition() {
+        let playstate = this.display.animationHandler.playstate;
+
+        let ticks = playstate.ticks
+
         let left = this.scroll / pixelsPerTick
 
         let conatainerWidth = this.board.clientWidth
@@ -67,7 +96,7 @@ export class KeyframeManger {
 
         let xpos = 0
         //Not on screen, we need to move screen to fit
-        if(ticks < left || ticks > left + ticksInContainer) {
+        if(playstate.playing && (ticks < left || ticks > left + ticksInContainer)) {
             this.scroll = ticks * pixelsPerTick
             this.updateScroll()
         } else {
@@ -77,44 +106,51 @@ export class KeyframeManger {
         this.playbackMarker.style.left = this.entryBoard.getBoundingClientRect().x + xpos + "px"
     }
 
-    updateKeyframes() {
-        this.keyframes.forEach(kf => {
-            if(!kf.element) {
+    updateKeyFrame(kf) {
+        if(!kf.element) {
 
-                let wrapper = document.createElement("div")
-                this.entryBoard.appendChild(wrapper)
-                wrapper.className = "keyframe-entry-wrapper"
+            let wrapper = document.createElement("div")
+            wrapper.draggable = false
+            this.entryBoard.appendChild(wrapper)
+            wrapper.className = "keyframe-entry-wrapper"
 
 
-                let inner = document.createElement("div")
-                wrapper.appendChild(inner)
-                inner.className = "keyframe-entry"
+            let inner = document.createElement("div")
+            inner.draggable = false
+            wrapper.appendChild(inner)
+            inner.className = "keyframe-entry"
 
-                let marker = document.createElement("div")
-                inner.appendChild(marker)
-                marker.className = "keyframe-entry-marker"
+            let marker = document.createElement("div")
+            marker.draggable = false
+            inner.appendChild(marker)
+            marker.className = "keyframe-entry-marker"
 
-                marker.onmouseenter = () => {
-                    wrapper.classList.toggle("is-hovered", true)
-                    inner.classList.toggle("is-hovered", true)
+            marker.onmouseenter = () => {
+                if(!this.hoveredKeyframe) {
+                    this.hoveredKeyframe = kf
                 }
-
-                marker.onmouseleave = () => {
-                    wrapper.classList.toggle("is-hovered", false)
-                    inner.classList.toggle("is-hovered", false)
-                }
-
-                kf.element = wrapper
-
+                wrapper.classList.toggle("is-hovered", true)
+                inner.classList.toggle("is-hovered", true)
             }
-            
-            let x = this.entryBoard.getBoundingClientRect().x;
 
-            let left = kf.startTime * pixelsPerTick
+            marker.onmouseleave = e => {
+                if(!e.shiftKey) {
+                    this.hoveredKeyframe = undefined
+                }
+                wrapper.classList.toggle("is-hovered", false)
+                inner.classList.toggle("is-hovered", false)
+            }
 
-            kf.element.style.width = kf.duration * pixelsPerTick + "px"
-            kf.element.style.left = x + left - this.scroll + "px"
-        })
+            kf.element = wrapper
+
+        }
+        
+        let x = this.entryBoard.getBoundingClientRect().x;
+
+        let left = kf.startTime * pixelsPerTick
+
+        kf.element.style.width = kf.duration * pixelsPerTick + "px"
+        kf.element.style.left = x + left - this.scroll + "px"
     }
 
     updateLables() {
@@ -135,6 +171,7 @@ export class KeyframeManger {
                 label = this.lables.get(res)
             } else {
                 label = document.createElement("label")
+                label.draggable = false
                 label.style.position = "absolute"
                 label.style.color = "#antiquewhite"
                 label.style.textAlign = "center"

@@ -154,10 +154,8 @@
     
 
     .keyframe-entry-wrapper.is-hovered {
-        border-style: solid;
         border-width: 1px;
-        border-top-style: none;
-        border-bottom-style: none;
+        border-left-style: solid;
         border-color: #000000;
     }
 
@@ -182,7 +180,7 @@
     .keyframe-playback-marker {
         position:absolute;
         width: 5px;
-        height: 125px;
+        height: 150px;
         background-color: #4CAF50;
     }
 
@@ -289,7 +287,7 @@
                                                 <h5 class="title is-5" style="color: whitesmoke">Animation Settings</h5>
                                                 <label>Use Inertia:</label>
                                                 <div class="b-checkbox is-inline">
-                                                    <input id="checkbox-inertia" class="styled" type="checkbox" onclick="setInertia(this)" checked>
+                                                    <input id="checkbox-inertia" class="styled" type="checkbox" onclick="setInertia(this)">
                                                     <label for="checkbox-inertia"></label>
                                                 </div>
                                             </div>
@@ -408,9 +406,9 @@
                         </div>
                     </div>
                     <div class="column" >
-                            <a class="button is-dark" onmousedown="playKeyframes()">Play</a>
-                            <a class="button is-dark" onmousedown="pauseKeyFrames()">Pause</a>
+                            <a class="button is-dark" onmousedown="keyframesPressed(this)">Play</a>
                             <a class="button is-dark" onmousedown="resetKeyFrames()">Reset</a>
+                            <input class="input-rotation-slider is-active" type="range" step="0.01" min="0" max="2" value="1" oninput="setSpeed(this.value)">
                         </div>
                 </div>
                 <div id="keyframe-board">

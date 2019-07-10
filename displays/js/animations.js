@@ -5,8 +5,8 @@ export class AnimationHandler {
     tbl;
     inertia;
     animationMap;
-    defaultAnimationMap = new Map();
-    keyframes = new Map() //time, [kf]
+    keyframes = []
+    sortedTimes = [] // a list of `keyframes` sorted by start time
     playstate = new PlayState()
 
     constructor(tbl, animationMap) {
@@ -14,20 +14,22 @@ export class AnimationHandler {
         this.inertia = false
         this.animationMap = animationMap
 
-        for(let [name, cube] of this.animationMap.entries()) {
-            this.defaultAnimationMap.set(name, {rot: cube.rotation.toArray(), pos: cube.position.toArray()})
+        window.keyframesPressed = (elem) => {
+            if(this.playstate.playing) {
+                elem.innerHTML = "Play"
+            } else {
+                elem.innerHTML = "Pause"
+            }
+            this.playstate.playing = !this.playstate.playing
         }
 
-        window.playKeyframes = () => {
-            this.playstate.speed = 1;
-        }
-
-        window.pauseKeyFrames = () => {
-            this.playstate.speed = 0;
-        }
 
         window.resetKeyFrames = () => {
             this.reset()
+        }
+
+        window.setSpeed = value => {
+            this.playstate.speed = value
         }
     }
 
@@ -75,13 +77,16 @@ export class AnimationHandler {
             let baseTime = info.base_time
 
             result.sort((a, b) => a.fileName.localeCompare(b.fileName))
-
+            
             let startTime = 0;
+            let f =0
             for(let pose of result) {
-                let keyframe = new KeyFrame(this.animationMap)
+                let keyframe = new KeyFrame(this)
 
                 keyframe.startTime = startTime
+                // if(f == 1) keyframe.startTime -= 1
                 keyframe.duration = baseTime
+                f+=1
 
                 pose.cubeMap.forEach(poseCube => {
                     let mainCube = this.tbl.cubeMap.get(poseCube.name)
@@ -93,9 +98,9 @@ export class AnimationHandler {
                     }
                 })
 
-                computeIfAbsent(this.keyframes, startTime, ()=>[]).push(keyframe)
-
                 startTime += baseTime; //todo: time overrides ???
+
+                this.keyframes.push(keyframe)
 
             }
             this.keyframesDirty()
@@ -110,45 +115,33 @@ export class AnimationHandler {
 
     reset() {
         this.playstate.ticks = 0;
-
-        this.defaultAnimationMap.forEach((data, name) => {
-            let cube = this.animationMap.get(name)
-
-            cube.position.fromArray(data.pos)
-            cube.rotation.fromArray(data.rot)
-        })
+        this.tbl.resetAnimations()
     }
 
     animate(deltaTime) {
         this.playstate.onFrame(deltaTime)
 
-        for(let kflist of this.keyframes.values()) {
-            kflist.forEach(kf => kf.animate(this.playstate.ticks))
-        }
-        
+        this.sortedTimes.forEach(kf => kf.animate(this.playstate.ticks))
     }
-
     keyframesDirty() {
-        for(let kflist of this.keyframes.values()) {
-            kflist.forEach(kf => kf.setup = false)
-        }
-
-        let sortedTimes = new Array(...this.keyframes.keys()).sort((a, b) => a - b);
-
+        this.keyframes.forEach(kf => kf.setup = false)
+        this.sortedTimes = new Array(...this.keyframes).sort((a, b) => a.startTime - b.startTime);
         let setupKeyframes = []
-        for(let time of sortedTimes) {
-            let kflist = this.keyframes.get(time)
-            setupKeyframes.forEach(skf => skf.animate(time))
-            kflist.forEach(kf => {
-                kf.doSetup();
-                setupKeyframes.push(kf);
-            })
+
+        this.tbl.resetAnimations()
+
+        for(let kf of this.sortedTimes) {
+            setupKeyframes.forEach(skf => skf.animate(kf.startTime, true))
+            kf.doSetup();
+            setupKeyframes.push(kf);
         }
+        this.tbl.resetAnimations()
     }
 }
 
-
 class KeyFrame {
+    handler
+
     startTime = 0; 
     duration = 0;
     rotationMap = new Map();
@@ -161,31 +154,41 @@ class KeyFrame {
 
     percentageDone
 
-    constructor(cubeMap) {
-        this.cubeMap = cubeMap
+    constructor(handler) {
+        this.handler = handler
     }
 
     doSetup() {
         this.setup = true
-        for(let [cubename, entry] of this.cubeMap.entries()) {
+        for(let [cubename, entry] of this.handler.animationMap.entries()) {
             this.fromRotationMap.set(cubename, [entry.rotation.x, entry.rotation.y, entry.rotation.z].map(r => r * 180/Math.PI))
             this.fromRotationPointMap.set(cubename, entry.position.toArray())
         }
     }
 
-    animate(ticks) {
+    animate(ticks, force = false) {
         if(!this.setup) {
             return
         }
         
         this.percentageDone = (ticks - this.startTime) / this.duration
-        if(this.percentageDone < 0 || this.percentageDone > 1) {
+        if(this.percentageDone < 0) {
             return
         }
+        if(this.percentageDone > 1) {
+            if(!force) {
+                // return
+            }
+            this.percentageDone = 1
+        }
 
+ 
+        if(this.handler.inertia) {
+            this.percentageDone = Math.sin((this.percentageDone - 0.5) * Math.PI) / 2 + 0.5
+        }
 
-        for(let key of this.cubeMap.keys()) {
-            let cube = this.cubeMap.get(key);
+        for(let key of this.handler.animationMap.keys()) {
+            let cube = this.handler.animationMap.get(key);
             if(this.rotationMap.has(key)) {
                 let irot = this.interpolate(this.fromRotationMap.get(key), this.rotationMap.get(key))
                 cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
@@ -213,10 +216,13 @@ class KeyFrame {
 }
 
 class PlayState {
-    ticks;
-    speed = 0;
+    ticks = 0;
+    speed = 1;
+    playing = false;
     onFrame(deltaTime) {
-        this.ticks += deltaTime * this.speed * 20 //t-p-s
+        if(this.playing) {
+            this.ticks += deltaTime * this.speed * 20 //t-p-s
+        }
     }
 }
 

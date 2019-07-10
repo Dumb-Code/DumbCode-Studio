@@ -29,9 +29,10 @@ let isMale = true
 let clickY; //Used to track what part of the border has been clicked
 let panelHeight
 
-let manager = new KeyframeManger(document.getElementById("keyframe-board"))
+let manager = new KeyframeManger(document.getElementById("keyframe-board"), this)
 
 function init() {
+    manager.display = display;
     //Set up the renderer
     let renderer = new WebGLRenderer({
         alpha: true
@@ -125,8 +126,8 @@ async function getModel(dinosaur) {
 function frame() {
     calculateIntersections()
     requestAnimationFrame(frame)
-    if(display.animationHandler && !Number.isNaN(display.animationHandler.playstate.ticks)) {
-        manager.ensureFramePosition(display.animationHandler.playstate.ticks)
+    if(display.animationHandler) {
+        manager.ensureFramePosition()
     }
     display.display()
 }
