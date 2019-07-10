@@ -19,11 +19,19 @@ export class AnimationHandler {
         }
 
         window.playKeyframes = () => {
+            this.playstate.speed = 1;
+        }
+
+        window.pauseKeyFrames = () => {
+            this.playstate.speed = 0;
+        }
+
+        window.resetKeyFrames = () => {
             this.reset()
         }
     }
 
-    onAnimationFileChange(files) {
+    async onAnimationFileChange(files) {
         let tblFiles = []
         let infoFile
 
@@ -58,7 +66,7 @@ export class AnimationHandler {
         }
 
         
-        (async() => {
+        return (async() => {
         
             let promiseFiles = tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))
             let result = await Promise.all([...promiseFiles, readFile(infoFile)])
@@ -92,6 +100,7 @@ export class AnimationHandler {
             }
             this.keyframesDirty()
             this.reset()
+            return ""
         })()
     }
 
@@ -205,8 +214,9 @@ class KeyFrame {
 
 class PlayState {
     ticks;
+    speed = 0;
     onFrame(deltaTime) {
-        this.ticks += deltaTime * 20 //t-p-s
+        this.ticks += deltaTime * this.speed * 20 //t-p-s
     }
 }
 

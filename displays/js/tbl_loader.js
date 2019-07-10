@@ -106,11 +106,6 @@ class Cube {
         this.children = children
         this.tbl = tbl
 
-        if(name == "armLeft2") {
-            console.log(rotation)
-
-        }
-
         tbl.cubeMap.set(this.name, this)
     }
 

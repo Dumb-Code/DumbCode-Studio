@@ -60,7 +60,7 @@
         outline: none; 
         opacity: 0.7; 
         -webkit-transition: .2s;
-        transition: opacity .2s;
+        transition: .2s;
     }
 
     .input-rotation-slider:hover {
@@ -120,16 +120,19 @@
     }
 
     #keyframe-board {
-        height: 150px;
         margin-left: 10px;
         margin-right: 10px;
+    }
+
+    .keyframe-board-entries {
+        height: 125px;
         background: repeating-linear-gradient( 
             90deg,
             #7a7a7a 0px,
             #7a7a7a 20px,
             #525252 20px,
             #525252 40px);
-	    background-size: 40px 
+	    background-size: 40px
     }
 
     #editor-mouseover {
@@ -141,6 +144,51 @@
         padding: 2px 5px; 
         text-transform: none; 
         display: none;
+    }
+
+    .keyframe-entry-wrapper {
+        position: absolute;
+        height: 125px;
+        
+    }
+    
+
+    .keyframe-entry-wrapper.is-hovered {
+        border-style: solid;
+        border-width: 1px;
+        border-top-style: none;
+        border-bottom-style: none;
+        border-color: #000000;
+    }
+
+    .keyframe-entry {
+        height: 125px;
+
+        -webkit-transition: .5s;
+        transition: .5s;
+    }
+
+    .keyframe-entry.is-hovered {
+        background: #aaaaaa;
+    }
+
+    .keyframe-entry-marker {
+        float: right;
+        width: 7px;
+        height: 125px;
+        background-color: #ffaa00;
+    }
+
+    .keyframe-playback-marker {
+        position:absolute;
+        width: 5px;
+        height: 125px;
+        background-color: #4CAF50;
+    }
+
+    .keyframe-board-labels {
+        height:25px;
+        background: #121212;
     }
     
 </style>
@@ -360,8 +408,10 @@
                         </div>
                     </div>
                     <div class="column" >
-                        <a class="button is-dark" onmousedown="playKeyframes()">Play</a>
-                    </div>
+                            <a class="button is-dark" onmousedown="playKeyframes()">Play</a>
+                            <a class="button is-dark" onmousedown="pauseKeyFrames()">Pause</a>
+                            <a class="button is-dark" onmousedown="resetKeyFrames()">Reset</a>
+                        </div>
                 </div>
                 <div id="keyframe-board">
                 </div>

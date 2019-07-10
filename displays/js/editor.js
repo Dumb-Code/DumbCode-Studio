@@ -125,6 +125,9 @@ async function getModel(dinosaur) {
 function frame() {
     calculateIntersections()
     requestAnimationFrame(frame)
+    if(display.animationHandler && !Number.isNaN(display.animationHandler.playstate.ticks)) {
+        manager.ensureFramePosition(display.animationHandler.playstate.ticks)
+    }
     display.display()
 }
 
@@ -358,7 +361,10 @@ window.setRotation = elem => {
     angles[elem.getAttribute("axis")] = num
     setRotation(angles)
 }
-window.onAnimationFileChange = files => display.animationHandler.onAnimationFileChange(files)
+window.onAnimationFileChange = async(files) => {
+    await display.animationHandler.onAnimationFileChange(files)
+    manager.setup([].concat(...display.animationHandler.keyframes.values()))
+}
 window.setInertia = elem => display.animationHandler.inertia = elem.checked
 window.setGrid = elem => displaygridGroup.visible = elem.checked
 window.setupDinosaur = dino => setupDinosaur(dino)
