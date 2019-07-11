@@ -40,13 +40,13 @@ document.onkeydown = e => {
     }
 }
 
-container.addEventListener("mousemove", () => escapeCallback = () => {
+container.addEventListener("mousedown", () => escapeCallback = () => {
     if(manager.selectedKeyFrame) {
         manager.selectedKeyFrame.selectChange(false)
     }
     manager.selectedKeyFrame = undefined
 })
-canvasContainer.addEventListener("mousemove", () => escapeCallback = () => setAsSelected(undefined))
+canvasContainer.addEventListener("mousedown", () => escapeCallback = () => setAsSelected(undefined))
 
 function init() {
     manager.display = display;
