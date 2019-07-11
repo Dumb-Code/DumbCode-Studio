@@ -22,7 +22,7 @@ export class KeyframeManger {
             return div
         }
         
-        this.playbackMarker = createContainer("keyframe-playback-marker")
+        this.playbackMarker = createContainer("keyframe-playback-marker tooltip")
         this.labelBoard = createContainer("keyframe-board-labels")
         this.entryBoard = createContainer("keyframe-board-entries")
 
@@ -50,22 +50,41 @@ export class KeyframeManger {
 
         let markerMouseMove = e => {
             let off = e.clientX - this.entryBoard.getBoundingClientRect().x
-            let ticks = off / pixelsPerTick
-            this.display.animationHandler.playstate.ticks = ticks + this.scroll / pixelsPerTick
+            let ticksoff = off / pixelsPerTick
+            let ticks = ticksoff + this.scroll / pixelsPerTick;
+            this.display.animationHandler.playstate.ticks = ticks
+            this.playbackMarker.dataset.tooltip = `${ticks} ticks`
             this.ensureFramePosition()
         }
         this.entryBoard.addEventListener("mousedown", e => {
+            e.preventDefault ? e.preventDefault() : e.returnValue = false
             this.xHold = e.screenX
             this.entryBoard.addEventListener("mousemove", mouseMove, false);
         }, false);
 
         this.playbackMarker.addEventListener("mousedown", e => {
+            e.preventDefault ? e.preventDefault() : e.returnValue = false
+            markerMouseMove.enabled = true
             document.addEventListener("mousemove", markerMouseMove, false);
         }, false);
+
+        this.playbackMarker.addEventListener("mouseenter", e => {
+            this.playbackMarker.classList.toggle("is-tooltip-active", true)
+            this.playbackMarker.dataset.tooltip = `${this.display.animationHandler.playstate.ticks} ticks`
+        }, false)
+
+        this.playbackMarker.addEventListener("mouseleave", e => {
+            if(!markerMouseMove.enabled) {
+                this.playbackMarker.classList.toggle("is-tooltip-active", false)
+            }
+        }, false)
         
         document.addEventListener("mouseup", () => {
             this.entryBoard.removeEventListener("mousemove", mouseMove, false)
             document.removeEventListener("mousemove", markerMouseMove, false)
+            markerMouseMove.enabled = false
+            this.playbackMarker.classList.toggle("is-tooltip-active", false)
+
         }, false);
 
         document.addEventListener("resize", () => this.updateScroll())
