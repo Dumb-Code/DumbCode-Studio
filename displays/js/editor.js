@@ -31,6 +31,23 @@ let panelHeight
 
 let manager = new KeyframeManger(document.getElementById("keyframe-board"), this)
 
+let escapeCallback = () => {}
+
+
+document.onkeydown = e => {
+    if(e.key === "Escape") {
+        escapeCallback()
+    }
+}
+
+container.addEventListener("mousemove", () => escapeCallback = () => {
+    if(manager.selectedKeyFrame) {
+        manager.selectedKeyFrame.selectChange(false)
+    }
+    manager.selectedKeyFrame = undefined
+})
+canvasContainer.addEventListener("mousemove", () => escapeCallback = () => setAsSelected(undefined))
+
 function init() {
     manager.display = display;
     //Set up the renderer
@@ -189,14 +206,24 @@ function setHeights(height) {
     onWindowResize()
 }
 
-function updateSelected() {
+function setAsSelected(selectedElem) {
+    if(selected) {
+        selected.material = material
+   }
+    let isSelected = selectedElem !== undefined;
+    selected = selectedElem;
     [...document.getElementsByClassName("editor-require-selected")].forEach(elem => {
-        elem.disabled = false
-        elem.classList.toggle("is-active", true)
+        elem.disabled = !isSelected
+        elem.classList.toggle("is-active", isSelected)
     })
 
-    setPosition(selected.tabulaCube.rotationPoint)
-    setRotation(selected.tabulaCube.rotation)
+    if(isSelected) {
+        setPosition(selected.tabulaCube.rotationPoint)
+        setRotation(selected.tabulaCube.rotation)
+    } else {
+        setPosition([0, 0, 0])
+        setRotation([0, 0, 0])
+    }
 }
 
 function setPosition(values) {
@@ -205,9 +232,10 @@ function setPosition(values) {
         elem.checkValidity()
     });
 
-    selected.tabulaCube.rotationPoint = values
-    selected.parent.position.set(values[0], values[1], values[2])
-
+    if(selected) {
+        selected.tabulaCube.rotationPoint = values
+        selected.parent.position.set(values[0], values[1], values[2])
+    }
 }
 
 function setRotation(values) {
@@ -219,8 +247,10 @@ function setRotation(values) {
         elem.value = ((values[elem.getAttribute("axis")] + 180) % 360) - 180
     });
 
-    selected.tabulaCube.rotation = values
-    selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
+    if(selected) {
+        selected.tabulaCube.rotation = values
+        selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
+    }
 }
 
 export async function createGif(fps, progressCallback = undefined) {
@@ -452,12 +482,7 @@ function onMouseUp( event ) {
    let yMove = Math.abs(mouseClickDown.y - event.clientY)
 
    if(intersected && (xMove < 5 || yMove < 5)) {
-       if(selected) {
-            selected.material = material
-       }
-       selected = intersected
-       selected.material = selectedMaterial
-       updateSelected()
+       setAsSelected(intersected)
    }
 }
 

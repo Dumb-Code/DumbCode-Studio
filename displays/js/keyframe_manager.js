@@ -8,7 +8,7 @@ export class KeyframeManger {
 
     keyframes = [];
     lables = new Map()
-    hoveredKeyframe
+    selectedKeyFrame
     display
 
     constructor(keyframeBoard) {
@@ -31,14 +31,11 @@ export class KeyframeManger {
         this.updateLables()
 
         let mouseMove = e => {
-            if(e.shiftKey) {
-                if(!this.hoveredKeyframe) {
-                    return
-                }
+            if(this.selectedKeyFrame && e.shiftKey) {
                 let pixelDiff = e.screenX - this.xHold
                 this.xHold = e.screenX
-                this.hoveredKeyframe.startTime += pixelDiff / pixelsPerTick
-                this.updateKeyFrame(this.hoveredKeyframe)
+                this.selectedKeyFrame.startTime += pixelDiff / pixelsPerTick
+                this.updateKeyFrame(this.selectedKeyFrame)
                 this.display.animationHandler.keyframesDirty()
             } else {
                 this.scroll -= e.screenX - this.xHold
@@ -133,7 +130,6 @@ export class KeyframeManger {
             this.entryBoard.appendChild(wrapper)
             wrapper.className = "keyframe-entry-wrapper"
 
-
             let inner = document.createElement("div")
             inner.draggable = false
             wrapper.appendChild(inner)
@@ -144,21 +140,32 @@ export class KeyframeManger {
             inner.appendChild(marker)
             marker.className = "keyframe-entry-marker"
 
-            marker.onmouseenter = () => {
-                if(!this.hoveredKeyframe) {
-                    this.hoveredKeyframe = kf
-                }
-                wrapper.classList.toggle("is-hovered", true)
-                inner.classList.toggle("is-hovered", true)
+            kf.hoverChange = (hover) => {
+                wrapper.classList.toggle("is-hovered", hover)
+                inner.classList.toggle("is-hovered", hover)
             }
 
-            marker.onmouseleave = e => {
-                if(!e.shiftKey) {
-                    this.hoveredKeyframe = undefined
-                }
-                wrapper.classList.toggle("is-hovered", false)
-                inner.classList.toggle("is-hovered", false)
+            kf.selectChange = (select) => {
+                wrapper.style.zIndex = select ? "100" : "auto"
+                inner.classList.toggle("is-selected", select)
+                marker.classList.toggle("is-selected", select)
             }
+            
+
+            marker.onmousedown = () => {
+                if(this.selectedKeyFrame) {
+                    this.selectedKeyFrame.selectChange(false)
+                }
+                kf.selectChange(true)
+                this.selectedKeyFrame = kf
+            }
+            marker.onmouseenter = () => {
+                if(!this.selectedKeyFrame) {
+                    kf.hoverChange(true)
+                }
+            }
+            marker.onmouseleave = () => kf.hoverChange(false)
+
 
             kf.element = wrapper
 
