@@ -149,7 +149,7 @@
     .keyframe-entry-wrapper {
         position: absolute;
         height: 125px;
-        
+        pointer-events: none;
     }
     
 
@@ -161,6 +161,7 @@
 
     .keyframe-entry {
         height: 125px;
+        pointer-events: none;
 
         -webkit-transition: .5s;
         transition: .5s;
@@ -171,6 +172,7 @@
     }
 
     .keyframe-entry-marker {
+        pointer-events: all;
         float: right;
         width: 7px;
         height: 125px;
