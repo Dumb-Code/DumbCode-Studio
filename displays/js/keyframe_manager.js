@@ -46,11 +46,11 @@ export class KeyframeManger {
         }
 
         let markerMouseMove = e => {
-            let off = e.clientX - this.entryBoard.getBoundingClientRect().x
+            let off = e.clientX - this.getLeft()
             let ticksoff = off / pixelsPerTick
             let ticks = ticksoff + this.scroll / pixelsPerTick;
             this.display.animationHandler.playstate.ticks = ticks
-            this.playbackMarker.dataset.tooltip = `${ticks} ticks`
+            this.updateTooltipTicks()
             this.ensureFramePosition()
         }
         this.entryBoard.addEventListener("mousedown", e => {
@@ -67,7 +67,7 @@ export class KeyframeManger {
 
         this.playbackMarker.addEventListener("mouseenter", e => {
             this.playbackMarker.classList.toggle("is-tooltip-active", true)
-            this.playbackMarker.dataset.tooltip = `${this.display.animationHandler.playstate.ticks} ticks`
+            this.updateTooltipTicks()
         }, false)
 
         this.playbackMarker.addEventListener("mouseleave", e => {
@@ -85,6 +85,12 @@ export class KeyframeManger {
         }, false);
 
         document.addEventListener("resize", () => this.updateScroll())
+    }
+
+    updateTooltipTicks() {
+        let ticks = this.display.animationHandler.playstate.ticks
+        let rounded = Math.round(ticks * 10) / 10;
+        this.playbackMarker.dataset.tooltip = `${rounded} ticks`
     }
 
     updateScroll() {
@@ -119,7 +125,7 @@ export class KeyframeManger {
             xpos = ((ticks - left) / ticksInContainer) * this.board.clientWidth
         }
 
-        this.playbackMarker.style.left = this.entryBoard.getBoundingClientRect().x + xpos + "px"
+        this.playbackMarker.style.left = this.getLeft() + xpos + "px"
     }
 
     updateKeyFrame(kf) {
@@ -165,18 +171,14 @@ export class KeyframeManger {
                 }
             }
             marker.onmouseleave = () => kf.hoverChange(false)
-
-
             kf.element = wrapper
 
         }
         
-        let x = this.entryBoard.getBoundingClientRect().x;
-
         let left = kf.startTime * pixelsPerTick
 
         kf.element.style.width = kf.duration * pixelsPerTick + "px"
-        kf.element.style.left = x + left - this.scroll + "px"
+        kf.element.style.left = this.getLeft() + left - this.scroll + "px"
     }
 
     updateLables() {
@@ -198,17 +200,12 @@ export class KeyframeManger {
             } else {
                 label = document.createElement("label")
                 label.draggable = false
-                label.style.position = "absolute"
-                label.style.color = "#antiquewhite"
-                label.style.textAlign = "center"
-                label.style.textAlignLast = "center"
-                label.style.width = sectionWidth + "px"
-                label.classList.add("disable-select")
+                label.className = "keyframe-board-label disable-select"
                 label.innerHTML = res
                 this.lables.set(res, label)
                 this.labelBoard.appendChild(label)
             }
-            label.style.paddingLeft = (res * pixelsPerTick) - this.scroll + "px"
+            label.style.left = this.getLeft() + (res * pixelsPerTick) - this.scroll - label.clientWidth/2 + "px"
             acceptedLables.push(res)
         }
         for (const label of this.lables.keys()) {
@@ -217,5 +214,9 @@ export class KeyframeManger {
                 this.lables.delete(label)
             }
         } 
+    }
+
+    getLeft() {
+        return this.entryBoard.getBoundingClientRect().x
     }
 }
