@@ -146,7 +146,15 @@ function frame() {
     if(display.animationHandler) {
         manager.ensureFramePosition()
     }
-    display.display()
+    
+    display.display(() => manager.setupSelectedPose())
+    
+    if(selected) {
+        let pos = selected.parent.position
+        let rot = selected.parent.rotation
+        setPosition([pos.x, pos.y, pos.z], {displaysonly: true})
+        setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), {displaysonly: true})
+    }
 }
 
 function calculateIntersections() {
@@ -218,27 +226,31 @@ function setAsSelected(selectedElem) {
     })
 
     if(isSelected) {
-        setPosition(selected.tabulaCube.rotationPoint)
-        setRotation(selected.tabulaCube.rotation)
+        setPosition(getSelectedPos())
+        setRotation(getSelectedRot())
     } else {
         setPosition([0, 0, 0])
         setRotation([0, 0, 0])
     }
 }
 
-function setPosition(values) {
+function setPosition(values, options) {
     [...document.getElementsByClassName("input-position")].forEach(elem => {
         elem.value = values[elem.getAttribute("axis")]
         elem.checkValidity()
     });
 
-    if(selected) {
-        selected.tabulaCube.rotationPoint = values
+    if((!options || !options.displaysonly) && selected) {
         selected.parent.position.set(values[0], values[1], values[2])
+        
+        if(manager.selectedKeyFrame) {
+            manager.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
+            display.animationHandler.keyframesDirty()
+        }
     }
 }
 
-function setRotation(values) {
+function setRotation(values, options) {
     [...document.getElementsByClassName("input-rotation")].forEach(elem => {
         elem.value = values[elem.getAttribute("axis")]
     });
@@ -247,9 +259,13 @@ function setRotation(values) {
         elem.value = ((values[elem.getAttribute("axis")] + 180) % 360) - 180
     });
 
-    if(selected) {
-        selected.tabulaCube.rotation = values
+    if((!options || !options.displaysonly) && selected) {
         selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
+
+        if(manager.selectedKeyFrame) {
+            manager.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
+            display.animationHandler.keyframesDirty()
+        }
     }
 }
 
@@ -379,18 +395,34 @@ window.setPosition = elem => {
     if(Number.isNaN(num)) {
         return
     }
-    let point = selected.tabulaCube.rotationPoint
+    let point = getSelectedPos()
     point[elem.getAttribute("axis")] = num
     setPosition(point)
 }
+
+function getSelectedPos() {
+    let point = selected.tabulaCube.rotationPoint
+    if(manager.selectedKeyFrame) {
+        point = manager.selectedKeyFrame.getPosition(selected.tabulaCube.name)
+    }
+    return point
+}
+
 window.setRotation = elem => {
     let num = Number(elem.value)
     if(Number.isNaN(num)) {
         return
     }
-    let angles = selected.tabulaCube.rotation
+    let angles = getSelectedRot()
     angles[elem.getAttribute("axis")] = num
     setRotation(angles)
+}
+function getSelectedRot() {
+    let angles = selected.tabulaCube.rotation
+    if(manager.selectedKeyFrame) {
+        angles = manager.selectedKeyFrame.getRotation(selected.tabulaCube.name)
+    }
+    return angles
 }
 window.onAnimationFileChange = async(files) => {
     await display.animationHandler.onAnimationFileChange(files)
@@ -413,7 +445,7 @@ window.addValue = elem => {
     if(selected) {
         let axis = elem.getAttribute("axis")
         new ButtonSpeed().setupfor(elem, () => {
-            let poss = selected.tabulaCube.rotationPoint
+            let poss = getSelectedPos()
             poss[axis] += 0.1
             setPosition(poss)
         })
@@ -424,7 +456,7 @@ window.subtractValue = elem => {
     if(selected) {
         let axis = elem.getAttribute("axis")
         new ButtonSpeed().setupfor(elem, () => {
-            let poss = selected.tabulaCube.rotationPoint
+            let poss = getSelectedPos()
             poss[axis] -= 0.1
             setPosition(poss)
         })

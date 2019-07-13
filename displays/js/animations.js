@@ -131,7 +131,7 @@ export class AnimationHandler {
         this.tbl.resetAnimations()
 
         for(let kf of this.sortedTimes) {
-            setupKeyframes.forEach(skf => skf.animate(kf.startTime, true))
+            setupKeyframes.forEach(skf => skf.animate(kf.startTime))
             kf.doSetup();
             setupKeyframes.push(kf);
         }
@@ -166,20 +166,14 @@ class KeyFrame {
         }
     }
 
-    animate(ticks, force = false) {
+    animate(ticks) {
         if(!this.setup) {
             return
         }
         
         this.percentageDone = (ticks - this.startTime) / this.duration
-        if(this.percentageDone < 0) {
+        if(this.percentageDone < 0 || this.percentageDone > 1) {
             return
-        }
-        if(this.percentageDone > 1) {
-            if(!force) {
-                // return
-            }
-            this.percentageDone = 1
         }
 
  
@@ -189,17 +183,39 @@ class KeyFrame {
 
         for(let key of this.handler.animationMap.keys()) {
             let cube = this.handler.animationMap.get(key);
+
+            let irot
             if(this.rotationMap.has(key)) {
-                let irot = this.interpolate(this.fromRotationMap.get(key), this.rotationMap.get(key))
-                cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
+                irot = this.interpolate(this.fromRotationMap.get(key), this.rotationMap.get(key))
+            } else {
+                irot = this.fromRotationMap.get(key)
             }
+            cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
 
+            let ipos
             if(this.rotationPointMap.has(key)) {
-                let ipos = this.interpolate(this.fromRotationPointMap.get(key), this.rotationPointMap.get(key))
-                cube.position.set(ipos[0], ipos[1], ipos[2])
+                ipos = this.interpolate(this.fromRotationPointMap.get(key), this.rotationPointMap.get(key))
+            } else {
+                ipos = this.fromRotationPointMap.get(key)
             }
-
+            cube.position.set(ipos[0], ipos[1], ipos[2])
         }
+    }
+
+    getPosition(cubename) {
+        if(this.rotationPointMap.has(cubename)) {
+            return this.rotationPointMap.get(cubename)
+        } else {
+            return this.fromRotationPointMap.get(cubename)
+        } 
+    }
+
+    getRotation(cubename) {
+        if(this.rotationMap.has(cubename)) {
+            return this.rotationMap.get(cubename)
+        } else {
+            return this.fromRotationMap.get(cubename)
+        } 
     }
 
     interpolate(prev, next) {

@@ -9,10 +9,12 @@ export class KeyframeManger {
     keyframes = [];
     lables = new Map()
     selectedKeyFrame
+    editor
     display
 
-    constructor(keyframeBoard) {
+    constructor(keyframeBoard, editor) {
         this.board = keyframeBoard
+        this.editor = editor;
 
         const createContainer = (classname, parent = this.board) => {
             let div = document.createElement("div")
@@ -106,6 +108,29 @@ export class KeyframeManger {
         this.keyframes.forEach(kf => this.updateKeyFrame(kf))
     }
 
+    setupSelectedPose() {
+        if(this.selectedKeyFrame && !this.display.animationHandler.playstate.playing) {
+            this.display.animationHandler.animationMap.forEach((cube, cubename) => {
+                let irot
+                if(this.selectedKeyFrame.rotationMap.has(cubename)) {
+                    irot = this.selectedKeyFrame.rotationMap.get(cubename)
+                } else {
+                    irot = this.selectedKeyFrame.fromRotationMap.get(cubename)
+                }
+                cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
+
+                let ipos
+                if(this.selectedKeyFrame.rotationPointMap.has(cubename)) {
+                    ipos = this.selectedKeyFrame.rotationPointMap.get(cubename)
+                } else {
+                    ipos = this.selectedKeyFrame.fromRotationPointMap.get(cubename)
+                }
+                cube.position.set(ipos[0], ipos[1], ipos[2])
+
+            })
+        }
+    }
+
     ensureFramePosition() {
         let playstate = this.display.animationHandler.playstate;
 
@@ -157,7 +182,6 @@ export class KeyframeManger {
                 marker.classList.toggle("is-selected", select)
             }
             
-
             marker.onmousedown = () => {
                 if(this.selectedKeyFrame) {
                     this.selectedKeyFrame.selectChange(false)

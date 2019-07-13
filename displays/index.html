@@ -422,9 +422,13 @@
                         </div>
                     </div>
                     <div class="column" >
-                            <a class="button is-dark" onmousedown="keyframesPressed(this)">Play</a>
-                            <a class="button is-dark" onmousedown="resetKeyFrames()">Reset</a>
-                            <input class="input-rotation-slider is-active" type="range" step="0.01" min="0" max="2" value="1" oninput="setSpeed(this.value)">
+                            <div>
+                                <a class="button is-dark" onmousedown="keyframesPressed(this)">Play</a>
+                                <a class="button is-dark" onmousedown="resetKeyFrames()">Reset</a>
+                            </div>
+                            <div>
+                                Playback Speed: <input class="input-rotation-slider is-active" style="min-width: 0%" type="range" step="0.01" min="0" max="2" value="1" oninput="setSpeed(this.value)">
+                            </div>
                         </div>
                 </div>
                 <div id="keyframe-board">

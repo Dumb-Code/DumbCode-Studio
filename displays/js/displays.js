@@ -64,9 +64,12 @@ export class DinosaurDisplay {
         this.checkAllCulled(texture)
     }
 
-    display() {
+    display(animationCallback) {
         if(this.animationHandler) {
             this.animationHandler.animate(this.clock.getDelta())
+        }
+        if(animationCallback) {
+            animationCallback()
         }
         this.render()
     }
