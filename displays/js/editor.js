@@ -1,6 +1,6 @@
-import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, TextureLoader, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera } from "./three.js";
+import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, TextureLoader, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./three.js";
 import { TBLModel } from "./tbl_loader.js";
-import { DinosaurDisplay } from "./displays.js";
+import { DinosaurDisplay, DinosaurTexture, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
 import { KeyframeManger } from './keyframe_manager.js'
 
@@ -18,13 +18,21 @@ let mouseClickDown = new Vector2(-5, -5)
 let rawMouse = new Vector2();
 let mouseDown = false
 
-let material, highlightMaterial, selectedMaterial;
-let allMaterials
+let material = new MeshLambertMaterial( {
+    color: 0xAAAAAA,
+    transparent: true,
+    side: DoubleSide,
+} )
 
-let maleTexture
-let femaleTexture
+let highlightMaterial = material.clone()
+highlightMaterial.emissive.setHex( 0xFF0000 )
 
-let isMale = true
+let selectedMaterial = material.clone()
+selectedMaterial.emissive.setHex( 0x0000FF )
+
+let mainModel
+
+let texture = new DinosaurTexture()
 
 let clickY; //Used to track what part of the border has been clicked
 let panelHeight
@@ -67,7 +75,6 @@ function init() {
     controls.addEventListener('change', () => display.render())
 
     display.setup(canvasContainer, renderer, camera, createScene())
-    setupDinosaur("trex")
     setHeights(320)
     frame()
 }
@@ -85,59 +92,6 @@ function createScene() {
     scene.add(dirLight);
 
     return scene
-}
-
-async function setupDinosaur(dinosaur) {
-    maleTexture = new DinosaurTexture()
-    femaleTexture = new DinosaurTexture()
-
-    await loadTextures(dinosaur)
-
-    display.setMainModel(material, maleTexture, await getModel(dinosaur))
-}
-
-async function loadTextures(dinosaur) {
-    let getTexture = location => {
-        return new Promise(resolve => {
-            new TextureLoader().load(location, tex => {
-                tex.flipY = false
-                tex.magFilter = NearestFilter;
-                tex.minFilter = LinearMipMapLinearFilter;
-                resolve(tex)
-            })
-        })
-    }
-    let femaleTex = getTexture(`assets/${dinosaur}/female.png`)
-    let maleTex = getTexture(`assets/${dinosaur}/male.png`)
-    
-    let result = await Promise.all([femaleTex, maleTex])
-    femaleTexture.texture = result[0]
-    maleTexture.texture = result[1]
-    
-    material = new MeshLambertMaterial( {
-        color: 0xAAAAAA,
-        map: maleTexture.texture,
-        transparent: true,
-        side: DoubleSide,
-    } )
-
-    highlightMaterial = material.clone()
-    highlightMaterial.emissive.setHex( 0xFF0000 )
-
-    selectedMaterial = material.clone()
-    selectedMaterial.emissive.setHex( 0x0000FF )
-
-    allMaterials = [material, highlightMaterial, selectedMaterial]
-
-
-    maleTexture.setup()
-    femaleTexture.setup()
-}
-
-async function getModel(dinosaur) {
-    let response = await fetch(`assets/${dinosaur}/model.tbl`)
-    let data = await response.blob()
-    return await TBLModel.loadModel(data)
 }
 
 function frame() {
@@ -217,7 +171,7 @@ function setHeights(height) {
 function setAsSelected(selectedElem) {
     if(selected) {
         selected.material = material
-   }
+    }
     let isSelected = selectedElem !== undefined;
     selected = selectedElem;
     [...document.getElementsByClassName("editor-require-selected")].forEach(elem => {
@@ -368,6 +322,79 @@ window.changeCamera = elem => {
 
 }
 
+window.downloadDCA = () => {
+    if(display.animationHandler) {
+        let buffer = new ByteBuffer()
+
+        buffer.writeNumber(0) //version
+        buffer.writeNumber(display.animationHandler.sortedTimes.length)
+
+        display.animationHandler.sortedTimes.forEach(kf => {
+            buffer.writeNumber(kf.startTime)
+            buffer.writeNumber(kf.duration)
+
+            buffer.writeNumber(kf.rotationMap.size)
+            kf.rotationMap.forEach((entry, cubename) => {
+                buffer.writeString(cubename)
+                buffer.writeNumber(entry[0])
+                buffer.writeNumber(entry[1])
+                buffer.writeNumber(entry[2])
+            })
+
+            buffer.writeNumber(kf.rotationPointMap.size)
+            kf.rotationPointMap.forEach((entry, cubename) => {
+                buffer.writeString(cubename)
+                buffer.writeNumber(entry[0])
+                buffer.writeNumber(entry[1])
+                buffer.writeNumber(entry[2])
+            })
+        })
+
+
+        let blob = new Blob([buffer.buffer]);
+        let url = window.URL.createObjectURL(blob);
+
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = mainModel.name + ".dca";
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+}
+
+window.setupAnimation = async(file) => {
+    let buffer = new ByteBuffer(await readFile(file, (reader, file) => reader.readAsArrayBuffer(file)))
+    
+    buffer.readNumber() //Version. Currently ignored
+    
+    let length = buffer.readNumber()
+
+    let keyframes = []
+
+    for(let i = 0; i < length; i++) {
+        let kf = display.animationHandler.createKeyframe()
+
+        kf.startTime = buffer.readNumber()
+        kf.duration  = buffer.readNumber()
+
+        let rotSize = buffer.readNumber()
+        for(let r = 0; r < rotSize; r++) {
+            kf.rotationMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
+        }
+
+        let posSize = buffer.readNumber()
+        for(let p = 0; p < posSize; p++) {
+            kf.rotationPointMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
+        }
+
+        keyframes.push(kf)
+    }
+    display.animationHandler.keyframes = keyframes
+    display.animationHandler.keyframesDirty()
+
+    manager.setup()
+}
+
 window.downloadGif = async(elem) => {
     elem.classList.toggle("is-loading", true)
     elem.parentNode.classList.toggle("tooltip", true)
@@ -401,9 +428,11 @@ window.setPosition = elem => {
 }
 
 function getSelectedPos() {
-    let point = selected.tabulaCube.rotationPoint
+    let point
     if(manager.selectedKeyFrame) {
         point = manager.selectedKeyFrame.getPosition(selected.tabulaCube.name)
+    } else {
+        point = selected.parent.position.toArray()
     }
     return point
 }
@@ -418,29 +447,73 @@ window.setRotation = elem => {
     setRotation(angles)
 }
 function getSelectedRot() {
-    let angles = selected.tabulaCube.rotation
+    let angles
     if(manager.selectedKeyFrame) {
         angles = manager.selectedKeyFrame.getRotation(selected.tabulaCube.name)
+    } else {
+        let rawr = selected.parent.rotation
+        angles = [rawr.x, rawr.y, rawr.z].map(a => a * 180 / Math.PI)
     }
     return angles
 }
+window.setupMainModel = async(file, nameElement) => {
+    mainModel = {name: file.name}
+    nameElement.innerHTML = file.name
+    try {
+        mainModel.model = await TBLModel.loadModel(readFile(file))
+    } catch(err) {
+        nameElement.innerHTML = "ERROR!"
+        console.error(`Error from file ${file.name}: ${err.message}`)
+    }
+
+    if(texture.texture) {
+        display.setMainModel(material, texture, mainModel.model)
+        display.animationHandler.playstate = manager.playstate
+    }
+}
+window.setupTexture = async(file, nameElement) => {
+    let imgtag = document.createElement("img")
+    nameElement.innerHTML = file.name
+
+    imgtag.onload = () => {
+
+        texture = new DinosaurTexture()
+        let tex = new Texture(imgtag)
+
+        tex.needsUpdate = true
+
+        tex.flipY = false
+        tex.magFilter = NearestFilter;
+        tex.minFilter = LinearMipMapLinearFilter;
+
+        material.map = tex
+        selectedMaterial.map = tex
+        highlightMaterial.map = tex
+
+        texture.texture = tex
+
+        texture.setup()
+
+        if(mainModel) {
+            display.setMainModel(material, texture, mainModel.model)
+            display.animationHandler.playstate = manager.playstate
+        }
+    }
+
+    imgtag.onerror = () => {
+        nameElement.innerHTML = "ERROR!"
+        console.error(`Unable to define image from file: ${file.name}`)
+    }
+
+
+    imgtag.src = await readFile(file, (reader, file) => reader.readAsDataURL(file))
+}
 window.onAnimationFileChange = async(files) => {
     await display.animationHandler.onAnimationFileChange(files)
-    manager.setup([].concat(...display.animationHandler.keyframes.values()))
+    manager.setup()
 }
 window.setInertia = elem => display.animationHandler.inertia = elem.checked
 window.setGrid = elem => displaygridGroup.visible = elem.checked
-window.setupDinosaur = dino => setupDinosaur(dino)
-window.setGender = elem => {
-    isMale = elem.value == "male"
-    let currentTexture = isMale ? maleTexture : femaleTexture
-    allMaterials.forEach(mat => {
-        mat.map = currentTexture.texture; 
-        mat.needsUpdate = true 
-    })
-    display.checkAllCulled(currentTexture)
-}
-
 window.addValue = elem => {
     if(selected) {
         let axis = elem.getAttribute("axis")
@@ -518,20 +591,6 @@ function onMouseUp( event ) {
    }
 }
 
-class DinosaurTexture {
-    setup() {
-        let canvas = document.createElement('canvas');
-        this.width = this.texture.image.width;
-        this.height = this.texture.image.height;
-
-        canvas.width = this.width
-        canvas.height = this.height
-
-        this.pixels = canvas.getContext('2d')
-        this.pixels.drawImage(this.texture.image, 0, 0, this.width, this.height);
-    }
-}
-
 class ButtonSpeed {
 
     setupfor(element, callback) {
@@ -541,7 +600,7 @@ class ButtonSpeed {
         this.mouseStillDown = true
         this.timeout = 500; //todo?
 
-        this.mouseUp = e => {
+        this.mouseUp = () => {
             this.mouseStillDown = false
             clearInterval(this.interval)
             document.removeEventListener("mouseup", this.mouseUp)
@@ -563,7 +622,46 @@ class ButtonSpeed {
         }
         clearInterval(this.interval)
         this.interval = setInterval(() => this.tick(), this.timeout)
+    }
+}
 
+class ByteBuffer {
+    offset = 0
+    constructor(buffer = new ArrayBuffer(0)) {
+        this.buffer = buffer
     }
 
+    _addBuffer(buffer) {
+        let tmp = new Uint8Array(this.buffer.byteLength + buffer.byteLength)
+        tmp.set(new Uint8Array(this.buffer), 0)
+        tmp.set(new Uint8Array(buffer), this.buffer.byteLength)
+        this.buffer = tmp.buffer
+    }
+
+    writeNumber(num) {
+        let buffer = new ArrayBuffer(4)
+        let veiw = new DataView(buffer)
+        veiw.setFloat32(0, num)
+        this._addBuffer(buffer)
+    }
+
+    writeString(str) {
+        let arr = new TextEncoder().encode(str).buffer
+        this.writeNumber(arr.byteLength)
+        this._addBuffer(arr)
+    }
+
+    readNumber() {
+        let veiw = new DataView(this.buffer)
+        let num = veiw.getFloat32(this.offset)
+        this.offset += 4
+        return num
+    }
+
+    readString() {
+        let length = this.readNumber()
+        let result = new TextDecoder().decode(this.buffer.slice(this.offset, this.offset + length))
+        this.offset += length
+        return result
+    }
 }

@@ -1,5 +1,6 @@
-import { Raycaster, Vector2, Clock, Geometry, Vector3, LineBasicMaterial, Group, Line } from "./three.js";
+import { Raycaster, Vector2, Clock, Geometry, Vector3, LineBasicMaterial, Group, Line, Material } from "./three.js";
 import { AnimationHandler } from './animations.js'
+import { TBLModel } from "./tbl_loader.js";
 
 export class DinosaurDisplay {
     scene;
@@ -52,6 +53,12 @@ export class DinosaurDisplay {
         }
     }
 
+    /**
+     * 
+     * @param {Material} material 
+     * @param {DinosaurTexture} texture 
+     * @param {TBLModel} model 
+     */
     setMainModel(material, texture, model) {
         if(this.tbl) {
             this.scene.remove(this.tbl.modelCache)
@@ -61,7 +68,7 @@ export class DinosaurDisplay {
         this.tbl = model
         this.scene.add(model.createModel(material, this.allCubes, this.animationMap))
         this.animationHandler = new AnimationHandler(this.tbl, this.animationMap)
-        this.checkAllCulled(texture)
+        this.checkAllCulled(texture)   
     }
 
     display(animationCallback) {
@@ -79,34 +86,22 @@ export class DinosaurDisplay {
     }
 
     checkAllCulled(texture) {
-        let cacheMap = texture.cullCache
-        if(!cacheMap) {
-            cacheMap = new Map()
-        }
         this.allCubes.forEach(cube => {
-    
-            let index
-    
-            if(cacheMap.has(cube.uuid)) {
-                index = cacheMap.get(cube.uuid)
-            } else {
-                let planes = [ 1, 1, 1, 1, 1, 1 ]
-                index = []
-                for(let face = 0; face < 6; face++) {
-                    if(!this.shouldBuild(cube.rawUV[face*4], cube.rawUV[face*4+1], cube.rawUV[face*4+2], cube.rawUV[face*4+3], texture)) {
-                        planes[face] = 0
-                    }
-                }
-                for(let i = 0; i < planes.length; i++) {
-                    if(planes[i] === 1) {
-                        index.push(...[0, 2, 1, 2, 3, 1].map(v => i*4 + v))
-                    }
+
+            let index = []
+            let planes = [ 1, 1, 1, 1, 1, 1 ]
+            for(let face = 0; face < 6; face++) {
+                if(!this.shouldBuild(cube.rawUV[face*4], cube.rawUV[face*4+1], cube.rawUV[face*4+2], cube.rawUV[face*4+3], texture)) {
+                    planes[face] = 0
                 }
             }
-            cacheMap.set(cube.uuid, index)
+            for(let i = 0; i < planes.length; i++) {
+                if(planes[i] === 1) {
+                    index.push(...[0, 2, 1, 2, 3, 1].map(v => i*4 + v))
+                }
+            }
             cube.setIndex(index)
         })
-        texture.cullCache = cacheMap
     }
 
     shouldBuild(x, y, dx, dy, texture) {
@@ -128,4 +123,27 @@ export class DinosaurDisplay {
         }
         return false
     }
+}
+
+export class DinosaurTexture {
+    setup() {
+        let canvas = document.createElement('canvas');
+        this.width = this.texture.image.naturalWidth;
+        this.height = this.texture.image.naturalHeight;
+
+        canvas.width = this.width
+        canvas.height = this.height
+
+        this.pixels = canvas.getContext('2d')
+        this.pixels.drawImage(this.texture.image, 0, 0, this.width, this.height);
+    }
+}
+
+export function readFile(file, readerCallback = (reader, file) => reader.readAsBinaryString(file)) {
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader()
+        reader.onload = event => resolve(event.target.result)
+        reader.onerror = error => reject(error)
+        readerCallback(reader, file)
+      })
 }

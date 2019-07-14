@@ -1,4 +1,5 @@
 import { TBLModel } from './tbl_loader.js'
+import { readFile } from './displays.js';
 
 export class AnimationHandler {
 
@@ -57,15 +58,6 @@ export class AnimationHandler {
             return
         }
 
-
-        const readFile = file => {
-            return new Promise((resolve, reject) => {
-                let reader = new FileReader()
-                reader.onload = event => resolve(event.target.result)
-                reader.onerror = error => reject(error)
-                reader.readAsBinaryString(file)
-              })
-        }
 
         
         return (async() => {
@@ -136,6 +128,10 @@ export class AnimationHandler {
             setupKeyframes.push(kf);
         }
         this.tbl.resetAnimations()
+    }
+
+    createKeyframe() {
+        return new KeyFrame(this)
     }
 }
 
@@ -231,7 +227,7 @@ class KeyFrame {
     }
 }
 
-class PlayState {
+export class PlayState {
     ticks = 0;
     speed = 1;
     playing = false;

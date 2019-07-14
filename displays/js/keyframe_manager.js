@@ -1,3 +1,5 @@
+import { PlayState } from "../js/animations.js";
+
 const sectionWidth = 20
 const ticksPerSection = 1 
 const pixelsPerTick = sectionWidth / ticksPerSection
@@ -11,6 +13,8 @@ export class KeyframeManger {
     selectedKeyFrame
     editor
     display
+
+    playstate = new PlayState()
 
     constructor(keyframeBoard, editor) {
         this.board = keyframeBoard
@@ -51,7 +55,7 @@ export class KeyframeManger {
             let off = e.clientX - this.getLeft()
             let ticksoff = off / pixelsPerTick
             let ticks = ticksoff + this.scroll / pixelsPerTick;
-            this.display.animationHandler.playstate.ticks = ticks
+            this.playstate.ticks = ticks
             this.updateTooltipTicks()
             this.ensureFramePosition()
         }
@@ -90,7 +94,7 @@ export class KeyframeManger {
     }
 
     updateTooltipTicks() {
-        let ticks = this.display.animationHandler.playstate.ticks
+        let ticks = this.playstate.ticks
         let rounded = Math.round(ticks * 10) / 10;
         this.playbackMarker.dataset.tooltip = `${rounded} ticks`
     }
@@ -101,15 +105,15 @@ export class KeyframeManger {
         this.keyframes.forEach(kf => this.updateKeyFrame(kf))
     }
 
-    setup(keyframes) {
+    setup() {
         this.keyframes.forEach(kf => this.board.removeChild(kf))
 
-        this.keyframes = keyframes
+        this.keyframes = this.display.animationHandler.keyframes
         this.keyframes.forEach(kf => this.updateKeyFrame(kf))
     }
 
     setupSelectedPose() {
-        if(this.selectedKeyFrame && !this.display.animationHandler.playstate.playing) {
+        if(this.selectedKeyFrame && !this.playstate.playing) {
             this.display.animationHandler.animationMap.forEach((cube, cubename) => {
                 let irot
                 if(this.selectedKeyFrame.rotationMap.has(cubename)) {
@@ -132,7 +136,7 @@ export class KeyframeManger {
     }
 
     ensureFramePosition() {
-        let playstate = this.display.animationHandler.playstate;
+        let playstate = this.playstate;
 
         let ticks = playstate.ticks
 
