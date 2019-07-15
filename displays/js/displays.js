@@ -85,7 +85,7 @@ export class DinosaurDisplay {
         this.renderer.render(this.scene, this.camera);
     }
 
-    checkAllCulled(texture) {
+    async checkAllCulled(texture) {
         this.allCubes.forEach(cube => {
 
             let index = []
