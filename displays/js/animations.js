@@ -36,24 +36,22 @@ export class AnimationHandler {
             }
         }
 
-        //todo: our own alert system
-        if(!infoFile) {
-            alert("Need an animation.json file") //todo: maybe just infer the animation  timeings?
-            return
-        }
         if(files.length == 0) {
             alert("No poses uploaded")
             return
         }
 
 
-        
         return (async() => {
         
-            let promiseFiles = tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))
-            let result = await Promise.all([...promiseFiles, readFile(infoFile)])
+            let promiseFiles = [...tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))]
+            if(infoFile) {
+                promiseFiles.push(readFile(infoFile))
+            }
 
-            let info = JSON.parse(result.pop())
+            let result = await Promise.all(promiseFiles)
+
+            let info = infoFile ? JSON.parse(result.pop()) : {base_time: 5}
             let baseTime = info.base_time
 
             result.sort((a, b) => a.fileName.localeCompare(b.fileName))
