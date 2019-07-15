@@ -8,7 +8,6 @@ const resolution = 10
 
 export class KeyframeManger {
 
-    keyframes = [];
     lables = new Map()
     selectedKeyFrame
     editor
@@ -41,6 +40,7 @@ export class KeyframeManger {
                 let pixelDiff = e.screenX - this.xHold
                 this.xHold = e.screenX
                 this.selectedKeyFrame.startTime += pixelDiff / pixelsPerTick
+                this.selectedKeyFrame.updateInfo()
                 this.updateKeyFrame(this.selectedKeyFrame)
                 this.display.animationHandler.keyframesDirty()
             } else {
@@ -90,7 +90,7 @@ export class KeyframeManger {
 
         }, false);
 
-        document.addEventListener("resize", () => this.updateScroll())
+        window.addEventListener("resize", () => this.updateScroll())
     }
 
     updateTooltipTicks() {
@@ -102,14 +102,13 @@ export class KeyframeManger {
     updateScroll() {
         this.entryBoard.style.backgroundPositionX = -this.scroll + "px"
         this.updateLables()
-        this.keyframes.forEach(kf => this.updateKeyFrame(kf))
+        this.reframeKeyframes()
     }
 
-    setup() {
-        this.keyframes.forEach(kf => this.board.removeChild(kf))
-
-        this.keyframes = this.display.animationHandler.keyframes
-        this.keyframes.forEach(kf => this.updateKeyFrame(kf))
+    reframeKeyframes() {
+        if(this.display.animationHandler) {
+            this.display.animationHandler.keyframes.forEach(kf => this.updateKeyFrame(kf))
+        }
     }
 
     setupSelectedPose() {
@@ -180,10 +179,19 @@ export class KeyframeManger {
                 inner.classList.toggle("is-hovered", hover)
             }
 
+            kf.updateInfo = () => {
+                document.getElementById("editor-kf-startime").value = kf.startTime
+                document.getElementById("editor-kf-duration").value = kf.duration
+            }
+
             kf.selectChange = (select) => {
                 wrapper.style.zIndex = select ? "100" : "auto"
                 inner.classList.toggle("is-selected", select)
                 marker.classList.toggle("is-selected", select)
+
+                if(select) {
+                    kf.updateInfo()
+                }
             }
             
             marker.onmousedown = () => {

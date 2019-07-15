@@ -362,7 +362,10 @@ window.downloadDCA = () => {
     }
 }
 
-window.setupAnimation = async(file) => {
+window.setupAnimation = async(file, nameElement) => {
+    nameElement.classList.toggle("tooltip", true)
+    nameElement = file.name
+
     let buffer = new ByteBuffer(await readFile(file, (reader, file) => reader.readAsArrayBuffer(file)))
     
     buffer.readNumber() //Version. Currently ignored
@@ -391,8 +394,9 @@ window.setupAnimation = async(file) => {
     }
     display.animationHandler.keyframes = keyframes
     display.animationHandler.keyframesDirty()
-
-    manager.setup()
+    
+    //todo: remove all previous elements
+    manager.reframeKeyframes()
 }
 
 window.downloadGif = async(elem) => {
@@ -417,6 +421,73 @@ window.downloadGif = async(elem) => {
     elem.parentNode.classList.toggle("tooltip", false)
     elem.classList.toggle('is-loading', false)    
 }
+
+window.setSpeed = valueIn => {
+    let value = Math.round(Math.pow(2, valueIn) * 100) / 100
+    document.getElementById("playback-speed").innerHTML = value
+    manager.playstate.speed = value
+}
+
+window.resetKeyFrames = () => {
+    manager.playstate.ticks = 0
+    display.animationHandler.tbl.resetAnimations()
+}
+
+window.deleteKeyframe = () => {
+    if(manager.selectedKeyFrame) {
+        let index = display.animationHandler.keyframes.indexOf(manager.selectedKeyFrame)
+        if(index > 0) {
+            display.animationHandler.keyframes.splice(index, 1)
+            manager.entryBoard.removeChild(manager.selectedKeyFrame.element)
+            display.animationHandler.keyframesDirty()
+            
+            manager.selectedKeyFrame = undefined
+            manager.reframeKeyframes()
+        }
+    }
+}
+
+window.addKeyframe = () => {
+    if(display.animationHandler) {
+
+        if(manager.selectedKeyFrame) {
+            manager.selectedKeyFrame.selectChange(false)
+        }
+
+        let kf = display.animationHandler.createKeyframe()
+
+        kf.duration = 5
+        kf.startTime = manager.playstate.ticks
+
+        display.animationHandler.keyframes.push(kf)
+        display.animationHandler.keyframesDirty()
+
+        manager.reframeKeyframes()
+
+        kf.selectChange(true)
+        manager.selectedKeyFrame = kf
+
+    }
+}
+
+window.setStartTime = value => {
+    if(manager.selectedKeyFrame) {
+        manager.selectedKeyFrame.startTime = value
+        display.animationHandler.keyframesDirty()
+        manager.updateKeyFrame(manager.selectedKeyFrame)
+    }
+}
+
+window.setDuration = value => {
+    if(manager.selectedKeyFrame) {
+        let diff = value - manager.selectedKeyFrame.duration
+        manager.selectedKeyFrame.duration = value
+        manager.selectedKeyFrame.startTime -= diff
+        display.animationHandler.keyframesDirty()
+        manager.updateKeyFrame(manager.selectedKeyFrame)
+    }
+}
+
 window.setPosition = elem => {
     let num = Number(elem.value)
     if(Number.isNaN(num)) {
@@ -436,6 +507,7 @@ function getSelectedPos() {
     }
     return point
 }
+
 
 window.setRotation = elem => {
     let num = Number(elem.value)
@@ -458,11 +530,14 @@ function getSelectedRot() {
 }
 window.setupMainModel = async(file, nameElement) => {
     mainModel = {name: file.name}
-    nameElement.innerHTML = file.name
+    nameElement.classList.toggle("tooltip", true)
+
+    nameElement.dataset.tooltip = file.name
+
     try {
         mainModel.model = await TBLModel.loadModel(readFile(file))
     } catch(err) {
-        nameElement.innerHTML = "ERROR!"
+        nameElement.dataset.tooltip = "ERROR!"
         console.error(`Error from file ${file.name}: ${err.message}`)
     }
 
@@ -473,7 +548,8 @@ window.setupMainModel = async(file, nameElement) => {
 }
 window.setupTexture = async(file, nameElement) => {
     let imgtag = document.createElement("img")
-    nameElement.innerHTML = file.name
+    nameElement.classList.toggle("tooltip", true)
+    nameElement.dataset.tooltip = file.name
 
     imgtag.onload = () => {
 
@@ -501,7 +577,7 @@ window.setupTexture = async(file, nameElement) => {
     }
 
     imgtag.onerror = () => {
-        nameElement.innerHTML = "ERROR!"
+        nameElement.dataset.tooltip = "ERROR!"
         console.error(`Unable to define image from file: ${file.name}`)
     }
 
@@ -510,10 +586,11 @@ window.setupTexture = async(file, nameElement) => {
 }
 window.onAnimationFileChange = async(files) => {
     await display.animationHandler.onAnimationFileChange(files)
-    manager.setup()
+    //todo: remove all previous elements
+    manager.reframeKeyframes()
 }
 window.setInertia = elem => display.animationHandler.inertia = elem.checked
-window.setGrid = elem => displaygridGroup.visible = elem.checked
+window.setGrid = elem => display.gridGroup.visible = elem.checked
 window.addValue = elem => {
     if(selected) {
         let axis = elem.getAttribute("axis")

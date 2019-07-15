@@ -23,15 +23,6 @@ export class AnimationHandler {
             }
             this.playstate.playing = !this.playstate.playing
         }
-
-
-        window.resetKeyFrames = () => {
-            this.reset()
-        }
-
-        window.setSpeed = value => {
-            this.playstate.speed = value
-        }
     }
 
     async onAnimationFileChange(files) {
@@ -71,14 +62,11 @@ export class AnimationHandler {
             result.sort((a, b) => a.fileName.localeCompare(b.fileName))
             
             let startTime = 0;
-            let f =0
             for(let pose of result) {
                 let keyframe = new KeyFrame(this)
 
                 keyframe.startTime = startTime
-                // if(f == 1) keyframe.startTime -= 1
                 keyframe.duration = baseTime
-                f+=1
 
                 pose.cubeMap.forEach(poseCube => {
                     let mainCube = this.tbl.cubeMap.get(poseCube.name)
@@ -96,18 +84,12 @@ export class AnimationHandler {
 
             }
             this.keyframesDirty()
-            this.reset()
             return ""
         })()
     }
 
     arrEqual(arr1, arr2) {
         return arr1[0] == arr2[0] && arr1[1] == arr2[1] && arr1[2] == arr2[2]
-    }
-
-    reset() {
-        this.playstate.ticks = 0;
-        this.tbl.resetAnimations()
     }
 
     animate(deltaTime) {
@@ -172,7 +154,6 @@ class KeyFrame {
             return
         }
 
- 
         if(this.handler.inertia) {
             this.percentageDone = Math.sin((this.percentageDone - 0.5) * Math.PI) / 2 + 0.5
         }
@@ -183,18 +164,18 @@ class KeyFrame {
             let irot
             if(this.rotationMap.has(key)) {
                 irot = this.interpolate(this.fromRotationMap.get(key), this.rotationMap.get(key))
+                cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
             } else {
-                irot = this.fromRotationMap.get(key)
+                // irot = this.fromRotationMap.get(key)
             }
-            cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
 
             let ipos
             if(this.rotationPointMap.has(key)) {
                 ipos = this.interpolate(this.fromRotationPointMap.get(key), this.rotationPointMap.get(key))
+                cube.position.set(ipos[0], ipos[1], ipos[2])
             } else {
-                ipos = this.fromRotationPointMap.get(key)
+                // ipos = this.fromRotationPointMap.get(key)
             }
-            cube.position.set(ipos[0], ipos[1], ipos[2])
         }
     }
 

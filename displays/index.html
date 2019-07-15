@@ -245,6 +245,11 @@
                     </div>
                 </div>
             </div>
+            <div class="navbar-end">
+                <div class="navbar-item" style="text-transform: none">
+                    v0.1.2
+                </div>
+            </div>
         </div>
         </div>
     </nav>
@@ -265,82 +270,42 @@
                                 <div class="settings-entry entry-top">
                                     <div class="field">
                                         <h5 class="title is-5" style="color: whitesmoke">Import</h5>
-                                        <div class="settings-entry-field file is-dark is-small">
-                                            <label class="file-label">
-                                                <input class="file-input" type="file" name="tabula-main-model" onchange="setupMainModel(this.files[0])">
-                                                <span class="file-cta" style="border-color: #dbdbdb">
-                                                <span class="file-icon">
-                                                    <i class="fas fa-upload"></i>
-                                                </span>
-                                                <span class="file-label">
-                                                    Upload Session
-                                                </span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                        <div class="settings-entry-field file is-dark is-small has-name">
-                                            <label class="file-label">
-                                                <input class="file-input" type="file" name="tabula-main-model" onchange="setupMainModel(this.files[0], this.parentElement.querySelector(`.file-name`))">
-                                                <span class="file-cta" style="border-color: #dbdbdb">
-                                                <span class="file-icon">
-                                                    <i class="fas fa-upload"></i>
-                                                </span>
-                                                <span class="file-label">
-                                                    Main Model:
-                                                </span>
-                                                </span>
-                                                <span class="file-name">
-                                                    No file uploaded
-                                                </span>
-                                            </label>
-                                        </div>
-                                        <div class="settings-entry-field file is-small is-dark has-name">
-                                            <label class="file-label">
-                                                <input class="file-input" type="file" name="tabula-main-model-texture" onchange="setupTexture(this.files[0], this.parentElement.querySelector(`.file-name`))">
-                                                <span class="file-cta" style="border-color: #dbdbdb">
+                                        <div class="toplayer-columns columns">
+                                            <div class="column file is-dark is-small">
+                                                    <label class="file-label" style="display: block">
+                                                            <input class="file-input" type="file" name="tabula-main-model" disabled>
+                                                    <span class="file-cta" style="border-color: #dbdbdb">
                                                     <span class="file-icon">
                                                         <i class="fas fa-upload"></i>
                                                     </span>
                                                     <span class="file-label">
-                                                        Texture File:
+                                                        Upload Session
                                                     </span>
-                                                </span>
-                                                <span class="file-name">
-                                                    No file uploaded
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="settings-entry">
-                                    <div class="field">
-                                        <div class="settings-entry-field">
-                                            <h5 class="title is-5" style="color: whitesmoke">Import Animation</h5>
-                                            <div class="settings-entry-field file is-small is-dark has-name">
-                                                <label class="file-label">
-                                                    <input class="file-input" type="file" name="tabula-main-model-texture" onchange="setupAnimation(this.files[0], this.parentElement.querySelector(`.file-name`))">
-                                                    <span class="file-cta" style="border-color: #dbdbdb">
-                                                        <span class="file-icon">
-                                                            <i class="fas fa-upload"></i>
-                                                        </span>
-                                                        <span class="file-label">
-                                                            From .dca file:
-                                                        </span>
-                                                    </span>
-                                                    <span class="file-name">
-                                                        No file uploaded
                                                     </span>
                                                 </label>
                                             </div>
-                                            <div class="settings-entry-field file is-small is-dark">
-                                                <label class="file-label">
-                                                    <input class="file-input" type="file" name="tabula-main-model-texture" onchange="onAnimationFileChange(this.files)">
+                                            <div class="column file is-dark is-small">
+                                                <label class="file-label" style="display: block">
+                                                    <input class="file-input" type="file" name="tabula-main-model" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
                                                     <span class="file-cta" style="border-color: #dbdbdb">
                                                         <span class="file-icon">
                                                             <i class="fas fa-upload"></i>
                                                         </span>
                                                         <span class="file-label">
-                                                            From pose files:
+                                                            Main Model
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="column file is-small is-dark">
+                                                    <label class="file-label" style="display: block">
+                                                            <input class="file-input" type="file" name="tabula-main-model-texture" onchange="setupTexture(this.files[0], this.parentElement.parentElement)">
+                                                    <span class="file-cta" style="border-color: #dbdbdb">
+                                                        <span class="file-icon">
+                                                            <i class="fas fa-upload"></i>
+                                                        </span>
+                                                        <span class="file-label">
+                                                            Texture File
                                                         </span>
                                                     </span>
                                                 </label>
@@ -350,19 +315,53 @@
                                 </div>
                                 <div class="settings-entry">
                                     <div class="field">
-                                        <div class="settings-entry-field">
-                                            <h5 class="title is-5" style="color: whitesmoke">Export</h5>
-                                            <div class="buttons has-addons is-tooltip-top" data-tooltip="">
+                                        <h5 class="title is-5" style="color: whitesmoke">Import Animation</h5>
+                                        <div class="toplayer-columns columns">
+                                            <div class="column file is-small is-dark">
+                                                <label class="file-label" style="display: block">
+                                                    <input class="file-input" type="file" name="tabula-main-model-texture" onchange="setupAnimation(this.files[0], this.parentElement.parentElement)">
+                                                    <span class="file-cta" style="border-color: #dbdbdb">
+                                                        <span class="file-icon">
+                                                            <i class="fas fa-upload"></i>
+                                                        </span>
+                                                        <span class="file-label">
+                                                            From .dca file
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="column file is-small is-dark">
+                                                <label class="file-label" style="display: block">
+                                                    <input class="file-input" type="file" name="tabula-main-model-texture" onchange="onAnimationFileChange(this.files)" multiple>
+                                                    <span class="file-cta" style="border-color: #dbdbdb">
+                                                        <span class="file-icon">
+                                                            <i class="fas fa-upload"></i>
+                                                        </span>
+                                                        <span class="file-label">
+                                                            From pose files
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="column"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-entry">
+                                    <div class="field">
+                                        <h5 class="title is-5" style="color: whitesmoke">Export</h5>
+                                        <div class="toplayer-columns columns">
+                                            <div class="column buttons has-addons">
                                                 <a class="button is-dark is-small" style="text-transform: none; border-color: #dbdbdb" onclick="downloadGif(this)">
                                                     Download Session
                                                 </a>
                                             </div>
-                                            <div class="buttons has-addons is-tooltip-top" data-tooltip="">
+                                            <div class="column buttons has-addons">
                                                 <a class="button is-dark is-small" style="text-transform: none; border-color: #dbdbdb" onclick="downloadDCA()">
                                                     Download as .dca file
                                                 </a>
                                             </div>
-                                            <div class="buttons has-addons is-tooltip-top" data-tooltip="">
+                                            <div class="column buttons has-addons">
                                                 <a class="button is-dark is-small" style="text-transform: none; border-color: #dbdbdb" onclick="downloadGif(this)">
                                                     Download as GIF
                                                 </a>
@@ -371,9 +370,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>       
-                    </div>
-                    <div class="column">
+                        </div>
                         <button class="button is-dark modal-button" data-target="modal-settings" aria-haspopup="true">Settings</button>
                         <div class="modal" id="modal-settings" style="text-transform: none">
                             <div class="modal-background"></div>
@@ -450,32 +447,17 @@
                         </div>            
                     </div>
                     <div class="column">
-                        Col3
+                        <a class="button is-dark" onmousedown="keyframesPressed(this)">Play</a>
+                        <a class="button is-dark" onmousedown="resetKeyFrames()">Reset</a>
                     </div>
                     <div class="column">
-                        Col4
-                    </div>
-                    <div class="column">
-                        <div class="file is-dark">
-                            <label class="file-label">
-                                <input class="file-input" type="file" onchange="onAnimationFileChange(this.files)" multiple>
-                                <span class="file-cta">
-                                    <span class="file-icon">
-                                        <i class="fas fa-upload"></i>
-                                    </span>
-                                    <span class="file-label" style="text-transform: none">
-                                        Choose files...
-                                    </span>
-                                </span>
-                            </label>
+                        <div>
+                            Playback Speed: 
+                            <span id="playback-speed">
+                                1
+                            </span>
                         </div>
-                    </div>
-                    <div class="column">
-                        <div class="buttons has-addons is-tooltip-top" data-tooltip="">
-                            <a class="button is-dark" style="text-transform: none" onclick="downloadGif(this)">
-                                Download as GIF
-                            </a>
-                        </div>
+                        <input class="input-rotation-slider is-active" type="range" step="0.01" min="-2" max="2" value="0" oninput="setSpeed(this.value)">
                     </div>
                 </div>
                 <div class="toplayer-columns columns">
@@ -518,15 +500,28 @@
                             <a axis="2" class="button is-dark button-small" onmousedown="addValue(this)">+</a>
                         </div>
                     </div>
-                    <div class="column" >
-                            <div>
-                                <a class="button is-dark" onmousedown="keyframesPressed(this)">Play</a>
-                                <a class="button is-dark" onmousedown="resetKeyFrames()">Reset</a>
-                            </div>
-                            <div>
-                                Playback Speed: <input class="input-rotation-slider is-active" style="min-width: 0%" type="range" step="0.01" min="0" max="2" value="1" oninput="setSpeed(this.value)">
-                            </div>
+                    <div class="column">
+                        <div>
+                            <a class="button is-dark is-medium tooltip" data-tooltip="Add Keyframe" onclick="addKeyframe()">
+                                <span class="icon is-medium">
+                                    <i class="fas fa-plus-square"></i>
+                                </span>
+                            </a>
+                            <a class="button is-dark is-medium tooltip" data-tooltip="Delete Keyframe" onclick="deleteKeyframe()">
+                                <span class="icon is-medium">
+                                    <i class="fas fa-trash-alt"></i>
+                                </span>
+                            </a>
                         </div>
+                        <div style="padding-top: 10px;">
+                            Start Time:
+                            <input id="editor-kf-startime" class="editor-text-value input is-small" style="width: 50px" type="text" onfocusout="setStartTime(this.value)">
+                        </div>
+                        <div style="padding-top: 10px;">
+                            Duration:
+                            <input id="editor-kf-duration" class="editor-text-value input is-small" style="width: 50px" type="text" onfocusout="setDuration(this.value)">
+                        </div>
+                    </div>
                 </div>
                 <div id="keyframe-board">
                 </div>
