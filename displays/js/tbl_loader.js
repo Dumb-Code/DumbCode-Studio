@@ -37,6 +37,10 @@ export class TBLModel {
 
         return this.modelCache
     }
+
+    resetAnimations() {
+        this.rootGroup.resetAnimations()
+    }
 }
 
 class CubeGroup {
@@ -44,23 +48,27 @@ class CubeGroup {
     //cubeList
     //childGroups
 
+    //modelGroup
+
     constructor(cubes, cubeGroups) {
 
        this.cubeList = cubes
        this.cubeGroups = cubeGroups
-
-
     }
 
     createGroup( material, allCubes, animationMap ) {
 
-        let group = new Group();
+        this.modelGroup = new Group();
 
-        this.cubeGroups.forEach(child => { group.add(child.createGroup(material, allCubes, animationMap)) })
-        this.cubeList.forEach(cube => { group.add(cube.createGroup(material, allCubes, animationMap)) })
+        this.cubeGroups.forEach(child => { this.modelGroup.add(child.createGroup(material, allCubes, animationMap)) })
+        this.cubeList.forEach(cube => { this.modelGroup.add(cube.createGroup(material, allCubes, animationMap)) })
 
-        return group
+        return this.modelGroup
+    }
 
+    resetAnimations() {
+        this.cubeGroups.forEach(child => child.resetAnimations())
+        this.cubeList.forEach(child => child.resetAnimations())
     }
 }
 
@@ -85,11 +93,14 @@ class Cube {
     //rotation
     //scale
     //textureoffset
+    //mcScale
     //children
 
     //tbl
 
-    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, children, tbl) {
+    //cubeGroup
+
+    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, mcScale, children, tbl) {
         this.name = name
         this.dimension = dimension
         this.rotationPoint = rotationPoint
@@ -97,6 +108,7 @@ class Cube {
         this.rotation = rotation
         this.scale = scale
         this.textureoffset = textureoffset
+        this.mcScale = mcScale
         this.children = children
         this.tbl = tbl
 
@@ -105,12 +117,10 @@ class Cube {
 
   
     createGroup( material, allCubes, animationMap ) {
-        let group = new Group();
-        let internalGroup = new Group();
-        group.add(internalGroup)
+        this.cubeGroup = new Group();
 
         let padding = 0.001
-        let geometry = new BoxBufferGeometry( this.dimension[0] + padding, this.dimension[1] + padding , this.dimension[2] + padding);
+        let geometry = new BoxBufferGeometry((this.dimension[0] + padding) + this.mcScale*2, (this.dimension[1] + padding) + this.mcScale*2, (this.dimension[2] + padding) + this.mcScale*2);
         allCubes.push(geometry)
 
         let rawUV = new Array(6 * 4)
@@ -118,28 +128,35 @@ class Cube {
         geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uv), 2))
         geometry.rawUV = rawUV
 
-        let cube = new Mesh( geometry, material )
+        let cube = new Mesh( geometry, material)
         cube.position.set( this.dimension[0] / 2 + this.offset[0], this.dimension[1] / 2 + this.offset[1], this.dimension[2] / 2 + this.offset[2] )
-        cube.cubeName = this.name
-        internalGroup.add( cube )
+        cube.tabulaCube = this
+        this.cubeGroup.tabulaCube = this
+        this.cubeGroup.add( cube )
 
-        group.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
-        group.rotation.order = "ZYX"
-        group.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)
+        this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
+        this.cubeGroup.rotation.order = "ZYX"
+        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)
 
-        animationMap.set(this.name, group)
+        animationMap.set(this.name, this.cubeGroup)
 
-        this.children.forEach(child => { group.add(child.createGroup(material, allCubes, animationMap)) })
+        this.children.forEach(child => this.cubeGroup.add(child.createGroup(material, allCubes, animationMap)))
 
-        return group
+        return this.cubeGroup
     }
+
+    resetAnimations() {
+        this.children.forEach(child => child.resetAnimations())
+
+        this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
+        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)    }
 
 }
 
 function parseCubeJson(json, tbl) {
     let children = []
     json.children.forEach(child => { children.push( parseCubeJson( child, tbl ) ) })
-    return new Cube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, children, tbl)
+    return new Cube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, tbl)
 }
 
 function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight) {

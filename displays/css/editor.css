@@ -1,0 +1,22 @@
+#editor-container {
+    position: relative;
+    border-top-style: solid;
+    border-color: #555;
+    border-width: 15px;
+    cursor: n-resize;
+}
+
+#editor {
+    background-color: #222;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 16px;
+
+    cursor: initial;
+}
+
+.toplayer-columns .column {
+    text-align: center
+}

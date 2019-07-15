@@ -4,9 +4,208 @@
     <meta charset=utf-8>
     <title>Dumbcode</title>
     <link href="../css/display.css" rel="stylesheet">
+    <link href="../css/tooltips.css" rel="stylesheet" />
+    <link href="../css/cool-checkboxes.css" rel="stylesheet"/>
+    <link href="css/editor.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
     <script src="../scripts/navigation.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- used for modal veiwing of the settings page -->
+    <script src="https://bulma.io/vendor/clipboard-1.7.1.min.js"></script>
+    <script src="https://bulma.io/vendor/js.cookie-2.1.4.min.js"></script>
+    <script src="https://bulma.io/lib/main.js?v=201907050846"></script>
+
+    <script src="js/jszip.js"></script>
+    <script src="js/gif.js"></script>
+
+    <script type="module" src="js/editor.js"></script>
+
+    <style>
+    .disable-select {
+         user-select: none; /* supported by Chrome and Opera */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+    }
+
+
+    .settings-entry {
+        padding-bottom: 15px;
+        padding-top: 10px;
+        border-style: none;
+        border-bottom-style: solid;
+        border-width: 1px;
+        border-color: #181818
+    }
+
+    .settings-entry-field {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .editor-slider {
+        width: 100%
+    }
+
+    .input-rotation-slider {
+        -webkit-appearance: none;  
+        appearance: none;
+        min-width: 50%;
+        height: 15px;
+        background: #d3d3d3; 
+        outline: none; 
+        opacity: 0.7; 
+        -webkit-transition: .2s;
+        transition: .2s;
+    }
+
+    .input-rotation-slider:hover {
+        opacity: 1; 
+    }
+
+    .input-rotation-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 15px;
+        height: 15px;
+        background: #4CAF50; 
+        cursor: pointer; 
+    }
+
+    .input-rotation-slider::-moz-range-thumb {
+        width: 15px; 
+        height: 15px; 
+        background: #4CAF50;
+        cursor: pointer;
+    }
+
+    .input-rotation-slider:not(.is-active) {
+        background: #535353; 
+    }
+
+    .input-rotation-slider:not(.is-active)::-webkit-slider-thumb {
+        background: #707070;
+    }
+
+    .input-rotation-slider:not(.is-active)::-moz-range-thumb {
+        background: #707070;
+    }
+
+    .editor-text-value {
+        width: 50%;
+        height: 20px;
+    }
+
+    .editor-entry {
+        padding-top: 2px;
+        padding-bottom: 2px;
+        height: 32px;
+    }
+
+    .input-rotation {
+        width: 50px;
+        height: 20px;
+    }
+
+    .button-small {
+        width: 20px;
+        height: 20px;
+        font-size: 1rem;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+
+    #keyframe-board {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .keyframe-board-entries {
+        height: 125px;
+        background: repeating-linear-gradient( 
+            90deg,
+            #7a7a7a 0px,
+            #7a7a7a 20px,
+            #525252 20px,
+            #525252 40px);
+	    background-size: 40px
+    }
+
+    #editor-mouseover {
+        position: absolute; 
+        background-color: black; 
+        color: white; 
+        font-family: sans-serif; 
+        border-radius: 20px; 
+        padding: 2px 5px; 
+        text-transform: none; 
+        display: none;
+    }
+
+    .keyframe-entry-wrapper {
+        position: absolute;
+        height: 125px;
+        pointer-events: none;
+    }
+    
+
+    .keyframe-entry-wrapper.is-hovered {
+        border-width: 1px;
+        border-left-style: solid;
+        border-color: #000000;
+    }
+
+    .keyframe-entry {
+        height: 125px;
+        pointer-events: none;
+
+        -webkit-transition: .5s;
+        transition: .5s;
+    }
+
+    .keyframe-entry.is-hovered {
+        background: #aaaaaa;
+    }
+
+    .keyframe-entry.is-selected {
+        background: #77AAAADD;
+    }
+
+    .keyframe-entry-marker {
+        pointer-events: all;
+        float: right;
+        width: 7px;
+        height: 125px;
+        background-color: #ffaa00;
+    }
+
+    .keyframe-entry-marker.is-selected {
+        background-color: #ffaaff;
+    }
+
+    .keyframe-playback-marker {
+        position:absolute;
+        width: 5px;
+        height: 150px;
+        background-color: #4CAF50;
+    }
+
+    .keyframe-board-labels {
+        height:25px;
+        background: #121212;
+    }
+
+    .keyframe-board-label {
+        position: absolute;
+        color: antiquewhite;
+        pointer-events: none;
+    }
+    
+</style>
 </head>
 <body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
 
@@ -45,57 +244,290 @@
                         <a class="navbar-item center is-size-7 has-text-light" href="../team.html">ABOUT US</a>
                     </div>
                 </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">Edit</a>
-                    <div class="navbar-dropdown is-hoverable has-background-black">
-                        <a class="navbar-item has-text-light">
-                            <label class="checkbox">
-                                <input id="toggle-checkbox" type="checkbox" onclick="setGender(this)" checked>
-                                Male Texture
-                            </label>
-                        </a>
-                        <a class="navbar-item has-text-light">
-                            <label class="checkbox">
-                                <input id="grid" type="checkbox" onclick="setGrid(this)" checked>
-                                Display Grid
-                            </label>
-                        </a>
-                    </div>
-                </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">Dinosaur</a>
-                    <div class="navbar-dropdown is-hoverable has-background-black">
-                        <a class="navbar-item center is-size-7 has-text-light" href="?dinosaur=trex">TREX</a>
-                        <a class="navbar-item center is-size-7 has-text-light" href="?dinosaur=dilo">DILO</a>
-                    </div>
-                </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">Animation</a>
-                    <div class="navbar-dropdown is-hoverable has-background-black">
-                        <a class="navbar-item has-text-light">
-                            <input id="animations-files" type="file" onchange="onAnimationFileChange(this.files)" multiple>
-                        </a>
-                        <a class="navbar-item has-text-light">
-                            <label class="checkbox">
-                                <input id="intertia" type="checkbox" onclick="setInertia(this)" checked>
-                                Intertia
-                            </label>
-                        </a>
-                    </div>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item" style="text-transform: none">
+                    v0.1.2
                 </div>
             </div>
-
         </div>
         </div>
     </nav>
-
-
-
-    <script src="js/jszip.js"></script>
-
-    <script type="module" src="js/animations.js"></script>
-    <script type="module" src="js/tbl_loader.js"></script>
-    <script type="module" src="js/displays.js"></script>
-</section>
+    <div id="display-div"></div>
+    <div class="editor-container" id="editor-container">
+            <div class="editor" id="editor">
+                <h5 class="title is-5" style="text-align: center">DumbCode Animation Editor</h5>
+                <div class="toplayer-columns columns">
+                    <div class="column" >
+                        <button class="button is-dark modal-button" data-target="modal-io" aria-haspopup="true">Import/Export</button>
+                        <div class="modal" id="modal-io" style="text-transform: none">
+                            <div class="modal-background"></div>
+                            <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+                                <h3 class="title is-3" style="color: whitesmoke">Import/Export</h3>
+                                <div style="padding-bottom: 20px">
+                                    <button class="modal-close" aria-label="close" style="position: absolute"></button>
+                                </div>
+                                <div class="settings-entry entry-top">
+                                    <div class="field">
+                                        <h5 class="title is-5" style="color: whitesmoke">Import</h5>
+                                        <div class="toplayer-columns columns">
+                                            <div class="column file is-dark is-small">
+                                                    <label class="file-label" style="display: block">
+                                                            <input class="file-input" type="file" name="tabula-main-model" disabled>
+                                                    <span class="file-cta" style="border-color: #dbdbdb">
+                                                    <span class="file-icon">
+                                                        <i class="fas fa-upload"></i>
+                                                    </span>
+                                                    <span class="file-label">
+                                                        Upload Session
+                                                    </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="column file is-dark is-small">
+                                                <label class="file-label" style="display: block">
+                                                    <input class="file-input" type="file" name="tabula-main-model" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
+                                                    <span class="file-cta" style="border-color: #dbdbdb">
+                                                        <span class="file-icon">
+                                                            <i class="fas fa-upload"></i>
+                                                        </span>
+                                                        <span class="file-label">
+                                                            Main Model
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="column file is-small is-dark">
+                                                    <label class="file-label" style="display: block">
+                                                            <input class="file-input" type="file" name="tabula-main-model-texture" onchange="setupTexture(this.files[0], this.parentElement.parentElement)">
+                                                    <span class="file-cta" style="border-color: #dbdbdb">
+                                                        <span class="file-icon">
+                                                            <i class="fas fa-upload"></i>
+                                                        </span>
+                                                        <span class="file-label">
+                                                            Texture File
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-entry">
+                                    <div class="field">
+                                        <h5 class="title is-5" style="color: whitesmoke">Import Animation</h5>
+                                        <div class="toplayer-columns columns">
+                                            <div class="column file is-small is-dark">
+                                                <label class="file-label" style="display: block">
+                                                    <input class="file-input" type="file" name="tabula-main-model-texture" onchange="setupAnimation(this.files[0], this.parentElement.parentElement)">
+                                                    <span class="file-cta" style="border-color: #dbdbdb">
+                                                        <span class="file-icon">
+                                                            <i class="fas fa-upload"></i>
+                                                        </span>
+                                                        <span class="file-label">
+                                                            From .dca file
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="column file is-small is-dark">
+                                                <label class="file-label" style="display: block">
+                                                    <input class="file-input" type="file" name="tabula-main-model-texture" onchange="onAnimationFileChange(this.files)" multiple>
+                                                    <span class="file-cta" style="border-color: #dbdbdb">
+                                                        <span class="file-icon">
+                                                            <i class="fas fa-upload"></i>
+                                                        </span>
+                                                        <span class="file-label">
+                                                            From pose files
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="column"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-entry">
+                                    <div class="field">
+                                        <h5 class="title is-5" style="color: whitesmoke">Export</h5>
+                                        <div class="toplayer-columns columns">
+                                            <div class="column buttons has-addons">
+                                                <a class="button is-dark is-small" style="text-transform: none; border-color: #dbdbdb" onclick="downloadGif(this)">
+                                                    Download Session
+                                                </a>
+                                            </div>
+                                            <div class="column buttons has-addons">
+                                                <a class="button is-dark is-small" style="text-transform: none; border-color: #dbdbdb" onclick="downloadDCA()">
+                                                    Download as .dca file
+                                                </a>
+                                            </div>
+                                            <div class="column buttons has-addons">
+                                                <a class="button is-dark is-small" style="text-transform: none; border-color: #dbdbdb" onclick="downloadGif(this)">
+                                                    Download as GIF
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="button is-dark modal-button" data-target="modal-settings" aria-haspopup="true">Settings</button>
+                        <div class="modal" id="modal-settings" style="text-transform: none">
+                            <div class="modal-background"></div>
+                            <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+                                <h3 class="title is-3" style="color: whitesmoke">Settings</h3>
+                                <div style="padding-bottom: 20px">
+                                    <button class="modal-close" aria-label="close" style="position: absolute"></button>
+                                </div>
+                                <div class="settings-entry entry-top">
+                                    <div class="field">
+                                        <h5 class="title is-5" style="color: whitesmoke">Scene Settings</h5>
+                                        <div class="settings-entry-field">
+                                            <label>Display Grid:</label>
+                                            <div class="b-checkbox is-inline">
+                                                <input id="checkbox-grid" class="styled" type="checkbox" onclick="setGrid(this)" checked>
+                                                <label for="checkbox-grid"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-entry">
+                                    <div class="field">
+                                        <div class="settings-entry-field">
+                                            <h5 class="title is-5" style="color: whitesmoke">Animation Settings</h5>
+                                            <label>Use Inertia:</label>
+                                            <div class="b-checkbox is-inline">
+                                                <input id="checkbox-inertia" class="styled" type="checkbox" onclick="setInertia(this)">
+                                                <label for="checkbox-inertia"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-entry">
+                                    <div class="field">
+                                        <h5 class="title is-5" style="color: whitesmoke">Export Settings</h5>
+                                        <div class="settings-entry-field">
+                                            <div class="control">
+                                                <span> GIF FPS:</span>
+                                                <div class="b-checkbox is-circular is-inline">
+                                                    <input class="fps-radio" id="checkbox-fps-30" type="radio" name="fps" fps="30" checked>
+                                                    <label for="checkbox-fps-30">
+                                                        30
+                                                    </label>
+                                                </div>
+                                                <div class="b-checkbox is-circular is-inline">
+                                                    <input class="fps-radio" id="checkbox-fps-45" type="radio" name="fps" fps="45">
+                                                    <label for="checkbox-fps-45">
+                                                        45
+                                                    </label>
+                                                </div>
+                                                <div class="b-checkbox is-circular is-inline">
+                                                    <input class="fps-radio" id="checkbox-fps-30" type="radio" name="fps" fps="60">
+                                                    <label for="checkbox-fps-30">
+                                                        60
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-entry">
+                                    <h5 class="title is-5" style="color: whitesmoke">Camera Settings</h5>
+                                    <div class="settings-entry-field">
+                                        <label>Type:</label>
+                                        <div class="select is-small">
+                                            <select onchange="changeCamera(this)">
+                                                <option value="perspective">Perspective</option>
+                                                <option value="orthographic">Orthographic</option>
+                                            </select>
+                                        </div>   
+                                    </div>
+                                </div>
+                            </div>
+                        </div>            
+                    </div>
+                    <div class="column">
+                        <a class="button is-dark" onmousedown="keyframesPressed(this)">Play</a>
+                        <a class="button is-dark" onmousedown="resetKeyFrames()">Reset</a>
+                    </div>
+                    <div class="column">
+                        <div>
+                            Playback Speed: 
+                            <span id="playback-speed">
+                                1
+                            </span>
+                        </div>
+                        <input class="input-rotation-slider is-active" type="range" step="0.01" min="-2" max="2" value="0" oninput="setSpeed(this.value)">
+                    </div>
+                </div>
+                <div class="toplayer-columns columns">
+                    <div class="column" >
+                        Rotation
+                        <div class="editor-slider editor-entry">
+                            X: 
+                            <input axis="0" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+                            <input axis="0" class="input is-small editor-require-selected input-rotation" type="text" placeholder="X" onfocusout="setRotation(this)" disabled>
+                        </div>
+                        <div class="editor-slider editor-entry">
+                            Y: 
+                            <input axis="1" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+                            <input axis="1" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Y" onfocusout="setRotation(this)" disabled>
+                        </div>
+                        <div class="editor-slider editor-entry">
+                            Z: 
+                            <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+                            <input axis="2" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Z" onfocusout="setRotation(this)" disabled>
+                        </div>
+                    </div>
+                    <div class="column">
+                        Position
+                        <div class="editor-entry">
+                            X: 
+                            <a axis="0" class="button is-dark button-small" onmousedown="subtractValue(this)">-</a>
+                            <input axis="0" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="X Position" onfocusout="setPosition(this)" disabled>
+                            <a axis="0" class="button is-dark button-small" onmousedown="addValue(this)">+</a>
+                        </div>
+                        <div class="editor-entry">
+                            Y: 
+                            <a axis="1" class="button is-dark button-small" onmousedown="addValue(this)">-</a>
+                            <input axis="1" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="Y Position" onfocusout="setPosition(this)" disabled>
+                            <a axis="1" class="button is-dark button-small" onmousedown="subtractValue(this)">+</a>
+                        </div>
+                        <div class="editor-entry">
+                            Z: 
+                            <a axis="2" class="button is-dark button-small" onmousedown="subtractValue(this)">-</a>
+                            <input axis="2" class="input-position input is-small editor-text-value editor-require-selected" type="text" placeholder="Z Position" onfocusout="setPosition(this)" disabled>
+                            <a axis="2" class="button is-dark button-small" onmousedown="addValue(this)">+</a>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div>
+                            <a class="button is-dark is-medium tooltip" data-tooltip="Add Keyframe" onclick="addKeyframe()">
+                                <span class="icon is-medium">
+                                    <i class="fas fa-plus-square"></i>
+                                </span>
+                            </a>
+                            <a class="button is-dark is-medium tooltip" data-tooltip="Delete Keyframe" onclick="deleteKeyframe()">
+                                <span class="icon is-medium">
+                                    <i class="fas fa-trash-alt"></i>
+                                </span>
+                            </a>
+                        </div>
+                        <div style="padding-top: 10px;">
+                            Start Time:
+                            <input id="editor-kf-startime" class="editor-text-value input is-small" style="width: 50px" type="text" onfocusout="setStartTime(this.value)">
+                        </div>
+                        <div style="padding-top: 10px;">
+                            Duration:
+                            <input id="editor-kf-duration" class="editor-text-value input is-small" style="width: 50px" type="text" onfocusout="setDuration(this.value)">
+                        </div>
+                    </div>
+                </div>
+                <div id="keyframe-board">
+                </div>
+            </div>
+        </div>
+    </section>
+    <div id="editor-mouseover"></div>
 </body>
 </html>
