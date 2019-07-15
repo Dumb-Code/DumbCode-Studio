@@ -72,6 +72,7 @@ function init() {
 
     //Set up the controls
     controls = new OrbitControls(camera, renderer.domElement);
+    controls.screenSpacePanning = true
     controls.addEventListener('change', () => display.render())
 
     display.setup(canvasContainer, renderer, camera, createScene())
