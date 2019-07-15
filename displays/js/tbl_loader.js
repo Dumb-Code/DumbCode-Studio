@@ -2,13 +2,6 @@ import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material } from "./thr
 
 export class TBLModel {
 
-    texWidth
-    texHeight
-
-    rootGroup
-
-    cubeMap
-
     constructor(content) {
 
         let jobj = JSON.parse(content)
@@ -45,11 +38,6 @@ export class TBLModel {
 
 class CubeGroup {
 
-    cubeList
-    childGroups
-
-    modelGroup
-
     constructor(cubes, cubeGroups) {
 
        this.cubeList = cubes
@@ -85,20 +73,6 @@ function parseGroupJson(json, tbl) {
 }
 
 class Cube {
-
-    name
-    dimension
-    rotationPoint
-    offset
-    rotation
-    scale
-    textureoffset
-    mcScale
-    children
-
-    tbl
-
-    cubeGroup
 
     constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, mcScale, children, tbl) {
         this.name = name

@@ -8,13 +8,6 @@ const resolution = 10
 
 export class KeyframeManger {
 
-    lables
-    selectedKeyFrame
-    editor
-    display
-
-    playstate
-
     constructor(keyframeBoard, editor) {
 
         this.lables = new Map()

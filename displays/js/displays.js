@@ -3,19 +3,6 @@ import { AnimationHandler } from './animations.js'
 import { TBLModel } from "./tbl_loader.js";
 
 export class DinosaurDisplay {
-    scene;
-    renderer;
-    clock;
-
-    container;
-
-    gridGroup;
-    allCubes;
-    animationMap;
-
-    tbl;
-
-    animationHandler;
 
     constructor() {
         this.clock = new Clock()

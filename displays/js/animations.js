@@ -2,14 +2,7 @@ import { TBLModel } from './tbl_loader.js'
 import { readFile } from './displays.js';
 
 export class AnimationHandler {
-
-    tbl;
-    inertia;
-    animationMap;
-    keyframes;
-    sortedTimes; // a list of `keyframes` sorted by start time
-    playstate;
-
+    
     constructor(tbl, animationMap) {
         this.tbl = tbl
         this.inertia = false
@@ -122,19 +115,6 @@ export class AnimationHandler {
 }
 
 class KeyFrame {
-    handler
-
-    startTime; 
-    duration;
-    rotationMap;
-    rotationPointMap;
-
-    fromRotationMap;
-    fromRotationPointMap ;
-
-    setup;
-
-    percentageDone;
 
     constructor(handler) {
         this.handler = handler
@@ -226,27 +206,16 @@ class KeyFrame {
 }
 
 export class PlayState {
-    ticks = 0;
-    speed = 1;
-    playing = false;
+    constructor() {
+        this.ticks = 0
+        this.speed = 1
+        this.playing = false
+    }
     onFrame(deltaTime) {
         if(this.playing) {
             this.ticks += deltaTime * this.speed * 20 //t-p-s
         }
     }
 }
-
-function computeIfAbsent(map, key, valueFunc) {
-    let value = map.get(key);
-    if (value !== undefined)
-      return value;
-  
-    let newValue = valueFunc(value);
-    if (newValue !== undefined)
-    map.set(key, newValue);
-  
-    return newValue;
-  }
-
 
 
