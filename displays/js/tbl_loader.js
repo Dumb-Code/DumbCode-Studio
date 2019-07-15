@@ -45,10 +45,10 @@ export class TBLModel {
 
 class CubeGroup {
 
-    //cubeList
-    //childGroups
+    cubeList
+    childGroups
 
-    //modelGroup
+    modelGroup
 
     constructor(cubes, cubeGroups) {
 
@@ -86,19 +86,19 @@ function parseGroupJson(json, tbl) {
 
 class Cube {
 
-    //name
-    //dimension
-    //rotationPoint
-    //offset
-    //rotation
-    //scale
-    //textureoffset
-    //mcScale
-    //children
+    name
+    dimension
+    rotationPoint
+    offset
+    rotation
+    scale
+    textureoffset
+    mcScale
+    children
 
-    //tbl
+    tbl
 
-    //cubeGroup
+    cubeGroup
 
     constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, mcScale, children, tbl) {
         this.name = name

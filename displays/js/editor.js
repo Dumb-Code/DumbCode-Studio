@@ -703,8 +703,9 @@ class ButtonSpeed {
 }
 
 class ByteBuffer {
-    offset = 0
+    offsetTop
     constructor(buffer = new ArrayBuffer(0)) {
+        this.offsetTop = 0
         this.buffer = buffer
     }
 

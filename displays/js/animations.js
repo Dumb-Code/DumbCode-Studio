@@ -6,14 +6,18 @@ export class AnimationHandler {
     tbl;
     inertia;
     animationMap;
-    keyframes = []
-    sortedTimes = [] // a list of `keyframes` sorted by start time
-    playstate = new PlayState()
+    keyframes;
+    sortedTimes; // a list of `keyframes` sorted by start time
+    playstate;
 
     constructor(tbl, animationMap) {
         this.tbl = tbl
         this.inertia = false
         this.animationMap = animationMap
+
+        this.keyframes = []
+        this.sortedTimes = []
+        this.playstate = new PlayState()
 
         window.keyframesPressed = (elem) => {
             if(this.playstate.playing) {
@@ -120,20 +124,33 @@ export class AnimationHandler {
 class KeyFrame {
     handler
 
-    startTime = 0; 
-    duration = 0;
-    rotationMap = new Map();
-    rotationPointMap = new Map();
+    startTime; 
+    duration;
+    rotationMap;
+    rotationPointMap;
 
-    fromRotationMap = new Map()
-    fromRotationPointMap = new Map()
+    fromRotationMap;
+    fromRotationPointMap ;
 
-    setup = false
+    setup;
 
-    percentageDone
+    percentageDone;
 
     constructor(handler) {
         this.handler = handler
+
+        this.startTime = 0
+        this.duration = 0
+
+        this.rotationMap = new Map();
+        this.rotationPointMap = new Map();
+
+        this.fromRotationMap = new Map()
+        this.fromRotationPointMap = new Map()
+
+        this.setup = false
+
+        this.percentageDone
     }
 
     doSetup() {

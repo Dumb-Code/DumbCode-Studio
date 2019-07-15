@@ -8,14 +8,18 @@ const resolution = 10
 
 export class KeyframeManger {
 
-    lables = new Map()
+    lables
     selectedKeyFrame
     editor
     display
 
-    playstate = new PlayState()
+    playstate
 
     constructor(keyframeBoard, editor) {
+
+        this.lables = new Map()
+        this.playstate = new PlayState()
+
         this.board = keyframeBoard
         this.editor = editor;
 

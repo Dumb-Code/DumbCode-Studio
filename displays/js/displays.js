@@ -5,17 +5,23 @@ import { TBLModel } from "./tbl_loader.js";
 export class DinosaurDisplay {
     scene;
     renderer;
-    clock = new Clock();
+    clock;
 
     container;
 
     gridGroup;
-    allCubes = [];
-    animationMap = new Map();
+    allCubes;
+    animationMap;
 
     tbl;
 
     animationHandler;
+
+    constructor() {
+        this.clock = new Clock()
+        this.allCubes = []
+        this.animationMap = new Map()
+    }
 
 
     setup(container, renderer, camera, scene) {
