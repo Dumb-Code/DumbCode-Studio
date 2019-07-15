@@ -27,10 +27,6 @@
     {
       "id": "builder", "title": "Builders", "img": "pn/trexm.jpg",
       "content": "Builders have a special job in our team too. They have 2 main jobs. Create structures that generate in game for the players to experience, and to make sets for our mod showcases! Follow our twitter? then you've probably seen the sets that our builders have made already."
-    },
-    {
-      "id": "thanks", "title": "Special Thanks",
-      "content": "These people have contributed to the team's progress, but have moved on to other things. We want to give them some recognition anyways. Thanks guys!"
     }
   ],
   "social": {
@@ -396,17 +392,18 @@
       }
     },
     {
-      "name": "RaptorWhisperer ",
-      "uuid": "7e25384a-49b9-4467-bd94-655c666e78c7",
+      "name": "RaptorWhisper",
+      "uuid": "d4e2414a-72ba-4eab-ae4e-75cb515e1f74",
       "roles": [
-        "thanks"
+        "animator",
+        "modeler"
       ],
       "projects": [
         "pn"
       ],
       "social": {
-        "discord": "unset",
-        "twitter": "unset",
+        "discord": "RaptorWhisper#7681",
+        "twitter": "https://twitter.com/justinvroonland",
         "github": "unset",
         "website": "unset"
       }
