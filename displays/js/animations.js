@@ -100,7 +100,7 @@ export class AnimationHandler {
         this.tbl.resetAnimations()
 
         for(let kf of this.sortedTimes) {
-            setupKeyframes.forEach(skf => skf.animate(kf.startTime))
+            setupKeyframes.forEach(skf => skf.animate(kf.startTime, true))
             kf.doSetup();
             setupKeyframes.push(kf);
         }
@@ -133,20 +133,31 @@ class KeyFrame {
 
     doSetup() {
         this.setup = true
+        this.fromRotationMap.clear()
+        this.fromRotationPointMap.clear()
         for(let [cubename, entry] of this.handler.animationMap.entries()) {
             this.fromRotationMap.set(cubename, [entry.rotation.x, entry.rotation.y, entry.rotation.z].map(r => r * 180/Math.PI))
             this.fromRotationPointMap.set(cubename, entry.position.toArray())
         }
     }
 
-    animate(ticks) {
+    animate(ticks, settingup = false) {
         if(!this.setup) {
             return
         }
         
         this.percentageDone = (ticks - this.startTime) / this.duration
-        if(this.percentageDone < 0 || this.percentageDone > 1) {
+        if(this.percentageDone < 0) {
             return
+        }
+
+        if(this.percentageDone > 1) {
+            if(settingup) {
+                this.percentageDone = 1
+            } else {
+                return
+            }
+
         }
 
         if(this.handler.inertia) {
