@@ -365,7 +365,7 @@ window.downloadDCA = () => {
 
 window.setupAnimation = async(file, nameElement) => {
     nameElement.classList.toggle("tooltip", true)
-    nameElement = file.name
+    nameElement.dataset.tooltip = file.name
 
     let buffer = new ByteBuffer(await readFile(file, (reader, file) => reader.readAsArrayBuffer(file)))
     
@@ -705,7 +705,7 @@ class ButtonSpeed {
 
 class ByteBuffer {
     constructor(buffer = new ArrayBuffer(0)) {
-        this.offsetTop = 0
+        this.offset = 0
         this.buffer = buffer
     }
 
