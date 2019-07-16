@@ -1,7 +1,8 @@
-import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, TextureLoader, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./three.js";
+import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./three.js";
 import { TBLModel } from "./tbl_loader.js";
 import { DinosaurDisplay, DinosaurTexture, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
+import { TransformControls } from './transform_controls.js'
 import { KeyframeManger } from './keyframe_manager.js'
 
 const container = document.getElementById("editor-container")
@@ -9,9 +10,10 @@ const panel = document.getElementById("editor");
 const canvasContainer = document.getElementById("display-div");
 const display = new DinosaurDisplay()
 
-let controls
+let controls, transformControls
 let selected
 let intersected
+let disableRaycast = false
 
 let mouse = new Vector2(-5, -5);
 let mouseClickDown = new Vector2(-5, -5)
@@ -41,7 +43,6 @@ let manager = new KeyframeManger(document.getElementById("keyframe-board"), this
 
 let escapeCallback = () => {}
 
-
 document.onkeydown = e => {
     if(e.key === "Escape") {
         escapeCallback()
@@ -70,12 +71,37 @@ function init() {
     camera.position.set(-3.745472848477101, 0.9616311452213426, -4.53288230701089)
     camera.lookAt(0, 0, 0)
 
+    display.setup(canvasContainer, renderer, camera, createScene())
+
     //Set up the controls
     controls = new OrbitControls(camera, renderer.domElement);
     controls.screenSpacePanning = true
-    controls.addEventListener('change', () => display.render())
+    controls.addEventListener('change', () => runFrame())
 
-    display.setup(canvasContainer, renderer, camera, createScene())
+    transformControls = new TransformControls(camera, renderer.domElement)
+    transformControls.addEventListener('change', () => runFrame() );
+    transformControls.addEventListener('dragging-changed', e => {
+        controls.enabled = !e.value;
+    });
+    transformControls.addEventListener('axis-changed', e => {
+        let textDiv = document.getElementById("editor-mouseover")
+        if(e.value === null) {
+            textDiv.style.display = "block"
+            if(intersected && intersected != selected) {
+                intersected.material = material
+            }
+            disableRaycast = false
+        } else {
+            if(intersected && intersected != selected) {
+                intersected.material = highlightMaterial
+            }
+            textDiv.style.display = "none"
+            disableRaycast = true
+        }
+    })
+    display.scene.add(transformControls)
+    setMode("none")
+
     setHeights(320)
     frame()
 }
@@ -96,8 +122,12 @@ function createScene() {
 }
 
 function frame() {
-    calculateIntersections()
     requestAnimationFrame(frame)
+    runFrame()
+}
+
+function runFrame() {
+    calculateIntersections()
     if(display.animationHandler) {
         manager.ensureFramePosition()
     }
@@ -114,6 +144,10 @@ function frame() {
 
 function calculateIntersections() {
     let textDiv = document.getElementById("editor-mouseover")
+
+    if(disableRaycast) {
+        return
+    }
 
     if(intersected) {
         let style = textDiv.style
@@ -170,11 +204,21 @@ function setHeights(height) {
 }
 
 function setAsSelected(selectedElem) {
+    let isSelected = selectedElem !== undefined;
+
     if(selected) {
         selected.material = material
+        if(!isSelected) {
+            transformControls.detach(selected);
+        }
     }
-    let isSelected = selectedElem !== undefined;
     selected = selectedElem;
+    if(selectedElem) {
+        selectedElem.material = selectedMaterial
+    }
+    let visible = transformControls.visible
+    transformControls.attach(selectedElem == undefined ? undefined : selectedElem.parent);
+    setMode(visible ? transformControls.mode : "none");
     [...document.getElementsByClassName("editor-require-selected")].forEach(elem => {
         elem.disabled = !isSelected
         elem.classList.toggle("is-active", isSelected)
@@ -429,9 +473,54 @@ window.setSpeed = valueIn => {
     manager.playstate.speed = value
 }
 
+window.toggleTranslate = () => {
+    if(transformControls.visible && transformControls.mode == "translate") {
+        setMode("none")
+    } else {
+        setMode("translate")
+    }
+}
+
+window.toggleRotate = () => {
+    if(transformControls.visible && transformControls.mode == "rotate") {
+        setMode("none")
+    } else {
+        setMode("rotate")
+    }
+}
+
+window.toggleGlobal = elem => {
+    let wasLocal = transformControls.space == "local"
+    transformControls.space = wasLocal ? "world" : "local"
+    elem.classList.toggle("is-active", wasLocal)
+}
+
 window.resetKeyFrames = () => {
     manager.playstate.ticks = 0
     display.animationHandler.tbl.resetAnimations()
+}
+
+function setMode(mode) {
+    if(!selected) {
+        mode = "none"
+    }
+    transformControls.visible = mode != "none"
+    if(mode != "none") {
+        transformControls.mode = mode
+
+        let oldelement = document.getElementById("control-rotate")
+        let newelement = document.getElementById("control-translate")
+        if(mode == "rotate") {
+            let e = oldelement
+            oldelement = newelement
+            newelement = e
+        }
+
+        oldelement.classList.toggle("is-active", false)
+        newelement.classList.toggle("is-active", true)
+    } else {
+        [...document.getElementsByClassName("transform-control-tool")].forEach(elem => elem.classList.toggle("is-active", false))
+    }
 }
 
 window.deleteKeyframe = () => {

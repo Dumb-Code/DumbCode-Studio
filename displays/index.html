@@ -12,15 +12,17 @@
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <link href="./css/displays.css" rel="stylesheet">
 
     <!-- used for modal veiwing of the settings page -->
     <script src="https://bulma.io/vendor/clipboard-1.7.1.min.js"></script>
     <script src="https://bulma.io/vendor/js.cookie-2.1.4.min.js"></script>
     <script src="https://bulma.io/lib/main.js?v=201907050846"></script>
 
+    <link href="./css/displays.css" rel="stylesheet">
+
     <script src="js/jszip.js"></script>
     <script src="js/gif.js"></script>
+
 
     <script type="module" src="js/editor.js"></script>
 </head>
@@ -64,7 +66,7 @@
             </div>
             <div class="navbar-end">
                 <div class="navbar-item" style="text-transform: none">
-                    v0.1.7
+                    v0.2.8
                 </div>
             </div>
         </div>
@@ -266,6 +268,21 @@
                     <div class="column">
                         <a class="button is-dark" onmousedown="keyframesPressed(this)">Play</a>
                         <a class="button is-dark" onmousedown="resetKeyFrames()">Reset</a>
+                        <a id="control-translate" class="button is-dark tooltip transform-control-tool" data-tooltip="Toggle Translate Mode" onclick="toggleTranslate()">
+                            <span class="icon is-medium">
+                                <i class="fas fa-arrows-alt"></i>
+                            </span>
+                        </a>
+                        <a id="control-rotate" class="button is-dark tooltip transform-control-tool" data-tooltip="Toggle Rotate Mode" onclick="toggleRotate()">
+                            <span class="icon is-medium">
+                                <i class="fas fa-sync-alt"></i>
+                            </span>
+                        </a>
+                        <a id="control_rotate" class="button is-dark tooltip is-active" data-tooltip="Toggle Global" onclick="toggleGlobal(this)">
+                            <span class="icon is-medium">
+                                <i class="fas fa-globe-americas"></i>
+                            </span>
+                        </a>
                     </div>
                     <div class="column">
                         <div>
