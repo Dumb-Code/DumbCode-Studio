@@ -36,7 +36,19 @@ export class KeyframeManger {
             if(this.selectedKeyFrame && e.shiftKey) {
                 let pixelDiff = e.screenX - this.xHold
                 this.xHold = e.screenX
-                this.selectedKeyFrame.startTime += pixelDiff / pixelsPerTick
+                this.selectedKeyFrame.startTimeNoSnap += pixelDiff / pixelsPerTick
+
+                this.selectedKeyFrame.startTime = this.selectedKeyFrame.startTimeNoSnap
+
+                const snappingTicks = 0.5
+                this.display.animationHandler.keyframes.filter(kf => kf != this.selectedKeyFrame).forEach(kf =>{
+                    if(Math.abs(this.selectedKeyFrame.startTimeNoSnap - (kf.startTime + kf.duration)) < snappingTicks) {
+                        this.selectedKeyFrame.startTime = kf.startTime + kf.duration
+                    } else if(Math.abs(this.selectedKeyFrame.startTimeNoSnap + this.selectedKeyFrame.duration - (kf.startTime)) < snappingTicks) {
+                        this.selectedKeyFrame.startTime = kf.startTime - this.selectedKeyFrame.duration
+                    }
+                })
+
                 this.selectedKeyFrame.updateInfo()
                 this.updateKeyFrame(this.selectedKeyFrame)
                 this.display.animationHandler.keyframesDirty()
@@ -56,9 +68,14 @@ export class KeyframeManger {
             this.updateTooltipTicks()
             this.ensureFramePosition()
         }
+        
         this.entryBoard.addEventListener("mousedown", e => {
             e.preventDefault ? e.preventDefault() : e.returnValue = false
             this.xHold = e.screenX
+            if(this.selectedKeyFrame) {
+                this.selectedKeyFrame.startTimeNoSnap = this.selectedKeyFrame.startTime
+                this.selectedKeyFrame.durationNoSnap = this.selectedKeyFrame.duration
+            }
             this.entryBoard.addEventListener("mousemove", mouseMove, false);
         }, false);
 
