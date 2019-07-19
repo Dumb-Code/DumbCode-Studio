@@ -8,13 +8,12 @@ const resolution = 10
 
 export class KeyframeManger {
 
-    constructor(keyframeBoard, editor) {
+    constructor(keyframeBoard) {
 
         this.lables = new Map()
         this.playstate = new PlayState()
 
         this.board = keyframeBoard
-        this.editor = editor;
 
         const createContainer = (classname, parent = this.board) => {
             let div = document.createElement("div")
@@ -34,6 +33,7 @@ export class KeyframeManger {
 
         let mouseMove = e => {
             if(this.selectedKeyFrame && e.shiftKey) {
+                this.selectedKeyFrame.moved = true
                 let pixelDiff = e.screenX - this.xHold
                 this.xHold = e.screenX
                 this.selectedKeyFrame.startTimeNoSnap += pixelDiff / pixelsPerTick
@@ -74,7 +74,10 @@ export class KeyframeManger {
             this.xHold = e.screenX
             if(this.selectedKeyFrame) {
                 this.selectedKeyFrame.startTimeNoSnap = this.selectedKeyFrame.startTime
+                this.selectedKeyFrame.mouseDownStartTimeNoSnap = this.selectedKeyFrame.startTime
+
                 this.selectedKeyFrame.durationNoSnap = this.selectedKeyFrame.duration
+                this.selectedKeyFrame.mouseDownDurationNoSnap = this.selectedKeyFrame.duration
             }
             this.entryBoard.addEventListener("mousemove", mouseMove, false);
         }, false);
@@ -97,6 +100,36 @@ export class KeyframeManger {
         }, false)
         
         document.addEventListener("mouseup", () => {
+
+            if(this.selectedKeyFrame) {
+                if(this.selectedKeyFrame.moved) { 
+                    let startTime = this.selectedKeyFrame.mouseDownStartTimeNoSnap
+                    let duration = this.selectedKeyFrame.mouseDownDurationNoSnap
+
+                    let startTimeEnd = this.selectedKeyFrame.startTime
+                    let durationEnd = this.selectedKeyFrame.duration
+
+                    daeHistory.addAction(() => {
+                        this.selectedKeyFrame.startTime = startTime
+                        this.selectedKeyFrame.duration = duration
+
+                        this.selectedKeyFrame.updateInfo()
+                        this.updateKeyFrame(this.selectedKeyFrame)
+                        this.display.animationHandler.keyframesDirty()
+                    }, () => {
+                        this.selectedKeyFrame.startTime = startTimeEnd
+                        this.selectedKeyFrame.duration = durationEnd
+
+                        this.selectedKeyFrame.updateInfo()
+                        this.updateKeyFrame(this.selectedKeyFrame)
+                        this.display.animationHandler.keyframesDirty()
+                    })
+  
+                }
+                this.selectedKeyFrame.moved = false
+            }
+            
+
             this.entryBoard.removeEventListener("mousemove", mouseMove, false)
             document.removeEventListener("mousemove", markerMouseMove, false)
             markerMouseMove.enabled = false
@@ -198,22 +231,33 @@ export class KeyframeManger {
                 document.getElementById("editor-kf-duration").value = kf.duration
             }
 
-            kf.selectChange = (select) => {
+            kf.selectChange = (select, recursive = true) => {
                 wrapper.style.zIndex = select ? "100" : "auto"
                 inner.classList.toggle("is-selected", select)
                 marker.classList.toggle("is-selected", select)
 
                 if(select) {
                     kf.updateInfo()
+                    if(recursive && this.selectedKeyFrame) {
+                        this.selectedKeyFrame.selectChange(false, false)
+                    }
+                    this.selectedKeyFrame = kf
+
+                } else {
+                    this.selectedKeyFrame = undefined
                 }
             }
             
             marker.onmousedown = () => {
-                if(this.selectedKeyFrame) {
-                    this.selectedKeyFrame.selectChange(false)
-                }
+                let oldKf = this.selectedKeyFrame
+                daeHistory.addAction(() => {
+                    if(oldKf) {
+                        oldKf.selectChange(true)
+                    } else {
+                        kf.selectChange(false)
+                    }
+                }, () => kf.selectChange(true))
                 kf.selectChange(true)
-                this.selectedKeyFrame = kf
             }
             marker.onmouseenter = () => {
                 if(!this.selectedKeyFrame) {

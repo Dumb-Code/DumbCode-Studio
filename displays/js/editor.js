@@ -4,6 +4,7 @@ import { DinosaurDisplay, DinosaurTexture, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
 import { KeyframeManger } from './keyframe_manager.js'
+import { HistoryList } from "./history.js";
 
 const container = document.getElementById("editor-container")
 const panel = document.getElementById("editor");
@@ -33,19 +34,34 @@ let selectedMaterial = material.clone()
 selectedMaterial.emissive.setHex( 0x0000FF )
 
 let mainModel
+let modeCache, rotationCache
 
 let texture = new DinosaurTexture()
 
 let clickY; //Used to track what part of the border has been clicked
 let panelHeight
 
-let manager = new KeyframeManger(document.getElementById("keyframe-board"), this)
+let manager = new KeyframeManger(document.getElementById("keyframe-board"))
+
+window.daeHistory = new HistoryList()
 
 let escapeCallback = () => {}
 
 document.onkeydown = e => {
-    if(e.key === "Escape") {
+    if(e.keyCode === 27) { //escape
         escapeCallback()
+    }
+
+    if(e.ctrlKey && e.keyCode === 90) { //z
+        if(e.shiftKey) {
+            daeHistory.redo()
+        } else {
+            daeHistory.undo()
+        }
+    }
+
+    if(e.ctrlKey && e.keyCode === 89) { //y
+        daeHistory.redo()
     }
 }
 
@@ -53,7 +69,6 @@ container.addEventListener("mousedown", () => escapeCallback = () => {
     if(manager.selectedKeyFrame) {
         manager.selectedKeyFrame.selectChange(false)
     }
-    manager.selectedKeyFrame = undefined
 })
 canvasContainer.addEventListener("mousedown", () => escapeCallback = () => setAsSelected(undefined))
 
@@ -100,7 +115,7 @@ function init() {
         }
     })
     display.scene.add(transformControls)
-    setMode("none")
+    setMode("none", false)
 
     setHeights(320)
     frame()
@@ -137,8 +152,8 @@ function runFrame() {
     if(selected) {
         let pos = selected.parent.position
         let rot = selected.parent.rotation
-        setPosition([pos.x, pos.y, pos.z], {displaysonly: true})
-        setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), {displaysonly: true})
+        setPosition([pos.x, pos.y, pos.z], true)
+        setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), true)
     }
 }
 
@@ -191,7 +206,6 @@ function resize(e) {
     let range = window.innerHeight + canvasContainer.offsetTop
     let height = range - (e.y) + clickY
 
-
     let panelHeight = Math.min(Math.max(height, 100), 500)
     setHeights(panelHeight)
 }
@@ -203,7 +217,11 @@ function setHeights(height) {
     onWindowResize()
 }
 
-function setAsSelected(selectedElem) {
+function setAsSelected(selectedElem, history = true) {
+    if(history && selected != selectedElem) {
+        let oldSelected = selected
+        daeHistory.addAction(() => setAsSelected(oldSelected, false), () => setAsSelected(selectedElem, false))
+    }
     let isSelected = selectedElem !== undefined;
 
     if(selected) {
@@ -218,28 +236,35 @@ function setAsSelected(selectedElem) {
     }
     let visible = transformControls.visible
     transformControls.attach(selectedElem == undefined ? undefined : selectedElem.parent);
-    setMode(visible ? transformControls.mode : "none");
+    setMode(visible ? transformControls.mode : "none", false);
     [...document.getElementsByClassName("editor-require-selected")].forEach(elem => {
         elem.disabled = !isSelected
         elem.classList.toggle("is-active", isSelected)
     })
 
     if(isSelected) {
-        setPosition(getSelectedPos())
-        setRotation(getSelectedRot())
+        //Don't add history stuff, as we handle it ourselves
+        setPosition(getSelectedPos(), false, false)
+        setRotation(getSelectedRot(), false, false)
     } else {
         setPosition([0, 0, 0])
         setRotation([0, 0, 0])
     }
 }
 
-function setPosition(values, options) {
+function setPosition(values, displaysonly = false, history = true) {
     [...document.getElementsByClassName("input-position")].forEach(elem => {
         elem.value = values[elem.getAttribute("axis")]
         elem.checkValidity()
     });
-
-    if((!options || !options.displaysonly) && selected) {
+    if((!displaysonly) && selected) {
+        if(history) {
+            let pos = selected.parent.position
+            let arr = [pos.x, pos.y, pos.z]
+            daeHistory.addAction(() => setPosition(arr, false, false), () => {
+                setPosition(values.slice(0), false, false)
+            })
+        } 
         selected.parent.position.set(values[0], values[1], values[2])
         
         if(manager.selectedKeyFrame) {
@@ -249,7 +274,7 @@ function setPosition(values, options) {
     }
 }
 
-function setRotation(values, options) {
+function setRotation(values, displaysonly = false, history = true) {
     [...document.getElementsByClassName("input-rotation")].forEach(elem => {
         elem.value = values[elem.getAttribute("axis")]
     });
@@ -258,7 +283,14 @@ function setRotation(values, options) {
         elem.value = ((values[elem.getAttribute("axis")] + 180) % 360) - 180
     });
 
-    if((!options || !options.displaysonly) && selected) {
+
+    if((!displaysonly) && selected) {
+        if(history) {
+            let rot = selected.parent.rotation
+            let arr = [rot.x, rot.y, rot.z].map(v => v * 180 / Math.PI)
+            daeHistory.addAction(() => setRotation(arr, false, false), () => setRotation(values, false, false))
+        } 
+
         selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
 
         if(manager.selectedKeyFrame) {
@@ -489,10 +521,18 @@ window.toggleRotate = () => {
     }
 }
 
-window.toggleGlobal = elem => {
+window.toggleGlobal = (elem, addHistory = true) => {
     let wasLocal = transformControls.space == "local"
-    transformControls.space = wasLocal ? "world" : "local"
-    elem.classList.toggle("is-active", wasLocal)
+    setGlobal(elem, wasLocal)
+    if(addHistory) {
+        daeHistory.addAction(() => setGlobal(elem, !wasLocal), () => setGlobal(elem, wasLocal));
+    }
+    
+}
+
+function setGlobal(elem, world) {
+    transformControls.space = world ? "world" : "local"
+    elem.classList.toggle("is-active", world)
 }
 
 window.resetKeyFrames = () => {
@@ -500,9 +540,13 @@ window.resetKeyFrames = () => {
     display.animationHandler.tbl.resetAnimations()
 }
 
-function setMode(mode) {
+function setMode(mode, updateHistory = true) {
+    modeCache = mode
     if(!selected) {
         mode = "none"
+    }
+    if(updateHistory) {
+        daeHistory.addAction(() => setMode(modeCache, false), () => setMode(mode, false) )
     }
     transformControls.visible = mode != "none"
     if(mode != "none") {
@@ -526,13 +570,28 @@ function setMode(mode) {
 window.deleteKeyframe = () => {
     if(manager.selectedKeyFrame) {
         let index = display.animationHandler.keyframes.indexOf(manager.selectedKeyFrame)
-        if(index > 0) {
-            display.animationHandler.keyframes.splice(index, 1)
-            manager.entryBoard.removeChild(manager.selectedKeyFrame.element)
-            display.animationHandler.keyframesDirty()
-            
-            manager.selectedKeyFrame = undefined
-            manager.reframeKeyframes()
+        if(index >= 0) {
+            let keyframe = manager.selectedKeyFrame
+
+            let redo = () => {
+                display.animationHandler.keyframes.splice(index, 1)
+                manager.entryBoard.removeChild(keyframe.element)
+                display.animationHandler.keyframesDirty()
+                
+                keyframe.selectChange(false)
+                manager.reframeKeyframes()
+            }
+
+            daeHistory.addAction(() => {
+                display.animationHandler.keyframes.splice(index, 0, keyframe)
+                manager.entryBoard.appendChild(keyframe.element)
+                display.animationHandler.keyframesDirty()
+
+                keyframe.selectChange(true)
+                manager.reframeKeyframes()
+            }, redo)
+
+            redo()
         }
     }
 }
@@ -540,22 +599,35 @@ window.deleteKeyframe = () => {
 window.addKeyframe = () => {
     if(display.animationHandler) {
 
-        if(manager.selectedKeyFrame) {
-            manager.selectedKeyFrame.selectChange(false)
-        }
-
         let kf = display.animationHandler.createKeyframe()
 
         kf.duration = 5
         kf.startTime = manager.playstate.ticks
+        let currentSelected = manager.selectedKeyFrame
 
-        display.animationHandler.keyframes.push(kf)
-        display.animationHandler.keyframesDirty()
+        let redo = () => {
+            display.animationHandler.keyframes.push(kf)
+            display.animationHandler.keyframesDirty()
+    
+            manager.reframeKeyframes()
+    
+            kf.selectChange(true)
+        }
+        
 
-        manager.reframeKeyframes()
+        daeHistory.addAction(() => {
+            display.animationHandler.keyframes.slice(display.animationHandler.keyframes.indexOf(kf), 1)
+            manager.entryBoard.removeChild(kf.element)
+            kf.element = false
+            display.animationHandler.keyframesDirty()
+            if(currentSelected) {
+                currentSelected.selectChange(true)
+            } else {
+                kf.selectChange(false)
+            }
+        }, redo)
 
-        kf.selectChange(true)
-        manager.selectedKeyFrame = kf
+        redo()
 
     }
 }
@@ -599,14 +671,14 @@ function getSelectedPos() {
 }
 
 
-window.setRotation = elem => {
+window.setRotation = (elem, history) => {
     let num = Number(elem.value)
     if(Number.isNaN(num)) {
         return
     }
     let angles = getSelectedRot()
     angles[elem.getAttribute("axis")] = num
-    setRotation(angles)
+    setRotation(angles, false, history)
 }
 function getSelectedRot() {
     let angles
@@ -618,6 +690,16 @@ function getSelectedRot() {
     }
     return angles
 }
+
+window.setRotationHistory = () => {
+    let rotation = getSelectedRot().splice(0)
+    daeHistory.addAction(() => setRotation(rotationCache, false, false), () => setRotation(rotation, false, false))
+}
+
+window.storeRotationHistory = () => {
+    rotationCache = getSelectedRot().splice(0)
+}
+
 window.setupMainModel = async(file, nameElement) => {
     mainModel = {name: file.name}
     nameElement.classList.toggle("tooltip", true)

@@ -299,17 +299,17 @@
                         Rotation
                         <div class="editor-slider editor-entry">
                             X: 
-                            <input axis="0" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+                            <input axis="0" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this, false)" onmousedown="storeRotationHistory()" onmouseup="setRotationHistory()" disabled>
                             <input axis="0" class="input is-small editor-require-selected input-rotation" type="text" placeholder="X" onfocusout="setRotation(this)" disabled>
                         </div>
                         <div class="editor-slider editor-entry">
                             Y: 
-                            <input axis="1" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+                            <input axis="1" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this, false)" onmousedown="storeRotationHistory()" onmouseup="setRotationHistory()" disabled>
                             <input axis="1" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Y" onfocusout="setRotation(this)" disabled>
                         </div>
                         <div class="editor-slider editor-entry">
                             Z: 
-                            <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+                            <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this, false)" onmousedown="storeRotationHistory()" onmouseup="setRotationHistory()" disabled>
                             <input axis="2" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Z" onfocusout="setRotation(this)" disabled>
                         </div>
                     </div>
