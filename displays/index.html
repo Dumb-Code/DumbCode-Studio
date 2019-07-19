@@ -263,7 +263,17 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>            
+                        </div>  
+                        <a id="editor-undo" class="button is-dark tooltip" data-tooltip="Undo" onclick="daeHistory.undo()" disabled>
+                            <span class="icon is-medium">
+                                <i class="fas fa-undo-alt"></i>
+                            </span>
+                        </a>  
+                        <a id="editor-redo" class="button is-dark tooltip" data-tooltip="Redo" onclick="daeHistory.redo()"  disabled>
+                            <span class="icon is-medium">
+                                <i class="fas fa-redo-alt"></i>
+                            </span>
+                        </a>         
                     </div>
                     <div class="column">
                         <a class="button is-dark" onmousedown="keyframesPressed(this)">Play</a>
