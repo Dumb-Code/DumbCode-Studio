@@ -160,7 +160,7 @@ class KeyFrame {
 
         }
 
-        if(this.handler.inertia) {
+        if(!settingup && this.handler.inertia) {
             this.percentageDone = Math.sin((this.percentageDone - 0.5) * Math.PI) / 2 + 0.5
         }
 
