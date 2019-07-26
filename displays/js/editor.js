@@ -403,7 +403,7 @@ window.downloadDCA = () => {
     if(display.animationHandler) {
         let buffer = new ByteBuffer()
 
-        buffer.writeNumber(0) //version
+        buffer.writeNumber(1) //version
         buffer.writeNumber(display.animationHandler.sortedTimes.length)
 
         display.animationHandler.sortedTimes.forEach(kf => {
@@ -445,8 +445,12 @@ window.setupAnimation = async(file, nameElement) => {
 
     let buffer = new ByteBuffer(await readFile(file, (reader, file) => reader.readAsArrayBuffer(file)))
     
-    buffer.readNumber() //Version. Currently ignored
+    let version = buffer.readNumber()
     
+    if(version < 1) {
+        buffer.useOldString = true
+    }
+
     let length = buffer.readNumber()
 
     let keyframes = []
@@ -878,6 +882,7 @@ class ByteBuffer {
     constructor(buffer = new ArrayBuffer(0)) {
         this.offset = 0
         this.buffer = buffer
+        this.useOldString = false
     }
 
     _addBuffer(buffer) {
@@ -896,7 +901,13 @@ class ByteBuffer {
 
     writeString(str) {
         let arr = new TextEncoder().encode(str).buffer
-        this.writeNumber(arr.byteLength)
+
+        //write the length
+        let buffer = new ArrayBuffer(2)
+        let veiw = new DataView(buffer)
+        veiw.setInt16(0, arr.byteLength)
+        this._addBuffer(buffer)
+
         this._addBuffer(arr)
     }
 
@@ -908,9 +919,17 @@ class ByteBuffer {
     }
 
     readString() {
-        let length = this.readNumber()
-        let result = new TextDecoder().decode(this.buffer.slice(this.offset, this.offset + length))
+        //read the length
+        let length
+        if(this.useOldString) {
+            length = this.readNumber()
+        } else {
+            let veiw = new DataView(this.buffer)
+            length = veiw.getInt16(this.offset)
+            this.offset += 2
+        }
+
         this.offset += length
-        return result
+        return new TextDecoder().decode(this.buffer.slice(this.offset - length, this.offset))
     }
 }
