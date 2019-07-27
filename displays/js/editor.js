@@ -789,6 +789,10 @@ window.subtractValue = elem => {
     }
 }
 
+///todo: Fix this. The problem is that if keyframs overlap the snapshot will bounce back and forth betweem them
+//to fix this, we need to generate something similar to the system in dumb library, whereas the keyframes act like events.
+//This is practicaly already done, as the from and to maps are done, we just need to posify it with an event map and such. 
+
 window.generateJavaMethod = () => {
     let elem = document.getElementById("java-method-code-result")
     let animationName = prompt("Enter Animation Name. This is temporary. Need to do a way of having animaion names")
