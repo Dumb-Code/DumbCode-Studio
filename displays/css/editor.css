@@ -20,3 +20,11 @@
 .toplayer-columns .column {
     text-align: center
 }
+
+.java-method-code {
+    background-color: #222;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 75%;
+    white-space: pre;
+}

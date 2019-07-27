@@ -185,6 +185,52 @@
                                                     Download as GIF
                                                 </a>
                                             </div>
+                                            <div class="column buttons has-addons">
+                                                <a class="button is-dark is-small modal-button" data-target="modal-java-method" aria-haspopup="true" style="text-transform: none; border-color: #dbdbdb" onclick="generateJavaMethod()">
+                                                    As Java Method
+                                                </a>
+                                                <div class="modal" id="modal-java-method" style="text-transform: none">
+                                                    <div class="modal-background"></div>
+                                                    <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+                                                        <h3 class="title is-3" style="color: whitesmoke">Settings</h3>
+                                                        <div style="padding-bottom: 20px">
+                                                            <button class="modal-close" aria-label="close" style="position: absolute"></button>
+                                                        </div>
+                                                        <div class="settings-entry entry-top">
+                                                            1) Add these fields to your model class:
+                                                            <div class="java-method-code">
+private final Map&lt;ModelRenderer, float[]&gt; snapshotMap = new HashMap&lt;&gt;();<br>
+private String snapshotName = "";
+                                                            </div>
+                                                        </div>
+                                                        <div class="settings-entry">
+                                                            2) Add these methods to your model class:
+                                                            <div class="java-method-code">
+private void ensureSnapshot(String snapshotName) {
+    if (this.snapshotName.equals(snapshotName)) {
+        return;
+    }
+    this.snapshotName = snapshotName
+
+    for (ModelRenderer renderer : this.boxList) {
+        this.snapshotMap.put(renderer, new float[]{ renderer.rotationPointX, renderer.rotationPointY, renderer.rotationPointZ, renderer.rotateAngleX, renderer.rotateAngleY, renderer.rotateAngleZ });
+    }
+}
+
+private float interpolate(float from, float to, float alpha) {
+    return from + (to - from) * alpha;
+}
+                                                            </div>
+                                                        </div>
+                                                        <div class="settings-entry">
+                                                            Generating...
+                                                            <div class="java-method-code" id="java-method-code-result">
+                                                                
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>  
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

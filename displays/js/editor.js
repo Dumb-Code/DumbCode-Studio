@@ -789,6 +789,44 @@ window.subtractValue = elem => {
     }
 }
 
+window.generateJavaMethod = () => {
+    let elem = document.getElementById("java-method-code-result")
+    let animationName = prompt("Enter Animation Name. This is temporary. Need to do a way of having animaion names")
+    let result = `private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(float ticksDone) {\n`
+
+    let times = display.animationHandler.sortedTimes
+
+    result += `    //ticksDone %= ${times[times.length - 1].startTime + times[times.length - 1].duration};  //Uncomment this for the animation to loop`
+
+    let index = 0
+    times.forEach(kf => {
+        result += 
+`
+    if (ticksDone > ${kf.startTime} && ticksDone < ${kf.startTime + kf.duration}) {
+        this.ensureSnapshot("${animationName + ++index}")
+        float percentage = (ticksDone - ${kf.startTime}F) / ${kf.duration}F;\n`
+        kf.rotationPointMap.forEach((value, name) => {
+
+            result += `        this.${name}.rotationPointX = this.interpolate(this.snapshotMap.get(this.${name})[0], ${value[0]}F, percentage);\n`
+            result += `        this.${name}.rotationPointY = this.interpolate(this.snapshotMap.get(this.${name})[1], ${value[1]}F, percentage);\n`
+            result += `        this.${name}.rotationPointZ = this.interpolate(this.snapshotMap.get(this.${name})[2], ${value[2]}F, percentage);\n`
+        })
+
+        result += `\n`
+
+        kf.rotationMap.forEach((value, name) => {
+
+            result += `        this.${name}.rotateAngleX = this.interpolate(this.snapshotMap.get(this.${name})[0], ${value[0] * Math.PI / 180}F, percentage);\n`
+            result += `        this.${name}.rotateAngleY = this.interpolate(this.snapshotMap.get(this.${name})[1], ${value[1] * Math.PI / 180}F, percentage);\n`
+            result += `        this.${name}.rotateAngleZ = this.interpolate(this.snapshotMap.get(this.${name})[2], ${value[2] * Math.PI / 180}F, percentage);\n`
+        })
+        result += "    }"
+    })
+
+    result += "\n}"
+    elem.innerText = result
+}
+
 window.addEventListener( 'resize', onWindowResize, false );
 window.addEventListener( 'resize', () => setHeights(panelHeight), false );
 document.addEventListener( 'mousemove', onMouseMove, false );
