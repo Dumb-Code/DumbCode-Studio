@@ -835,7 +835,7 @@ window.generateJavaMethod = () => {
         result += 
 `
     if (ticksDone > ${start}) {
-        this.ensureSnapshot("${animationName + i}")
+        this.ensureSnapshot("${animationName + i}");
         float percentage = (ticksDone - ${start}F) / ${end - start}F;
         if(percentage > 1F) {
             percentage = 1F;
@@ -857,6 +857,7 @@ window.generateJavaMethod = () => {
                 result += `        this.setTransforms(this.${ss.name}, ${getNum(ss.position[0])}F, ${getNum(ss.position[1])}F, ${getNum(ss.position[2])}F, ${getNum(ss.rotation[0])}F, ${getNum(ss.rotation[1])}F, ${getNum(ss.rotation[2])}F, percentage)\n`
             }
         })
+        result += "    }"
         previousSnapshot = captured
         
     }

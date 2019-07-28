@@ -207,7 +207,7 @@ private void ensureSnapshot(String snapshotName) {
     if (this.snapshotName.equals(snapshotName)) {
         return;
     }
-    this.snapshotName = snapshotName
+    this.snapshotName = snapshotName;
 
     for (ModelRenderer renderer : this.boxList) {
         this.snapshotMap.put(renderer, new float[]{ renderer.rotationPointX, renderer.rotationPointY, renderer.rotationPointZ, renderer.rotateAngleX, renderer.rotateAngleY, renderer.rotateAngleZ });
