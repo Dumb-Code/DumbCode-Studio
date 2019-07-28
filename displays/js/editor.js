@@ -789,43 +789,74 @@ window.subtractValue = elem => {
     }
 }
 
-///todo: Fix this. The problem is that if keyframs overlap the snapshot will bounce back and forth betweem them
-//to fix this, we need to generate something similar to the system in dumb library, whereas the keyframes act like events.
-//This is practicaly already done, as the from and to maps are done, we just need to posify it with an event map and such. 
-
 window.generateJavaMethod = () => {
+
     let elem = document.getElementById("java-method-code-result")
     let animationName = prompt("Enter Animation Name. This is temporary. Need to do a way of having animaion names")
-    let result = `private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(float ticksDone) {\n`
-
     let times = display.animationHandler.sortedTimes
+    let arrEqual = (arr1, arr2) => arr1[0] == arr2[0] && arr1[1] == arr2[1] && arr1[2] == arr2[2]
+    
+    let decimalCutoff = Math.pow(10, 3) //the 3 represents 3 decimal places
+    let getNum = num => Math.round(num * decimalCutoff) / decimalCutoff
 
+    let createSnapshot = () => {
+        let snapshot = []
+        display.tbl.cubeMap.forEach((value, name) => {
+            let rot = value.cubeGroup.rotation
+            let pos = value.cubeGroup.position
+
+            snapshot.push( { name, rotation:[rot.x, rot.y, rot.z], position:[pos.x, pos.y, pos.z] } )
+        })
+        return snapshot
+    }
+
+    display.tbl.resetAnimations()
+    let eventMap = new Map() //<float, cubereference[]>
+    eventMap.set(0, createSnapshot())
+
+    times.forEach(eventKf => {
+        times.forEach(kf => kf.animate(eventKf.startTime, true))
+        eventMap.set(eventKf.startTime, createSnapshot())
+
+        times.forEach(kf => kf.animate(eventKf.startTime + eventKf.duration, true))
+        eventMap.set(eventKf.startTime + eventKf.duration, createSnapshot())
+    });
+
+    let sorted = [...eventMap.keys()].sort((a, b) => a - b)
+
+    let result = `private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(float ticksDone) {\n`
     result += `    //ticksDone %= ${times[times.length - 1].startTime + times[times.length - 1].duration};  //Uncomment this for the animation to loop`
 
-    let index = 0
-    times.forEach(kf => {
+    let previousSnapshot = false
+    for(let i = 0; i < sorted.length - 1; i++) {
+        let start = sorted[i]
+        let end = sorted[i + 1]
+
         result += 
 `
-    if (ticksDone > ${kf.startTime} && ticksDone < ${kf.startTime + kf.duration}) {
-        this.ensureSnapshot("${animationName + ++index}")
-        float percentage = (ticksDone - ${kf.startTime}F) / ${kf.duration}F;\n`
-        kf.rotationPointMap.forEach((value, name) => {
+    if (ticksDone > ${start} && ticksDone < ${end}) {
+        this.ensureSnapshot("${animationName + i}")
+        float percentage = (ticksDone - ${start}F) / ${end - start}F;\n`
 
-            result += `        this.${name}.rotationPointX = this.interpolate(this.snapshotMap.get(this.${name})[0], ${value[0]}F, percentage);\n`
-            result += `        this.${name}.rotationPointY = this.interpolate(this.snapshotMap.get(this.${name})[1], ${value[1]}F, percentage);\n`
-            result += `        this.${name}.rotationPointZ = this.interpolate(this.snapshotMap.get(this.${name})[2], ${value[2]}F, percentage);\n`
+        let snapshot = eventMap.get(end)
+
+        let captured = new Map()
+        snapshot.forEach(ss => {
+            captured.set(ss.name, {rotation:ss.rotation, position:ss.position})
+            let skip = false
+            if(previousSnapshot) {
+                let ps = previousSnapshot.get(ss.name)
+                if(arrEqual(ps.rotation, ss.rotation) && arrEqual(ps.position, ss.position)) {
+                    skip = true
+                }
+            }
+            if(!skip) {
+                result += `        this.setTransforms(this.${ss.name}, ${getNum(ss.position[0])}F, ${getNum(ss.position[1])}F, ${getNum(ss.position[2])}F, ${getNum(ss.rotation[0])}F, ${getNum(ss.rotation[1])}F, ${getNum(ss.rotation[2])}F, percentage)\n`
+            }
         })
-
-        result += `\n`
-
-        kf.rotationMap.forEach((value, name) => {
-
-            result += `        this.${name}.rotateAngleX = this.interpolate(this.snapshotMap.get(this.${name})[0], ${value[0] * Math.PI / 180}F, percentage);\n`
-            result += `        this.${name}.rotateAngleY = this.interpolate(this.snapshotMap.get(this.${name})[1], ${value[1] * Math.PI / 180}F, percentage);\n`
-            result += `        this.${name}.rotateAngleZ = this.interpolate(this.snapshotMap.get(this.${name})[2], ${value[2] * Math.PI / 180}F, percentage);\n`
-        })
-        result += "    }"
-    })
+        previousSnapshot = captured
+        
+    }
 
     result += "\n}"
     elem.innerText = result
