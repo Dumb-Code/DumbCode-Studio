@@ -854,7 +854,7 @@ window.generateJavaMethod = () => {
                 }
             }
             if(!skip) {
-                result += `        this.setTransforms(this.${ss.name}, ${getNum(ss.position[0])}F, ${getNum(ss.position[1])}F, ${getNum(ss.position[2])}F, ${getNum(ss.rotation[0])}F, ${getNum(ss.rotation[1])}F, ${getNum(ss.rotation[2])}F, percentage)\n`
+                result += `        this.setTransforms(this.${ss.name}, ${getNum(ss.position[0])*16}F, ${getNum(ss.position[1])*16}F, ${getNum(ss.position[2])*16}F, ${getNum(ss.rotation[0])}F, ${getNum(ss.rotation[1])}F, ${getNum(ss.rotation[2])}F, percentage);\n`
             }
         })
         result += "    }"
