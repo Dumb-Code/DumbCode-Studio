@@ -161,20 +161,10 @@ export class KeyframeManger {
     setupSelectedPose() {
         if(this.selectedKeyFrame && !this.playstate.playing) {
             this.display.animationHandler.animationMap.forEach((cube, cubename) => {
-                let irot
-                if(this.selectedKeyFrame.rotationMap.has(cubename)) {
-                    irot = this.selectedKeyFrame.rotationMap.get(cubename)
-                } else {
-                    irot = this.selectedKeyFrame.fromRotationMap.get(cubename)
-                }
+                let irot = this.selectedKeyFrame.getRotation(cubename)
                 cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
 
-                let ipos
-                if(this.selectedKeyFrame.rotationPointMap.has(cubename)) {
-                    ipos = this.selectedKeyFrame.rotationPointMap.get(cubename)
-                } else {
-                    ipos = this.selectedKeyFrame.fromRotationPointMap.get(cubename)
-                }
+                let ipos = this.selectedKeyFrame.getPosition(cubename)
                 cube.position.set(ipos[0], ipos[1], ipos[2])
 
             })

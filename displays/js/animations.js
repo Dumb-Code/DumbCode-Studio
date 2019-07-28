@@ -167,37 +167,31 @@ class KeyFrame {
         for(let key of this.handler.animationMap.keys()) {
             let cube = this.handler.animationMap.get(key);
 
-            let irot
             if(this.rotationMap.has(key)) {
-                irot = this.interpolate(this.fromRotationMap.get(key), this.rotationMap.get(key))
+                let irot = this.interpolate(this.fromRotationMap.get(key), this.rotationMap.get(key))
                 cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
-            } else {
-                // irot = this.fromRotationMap.get(key)
             }
 
-            let ipos
             if(this.rotationPointMap.has(key)) {
-                ipos = this.interpolate(this.fromRotationPointMap.get(key), this.rotationPointMap.get(key))
+                let ipos = this.interpolate(this.fromRotationPointMap.get(key), this.rotationPointMap.get(key))
                 cube.position.set(ipos[0], ipos[1], ipos[2])
-            } else {
-                // ipos = this.fromRotationPointMap.get(key)
             }
         }
     }
 
     getPosition(cubename) {
         if(this.rotationPointMap.has(cubename)) {
-            return this.rotationPointMap.get(cubename)
+            return this.rotationPointMap.get(cubename).slice(0)
         } else {
-            return this.fromRotationPointMap.get(cubename)
+            return this.fromRotationPointMap.get(cubename).slice(0)
         } 
     }
 
     getRotation(cubename) {
         if(this.rotationMap.has(cubename)) {
-            return this.rotationMap.get(cubename)
+            return this.rotationMap.get(cubename).slice(0)
         } else {
-            return this.fromRotationMap.get(cubename)
+            return this.fromRotationMap.get(cubename).slice(0)
         } 
     }
 

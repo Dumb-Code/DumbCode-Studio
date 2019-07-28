@@ -275,6 +275,7 @@ function setPosition(values, displaysonly = false, history = true) {
 }
 
 function setRotation(values, displaysonly = false, history = true) {
+
     [...document.getElementsByClassName("input-rotation")].forEach(elem => {
         elem.value = values[elem.getAttribute("axis")]
     });
@@ -283,13 +284,12 @@ function setRotation(values, displaysonly = false, history = true) {
         elem.value = ((values[elem.getAttribute("axis")] + 180) % 360) - 180
     });
 
-
-    if((!displaysonly) && selected) {
+    if(!displaysonly && selected) {
         if(history) {
             let rot = selected.parent.rotation
             let arr = [rot.x, rot.y, rot.z].map(v => v * 180 / Math.PI)
             daeHistory.addAction(() => setRotation(arr, false, false), () => setRotation(values, false, false))
-        } 
+        }
 
         selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
 
