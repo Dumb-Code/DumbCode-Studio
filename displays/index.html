@@ -192,20 +192,17 @@
                                                 <div class="modal" id="modal-java-method" style="text-transform: none">
                                                     <div class="modal-background"></div>
                                                     <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
-                                                        <h3 class="title is-3" style="color: whitesmoke">Settings</h3>
+                                                        <h3 class="title is-3" style="color: whitesmoke">Export as Java Method</h3>
                                                         <div style="padding-bottom: 20px">
                                                             <button class="modal-close" aria-label="close" style="position: absolute"></button>
                                                         </div>
                                                         <div class="settings-entry entry-top">
-                                                            1) Add these fields to your model class:
+                                                            Add these methods and fields to your model class:
                                                             <div class="java-method-code">
 private final Map&lt;ModelRenderer, float[]&gt; snapshotMap = new HashMap&lt;&gt;();<br>
 private String snapshotName = "";
                                                             </div>
-                                                        </div>
-                                                        <div class="settings-entry">
-                                                            2) Add these methods to your model class:
-                                                            <div class="java-method-code">
+                                                            <div class="java-method-code" style="margin-top: 10px;">
 private void ensureSnapshot(String snapshotName) {
     if (this.snapshotName.equals(snapshotName)) {
         return;
@@ -231,9 +228,9 @@ private void setTransforms(ModelRenderer modelRenderer, float positionX, float p
                                                             </div>
                                                         </div>
                                                         <div class="settings-entry">
-                                                            Generating...
+                                                            Add this method to your model class
                                                             <div class="java-method-code" id="java-method-code-result">
-                                                                
+Generating...
                                                             </div>
                                                         </div>
                                                     </div>
