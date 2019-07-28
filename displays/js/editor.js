@@ -834,9 +834,12 @@ window.generateJavaMethod = () => {
 
         result += 
 `
-    if (ticksDone > ${start} && ticksDone < ${end}) {
+    if (ticksDone > ${start}) {
         this.ensureSnapshot("${animationName + i}")
-        float percentage = (ticksDone - ${start}F) / ${end - start}F;\n`
+        float percentage = (ticksDone - ${start}F) / ${end - start}F;
+        if(percentage > 1F) {
+            percentage = 1F;
+        }\n`
 
         let snapshot = eventMap.get(end)
 
