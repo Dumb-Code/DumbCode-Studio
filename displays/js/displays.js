@@ -34,14 +34,12 @@ export class DinosaurDisplay {
         for (let i = 0; i <= 30; i ++) {
 
             let line = new Line(geometry, linesMaterial);
-            line.position.z =  i  - 15
-            line.position.y = -1.5
+            line.position.z =  i - 15
             this.gridGroup.add( line );
 
             line = new Line(geometry, linesMaterial);
             line.position.x = i - 15
             line.rotation.y = 90 * Math.PI / 180;
-            line.position.y = -1.5
             this.gridGroup.add(line);
         }
     }

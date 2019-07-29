@@ -197,7 +197,7 @@
                                                             <button class="modal-close" aria-label="close" style="position: absolute"></button>
                                                         </div>
                                                         <div class="settings-entry entry-top">
-                                                            Add these methods and fields to your model class:
+                                                            Ensure these methods and fields to your model class:
                                                             <div class="java-method-code">
 private final Map&lt;ModelRenderer, float[]&gt; snapshotMap = new HashMap&lt;&gt;();<br>
 private String snapshotName = "";
@@ -225,6 +225,9 @@ private void setTransforms(ModelRenderer modelRenderer, float positionX, float p
     modelRenderer.rotateAngleY = snapshot[4] + (rotateY - snapshot[4]) * alpha;
     modelRenderer.rotateAngleZ = snapshot[5] + (rotateZ - snapshot[5]) * alpha;
 }
+                                                            </div>
+                                                            <div class="java-method-code" id="java-method-code-reset" style="margin-top: 10px;">
+Generating...
                                                             </div>
                                                         </div>
                                                         <div class="settings-entry">

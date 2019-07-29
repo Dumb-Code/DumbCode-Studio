@@ -83,7 +83,7 @@ function init() {
 
     //Set up the camera
     let camera = new PerspectiveCamera( 65, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 700 )
-    camera.position.set(-3.745472848477101, 0.9616311452213426, -4.53288230701089)
+    camera.position.set(-3.745472848477101, 2.4616311452213426, -4.53288230701089)
     camera.lookAt(0, 0, 0)
 
     display.setup(canvasContainer, renderer, camera, createScene())
@@ -645,6 +645,7 @@ window.setStartTime = value => {
 }
 
 window.setDuration = value => {
+    value = Number(value)
     if(manager.selectedKeyFrame) {
         let diff = value - manager.selectedKeyFrame.duration
         manager.selectedKeyFrame.duration = value
@@ -791,6 +792,7 @@ window.subtractValue = elem => {
 
 window.generateJavaMethod = () => {
 
+
     let elem = document.getElementById("java-method-code-result")
     let animationName = prompt("Enter Animation Name. This is temporary. Need to do a way of having animaion names")
     let times = display.animationHandler.sortedTimes
@@ -798,6 +800,9 @@ window.generateJavaMethod = () => {
     
     let decimalCutoff = Math.pow(10, 3) //the 3 represents 3 decimal places
     let getNum = num => Math.round(num * decimalCutoff) / decimalCutoff
+
+    generateResetMethod(getNum)
+
 
     let createSnapshot = () => {
         let snapshot = []
@@ -866,6 +871,28 @@ window.generateJavaMethod = () => {
 
     result += "\n}"
     elem.innerText = result
+
+
+}
+
+function generateResetMethod(getNum) {
+    let elem = document.getElementById("java-method-code-reset")
+    
+    let result = 
+`private void stopAnimation(float ticksDone) {
+    final float duration = 5F; //This is the time taken (in ticks) to get back to the idle pose
+    if(ticksDone < duration) {
+        float percentage = ticksDone / duration;\n`
+    display.tbl.cubeMap.forEach((cube, name) => {
+        result += `        this.setTransforms(this.${name}, ${getNum(cube.rotationPoint[0])}F, ${getNum(cube.rotationPoint[1])}F, ${getNum(cube.rotationPoint[2])}F, ${getNum(cube.rotation[0])}F, ${getNum(cube.rotation[1])}F, ${getNum(cube.rotation[2])}F, percentage);\n`
+    })
+    
+    result += 
+`    }
+}` 
+
+    elem.innerText = result
+
 }
 
 window.addEventListener( 'resize', onWindowResize, false );

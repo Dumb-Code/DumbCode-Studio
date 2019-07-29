@@ -26,6 +26,7 @@ export class TBLModel {
 
         this.modelCache = new Group();
         this.modelCache.scale.set(-1/16, -1/16, 1/16)
+        this.modelCache.position.set(0, 1.5, 0)
         this.modelCache.add(mainCubeGroup)
 
         return this.modelCache
