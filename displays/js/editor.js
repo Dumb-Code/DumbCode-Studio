@@ -149,7 +149,7 @@ function runFrame() {
     
     display.display(() => manager.setupSelectedPose())
     
-    if(selected) {
+    if(selected && display.animationHandler.playstate.playing) {
         let pos = selected.parent.position
         let rot = selected.parent.rotation
         setPosition([pos.x, pos.y, pos.z], true)
