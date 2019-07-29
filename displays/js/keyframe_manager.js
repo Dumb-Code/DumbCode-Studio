@@ -228,7 +228,7 @@ export class KeyframeManger {
 
                 if(select) {
                     kf.updateInfo()
-                    if(recursive && this.selectedKeyFrame) {
+                    if(recursive && this.selectedKeyFrame && this.selectedKeyFrame != kf) {
                         this.selectedKeyFrame.selectChange(false, false)
                     }
                     this.selectedKeyFrame = kf
