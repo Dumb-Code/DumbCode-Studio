@@ -199,32 +199,50 @@
                                                         <div class="settings-entry entry-top">
                                                             Ensure these methods and fields to your model class:
                                                             <div class="java-method-code">
-private final Map&lt;ModelRenderer, float[]&gt; snapshotMap = new HashMap&lt;&gt;();<br>
-private String snapshotName = "";
-                                                            </div>
+private final Map&lt;Entity, Map&lt;ModelRenderer, float[]&gt;&gt; snapshotMap = new WeakHashMap&lt;&gt;();
+private final Map&lt;Entity, Map&lt;ModelRenderer, float[]&gt;&gt; currentTransformsMap = new WeakHashMap&lt;&gt;();
+private Map&lt;Entity, String&gt; snapshotName = new WeakHashMap&lt;&gt;();
+                                                       </div>
                                                             <div class="java-method-code" style="margin-top: 10px;">
-private void ensureSnapshot(String snapshotName) {
-    if (this.snapshotName.equals(snapshotName)) {
-        return;
-    }
-    this.snapshotName = snapshotName;
-
-    for (ModelRenderer renderer : this.boxList) {
-        this.snapshotMap.put(renderer, new float[]{ renderer.rotationPointX, renderer.rotationPointY, renderer.rotationPointZ, renderer.rotateAngleX, renderer.rotateAngleY, renderer.rotateAngleZ });
-    }
+private void ensureSnapshot(Entity entity, String snapshotName) {
+	if (snapshotName.equals(this.snapshotName.get(entity))) {
+		return;
+	}
+	this.snapshotName.put(entity, snapshotName);
+	Map&lt;ModelRenderer, float[]&gt; rendererMap = snapshotMap.get(entity);
+	Map&lt;ModelRenderer, float[]&gt; transformsMap = this.currentTransformsMap.get(entity);
+	for (ModelRenderer renderer : this.boxList) {
+		float[] floats = transformsMap.get(renderer);
+		rendererMap.put(renderer, new float[]{floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]});
+	}
 }
 
-private void setTransforms(ModelRenderer modelRenderer, float positionX, float positionY, float positionZ, float rotateX, float rotateY, float rotateZ, float alpha) {
-    final float[] snapshot = this.snapshotMap.get(modelRenderer);
-    
-    modelRenderer.rotationPointX = snapshot[0] + (positionX - snapshot[0]) * alpha;
-    modelRenderer.rotationPointY = snapshot[1] + (positionY - snapshot[1]) * alpha;
-    modelRenderer.rotationPointZ = snapshot[2] + (positionZ - snapshot[2]) * alpha;
-    
-    modelRenderer.rotateAngleX = snapshot[3] + (rotateX - snapshot[3]) * alpha;
-    modelRenderer.rotateAngleY = snapshot[4] + (rotateY - snapshot[4]) * alpha;
-    modelRenderer.rotateAngleZ = snapshot[5] + (rotateZ - snapshot[5]) * alpha;
+private void setTransforms(Entity entity, ModelRenderer modelRenderer, float positionX, float positionY, float positionZ, float rotateX, float rotateY, float rotateZ, float alpha) {
+	final float[] snapshot = this.snapshotMap.get(entity).get(modelRenderer);
+	final float[] currentTransforms = this.currentTransformsMap.get(entity).get(modelRenderer);
+
+	currentTransforms[0] = snapshot[0] + (positionX - snapshot[0]) * alpha;
+	currentTransforms[1] = snapshot[1] + (positionY - snapshot[1]) * alpha;
+	currentTransforms[2] = snapshot[2] + (positionZ - snapshot[2]) * alpha;
+
+	currentTransforms[3] = snapshot[3] + (rotateX - snapshot[3]) * alpha;
+	currentTransforms[4] = snapshot[4] + (rotateY - snapshot[4]) * alpha;
+	currentTransforms[5] = snapshot[5] + (rotateZ - snapshot[5]) * alpha;
 }
+
+private void applyAnimations(Entity entity) {
+	Map&lt;ModelRenderer, float[]&gt; rendererMap = this.currentTransformsMap.get(entity);
+	rendererMap.forEach((renderer, dat) -> {
+		renderer.rotationPointX = dat[0];
+		renderer.rotationPointY = dat[1];
+		renderer.rotationPointZ = dat[2];
+
+		renderer.rotateAngleX = dat[3];
+		renderer.rotateAngleY = dat[4];
+		renderer.rotateAngleZ = dat[5];
+	});
+}
+
                                                             </div>
                                                             <div class="java-method-code" id="java-method-code-reset" style="margin-top: 10px;">
 Generating...

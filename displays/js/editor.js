@@ -828,7 +828,6 @@ window.generateJavaMethod = () => {
 
     display.tbl.resetAnimations()
     let eventMap = new Map() //<float, cubereference[]>
-    eventMap.set(0, createSnapshot())
 
     times.forEach(eventKf => {
         times.forEach(kf => kf.animate(eventKf.startTime, true))
@@ -840,8 +839,17 @@ window.generateJavaMethod = () => {
 
     let sorted = [...eventMap.keys()].sort((a, b) => a - b)
 
-    let result = `private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(float ticksDone) {\n`
-    result += `    //ticksDone %= ${times[times.length - 1].startTime + times[times.length - 1].duration};  //Uncomment this for the animation to loop`
+    let result = `private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(Entity entity, float ticksDone) {
+        if(!this.snapshotMap.containsKey(entity)) {
+			this.snapshotMap.put(entity, new HashMap<>());
+
+			Map<Cuboid, float[]> map = new HashMap<>();
+			for (Cuboid cuboid : this.cuboidList) {
+				map.put(cuboid, new float[6]);
+			}
+			this.currentTransformsMap.put(entity, map);
+		}\n`
+    result += `    ticksDone %= ${times[times.length - 1].startTime + times[times.length - 1].duration};  //Comment this for the animation NOT to loop`
 
     let previousSnapshot = false
     for(let i = 0; i < sorted.length - 1; i++) {
@@ -851,13 +859,9 @@ window.generateJavaMethod = () => {
         result += 
 `
     if (ticksDone > ${start}) {
-        if(ticksDone < ${end}) {
-            this.ensureSnapshot("${animationName + i}");
-        }
         float percentage = (ticksDone - ${start}F) / ${end - start}F;
-        if(percentage > 1F) {
-            percentage = 1F;
-        }\n`
+        if(ticksDone < ${end}) this.ensureSnapshot(entity, "${animationName + i}");
+        else percentage = 1F;\n`
 
         let snapshot = eventMap.get(end)
 
@@ -872,15 +876,17 @@ window.generateJavaMethod = () => {
                 }
             }
             if(!skip) {
-                result += `        this.setTransforms(this.${ss.name}, ${getNum(ss.position[0])}F, ${getNum(ss.position[1])}F, ${getNum(ss.position[2])}F, ${getNum(ss.rotation[0])}F, ${getNum(ss.rotation[1])}F, ${getNum(ss.rotation[2])}F, percentage);\n`
+                result += `        this.setTransforms(entity, this.${ss.name}, ${getNum(ss.position[0])}F, ${getNum(ss.position[1])}F, ${getNum(ss.position[2])}F, ${getNum(ss.rotation[0])}F, ${getNum(ss.rotation[1])}F, ${getNum(ss.rotation[2])}F, percentage);\n`
             }
         })
         result += "    }"
-        previousSnapshot = captured
-        
+        previousSnapshot = captured   
     }
 
-    result += "\n}"
+    result += 
+    `\n
+    this.applyAnimations(entity);
+}`
     elem.innerText = result
 
 
