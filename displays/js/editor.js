@@ -94,7 +94,17 @@ function init() {
     controls.addEventListener('change', () => runFrame())
 
     transformControls = new TransformControls(camera, renderer.domElement)
-    transformControls.addEventListener('change', () => runFrame() );
+    transformControls.addEventListener('objectChange', () => {
+        let pos = selected.parent.position
+        let rot = selected.parent.rotation
+
+        let rotations = [rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI)
+        let positions = [pos.x, pos.y, pos.z]
+
+        setPosition(positions, false, false)
+        setRotation(rotations, false, false)
+        runFrame()
+    } );
     transformControls.addEventListener('dragging-changed', e => {
         controls.enabled = !e.value;
     });
