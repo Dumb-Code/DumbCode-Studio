@@ -6,6 +6,14 @@ import { TransformControls } from './transform_controls.js'
 import { KeyframeManger } from './keyframe_manager.js'
 import { HistoryList } from "./history.js";
 
+
+const major = 0
+const minor = 3
+const patch = 9
+
+const version = `${major}.${minor}.${patch}`
+document.getElementById("dumbcode-studio-version").innerText = `v${version}`
+
 const container = document.getElementById("editor-container")
 const panel = document.getElementById("editor");
 const canvasContainer = document.getElementById("display-div");
@@ -814,7 +822,6 @@ window.generateJavaMethod = () => {
 
     generateResetMethod(getNum)
 
-
     let createSnapshot = () => {
         let snapshot = []
         display.tbl.cubeMap.forEach((value, name) => {
@@ -838,18 +845,26 @@ window.generateJavaMethod = () => {
     });
 
     let sorted = [...eventMap.keys()].sort((a, b) => a - b)
+    let totalResult = times[times.length - 1].startTime + times[times.length - 1].duration
 
-    let result = `private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(Entity entity, float ticksDone) {
-        if(!this.snapshotMap.containsKey(entity)) {
-			this.snapshotMap.put(entity, new HashMap<>());
+    let result = `
+/**
+ * Play the animation {@code ${animationName}}, which is ${totalResult} ticks long
+ * @param entity The entity to run the animation on
+ * @param ticksDone the amount of ticks that this animation has been running for. Doesn't have to start at 0
+ * This method is generated from DumbCode Animation Studio v${version}
+ */
+private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(Entity entity, float ticksDone) {
+    if(!this.snapshotMap.containsKey(entity)) {
+		this.snapshotMap.put(entity, new HashMap<>());
 
-			Map<Cuboid, float[]> map = new HashMap<>();
-			for (Cuboid cuboid : this.cuboidList) {
-				map.put(cuboid, new float[6]);
-			}
-			this.currentTransformsMap.put(entity, map);
-		}\n`
-    result += `    ticksDone %= ${times[times.length - 1].startTime + times[times.length - 1].duration};  //Comment this for the animation NOT to loop`
+		Map<Cuboid, float[]> map = new HashMap<>();
+		for (Cuboid cuboid : this.cuboidList) {
+			map.put(cuboid, new float[6]);
+		}
+		this.currentTransformsMap.put(entity, map);
+	}\n`
+    result += `    ticksDone %= ${totalResult};  //Comment this for the animation NOT to loop`
 
     let previousSnapshot = false
     for(let i = 0; i < sorted.length - 1; i++) {
@@ -931,8 +946,6 @@ document.addEventListener("mouseup", () => {
     document.removeEventListener("mousemove", resize, false)
     document.body.className = undefined
 }, false);
-
-document.addEventListener('DOMContentLoaded', init, false);
 
 function onWindowResize() {
     let width = canvasContainer.clientWidth;
@@ -1056,3 +1069,5 @@ class ByteBuffer {
         return new TextDecoder().decode(this.buffer.slice(this.offset - length, this.offset))
     }
 }
+
+init()
