@@ -637,6 +637,7 @@ window.addKeyframe = () => {
 }
 
 window.setStartTime = value => {
+    value = Number(value)
     if(manager.selectedKeyFrame) {
         manager.selectedKeyFrame.startTime = value
         display.animationHandler.keyframesDirty()
