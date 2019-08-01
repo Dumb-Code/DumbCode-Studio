@@ -258,7 +258,7 @@ public abstract class AnimatedModel&lt;T extends Entity&gt; extends EntityModel&
 	/**
 	 * Stops the animations, and returns the model to it's default state. By changing {@code duration}, you can change how long this takes.
 	 * @param entity the entity to return the model to the default state.
-	 * @param ticksDone the amount of ticks done for this animation.
+	 * @param ticksDone the amount of ticks done for this animation. See: https://github.com/Dumb-Code/Dumb-Code.github.io/wiki/Ticks-Done
 	 */
 	protected void stopAnimation(Entity entity, float ticksDone) {
 		final float duration = 5F; //This is the time taken (in ticks) to get back to the idle pose
@@ -326,7 +326,7 @@ public abstract class AnimatedModel&lt;T extends Entity&gt; extends EntityModel&
     * Get the internal ticks done. This is optional
     * @param entity the entity to use
     * @param partialTicks the interpolation between ticks
-    * @return the internal ticks done. See:
+    * @return the internal ticks done. See: https://github.com/Dumb-Code/Dumb-Code.github.io/wiki/Ticks-Done
     */
    protected float getTicksDone(Entity entity, float partialTicks) {
        AnimatedEntityEntry entry = this.getEntry(entity);
