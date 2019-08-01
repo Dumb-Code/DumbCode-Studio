@@ -820,8 +820,6 @@ window.generateJavaMethod = () => {
     let decimalCutoff = Math.pow(10, 3) //the 3 represents 3 decimal places
     let getNum = num => Math.round(num * decimalCutoff) / decimalCutoff
 
-    generateResetMethod(getNum)
-
     let createSnapshot = () => {
         let snapshot = []
         display.tbl.cubeMap.forEach((value, name) => {
@@ -854,16 +852,7 @@ window.generateJavaMethod = () => {
  * @param ticksDone the amount of ticks that this animation has been running for. Doesn't have to start at 0
  * This method is generated from DumbCode Animation Studio v${version}
  */
-private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(Entity entity, float ticksDone) {
-    if(!this.snapshotMap.containsKey(entity)) {
-		this.snapshotMap.put(entity, new HashMap<>());
-
-		Map<Cuboid, float[]> map = new HashMap<>();
-		for (Cuboid cuboid : this.cuboidList) {
-			map.put(cuboid, new float[6]);
-		}
-		this.currentTransformsMap.put(entity, map);
-	}\n`
+private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(Entity entity, float ticksDone) {\n`
     result += `    ticksDone %= ${totalResult};  //Comment this for the animation NOT to loop`
 
     let previousSnapshot = false
@@ -875,7 +864,7 @@ private void playAnimation${animationName.charAt(0).toUpperCase() + animationNam
 `
     if (ticksDone > ${start}) {
         float percentage = (ticksDone - ${start}F) / ${end - start}F;
-        if(ticksDone < ${end}) this.ensureSnapshot(entity, "${animationName + i}");
+        if(ticksDone < ${end}) this.ensureSnapshot(entity, "${animationName}", ${i});
         else percentage = 1F;\n`
 
         let snapshot = eventMap.get(end)
@@ -900,29 +889,7 @@ private void playAnimation${animationName.charAt(0).toUpperCase() + animationNam
 
     result += 
     `\n
-    this.applyAnimations(entity);
 }`
-    elem.innerText = result
-
-
-}
-
-function generateResetMethod(getNum) {
-    let elem = document.getElementById("java-method-code-reset")
-    
-    let result = 
-`private void stopAnimation(float ticksDone) {
-    final float duration = 5F; //This is the time taken (in ticks) to get back to the idle pose
-    if(ticksDone < duration) {
-        float percentage = ticksDone / duration;\n`
-    display.tbl.cubeMap.forEach((cube, name) => {
-        result += `        this.setTransforms(this.${name}, ${getNum(cube.rotationPoint[0])}F, ${getNum(cube.rotationPoint[1])}F, ${getNum(cube.rotationPoint[2])}F, ${getNum(cube.rotation[0])}F, ${getNum(cube.rotation[1])}F, ${getNum(cube.rotation[2])}F, percentage);\n`
-    })
-    
-    result += 
-`    }
-}` 
-
     elem.innerText = result
 
 }

@@ -196,55 +196,166 @@
                                                             <button class="modal-close" aria-label="close" style="position: absolute"></button>
                                                         </div>
                                                         <div class="settings-entry entry-top">
-                                                            Ensure these methods and fields to your model class:
+                                                            Ensure that your model class extends this class:
                                                             <div class="java-method-code">
-private final Map&lt;Entity, Map&lt;ModelRenderer, float[]&gt;&gt; snapshotMap = new WeakHashMap&lt;&gt;();
-private final Map&lt;Entity, Map&lt;ModelRenderer, float[]&gt;&gt; currentTransformsMap = new WeakHashMap&lt;&gt;();
-private Map&lt;Entity, String&gt; snapshotName = new WeakHashMap&lt;&gt;();
-                                                       </div>
-                                                            <div class="java-method-code" style="margin-top: 10px;">
-private void ensureSnapshot(Entity entity, String snapshotName) {
-	if (snapshotName.equals(this.snapshotName.get(entity))) {
-		return;
+package myPackage;
+
+import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.entity.Entity;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+/**
+ * This holds all the base fields, methods and classes, acting like an API to allow for mods to easily animate tabula models.
+ * @author Dumbcode Animation Editor
+ * @author Wyn Price
+ * @param &lt;T&gt; the entity type
+ */
+public abstract class AnimatedModel&lt;T extends Entity&gt; extends EntityModel&lt;T&gt; {
+
+    /**
+     * Holds information about where the model's cubes are by default
+     */
+    protected Map&lt;ModelRenderer, float[]&gt; defaultMap = null;
+
+    /**
+     * Stores a map of {@link Entity#getEntityId()} to {@link AnimatedEntityEntry}
+     */
+    private final Map&lt;Integer, AnimatedEntityEntry&gt; entityEntryMap = new WeakHashMap&lt;&gt;();
+
+    @Override
+    public final void animateModel(T entity, float limbSwing, float limbSwingAmount, float partialTicks) {
+        if(this.defaultMap == null) {
+            this.defaultMap = new HashMap&lt;&gt;();
+            for (ModelRenderer renderer : this.boxList) {
+                this.defaultMap.put(renderer, new float[]{renderer.rotationPointX, renderer.rotationPointY, renderer.rotationPointZ, renderer.rotateAngleX, renderer.rotateAngleY, renderer.rotateAngleZ });
+            }
+        }
+
+        this.runAnimations(entity, partialTicks);
+
+        this.getEntry(entity_1).currentTransformsMap.forEach((renderer, dat) -&gt; {
+            renderer.rotationPointX = data[0];
+            renderer.rotationPointY = data[1];
+            renderer.rotationPointZ = data[2];
+
+            renderer.rotateAngleX = data[3];
+            renderer.rotateAngleY = data[4];
+            renderer.rotateAngleZ = data[5];
+        });
+    }
+
+    /**
+    * This method is for calling your animation methods, generated from the animation editor.
+    * @param entity the entity to call the animations on
+    * @param partialTicks the interpolation between ticks
+    */
+    protected abstract void runAnimations(T entity, float partialTicks);
+
+	/**
+	 * Stops the animations, and returns the model to it's default state. By changing {@code duration}, you can change how long this takes.
+	 * @param entity the entity to return the model to the default state.
+	 * @param ticksDone the amount of ticks done for this animation.
+	 */
+	protected void stopAnimation(Entity entity, float ticksDone) {
+		final float duration = 5F; //This is the time taken (in ticks) to get back to the idle pose
+		this.ensureSnapshot(entity, "@@none@@", 0);
+		float percentage = ticksDone / duration;
+		if(percentage > 1) percentage = 1F;
+
+		for (Cuboid cuboid : this.cuboidList) {
+			float[] floats = this.defaultMap.get(cuboid);
+			this.setTransforms(entity, cuboid, floats[0], floats[1], floats[2], floats[3], floats[4], floats[5], percentage);
+		}
 	}
-	this.snapshotName.put(entity, snapshotName);
-	Map&lt;ModelRenderer, float[]&gt; rendererMap = snapshotMap.get(entity);
-	Map&lt;ModelRenderer, float[]&gt; transformsMap = this.currentTransformsMap.get(entity);
-	for (ModelRenderer renderer : this.boxList) {
-		float[] floats = transformsMap.get(renderer);
-		rendererMap.put(renderer, new float[]{floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]});
+
+	/**
+	 * Makes sure that the current snapshot is active. If not, then a new snapshot is taken
+	 * (meaning that the model's cubes current rotations and positions are captured and stored for interpolating.
+	 * @param entity tee entity to get the snapshot from
+	 * @param snapshotGroup the group name of the current snapshot
+	 * @param id id of the current snapshot
+	 */
+	protected void ensureSnapshot(Entity entity, String snapshotGroup, int id) {
+		String snapshotName = snapshotGroup + id;
+		AnimatedEntityEntry entry = this.getEntry(entity);
+		if (snapshotName.equals(entry.snapshotName)) {
+			return;
+		}
+		if(!snapshotGroup.equals(entry.snapshotGroup)) {
+			entry.tickOffset = entity.age;
+		}
+		entry.snapshotName = snapshotName;
+		for (Cuboid renderer : this.cuboidList) {
+			float[] floats = entry.currentTransformsMap.get(renderer);
+			entry.snapshotMap.put(renderer, new float[]{floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]});
+		}
 	}
+
+	/**
+	 * Sets the transforms to the model renderer
+	 * @param entity the entity to set the transforms to
+	 * @param modelRenderer the model renderer to set the transforms on
+	 * @param positionX the x position (rotation point) to set to 
+	 * @param positionY the y position (rotation point) to set to 
+	 * @param positionZ the z position (rotation point) to set to 
+	 * @param rotateX the x angle (in radians) to set to
+	 * @param rotateY the y angle (in radians) to set to
+	 * @param rotateZ the z angle (in radians) to set to
+	 * @param alpha the interpolation amount. 0 would means the transforms are set to the current snapshot. 1 means the transforms are set exactly as the parameters
+	 */
+    protected void setTransforms(Entity entity, ModelRenderer modelRenderer, float positionX, float positionY, float positionZ, float rotateX, float rotateY, float rotateZ, float alpha) {
+        AnimatedEntityEntry entry = this.getEntry(entity);
+
+        final float[] snapshot = entry.snapshotMap.get(modelRenderer);
+        final float[] currentTransforms = entry.currentTransformsMap.get(modelRenderer);
+
+        currentTransforms[0] = snapshot[0] + (positionX - snapshot[0]) * alpha;
+        currentTransforms[1] = snapshot[1] + (positionY - snapshot[1]) * alpha;
+        currentTransforms[2] = snapshot[2] + (positionZ - snapshot[2]) * alpha;
+
+        currentTransforms[3] = snapshot[3] + (rotateX - snapshot[3]) * alpha;
+        currentTransforms[4] = snapshot[4] + (rotateY - snapshot[4]) * alpha;
+        currentTransforms[5] = snapshot[5] + (rotateZ - snapshot[5]) * alpha;
+    }
+    
+	/**
+    * Get the internal ticks done. This is optional
+    * @param entity the entity to use
+    * @param partialTicks the interpolation between ticks
+    * @return the internal ticks done. See:
+    */
+   protected float getTicksDone(Entity entity, float partialTicks) {
+       AnimatedEntityEntry entry = this.getEntry(entity);
+       return entity.ticksExisted + partialTicks - entry.tickOffset;
+   }
+
+	/**
+	 * Gets or creates the specified entry for the entity
+	 * @param entity the entity to get or create the entry from
+	 * @return the already generated entry, or a new entry if one was not found
+	 */
+	protected AnimatedEntityEntry getEntry(Entity entity) {
+		return this.entityEntryMap.computeIfAbsent(entity.getEntityId(), i -> new AnimatedEntityEntry());
+	}
+
+    protected class AnimatedEntityEntry {
+        protected final Map&lt;ModelRenderer, float[]&gt; snapshotMap = new HashMap&lt;&gt;();
+        protected final Map&lt;ModelRenderer, float[]&gt; currentTransformsMap = new HashMap&lt;&gt;();
+
+        protected String snapshotName = "";
+
+        AnimatedEntityEntry() {
+            for (ModelRenderer renderer : AnimatedModel.this.boxList) {
+                float[] floats = AnimatedModel.this.defaultMap.get(renderer);
+                this.currentTransformsMap.put(renderer, new float[]{floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]});
+            }
+        }
+    }
 }
-
-private void setTransforms(Entity entity, ModelRenderer modelRenderer, float positionX, float positionY, float positionZ, float rotateX, float rotateY, float rotateZ, float alpha) {
-	final float[] snapshot = this.snapshotMap.get(entity).get(modelRenderer);
-	final float[] currentTransforms = this.currentTransformsMap.get(entity).get(modelRenderer);
-
-	currentTransforms[0] = snapshot[0] + (positionX - snapshot[0]) * alpha;
-	currentTransforms[1] = snapshot[1] + (positionY - snapshot[1]) * alpha;
-	currentTransforms[2] = snapshot[2] + (positionZ - snapshot[2]) * alpha;
-
-	currentTransforms[3] = snapshot[3] + (rotateX - snapshot[3]) * alpha;
-	currentTransforms[4] = snapshot[4] + (rotateY - snapshot[4]) * alpha;
-	currentTransforms[5] = snapshot[5] + (rotateZ - snapshot[5]) * alpha;
-}
-
-private void applyAnimations(Entity entity) {
-	Map&lt;ModelRenderer, float[]&gt; rendererMap = this.currentTransformsMap.get(entity);
-	rendererMap.forEach((renderer, dat) -> {
-		renderer.rotationPointX = dat[0];
-		renderer.rotationPointY = dat[1];
-		renderer.rotationPointZ = dat[2];
-
-		renderer.rotateAngleX = dat[3];
-		renderer.rotateAngleY = dat[4];
-		renderer.rotateAngleZ = dat[5];
-	});
-}
-
-                                                            </div>
-                                                            <div class="java-method-code" id="java-method-code-reset" style="margin-top: 10px;">
-Generating...
                                                             </div>
                                                         </div>
                                                         <div class="settings-entry">
