@@ -848,12 +848,25 @@ window.generateJavaMethod = () => {
     let result = `
 /**
  * Play the animation {@code ${animationName}}, which is ${totalResult} ticks long
- * @param entity The entity to run the animation on
- * @param ticksDone the amount of ticks that this animation has been running for. Doesn't have to start at 0
+ * @param entry The entry to run the animation on
+ * @param ticksDone the amount of ticks that this animation has been running for. This doesn't have to start at 0
  * This method is generated from DumbCode Animation Studio v${version}
  */
-private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(Entity entity, float ticksDone) {\n`
-    result += `    ticksDone %= ${totalResult};  //Comment this for the animation NOT to loop`
+private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(AnimatedEntityEntry entry, float ticksDone) {
+    ticksDone %= ${totalResult};  //Comment this for the animation NOT to loop
+
+    int snapshotID;\n`
+
+    for(let i = 0; i < sorted.length - 2; i++) {
+        result += `    `
+        if(i != 0) {
+            result += `else `
+        }
+        result += `if(ticksDone < ${sorted[i + 1]}) snapshotID = ${i};\n`
+    }
+    result += `    else snapshotID = ${sorted.length - 2};
+    entry.ensureSnapshot("${animationName}", snapshotID);
+    `
 
     let previousSnapshot = false
     for(let i = 0; i < sorted.length - 1; i++) {
@@ -864,8 +877,7 @@ private void playAnimation${animationName.charAt(0).toUpperCase() + animationNam
 `
     if (ticksDone > ${start}) {
         float percentage = (ticksDone - ${start}F) / ${end - start}F;
-        if(ticksDone < ${end}) this.ensureSnapshot(entity, "${animationName}", ${i});
-        else percentage = 1F;\n`
+        if(percentage > 1F) percentage = 1F;\n`
 
         let snapshot = eventMap.get(end)
 
@@ -880,7 +892,7 @@ private void playAnimation${animationName.charAt(0).toUpperCase() + animationNam
                 }
             }
             if(!skip) {
-                result += `        this.setTransforms(entity, this.${ss.name}, ${getNum(ss.position[0])}F, ${getNum(ss.position[1])}F, ${getNum(ss.position[2])}F, ${getNum(ss.rotation[0])}F, ${getNum(ss.rotation[1])}F, ${getNum(ss.rotation[2])}F, percentage);\n`
+                result += `        entry.setTransforms(this.${ss.name}, ${getNum(ss.position[0])}F, ${getNum(ss.position[1])}F, ${getNum(ss.position[2])}F, ${getNum(ss.rotation[0])}F, ${getNum(ss.rotation[1])}F, ${getNum(ss.rotation[2])}F, percentage);\n`
             }
         })
         result += "    }"
