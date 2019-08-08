@@ -371,15 +371,18 @@ public final class AnimatedEntityEntry {
 		currentTransforms[5] = snapshot[5] + (rotateZ - snapshot[5]) * alpha;
 	}
 
+    /**
+    * Applys the current transforms in {@link AnimatedEntityEntry#currentTransformsMap} to the model
+    */
 	public void applyTransforms() {
 		this.currentTransformsMap.forEach((renderer, data) -&gt; {
 			renderer.rotationPointX = data[0];
 			renderer.rotationPointY = data[1];
 			renderer.rotationPointZ = data[2];
 
-			renderer.pitch = data[3];
-			renderer.yaw = data[4];
-			renderer.roll = data[5];
+			renderer.rotateAngleX = data[3];
+			renderer.rotateAngleY = data[4];
+			renderer.rotateAngleZ = data[5];
 		});
 	}
 
