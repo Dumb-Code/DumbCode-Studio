@@ -5,6 +5,7 @@ import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
 import { KeyframeManger } from './keyframe_manager.js'
 import { HistoryList } from "./history.js";
+import { JavaMethodExporter } from "./java_method_exporter.js";
 
 
 const major = 0
@@ -50,6 +51,7 @@ let clickY; //Used to track what part of the border has been clicked
 let panelHeight
 
 let manager = new KeyframeManger(document.getElementById("keyframe-board"))
+let methodExporter = new JavaMethodExporter()
 
 window.daeHistory = new HistoryList()
 
@@ -809,11 +811,24 @@ window.subtractValue = elem => {
     }
 }
 
-window.generateJavaMethod = () => {
+window.setMappings = elem => {    
+    elem.parentNode.querySelector(".is-active").classList.toggle("is-active", false)
+    elem.classList.toggle("is-active", true)
+    methodExporter.mappings = elem.getAttribute("mapping")
+    window.generateJavaMethod()
+}
+
+window.generateJavaMethod = async() => {
+
+    let animatedModel = document.getElementById("java-method-code-animated-model")
+    animatedModel.innerText = await methodExporter.getText(`method_export/animated_model.txt`)
+
+    let animatedEntityEntry = document.getElementById("java-method-code-animated-entity-entry")
+    animatedEntityEntry.innerText = await methodExporter.getText(`method_export/animated_entity_entry.txt`)
 
 
     let elem = document.getElementById("java-method-code-result")
-    let animationName = prompt("Enter Animation Name. This is temporary. Need to do a way of having animaion names")
+    let animationName = document.getElementById("java-method-name").value
     let times = display.animationHandler.sortedTimes
     let arrEqual = (arr1, arr2) => arr1[0] == arr2[0] && arr1[1] == arr2[1] && arr1[2] == arr2[2]
     
