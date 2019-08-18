@@ -124,7 +124,8 @@ class Cube {
         this.children.forEach(child => child.resetAnimations())
 
         this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
-        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)    }
+        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)    
+    }
 
 }
 

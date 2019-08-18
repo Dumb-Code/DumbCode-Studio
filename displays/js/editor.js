@@ -322,7 +322,7 @@ function setRotation(values, displaysonly = false, history = true) {
 
 export async function createGif(fps, progressCallback = undefined) {
     return new Promise((resolve, reject) => {
-        if(!display.animationHandler.currentIncrement) {
+        if(display.animationHandler.sortedTimes.length == 0) {
             reject("No Animation Playing")
             return
         }
@@ -354,25 +354,33 @@ export async function createGif(fps, progressCallback = undefined) {
         let dummyCamera = display.camera.clone()
         updateCamera(dummyCamera, width, height)
 
-        display.animationHandler.reset()
+        display.tbl.resetAnimations()
         
-        let started = false
         let delay = 1 / fps
+
+        let start = 0
+        let end = display.animationHandler.totalTime
+
+        if(display.animationHandler.looping) {
+            let kf = display.animationHandler.loopKeyframe
+            start += kf.startTime + kf.duration
+            end += kf.startTime + kf.duration
+        }
+
+        let ticks = manager.playstate.ticks
     
+        manager.playstate.ticks = start
+        manager.playstate.playing = true
+
         setTimeout(() => {
-            while(true) {
-                if(display.animationHandler.poseIndex == 1) {
-                    started = true
-                }
-                if(display.animationHandler.poseIndex == 0 && started) {
-                    break
-                }
+            while(manager.playstate.ticks < end) {
                 display.animationHandler.animate(delay)
-        
                 dummyRenderer.render( dummyScene, dummyCamera )
                 gif.addFrame(dummyRenderer.domElement, {copy: true, delay: delay * 1000})
             }
 
+            manager.playstate.playing = false
+            manager.playstate.ticks = ticks
             display.scene.add(display.tbl.modelCache)
             
             gif.on("finished", resolve);
@@ -381,6 +389,7 @@ export async function createGif(fps, progressCallback = undefined) {
             }
             gif.render();
         }, 0)
+        
 
     })
 }
@@ -788,6 +797,7 @@ window.onAnimationFileChange = async(files) => {
     manager.reframeKeyframes()
 }
 window.setInertia = elem => display.animationHandler.inertia = elem.checked
+window.setLooped = elem => display.animationHandler.looping = elem.checked
 window.setGrid = elem => display.gridGroup.visible = elem.checked
 window.addValue = elem => {
     if(selected) {
@@ -829,6 +839,7 @@ window.generateJavaMethod = async() => {
 
     let elem = document.getElementById("java-method-code-result")
     let animationName = document.getElementById("java-method-name").value
+    
     let times = display.animationHandler.sortedTimes
     let arrEqual = (arr1, arr2) => arr1[0] == arr2[0] && arr1[1] == arr2[1] && arr1[2] == arr2[2]
     
@@ -858,7 +869,7 @@ window.generateJavaMethod = async() => {
     });
 
     let sorted = [...eventMap.keys()].sort((a, b) => a - b)
-    let totalResult = times[times.length - 1].startTime + times[times.length - 1].duration
+    let totalResult = display.animationHandler.totalTime
 
     let result = `
 /**

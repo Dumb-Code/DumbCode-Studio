@@ -6,10 +6,13 @@ export class AnimationHandler {
     constructor(tbl, animationMap) {
         this.tbl = tbl
         this.inertia = false
+        this.looping = false
         this.animationMap = animationMap
 
+        this.totalTime = 0
         this.keyframes = []
         this.sortedTimes = []
+        this.loopKeyframe = false
         this.playstate = new PlayState()
 
         window.keyframesPressed = (elem) => {
@@ -89,12 +92,32 @@ export class AnimationHandler {
 
     animate(deltaTime) {
         this.playstate.onFrame(deltaTime)
-
-        this.sortedTimes.forEach(kf => kf.animate(this.playstate.ticks))
+        
+        if(this.looping) {
+            let ticks = this.playstate.ticks % this.totalTime
+            for(let i = this.sortedTimes.length - 1; i >= 0; i--) {
+                if(i == 0) {
+                    if(this.playstate.ticks < this.totalTime) {
+                        this.sortedTimes[i].animate(ticks)
+                    } else {
+                        this.loopKeyframe.animate(ticks)
+                    }
+                } else {
+                    this.sortedTimes[i].animate(ticks)
+                }
+            }
+        } else {
+            this.sortedTimes.forEach(kf => kf.animate(this.playstate.ticks))
+        }
     }
+    
     keyframesDirty() {
         this.keyframes.forEach(kf => kf.setup = false)
         this.sortedTimes = new Array(...this.keyframes).sort((a, b) => a.startTime - b.startTime);
+
+        let lastKF = this.sortedTimes[this.sortedTimes.length - 1]
+        this.totalTime = lastKF.startTime + lastKF.duration
+
         let setupKeyframes = []
 
         this.tbl.resetAnimations()
@@ -104,7 +127,33 @@ export class AnimationHandler {
             kf.doSetup();
             setupKeyframes.push(kf);
         }
+
+        this.setupLoopedKeyframe()
+
         this.tbl.resetAnimations()
+
+    }
+
+    setupLoopedKeyframe() {
+        let copyFrame = this.sortedTimes[0]
+
+        this.loopKeyframe = new KeyFrame(this)
+        this.loopKeyframe.startTime = copyFrame.startTime
+        this.loopKeyframe.duration = copyFrame.duration
+        
+        this.tbl.resetAnimations()
+
+        copyFrame.animate(copyFrame.startTime + copyFrame.duration, true)
+
+        for(let [cubename, entry] of this.animationMap.entries()) {
+            this.loopKeyframe.rotationMap.set(cubename, [entry.rotation.x, entry.rotation.y, entry.rotation.z].map(r => r * 180/Math.PI))
+            this.loopKeyframe.rotationPointMap.set(cubename, entry.position.toArray())
+        }
+
+        for(let kf of this.sortedTimes) {
+            kf.animate(this.totalTime, true)
+        }
+        this.loopKeyframe.doSetup()
     }
 
     createKeyframe() {
@@ -167,15 +216,21 @@ class KeyFrame {
         for(let key of this.handler.animationMap.keys()) {
             let cube = this.handler.animationMap.get(key);
 
+            let irot
             if(this.rotationMap.has(key)) {
-                let irot = this.interpolate(this.fromRotationMap.get(key), this.rotationMap.get(key))
-                cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
+                irot = this.interpolate(this.fromRotationMap.get(key), this.rotationMap.get(key))
+            } else {
+                irot = this.fromRotationMap.get(key)
             }
+            cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
 
+            let ipos
             if(this.rotationPointMap.has(key)) {
-                let ipos = this.interpolate(this.fromRotationPointMap.get(key), this.rotationPointMap.get(key))
-                cube.position.set(ipos[0], ipos[1], ipos[2])
+                ipos = this.interpolate(this.fromRotationPointMap.get(key), this.rotationPointMap.get(key))
+            } else {
+                ipos = this.fromRotationPointMap.get(key)
             }
+            cube.position.set(ipos[0], ipos[1], ipos[2])
         }
     }
 
