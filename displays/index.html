@@ -4,6 +4,7 @@
     <meta charset=utf-8>
     <title>Dumbcode</title>
     <link href="../css/tooltips.css" rel="stylesheet" />
+    <link href="../css/collapsible.css" rel="stylesheet" />
     <link href="../css/cool-checkboxes.css" rel="stylesheet"/>
     <link href="css/editor.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
@@ -65,8 +66,7 @@
                 </div>
             </div>
             <div class="navbar-end">
-                <div class="navbar-item" style="text-transform: none">
-                    v0.3.9
+                <div class="navbar-item" style="text-transform: none" id="dumbcode-studio-version">
                 </div>
             </div>
         </div>
@@ -185,6 +185,82 @@
                                                     Download as GIF
                                                 </a>
                                             </div>
+                                            <div class="column buttons has-addons">
+                                                <a class="button is-dark is-small modal-button" data-target="modal-java-method" aria-haspopup="true" style="text-transform: none; border-color: #dbdbdb" onclick="generateJavaMethod()">
+                                                    As Java Method
+                                                </a>
+                                                <div class="modal" id="modal-java-method" style="text-transform: none">
+                                                    <div class="modal-background"></div>
+                                                    <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+                                                        <h3 class="title is-3" style="color: whitesmoke">Export as Java Method</h3>
+                                                        <div style="padding-bottom: 20px">
+                                                            <button class="modal-close" aria-label="close" style="position: absolute"></button>
+                                                        </div>
+                                                        <div class="settings-entry">
+                                                            <div class="dropdown is-active">
+                                                                Choose Mappings:
+                                                                <div class="dropdown-trigger">
+                                                                    <button class="button" aria-haspopup="true" aria-controls="dropdown-menu-mappings">
+                                                                        <span>Select Mapping</span>
+                                                                        <span class="icon is-small">
+                                                                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                                                        </span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="dropdown-menu" id="dropdown-menu-mappings" role="menu">
+                                                                    <div class="dropdown-content">
+                                                                        <a class="dropdown-item is-active" mapping="mcp112" onclick="setMappings(this)">
+                                                                            MCP 1.12
+                                                                        </a>
+                                                                        <a class="dropdown-item" mapping="mcp113" onclick="setMappings(this)">
+                                                                            MCP 1.13/1.14
+                                                                        </a>
+                                                                        <a class="dropdown-item" mapping="yarn" onclick="setMappings(this)">
+                                                                            Yarn
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                Animation Name: <input id="java-method-name" class="input" type="text" value="myAnimation" placeholder="Animation Name" oninput="generateJavaMethod()">
+                                                            </div>
+                                                        </div>
+                                                        <div class="settings-entry">
+                                                            <div class="wrap-collabsible">
+                                                                <input id="collapsible-code-model-class" class="toggle" type="checkbox">
+                                                                <label for="collapsible-code-model-class" class="lbl-toggle">Ensure that your model class extends this class. (You can change what model this extends)</label>
+                                                                <div class="collapsible-content">
+                                                                    <div class="java-method-code" id="java-method-code-animated-model">
+Generating...
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="settings-entry">
+                                                            <div class="wrap-collabsible">
+                                                                <input id="collapsible-code-entry-class" class="toggle" type="checkbox">
+                                                                <label for="collapsible-code-entry-class" class="lbl-toggle">Also make sure that this class exists (in the same package as AnimatedModel)</label>
+                                                                <div class="collapsible-content">
+                                                                    <div class="java-method-code" id="java-method-code-animated-entity-entry">
+Generating...
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="settings-entry">
+                                                            <div class="wrap-collabsible">
+                                                                <input id="collapsible-code-generated-method" class="toggle" type="checkbox">
+                                                                <label for="collapsible-code-generated-method" class="lbl-toggle">Also make sure that this class exists (in the same package as AnimatedModel)</label>
+                                                                <div class="collapsible-content">
+                                                                    <div class="java-method-code" id="java-method-code-result">
+Generating...
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>  
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -214,10 +290,19 @@
                                     <div class="field">
                                         <div class="settings-entry-field">
                                             <h5 class="title is-5" style="color: whitesmoke">Animation Settings</h5>
-                                            <label>Use Inertia:</label>
-                                            <div class="b-checkbox is-inline">
-                                                <input id="checkbox-inertia" class="styled" type="checkbox" onclick="setInertia(this)">
-                                                <label for="checkbox-inertia"></label>
+                                            <div>
+                                                <label>Use Inertia:</label>
+                                                <div class="b-checkbox is-inline">
+                                                    <input id="checkbox-inertia" class="styled" type="checkbox" onclick="setInertia(this)">
+                                                    <label for="checkbox-inertia"></label>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label>Loop:</label>
+                                                <div class="b-checkbox is-inline">
+                                                    <input id="checkbox-looped" class="styled" type="checkbox" onclick="setLooped(this)">
+                                                    <label for="checkbox-looped"></label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

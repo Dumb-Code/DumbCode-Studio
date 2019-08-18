@@ -5,6 +5,15 @@ import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
 import { KeyframeManger } from './keyframe_manager.js'
 import { HistoryList } from "./history.js";
+import { JavaMethodExporter } from "./java_method_exporter.js";
+
+
+const major = 0
+const minor = 3
+const patch = 9
+
+const version = `${major}.${minor}.${patch}`
+document.getElementById("dumbcode-studio-version").innerText = `v${version}`
 
 const container = document.getElementById("editor-container")
 const panel = document.getElementById("editor");
@@ -42,6 +51,7 @@ let clickY; //Used to track what part of the border has been clicked
 let panelHeight
 
 let manager = new KeyframeManger(document.getElementById("keyframe-board"))
+let methodExporter = new JavaMethodExporter()
 
 window.daeHistory = new HistoryList()
 
@@ -83,7 +93,7 @@ function init() {
 
     //Set up the camera
     let camera = new PerspectiveCamera( 65, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 700 )
-    camera.position.set(-3.745472848477101, 0.9616311452213426, -4.53288230701089)
+    camera.position.set(-3.745472848477101, 2.4616311452213426, -4.53288230701089)
     camera.lookAt(0, 0, 0)
 
     display.setup(canvasContainer, renderer, camera, createScene())
@@ -94,7 +104,17 @@ function init() {
     controls.addEventListener('change', () => runFrame())
 
     transformControls = new TransformControls(camera, renderer.domElement)
-    transformControls.addEventListener('change', () => runFrame() );
+    transformControls.addEventListener('objectChange', () => {
+        let pos = selected.parent.position
+        let rot = selected.parent.rotation
+
+        let rotations = [rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI)
+        let positions = [pos.x, pos.y, pos.z]
+
+        setPosition(positions, false, false)
+        setRotation(rotations, false, false)
+        runFrame()
+    } );
     transformControls.addEventListener('dragging-changed', e => {
         controls.enabled = !e.value;
     });
@@ -149,7 +169,7 @@ function runFrame() {
     
     display.display(() => manager.setupSelectedPose())
     
-    if(selected) {
+    if(selected && display.animationHandler.playstate.playing) {
         let pos = selected.parent.position
         let rot = selected.parent.rotation
         setPosition([pos.x, pos.y, pos.z], true)
@@ -275,6 +295,7 @@ function setPosition(values, displaysonly = false, history = true) {
 }
 
 function setRotation(values, displaysonly = false, history = true) {
+
     [...document.getElementsByClassName("input-rotation")].forEach(elem => {
         elem.value = values[elem.getAttribute("axis")]
     });
@@ -283,13 +304,12 @@ function setRotation(values, displaysonly = false, history = true) {
         elem.value = ((values[elem.getAttribute("axis")] + 180) % 360) - 180
     });
 
-
-    if((!displaysonly) && selected) {
+    if(!displaysonly && selected) {
         if(history) {
             let rot = selected.parent.rotation
             let arr = [rot.x, rot.y, rot.z].map(v => v * 180 / Math.PI)
             daeHistory.addAction(() => setRotation(arr, false, false), () => setRotation(values, false, false))
-        } 
+        }
 
         selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
 
@@ -302,7 +322,7 @@ function setRotation(values, displaysonly = false, history = true) {
 
 export async function createGif(fps, progressCallback = undefined) {
     return new Promise((resolve, reject) => {
-        if(!display.animationHandler.currentIncrement) {
+        if(display.animationHandler.sortedTimes.length == 0) {
             reject("No Animation Playing")
             return
         }
@@ -334,25 +354,33 @@ export async function createGif(fps, progressCallback = undefined) {
         let dummyCamera = display.camera.clone()
         updateCamera(dummyCamera, width, height)
 
-        display.animationHandler.reset()
+        display.tbl.resetAnimations()
         
-        let started = false
         let delay = 1 / fps
+
+        let start = 0
+        let end = display.animationHandler.totalTime
+
+        if(display.animationHandler.looping) {
+            let kf = display.animationHandler.loopKeyframe
+            start += kf.startTime + kf.duration
+            end += kf.startTime + kf.duration
+        }
+
+        let ticks = manager.playstate.ticks
     
+        manager.playstate.ticks = start
+        manager.playstate.playing = true
+
         setTimeout(() => {
-            while(true) {
-                if(display.animationHandler.poseIndex == 1) {
-                    started = true
-                }
-                if(display.animationHandler.poseIndex == 0 && started) {
-                    break
-                }
+            while(manager.playstate.ticks < end) {
                 display.animationHandler.animate(delay)
-        
                 dummyRenderer.render( dummyScene, dummyCamera )
                 gif.addFrame(dummyRenderer.domElement, {copy: true, delay: delay * 1000})
             }
 
+            manager.playstate.playing = false
+            manager.playstate.ticks = ticks
             display.scene.add(display.tbl.modelCache)
             
             gif.on("finished", resolve);
@@ -361,6 +389,7 @@ export async function createGif(fps, progressCallback = undefined) {
             }
             gif.render();
         }, 0)
+        
 
     })
 }
@@ -637,6 +666,7 @@ window.addKeyframe = () => {
 }
 
 window.setStartTime = value => {
+    value = Number(value)
     if(manager.selectedKeyFrame) {
         manager.selectedKeyFrame.startTime = value
         display.animationHandler.keyframesDirty()
@@ -645,6 +675,7 @@ window.setStartTime = value => {
 }
 
 window.setDuration = value => {
+    value = Number(value)
     if(manager.selectedKeyFrame) {
         let diff = value - manager.selectedKeyFrame.duration
         manager.selectedKeyFrame.duration = value
@@ -766,6 +797,7 @@ window.onAnimationFileChange = async(files) => {
     manager.reframeKeyframes()
 }
 window.setInertia = elem => display.animationHandler.inertia = elem.checked
+window.setLooped = elem => display.animationHandler.looping = elem.checked
 window.setGrid = elem => display.gridGroup.visible = elem.checked
 window.addValue = elem => {
     if(selected) {
@@ -789,6 +821,120 @@ window.subtractValue = elem => {
     }
 }
 
+window.setMappings = elem => {    
+    elem.parentNode.querySelector(".is-active").classList.toggle("is-active", false)
+    elem.classList.toggle("is-active", true)
+    methodExporter.mappings = elem.getAttribute("mapping")
+    window.generateJavaMethod()
+}
+
+window.generateJavaMethod = async() => {
+
+    let animatedModel = document.getElementById("java-method-code-animated-model")
+    animatedModel.innerText = await methodExporter.getText(`method_export/animated_model.txt`)
+
+    let animatedEntityEntry = document.getElementById("java-method-code-animated-entity-entry")
+    animatedEntityEntry.innerText = await methodExporter.getText(`method_export/animated_entity_entry.txt`)
+
+
+    let elem = document.getElementById("java-method-code-result")
+    let animationName = document.getElementById("java-method-name").value
+    
+    let times = display.animationHandler.sortedTimes
+    let arrEqual = (arr1, arr2) => arr1[0] == arr2[0] && arr1[1] == arr2[1] && arr1[2] == arr2[2]
+    
+    let decimalCutoff = Math.pow(10, 3) //the 3 represents 3 decimal places
+    let getNum = num => Math.round(num * decimalCutoff) / decimalCutoff
+
+    let createSnapshot = () => {
+        let snapshot = []
+        display.tbl.cubeMap.forEach((value, name) => {
+            let rot = value.cubeGroup.rotation
+            let pos = value.cubeGroup.position
+
+            snapshot.push( { name, rotation:[rot.x, rot.y, rot.z], position:[pos.x, pos.y, pos.z] } )
+        })
+        return snapshot
+    }
+
+    display.tbl.resetAnimations()
+    let eventMap = new Map() //<float, cubereference[]>
+
+    times.forEach(eventKf => {
+        times.forEach(kf => kf.animate(eventKf.startTime, true))
+        eventMap.set(eventKf.startTime, createSnapshot())
+
+        times.forEach(kf => kf.animate(eventKf.startTime + eventKf.duration, true))
+        eventMap.set(eventKf.startTime + eventKf.duration, createSnapshot())
+    });
+
+    let sorted = [...eventMap.keys()].sort((a, b) => a - b)
+    let totalResult = display.animationHandler.totalTime
+
+    let result = `
+/**
+ * Play the animation {@code ${animationName}}, which is ${totalResult} ticks long
+ * @param entry The entry to run the animation on
+ * @param ticksDone the amount of ticks that this animation has been running for. This doesn't have to start at 0
+ * This method is generated from DumbCode Animation Studio v${version}
+ */
+private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(AnimatedEntityEntry entry, float ticksDone) {
+    ticksDone *= ${manager.playstate.speed}; //Speed of the animation\n`
+    if(display.animationHandler.looping) {
+        result += `    ticksDone %= ${totalResult};  //Loop the animation\n`
+    }
+
+    result += `\n    int snapshotID;\n`
+
+    for(let i = 0; i < sorted.length - 2; i++) {
+        result += `    `
+        if(i != 0) {
+            result += `else `
+        }
+        result += `if(ticksDone < ${sorted[i + 1]}) snapshotID = ${i};\n`
+    }
+    result += `    else snapshotID = ${sorted.length - 2};
+    entry.ensureSnapshot("${animationName}", snapshotID);
+    `
+
+    let previousSnapshot = false
+    for(let i = 0; i < sorted.length - 1; i++) {
+        let start = sorted[i]
+        let end = sorted[i + 1]
+
+        result += 
+`
+    if (ticksDone > ${start}) {
+        float percentage = (ticksDone - ${start}F) / ${end - start}F;
+        if(percentage > 1F) percentage = 1F;\n`
+
+        let snapshot = eventMap.get(end)
+
+        let captured = new Map()
+        snapshot.forEach(ss => {
+            captured.set(ss.name, {rotation:ss.rotation, position:ss.position})
+            let skip = false
+            if(previousSnapshot) {
+                let ps = previousSnapshot.get(ss.name)
+                if(arrEqual(ps.rotation, ss.rotation) && arrEqual(ps.position, ss.position)) {
+                    skip = true
+                }
+            }
+            if(!skip) {
+                result += `        entry.setTransforms(this.${ss.name}, ${getNum(ss.position[0])}F, ${getNum(ss.position[1])}F, ${getNum(ss.position[2])}F, ${getNum(ss.rotation[0])}F, ${getNum(ss.rotation[1])}F, ${getNum(ss.rotation[2])}F, percentage);\n`
+            }
+        })
+        result += "    }"
+        previousSnapshot = captured   
+    }
+
+    result += 
+    `\n
+}`
+    elem.innerText = result
+
+}
+
 window.addEventListener( 'resize', onWindowResize, false );
 window.addEventListener( 'resize', () => setHeights(panelHeight), false );
 document.addEventListener( 'mousemove', onMouseMove, false );
@@ -808,8 +954,6 @@ document.addEventListener("mouseup", () => {
     document.removeEventListener("mousemove", resize, false)
     document.body.className = undefined
 }, false);
-
-document.addEventListener('DOMContentLoaded', init, false);
 
 function onWindowResize() {
     let width = canvasContainer.clientWidth;
@@ -933,3 +1077,5 @@ class ByteBuffer {
         return new TextDecoder().decode(this.buffer.slice(this.offset - length, this.offset))
     }
 }
+
+init()
