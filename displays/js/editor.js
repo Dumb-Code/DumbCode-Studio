@@ -879,9 +879,12 @@ window.generateJavaMethod = async() => {
  * This method is generated from DumbCode Animation Studio v${version}
  */
 private void playAnimation${animationName.charAt(0).toUpperCase() + animationName.slice(1)}(AnimatedEntityEntry entry, float ticksDone) {
-    ticksDone %= ${totalResult};  //Comment this for the animation NOT to loop
+    ticksDone *= ${manager.playstate.speed}; //Speed of the animation\n`
+    if(display.animationHandler.looping) {
+        result += `    ticksDone %= ${totalResult};  //Loop the animation\n`
+    }
 
-    int snapshotID;\n`
+    result += `\n    int snapshotID;\n`
 
     for(let i = 0; i < sorted.length - 2; i++) {
         result += `    `
