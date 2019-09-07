@@ -10,7 +10,7 @@ import { JavaMethodExporter } from "./java_method_exporter.js";
 
 const major = 0
 const minor = 3
-const patch = 9
+const patch = 10
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -75,12 +75,27 @@ document.onkeydown = e => {
     }
 }
 
-container.addEventListener("mousedown", () => escapeCallback = () => {
+const keyframeCallback = () => {
     if(manager.selectedKeyFrame) {
         manager.selectedKeyFrame.selectChange(false)
     }
+}
+const dinosaurCallback = () => setAsSelected(undefined)
+
+container.addEventListener("mousedown", () => escapeCallback = () => {
+    if(manager.selectedKeyFrame) {
+        keyframeCallback()
+    } else {
+        dinosaurCallback()
+    }
 })
-canvasContainer.addEventListener("mousedown", () => escapeCallback = () => setAsSelected(undefined))
+canvasContainer.addEventListener("mousedown", () => escapeCallback = () => {
+    if(selected) {
+        dinosaurCallback()
+    } else {
+        keyframeCallback()
+    }
+})
 
 function init() {
     manager.display = display;
@@ -525,7 +540,12 @@ window.downloadGif = async(elem) => {
         let a = document.createElement("a");
         a.href = url;
         a.download = "dinosaur.gif" //todo: name from model?
+        document.body.appendChild(a);
         a.click() 
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url); 
+        }, 100)
     }
 
     elem.parentNode.classList.toggle("tooltip", false)
