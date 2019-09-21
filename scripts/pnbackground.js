@@ -63,7 +63,7 @@ function setImage() {
                 element.style.background = "url('images/pn/dilom.png')";
             }
             break;
-        case 1:
+        case 2:
             //The velociraptor image isnt great for all devices so above this width we swap it with an edited version
             if (document.documentElement.clientWidth > 960) {
                 element.style.background = "url('images/pn/velo.png')";
