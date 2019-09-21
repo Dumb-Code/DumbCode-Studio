@@ -1,5 +1,5 @@
 var currentSlide = 0;
-const maxSlides = 2;
+const maxSlides = 3;
 var timer = setInterval(updateCarousels, 4000);
 const element = document.getElementById("projectnublar")
 
@@ -61,6 +61,14 @@ function setImage() {
                 element.style.background = "url('images/pn/dilo.png')";
             } else {
                 element.style.background = "url('images/pn/dilom.png')";
+            }
+            break;
+        case 1:
+            //The velociraptor image isnt great for all devices so above this width we swap it with an edited version
+            if (document.documentElement.clientWidth > 960) {
+                element.style.background = "url('images/pn/velo.png')";
+            } else {
+                element.style.background = "url('images/pn/velom.png')";
             }
             break;
     }
