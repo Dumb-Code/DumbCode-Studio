@@ -1,6 +1,6 @@
 var currentSlide = 0;
 const maxSlides = 3;
-var timer = setInterval(updateCarousels, 4000);
+var timer = setInterval(updateCarousels, 10000);
 const element = document.getElementById("projectnublar")
 
 function startCarousel() {
