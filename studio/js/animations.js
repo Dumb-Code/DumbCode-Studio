@@ -67,13 +67,8 @@ export class AnimationHandler {
                 keyframe.duration = baseTime
 
                 pose.cubeMap.forEach(poseCube => {
-                    let mainCube = this.tbl.cubeMap.get(poseCube.name)
-                    if(!this.arrEqual(poseCube.rotationPoint, mainCube.rotationPoint)) {
-                        keyframe.rotationPointMap.set(poseCube.name, poseCube.rotationPoint)
-                    }
-                    if(!this.arrEqual(poseCube.rotation, mainCube.rotation)) {
-                        keyframe.rotationMap.set(poseCube.name, poseCube.rotation)
-                    }
+                    keyframe.rotationPointMap.set(poseCube.name, poseCube.rotationPoint)
+                    keyframe.rotationMap.set(poseCube.name, poseCube.rotation)
                 })
 
                 startTime += baseTime; //todo: time overrides ???
@@ -84,10 +79,6 @@ export class AnimationHandler {
             this.keyframesDirty()
             return ""
         })()
-    }
-
-    arrEqual(arr1, arr2) {
-        return arr1[0] == arr2[0] && arr1[1] == arr2[1] && arr1[2] == arr2[2]
     }
 
     animate(deltaTime) {

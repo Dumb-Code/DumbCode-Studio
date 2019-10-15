@@ -10,7 +10,7 @@ import { JavaMethodExporter } from "./java_method_exporter.js";
 
 const major = 0
 const minor = 3
-const patch = 10
+const patch = 11
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
