@@ -10,7 +10,7 @@ import { JavaMethodExporter } from "./java_method_exporter.js";
 
 const major = 0
 const minor = 3
-const patch = 11
+const patch = 12
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -336,6 +336,7 @@ function setRotation(values, displaysonly = false, history = true) {
 }
 
 export async function createGif(fps, progressCallback = undefined) {
+    let color = parseInt(document.getElementById("gif_transparent_texture").value.substring(1), 16)
     return new Promise((resolve, reject) => {
         if(display.animationHandler.sortedTimes.length == 0) {
             reject("No Animation Playing")
@@ -351,18 +352,18 @@ export async function createGif(fps, progressCallback = undefined) {
             width: width,
             height: height,
             workerScript: "./js/gif.worker.js",
-            transparent: 0x000000
+            transparent: color
         });
     
         let dummyRenderer = new WebGLRenderer({
             alpha:true
         });
     
-        dummyRenderer.setClearColor(0x000000, 0);
+        dummyRenderer.setClearColor(color, 0);
         dummyRenderer.setSize( width, height );
     
         let dummyScene = createScene()
-        dummyScene.background = null
+        dummyScene.background = new Color(color)
         dummyScene.add(display.tbl.modelCache)
     
 
