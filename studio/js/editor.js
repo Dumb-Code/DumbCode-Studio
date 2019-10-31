@@ -10,7 +10,7 @@ import { JavaMethodExporter } from "./java_method_exporter.js";
 
 const major = 0
 const minor = 3
-const patch = 12
+const patch = 13
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -769,10 +769,13 @@ window.setupMainModel = async(file, nameElement) => {
         console.error(`Error from file ${file.name}: ${err.message}`)
     }
 
-    if(texture.texture) {
-        display.setMainModel(material, texture, mainModel.model)
-        display.animationHandler.playstate = manager.playstate
+    if(!texture.texture) {
+        texture = new DinosaurTexture()
+        texture.setup()
     }
+
+    display.setMainModel(material, texture, mainModel.model)
+    display.animationHandler.playstate = manager.playstate
 }
 window.setupTexture = async(file, nameElement) => {
     let imgtag = document.createElement("img")
@@ -793,6 +796,10 @@ window.setupTexture = async(file, nameElement) => {
         material.map = tex
         selectedMaterial.map = tex
         highlightMaterial.map = tex
+
+        material.needsUpdate = true
+        selectedMaterial.needsUpdate = true
+        highlightMaterial.needsUpdate = true
 
         texture.texture = tex
 

@@ -99,13 +99,14 @@ export class DinosaurDisplay {
         if(dx * dy <= 0) {
             return false
         }
+
         //Move the getImageData to the DinosaurTexture class?
         let data = texture.pixels.getImageData(
-            x / this.tbl.texWidth * texture.width, 
-            y / this.tbl.texHeight * texture.height, 
+            Math.floor(x / this.tbl.texWidth * texture.width), 
+            Math.floor(y / this.tbl.texHeight * texture.height), 
             
-            dx / this.tbl.texWidth * texture.width, 
-            dy / this.tbl.texHeight * texture.height
+            Math.max(dx / this.tbl.texWidth * texture.width, 1), 
+            Math.max(dy / this.tbl.texHeight * texture.height, 1)
         ).data
         for(let index = 0; index < data.length; index+=4) {
             if(data[index+3] != 0) { //Maybe add a threshold
@@ -119,14 +120,22 @@ export class DinosaurDisplay {
 export class DinosaurTexture {
     setup() {
         let canvas = document.createElement('canvas');
-        this.width = this.texture.image.naturalWidth;
-        this.height = this.texture.image.naturalHeight;
-
-        canvas.width = this.width
-        canvas.height = this.height
-
         this.pixels = canvas.getContext('2d')
-        this.pixels.drawImage(this.texture.image, 0, 0, this.width, this.height);
+
+        if(this.texture === undefined) {
+            this.width = this.height = canvas.width = canvas.height = 1
+            this.width = this.height = canvas.width = canvas.height = 1
+            this.pixels.fillStyle = "rgba(1,1,1,1)"
+            this.pixels.fillRect(0, 0, 1, 1)
+        } else {
+            this.width = this.texture.image.naturalWidth;
+            this.height = this.texture.image.naturalHeight;
+    
+            canvas.width = this.width
+            canvas.height = this.height
+    
+            this.pixels.drawImage(this.texture.image, 0, 0, this.width, this.height);
+        }
     }
 }
 
