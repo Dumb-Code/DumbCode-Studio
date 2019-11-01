@@ -18,10 +18,6 @@ export class TBLModel {
     }
 
     createModel( material, allCubes, animationMap ) {
-        if(this.modelCache) {
-            return this.modelCache
-        }
-
         let mainCubeGroup = this.rootGroup.createGroup(material, allCubes, animationMap)
 
         this.modelCache = new Group();
