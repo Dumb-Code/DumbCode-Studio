@@ -44,6 +44,7 @@ export class AnimationHandler {
             return
         }
 
+        this.keyframes = []
 
         return (async() => {
         
