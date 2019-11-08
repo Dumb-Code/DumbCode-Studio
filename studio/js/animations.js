@@ -46,40 +46,42 @@ export class AnimationHandler {
 
         this.keyframes = []
 
-        return (async() => {
+        let promiseFiles = [...tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))]
+        if(infoFile) {
+            promiseFiles.push(readFile(infoFile))
+        }
+
+        let result = await Promise.all(promiseFiles)
+
+        let info = infoFile ? JSON.parse(result.pop()) : { base_time: 5 }
+        this.loadFromAnimationFiles(result, info)
+    }
+
+    async loadFromAnimationFiles(files, meta = { base_time: 5 }) {
+        let baseTime = meta.base_time
+
+        if(files.length > 0 && files[0].fileName !== undefined) {
+            files.sort((a, b) => a.fileName.localeCompare(b.fileName))
+        }
         
-            let promiseFiles = [...tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))]
-            if(infoFile) {
-                promiseFiles.push(readFile(infoFile))
-            }
+        let startTime = 0;
+        for(let pose of files) {
+            let keyframe = new KeyFrame(this)
 
-            let result = await Promise.all(promiseFiles)
+            keyframe.startTime = startTime
+            keyframe.duration = baseTime
 
-            let info = infoFile ? JSON.parse(result.pop()) : {base_time: 5}
-            let baseTime = info.base_time
+            pose.cubeMap.forEach(poseCube => {
+                keyframe.rotationPointMap.set(poseCube.name, poseCube.rotationPoint)
+                keyframe.rotationMap.set(poseCube.name, poseCube.rotation)
+            })
 
-            result.sort((a, b) => a.fileName.localeCompare(b.fileName))
-            
-            let startTime = 0;
-            for(let pose of result) {
-                let keyframe = new KeyFrame(this)
+            startTime += baseTime; //todo: time overrides ???
 
-                keyframe.startTime = startTime
-                keyframe.duration = baseTime
+            this.keyframes.push(keyframe)
 
-                pose.cubeMap.forEach(poseCube => {
-                    keyframe.rotationPointMap.set(poseCube.name, poseCube.rotationPoint)
-                    keyframe.rotationMap.set(poseCube.name, poseCube.rotation)
-                })
-
-                startTime += baseTime; //todo: time overrides ???
-
-                this.keyframes.push(keyframe)
-
-            }
-            this.keyframesDirty()
-            return ""
-        })()
+        }
+        this.keyframesDirty()
     }
 
     animate(deltaTime) {
