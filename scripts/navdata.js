@@ -8,8 +8,8 @@ const data = {
     ],
 
     Animation: [
-        { link: "../studio/", text: "ANIMATION STUDIO" },
-        { link: "../studio/viewer.html", text: "ANIMATION VIEWER" },
+        { link: "../animation/studio.html", text: "ANIMATION STUDIO" },
+        { link: "../animation/viewer.html", text: "ANIMATION VIEWER" },
     ],
 
     AboutUs: { type:"single", link: "../team.html", text: "ABOUT US" }
