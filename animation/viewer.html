@@ -97,8 +97,8 @@
                 <input type="checkbox" onchange="setTexture(this.checked)">
                 <span class="slider round"></span>
             </label>
-            <span style="vertical-align: 50%;" class="tooltip" data-tooltip="Playback Speed">
-                <input class="input-rotation-slider is-active" style="min-width: 25%;" type="range" step="0.05" min="0" max="3" value="1" oninput="setSpeed(this.value)">
+            <span style="vertical-align: 50%;" class="tooltip" data-tooltip="Playback Speed: 1">
+                <input class="input-rotation-slider is-active" style="min-width: 25%;" type="range" step="0.05" min="0" max="3" value="1" oninput="setSpeed(this)">
             </span >
             <br>
             <input class="input-rotation-slider is-active" id="tick-bar" type="range" step="0.001" min="0" max="1" value="0" oninput="setCurrentTicks(this.value)">

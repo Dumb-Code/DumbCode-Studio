@@ -291,12 +291,14 @@ window.setCurrentTicks = value => {
     playstate.ticks = display.animationHandler.totalTime * value
 }
 
-window.setSpeed = value => {
-    playstate.speed = value
+window.setSpeed = elem => {
+    playstate.speed = elem.value
+    elem.parentElement.setAttribute("data-tooltip", `Playback Speed: ${elem.value}`)    
 }
 
 function progressUpdate(data) {
     let div = document.createElement("div")
+
     div.classList.add("content")
     div.innerText = data
 
