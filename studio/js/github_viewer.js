@@ -88,7 +88,11 @@ async function loadDinosaur(dinoName) {
 }
 
 async function request(url) {
-    let response = await fetch(url);
+    let response = await fetch(url, {
+        headers: {
+            Authorization: "token 06e32c2922f7f350fb4d64bb35462754d7863e44" //Access token that does absolutly nothing
+        }
+    });
     let data = await response.json();
     return data;
 }
