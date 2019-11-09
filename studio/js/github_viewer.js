@@ -98,7 +98,7 @@ window.setupDinosaur = async dino => {
 
 
     // let fetchedModelResponse = 
-    let model = await TBLModel.loadModel((await fetch(modelDownloadFolder)).blob())
+    let model = await TBLModel.loadModel(await fetch(modelDownloadFolder).then(f => f.blob()))
 
     let tex = await loadTexture(`data:image/png;base64,${loaded.textureFile.content}`)
 
@@ -130,13 +130,19 @@ window.setupDinosaur = async dino => {
         name2Animation.set(folder.name, async() => {
             let files = await folder.data
             let meta = files.find(d => d.name == "animation.json")
-            console.log(meta)
             if(meta !== undefined) {
-                meta = JSON.parse(await (await fetch(meta.download_url)).text())
+                meta = JSON.parse(await fetch(meta.download_url).then(a => a.text()))
             }
-            console.log(meta)
-            let models = await Promise.all((await Promise.all(files.filter(d => d.name.endsWith(".tbl")).map(d => fetch(d.download_url)))).map(d => TBLModel.loadModel(d.blob())))
-        
+            
+            let models = await Promise.all(
+                files.filter(d => d.name.endsWith(".tbl"))
+                .map(d => fetch(d.download_url))
+            ).then(arr => 
+                Promise.all(
+                    arr.map(d => TBLModel.loadModel(d.blob()))
+                )
+            )
+
             display.animationHandler.loadFromAnimationFiles(models, meta)
             
             let play = display.animationHandler.playstate
