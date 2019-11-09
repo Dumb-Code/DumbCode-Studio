@@ -44,8 +44,6 @@ export class AnimationHandler {
             return
         }
 
-        this.keyframes = []
-
         let promiseFiles = [...tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))]
         if(infoFile) {
             promiseFiles.push(readFile(infoFile))
@@ -58,6 +56,8 @@ export class AnimationHandler {
     }
 
     async loadFromAnimationFiles(files, meta = { base_time: 5 }) {
+        this.keyframes = []
+
         let baseTime = meta.base_time
 
         if(files.length > 0 && files[0].fileName !== undefined) {
