@@ -71,6 +71,9 @@ function runFrame() {
     display.display()
 
     if(display.animationHandler) {
+        if(!display.animationHandler.looping && playstate.ticks >= display.animationHandler.totalTime) {
+            togglePlaying(true)
+        }
         let percValue = playstate.ticks / display.animationHandler.totalTime
         if(display.animationHandler.looping) {
             percValue %= 1
