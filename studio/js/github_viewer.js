@@ -17,7 +17,9 @@ const modalNode = document.getElementById("modal-progressbar")
 const modelDataNode = document.getElementById("modal-prograssbar-data")
 const tickBarNode = document.getElementById("tick-bar")
 
-let camera
+let camera, material, texture, maletex, femaletex
+
+let female = false
 
 let playstate = new PlayState()
 
@@ -80,7 +82,8 @@ function runFrame() {
 async function loadDinosaur(dinoName) {
     return {
         modelFolder: await request(`https://api.github.com/repos/${ext}/contents/src/main/resources/assets/projectnublar/models/entities/${dinoName}/adult`),
-        textureFile: await request(`https://api.github.com/repos/${ext}/contents/src/main/resources/assets/projectnublar/textures/entities/${dinoName}/male_adult.png`)
+        maleTextureFile: await request(`https://api.github.com/repos/${ext}/contents/src/main/resources/assets/projectnublar/textures/entities/${dinoName}/male_adult.png`),
+        femaleTextureFile: await request(`https://api.github.com/repos/${ext}/contents/src/main/resources/assets/projectnublar/textures/entities/${dinoName}/female_adult.png`)
     }
 }
 
@@ -126,23 +129,34 @@ window.setupDinosaur = async dino => {
     let model = await TBLModel.loadModel(await fetch(modelDownload).then(f => f.blob()))
     div.innerHTML += ` - Finished`
 
-    div = progressUpdate(`Started parseing of texture: ${loaded.textureFile.name}`)
-    let tex = await loadTexture(`data:image/png;base64,${loaded.textureFile.content}`)
+    div = progressUpdate(`Started parsing of male texture: ${loaded.maleTextureFile.name}`)
+    maletex = await loadTexture(`data:image/png;base64,${loaded.maleTextureFile.content}`)
     div.innerHTML += ` - Finished`
 
-    tex.flipY = false
-    tex.magFilter = NearestFilter;
-    tex.minFilter = LinearMipMapLinearFilter;
-    tex.needsUpdate = true
+    maletex.flipY = false
+    maletex.magFilter = NearestFilter;
+    maletex.minFilter = LinearMipMapLinearFilter;
+    maletex.needsUpdate = true
 
-    let material = new MeshLambertMaterial( {
+    div = progressUpdate(`Started parsing of female texture: ${loaded.femaleTextureFile.name}`)
+    femaletex = await loadTexture(`data:image/png;base64,${loaded.femaleTextureFile.content}`)
+    div.innerHTML += ` - Finished`
+
+    femaletex.flipY = false
+    femaletex.magFilter = NearestFilter;
+    femaletex.minFilter = LinearMipMapLinearFilter;
+    femaletex.needsUpdate = true
+
+    let tex = female ? femaletex : maletex
+
+    material = new MeshLambertMaterial( {
         color: 0xAAAAAA,
         transparent: true,
         side: DoubleSide,
         map: tex
     })
 
-    let texture = new DinosaurTexture()
+    texture = new DinosaurTexture()
     texture.texture = tex
     texture.setup()
 
@@ -245,6 +259,19 @@ window.togglePlaying = isCurrentlyPlaying => {
     }
     playstate.playing = !isCurrentlyPlaying
     
+}
+
+window.setTexture = value => {
+    female = value
+    let newTex = value ? femaletex : maletex
+
+    material.map = newTex
+    material.needsUpdate = true
+
+    texture.texture = newTex
+    texture.setup()
+
+    display.checkAllCulled(texture)
 }
 
 window.setCurrentTicks = value => {

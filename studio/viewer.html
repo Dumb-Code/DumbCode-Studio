@@ -6,7 +6,6 @@
         <link href="../css/tooltips.css" rel="stylesheet" />
         <link href="../css/collapsible.css" rel="stylesheet" />
         <link href="../css/cool-checkboxes.css" rel="stylesheet"/>
-        <link href="css/editor.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
         <script src="../scripts/navigation.js"></script>
@@ -20,6 +19,7 @@
         <script src="https://bulma.io/lib/main.js?v=201907050846"></script>
 
         <link href="./css/displays.css" rel="stylesheet">
+        <link href="../css/switch.css" rel="stylesheet">
 
         <script src="js/jszip.js"></script>
         <script src="js/gif.js"></script>
@@ -66,7 +66,7 @@
         </nav>
     </section>
     <div id="display-div" style="position:absolute; top:0; left:0; height:100%; width:100%;"></div>
-    <div id="control-div" style="position:fixed; bottom:0; height:125px; width:100%; background-color: #262626; text-align: center; padding-top: 50px; color: antiquewhite;">
+    <div id="control-div" style="position:fixed; bottom:0; height:125px; width:100%; background-color: #262626; text-align: center; padding-top: 20px; color: antiquewhite;">    
         <div class="columns">
             <div class="column is-one-quarter">
             Dinosaur: 
@@ -90,13 +90,18 @@
                 </span>
             </a>
             <a class="button is-dark transform-control-tool" onclick="togglePlaying(this.value)">
-                    <span id="ico-when-paused" class="icon is-medium" style="margin: 0px;">
-                        <i class="fas fa-play"></i>
-                    </span>
-                    <span id="ico-when-playing" class="icon is-medium" style="display: none; margin: 0px;">
-                        <i class="fas fa-pause"></i>
-                    </span>
-                </a>
+                <span id="ico-when-paused" class="icon is-medium" style="margin: 0px;">
+                    <i class="fas fa-play"></i>
+                </span>
+                <span id="ico-when-playing" class="icon is-medium" style="display: none; margin: 0px;">
+                    <i class="fas fa-pause"></i>
+                </span>
+            </a>
+            <label class="switch tooltip" data-tooltip="Texture: Male - Female">
+                <input type="checkbox" onchange="setTexture(this.checked)">
+                <span class="slider round"></span>
+            </label>
+            <br>
             <input class="input-rotation-slider is-active" id="tick-bar" type="range" step="0.001" min="0" max="1" value="0" oninput="setCurrentTicks(this.value)">
             </div>
         </div>
