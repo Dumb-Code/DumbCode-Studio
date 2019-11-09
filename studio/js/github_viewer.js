@@ -58,8 +58,8 @@ function init() {
 }
 
 async function setupInitial() {
-    await window.setupDinosaur("tyrannosaurus")
-    await window.playAnimation("attack")
+    await setupDinosaur("tyrannosaurus")
+    playAnimation("attack")
 }
 
 function frame() {
@@ -222,12 +222,13 @@ window.setupDinosaur = async dino => {
         option.innerText = d.name
         animationSelectionNode.appendChild(option)
     }))
+    await folderAnimations[0].then(d => playAnimation(d.name)) //Should resolve instantly 
     div.innerHTML += ` - Finished`
     hideProgressBar()
     return ""
 }
 
-window.playAnimation = async anim => {
+window.playAnimation = anim => {
     let animation = name2Animation.get(anim)
     if(animation !== undefined) {
         animation()
