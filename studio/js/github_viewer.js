@@ -255,6 +255,10 @@ window.togglePlaying = isCurrentlyPlaying => {
     let playing = document.getElementById("ico-when-playing")
     let paused = document.getElementById("ico-when-paused")
 
+    if(display.animationHandler !== undefined && !display.animationHandler.looping && !isCurrentlyPlaying && playstate.ticks >= display.animationHandler.totalTime) {
+        playstate.ticks = 0
+    }
+
     if(isCurrentlyPlaying) {
         playing.style.display = "none"
         paused.style.display = "inherit"
