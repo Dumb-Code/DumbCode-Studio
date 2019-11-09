@@ -101,6 +101,7 @@ export class AnimationHandler {
                 }
             }
         } else {
+            this.playstate.ticks = Math.min(this.playstate.ticks, this.totalTime)
             this.sortedTimes.forEach(kf => kf.animate(this.playstate.ticks))
         }
     }

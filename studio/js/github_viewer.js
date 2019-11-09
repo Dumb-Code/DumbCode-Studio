@@ -2,6 +2,7 @@ import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, Hem
 import { OrbitControls } from './orbit_controls.js'
 import { DinosaurDisplay, DinosaurTexture, readFile } from "./displays.js";
 import { TBLModel } from "./tbl_loader.js";
+import { PlayState } from "./animations.js";
 
 const display = new DinosaurDisplay()
 
@@ -11,7 +12,14 @@ const animationSelectionNode = document.getElementById("animation-select-control
 
 const name2Animation = new Map()
 
+const htmlNode = document.querySelector("html")
+const modalNode = document.getElementById("modal-progressbar")
+const modelDataNode = document.getElementById("modal-prograssbar-data")
+const tickBarNode = document.getElementById("tick-bar")
+
 let camera
+
+let playstate = new PlayState()
 
 function init() {
     //Set up the Scene
@@ -47,6 +55,11 @@ function init() {
     frame()
 }
 
+async function setupInitial() {
+    await window.setupDinosaur("tyrannosaurus")
+    await window.playAnimation("attack")
+}
+
 function frame() {
     requestAnimationFrame(frame)
     runFrame()
@@ -54,6 +67,14 @@ function frame() {
 
 function runFrame() {
     display.display()
+
+    if(display.animationHandler) {
+        let percValue = playstate.ticks / display.animationHandler.totalTime
+        if(display.animationHandler.looping) {
+            percValue %= 1
+        }
+        tickBarNode.value = percValue
+    }
 }
 
 async function loadDinosaur(dinoName) {
@@ -77,30 +98,37 @@ window.addEventListener( 'resize', () => {
     display.renderer.setSize(width, height);
 }, false );
 
-init()
 window.setupDinosaur = async dino => {
+    clearProgressBar()
+    showProgressBar()
+    let div = progressUpdate(`Loading Dinosaur ${dino}`)
     let loaded = await loadDinosaur(dino.toLowerCase())
+    div.innerHTML += ` - Finished`
 
-    let modelDownloadFolder
+    let modelDownload
 
     let fileAnimations = []
     let folderAnimations = []
 
+    div = progressUpdate(`Starting parsing of model folder`)
     loaded.modelFolder.forEach(element => {
         if(element.name.endsWith(".tbl")) { //Model Folder
-            modelDownloadFolder = element.download_url;
+            modelDownload = element.download_url;
         } else if(element.name.endsWith(".dca")) { //.dca file
             fileAnimations.push(element.download_url)
         } else { //Folder animation 
-            folderAnimations.push({ name:element.name, data: request(element.url) })
+            folderAnimations.push(new Promise(call => { request(element.url).then(d => call({ name:element.name, data: d }))}))
         }
     })
+    div.innerHTML += ` - Finished, found ${fileAnimations.length} .dca animations, and ${folderAnimations.length} folder animations.`
 
+    div = progressUpdate(`Started Downloading of main model`)
+    let model = await TBLModel.loadModel(await fetch(modelDownload).then(f => f.blob()))
+    div.innerHTML += ` - Finished`
 
-    // let fetchedModelResponse = 
-    let model = await TBLModel.loadModel(await fetch(modelDownloadFolder).then(f => f.blob()))
-
+    div = progressUpdate(`Started parseing of texture: ${loaded.textureFile.name}`)
     let tex = await loadTexture(`data:image/png;base64,${loaded.textureFile.content}`)
+    div.innerHTML += ` - Finished`
 
     tex.flipY = false
     tex.magFilter = NearestFilter;
@@ -118,46 +146,134 @@ window.setupDinosaur = async dino => {
     texture.texture = tex
     texture.setup()
 
+    div = progressUpdate(`Started setting up main model and texture`)
     display.setMainModel(material, texture, model)
+    display.animationHandler.playstate = playstate
+    div.innerHTML += ` - Finished`
 
     while (animationSelectionNode.firstChild) {
         animationSelectionNode.removeChild(animationSelectionNode.firstChild);
     }
     name2Animation.clear()
 
-    folderAnimations.forEach(folder => {
-        let option = document.createElement("option")
-        name2Animation.set(folder.name, async() => {
-            let files = await folder.data
-            let meta = files.find(d => d.name == "animation.json")
-            if(meta !== undefined) {
-                meta = JSON.parse(await fetch(meta.download_url).then(a => a.text()))
-            }
-            
-            let models = await Promise.all(
-                files.filter(d => d.name.endsWith(".tbl"))
-                .map(d => fetch(d.download_url))
-            ).then(arr => 
-                Promise.all(
-                    arr.map(d => TBLModel.loadModel(d.blob()))
-                )
-            )
+    div = progressUpdate(`Began loading of folder animations`)
 
-            display.animationHandler.loadFromAnimationFiles(models, meta)
-            
-            let play = display.animationHandler.playstate
-            play.ticks = 0
-            play.playing = true
-        })
-        option.innerHTML = folder.name
-        animationSelectionNode.appendChild(option)
+    await Promise.all(folderAnimations)
+    .then(arr => { //Load animation.json and get .tbl entries from the file array
+        let node
+        let total = 0
+        let counter = 0 
+        return Promise.all(arr.map(d => {
+            let meta = d.data.find(f => f.name == "animation.json")
+            let animations = d.data.filter(f => f.name.endsWith(".tbl"))
+            if(meta) {
+                if(node === undefined) {
+                    node = progressUpdate(`Downloading animation meta data (?/?)`)
+                }
+                total++
+                return new Promise(call => 
+                    fetch(meta.download_url)
+                    .then(a => a.text())
+                    .then(text => call({ name: d.name, animations, meta: JSON.parse(text) }))
+                )
+                .then(o => { node.innerText = `Downloading animation meta data ( ${++counter} / ${total} )`; return o })
+            }
+            return {name: d.name, animations}
+        }))
     })
+    .then(arr => { //Load the .tbl models
+        let node = progressUpdate(`Parsing table models (?/?) - ?`)
+        let total = 0
+        let counter = 0
+        return Promise.all(arr.map(d => {
+            total += d.animations.length
+            return new Promise(call => 
+                Promise.all(
+                    d.animations.map(f => 
+                        fetch(f.download_url)
+                        .then(f => TBLModel.loadModel(f.blob()))
+                        .then(o => { node.innerText = `Parsing tabula models ( ${++counter} / ${total} ) - ${d.name}`; return o})
+                    )
+                ).then(animations => call({ name:d.name, animations }))
+            )
+        }))
+    })//Put the .tbl models in the name2Animation map
+    .then(arr => arr.forEach(d => {
+        name2Animation.set(d.name, () => {
+            display.animationHandler.loadFromAnimationFiles(d.animations, d.meta)
+            playstate.ticks = 0
+            togglePlaying(true)
+        })
+        let option = document.createElement("option")
+        option.innerText = d.name
+        animationSelectionNode.appendChild(option)
+    }))
+    div.innerHTML += ` - Finished`
+    hideProgressBar()
+    return ""
 }
 
 window.playAnimation = async anim => {
     let animation = name2Animation.get(anim)
     if(animation !== undefined) {
         animation()
+    }
+}
+
+window.toggleLoop = elem => {
+    let n = !display.animationHandler.looping;
+    if(!n) { //Set the looping back into the starting space
+        playstate.ticks %= display.animationHandler.totalTime
+    } 
+    elem.classList.toggle("is-active", n)
+    display.animationHandler.looping = n
+}
+
+window.togglePlaying = isCurrentlyPlaying => {
+    if(isCurrentlyPlaying === undefined) {
+        isCurrentlyPlaying = playstate.playing
+    }
+    let playing = document.getElementById("ico-when-playing")
+    let paused = document.getElementById("ico-when-paused")
+
+    if(isCurrentlyPlaying) {
+        playing.style.display = "none"
+        paused.style.display = "inherit"
+    } else {
+        playing.style.display = "inherit"
+        paused.style.display = "none"
+    }
+    playstate.playing = !isCurrentlyPlaying
+    
+}
+
+window.setCurrentTicks = value => {
+    // display.animationHandler.playstate.speed = Math.pow(2, value) //This was what speed was.
+    playstate.ticks = display.animationHandler.totalTime * value
+}
+
+function progressUpdate(data) {
+    let div = document.createElement("div")
+    div.classList.add("content")
+    div.innerText = data
+
+    modelDataNode.appendChild(div)
+    return div
+}
+
+function showProgressBar() {
+    htmlNode.classList.toggle("is-clipped", true)
+    modalNode.classList.toggle("is-active", true)
+}
+
+function hideProgressBar() {
+    htmlNode.classList.toggle("is-clipped", false)
+    modalNode.classList.toggle("is-active", false)
+}
+
+function clearProgressBar() {
+    while (modelDataNode.firstChild) {
+        modelDataNode.removeChild(modelDataNode.firstChild);
     }
 }
 
@@ -168,3 +284,6 @@ async function loadTexture(src) {
         image.src = src
     })
 }
+
+init()
+setupInitial()

@@ -1,101 +1,123 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset=utf-8>
-    <title>Dumbcode</title>
-    <link href="../css/tooltips.css" rel="stylesheet" />
-    <link href="../css/collapsible.css" rel="stylesheet" />
-    <link href="../css/cool-checkboxes.css" rel="stylesheet"/>
-    <link href="css/editor.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
-    <script src="../scripts/navigation.js"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <head>
+        <meta charset=utf-8>
+        <title>Dumbcode</title>
+        <link href="../css/tooltips.css" rel="stylesheet" />
+        <link href="../css/collapsible.css" rel="stylesheet" />
+        <link href="../css/cool-checkboxes.css" rel="stylesheet"/>
+        <link href="css/editor.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
+        <script src="../scripts/navigation.js"></script>
+        <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
 
-    <!-- used for modal veiwing of the settings page -->
-    <script src="https://bulma.io/vendor/clipboard-1.7.1.min.js"></script>
-    <script src="https://bulma.io/vendor/js.cookie-2.1.4.min.js"></script>
-    <script src="https://bulma.io/lib/main.js?v=201907050846"></script>
+        <!-- used for modal veiwing of the settings page -->
+        <script src="https://bulma.io/vendor/clipboard-1.7.1.min.js"></script>
+        <script src="https://bulma.io/vendor/js.cookie-2.1.4.min.js"></script>
+        <script src="https://bulma.io/lib/main.js?v=201907050846"></script>
 
-    <!-- <link href="./css/displays.css" rel="stylesheet"> -->
+        <link href="./css/displays.css" rel="stylesheet">
 
-    <script src="js/jszip.js"></script>
-    <script src="js/gif.js"></script>
+        <script src="js/jszip.js"></script>
+        <script src="js/gif.js"></script>
 
 
-    <script type="module" src="js/github_viewer.js"></script>
-</head>
-<body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
+        <script type="module" src="js/github_viewer.js"></script>
+    </head>
+    <body style="font-family: 'Montserrat', sans-serif; font-weight: 300;">
 
-<section class="is-fullheight is-mobile">
-    <nav aria-label="main navigation" class="navbar is-dark is-mobile is-marginless heading has-text-weight-bold"
-         role="navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="../">
-                <img class="is-size-3-mobile" height="48" src="../images/dclogo.svg" width="48">DUMBCODE
-            </a>
+    <section class="is-fullheight is-mobile">
+        <nav aria-label="main navigation" class="navbar is-dark is-mobile is-marginless heading has-text-weight-bold"
+            role="navigation">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="../">
+                    <img class="is-size-3-mobile" height="48" src="../images/dclogo.svg" width="48">DUMBCODE
+                </a>
 
-            <div class="divider" style="width: 6rem"></div>
+                <div class="divider" style="width: 6rem"></div>
 
-            <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navbarBasicExample" role="button">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
-        </div>
+                <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navbarBasicExample" role="button">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
 
-        <div class="navbar-menu is-fullhd" id="navbarBasicExample">
-            <div class="navbar-start">
-                <a class="navbar-item center" href="../index.html">HOME</a>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">Projects</a>
-                    <div class="navbar-dropdown is-hoverable has-background-black">
-                        <a class="navbar-item center is-size-7 has-text-light" href="../index.html#projectnublar">PROJECT NUBLAR</a>
-                        <a class="navbar-item center is-size-7 has-text-light" href="../index.html#dumblibrary">DUMB LIBRARY</a>
-                        <a class="navbar-item center is-size-7 has-text-light" href="../index.html#gradlehook">GRADLEHOOK</a>
+            <div class="navbar-menu is-fullhd" id="navbarBasicExample">
+                <div class="navbar-start">
+                    <a class="navbar-item center" href="../index.html">HOME</a>
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">Projects</a>
+                        <div class="navbar-dropdown is-hoverable has-background-black">
+                            <a class="navbar-item center is-size-7 has-text-light" href="../index.html#projectnublar">PROJECT NUBLAR</a>
+                            <a class="navbar-item center is-size-7 has-text-light" href="../index.html#dumblibrary">DUMB LIBRARY</a>
+                            <a class="navbar-item center is-size-7 has-text-light" href="../index.html#gradlehook">GRADLEHOOK</a>
+                        </div>
+                    </div>
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">More</a>
+                        <div class="navbar-dropdown is-hoverable has-background-black">
+                            <a class="navbar-item center is-size-7 has-text-light" href="studio/index.html">ANIMATION STUDIO</a>
+                            <a class="navbar-item center is-size-7 has-text-light" href="../team.html">ABOUT US</a>
+                        </div>
                     </div>
                 </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">More</a>
-                    <div class="navbar-dropdown is-hoverable has-background-black">
-                        <a class="navbar-item center is-size-7 has-text-light" href="studio/index.html">ANIMATION STUDIO</a>
-                        <a class="navbar-item center is-size-7 has-text-light" href="../team.html">ABOUT US</a>
+                <div class="navbar-end">
+                    <div class="navbar-item" style="text-transform: none" id="dumbcode-studio-version">
                     </div>
                 </div>
             </div>
-            <div class="navbar-end">
-                <div class="navbar-item" style="text-transform: none" id="dumbcode-studio-version">
-                </div>
+            </div>
+        </nav>
+    </section>
+    <div id="display-div" style="position:absolute; top:0; left:0; height:100%; width:100%;"></div>
+    <div id="control-div" style="position:fixed; bottom:0; height:125px; width:100%; background-color: #262626; text-align: center; padding-top: 50px; color: antiquewhite;">
+        <div class="columns">
+            <div class="column is-one-quarter">
+            Dinosaur: 
+            <div class="select is-rounded">
+                <select onchange="setupDinosaur(this.value)">
+                <option>Tyrannosaurus</option>
+                <option>Dilophosaurus</option>
+                </select>
+            </div>
+            </div>
+            <div class="column is-one-quarter">
+            Animation:
+            <div class="select is-rounded">
+                <select id="animation-select-controller" onchange="playAnimation(this.value)"></select>
+            </div>
+            </div>
+            <div class="column is-half">Controls<br>
+            <a class="button is-dark tooltip transform-control-tool" data-tooltip="Toggle Looping" onclick="toggleLoop(this)">
+                <span class="icon is-medium">
+                    <i class="fas fa-sync-alt"></i>
+                </span>
+            </a>
+            <a class="button is-dark transform-control-tool" onclick="togglePlaying(this.value)">
+                    <span id="ico-when-paused" class="icon is-medium" style="margin: 0px;">
+                        <i class="fas fa-play"></i>
+                    </span>
+                    <span id="ico-when-playing" class="icon is-medium" style="display: none; margin: 0px;">
+                        <i class="fas fa-pause"></i>
+                    </span>
+                </a>
+            <input class="input-rotation-slider is-active" id="tick-bar" type="range" step="0.01" min="0" max="1" value="0" oninput="setCurrentTicks(this.value)">
             </div>
         </div>
+    </div>
+    <div class="modal" id="modal-progressbar">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box">
+                <article class="media">
+                    <div class="media-content" id="modal-prograssbar-data"></div>
+                </article>
+            </div>
         </div>
-    </nav>
-</section>
-<div id="display-div" style="position:absolute; top:0; left:0; height:100%; width:100%;"></div>
-<div id="control-div" style="position:fixed; bottom:0; height:75px; width:100%; background-color: #363636; text-align: center; padding-top: 25px; color: antiquewhite;">
-    <div class="columns">
-        <div class="column is-one-quarter">
-          Dinosaur: 
-          <div class="select is-rounded">
-            <select onchange="setupDinosaur(this.value)">
-              <option>Tyrannosaurus</option>
-              <option>Dilophosaurus</option>
-            </select>
-          </div>
-        </div>
-        <div class="column is-one-quarter">
-          Animation:
-          <div class="select is-rounded">
-            <select id="animation-select-controller" onchange="playAnimation(this.value)"></select>
-          </div>
-        </div>
-        <div class="column is-half">
-          Playback speed ect ect
-        </div>
-      </div>
-</div>
-
-</body>
+    </div>
+    </body>
 </html>
