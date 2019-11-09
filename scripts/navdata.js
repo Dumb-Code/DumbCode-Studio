@@ -7,11 +7,12 @@ const data = {
         { link: "../index.html#gradlehook", text: "GRADLEHOOK" }
     ],
 
-    More: [
+    Animation: [
         { link: "../studio/", text: "ANIMATION STUDIO" },
         { link: "../studio/viewer.html", text: "ANIMATION VIEWER" },
-        { link: "../team.html", text: "ABOUT US" }
-    ]
+    ],
+
+    AboutUs: { type:"single", link: "../team.html", text: "ABOUT US" }
 }
 
 element = (type, classname, text) => {
