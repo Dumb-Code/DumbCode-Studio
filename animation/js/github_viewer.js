@@ -288,8 +288,11 @@ window.setTexture = value => {
 }
 
 window.setCurrentTicks = value => {
-    // display.animationHandler.playstate.speed = Math.pow(2, value) //This was what speed was.
     playstate.ticks = display.animationHandler.totalTime * value
+}
+
+window.setSpeed = value => {
+    playstate.speed = value
 }
 
 function progressUpdate(data) {
