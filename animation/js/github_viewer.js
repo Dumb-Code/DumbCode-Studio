@@ -68,6 +68,10 @@ function frame() {
 }
 
 function runFrame() {
+    if(display.animationHandler && !display.animationHandler.looping) {
+        playstate.ticks = Math.min(playstate.ticks, display.animationHandler.totalTime)
+    }
+
     display.display()
 
     if(display.animationHandler) {

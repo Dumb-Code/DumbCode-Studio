@@ -448,7 +448,7 @@ window.downloadDCA = () => {
     if(display.animationHandler) {
         let buffer = new ByteBuffer()
 
-        buffer.writeNumber(1) //version
+        buffer.writeNumber(2) //version
         buffer.writeNumber(display.animationHandler.sortedTimes.length)
 
         display.animationHandler.sortedTimes.forEach(kf => {
@@ -469,6 +469,12 @@ window.downloadDCA = () => {
                 buffer.writeNumber(entry[0])
                 buffer.writeNumber(entry[1])
                 buffer.writeNumber(entry[2])
+            })
+
+            buffer.writeNumber(kf.progressionPoints.length)
+            kf.progressionPoints.forEach(p => {
+                buffer.writeNumber(p.x)
+                buffer.writeNumber(p.y)
             })
         })
 
@@ -514,6 +520,14 @@ window.setupAnimation = async(file, nameElement) => {
         let posSize = buffer.readNumber()
         for(let p = 0; p < posSize; p++) {
             kf.rotationPointMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
+        }
+
+        if(version < 2) {
+            let ppSize = buffer.readNumber()
+            for(let p = 0; p < ppSize; p++) {
+                kf.progressionPoints.push({ x: buffer.readNumber(), y: buffer.readNumber() })
+            }
+            kf.resortPointsDirty()
         }
 
         keyframes.push(kf)
