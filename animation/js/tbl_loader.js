@@ -71,7 +71,7 @@ function parseGroupJson(json, tbl) {
 
 class Cube {
 
-    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, mcScale, children, tbl) {
+    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, mcScale, children, textureMirrored, tbl) {
         this.name = name
         this.dimension = dimension
         this.rotationPoint = rotationPoint
@@ -82,6 +82,7 @@ class Cube {
         this.mcScale = mcScale
         this.children = children
         this.tbl = tbl
+        this.textureMirrored = textureMirrored
 
         tbl.cubeMap.set(this.name, this)
     }
@@ -95,7 +96,7 @@ class Cube {
         allCubes.push(geometry)
 
         let rawUV = new Array(6 * 4)
-        let uv = getUV(rawUV, this.textureoffset[0], this.textureoffset[1], this.dimension[0], this.dimension[1], this.dimension[2], this.tbl.texWidth, this.tbl.texHeight)
+        let uv = getUV(rawUV, this.textureoffset[0], this.textureoffset[1], this.dimension[0], this.dimension[1], this.dimension[2], this.tbl.texWidth, this.tbl.texHeight, this.textureMirrored)
         geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uv), 2))
         geometry.rawUV = rawUV
 
@@ -128,10 +129,10 @@ class Cube {
 function parseCubeJson(json, tbl) {
     let children = []
     json.children.forEach(child => { children.push( parseCubeJson( child, tbl ) ) })
-    return new Cube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, tbl)
+    return new Cube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
 }
 
-function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight) {
+function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {
 
     //Uv data goes west, east, down, up, south north
 
@@ -154,16 +155,15 @@ function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight) {
         }
         offX += xDist
 
-        putUVData(rawData, uvdata, texBottomOrder[texh], minX, minY, xDist, h, texWidth, texHeight)
+        putUVData(rawData, uvdata, texBottomOrder[texh], minX, minY, xDist, h, texWidth, texHeight, texMirrored)
     }
 
     for(let texb = 0; texb < texUpperOrder.length; texb++) {
         let minXLower = offsetX + d + w * texb + w
         if(texb == 0) { //Up
-            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY+d, -w, -d, texWidth, texHeight)
+            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY+d, -w, -d, texWidth, texHeight, texMirrored)
         } else { //Down
-            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower-w, offsetY, w, d, texWidth, texHeight) //todo: double triple quadruple check that this isn't flipped on the x axis. If so, just chang the uv accordingly
-            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY, -w, d, texWidth, texHeight) 
+            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY, -w, d, texWidth, texHeight, texMirrored) 
         }
     }
 
@@ -171,7 +171,11 @@ function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight) {
     return uvdata
 }
 
-function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize, texWidth, texHeight) {
+function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize, texWidth, texHeight, texMirrored) {
+    if(texMirrored) {
+        minU += uSize
+        uSize = -uSize
+    }
     //1 0 1 0
     //1 1 0 0
     let u = [minU + uSize, minU, minU + uSize, minU]
@@ -181,6 +185,7 @@ function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize, texWi
         uvdata[index] = u[vertex] / texWidth
         uvdata[index + 1] = v[vertex] / texHeight
     }
+
     rawData[facingindex*4+0] = minU
     rawData[facingindex*4+1] = minV
     rawData[facingindex*4+2] = uSize
