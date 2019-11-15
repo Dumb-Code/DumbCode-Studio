@@ -150,12 +150,18 @@ function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight, texMirro
         let minY = offsetY + d
 
         let xDist = w;
+
+        let index = texBottomOrder[texh]
+
         if (texh % 2 == 0) {
             xDist = d
+            if(texMirrored) {
+                index = texBottomOrder[(texh + 2) % 4]
+            }
         }
         offX += xDist
 
-        putUVData(rawData, uvdata, texBottomOrder[texh], minX, minY, xDist, h, texWidth, texHeight, texMirrored)
+        putUVData(rawData, uvdata, index, minX, minY, xDist, h, texWidth, texHeight, texMirrored)
     }
 
     for(let texb = 0; texb < texUpperOrder.length; texb++) {
