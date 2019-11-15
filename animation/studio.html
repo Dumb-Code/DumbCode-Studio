@@ -366,7 +366,7 @@ Generating...
                             <span class="icon is-medium">
                                 <i class="fas fa-globe-americas"></i>
                             </span>
-                        </a>
+                        </a> 
                     </div>
                     <div class="column">
                         <div>
@@ -430,6 +430,23 @@ Generating...
                                     <i class="fas fa-trash-alt"></i>
                                 </span>
                             </a>
+                            <a class="button is-dark is-medium tooltip modal-button" data-tooltip="Progression" data-target="modal-progression" aria-haspopup="true" onclick="redrawProgressionCanvas()">
+                                <span class="icon is-medium">
+                                    <i class="fas fa-percentage"></i>
+                                </span>
+                            </a>
+                            <div class="modal" id="modal-progression" style="text-transform: none">
+                                <div class="modal-background"></div>
+                                <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+                                    <h3 class="title is-3" style="color: whitesmoke">Progression</h3>
+                                    <div style="padding-bottom: 20px">
+                                        <button class="modal-close" aria-label="close" style="position: absolute"></button>
+                                    </div>
+                                    <div>
+                                       <canvas id="progression_canvas" width="600px" height="600px" style="border:1px solid #d3d3d3; background-color: #161616;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div style="padding-top: 10px;">
                             Start Time:

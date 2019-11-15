@@ -1,5 +1,6 @@
 import { TBLModel } from './tbl_loader.js'
 import { readFile } from './displays.js';
+import { PointCloudMaterial } from './three.js';
 
 export class AnimationHandler {
     
@@ -173,6 +174,8 @@ class KeyFrame {
         this.setup = false
 
         this.percentageDone
+
+        this.progressionPoints = [{required: true, x: 0, y: 1}, {required: true, x: 1, y: 0}]
     }
 
     doSetup() {
@@ -185,12 +188,25 @@ class KeyFrame {
         }
     }
 
+    getProgressionValue(basePercentage) {
+        for(let i = 0; i < this.progressionPoints.length - 1; i++) {
+            let point = this.progressionPoints[i]
+            let next = this.progressionPoints[i + 1]
+
+            if(basePercentage > point.x && basePercentage < next.x) {
+                let interpolateBetweenAmount = (basePercentage - point.x) / (next.x - point.x)
+                return 1 - (point.y + (next.y - point.y) * interpolateBetweenAmount)
+            }
+        }
+        return basePercentage //Shouldn't happen. There should always be at least the first and last progression point
+    }
+
     animate(ticks, settingup = false) {
         if(!this.setup) {
             return
         }
         
-        this.percentageDone = (ticks - this.startTime) / this.duration
+        this.percentageDone = this.getProgressionValue((ticks - this.startTime) / this.duration)
         if(this.percentageDone < 0) {
             return
         }
@@ -205,7 +221,7 @@ class KeyFrame {
         }
 
         if(!settingup && this.handler.inertia) {
-            this.percentageDone = Math.sin((this.percentageDone - 0.5) * Math.PI) / 2 + 0.5
+            // this.percentageDone = Math.sin((this.percentageDone - 0.5) * Math.PI) / 2 + 0.5
         }
 
         for(let key of this.handler.animationMap.keys()) {
@@ -227,6 +243,10 @@ class KeyFrame {
             }
             cube.position.set(ipos[0], ipos[1], ipos[2])
         }
+    }
+
+    resortPointsDirty() {
+        this.progressionPoints = this.progressionPoints.sort((p1, p2) => p1.x - p2.x)
     }
 
     getPosition(cubename) {

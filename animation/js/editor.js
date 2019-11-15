@@ -7,7 +7,6 @@ import { KeyframeManger } from './keyframe_manager.js'
 import { HistoryList } from "./history.js";
 import { JavaMethodExporter } from "./java_method_exporter.js";
 
-
 const major = 0
 const minor = 3
 const patch = 14
@@ -18,6 +17,7 @@ document.getElementById("dumbcode-studio-version").innerText = `v${version}`
 const container = document.getElementById("editor-container")
 const panel = document.getElementById("editor");
 const canvasContainer = document.getElementById("display-div");
+const progressionCanvas = document.getElementById("progression_canvas")
 const display = new DinosaurDisplay()
 
 let controls, transformControls
@@ -982,6 +982,87 @@ document.addEventListener("mouseup", () => {
     document.removeEventListener("mousemove", resize, false)
     document.body.className = undefined
 }, false);
+
+let selectedPoint = undefined
+let ctx = progressionCanvas.getContext("2d");
+let radius = 7.5
+
+progressionCanvas.onmousedown = e => {
+
+    if(manager.selectedKeyFrame !== undefined) {
+        let points = manager.selectedKeyFrame.progressionPoints
+
+        let width = progressionCanvas.width
+        let height = progressionCanvas.height
+
+        let clickedOn = points.find(p => !p.required && Math.pow(width*p.x-e.offsetX, 2) + Math.pow(height*p.y-e.offsetY, 2) <= 3*radius*radius) //The 3 is just for comedic effect.
+
+        if(clickedOn !== undefined) {
+            clickedOn.startX = clickedOn.x
+            clickedOn.startY = clickedOn.y
+            selectedPoint = clickedOn
+        } else {
+            let newPoint = { x: e.offsetX / width, y: e.offsetY / height }
+            points.push( newPoint )
+            manager.selectedKeyFrame.resortPointsDirty()
+            selectedPoint = newPoint
+        }
+
+        redrawProgressionCanvas()
+    }
+}
+
+progressionCanvas.onmousemove = e => {
+    if(selectedPoint !== undefined) {
+        selectedPoint.x = e.offsetX / progressionCanvas.width
+        selectedPoint.y = e.offsetY / progressionCanvas.height
+        redrawProgressionCanvas()
+    }
+}
+
+progressionCanvas.onmouseup = () => {
+    let width = progressionCanvas.width
+    let height = progressionCanvas.height
+
+    if(selectedPoint !== undefined) {
+        if(selectedPoint.startX !== undefined && selectedPoint.startY !== undefined) {
+            let distX = width*(selectedPoint.startX - selectedPoint.x)
+            let distY = height*(selectedPoint.startY - selectedPoint.y)
+            if(distX*distX + distY*distY < radius*radius*3) {
+                manager.selectedKeyFrame.progressionPoints = manager.selectedKeyFrame.progressionPoints.filter(p => p !== selectedPoint)
+                manager.selectedKeyFrame.resortPointsDirty()
+            }
+        }
+        selectedPoint = undefined
+        redrawProgressionCanvas()
+    }
+}
+
+window.redrawProgressionCanvas = () => {
+    if(manager.selectedKeyFrame !== undefined) {
+        let width = progressionCanvas.width
+        let height = progressionCanvas.height
+    
+        ctx.clearRect(0, 0, width, height);
+        ctx.strokeStyle = "#363636";
+        let points = manager.selectedKeyFrame.progressionPoints
+    
+        for(let i = 0; i < points.length; i++) {
+            let point = points[i]
+            let next = points[i+1]
+    
+            ctx.beginPath();
+            ctx.arc(point.x * width, point.y * height, radius, 0, 2 * Math.PI);
+    
+            if(next !== undefined) {
+                ctx.moveTo(point.x * width, point.y * height);
+                ctx.lineTo(next.x * width, next.y * height);
+            }
+    
+            ctx.stroke();
+        }
+    }
+}
 
 function onWindowResize() {
     let width = canvasContainer.clientWidth;
