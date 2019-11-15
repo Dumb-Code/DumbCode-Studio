@@ -96,8 +96,18 @@ export class DinosaurDisplay {
     }
 
     shouldBuild(x, y, dx, dy, texture) {
-        if(dx * dy <= 0) {
+        if(dx * dy == 0) {
             return false
+        }
+
+        if(dx < 0) {
+            x += dx
+            dx = Math.abs(dx)
+        }
+
+        if(dy < 0) {
+            y += dy
+            dy = Math.abs(dy)
         }
 
         //Move the getImageData to the DinosaurTexture class?

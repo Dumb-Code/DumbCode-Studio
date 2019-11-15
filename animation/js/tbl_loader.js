@@ -159,10 +159,11 @@ function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight) {
 
     for(let texb = 0; texb < texUpperOrder.length; texb++) {
         let minXLower = offsetX + d + w * texb + w
-        if(texb == 0) { //up
+        if(texb == 0) { //Up
             putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY+d, -w, -d, texWidth, texHeight)
         } else { //Down
             putUVData(rawData, uvdata, texUpperOrder[texb], minXLower-w, offsetY, w, d, texWidth, texHeight) //todo: double triple quadruple check that this isn't flipped on the x axis. If so, just chang the uv accordingly
+            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY, -w, d, texWidth, texHeight) 
         }
     }
 
