@@ -8,8 +8,8 @@ import { HistoryList } from "./history.js";
 import { JavaMethodExporter } from "./java_method_exporter.js";
 
 const major = 0
-const minor = 3
-const patch = 14
+const minor = 4
+const patch = 0
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
