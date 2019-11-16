@@ -522,7 +522,7 @@ window.setupAnimation = async(file, nameElement) => {
             kf.rotationPointMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
         }
 
-        if(version < 2) {
+        if(version >= 2) {
             let ppSize = buffer.readNumber()
             for(let p = 0; p < ppSize; p++) {
                 kf.progressionPoints.push({ x: buffer.readNumber(), y: buffer.readNumber() })
