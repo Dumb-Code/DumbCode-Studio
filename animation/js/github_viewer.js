@@ -2,7 +2,7 @@ import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, Hem
 import { OrbitControls } from './orbit_controls.js'
 import { DinosaurDisplay, DinosaurTexture, readFile } from "./displays.js";
 import { TBLModel } from "./tbl_loader.js";
-import { PlayState } from "./animations.js";
+import { PlayState, ByteBuffer } from "./animations.js";
 
 const display = new DinosaurDisplay()
 
@@ -130,7 +130,7 @@ window.setupDinosaur = dino => {
             if(element.name.endsWith(".tbl")) { //Model Folder
                 modelDownload = element.download_url;
             } else if(element.name.endsWith(".dca")) { //.dca file
-                fileAnimations.push(element.download_url)
+                fileAnimations.push({ url:element.download_url, name:element.name })
             } else { //Folder animation 
                 folderAnimations.push(new Promise(call => { request(element.url).then(d => call({ name:element.name, data: d }))}))
             }
@@ -225,15 +225,29 @@ window.setupDinosaur = dino => {
             }))
         })//Put the .tbl models in the name2Animation map
         .then(arr => arr.forEach(d => {
-            name2Animation.set(d.name, () => {
-                display.animationHandler.loadFromAnimationFiles(d.animations, d.meta)
-                playstate.ticks = 0
-                togglePlaying(true)
-            })
+            name2Animation.set(d.name, display.animationHandler.readFromAnimationFiles(d.animations, d.meta))
             let option = document.createElement("option")
             option.innerText = d.name
             animationSelectionNode.appendChild(option)
         }))
+        let fileNode = progressUpdate(`Began loading of .dca animations`)
+        await Promise.all(fileAnimations)
+            .then(arr => {
+                if(arr.length == 0) {
+                    return []
+                }
+                let node = progressUpdate(`Parsing .dca file (?/${arr.length}) - ?`)
+                let counter = 0
+                return Promise.all(arr.map(d => 
+                    fetch(d.url)
+                    .then(d => d.arrayBuffer())
+                    .then(d => {
+                        name2Animation.set(d.name, display.animationHandler.readDCAFile(new ByteBuffer(d)))
+                        node.innerText = `Parsing .dca file (${++counter}/${arr.length}) - ${d.name}`
+                    })
+                ))
+            })
+        fileNode.innerText += ` - Finished`
         await folderAnimations[0].then(d => playAnimation(d.name)) //Should resolve instantly 
         div.innerHTML += ` - Finished`
         hideProgressBar()
@@ -241,9 +255,12 @@ window.setupDinosaur = dino => {
 }
 
 window.playAnimation = anim => {
-    let animation = name2Animation.get(anim)
-    if(animation !== undefined) {
-        animation()
+    let kfs = name2Animation.get(anim)
+    if(kfs !== undefined) {
+        display.animationHandler.keyframes = kfs.map(k => k.cloneKeyframe())
+        display.animationHandler.keyframesDirty()
+        playstate.ticks = 0
+        togglePlaying(true)
     }
 }
 

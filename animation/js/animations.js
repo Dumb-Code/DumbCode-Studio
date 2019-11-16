@@ -1,6 +1,5 @@
 import { TBLModel } from './tbl_loader.js'
 import { readFile } from './displays.js';
-import { PointCloudMaterial } from './three.js';
 
 export class AnimationHandler {
     
@@ -53,11 +52,12 @@ export class AnimationHandler {
         let result = await Promise.all(promiseFiles)
 
         let info = infoFile ? JSON.parse(result.pop()) : { base_time: 5 }
-        this.loadFromAnimationFiles(result, info)
+        this.keyframes = this.readFromAnimationFiles(result, info)
+        this.keyframesDirty()
     }
 
-    async loadFromAnimationFiles(files, meta = { base_time: 5 }) {
-        this.keyframes = []
+    readFromAnimationFiles(files, meta = { base_time: 5 }) {
+        let keyframes = []
 
         let baseTime = meta.base_time
 
@@ -79,10 +79,50 @@ export class AnimationHandler {
 
             startTime += baseTime; //todo: time overrides ???
 
-            this.keyframes.push(keyframe)
+            keyframes.push(keyframe)
 
         }
-        this.keyframesDirty()
+        return keyframes
+    }
+
+    readDCAFile(buffer) {
+        let version = buffer.readNumber()
+
+        if(version < 1) {
+            buffer.useOldString = true
+        }
+
+        let length = buffer.readNumber()
+
+        let keyframes = []
+
+        for(let i = 0; i < length; i++) {
+            let kf = this.createKeyframe()
+
+            kf.startTime = buffer.readNumber()
+            kf.duration  = buffer.readNumber()
+
+            let rotSize = buffer.readNumber()
+            for(let r = 0; r < rotSize; r++) {
+                kf.rotationMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
+            }
+
+            let posSize = buffer.readNumber()
+            for(let p = 0; p < posSize; p++) {
+                kf.rotationPointMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
+            }
+
+            if(version >= 2) {
+                let ppSize = buffer.readNumber()
+                for(let p = 0; p < ppSize; p++) {
+                    kf.progressionPoints.push({ x: buffer.readNumber(), y: buffer.readNumber() })
+                }
+                kf.resortPointsDirty()
+            }
+
+            keyframes.push(kf)
+        }
+        return keyframes
     }
 
     animate(deltaTime) {
@@ -170,11 +210,11 @@ class KeyFrame {
         this.fromRotationMap = new Map()
         this.fromRotationPointMap = new Map()
 
+        this.progressionPoints = [{required: true, x: 0, y: 1}, {required: true, x: 1, y: 0}]
+
         this.setup = false
 
         this.percentageDone
-
-        this.progressionPoints = [{required: true, x: 0, y: 1}, {required: true, x: 1, y: 0}]
     }
 
     doSetup() {
@@ -244,6 +284,19 @@ class KeyFrame {
         }
     }
 
+    cloneKeyframe() {
+        let kf = new KeyFrame(this.handler)
+        kf.startTime = this.startTime
+        kf.duration = this.duration
+
+        kf.rotationMap = new Map(this.rotationMap)
+        kf.rotationPointMap = new Map(this.rotationPointMap)
+
+        kf.progressionPoints = [...this.progressionPoints]
+
+        return kf
+    }
+
     resortPointsDirty() {
         this.progressionPoints = this.progressionPoints.sort((p1, p2) => p1.x - p2.x)
     }
@@ -287,6 +340,62 @@ export class PlayState {
         if(this.playing) {
             this.ticks += deltaTime * this.speed * 20 //t-p-s
         }
+    }
+}
+
+export class ByteBuffer {
+    constructor(buffer = new ArrayBuffer(0)) {
+        this.offset = 0
+        this.buffer = buffer
+        this.useOldString = false
+    }
+
+    _addBuffer(buffer) {
+        let tmp = new Uint8Array(this.buffer.byteLength + buffer.byteLength)
+        tmp.set(new Uint8Array(this.buffer), 0)
+        tmp.set(new Uint8Array(buffer), this.buffer.byteLength)
+        this.buffer = tmp.buffer
+    }
+
+    writeNumber(num) {
+        let buffer = new ArrayBuffer(4)
+        let veiw = new DataView(buffer)
+        veiw.setFloat32(0, num)
+        this._addBuffer(buffer)
+    }
+
+    writeString(str) {
+        let arr = new TextEncoder().encode(str).buffer
+
+        //write the length
+        let buffer = new ArrayBuffer(2)
+        let veiw = new DataView(buffer)
+        veiw.setInt16(0, arr.byteLength)
+        this._addBuffer(buffer)
+
+        this._addBuffer(arr)
+    }
+
+    readNumber() {
+        let veiw = new DataView(this.buffer)
+        let num = veiw.getFloat32(this.offset)
+        this.offset += 4
+        return num
+    }
+
+    readString() {
+        //read the length
+        let length
+        if(this.useOldString) {
+            length = this.readNumber()
+        } else {
+            let veiw = new DataView(this.buffer)
+            length = veiw.getInt16(this.offset)
+            this.offset += 2
+        }
+
+        this.offset += length
+        return new TextDecoder().decode(this.buffer.slice(this.offset - length, this.offset))
     }
 }
 
