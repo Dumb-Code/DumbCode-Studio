@@ -10,7 +10,7 @@ import { ByteBuffer } from "./animations.js"
 
 const major = 0
 const minor = 4
-const patch = 0
+const patch = 2
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -997,6 +997,7 @@ progressionCanvas.onmousemove = e => {
         selectedPoint.x = e.offsetX / progressionCanvas.width
         selectedPoint.y = e.offsetY / progressionCanvas.height
         redrawProgressionCanvas()
+        manager.selectedKeyFrame.resortPointsDirty()
     }
 }
 
