@@ -10,7 +10,7 @@ import { ByteBuffer } from "./animations.js"
 
 const major = 0
 const minor = 4
-const patch = 2
+const patch = 3
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -455,22 +455,10 @@ window.downloadDCA = () => {
         display.animationHandler.sortedTimes.forEach(kf => {
             buffer.writeNumber(kf.startTime)
             buffer.writeNumber(kf.duration)
-
-            buffer.writeNumber(kf.rotationMap.size)
-            kf.rotationMap.forEach((entry, cubename) => {
-                buffer.writeString(cubename)
-                buffer.writeNumber(entry[0])
-                buffer.writeNumber(entry[1])
-                buffer.writeNumber(entry[2])
-            })
-
-            buffer.writeNumber(kf.rotationPointMap.size)
-            kf.rotationPointMap.forEach((entry, cubename) => {
-                buffer.writeString(cubename)
-                buffer.writeNumber(entry[0])
-                buffer.writeNumber(entry[1])
-                buffer.writeNumber(entry[2])
-            })
+            
+            writeMap(buffer, kf.rotationMap, kf.fromRotationMap)
+            writeMap(buffer, kf.rotationPointMap, kf.fromRotationPointMap)
+        
 
             buffer.writeNumber(kf.progressionPoints.length)
             kf.progressionPoints.forEach(p => {
@@ -489,6 +477,32 @@ window.downloadDCA = () => {
         a.click();
         window.URL.revokeObjectURL(url);
     }
+}
+
+function writeMap(buffer, fromMap, map) {
+    let arr = []
+    map.forEach((entry, cubename) => {
+        if(!array3FuzzyEqual(entry, fromMap.get(cubename))) {
+            arr.push({ cubename, entry })
+        }
+    })
+    buffer.writeNumber(arr.length)
+    arr.forEach(entry => {
+        console.log(entry)
+        buffer.writeString(entry.cubename)
+        buffer.writeNumber(entry.entry[0])
+        buffer.writeNumber(entry.entry[1])
+        buffer.writeNumber(entry.entry[2])
+    })
+}
+
+function array3FuzzyEqual(arr1, arr2) {
+    for(let i = 0; i < 3; ++i) {
+        if(Math.abs(arr1[i] - arr2[i]) > 0.001) {
+            return false
+        }
+    }
+    return true
 }
 
 window.setupAnimation = async(file, nameElement) => {
