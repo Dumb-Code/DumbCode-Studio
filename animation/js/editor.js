@@ -10,7 +10,7 @@ import { ByteBuffer } from "./animations.js"
 
 const major = 0
 const minor = 4
-const patch = 3
+const patch = 4
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -456,8 +456,8 @@ window.downloadDCA = () => {
             buffer.writeNumber(kf.startTime)
             buffer.writeNumber(kf.duration)
             
-            writeMap(buffer, kf.rotationMap, kf.fromRotationMap)
-            writeMap(buffer, kf.rotationPointMap, kf.fromRotationPointMap)
+            writeMap(buffer, kf.fromRotationMap, kf.rotationMap)
+            writeMap(buffer, kf.fromRotationPointMap, kf.rotationPointMap)
         
 
             buffer.writeNumber(kf.progressionPoints.length)
@@ -488,7 +488,6 @@ function writeMap(buffer, fromMap, map) {
     })
     buffer.writeNumber(arr.length)
     arr.forEach(entry => {
-        console.log(entry)
         buffer.writeString(entry.cubename)
         buffer.writeNumber(entry.entry[0])
         buffer.writeNumber(entry.entry[1])
