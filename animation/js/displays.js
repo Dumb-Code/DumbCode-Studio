@@ -5,7 +5,6 @@ import { TBLModel } from "./tbl_loader.js";
 export class DinosaurDisplay {
 
     constructor() {
-        this.clock = new Clock()
         this.allCubes = []
         this.animationMap = new Map()
     }
@@ -58,18 +57,7 @@ export class DinosaurDisplay {
         this.animationMap.clear()
         this.tbl = model
         this.scene.add(model.createModel(material, this.allCubes, this.animationMap))
-        this.animationHandler = new AnimationHandler(this.tbl, this.animationMap)
         this.checkAllCulled(texture)   
-    }
-
-    display(animationCallback) {
-        if(this.animationHandler) {
-            this.animationHandler.animate(this.clock.getDelta())
-        }
-        if(animationCallback) {
-            animationCallback()
-        }
-        this.render()
     }
 
     render() {

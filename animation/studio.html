@@ -54,9 +54,30 @@
                 <div class="navbar-item" style="text-transform: none" id="dumbcode-studio-version"></div>
             </div>
         </div>
+
+        <div class="tabs">
+            <ul>
+                <li class="is-active"><a onclick="setTab(this, 0)">File</a></li>
+                <li><a onclick="setTab(this, 1)">Modeling</a></li>
+                <li><a onclick="setTab(this, 2)">Animation</a></li>
+            </ul>
+        </div>
     </nav>
-    <div id="display-div"></div>
-    <div class="editor-container" id="editor-container">
+    <div class="editor-part", editor-tab="files">
+        <label class="file-label" style="display: block">
+            <input class="file-input" type="file" name="tabula-main-model" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
+            <span class="file-cta" style="border-color: #dbdbdb">
+                <span class="file-icon">
+                    <i class="fas fa-upload"></i>
+                </span>
+                <span class="file-label">
+                    Main Model
+                </span>
+            </span>
+        </label>
+    </div>
+    <div id="display-div" class="editor-part" editor-tab="modeling,animation"></div>
+    <div class="editor-container editor-part" id="editor-container" editor-tab="animation">
             <div class="editor" id="editor">
                 <h5 class="title is-5" style="text-align: center">DumbCode Animation Editor</h5>
                 <div class="toplayer-columns columns">

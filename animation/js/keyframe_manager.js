@@ -8,18 +8,19 @@ const resolution = 10
 
 export class KeyframeManger {
 
-    constructor(keyframeBoard) {
+    constructor(animationHandler, keyframeBoard) {
 
+        this.animationHandler = animationHandler
         this.lables = new Map()
         this.playstate = new PlayState()
 
         this.board = keyframeBoard
 
-        const createContainer = (classname, parent = this.board) => {
+        const createContainer = classname => {
             let div = document.createElement("div")
             div.draggable = false
             div.className = classname
-            parent.appendChild(div)
+            this.board.appendChild(div)
             return div
         }
         
@@ -41,7 +42,7 @@ export class KeyframeManger {
                 this.selectedKeyFrame.startTime = this.selectedKeyFrame.startTimeNoSnap
 
                 const snappingTicks = 0.5
-                this.display.animationHandler.keyframes.filter(kf => kf != this.selectedKeyFrame).forEach(kf =>{
+                this.animationHandler.keyframes.filter(kf => kf != this.selectedKeyFrame).forEach(kf =>{
                     if(Math.abs(this.selectedKeyFrame.startTimeNoSnap - (kf.startTime + kf.duration)) < snappingTicks) {
                         this.selectedKeyFrame.startTime = kf.startTime + kf.duration
                     } else if(Math.abs(this.selectedKeyFrame.startTimeNoSnap + this.selectedKeyFrame.duration - (kf.startTime)) < snappingTicks) {
@@ -51,7 +52,7 @@ export class KeyframeManger {
 
                 this.selectedKeyFrame.updateInfo()
                 this.updateKeyFrame(this.selectedKeyFrame)
-                this.display.animationHandler.keyframesDirty()
+                this.animationHandler.keyframesDirty()
             } else {
                 this.scroll -= e.screenX - this.xHold
                 this.scroll = this.scroll < 0 ? 0 : this.scroll
@@ -115,14 +116,14 @@ export class KeyframeManger {
 
                         this.selectedKeyFrame.updateInfo()
                         this.updateKeyFrame(this.selectedKeyFrame)
-                        this.display.animationHandler.keyframesDirty()
+                        this.animationHandler.keyframesDirty()
                     }, () => {
                         this.selectedKeyFrame.startTime = startTimeEnd
                         this.selectedKeyFrame.duration = durationEnd
 
                         this.selectedKeyFrame.updateInfo()
                         this.updateKeyFrame(this.selectedKeyFrame)
-                        this.display.animationHandler.keyframesDirty()
+                        this.animationHandler.keyframesDirty()
                     })
   
                 }
@@ -153,14 +154,14 @@ export class KeyframeManger {
     }
 
     reframeKeyframes() {
-        if(this.display.animationHandler) {
-            this.display.animationHandler.keyframes.forEach(kf => this.updateKeyFrame(kf))
+        if(this.animationHandler) {
+            this.animationHandler.keyframes.forEach(kf => this.updateKeyFrame(kf))
         }
     }
 
     setupSelectedPose() {
         if(this.selectedKeyFrame && !this.playstate.playing) {
-            this.display.animationHandler.animationMap.forEach((cube, cubename) => {
+            this.animationHandler.animationMap.forEach((cube, cubename) => {
                 let irot = this.selectedKeyFrame.getRotation(cubename)
                 cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
 

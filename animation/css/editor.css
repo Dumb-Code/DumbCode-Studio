@@ -6,6 +6,10 @@
     cursor: n-resize;
 }
 
+.editor-part:not(.is-active) {
+    display: none;
+}
+
 #editor {
     background-color: #222;
 
@@ -27,4 +31,13 @@
     padding: 5px;
     font-size: 75%;
     white-space: pre;
+}
+
+.tabs a {
+    color: antiquewhite !important;
+}
+
+.tabs li.is-active a {
+    color: yellow !important;
+    border-bottom-color: yellow !important;
 }
