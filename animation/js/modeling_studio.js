@@ -15,4 +15,8 @@ export class ModelingStudio {
         canvasContainer.style.height = (window.innerHeight + canvasContainer.offsetTop) + "px"
         window.studioWindowResized()
     }
+
+    setUnactive() {
+
+    }
 }

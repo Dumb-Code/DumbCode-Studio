@@ -21,6 +21,7 @@ const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
 
 const canvasContainer = document.getElementById("display-div");
+const mainArea = document.getElementById("main-area")
 const display = new DinosaurDisplay()
 
 let controls, transformControls
@@ -148,6 +149,12 @@ function createScene() {
 function frame() {
     let newTab = projectTabs.getActive(filesPage, modelingStudio, animationStudio)
     if(newTab !== activeTab && newTab !== undefined) {
+        if(activeTab !== undefined) {
+            activeTab.setUnactive()
+        }
+        projectTabs.tabs.forEach(t => mainArea.classList.remove("is-"+t))
+        
+        mainArea.classList.toggle("is-"+projectTabs.activeTab, true)
         activeTab = newTab
         Array.from(document.getElementsByClassName("editor-part")).forEach(elem => {
             elem.classList.toggle("is-active", elem.getAttribute("editor-tab").split(",").includes(projectTabs.activeTab))
@@ -470,12 +477,11 @@ window.subtractValue = elem => {
     }
 }
 
-window.addEventListener( 'resize', window.studioWindowResized, false );
-
+window.addEventListener( 'resize', e => window.studioWindowResized(), false );
 
 window.studioWindowResized = () => {
-    let width = canvasContainer.clientWidth;
-    let height = canvasContainer.clientHeight;
+    let width = canvasContainer.clientWidth
+    let height = canvasContainer.clientHeight
     updateCamera(display.camera, width, height)
     display.renderer.setSize( width, height );
 }

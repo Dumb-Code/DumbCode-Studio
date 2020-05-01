@@ -34,6 +34,10 @@ export class AnimationStudio {
         }
     }
 
+    setUnactive() {
+        activeStudio = undefined
+    }
+
     rotationChanged(tabulaCube, values) {
         if(this.manager.selectedKeyFrame) {
             this.rotationCache = values

@@ -4,6 +4,10 @@ export class FilesPage {
     }
 
     setActive() {
+
+    }
+
+    setUnactive() {
         
     }
 }
