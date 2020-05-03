@@ -38,6 +38,7 @@ export class Raytracer {
         this.intersected
         this.intersectedMesh
         this.disableRaycast = false
+        this.setSelected = setSelected
 
 
         document.addEventListener( 'mouseup', e => {
@@ -45,7 +46,7 @@ export class Raytracer {
             let xMove = Math.abs(mouseClickDown.x - event.clientX)
             let yMove = Math.abs(mouseClickDown.y - event.clientY)
         
-            if(this.intersectedMesh && (xMove < 5 || yMove < 5)) {
+            if(xMove < 5 && yMove < 5) {
                 let old = this.selected
                 this.selected = this.intersected
                 this.selectedMesh = this.intersectedMesh
@@ -75,7 +76,7 @@ export class Raytracer {
 
         if(this.display.tbl) {
             let intersects = raycaster.intersectObjects(this.display.tbl.modelCache.children , true);
-            if(!mouseDown && !document.getElementById("modal-settings").classList.contains("is-active")) {
+            if(!mouseDown) {
                 if(intersects.length > 0) {
                     if(this.intersectedMesh != intersects[0].object) {
                         if(this.intersectedMesh && this.intersectedMesh != this.selectedMesh) {
@@ -92,8 +93,10 @@ export class Raytracer {
                     } 
                     textDiv.style.display = "block"
                 } else {
-                    if(this.intersectedMesh && this.intersectedMesh != this.selectedMesh) {
-                        this.intersected.children.forEach(c => c.material = this.material)
+                    if(this.intersectedMesh) {
+                        if(this.intersectedMesh != this.selectedMesh) {
+                            this.intersected.children.forEach(c => c.material = this.material)
+                        }
                         this.intersectedMesh = null
                         this.intersected = null
                     }
