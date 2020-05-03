@@ -231,7 +231,13 @@ const keyframeCallback = () => {
         activeStudio.manager.selectedKeyFrame.selectChange(false)
     }
 }
-const dinosaurCallback = () => setAsSelected(undefined)
+const dinosaurCallback = () => {
+    if(activeStudio !== undefined) {
+        activeStudio.raytracer.setAsSelected(undefined)
+        activeStudio.raytracer.selected = undefined
+        activeStudio.raytracer.selectedMest = undefined
+    }
+}
 
 container.addEventListener("mousedown", () => window.studioEscapeCallback = () => {
     if(activeStudio !== undefined) {
