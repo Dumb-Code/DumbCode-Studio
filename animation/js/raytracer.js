@@ -48,6 +48,7 @@ export class Raytracer {
             if(this.intersectedMesh && (xMove < 5 || yMove < 5)) {
                 let old = this.selected
                 this.selected = this.intersected
+                this.selectedMesh = this.intersectedMesh
                 setSelected(old, this.selected)
             }
         }, false );
