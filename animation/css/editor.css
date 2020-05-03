@@ -42,12 +42,17 @@
     border-bottom-color: yellow !important;
 }
 
-
 #main-area.is-modeling {
     display: grid;
     grid-template-columns: calc(300px) calc(100% - 300px) ;
     grid-template-areas: "left_area main_area";
     width: 100%;
+}
+
+.modeling-input-3 {
+    display: grid;
+    grid-template-columns: 30% 5% 30% 5% 30%;
+    grid-template-areas: "l bl m br r";
 }
   
   

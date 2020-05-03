@@ -1,12 +1,9 @@
-import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./three.js";
+import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./three.js";
 import { TBLModel } from "./tbl_loader.js";
-import { DinosaurDisplay, DinosaurTexture, readFile } from "./displays.js";
+import { DinosaurDisplay, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
-import { KeyframeManger } from './keyframe_manager.js'
 import { HistoryList } from "./history.js";
-import { JavaMethodExporter } from "./java_method_exporter.js";
-import { ByteBuffer } from "./animations.js"
 import { ProjectTabs } from "./project_tabs.js";
 import { AnimationStudio } from "./animation_studio.js";
 import { ModelingStudio } from "./modeling_studio.js";
@@ -32,6 +29,7 @@ let material = new MeshLambertMaterial( {
     side: DoubleSide,
 } )
 
+
 let highlightMaterial = material.clone()
 highlightMaterial.emissive.setHex( 0xFF0000 )
 
@@ -41,7 +39,6 @@ selectedMaterial.emissive.setHex( 0x0000FF )
 let mainModel
 let modeCache, rotationCache
 
-let texture = new DinosaurTexture()
 const raytracer = new Raytracer(display, material, highlightMaterial, setAsSelected)
 
 let projectTabs = new ProjectTabs()
@@ -94,13 +91,14 @@ function init() {
     transformControls = new TransformControls(camera, renderer.domElement)
     transformControls.addEventListener('objectChange', () => {
         let pos = raytracer.selected.parent.position
+        let offset = raytracer.selected.position
         let rot = raytracer.selected.parent.rotation
 
         let rotations = [rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI)
         let positions = [pos.x, pos.y, pos.z]
 
-        setPosition(positions, false, false)
         setRotation(rotations, false, false)
+        setPosition(positions, false, false)
         runFrame()
     } );
     transformControls.addEventListener('dragging-changed', e => {
@@ -166,20 +164,7 @@ function frame() {
 }
 
 function runFrame() {
-    // calculateIntersections()
     activeTab.runFrame()
-    // if(display.animationHandler) {
-    //     manager.ensureFramePosition()
-    // }
-    
-    // display.display(() => manager.setupSelectedPose())
-    
-    // if(selected && display.animationHandler.playstate.playing) {
-    //     let pos = selected.parent.position
-    //     let rot = selected.parent.rotation
-    //     setPosition([pos.x, pos.y, pos.z], true)
-    //     setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), true)
-    // }
 }
 
 
@@ -187,16 +172,15 @@ function setAsSelected(oldSelected, selectedElem) {
     let isSelected = selectedElem !== undefined;
 
     if(oldSelected) {
-        oldSelected.material = material
+        oldSelected.children.forEach(c => c.material = material)
         if(!isSelected) {
             transformControls.detach(oldSelected);
         }
     }
     if(selectedElem) {
-        selectedElem.material = selectedMaterial
+        selectedElem.children.forEach(c => c.material = selectedMaterial)
     }
     let visible = transformControls.visible
-    transformControls.attach(selectedElem == undefined ? undefined : selectedElem.parent);
     setMode(visible ? transformControls.mode : "none", false);
     [...document.getElementsByClassName("editor-require-selected")].forEach(elem => {
         elem.disabled = !isSelected
@@ -211,6 +195,10 @@ function setAsSelected(oldSelected, selectedElem) {
         setPosition([0, 0, 0])
         setRotation([0, 0, 0])
     }
+
+    if(activeTab === modelingStudio) {
+        modelingStudio.selectedChanged()
+    }
 }
 
 function setPosition(values, displaysonly = false) {
@@ -219,13 +207,11 @@ function setPosition(values, displaysonly = false) {
         elem.checkValidity()
     });
     if(!displaysonly && raytracer.selected) {
+        raytracer.selected.tabulaCube.updatePosition(values)
 
-        raytracer.selected.parent.position.set(values[0], values[1], values[2])
-        
         if(activeTab === animationStudio) {
             animationStudio.positionChanged(raytracer.selected.tabulaCube, values)
-        }
-        
+        }        
     }
 }
 
@@ -240,7 +226,7 @@ function setRotation(values, displaysonly = false) {
     });
 
     if(!displaysonly && raytracer.selected) {
-        raytracer.selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
+        raytracer.selected.tabulaCube.updateRotation(values)
 
         if(activeTab === animationStudio) {
             animationStudio.rotationChanged(raytracer.selected.tabulaCube, values)
@@ -312,16 +298,18 @@ function setGlobal(elem, world) {
     elem.classList.toggle("is-active", world)
 }
 
-function setMode(mode, updateHistory = true) {
+function setMode(mode) {
     modeCache = mode
     if(!raytracer.selected) {
         mode = "none"
     }
-    if(updateHistory) {
-        daeHistory.addAction(() => setMode(modeCache, false), () => setMode(mode, false) )
-    }
     transformControls.visible = mode != "none"
     if(mode != "none") {
+        let toAttach = raytracer.selected.parent
+        if(mode === 'dimensions') {
+            toAttach = raytracer.selected
+        }
+        transformControls.attach(toAttach);
         transformControls.mode = mode
 
         let oldelement = document.getElementById("control-rotate")
@@ -360,14 +348,14 @@ function getSelectedPos() {
     return point
 }
 
-window.setRotation = (elem, history) => {
+window.setRotation = elem => {
     let num = Number(elem.value)
     if(Number.isNaN(num)) {
         return
     }
     let angles = getSelectedRot()
     angles[elem.getAttribute("axis")] = num
-    setRotation(angles, false, history)
+    setRotation(angles, false)
 }
 
 
@@ -404,14 +392,10 @@ window.setupMainModel = async(file, nameElement) => {
         console.error(`Error from file ${file.name}: ${err.message}`)
     }
 
-    if(!texture.texture) {
-        texture = new DinosaurTexture()
-        texture.setup()
-    }
 
-    display.setMainModel(material, texture, mainModel.model)
+    display.setMainModel(material, mainModel.model)
     animationStudio = new AnimationStudio(raytracer, display, mainModel.model, display.animationMap, setPosition, setRotation)
-    modelingStudio = new ModelingStudio(display)
+    modelingStudio = new ModelingStudio(display, raytracer, transformControls, setMode, setPosition, setRotation)
 
 }
 window.setupTexture = async(file, nameElement) => {
@@ -421,7 +405,6 @@ window.setupTexture = async(file, nameElement) => {
 
     imgtag.onload = () => {
 
-        texture = new DinosaurTexture()
         let tex = new Texture(imgtag)
 
         tex.needsUpdate = true
@@ -430,6 +413,7 @@ window.setupTexture = async(file, nameElement) => {
         tex.magFilter = NearestFilter;
         tex.minFilter = LinearMipMapLinearFilter;
 
+
         material.map = tex
         selectedMaterial.map = tex
         highlightMaterial.map = tex
@@ -437,10 +421,6 @@ window.setupTexture = async(file, nameElement) => {
         material.needsUpdate = true
         selectedMaterial.needsUpdate = true
         highlightMaterial.needsUpdate = true
-
-        texture.texture = tex
-
-        texture.setup()
     }
 
     imgtag.onerror = () => {

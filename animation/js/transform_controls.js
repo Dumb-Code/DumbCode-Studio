@@ -112,6 +112,9 @@ var TransformControls = function ( camera, domElement ) {
 	var quaternionStart = new Quaternion();
 	var scaleStart = new Vector3();
 
+	var dimensionsStart
+	var offsetsStart
+
 	// TODO: remove properties unused in plane and gizmo
 
 	defineProperty( "worldPosition", worldPosition );
@@ -281,7 +284,7 @@ var TransformControls = function ( camera, domElement ) {
 
 				var space = this.space;
 
-				if ( this.mode === 'scale' ) {
+				if ( this.mode === 'scale' || this.mode === 'dimensions' ) {
 
 					space = 'local';
 
@@ -308,6 +311,11 @@ var TransformControls = function ( camera, domElement ) {
 				quaternionStart.copy( this.object.quaternion );
 				scaleStart.copy( this.object.scale );
 
+				if(this.object.tabulaCube !== undefined) {
+					dimensionsStart = [...this.object.tabulaCube.dimension]
+					offsetsStart = [...this.object.tabulaCube.offset]
+				}
+
 				this.object.matrixWorld.decompose( worldPositionStart, worldQuaternionStart, worldScaleStart );
 
 				pointStart.copy( planeIntersect.point ).sub( worldPositionStart );
@@ -329,7 +337,7 @@ var TransformControls = function ( camera, domElement ) {
 		var object = this.object;
 		var space = this.space;
 
-		if ( mode === 'scale' ) {
+		if ( mode === 'scale' || mode === 'dimensions') {
 
 			space = 'local';
 
@@ -348,6 +356,51 @@ var TransformControls = function ( camera, domElement ) {
 		if ( planeIntersect === false ) return;
 
 		pointEnd.copy( planeIntersect.point ).sub( worldPositionStart );
+
+		if( mode === 'dimensions') {
+			// Apply dimension change
+
+			offset.copy( pointEnd ).sub( pointStart );
+
+			offset.applyQuaternion( worldQuaternionInv );
+
+			if ( axis.indexOf( 'X' ) === - 1 ) offset.x = 0;
+			if ( axis.indexOf( 'Y' ) === - 1 ) offset.y = 0;
+			if ( axis.indexOf( 'Z' ) === - 1 ) offset.z = 0;
+
+			offset.applyQuaternion( quaternionStart ).divide( parentScale );
+
+
+			if(this.object.tabulaCube !== undefined && dimensionsStart !== undefined && offsetsStart !== undefined) {
+				let dims = this.object.tabulaCube.dimension
+				let offs = this.object.tabulaCube.offset
+				
+				if(axis.endsWith('N')) {
+					offset.multiplyScalar(-1)
+				}
+
+				if(axis.startsWith('X')) {
+					dims[0] = dimensionsStart[0] + Math.floor(offset.x)
+				} else if(axis.startsWith('Y')) {
+					dims[1] = dimensionsStart[1] + Math.floor(offset.y)
+				} else if(axis.startsWith('Z')) {
+					dims[2] = dimensionsStart[2] + Math.floor(offset.z)
+				}
+
+				if(axis.endsWith('N')) {					
+					if(axis.startsWith('X')) {
+						offs[0] = offsetsStart[0] - Math.floor(offset.x)
+					} else if(axis.startsWith('Y')) {
+						offs[1] = offsetsStart[1] - Math.floor(offset.y)
+					} else if(axis.startsWith('Z')) {
+						offs[2] = offsetsStart[2] - Math.floor(offset.z)
+					}
+				}
+
+				this.studioCallback(dims, offs)
+		
+			}
+		}
 
 		if ( mode === 'translate' ) {
 
@@ -564,6 +617,9 @@ var TransformControls = function ( camera, domElement ) {
 
 		if ( pointer.button === undefined ) this.axis = null;
 
+		dimensionsStart = undefined
+		offsetsStart = undefined
+
 	};
 
 	// normalize mouse / touch pointer and remap {x,y} to view space.
@@ -719,6 +775,15 @@ var TransformControlsGizmo = function () {
 	var matBlue = gizmoMaterial.clone();
 	matBlue.color.set( 0x2d5ee8 );
 
+	var matRedDark = gizmoMaterial.clone();
+	matRedDark.color.set( 0x8c1b26 );
+
+	var matGreenDark = gizmoMaterial.clone();
+	matGreenDark.color.set( 0x168c28 );
+
+	var matBlueDark = gizmoMaterial.clone();
+	matBlueDark.color.set( 0x1b378c );
+
 	var matWhiteTransperent = gizmoMaterial.clone();
 	matWhiteTransperent.opacity = 0.25;
 
@@ -798,7 +863,35 @@ var TransformControlsGizmo = function () {
 		]
 	};
 
+	var gizmoDimensions = {
+		XN: [
+			[ new Mesh( scaleHandleGeometry, matRed ), [ -1.2, 0, 0 ], [ 0, 0, Math.PI / 2 ], null ],
+			[ new Mesh(translationLineGeometry , matLineRed ), [ -0.6, 0, 0 ], [ 0, 0, Math.PI / 2 ] ]
+		],
+		XP: [
+			[ new Mesh( scaleHandleGeometry, matRedDark ), [ 1.2, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null ],
+			[ new Mesh(translationLineGeometry , matRedDark ), [ 0.6, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ]
+		],
+		YN: [
+			[ new Mesh( scaleHandleGeometry, matGreen ), [ 0, -1.2, 0 ],  [ Math.PI, 0, 0 ], null ],
+			[ new Mesh( translationLineGeometry, matGreen), [ 0, -0.6, 0 ],  [ Math.PI, 0, 0 ]]
+		],
+		YP: [
+			[ new Mesh( scaleHandleGeometry, matGreenDark ), [ 0, 1.2, 0 ], null, null ],
+			[ new Mesh( translationLineGeometry, matGreenDark), [ 0, 0.6, 0 ], null]
+		],
+		ZN: [
+			[ new Mesh( scaleHandleGeometry, matBlue ), [ 0, 0, 1.2 ], [ - Math.PI / 2, 0, 0 ], null],
+			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, 0.6 ], [ - Math.PI / 2, 0, 0 ]]
+		],
+		ZP: [
+			[ new Mesh( scaleHandleGeometry, matBlueDark ), [ 0, 0, -1.2 ], [ Math.PI / 2, 0, 0 ], null],
+			[ new Mesh( translationLineGeometry, matBlueDark ), [ 0, 0, -0.6 ], [ Math.PI / 2, 0, 0 ]]
+		]
+	};
+
 	var pickerTranslate = gizmoTranslate;
+	var pikcerDimensions = gizmoDimensions
 
 	var helperTranslate = {
 		START: [
@@ -817,6 +910,36 @@ var TransformControlsGizmo = function () {
 			[ new Line( lineGeometry, matHelper.clone() ), [ 0, - 1e3, 0 ], [ 0, 0, Math.PI / 2 ], [ 1e6, 1, 1 ], 'helper' ]
 		],
 		Z: [
+			[ new Line( lineGeometry, matHelper.clone() ), [ 0, 0, - 1e3 ], [ 0, - Math.PI / 2, 0 ], [ 1e6, 1, 1 ], 'helper' ]
+		]
+	};
+
+	var helperDimensions = {
+		START: [
+			[ new Mesh( new OctahedronBufferGeometry( 0.01, 2 ), matHelper ), null, null, null, 'helper' ]
+		],
+		END: [
+			[ new Mesh( new OctahedronBufferGeometry( 0.01, 2 ), matHelper ), null, null, null, 'helper' ]
+		],
+		DELTA: [
+			[ new Line( TranslateHelperGeometry(), matHelper ), null, null, null, 'helper' ]
+		],
+		XN: [
+			[ new Line( lineGeometry, matHelper.clone() ), [ 1e3, 0, 0 ], null, [ 1e6, 1, 1 ], 'helper' ]
+		],
+		XP: [
+			[ new Line( lineGeometry, matHelper.clone() ), [ - 1e3, 0, 0 ], null, [ 1e6, 1, 1 ], 'helper' ]
+		],
+		YN: [
+			[ new Line( lineGeometry, matHelper.clone() ), [ 0, 1e3, 0 ], [ 0, 0, Math.PI / 2 ], [ 1e6, 1, 1 ], 'helper' ]
+		],
+		YP: [
+			[ new Line( lineGeometry, matHelper.clone() ), [ 0, - 1e3, 0 ], [ 0, 0, Math.PI / 2 ], [ 1e6, 1, 1 ], 'helper' ]
+		],
+		ZN: [
+			[ new Line( lineGeometry, matHelper.clone() ), [ 0, 0, 1e3 ], [ 0, - Math.PI / 2, 0 ], [ 1e6, 1, 1 ], 'helper' ]
+		],
+		ZP: [
 			[ new Line( lineGeometry, matHelper.clone() ), [ 0, 0, - 1e3 ], [ 0, - Math.PI / 2, 0 ], [ 1e6, 1, 1 ], 'helper' ]
 		]
 	};
@@ -1001,12 +1124,15 @@ var TransformControlsGizmo = function () {
 	this.helper = {};
 
 	this.add( this.gizmo[ "translate" ] = setupGizmo( gizmoTranslate ) );
+	this.add( this.gizmo[ "dimensions" ] = setupGizmo( gizmoDimensions ) );
 	this.add( this.gizmo[ "rotate" ] = setupGizmo( gizmoRotate ) );
 	this.add( this.gizmo[ "scale" ] = setupGizmo( gizmoScale ) );
 	this.add( this.picker[ "translate" ] = setupGizmo( pickerTranslate ) );
+	this.add( this.picker[ "dimensions" ] = setupGizmo( pikcerDimensions ) );
 	this.add( this.picker[ "rotate" ] = setupGizmo( pickerRotate ) );
 	this.add( this.picker[ "scale" ] = setupGizmo( pickerScale ) );
 	this.add( this.helper[ "translate" ] = setupGizmo( helperTranslate ) );
+	this.add( this.helper[ "dimensions" ] = setupGizmo( helperDimensions ) );
 	this.add( this.helper[ "rotate" ] = setupGizmo( helperRotate ) );
 	this.add( this.helper[ "scale" ] = setupGizmo( helperScale ) );
 
@@ -1015,6 +1141,7 @@ var TransformControlsGizmo = function () {
 	this.picker[ "translate" ].visible = false;
 	this.picker[ "rotate" ].visible = false;
 	this.picker[ "scale" ].visible = false;
+	this.picker[ "dimensions" ].visible = false;
 
 	// updateMatrixWorld will update transformations and appearance of individual handles
 
@@ -1022,7 +1149,7 @@ var TransformControlsGizmo = function () {
 
 		var space = this.space;
 
-		if ( this.mode === 'scale' ) space = 'local'; // scale always oriented to local rotation
+		if ( this.mode === 'scale' || this.mode === 'dimensions') space = 'local'; // scale always oriented to local rotation
 
 		var quaternion = space === "local" ? this.worldQuaternion : identityQuaternion;
 
@@ -1031,26 +1158,50 @@ var TransformControlsGizmo = function () {
 		this.gizmo[ "translate" ].visible = this.mode === "translate";
 		this.gizmo[ "rotate" ].visible = this.mode === "rotate";
 		this.gizmo[ "scale" ].visible = this.mode === "scale";
+		this.gizmo[ "dimensions" ].visible = this.mode === "dimensions";
 
 		this.helper[ "translate" ].visible = this.mode === "translate";
 		this.helper[ "rotate" ].visible = this.mode === "rotate";
 		this.helper[ "scale" ].visible = this.mode === "scale";
-
+		this.helper[ "dimensions" ].visible = this.mode === "dimensions";
 
 		var handles = [];
 		handles = handles.concat( this.picker[ this.mode ].children );
 		handles = handles.concat( this.gizmo[ this.mode ].children );
 		handles = handles.concat( this.helper[ this.mode ].children );
 
+		let centerFace = this.mode === 'dimensions' && this.object.tabulaCube !== undefined
+
 		for ( var i = 0; i < handles.length; i ++ ) {
 
 			var handle = handles[ i ];
 
 			// hide aligned to camera
+		
 
 			handle.visible = true;
 			handle.rotation.set( 0, 0, 0 );
 			handle.position.copy( this.worldPosition );
+
+			if(centerFace && handle.name.length == 2) {
+				let c = this.object.tabulaCube
+				let grow = c.mcScale
+				let additionVector
+				if(handle.name.startsWith('X')) {
+					additionVector = new Vector3(c.dimension[0]/2 + grow, 0, 0)
+				} else if(handle.name.startsWith('Y')) {
+					additionVector = new Vector3(0, c.dimension[1]/2 + grow, 0)
+				} else if(handle.name.startsWith('Z')) {
+					additionVector = new Vector3(0, 0, -c.dimension[2]/2 - grow)
+				}
+				
+				additionVector.multiplyScalar(1/16)
+				if(handle.name.endsWith('P')) {
+					additionVector.multiplyScalar(-1)
+				}
+
+				handle.position.add(additionVector)
+			}
 
 			var eyeDistance = this.worldPosition.distanceTo( this.cameraPosition );
 			handle.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance * this.size / 7 );
@@ -1172,6 +1323,8 @@ var TransformControlsGizmo = function () {
 
 			handle.quaternion.copy( quaternion );
 
+			let isDimension = this.mode === 'dimensions'
+
 			if ( this.mode === 'translate' || this.mode === 'scale' ) {
 
 				// Hide translate and scale axis facing the camera
@@ -1179,7 +1332,7 @@ var TransformControlsGizmo = function () {
 				var AXIS_HIDE_TRESHOLD = 0.99;
 
 
-				if ( handle.name === 'X' ) {
+				if ( handle.name === 'X' || (isDimension && handle.name.startsWith('X'))) {
 
 					if ( Math.abs( alignVector.copy( unitX ).applyQuaternion( quaternion ).dot( this.eye ) ) > AXIS_HIDE_TRESHOLD ) {
 
@@ -1189,7 +1342,7 @@ var TransformControlsGizmo = function () {
 					}
 
 				}
-				if ( handle.name === 'Y' ) {
+				if ( handle.name === 'Y' || (isDimension && handle.name.startsWith('Y')) ) {
 
 					if ( Math.abs( alignVector.copy( unitY ).applyQuaternion( quaternion ).dot( this.eye ) ) > AXIS_HIDE_TRESHOLD ) {
 
@@ -1199,7 +1352,7 @@ var TransformControlsGizmo = function () {
 					}
 
 				}
-				if ( handle.name === 'Z' ) {
+				if ( handle.name === 'Z' || (isDimension && handle.name.startsWith('Z'))) {
 
 					if ( Math.abs( alignVector.copy( unitZ ).applyQuaternion( quaternion ).dot( this.eye ) ) > AXIS_HIDE_TRESHOLD ) {
 
@@ -1321,7 +1474,7 @@ var TransformControlsPlane = function () {
 
 		this.position.copy( this.worldPosition );
 
-		if ( this.mode === 'scale' ) space = 'local'; // scale always oriented to local rotation
+		if ( this.mode === 'scale' || this.mode === 'dimensions' ) space = 'local'; // scale always oriented to local rotation
 
 		unitX.set( 1, 0, 0 ).applyQuaternion( space === "local" ? this.worldQuaternion : identityQuaternion );
 		unitY.set( 0, 1, 0 ).applyQuaternion( space === "local" ? this.worldQuaternion : identityQuaternion );
@@ -1333,6 +1486,29 @@ var TransformControlsPlane = function () {
 
 		switch ( this.mode ) {
 
+			case 'dimensions':
+				switch( this.axis ) {
+					case 'XN':
+					case 'XP':
+						alignVector.copy( this.eye ).cross( unitX );
+						dirVector.copy( unitX ).cross( alignVector );
+						break;
+					case 'YN':
+					case 'YP':
+						alignVector.copy( this.eye ).cross( unitY );
+						dirVector.copy( unitY ).cross( alignVector );
+						break;
+					case 'ZN':
+					case 'ZP':
+						alignVector.copy( this.eye ).cross( unitZ );
+						dirVector.copy( unitZ ).cross( alignVector );
+						break;
+				}
+				if(this.axis !== null && this.axis.endsWith("N")) {
+					alignVector.multiplyScalar(-1)
+					dirVector.multiplyScalar(-1)
+				}
+				break;
 			case 'translate':
 			case 'scale':
 				switch ( this.axis ) {

@@ -78,7 +78,61 @@
         </label>
     </div>
     <div class="editor-part", editor-tab="modeling" style="grid-area: left_area; color: black; width: 300px">
-        TEST
+        <div class="modeling-ui-entry">
+            <label>Dimensions</label>
+            <div class="modeling-input-3" style="padding: 5px;">
+                <input axis="0" class="input-dimension editor-require-selected" style="grid-area: l" type="number" name="X Dimension" oninput="setDimension(this)" disabled>
+                <input axis="1" class="input-dimension editor-require-selected" style="grid-area: m" type="number" name="X Dimension" oninput="setDimension(this)" disabled>
+                <input axis="2" class="input-dimension editor-require-selected" style="grid-area: r" type="number" name="X Dimension" oninput="setDimension(this)" disabled>
+            </div>
+        </div>
+        <div class="modeling-ui-entry">
+            <label>Position</label>
+            <div class="modeling-input-3" style="padding: 5px;">
+                <input axis="0" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Position" oninput="setPosition(this)" disabled>
+                <input axis="1" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="X Position" oninput="setPosition(this)" disabled>
+                <input axis="2" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: r" type="number" name="X Position" oninput="setPosition(this)" disabled>
+            </div>
+        </div>
+        <div class="modeling-ui-entry">
+            <label>Offset</label>
+            <div class="modeling-input-3" style="padding: 5px;">
+                <input axis="0" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Offet" oninput="setOffset(this)" disabled>
+                <input axis="1" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="X Offet" oninput="setOffset(this)" disabled>
+                <input axis="2" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: r" type="number" name="X Offet" oninput="setOffset(this)" disabled>
+            </div>
+        </div>
+        <div class="modeling-ui-entry">
+            <label>Cube Grow</label>
+            <div>
+                <input class="input-cube-grow modeling-ui-changeable editor-require-selected" type="number" name="Cube Grow" oninput="setMcScale(this)" disabled>
+            </div>
+        </div>
+        <div class="modeling-ui-entry">
+            <label>Offset</label>
+            <div class="modeling-input-3" style="padding: 5px;">
+                <input axis="0" class="input-texure-offset modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Tex Offet" oninput="setTextureOffset(this)" disabled>
+                <input axis="1" class="input-texure-offset modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="Y Tex Offet" oninput="setTextureOffset(this)" disabled>
+                <div style="grid-area: r" class="b-checkbox is-inline">
+                    <input class="input-texture-mirrored editor-require-selected" id="checkbox-tex-mirrored" class="styled" type="checkbox" oninput="setTextureMirrored(this)">
+                    <label for="checkbox-tex-mirrored">Mirror</label>
+                </div>
+            </div>
+        </div>
+        <div class="modeling-ui-entry">
+            <label>Rotation</label>
+            <div class="modeling-input-3" style="padding: 5px;">
+                <input axis="0" class="input-rotation editor-require-selected" style="grid-area: l" type="number" name="X Rotation" oninput="setRotation(this)" disabled>
+                <input axis="1" class="input-rotation editor-require-selected" style="grid-area: m" type="number" name="X Rotation" oninput="setRotation(this)" disabled>
+                <input axis="2" class="input-rotation editor-require-selected" style="grid-area: r" type="number" name="X Rotation" oninput="setRotation(this)" disabled>
+            </div>
+            <input axis="0" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+            <input axis="1" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+            <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" disabled>
+        </div>
+        <div>
+            <input type="button" onclick="toggleDimensionsTransform()">TEST</input>
+        </div>
     </div>
     <div id="display-div" class="editor-part" editor-tab="modeling,animation" style="grid-area: main_area;"></div>
     <div class="editor-container editor-part" id="editor-container" editor-tab="animation" style="grid-area: lower_area;">
@@ -408,17 +462,17 @@ Generating...
                         Rotation
                         <div class="editor-slider editor-entry">
                             X: 
-                            <input axis="0" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this, false)" onmousedown="storeRotationHistory()" onmouseup="setRotationHistory()" disabled>
+                            <input axis="0" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" onmousedown="storeRotationHistory()" onmouseup="setRotationHistory()" disabled>
                             <input axis="0" class="input is-small editor-require-selected input-rotation" type="text" placeholder="X" onfocusout="setRotation(this)" disabled>
                         </div>
                         <div class="editor-slider editor-entry">
                             Y: 
-                            <input axis="1" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this, false)" onmousedown="storeRotationHistory()" onmouseup="setRotationHistory()" disabled>
+                            <input axis="1" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" onmousedown="storeRotationHistory()" onmouseup="setRotationHistory()" disabled>
                             <input axis="1" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Y" onfocusout="setRotation(this)" disabled>
                         </div>
                         <div class="editor-slider editor-entry">
                             Z: 
-                            <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this, false)" onmousedown="storeRotationHistory()" onmouseup="setRotationHistory()" disabled>
+                            <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" oninput="setRotation(this)" onmousedown="storeRotationHistory()" onmouseup="setRotationHistory()" disabled>
                             <input axis="2" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Z" onfocusout="setRotation(this)" disabled>
                         </div>
                     </div>

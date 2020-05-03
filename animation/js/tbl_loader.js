@@ -1,4 +1,4 @@
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material } from "./three.js";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3 } from "./three.js";
 
 export class TBLModel {
 
@@ -17,8 +17,8 @@ export class TBLModel {
 
     }
 
-    createModel( material, allCubes, animationMap ) {
-        let mainCubeGroup = this.rootGroup.createGroup(material, allCubes, animationMap)
+    createModel( material, animationMap ) {
+        let mainCubeGroup = this.rootGroup.createGroup(material, animationMap)
 
         this.modelCache = new Group();
         this.modelCache.scale.set(-1/16, -1/16, 1/16)
@@ -41,12 +41,12 @@ class CubeGroup {
        this.cubeGroups = cubeGroups
     }
 
-    createGroup( material, allCubes, animationMap ) {
+    createGroup( material, animationMap ) {
 
         this.modelGroup = new Group();
 
-        this.cubeGroups.forEach(child => { this.modelGroup.add(child.createGroup(material, allCubes, animationMap)) })
-        this.cubeList.forEach(cube => { this.modelGroup.add(cube.createGroup(material, allCubes, animationMap)) })
+        this.cubeGroups.forEach(child => { this.modelGroup.add(child.createGroup(material, animationMap)) })
+        this.cubeList.forEach(cube => { this.modelGroup.add(cube.createGroup(material, animationMap)) })
 
         return this.modelGroup
     }
@@ -71,14 +71,14 @@ function parseGroupJson(json, tbl) {
 
 class Cube {
 
-    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureoffset, mcScale, children, textureMirrored, tbl) {
+    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureOffset, mcScale, children, textureMirrored, tbl) {
         this.name = name
         this.dimension = dimension
         this.rotationPoint = rotationPoint
         this.offset = offset
         this.rotation = rotation
         this.scale = scale
-        this.textureoffset = textureoffset
+        this.textureOffset = textureOffset
         this.mcScale = mcScale
         this.children = children
         this.tbl = tbl
@@ -88,31 +88,29 @@ class Cube {
     }
 
   
-    createGroup( material, allCubes, animationMap ) {
+    createGroup( material, animationMap ) {
         this.cubeGroup = new Group();
-
-        let padding = 0.001
-        let geometry = new BoxBufferGeometry((this.dimension[0] + padding) + this.mcScale*2, (this.dimension[1] + padding) + this.mcScale*2, (this.dimension[2] + padding) + this.mcScale*2);
-        allCubes.push(geometry)
-
-        let rawUV = new Array(6 * 4)
-        let uv = getUV(rawUV, this.textureoffset[0], this.textureoffset[1], this.dimension[0], this.dimension[1], this.dimension[2], this.tbl.texWidth, this.tbl.texHeight, this.textureMirrored)
-        geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uv), 2))
-        geometry.rawUV = rawUV
-
-        let cube = new Mesh( geometry, material)
-        cube.position.set( this.dimension[0] / 2 + this.offset[0], this.dimension[1] / 2 + this.offset[1], this.dimension[2] / 2 + this.offset[2] )
-        cube.tabulaCube = this
         this.cubeGroup.tabulaCube = this
-        this.cubeGroup.add( cube )
 
-        this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
+        this.planesGroup = new Group()
+        this.planesGroup.tabulaCube = this
+
+        this.cubeGroup.add(this.planesGroup)
+        this.cubeMesh = []
+        for(let f = 0; f < 6; f++) {
+            let mesh = new Mesh(undefined, material)
+            this.cubeMesh.push(mesh)
+            this.planesGroup.add(mesh)
+        }
+        this.updateDimensions()
+
         this.cubeGroup.rotation.order = "ZYX"
-        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)
+        this.updatePosition()
+        this.updateRotation()
 
         animationMap.set(this.name, this.cubeGroup)
 
-        this.children.forEach(child => this.cubeGroup.add(child.createGroup(material, allCubes, animationMap)))
+        this.children.forEach(child => this.cubeGroup.add(child.createGroup(material, animationMap)))
 
         return this.cubeGroup
     }
@@ -124,6 +122,81 @@ class Cube {
         this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)    
     }
 
+    updateGeometry() {
+        let w = this.dimension[0] + this.mcScale*2 + 0.02
+        let h = this.dimension[1] + this.mcScale*2 + 0.02
+        let d = this.dimension[2] + this.mcScale*2 + 0.02
+
+        this.cubeMesh[0].geometry = new PlaneBufferGeometry(d, h); //+x
+        this.cubeMesh[0].rotation.set(0, Math.PI / 2, 0)
+        this.cubeMesh[0].position.set(w/2, 0, 0)
+
+        this.cubeMesh[1].geometry = new PlaneBufferGeometry(d, h); //-x
+        this.cubeMesh[1].rotation.set(0, -Math.PI / 2, 0)
+        this.cubeMesh[1].position.set(-w/2, 0, 0)
+
+        
+        this.cubeMesh[2].geometry = new PlaneBufferGeometry(w, d); //+y
+        this.cubeMesh[2].rotation.set(Math.PI / 2, 0, 0)
+        this.cubeMesh[2].position.set(0, -h/2, 0)
+
+        this.cubeMesh[3].geometry = new PlaneBufferGeometry(w, d); //-y
+        this.cubeMesh[3].rotation.set(-Math.PI / 2, 0, 0)
+        this.cubeMesh[3].position.set(0, h/2, 0)
+
+
+        this.cubeMesh[4].geometry = new PlaneBufferGeometry(w, h); //+z
+        this.cubeMesh[4].position.set(0, 0, d/2)
+
+        this.cubeMesh[5].geometry = new PlaneBufferGeometry(w, h); //-z
+        this.cubeMesh[5].rotation.set(0, Math.PI, 0)
+        this.cubeMesh[5].position.set(0, 0, -d/2)
+    }
+
+    updateTexture() {
+        let uvData = getUV(this.textureOffset[0], this.textureOffset[1], this.dimension[0], this.dimension[1], this.dimension[2], this.tbl.texWidth, this.tbl.texHeight, this.textureMirrored)
+        for(let f = 0; f < 6; f++) {
+            this.cubeMesh[f].geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uvData.slice(f*8, (f+1)*8)), 2))
+        }
+    }
+
+    updateDimensions(values = this.dimensions) {
+        this.dimensions = values
+        this.updateOffset()
+        this.updateGeometry()
+        this.updateTexture()
+    }
+
+    updateMcScale(value = this.mcScale) {
+        this.mcScale = value
+        this.updateGeometry()
+    }
+
+    updateTextureOffset(values = this.textureOffset) {
+        this.textureOffset = values
+        this.updateTexture()
+    }
+
+    updateTextureMirrored(value = this.textureMirrored) {
+        this.textureMirrored = value
+        this.updateTexture()
+    }
+
+    updateOffset(values = this.offset) {
+        this.offset = values
+        this.planesGroup.position.set( this.dimension[0] / 2 + this.offset[0], this.dimension[1] / 2 + this.offset[1], this.dimension[2] / 2 + this.offset[2] )
+    }
+
+    updatePosition(values = this.rotationPoint) {
+        this.rotationPoint = values
+        this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
+    }
+
+    updateRotation(values = this.rotation) {
+        this.rotation = values
+        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)
+    }
+
 }
 
 function parseCubeJson(json, tbl) {
@@ -132,17 +205,15 @@ function parseCubeJson(json, tbl) {
     return new Cube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
 }
 
-function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {
+function getUV(offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {
 
-    //Uv data goes west, east, down, up, south north
-
+    //Uv data goes west, east, down, up, south, north (+x, -x, +y, -y, +z, -z)
     //6 -> 6 faces
     //4 -> 4 vertices per face
     //2 -> 2 data per vertex (u, v)
-    let uvdata = new Array(6 * 4 * 2)
-
+    let uvData = new Array(6 * 4 * 2)
     let texBottomOrder = [ 1, 5, 0, 4 ]
-    let texUpperOrder = [3, 2]
+    let texUpperOrder = [2, 3]
 
     let offX = 0
     for(let texh = 0; texh < texBottomOrder.length; texh++) {
@@ -161,41 +232,37 @@ function getUV(rawData, offsetX, offsetY, w, h, d, texWidth, texHeight, texMirro
         }
         offX += xDist
 
-        putUVData(rawData, uvdata, index, minX, minY, xDist, h, texWidth, texHeight, texMirrored)
+        putUVData(uvData, index, minX, minY, xDist, h, texWidth, texHeight, texMirrored)
     }
 
     for(let texb = 0; texb < texUpperOrder.length; texb++) {
         let minXLower = offsetX + d + w * texb + w
         if(texb == 0) { //Up
-            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY+d, -w, -d, texWidth, texHeight, texMirrored)
+            putUVData(uvData, texUpperOrder[texb], minXLower, offsetY+d, -w, -d, texWidth, texHeight, texMirrored)
         } else { //Down
-            putUVData(rawData, uvdata, texUpperOrder[texb], minXLower, offsetY, -w, d, texWidth, texHeight, texMirrored) 
+            putUVData(uvData, texUpperOrder[texb], minXLower, offsetY, -w, d, texWidth, texHeight, texMirrored) 
         }
     }
 
-
-    return uvdata
+    // console.log(uvData.slice(2*8, 3*8))
+    return uvData
 }
 
-function putUVData(rawData, uvdata, facingindex, minU, minV, uSize, vSize, texWidth, texHeight, texMirrored) {
+function putUVData(uvData, facingindex, minU, minV, uSize, vSize, texWidth, texHeight, texMirrored) {
     if(texMirrored) {
         minU += uSize
         uSize = -uSize
     }
+
     //1 0 1 0
     //1 1 0 0
     let u = [minU + uSize, minU, minU + uSize, minU]
     let v = [minV + vSize, minV + vSize, minV, minV]
     for(let vertex = 0; vertex < 4; vertex++) {
         let index = (facingindex * 4 + vertex) * 2
-        uvdata[index] = u[vertex] / texWidth
-        uvdata[index + 1] = v[vertex] / texHeight
+        uvData[index] = u[vertex] / texWidth
+        uvData[index + 1] = v[vertex] / texHeight
     }
-
-    rawData[facingindex*4+0] = minU
-    rawData[facingindex*4+1] = minV
-    rawData[facingindex*4+2] = uSize
-    rawData[facingindex*4+3] = vSize
 }
 
 

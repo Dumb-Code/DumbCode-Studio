@@ -34,7 +34,9 @@ export class Raytracer {
         this.highlightMaterial = highlightMaterial
         this.display = display
         this.selected
+        this.selectedMesh
         this.intersected
+        this.intersectedMesh
         this.disableRaycast = false
 
 
@@ -43,7 +45,7 @@ export class Raytracer {
             let xMove = Math.abs(mouseClickDown.x - event.clientX)
             let yMove = Math.abs(mouseClickDown.y - event.clientY)
         
-            if(this.intersected && (xMove < 5 || yMove < 5)) {
+            if(this.intersectedMesh && (xMove < 5 || yMove < 5)) {
                 let old = this.selected
                 this.selected = this.intersected
                 setSelected(old, this.selected)
@@ -60,7 +62,7 @@ export class Raytracer {
             return undefined
         }
 
-        if(this.intersected) {
+        if(this.intersectedMesh) {
             let style = textDiv.style
             let divRect = textDiv.getBoundingClientRect()
             style.left = rawMouse.x - divRect.width/2 + "px"
@@ -74,22 +76,24 @@ export class Raytracer {
             let intersects = raycaster.intersectObjects(this.display.tbl.modelCache.children , true);
             if(!mouseDown && !document.getElementById("modal-settings").classList.contains("is-active")) {
                 if(intersects.length > 0) {
-                    if(this.intersected != intersects[0].object) {
-                        if(this.intersected && this.intersected != this.selected) {
-                            this.intersected.material = this.material
+                    if(this.intersectedMesh != intersects[0].object) {
+                        if(this.intersectedMesh && this.intersectedMesh != this.selectedMesh) {
+                            this.intersected.children.forEach(c => c.material = this.material)
                         }
             
-                        this.intersected = intersects[0].object
+                        this.intersectedMesh = intersects[0].object
+                        this.intersected = this.intersectedMesh.parent
                         textDiv.innerHTML = this.intersected.tabulaCube.name
                         
-                        if(this.intersected != this.selected) {
-                            this.intersected.material = this.highlightMaterial
+                        if(this.intersectedMesh != this.selectedMesh) {
+                            this.intersected.children.forEach(c => c.material = this.highlightMaterial)
                         } 
                     } 
                     textDiv.style.display = "block"
                 } else {
-                    if(this.intersected && this.intersected != this.selected) {
-                        this.intersected.material = this.material
+                    if(this.intersectedMesh && this.intersectedMesh != this.selectedMesh) {
+                        this.intersected.children.forEach(c => c.material = this.material)
+                        this.intersectedMesh = null
                         this.intersected = null
                     }
                     textDiv.style.display = "none"

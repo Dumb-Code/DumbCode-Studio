@@ -1,5 +1,4 @@
-import { Raycaster, Vector2, Clock, Geometry, Vector3, LineBasicMaterial, Group, Line, Material } from "./three.js";
-import { AnimationHandler } from './animations.js'
+import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material } from "./three.js";
 import { TBLModel } from "./tbl_loader.js";
 
 export class DinosaurDisplay {
@@ -46,94 +45,20 @@ export class DinosaurDisplay {
     /**
      * 
      * @param {Material} material 
-     * @param {DinosaurTexture} texture 
      * @param {TBLModel} model 
      */
-    setMainModel(material, texture, model) {
+    setMainModel(material, model) {
         if(this.tbl) {
             this.scene.remove(this.tbl.modelCache)
         }
         this.allCubes.length = 0
         this.animationMap.clear()
         this.tbl = model
-        this.scene.add(model.createModel(material, this.allCubes, this.animationMap))
-        this.checkAllCulled(texture)   
+        this.scene.add(model.createModel(material, this.animationMap))
     }
 
     render() {
         this.renderer.render(this.scene, this.camera);
-    }
-
-    checkAllCulled(texture) {
-        this.allCubes.forEach(cube => {
-
-            let index = []
-            let planes = [ 1, 1, 1, 1, 1, 1 ]
-            for(let face = 0; face < 6; face++) {
-                if(!this.shouldBuild(cube.rawUV[face*4], cube.rawUV[face*4+1], cube.rawUV[face*4+2], cube.rawUV[face*4+3], texture)) {
-                    planes[face] = 0
-                }
-            }
-            for(let i = 0; i < planes.length; i++) {
-                if(planes[i] === 1) {
-                    index.push(...[0, 2, 1, 2, 3, 1].map(v => i*4 + v))
-                }
-            }
-            cube.setIndex(index)
-        })
-    }
-
-    shouldBuild(x, y, dx, dy, texture) {
-        if(dx * dy == 0) {
-            return false
-        }
-
-        if(dx < 0) {
-            x += dx
-            dx = Math.abs(dx)
-        }
-
-        if(dy < 0) {
-            y += dy
-            dy = Math.abs(dy)
-        }
-
-        //Move the getImageData to the DinosaurTexture class?
-        let data = texture.pixels.getImageData(
-            Math.floor(x / this.tbl.texWidth * texture.width), 
-            Math.floor(y / this.tbl.texHeight * texture.height), 
-            
-            Math.max(dx / this.tbl.texWidth * texture.width, 1), 
-            Math.max(dy / this.tbl.texHeight * texture.height, 1)
-        ).data
-        for(let index = 0; index < data.length; index+=4) {
-            if(data[index+3] != 0) { //Maybe add a threshold
-                return true
-            }
-        }
-        return false
-    }
-}
-
-export class DinosaurTexture {
-    setup() {
-        let canvas = document.createElement('canvas');
-        this.pixels = canvas.getContext('2d')
-
-        if(this.texture === undefined) {
-            this.width = this.height = canvas.width = canvas.height = 1
-            this.width = this.height = canvas.width = canvas.height = 1
-            this.pixels.fillStyle = "rgba(1,1,1,1)"
-            this.pixels.fillRect(0, 0, 1, 1)
-        } else {
-            this.width = this.texture.image.naturalWidth;
-            this.height = this.texture.image.naturalHeight;
-    
-            canvas.width = this.width
-            canvas.height = this.height
-    
-            this.pixels.drawImage(this.texture.image, 0, 0, this.width, this.height);
-        }
     }
 }
 
