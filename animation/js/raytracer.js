@@ -97,8 +97,8 @@ export class Raytracer {
                         if(this.intersectedMesh != this.selectedMesh) {
                             this.intersected.children.forEach(c => c.material = this.material)
                         }
-                        this.intersectedMesh = null
-                        this.intersected = null
+                        this.intersectedMesh = undefined
+                        this.intersected = undefined
                     }
                     textDiv.style.display = "none"
                 }
