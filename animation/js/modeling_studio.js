@@ -1,6 +1,11 @@
 import { CubeListBoard } from "./cube_list_board.js";
 
+const mainArea = document.getElementById("main-area")
+const leftDivider = document.getElementById("left-divider")
+const rightDivider = document.getElementById("right-divider")
 const canvasContainer = document.getElementById("display-div");
+
+let clickedDivider = -1
 
 let activeStudio
 
@@ -18,6 +23,35 @@ export class ModelingStudio {
             setDimension(dims)
             setOffset(offset)
         }
+
+        this.leftArea = 300
+        this.rightArea = 300
+        
+        document.onmouseup = () => clickedDivider = 0
+        leftDivider.onmousedown = () => clickedDivider = 1
+        rightDivider.onmousedown = () => clickedDivider = 2
+
+        document.onmousemove = e => {
+            if(clickedDivider !== 0) {
+                if(clickedDivider === 1) {
+                    this.leftArea = e.clientX
+                } else if(clickedDivider === 2) {
+                    this.rightArea = mainArea.clientWidth - e.clientX
+                }
+                this.updateAreas()
+            }
+        }
+
+        this.updateAreas()
+    }
+
+    updateAreas() {
+        leftDivider.style.left = this.leftArea + "px"
+        rightDivider.style.right = this.rightArea + "px"
+
+        mainArea.style.gridTemplateColumns = this.leftArea + "px " + " calc(100% - " + (this.leftArea + this.rightArea) + "px) " + this.rightArea + "px"
+
+        window.studioWindowResized()
     }
 
     runFrame() {
