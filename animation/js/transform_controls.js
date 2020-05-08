@@ -1192,7 +1192,7 @@ var TransformControlsGizmo = function () {
 				} else if(handle.name.startsWith('Y')) {
 					additionVector = new Vector3(0, c.dimension[1]/2 + grow, 0)
 				} else if(handle.name.startsWith('Z')) {
-					additionVector = new Vector3(0, 0, -c.dimension[2]/2 - grow)
+					additionVector = new Vector3(0, 0, c.dimension[2]/2 + grow)
 				}
 				
 				additionVector.multiplyScalar(1/16)
