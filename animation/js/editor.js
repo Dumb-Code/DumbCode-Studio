@@ -169,6 +169,7 @@ function runFrame() {
 
 
 function setAsSelected(oldSelected, selectedElem) {
+    console.trace(selectedElem)
     let isSelected = selectedElem !== undefined;
 
     if(oldSelected) {
@@ -395,7 +396,7 @@ window.setupMainModel = async(file, nameElement) => {
 
     display.setMainModel(material, mainModel.model)
     animationStudio = new AnimationStudio(raytracer, display, mainModel.model, display.animationMap, setPosition, setRotation)
-    modelingStudio = new ModelingStudio(display, raytracer, transformControls, setMode, setPosition, setRotation)
+    modelingStudio = new ModelingStudio(display, raytracer, transformControls, setMode, setPosition, setRotation, setAsSelected)
 
 }
 window.setupTexture = async(file, nameElement) => {

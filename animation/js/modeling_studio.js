@@ -1,3 +1,5 @@
+import { CubeListBoard } from "./cube_list_board.js";
+
 const canvasContainer = document.getElementById("display-div");
 
 let activeStudio
@@ -10,6 +12,7 @@ export class ModelingStudio {
         this.setPosition = setPosition
         this.setRotation = setRotation
         this.setMode = setMode
+        this.cubeList = new CubeListBoard(document.getElementById("cube-list"), raytracer, display.tbl)
         this.transformControls = transformControls
         this.transformControls.studioCallback = (dims, offset) => {
             setDimension(dims)

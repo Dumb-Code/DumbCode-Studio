@@ -34,9 +34,7 @@ export class Raytracer {
         this.highlightMaterial = highlightMaterial
         this.display = display
         this.selected
-        this.selectedMesh
         this.intersected
-        this.intersectedMesh
         this.disableRaycast = false
         this.setSelected = setSelected
 
@@ -46,15 +44,36 @@ export class Raytracer {
             let xMove = Math.abs(mouseClickDown.x - event.clientX)
             let yMove = Math.abs(mouseClickDown.y - event.clientY)
         
-            if(xMove < 5 && yMove < 5) {
-                let old = this.selected
-                this.selected = this.intersected
-                this.selectedMesh = this.intersectedMesh
-                setSelected(old, this.selected)
+            if(xMove < 5 && yMove < 5 && mouse.x > 0 && mouse.x < 1 && mouse.y > 0 && mouse.y < 1) {
+                this.clickOnMesh(this.intersected)
             }
         }, false );
+    }
+    
+    clickOnMesh(mesh) {
+        let old = this.selected
+        this.selected = mesh
+        this.setSelected(old, this.selected)
+    }
 
-
+    mouseOverMesh(mesh) {
+        if(mesh !== undefined) {
+            if(this.intersected != mesh) {
+                if(this.intersected && this.intersected != this.selected) {
+                    this.intersected.children.forEach(c => c.material = this.material)
+                }
+                this.intersected = mesh
+                
+                if(this.intersected != this.selected) {
+                    this.intersected.children.forEach(c => c.material = this.highlightMaterial)
+                } 
+            } 
+        } else if(this.intersected) {
+            if(this.intersected != this.selected) {
+                this.intersected.children.forEach(c => c.material = this.material)
+            }
+            this.intersected = undefined
+        }
     }
 
     update() {
@@ -64,42 +83,31 @@ export class Raytracer {
             return undefined
         }
 
-        if(this.intersectedMesh) {
+        if(mouse.x < 0 || mouse.x > 1 || mouse.y < 0 || mouse.y > 1) {
+            textDiv.style.display = "none"
+            return
+        }
+
+        if(this.intersected) {
             let style = textDiv.style
             let divRect = textDiv.getBoundingClientRect()
+            textDiv.innerHTML = this.intersected.tabulaCube.name
             style.left = rawMouse.x - divRect.width/2 + "px"
             style.top = rawMouse.y - 35 + "px"
         }
 
         let raycaster = new Raycaster()
         raycaster.setFromCamera(mouse, this.display.camera);
+        
 
         if(this.display.tbl) {
             let intersects = raycaster.intersectObjects(this.display.tbl.modelCache.children , true);
             if(!mouseDown) {
                 if(intersects.length > 0) {
-                    if(this.intersectedMesh != intersects[0].object) {
-                        if(this.intersectedMesh && this.intersectedMesh != this.selectedMesh) {
-                            this.intersected.children.forEach(c => c.material = this.material)
-                        }
-            
-                        this.intersectedMesh = intersects[0].object
-                        this.intersected = this.intersectedMesh.parent
-                        textDiv.innerHTML = this.intersected.tabulaCube.name
-                        
-                        if(this.intersectedMesh != this.selectedMesh) {
-                            this.intersected.children.forEach(c => c.material = this.highlightMaterial)
-                        } 
-                    } 
+                    this.mouseOverMesh(intersects[0].object.parent)
                     textDiv.style.display = "block"
                 } else {
-                    if(this.intersectedMesh) {
-                        if(this.intersectedMesh != this.selectedMesh) {
-                            this.intersected.children.forEach(c => c.material = this.material)
-                        }
-                        this.intersectedMesh = undefined
-                        this.intersected = undefined
-                    }
+                    this.mouseOverMesh(undefined)
                     textDiv.style.display = "none"
                 }
             }

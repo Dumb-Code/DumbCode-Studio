@@ -63,7 +63,7 @@ function parseGroupJson(json, tbl) {
      let childGroups = []
 
 
-     json.cubes.forEach(cube => { childGroups.push(parseCubeJson(cube, tbl)) })
+     json.cubes.forEach(cube => { cubeList.push(parseCubeJson(cube, tbl)) })
      json.cubeGroups.forEach(group => { childGroups.push(parseGroupJson(group, tbl)) })
 
     return new CubeGroup(cubeList, childGroups, tbl)
@@ -113,6 +113,11 @@ class Cube {
         this.children.forEach(child => this.cubeGroup.add(child.createGroup(material, animationMap)))
 
         return this.cubeGroup
+    }
+
+    getAllChildrenCubes(arr = []) {
+        this.children.forEach(c => c.getAllChildrenCubes(arr))
+        return arr
     }
 
     resetAnimations() {

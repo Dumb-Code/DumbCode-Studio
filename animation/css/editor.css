@@ -44,8 +44,11 @@
 
 #main-area.is-modeling {
     display: grid;
-    grid-template-columns: calc(300px) calc(100% - 300px) ;
-    grid-template-areas: "left_area main_area";
+    grid-template-columns: 300px calc(100% - 620px) 320px;
+    grid-template-rows: calc(50vh - 26px) calc(50vh - 26px);
+    grid-template-areas: 
+    "left_area main_area right_area_top"
+    "left_area main_area right_area_bottom";
     width: 100%;
 }
 
@@ -54,5 +57,8 @@
     grid-template-columns: 30% 5% 30% 5% 30%;
     grid-template-areas: "l bl m br r";
 }
-  
+
+li.is-collapsed ul {
+    display: none;
+}
   
