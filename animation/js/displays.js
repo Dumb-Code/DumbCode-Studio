@@ -5,7 +5,6 @@ export class DinosaurDisplay {
 
     constructor() {
         this.allCubes = []
-        this.animationMap = new Map()
     }
 
 
@@ -52,9 +51,8 @@ export class DinosaurDisplay {
             this.scene.remove(this.tbl.modelCache)
         }
         this.allCubes.length = 0
-        this.animationMap.clear()
         this.tbl = model
-        this.scene.add(model.createModel(material, this.animationMap))
+        this.scene.add(model.createModel(material))
     }
 
     render() {

@@ -83,11 +83,6 @@ export class Raytracer {
             return undefined
         }
 
-        if(mouse.x < 0 || mouse.x > 1 || mouse.y < 0 || mouse.y > 1) {
-            textDiv.style.display = "none"
-            return
-        }
-
         if(this.intersected) {
             let style = textDiv.style
             let divRect = textDiv.getBoundingClientRect()

@@ -5,7 +5,7 @@ import { Clock } from './three.js'
 
 export class AnimationStudio {
 
-    constructor(raytracer, display, tbl, animationMap, setPosition, setRotation) {
+    constructor(raytracer, display, tbl, setPosition, setRotation) {
         this.clickY
         this.panelHeight = 320
         this.raytracer = raytracer
@@ -13,7 +13,7 @@ export class AnimationStudio {
         this.setPosition = setPosition
         this.setRotation = setRotation
         this.methodExporter = new JavaMethodExporter()
-        this.animationHandler = new AnimationHandler(tbl, animationMap)
+        this.animationHandler = new AnimationHandler(tbl)
         this.manager = new KeyframeManger(this.animationHandler, document.getElementById("keyframe-board"))
         this.clock = new Clock()
         this.animationHandler.playstate = this.manager.playstate
@@ -41,7 +41,7 @@ export class AnimationStudio {
     rotationChanged(tabulaCube, values) {
         if(this.manager.selectedKeyFrame) {
             this.rotationCache = values
-            this.manager.selectedKeyFrame.rotationMap.set(tabulaCube.name, values)
+            this.manager.selectedKeyFrame.rotationMap.set(tabulaCube.name, values.map((v, i) => v - tabulaCube.rotation[i]))
             this.animationHandler.keyframesDirty()
         }
     }
@@ -49,7 +49,7 @@ export class AnimationStudio {
     positionChanged(tabulaCube, values) {
         if(this.manager.selectedKeyFrame) {
             this.positionCache = values
-            this.manager.selectedKeyFrame.rotationPointMap.set(tabulaCube.name, values)
+            this.manager.selectedKeyFrame.rotationPointMap.set(tabulaCube.name, values.map((v, i) => v - tabulaCube.rotationPoint[i]))
             this.animationHandler.keyframesDirty()
         }
     }
@@ -233,7 +233,7 @@ const keyframeCallback = () => {
 }
 const dinosaurCallback = () => {
     if(activeStudio !== undefined) {
-        activeStudio.raytracer.setAsSelected(undefined)
+        activeStudio.raytracer.setSelected(undefined)
         activeStudio.raytracer.selected = undefined
         activeStudio.raytracer.selectedMest = undefined
     }

@@ -19,7 +19,7 @@ export class CubeListBoard {
         let li = document.createElement("li")
         let a = document.createElement("a")
         a.style.paddingRight = "5px"
-        a.innerText = cube.name+cube.name
+        a.innerText = cube.name
         a.onclick = () => this.raytracer.clickOnMesh(cube.planesGroup)
         a.onmousemove = () => this.raytracer.mouseOverMesh(cube.planesGroup)
         a.onmouseleave = () => this.raytracer.mouseOverMesh(undefined)
@@ -49,6 +49,6 @@ export class CubeListBoard {
         }
 
         parent.appendChild(li)
-        this.elementMap.set(cube, li)
+        this.elementMap.set(cube, {li, a})
     }
 }

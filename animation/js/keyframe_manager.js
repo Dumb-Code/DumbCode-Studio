@@ -161,13 +161,14 @@ export class KeyframeManger {
 
     setupSelectedPose() {
         if(this.selectedKeyFrame && !this.playstate.playing) {
-            this.animationHandler.animationMap.forEach((cube, cubename) => {
+            this.animationHandler.tbl.cubeMap.forEach((tabulaCube, cubename) => {
+                let baseRot = [0, 0, 0]
                 let irot = this.selectedKeyFrame.getRotation(cubename)
-                cube.rotation.set(irot[0] * Math.PI / 180, irot[1] * Math.PI / 180, irot[2] * Math.PI / 180)
-
+                tabulaCube.cubeGroup.rotation.set((baseRot[0] + irot[0]) * Math.PI / 180, (baseRot[1] + irot[1]) * Math.PI / 180, (baseRot[2] + irot[2]) * Math.PI / 180)
+    
+                let basePos = [0, 0, 0]
                 let ipos = this.selectedKeyFrame.getPosition(cubename)
-                cube.position.set(ipos[0], ipos[1], ipos[2])
-
+                tabulaCube.cubeGroup.position.set(basePos[0] + ipos[0], basePos[1] + ipos[1], basePos[2] + ipos[2])
             })
         }
     }

@@ -79,6 +79,12 @@
     </div>
     <div class="editor-part", editor-tab="modeling" style="grid-area: left_area; color: black; ">
         <div class="modeling-ui-entry">
+            <label>Cube Name</label>
+            <div style="padding: 5px;">
+                <input class="input-cube-name editor-require-selected" type="text" name="Cube Name" oninput="setCubeName(this)" disabled>
+            </div>
+        </div>
+        <div class="modeling-ui-entry">
             <label>Dimensions</label>
             <div class="modeling-input-3" style="padding: 5px;">
                 <input axis="0" class="input-dimension editor-require-selected" style="grid-area: l" type="number" name="X Dimension" oninput="setDimension(this)" disabled>
@@ -104,7 +110,7 @@
         </div>
         <div class="modeling-ui-entry">
             <label>Cube Grow</label>
-            <div>
+            <div style="padding: 5px;">
                 <input class="input-cube-grow modeling-ui-changeable editor-require-selected" type="number" name="Cube Grow" oninput="setMcScale(this)" disabled>
             </div>
         </div>

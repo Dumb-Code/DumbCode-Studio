@@ -11,11 +11,12 @@ let activeStudio
 
 export class ModelingStudio {
 
-    constructor(display, raytracer, transformControls, setMode, setPosition, setRotation) {
+    constructor(display, raytracer, transformControls, setMode, setPosition, setRotation, setCubeName) {
         this.display = display
         this.raytracer = raytracer
         this.setPosition = setPosition
         this.setRotation = setRotation
+        this.setCubeName = setCubeName
         this.setMode = setMode
         this.cubeList = new CubeListBoard(document.getElementById("cube-list"), raytracer, display.tbl)
         this.transformControls = transformControls
@@ -78,12 +79,14 @@ export class ModelingStudio {
             setMcScale(cube.mcScale)
             setTextureOffset(cube.textureOffset)
             setTextureMirrored(cube.textureMirrored)
+            this.setCubeName(cube.name, true)
         } else {
             setDimension([0, 0, 0])
             setOffset([0, 0, 0])
             setMcScale(0)
             setTextureOffset([0, 0])
             setTextureMirrored(false)
+            this.setCubeName(cube.name, true)
         }
     }
 }
@@ -108,6 +111,7 @@ window.setMcScale = elem => {
     }
     setMcScale(num)
 }
+window.setCubeName = elem => setCubeName(elem.value)
 
 function setValuesFromElem(propertyGetter, elem, applier) {
     if(activeStudio !== undefined && activeStudio.raytracer.selected !== undefined) {
@@ -140,6 +144,12 @@ function setTextureOffset(values) {
 
 function setTextureMirrored(value) {
     updateCubeRaw("input-texture-mirrored", c => c.updateTextureMirrored(value), e => e.value = value)
+}
+
+function setCubeName(value) {
+    if(activeStudio !== undefined) {
+        activeStudio.setCubeName(value)
+    }
 }
 
 function updateCubeValuesArray(className, cubeFunction, values) {

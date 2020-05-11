@@ -167,7 +167,6 @@ function runFrame() {
     activeTab.runFrame()
 }
 
-
 function setAsSelected(oldSelected, selectedElem) {
     console.trace(selectedElem)
     let isSelected = selectedElem !== undefined;
@@ -202,22 +201,35 @@ function setAsSelected(oldSelected, selectedElem) {
     }
 }
 
+function setCubeName(newName, displaysonly = false) {
+    [...document.getElementsByClassName("input-cube-name")].forEach(elem => elem.value = newName);
+    if(!displaysonly && raytracer.selected) {
+        let tabulaCube = raytracer.selected.tabulaCube
+        let oldName = tabulaCube.name
+        tabulaCube.updateCubeName(newName)
+        animationStudio.animationHandler.renameCube(oldName, newName)
+        modelingStudio.cubeList.elementMap.get(tabulaCube).a.innerText = newName
+    }   
+}
+
 function setPosition(values, displaysonly = false) {
     [...document.getElementsByClassName("input-position")].forEach(elem => {
         elem.value = values[elem.getAttribute("axis")]
         elem.checkValidity()
     });
     if(!displaysonly && raytracer.selected) {
-        raytracer.selected.tabulaCube.updatePosition(values)
-
+        raytracer.selected.parent.position.set(values[0], values[1], values[2])
+        
         if(activeTab === animationStudio) {
             animationStudio.positionChanged(raytracer.selected.tabulaCube, values)
         }        
+        if(activeTab == modelingStudio) {
+            raytracer.selected.tabulaCube.updatePosition(values)
+        }
     }
 }
 
 function setRotation(values, displaysonly = false) {
-
     [...document.getElementsByClassName("input-rotation")].forEach(elem => {
         elem.value = values[elem.getAttribute("axis")]
     });
@@ -227,10 +239,13 @@ function setRotation(values, displaysonly = false) {
     });
 
     if(!displaysonly && raytracer.selected) {
-        raytracer.selected.tabulaCube.updateRotation(values)
+        raytracer.selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
 
         if(activeTab === animationStudio) {
             animationStudio.rotationChanged(raytracer.selected.tabulaCube, values)
+        }
+        if(activeTab == modelingStudio) {
+            raytracer.selected.tabulaCube.updateRotation(values)
         }
     }
 }
@@ -395,8 +410,8 @@ window.setupMainModel = async(file, nameElement) => {
 
 
     display.setMainModel(material, mainModel.model)
-    animationStudio = new AnimationStudio(raytracer, display, mainModel.model, display.animationMap, setPosition, setRotation)
-    modelingStudio = new ModelingStudio(display, raytracer, transformControls, setMode, setPosition, setRotation, setAsSelected)
+    animationStudio = new AnimationStudio(raytracer, display, mainModel.model, setPosition, setRotation)
+    modelingStudio = new ModelingStudio(display, raytracer, transformControls, setMode, setPosition, setRotation, setCubeName)
 
 }
 window.setupTexture = async(file, nameElement) => {

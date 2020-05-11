@@ -17,8 +17,8 @@ export class TBLModel {
 
     }
 
-    createModel( material, animationMap ) {
-        let mainCubeGroup = this.rootGroup.createGroup(material, animationMap)
+    createModel( material ) {
+        let mainCubeGroup = this.rootGroup.createGroup(material)
 
         this.modelCache = new Group();
         this.modelCache.scale.set(-1/16, -1/16, 1/16)
@@ -41,12 +41,12 @@ class CubeGroup {
        this.cubeGroups = cubeGroups
     }
 
-    createGroup( material, animationMap ) {
+    createGroup( material ) {
 
         this.modelGroup = new Group();
 
-        this.cubeGroups.forEach(child => { this.modelGroup.add(child.createGroup(material, animationMap)) })
-        this.cubeList.forEach(cube => { this.modelGroup.add(cube.createGroup(material, animationMap)) })
+        this.cubeGroups.forEach(child => { this.modelGroup.add(child.createGroup(material)) })
+        this.cubeList.forEach(cube => { this.modelGroup.add(cube.createGroup(material)) })
 
         return this.modelGroup
     }
@@ -88,7 +88,7 @@ class Cube {
     }
 
   
-    createGroup( material, animationMap ) {
+    createGroup( material ) {
         this.cubeGroup = new Group();
         this.cubeGroup.tabulaCube = this
 
@@ -108,9 +108,7 @@ class Cube {
         this.updatePosition()
         this.updateRotation()
 
-        animationMap.set(this.name, this.cubeGroup)
-
-        this.children.forEach(child => this.cubeGroup.add(child.createGroup(material, animationMap)))
+        this.children.forEach(child => this.cubeGroup.add(child.createGroup(material)))
 
         return this.cubeGroup
     }
@@ -163,6 +161,10 @@ class Cube {
         for(let f = 0; f < 6; f++) {
             this.cubeMesh[f].geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uvData.slice(f*8, (f+1)*8)), 2))
         }
+    }
+
+    updateCubeName(value = this.name) {
+        this.name = value;
     }
 
     updateDimensions(values = this.dimensions) {
