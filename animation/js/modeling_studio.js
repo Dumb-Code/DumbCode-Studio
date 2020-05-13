@@ -1,4 +1,5 @@
 import { CubeListBoard } from "./cube_list_board.js";
+import { TblCube } from "./tbl_loader.js"
 
 const mainArea = document.getElementById("main-area")
 const leftDivider = document.getElementById("left-divider")
@@ -61,6 +62,10 @@ export class ModelingStudio {
         this.display.render()
     }
 
+    cubeHierarchyChanged() {
+        this.cubeList.refreshCompleatly()
+    }
+
     setActive() {
         canvasContainer.style.height = (window.innerHeight + canvasContainer.offsetTop) + "px"
         window.studioWindowResized()
@@ -91,6 +96,19 @@ export class ModelingStudio {
     }
 }
 
+window.newCube = () => {
+    if(activeStudio !== undefined) {
+        let cube = new TblCube("newcube", [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 1], [0, 0], 1, [], false, activeStudio.display.tbl)
+        if(activeStudio.raytracer.selected !== undefined) {
+            activeStudio.raytracer.selected.tabulaCube.children.push(cube)
+            activeStudio.raytracer.selected.tabulaCube.onChildrenChange()
+        } else {
+            activeStudio.display.tbl.rootGroup.cubeList.push(cube)
+            activeStudio.display.tbl.rootGroup.refreshGroup()
+        }
+    }
+}
+
 
 window.toggleDimensionsTransform = () => {
     if(activeStudio !== undefined &&  activeStudio.transformControls.visible && activeStudio.transformControls.mode == "dimensions") {
@@ -99,6 +117,7 @@ window.toggleDimensionsTransform = () => {
         activeStudio.setMode("dimensions")
     }
 }
+
 
 window.setDimension = elem => setValuesFromElem(c => c.dimension, elem, setDimension)
 window.setOffset = elem => setValuesFromElem(c => c.offset, elem, setOffset)

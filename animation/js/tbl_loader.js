@@ -2,7 +2,18 @@ import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferG
 
 export class TBLModel {
 
-    constructor(content) {
+    constructor() {
+        this.texWidth = 64
+        this.texHeight = 64
+        this.onchange
+
+        this.cubeMap = new Map()
+        this.rootGroup = new TblCubeGroup(this, [], [])
+
+        this.onCubeHierarchyChanged = () => {}
+    }
+
+    parseJson(content) {
 
         let jobj = JSON.parse(content)
 
@@ -11,14 +22,11 @@ export class TBLModel {
 
         this.cubeMap = new Map()
         this.rootGroup = parseGroupJson(jobj, this)
-
-        this.checkedCulled = new Map()
-
-
     }
 
     createModel( material ) {
-        let mainCubeGroup = this.rootGroup.createGroup(material)
+        this.mat = material
+        let mainCubeGroup = this.rootGroup.createGroup()
 
         this.modelCache = new Group();
         this.modelCache.scale.set(-1/16, -1/16, 1/16)
@@ -33,22 +41,33 @@ export class TBLModel {
     }
 }
 
-class CubeGroup {
+export class TblCubeGroup {
 
-    constructor(cubes, cubeGroups) {
-
-       this.cubeList = cubes
-       this.cubeGroups = cubeGroups
+    constructor(tbl, cubes, cubeGroups) {
+        this.tbl = tbl
+        this.cubeList = cubes
+        this.cubeGroups = cubeGroups
     }
 
-    createGroup( material ) {
+    createGroup() {
+        if(this.modelGroup !== undefined) {
+            return this.modelGroup
+        }
+        this.modelGroup = new Group()
 
-        this.modelGroup = new Group();
-
-        this.cubeGroups.forEach(child => { this.modelGroup.add(child.createGroup(material)) })
-        this.cubeList.forEach(cube => { this.modelGroup.add(cube.createGroup(material)) })
+        this.cubeGroups.forEach(child => this.modelGroup.add(child.createGroup()))
+        this.cubeList.forEach(cube => this.modelGroup.add(cube.createGroup()))
 
         return this.modelGroup
+    }
+    
+    refreshGroup(cubes = this.cubeList, cubeGroups = this.cubeGroups) {
+        this.cubeList = cubes
+        this.cubeGroups = cubeGroups
+        this.modelGroup.children.forEach(child => this.modelGroup.remove(child))
+        this.cubeGroups.forEach(child => this.modelGroup.add(child.createGroup()))
+        this.cubeList.forEach(cube => this.modelGroup.add(cube.createGroup()))
+        this.tbl.onCubeHierarchyChanged()
     }
 
     resetAnimations() {
@@ -62,14 +81,13 @@ function parseGroupJson(json, tbl) {
      let cubeList = []
      let childGroups = []
 
-
      json.cubes.forEach(cube => { cubeList.push(parseCubeJson(cube, tbl)) })
      json.cubeGroups.forEach(group => { childGroups.push(parseGroupJson(group, tbl)) })
 
-    return new CubeGroup(cubeList, childGroups, tbl)
+    return new TblCubeGroup(tbl, cubeList, childGroups)
 }
 
-class Cube {
+export class TblCube {
 
     constructor(name, dimension, rotationPoint, offset, rotation, scale, textureOffset, mcScale, children, textureMirrored, tbl) {
         this.name = name
@@ -88,7 +106,10 @@ class Cube {
     }
 
   
-    createGroup( material ) {
+    createGroup( ) {
+        if(this.cubeGroup !== undefined) {
+            return this.cubeGroup
+        }
         this.cubeGroup = new Group();
         this.cubeGroup.tabulaCube = this
 
@@ -98,7 +119,7 @@ class Cube {
         this.cubeGroup.add(this.planesGroup)
         this.cubeMesh = []
         for(let f = 0; f < 6; f++) {
-            let mesh = new Mesh(undefined, material)
+            let mesh = new Mesh(undefined, this.tbl.mat)
             this.cubeMesh.push(mesh)
             this.planesGroup.add(mesh)
         }
@@ -107,10 +128,17 @@ class Cube {
         this.cubeGroup.rotation.order = "ZYX"
         this.updatePosition()
         this.updateRotation()
-
-        this.children.forEach(child => this.cubeGroup.add(child.createGroup(material)))
+        
+        this.onChildrenChange()
 
         return this.cubeGroup
+    }
+
+    onChildrenChange(childern = this.children) {
+        this.tbl.onCubeHierarchyChanged()
+        this.children.forEach(child => this.cubeGroup.remove(child))
+        this.children = childern;
+        this.children.forEach(child => this.cubeGroup.add(child.createGroup()))
     }
 
     getAllChildrenCubes(arr = []) {
@@ -209,7 +237,7 @@ class Cube {
 function parseCubeJson(json, tbl) {
     let children = []
     json.children.forEach(child => { children.push( parseCubeJson( child, tbl ) ) })
-    return new Cube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
+    return new TblCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
 }
 
 function getUV(offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {
@@ -275,8 +303,8 @@ function putUVData(uvData, facingindex, minU, minV, uSize, vSize, texWidth, texH
 
 TBLModel.loadModel = async(data, name = "") => {
     let zip = await JSZip.loadAsync(data)
-    let jsonContent = await zip.file("model.json").async("string")
-    let model = new TBLModel(jsonContent);
+    let model = new TBLModel();
+    model.parseJson(await zip.file("model.json").async("string"))
     if(name) {
         model.fileName = name
     }

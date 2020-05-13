@@ -24,7 +24,6 @@
     <script src="js/jszip.js"></script>
     <script src="js/gif.js"></script>
 
-
     <script type="module" src="js/editor.js"></script>
 </head>
 <body style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 300;">
@@ -76,6 +75,9 @@
                 </span>
             </span>
         </label>
+        <button onclick="createNewModel()">
+            Create new model
+        </button>
     </div>
     <div class="editor-part", editor-tab="modeling" style="grid-area: left_area; color: black; ">
         <div class="modeling-ui-entry">
@@ -148,6 +150,10 @@
         TEST
     </div>
     <div class="editor-part", editor-tab="modeling" style="grid-area: right_area_bottom;">
+        <div class="modeling-studio-cube-edit">
+            <button class="cube-create" onclick="newCube()">+</button>
+            <button class="cube-delete" onclick="deleteCube()">-</button>
+        </div>
         <ul id="cube-list" style="overflow-y: scroll; height: 100%;"></ul>
     </div>
     <div id="display-div" class="editor-part" editor-tab="modeling,animation" style="grid-area: main_area;"></div>

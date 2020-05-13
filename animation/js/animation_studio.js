@@ -5,7 +5,7 @@ import { Clock } from './three.js'
 
 export class AnimationStudio {
 
-    constructor(raytracer, display, tbl, setPosition, setRotation) {
+    constructor(raytracer, display, setPosition, setRotation) {
         this.clickY
         this.panelHeight = 320
         this.raytracer = raytracer
@@ -13,7 +13,7 @@ export class AnimationStudio {
         this.setPosition = setPosition
         this.setRotation = setRotation
         this.methodExporter = new JavaMethodExporter()
-        this.animationHandler = new AnimationHandler(tbl)
+        this.animationHandler = new AnimationHandler(display.tbl)
         this.manager = new KeyframeManger(this.animationHandler, document.getElementById("keyframe-board"))
         this.clock = new Clock()
         this.animationHandler.playstate = this.manager.playstate

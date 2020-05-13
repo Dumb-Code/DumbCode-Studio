@@ -395,25 +395,31 @@ window.storeRotationHistory = () => {
     rotationCache = getSelectedRot().splice(0)
 }
 
+window.createNewModel = () => {
+    initiateModel(new TBLModel())
+}
+
 window.setupMainModel = async(file, nameElement) => {
-    mainModel = {name: file.name}
     nameElement.classList.toggle("tooltip", true)
 
     nameElement.dataset.tooltip = file.name
 
     try {
-        mainModel.model = await TBLModel.loadModel(readFile(file))
+        initiateModel(await TBLModel.loadModel(readFile(file)))
     } catch(err) {
         nameElement.dataset.tooltip = "ERROR!"
         console.error(`Error from file ${file.name}: ${err.message}`)
     }
 
-
-    display.setMainModel(material, mainModel.model)
-    animationStudio = new AnimationStudio(raytracer, display, mainModel.model, setPosition, setRotation)
-    modelingStudio = new ModelingStudio(display, raytracer, transformControls, setMode, setPosition, setRotation, setCubeName)
-
 }
+
+function initiateModel(model) {
+    display.setMainModel(material, model)
+    animationStudio = new AnimationStudio(raytracer, display, setPosition, setRotation)
+    modelingStudio = new ModelingStudio(display, raytracer, transformControls, setMode, setPosition, setRotation, setCubeName)
+    model.onCubeHierarchyChanged = () => modelingStudio.cubeHierarchyChanged()
+}
+
 window.setupTexture = async(file, nameElement) => {
     let imgtag = document.createElement("img")
     nameElement.classList.toggle("tooltip", true)
