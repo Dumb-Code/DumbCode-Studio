@@ -1,37 +1,53 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { TblCube } from "./tbl_loader.js"
+import { LinkedElement } from "./editor.js"
 
 const mainArea = document.getElementById("main-area")
-// const canvasContainer = document.getElementById("display-div")
-
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, transformControls, setMode, setPosition, setRotation, setCubeName) {
+    constructor(domElement, display, raytracer, transformControls, setMode, renameCube) {
         this.domElement = domElement
-        this.canvasContainer = $(domElement).find("#display-div").get(0)
+        let dom = $(domElement)
+        this.canvasContainer = dom.find("#display-div").get(0)
         this.display = display
         this.raytracer = raytracer
-        this.setPosition = setPosition
-        this.setRotation = setRotation
-        this.setCubeName = setCubeName
         this.setMode = setMode
-        this.cubeList = new CubeListBoard($(domElement).find("#cube-list").get(0), raytracer, display.tbl)
+        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl)
         this.transformControls = transformControls
         this.transformControls.studioCallback = (dims, offset) => {
             setDimension(dims)
             setOffset(offset)
         }
 
+        let cube = () => raytracer.selected?.tabulaCube
 
-        this.leftDivider = $(domElement).find("#left-divider")
-        this.rightDivider = $(domElement).find("#right-divider")
+        this.cubeName = new LinkedElement(dom.find('.input-cube-name'), false, false).onchange(e => renameCube(e.old, e.value))
+        this.dimensions = new LinkedElement(dom.find('.input-dimension')).onchange(e => cube()?.updateDimension(e.value))
+        this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => cube()?.updatePosition(e.value))
+        this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => cube()?.updateOffset(e.value))
+        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e => cube()?.updateCubeGrow(e.value))
+        this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => cube()?.updateTextureOffset(e.value))
+        this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => cube()?.updateTextureMirrored(e.value))
+        this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => cube()?.updateRotation(e.value))
 
+
+        dom.find('.cube-create').click(() => {
+            let cube = new TblCube("newcube", [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 1], [0, 0], 0, [], false, this.display.tbl)
+            if(this.raytracer.selected !== undefined) {
+                this.raytracer.selected.tabulaCube.children.push(cube)
+                this.raytracer.selected.tabulaCube.onChildrenChange()
+            } else {
+                this.display.tbl.rootGroup.cubeList.push(cube)
+                this.display.tbl.rootGroup.refreshGroup()
+            }
+        })
+
+        this.leftDivider = dom.find("#left-divider")
+        this.rightDivider = dom.find("#right-divider")
         this.leftArea = 300
         this.rightArea = 300
-
         let clickedDivider = -1
-        
         $(document)
             .mouseup(() => clickedDivider = 0)
             .mousemove(e => {
@@ -77,36 +93,26 @@ export class ModelingStudio {
     selectedChanged() {
         if(this.raytracer.selected !== undefined) {
             let cube = this.raytracer.selected.tabulaCube
-            setDimension(cube.dimension)
-            setOffset(cube.offset)
-            setMcScale(cube.mcScale)
-            setTextureOffset(cube.textureOffset)
-            setTextureMirrored(cube.textureMirrored)
-            this.setCubeName(cube.name, true)
+            this.cubeName.value = cube.name
+            this.positions.value = cube.rotationPoint
+            this.dimensions.value = cube.dimension
+            this.rotation.value = cube.rotation
+            this.offsets.value = cube.offset
+            this.cubeGrow.value = cube.mcScale
+            this.textureOffset.value = cube.textureOffset
+            this.textureMirrored.value = cube.textureMirrored
         } else {
-            setDimension([0, 0, 0])
-            setOffset([0, 0, 0])
-            setMcScale(0)
-            setTextureOffset([0, 0])
-            setTextureMirrored(false)
-            this.setCubeName(cube.name, true)
+            this.dimensions.value = [0, 0, 0]
+            this.positions.value = [0, 0, 0]
+            this.offsets.value = [0, 0, 0]
+            this.rotation.value = [0, 0, 0]
+            this.cubeGrow.value = 0
+            this.textureOffset.value = [0, 0]
+            this.textureMirrored.value = false
+            this.cubeName.value = ""
         }
     }
 }
-
-// window.newCube = () => {
-//     if(activeStudio !== undefined) {
-//         let cube = new TblCube("newcube", [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 1], [0, 0], 1, [], false, activeStudio.display.tbl)
-//         if(activeStudio.raytracer.selected !== undefined) {
-//             activeStudio.raytracer.selected.tabulaCube.children.push(cube)
-//             activeStudio.raytracer.selected.tabulaCube.onChildrenChange()
-//         } else {
-//             activeStudio.display.tbl.rootGroup.cubeList.push(cube)
-//             activeStudio.display.tbl.rootGroup.refreshGroup()
-//         }
-//     }
-// }
-
 
 // window.toggleDimensionsTransform = () => {
 //     if(activeStudio !== undefined &&  activeStudio.transformControls.visible && activeStudio.transformControls.mode == "dimensions") {

@@ -1,4 +1,4 @@
-import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./three.js";
+import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, EventDispatcher } from "./three.js";
 import { TBLModel } from "./tbl_loader.js";
 import { DinosaurDisplay, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
@@ -175,7 +175,7 @@ function runFrame() {
 }
 
 function setAsSelected(oldSelected, selectedElem) {
-    console.trace(selectedElem)
+    // console.trace(selectedElem)
     let isSelected = selectedElem !== undefined;
 
     if(oldSelected) {
@@ -208,14 +208,12 @@ function setAsSelected(oldSelected, selectedElem) {
     }
 }
 
-function setCubeName(newName, displaysonly = false) {
-    [...document.getElementsByClassName("input-cube-name")].forEach(elem => elem.value = newName);
-    if(!displaysonly && raytracer.selected) {
+function renameCube(oldValue, newValue) {
+    if(oldValue !== newValue && raytracer.selected && raytracer.selected.tabulaCube.name == oldValue) {
         let tabulaCube = raytracer.selected.tabulaCube
-        let oldName = tabulaCube.name
-        tabulaCube.updateCubeName(newName)
-        animationStudio.animationHandler.renameCube(oldName, newName)
-        modelingStudio.cubeList.elementMap.get(tabulaCube).a.innerText = newName
+        tabulaCube.updateCubeName(newValue)
+        animationStudio.animationHandler.renameCube(oldValue, newValue)
+        modelingStudio.cubeList.elementMap.get(tabulaCube).a.innerText = newValue
     }   
 }
 
@@ -428,7 +426,7 @@ async function createFilesPage() {
 }
 
 async function createModelingStudio() {
-    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, transformControls, setMode, setPosition, setRotation, setCubeName)
+    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, transformControls, setMode, renameCube)
 }
 
 async function createAnimationStudio() {
@@ -548,5 +546,69 @@ export class ButtonSpeed {
         this.interval = setInterval(() => this.tick(), this.timeout)
     }
 }
+
+export class LinkedElement {
+
+    constructor(elems, array = true, parseNum = true) {
+        this.array = array
+        this.parseNum = parseNum
+        this.addElement(this.elems = elems)
+        this.sliderElems = undefined
+        if(this.array) {
+            this.rawValue = ['', '', '']
+        } else {
+            this.rawValue = ''
+        }
+    }
+
+    set value(value) {
+        if(this.array) {
+            value = [...value]
+        }
+        let old = this.rawValue
+        this.rawValue = value
+        this.visualValue = value
+        this.dispatchEvent({ type: "changed", old, value })
+    }
+    get value() {
+        return this.rawValue
+    }
+
+    set visualValue(value) {
+        if(this.array) {
+            this.elems.each((_i,e) => e.value = value[e.getAttribute('axis')])
+            if(this.sliderElems !== undefined) {
+                this.sliderElems.each((_i,e) => e.value = ((value[e.getAttribute("axis")] + 180) % 360) - 180)
+            }
+        } else {
+            this.elems.val(value)
+        }
+    }
+
+    onchange(listener) {
+        this.addEventListener('changed', listener)
+        return this
+    }
+
+    withsliders(sliderElems) {
+        this.addElement(this.sliderElems = sliderElems)
+        return this
+    }
+
+    addElement(elem) {
+        if(this.array) {
+            elem.on('input', e => {
+                let arr = this.value.splice(0)
+                arr[e.target.getAttribute('axis')] = this.parseNum ? parseInt(e.target.value) : e.target.value
+                this.value = arr
+            })
+        } else {
+            elem.on('input', e => this.value = this.parseNum ? parseInt(e.target.value) : e.target.value)
+        }
+    }
+}
+Object.assign( LinkedElement.prototype, EventDispatcher.prototype );
+
+
 
 init()

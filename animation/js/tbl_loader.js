@@ -123,7 +123,7 @@ export class TblCube {
             this.cubeMesh.push(mesh)
             this.planesGroup.add(mesh)
         }
-        this.updateDimensions()
+        this.updateDimension()
 
         this.cubeGroup.rotation.order = "ZYX"
         this.updatePosition()
@@ -195,14 +195,14 @@ export class TblCube {
         this.name = value;
     }
 
-    updateDimensions(values = this.dimensions) {
-        this.dimensions = values
+    updateDimension(values = this.dimension) {
+        this.dimension = values
         this.updateOffset()
         this.updateGeometry()
         this.updateTexture()
     }
 
-    updateMcScale(value = this.mcScale) {
+    updateCubeGrow(value = this.mcScale) {
         this.mcScale = value
         this.updateGeometry()
     }
