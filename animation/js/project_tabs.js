@@ -1,6 +1,6 @@
 export class ProjectTabs {
     constructor() {
-        this.files = "files"
+        this.files = "file"
         this.modeling = "modeling"
         this.animation = "animation"
         this.activeTab = this.files

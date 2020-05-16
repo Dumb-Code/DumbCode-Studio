@@ -7,19 +7,11 @@ export class DinosaurDisplay {
         this.allCubes = []
     }
 
-
-    setup(container, renderer, camera, scene) {
-        if(this.container) {
-            this.container.removeChild(this.renderer.domElement)
-        }
-        this.container = container
-
+    setup(renderer, camera, scene) {
         this.renderer = renderer
         this.camera = camera
         this.scene = scene
-       
-        this.container.appendChild(this.renderer.domElement);
-        
+               
         //Set up the grid
         this.gridGroup = new Group()
         this.gridGroup.dontRenderGif = true

@@ -1,6 +1,5 @@
 import { Vector2, Raycaster } from "./three.js";
 
-const canvasContainer = document.getElementById("display-div");
 
 document.addEventListener( 'mousemove', onMouseMove, false );
 document.addEventListener( 'mousedown', onMouseDown, false );
@@ -14,9 +13,12 @@ function onMouseMove( event ) {
     rawMouse.x = event.clientX
     rawMouse.y = event.clientY
 
-    let rect = canvasContainer.getBoundingClientRect()
-    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+    let div = $('#display-div').get(0)
+    if(div !== undefined) {
+        let rect = div.getBoundingClientRect()
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+    }
 
 }
 

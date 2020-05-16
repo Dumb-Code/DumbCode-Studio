@@ -17,7 +17,7 @@ const patch = -1
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
 
-const canvasContainer = document.getElementById("display-div");
+let canvasContainer = undefined //document.getElementById("display-div");
 const mainArea = document.getElementById("main-area")
 const display = new DinosaurDisplay()
 
@@ -41,7 +41,7 @@ let modeCache, rotationCache
 
 const raytracer = new Raytracer(display, material, highlightMaterial, setAsSelected)
 
-let projectTabs = new ProjectTabs()
+const projectTabs = new ProjectTabs()
 
 let activeTab
 let filesPage, modelingStudio, animationStudio
@@ -68,20 +68,20 @@ document.onkeydown = e => {
     }
 }
 
-function init() {
+async function init() {
     //Set up the renderer
     let renderer = new WebGLRenderer({
         alpha: true
     });
     renderer.setClearColor(0x000000, 0);
-    renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    renderer.setSize(1, 1);
 
     //Set up the camera
-    let camera = new PerspectiveCamera( 65, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 700 )
+    let camera = new PerspectiveCamera( 65, 1, 0.1, 700 )
     camera.position.set(-3.745472848477101, 2.4616311452213426, -4.53288230701089)
     camera.lookAt(0, 0, 0)
 
-    display.setup(canvasContainer, renderer, camera, createScene())
+    display.setup(renderer, camera, createScene())
 
     //Set up the controls
     controls = new OrbitControls(camera, renderer.domElement);
@@ -91,7 +91,6 @@ function init() {
     transformControls = new TransformControls(camera, renderer.domElement)
     transformControls.addEventListener('objectChange', () => {
         let pos = raytracer.selected.parent.position
-        let offset = raytracer.selected.position
         let rot = raytracer.selected.parent.rotation
 
         let rotations = [rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI)
@@ -123,9 +122,7 @@ function init() {
     display.scene.add(transformControls)
     setMode("none", false)
 
-    
-    filesPage = new FilesPage()
-
+    filesPage = await createFilesPage()
     frame()
 }
 
@@ -148,12 +145,22 @@ function frame() {
     let newTab = projectTabs.getActive(filesPage, modelingStudio, animationStudio)
     if(newTab !== activeTab && newTab !== undefined) {
         if(activeTab !== undefined) {
-            activeTab.setUnactive()
+            $(activeTab.domElement).detach()
+        }
+        if(canvasContainer !== undefined) {
+            $(display.renderer.domElement).detach()
         }
         projectTabs.tabs.forEach(t => mainArea.classList.remove("is-"+t))
-        
+
         mainArea.classList.toggle("is-"+projectTabs.activeTab, true)
         activeTab = newTab
+
+        canvasContainer = $(activeTab.domElement).find("#display-div").get(0)
+        if(canvasContainer !== undefined) {
+            $(display.renderer.domElement).appendTo(canvasContainer)
+        }
+        $(activeTab.domElement).appendTo('#main-area')
+
         Array.from(document.getElementsByClassName("editor-part")).forEach(elem => {
             elem.classList.toggle("is-active", elem.getAttribute("editor-tab").split(",").includes(projectTabs.activeTab))
         })
@@ -265,6 +272,9 @@ function updateCamera(camera, width, height) {
 }
 
 window.changeCamera = elem => {
+    if(canvasContainer === undefined) {
+        return
+    }
     let cam
     switch(elem.value) {
         case "perspective":
@@ -413,10 +423,22 @@ window.setupMainModel = async(file, nameElement) => {
 
 }
 
-function initiateModel(model) {
+async function createFilesPage() {
+    return new FilesPage(await loadHtml(projectTabs.files))
+}
+
+async function createModelingStudio() {
+    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, transformControls, setMode, setPosition, setRotation, setCubeName)
+}
+
+async function createAnimationStudio() {
+    return new AnimationStudio(await loadHtml(projectTabs.animation) , raytracer, display, setPosition, setRotation)
+}
+
+async function initiateModel(model) {
     display.setMainModel(material, model)
-    animationStudio = new AnimationStudio(raytracer, display, setPosition, setRotation)
-    modelingStudio = new ModelingStudio(display, raytracer, transformControls, setMode, setPosition, setRotation, setCubeName)
+    animationStudio = await createAnimationStudio()
+    modelingStudio = await createModelingStudio()
     model.onCubeHierarchyChanged = () => modelingStudio.cubeHierarchyChanged()
 }
 
@@ -482,9 +504,13 @@ window.subtractValue = elem => {
 window.addEventListener( 'resize', e => window.studioWindowResized(), false );
 
 window.studioWindowResized = () => {
+    if(canvasContainer === undefined) {
+        return
+    }
     let width = canvasContainer.clientWidth
     let height = canvasContainer.clientHeight
     updateCamera(display.camera, width, height)
+
     display.renderer.setSize( width, height );
 }
 
