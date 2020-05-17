@@ -1,6 +1,7 @@
 /**
  * @author arodic / https://github.com/arodic
  * modified by Wyn Price to change aesthetics for Dumbcode Animaion Editor
+ * modified by Wyn Price to add the ability to change cube dimensions
  */
 
 import {
@@ -1184,23 +1185,12 @@ var TransformControlsGizmo = function () {
 			handle.position.copy( this.worldPosition );
 
 			if(centerFace && handle.name.length == 2) {
-				let c = this.object.tabulaCube
-				let grow = c.mcScale
-				let additionVector
-				if(handle.name.startsWith('X')) {
-					additionVector = new Vector3(c.dimension[0]/2 + grow, 0, 0)
-				} else if(handle.name.startsWith('Y')) {
-					additionVector = new Vector3(0, c.dimension[1]/2 + grow, 0)
-				} else if(handle.name.startsWith('Z')) {
-					additionVector = new Vector3(0, 0, c.dimension[2]/2 + grow)
-				}
-				
-				additionVector.multiplyScalar(1/16)
-				if(handle.name.endsWith('P')) {
-					additionVector.multiplyScalar(-1)
+				let order = ['XP', 'XN', 'YP', 'YN', 'ZP', 'ZN']
+				let index = order.indexOf(handle.name)
+				if(index !== -1) {
+					this.object.tabulaCube.cubeMesh[index].getWorldPosition(handle.position);
 				}
 
-				handle.position.add(additionVector)
 			}
 
 			var eyeDistance = this.worldPosition.distanceTo( this.cameraPosition );
