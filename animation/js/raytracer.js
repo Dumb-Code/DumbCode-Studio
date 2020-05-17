@@ -8,6 +8,7 @@ let mouse = new Vector2(-5, -5);
 let mouseClickDown = new Vector2(-5, -5)
 let rawMouse = new Vector2();
 let mouseDown = false
+let mouseOnDiv = false
 
 function onMouseMove( event ) {
     rawMouse.x = event.clientX
@@ -18,6 +19,9 @@ function onMouseMove( event ) {
         let rect = div.getBoundingClientRect()
         mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+        mouseOnDiv = event.clientX > rect.left && event.clientX < rect.right && event.clientY > rect.top && event.clientY < rect.bottom
+    } else {
+        mouseOnDiv = false
     }
 
 }
@@ -81,7 +85,7 @@ export class Raytracer {
     update() {
         let textDiv = document.getElementById("editor-mouseover") //todo: cache?
 
-        if(this.disableRaycast) {
+        if(this.disableRaycast || !mouseOnDiv) {
             return undefined
         }
 

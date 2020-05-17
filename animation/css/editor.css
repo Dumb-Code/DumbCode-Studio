@@ -61,6 +61,10 @@ li.is-collapsed ul {
     display: none;
 }
 
+.input-invalid {
+    background-color: violet;
+}
+
 .vertical-divider {
     position: absolute;
     top: 0;
@@ -75,5 +79,16 @@ li.is-collapsed ul {
     width: 100%;
     height: 8px;
     cursor: n-resize;
+}
+
+ul#cube-list li {
+    background-color: wheat;
+}
+
+ul#cube-list li.cube-intersected {
     background-color: red;
+}
+
+ul#cube-list li.cube-selected {
+    background-color: blue;
 }

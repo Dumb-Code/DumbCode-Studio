@@ -209,12 +209,16 @@ function setAsSelected(oldSelected, selectedElem) {
 }
 
 function renameCube(oldValue, newValue) {
+    if(display.tbl.cubeMap.has(newValue) && display.tbl.cubeMap.get(newValue) !== raytracer.selected.tabulaCube) {
+        return true
+    }
     if(oldValue !== newValue && raytracer.selected && raytracer.selected.tabulaCube.name == oldValue) {
         let tabulaCube = raytracer.selected.tabulaCube
         tabulaCube.updateCubeName(newValue)
         animationStudio.animationHandler.renameCube(oldValue, newValue)
         modelingStudio.cubeList.elementMap.get(tabulaCube).a.innerText = newValue
     }   
+    return false
 }
 
 function setPosition(values, displaysonly = false) {
@@ -554,11 +558,6 @@ export class LinkedElement {
         this.parseNum = parseNum
         this.addElement(this.elems = elems)
         this.sliderElems = undefined
-        if(this.array) {
-            this.rawValue = ['', '', '']
-        } else {
-            this.rawValue = ''
-        }
     }
 
     set value(value) {

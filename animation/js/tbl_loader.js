@@ -47,6 +47,19 @@ export class TblCubeGroup {
         this.tbl = tbl
         this.cubeList = cubes
         this.cubeGroups = cubeGroups
+
+        this.cubeList.forEach(child => child.parent = this)
+    }
+
+    addChild(child) {
+        this.cubeList.push(child)
+        child.parent = this
+        this.refreshGroup()
+    }
+
+    deleteChild(child) {
+        this.cubeList = this.cubeList.filter(c => c != child)
+        this.refreshGroup()
     }
 
     createGroup() {
@@ -102,6 +115,8 @@ export class TblCube {
         this.tbl = tbl
         this.textureMirrored = textureMirrored
 
+        this.children.forEach(child => child.parent = this)
+
         tbl.cubeMap.set(this.name, this)
     }
 
@@ -132,6 +147,17 @@ export class TblCube {
         this.onChildrenChange()
 
         return this.cubeGroup
+    }
+
+    addChild(child) {
+        this.children.push(child)
+        child.parent = this
+        this.onChildrenChange()
+    }
+
+    deleteChild(child) {
+        this.children = this.children.filter(c => c != child)
+        this.onChildrenChange()
     }
 
     onChildrenChange(childern = this.children) {

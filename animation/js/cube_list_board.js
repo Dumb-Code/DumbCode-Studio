@@ -17,6 +17,7 @@ export class CubeListBoard {
 
     createCube(parent, cube, level) {
         let li = document.createElement("li")
+        li.setAttribute('cubename', cube.name)
         let a = document.createElement("a")
         a.style.paddingRight = "5px"
         a.innerText = cube.name

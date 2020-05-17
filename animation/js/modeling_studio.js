@@ -12,6 +12,8 @@ export class ModelingStudio {
         this.canvasContainer = dom.find("#display-div").get(0)
         this.display = display
         this.raytracer = raytracer
+        this.prevIntersected
+        this.prevSelected
         this.setMode = setMode
         this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl)
         this.transformControls = transformControls
@@ -22,7 +24,9 @@ export class ModelingStudio {
 
         let cube = () => raytracer.selected?.tabulaCube
 
-        this.cubeName = new LinkedElement(dom.find('.input-cube-name'), false, false).onchange(e => renameCube(e.old, e.value))
+        this.cubeName = new LinkedElement(dom.find('.input-cube-name'), false, false).onchange(e => {
+            dom.find('.input-cube-name').toggleClass('input-invalid', renameCube(e.old, e.value))
+        })
         this.dimensions = new LinkedElement(dom.find('.input-dimension')).onchange(e => cube()?.updateDimension(e.value))
         this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => cube()?.updatePosition(e.value))
         this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => cube()?.updateOffset(e.value))
@@ -31,15 +35,30 @@ export class ModelingStudio {
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => cube()?.updateTextureMirrored(e.value))
         this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => cube()?.updateRotation(e.value))
 
-
         dom.find('.cube-create').click(() => {
-            let cube = new TblCube("newcube", [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 1], [0, 0], 0, [], false, this.display.tbl)
+            let map = this.display.tbl.cubeMap
+            let name = "newcube"
+            if(map.has(name)) {
+                let num = 0
+                let newName = name
+                while(map.has(newName)) {
+                    newName = name + num++
+                }
+                name = newName
+            }
+            let cube = new TblCube(name, [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 1], [0, 0], 0, [], false, this.display.tbl)
             if(this.raytracer.selected !== undefined) {
-                this.raytracer.selected.tabulaCube.children.push(cube)
-                this.raytracer.selected.tabulaCube.onChildrenChange()
+                this.raytracer.selected.tabulaCube.addChild(cube)
             } else {
-                this.display.tbl.rootGroup.cubeList.push(cube)
-                this.display.tbl.rootGroup.refreshGroup()
+                this.display.tbl.rootGroup.addChild(cube)
+            }
+        })
+
+        dom.find('.cube-delete').click(() => {
+            if(this.raytracer.selected !== undefined) {
+                let cube = this.raytracer.selected.tabulaCube
+                cube.parent.deleteChild(cube)
+                this.raytracer.clickOnMesh(undefined)
             }
         })
 
@@ -78,6 +97,29 @@ export class ModelingStudio {
 
     runFrame() {
         this.raytracer.update()
+
+        let dom = $(this.cubeList.cubeList)
+        if(this.prevSelected !== this.raytracer.selected) {
+        
+            if(this.prevSelected !== undefined) {
+                dom.find(`li[cubename='${this.prevSelected.tabulaCube.name}']`).removeClass('cube-selected')
+            }
+            if(this.raytracer.selected !== undefined) {
+                dom.find(`li[cubename='${this.raytracer.selected.tabulaCube.name}']`).addClass('cube-selected')
+            }
+            this.prevSelected = this.raytracer.selected
+        }
+
+        if(this.prevIntersected !== this.raytracer.intersected) {
+            if(this.prevIntersected !== undefined) {
+                dom.find(`li[cubename='${this.prevIntersected.tabulaCube.name}']`).removeClass('cube-intersected')
+            }
+            if(this.raytracer.intersected !== undefined) {
+                dom.find(`li[cubename='${this.raytracer.intersected.tabulaCube.name}']`).addClass('cube-intersected')
+            }
+            this.prevIntersected = this.raytracer.intersected
+        }
+
         this.display.tbl.resetAnimations()
         this.display.render()
     }
