@@ -8,3 +8,9 @@ loadHtml = async file => {
         }, "html")
     })
 }
+
+removeItem = (array, item) => {
+    let newArr = [...array.filter(e => e !== item)]
+    array.length = 0
+    newArr.forEach(e => array.push(e))
+}

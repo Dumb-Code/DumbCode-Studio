@@ -87,6 +87,10 @@ export class TblCubeGroup {
         this.cubeGroups.forEach(child => child.resetAnimations())
         this.cubeList.forEach(child => child.resetAnimations())
     }
+
+    getGroup() {
+        return this.modelGroup
+    }
 }
 
 function parseGroupJson(json, tbl) {
@@ -158,6 +162,10 @@ export class TblCube {
     deleteChild(child) {
         this.children = this.children.filter(c => c != child)
         this.onChildrenChange()
+    }
+
+    getGroup() {
+        return this.cubeGroup
     }
 
     onChildrenChange(childern = this.children) {

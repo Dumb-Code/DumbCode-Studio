@@ -1,4 +1,4 @@
-import { EventDispatcher } from "./three.js";
+import { EventDispatcher, Matrix4, Vector3, Quaternion, Euler } from "./three.js";
 
 export class ButtonSpeed {
 
@@ -157,3 +157,28 @@ export class ToggleableElement {
     }
 }
 Object.assign( ToggleableElement.prototype, EventDispatcher.prototype );
+
+
+let resultMat = new Matrix4()
+let decomposePos = new Vector3()
+let decomposeRot = new Quaternion()
+let decomposeScale = new Vector3()
+let decomposeEuler = new Euler()
+
+export class CubeLocker {
+    constructor(cube) {
+        this.cube = cube
+        this.worldMatrix = cube.cubeGroup.matrixWorld.clone()
+    }
+
+    reconstruct() {
+        //      parent_world_matrix * local_matrix = world_matrix
+        //  =>  local_matrix = 'parent_world_matrix * world_matrix
+        resultMat.getInverse(this.cube.parent.getGroup().matrixWorld).multiply(this.worldMatrix)
+        resultMat.decompose(decomposePos, decomposeRot, decomposeScale)
+
+        this.cube.updatePosition(decomposePos.toArray())
+        decomposeEuler.setFromQuaternion(decomposeRot, "ZYX")
+        this.cube.updateRotation(decomposeEuler.toArray().map(e => e * 180 / Math.PI))
+    }
+}

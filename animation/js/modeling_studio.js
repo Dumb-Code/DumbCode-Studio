@@ -1,6 +1,6 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { TblCube } from "./tbl_loader.js"
-import { LinkedElement, LinkedSelectableList, ToggleableElement } from "./util.js"
+import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker } from "./util.js"
 import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4 } from "./three.js"
 
 const mainArea = document.getElementById("main-area")
@@ -20,7 +20,17 @@ export class ModelingStudio {
         this.prevIntersected
         this.prevSelected
         this.rotationPointSphere = this.createRotationPointObject()
-        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl)
+        this.lockedCubes = []
+        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, cube => {
+            if(this.lockedCubes.includes(cube)) {
+                removeItem(this.lockedCubes, cube)
+                return false
+            } else {
+                this.lockedCubes.push(cube)
+                return true
+            }
+            
+        })
         this.transformControls = transformControls
         this.transformControls.space = "local"
         this.transformControls.studioCallback = (dims, offset) => {//todo: move to an event
@@ -33,7 +43,7 @@ export class ModelingStudio {
         this.positionStart = new Vector3()
         this.offsetStart = new Vector3()
         this.rotationStart = new Quaternion()
-        this.childrenCache = []
+        this.lockedChildrenCache = []
         
         this.toolTransformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false).onchange(e => {
             switch(e.value) {
@@ -58,12 +68,10 @@ export class ModelingStudio {
             this.offsetStart.fromArray(this.offsets.value)
             this.rotationStart.copy(this.raytracer.selected.parent.quaternion)
 
-            this.childrenCache.length = 0
-            this.raytracer.selected.parent.children.forEach(child => {
-                if(this.raytracer.selected.tabulaCube !== child.tabulaCube) {
-                    this.childrenCache.push({child, pos: child.position.toArray(), matrix: child.matrixWorld.clone() })
-                }
-            })
+            this.createLockedCubesCache()
+            if(this.clampChildren.value) {
+                this.raytracer.selected.tabulaCube.children.forEach(child => this.lockedChildrenCache.push(new CubeLocker(child)))
+            }
         })
         this.transformControls.addEventListener('objectChange', () => {
             let selected = this.toolTransformType.value
@@ -90,22 +98,8 @@ export class ModelingStudio {
                     break
             };
 
-            if((selected === translateKey || selected === rotateKey) && this.clampChildren.value) {
-                this.raytracer.selected.parent.updateMatrixWorld(true)
-                    let inverse = new Matrix4()
-                    let resultMat = new Matrix4()
-                    let decomposePos = new Vector3()
-                    let decomposeRot = new Quaternion()
-                    this.childrenCache.forEach(obj => {
-                        inverse.getInverse(this.raytracer.selected.parent.matrixWorld)
-                        resultMat.multiplyMatrices(inverse, obj.matrix)
-                        resultMat.decompose(decomposePos, decomposeRot, new Vector3())
-
-                        obj.child.tabulaCube.updatePosition(decomposePos.toArray())
-                        let euler = new Euler().setFromQuaternion(decomposeRot, "ZYX")
-                        obj.child.tabulaCube.updateRotation(euler.toArray().map(e => e * 180 / Math.PI))
-                    
-                    })
+            if(selected === translateKey || selected === rotateKey) {
+                this.reconstructLockedCubes()
             }
             this.runFrame()
         });
@@ -117,7 +111,9 @@ export class ModelingStudio {
         })
         this.dimensions = new LinkedElement(dom.find('.input-dimension')).onchange(e => cube()?.updateDimension(e.value))
         this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => {
+            this.createLockedCubesCache()
             cube()?.updatePosition(e.value)
+            this.reconstructLockedCubes()
             cube()?.planesGroup.updateMatrix()
             this.updateSpherePosition()
         })
@@ -125,7 +121,11 @@ export class ModelingStudio {
         this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e => cube()?.updateCubeGrow(e.value))
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => cube()?.updateTextureOffset(e.value))
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => cube()?.updateTextureMirrored(e.value))
-        this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => cube()?.updateRotation(e.value))
+        this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => {
+            this.createLockedCubesCache()
+            cube()?.updateRotation(e.value)
+            this.reconstructLockedCubes()
+        })
 
         //Create cube and delete cube hooks
         dom.find('.cube-create').click(() => {
@@ -177,6 +177,21 @@ export class ModelingStudio {
         this.leftDivider.mousedown(() => clickedDivider = 1)
         this.rightDivider.mousedown(() => clickedDivider = 2)
         this.updateAreas()
+    }
+
+    createLockedCubesCache() {
+        this.lockedChildrenCache.length = 0
+        this.lockedCubes
+            .filter(cube => this.raytracer.selected === undefined || cube !== this.raytracer.selected.tabulaCube)
+            .forEach(cube => this.lockedChildrenCache.push(new CubeLocker(cube)))
+    }
+
+    reconstructLockedCubes() {
+        if(this.raytracer.selected !== undefined) {
+            this.raytracer.selected.parent.updateMatrixWorld(true)
+        }
+        this.lockedChildrenCache.forEach(lock => lock.reconstruct())
+        this.lockedChildrenCache.length = 0
     }
 
     setTranslationTool() {
@@ -252,6 +267,8 @@ export class ModelingStudio {
     }
 
     cubeHierarchyChanged() {
+        this.prevSelected = undefined
+        this.prevIntersected = undefined
         this.cubeList.refreshCompleatly()
     }
 
