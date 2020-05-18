@@ -1,12 +1,17 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { TblCube } from "./tbl_loader.js"
-import { LinkedElement } from "./editor.js"
+import { LinkedElement, LinkedSelectableList, ToggleableElement } from "./util.js"
+import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4 } from "./three.js"
 
 const mainArea = document.getElementById("main-area")
 
+const translateKey = "translate"
+const rotateKey = "rotate"
+const dimensionKey = "dimensions"
+
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, transformControls, setMode, renameCube) {
+    constructor(domElement, display, raytracer, transformControls, renameCube) {
         this.domElement = domElement
         let dom = $(domElement)
         this.canvasContainer = dom.find("#display-div").get(0)
@@ -14,27 +19,115 @@ export class ModelingStudio {
         this.raytracer = raytracer
         this.prevIntersected
         this.prevSelected
-        this.setMode = setMode
+        this.rotationPointSphere = this.createRotationPointObject()
         this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl)
         this.transformControls = transformControls
-        this.transformControls.studioCallback = (dims, offset) => {
-            setDimension(dims)
-            setOffset(offset)
+        this.transformControls.space = "local"
+        this.transformControls.studioCallback = (dims, offset) => {//todo: move to an event
+            this.dimensions.value = dims
+            this.offsets.value = offset
         }
 
-        let cube = () => raytracer.selected?.tabulaCube
+        //Tool Transform Types
 
+        this.positionStart = new Vector3()
+        this.offsetStart = new Vector3()
+        this.rotationStart = new Quaternion()
+        this.childrenCache = []
+        
+        this.toolTransformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false).onchange(e => {
+            switch(e.value) {
+                case translateKey: 
+                    this.setTranslationTool(); 
+                    break
+                case rotateKey: 
+                    this.setRotationTool(); 
+                    break
+                case dimensionKey: 
+                    this.setDimensionsTool(); 
+                    break
+                default:
+                    this.setMode('none')
+            };
+        })
+        this.selectedTransform = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.setTranslationTool())
+        this.clampChildren = new ToggleableElement(dom.find('.dropdown-clamp-children'))
+        this.globalSpace = new ToggleableElement(dom.find('.dropdown-global-space')).onchange(e => this.transformControls.space = e.value ? "world" : "local")
+        this.transformControls.addEventListener('mouseDown', () => {
+            this.positionStart.fromArray(this.positions.value)
+            this.offsetStart.fromArray(this.offsets.value)
+            this.rotationStart.copy(this.raytracer.selected.parent.quaternion)
+
+            this.childrenCache.length = 0
+            this.raytracer.selected.parent.children.forEach(child => {
+                if(this.raytracer.selected.tabulaCube !== child.tabulaCube) {
+                    this.childrenCache.push({child, pos: child.position.toArray(), matrix: child.matrixWorld.clone() })
+                }
+            })
+        })
+        this.transformControls.addEventListener('objectChange', () => {
+            let selected = this.toolTransformType.value
+            switch(selected) {
+                case translateKey: 
+                    switch(this.selectedTransform.value) {
+                        case 'offset':
+                            let cube = this.raytracer.selected.tabulaCube
+                            this.offsets.value = this.raytracer.selected.position.toArray().map((e, i) => e - cube.dimension[i]/2)
+                            break
+                        case 'rotation_point':
+                            let rotChangedInv = this.positionStart.clone()
+                                .sub(this.raytracer.selected.parent.position)
+                                .applyQuaternion(this.raytracer.selected.parent.quaternion.clone().inverse())
+                            this.offsets.value = [rotChangedInv.x+this.offsetStart.x, rotChangedInv.y+this.offsetStart.y, rotChangedInv.z+this.offsetStart.z]
+                        case 'position':
+                                this.positions.value = this.raytracer.selected.parent.position.toArray()
+                                break
+                    }
+                    break
+
+                case rotateKey: 
+                    this.rotation.value = this.raytracer.selected.parent.rotation.toArray().map(a => a * 180/Math.PI)
+                    break
+            };
+
+            if((selected === translateKey || selected === rotateKey) && this.clampChildren.value) {
+                this.raytracer.selected.parent.updateMatrixWorld(true)
+                    let inverse = new Matrix4()
+                    let resultMat = new Matrix4()
+                    let decomposePos = new Vector3()
+                    let decomposeRot = new Quaternion()
+                    this.childrenCache.forEach(obj => {
+                        inverse.getInverse(this.raytracer.selected.parent.matrixWorld)
+                        resultMat.multiplyMatrices(inverse, obj.matrix)
+                        resultMat.decompose(decomposePos, decomposeRot, new Vector3())
+
+                        obj.child.tabulaCube.updatePosition(decomposePos.toArray())
+                        let euler = new Euler().setFromQuaternion(decomposeRot, "ZYX")
+                        obj.child.tabulaCube.updateRotation(euler.toArray().map(e => e * 180 / Math.PI))
+                    
+                    })
+            }
+            this.runFrame()
+        });
+
+        //All hooks on the left panel
+        let cube = () => raytracer.selected?.tabulaCube
         this.cubeName = new LinkedElement(dom.find('.input-cube-name'), false, false).onchange(e => {
             dom.find('.input-cube-name').toggleClass('input-invalid', renameCube(e.old, e.value))
         })
         this.dimensions = new LinkedElement(dom.find('.input-dimension')).onchange(e => cube()?.updateDimension(e.value))
-        this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => cube()?.updatePosition(e.value))
+        this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => {
+            cube()?.updatePosition(e.value)
+            cube()?.planesGroup.updateMatrix()
+            this.updateSpherePosition()
+        })
         this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => cube()?.updateOffset(e.value))
         this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e => cube()?.updateCubeGrow(e.value))
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => cube()?.updateTextureOffset(e.value))
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => cube()?.updateTextureMirrored(e.value))
         this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => cube()?.updateRotation(e.value))
 
+        //Create cube and delete cube hooks
         dom.find('.cube-create').click(() => {
             let map = this.display.tbl.cubeMap
             let name = "newcube"
@@ -62,6 +155,7 @@ export class ModelingStudio {
             }
         })
 
+        //Setup the dividers to allow for changing the panel size
         this.leftDivider = dom.find("#left-divider")
         this.rightDivider = dom.find("#right-divider")
         this.leftArea = 300
@@ -82,8 +176,41 @@ export class ModelingStudio {
 
         this.leftDivider.mousedown(() => clickedDivider = 1)
         this.rightDivider.mousedown(() => clickedDivider = 2)
-
         this.updateAreas()
+    }
+
+    setTranslationTool() {
+        this.setMode(translateKey, this.selectedTransform.value === 'offset' ? this.raytracer.selected : this.raytracer.selected.parent)
+    }
+
+    setRotationTool() {
+        this.setMode(rotateKey, this.raytracer.selected.parent)
+    }
+
+    setDimensionsTool() {
+        this.setMode(dimensionKey, this.raytracer.selected)
+    }
+
+    setMode(mode, toAttach) {
+        let newValue = mode !== "none" ? mode : undefined
+        if(this.toolTransformType.value !== newValue) {
+            this.toolTransformType.value = newValue
+        } 
+        this.transformControls.visible = mode != "none"
+
+        if(mode !== "none") {
+            this.transformControls.attach(toAttach);
+            this.transformControls.mode = mode
+        }
+    }
+
+    createRotationPointObject() {
+        let geometry = new SphereGeometry(1/32, 32, 32);
+        let material = new MeshBasicMaterial({ color: 0x0624cf});
+        let sphere = new Mesh(geometry, material);
+        this.display.scene.add(sphere);
+        sphere.visible = false
+        return sphere
     }
 
     updateAreas() {
@@ -134,6 +261,9 @@ export class ModelingStudio {
 
     selectedChanged() {
         if(this.raytracer.selected !== undefined) {
+            this.rotationPointSphere.visible = true
+            this.updateSpherePosition()
+
             let cube = this.raytracer.selected.tabulaCube
             this.cubeName.value = cube.name
             this.positions.value = cube.rotationPoint
@@ -144,6 +274,8 @@ export class ModelingStudio {
             this.textureOffset.value = cube.textureOffset
             this.textureMirrored.value = cube.textureMirrored
         } else {
+            this.rotationPointSphere.visible = false
+
             this.dimensions.value = [0, 0, 0]
             this.positions.value = [0, 0, 0]
             this.offsets.value = [0, 0, 0]
@@ -154,81 +286,10 @@ export class ModelingStudio {
             this.cubeName.value = ""
         }
     }
+
+    updateSpherePosition() {
+        if(this.raytracer.selected !== undefined) {
+            this.raytracer.selected.parent.getWorldPosition(this.rotationPointSphere.position)
+        }
+    }
 }
-
-// window.toggleDimensionsTransform = () => {
-//     if(activeStudio !== undefined &&  activeStudio.transformControls.visible && activeStudio.transformControls.mode == "dimensions") {
-//         activeStudio.setMode("none")
-//     } else {
-//         activeStudio.setMode("dimensions")
-//     }
-// }
-
-
-// window.setDimension = elem => setValuesFromElem(c => c.dimension, elem, setDimension)
-// window.setOffset = elem => setValuesFromElem(c => c.offset, elem, setOffset)
-// window.setTextureOffset = elem => setValuesFromElem(c => c.textureOffset, elem, setTextureOffset)
-// window.setTextureMirrored = elem => setTextureMirrored(elem.value)
-// window.setMcScale = elem => {
-//     let num = Number(elem.value)
-//     if(Number.isNaN(num)) {
-//         return
-//     }
-//     setMcScale(num)
-// }
-// window.setCubeName = elem => setCubeName(elem.value)
-
-// function setValuesFromElem(propertyGetter, elem, applier) {
-//     if(activeStudio !== undefined && activeStudio.raytracer.selected !== undefined) {
-//         let num = Number(elem.value)
-//         if(Number.isNaN(num)) {
-//             return
-//         }
-//         let values = propertyGetter(activeStudio.raytracer.selected.tabulaCube)
-//         values[elem.getAttribute("axis")] = num
-//         applier(values)
-//     }
-    
-// }
-
-// function setDimension(values) {
-//     updateCubeValuesArray("input-dimension", c => c.updateDimensions(values), values)
-// }
-
-// function setOffset(values) {
-//     updateCubeValuesArray("input-offset", c => c.updateOffset(values), values)
-// }
-
-// function setMcScale(value) {
-//     updateCubeRaw("input-cube-grow", c => c.updateMcScale(value), e => e.value = value)
-// }
-
-// function setTextureOffset(values) {
-//     updateCubeValuesArray("input-texure-offset", c => c.updateTextureOffset(values), values)
-// }
-
-// function setTextureMirrored(value) {
-//     updateCubeRaw("input-texture-mirrored", c => c.updateTextureMirrored(value), e => e.value = value)
-// }
-
-// function setCubeName(value) {
-//     if(activeStudio !== undefined) {
-//         activeStudio.setCubeName(value)
-//     }
-// }
-
-// function updateCubeValuesArray(className, cubeFunction, values) {
-//     updateCubeRaw(className, cubeFunction, e => e.value = values[e.getAttribute("axis")])
-// }
-
-// function updateCubeRaw(className, cubeFunction, elemFunction) {
-//     if(activeStudio !== undefined) {
-//         [...document.getElementsByClassName(className)].forEach(elem => {
-//             elemFunction(elem)
-//             elem.checkValidity()
-//         });
-//         if(activeStudio.raytracer.selected !== undefined) {
-//             cubeFunction(activeStudio.raytracer.selected.tabulaCube)
-//         }
-//     }
-// }

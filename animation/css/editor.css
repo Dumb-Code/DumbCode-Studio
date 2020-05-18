@@ -44,10 +44,12 @@
 
 #main-area.is-modeling div#template-div {
     display: grid;
-    grid-template-rows: calc(50vh - 26px) calc(50vh - 26px);
+    grid-template-rows: calc(50vh - 46px) calc(50vh - 46px) 40px;
     grid-template-areas: 
     "left_area main_area right_area_top"
-    "left_area main_area right_area_bottom";
+    "left_area main_area right_area_bottom"
+    "left_area bottom_bar right_area_bottom"
+    ;
     width: 100%;
 }
 
@@ -92,3 +94,39 @@ ul#cube-list li.cube-intersected {
 ul#cube-list li.cube-selected {
     background-color: blue;
 }
+
+.dropdown-entry {
+    margin-top: 10px;
+}
+
+.dropdown-activateable.is-activated {
+    background-color: #83FF7B;
+}
+
+.dropdown-activateable:not(.is-activated) {
+    background-color: #FF7B7B;
+}
+
+.dropdown-activateable:hover {
+    background-color: #7BFBFF;
+}
+
+.dropdown-activateable::after {
+    margin-left: 10px;
+}
+
+.dropdown-activateable.is-activated::after {
+    content: "✔";
+}
+
+.dropdown-activateable:not(.is-activated)::after {
+    content: "🗙";
+ }
+
+ .dropdown-activateable {
+     cursor: pointer;
+ }
+
+ .bottombar-element {
+     display: inline-block;
+ }

@@ -57,9 +57,6 @@
         <input axis="1" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
         <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
     </div>
-    <div>
-        <input type="button" onclick="toggleDimensionsTransform()">TEST</input>
-    </div>
 </div>
 <div id="left-divider" class="vertical-divider"></div>
 <div id="right-divider" class="vertical-divider"></div>
@@ -73,4 +70,57 @@
         <button class="cube-delete">-</button>
     </div>
     <ul id="cube-list" style="overflow-y: scroll; height: 100%;"></ul>
+</div>
+<div id="editor-transform-tools" style="grid-area: bottom_bar;">
+    <div class="bottombar-element dropdown is-hoverable is-up">
+        <div class="dropdown-trigger">
+          <button class="button is-dark transform-control-tool" select-list-entry="translate">
+            <span class="icon is-small">
+                <i class="fas fa-arrows-alt"></i>
+            </span>
+          </button>
+        </div>
+        <div class="dropdown-menu" role="menu">
+            <div class="dropdown-content">
+                <span class="dropdown-entry dropdown-translation">
+                    <div select-list-entry="position" class="dropdown-item dropdown-activateable">Position</div>
+                    <div select-list-entry="offset" class="dropdown-item dropdown-activateable">Offset</div>
+                    <div select-list-entry="rotation_point" class="dropdown-item dropdown-activateable">Rotation Point</div>
+                </span>
+                <div class="dropdown-item dropdown-activateable dropdown-entry dropdown-clamp-children">
+                    Lock Children
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottombar-element dropdown is-hoverable is-up">
+        <div class="dropdown-trigger">
+          <button class="button is-dark transform-control-tool" select-list-entry="rotate">
+            <span class="icon is-small">
+                <i class="fas fa-sync-alt"></i>
+            </span>
+          </button>
+        </div>
+        <div class="dropdown-menu" role="menu">
+            <div class="dropdown-content">
+                <div class="dropdown-item dropdown-activateable dropdown-entry dropdown-clamp-children">
+                    Lock Children
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottombar-element">
+        <button class="button is-dark transform-control-tool" select-list-entry="dimensions">
+            <span class="icon is-small">
+                <i class="fas fa-expand"></i>
+            </span>
+        </button>
+    </div>
+    <div class="bottombar-element">
+        <button class="button is-dark dropdown-global-space">
+            <span class="icon is-small">
+                <i class="fas fa-globe-americas"></i>
+            </span>
+        </button>
+    </div>
 </div>

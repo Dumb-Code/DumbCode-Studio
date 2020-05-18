@@ -1,4 +1,4 @@
-import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, EventDispatcher } from "./three.js";
+import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./three.js";
 import { TBLModel } from "./tbl_loader.js";
 import { DinosaurDisplay, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
@@ -89,17 +89,17 @@ async function init() {
     controls.addEventListener('change', () => runFrame())
 
     transformControls = new TransformControls(camera, renderer.domElement)
-    transformControls.addEventListener('objectChange', () => {
-        let pos = raytracer.selected.parent.position
-        let rot = raytracer.selected.parent.rotation
+    // transformControls.addEventListener('objectChange', () => {
+    //     let pos = raytracer.selected.parent.position
+    //     let rot = raytracer.selected.parent.rotation
 
-        let rotations = [rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI)
-        let positions = [pos.x, pos.y, pos.z]
+    //     let rotations = rot.toArray().map(a => a * 180 / Math.PI)
+    //     let positions = [pos.x, pos.y, pos.z]
 
-        setRotation(rotations, false, false)
-        setPosition(positions, false, false)
-        runFrame()
-    } );
+    //     setRotation(rotations, false, false)
+    //     setPosition(positions, false, false)
+    //     runFrame()
+    // } );
     transformControls.addEventListener('dragging-changed', e => {
         controls.enabled = !e.value;
     });
@@ -348,8 +348,8 @@ function setMode(mode) {
             newelement = e
         }
 
-        oldelement.classList.toggle("is-active", false)
-        newelement.classList.toggle("is-active", true)
+        // oldelement.classList.toggle("is-active", false)
+        // newelement.classList.toggle("is-active", true)
     } else {
         [...document.getElementsByClassName("transform-control-tool")].forEach(elem => elem.classList.toggle("is-active", false))
     }
@@ -430,7 +430,7 @@ async function createFilesPage() {
 }
 
 async function createModelingStudio() {
-    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, transformControls, setMode, renameCube)
+    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, transformControls, renameCube)
 }
 
 async function createAnimationStudio() {
@@ -515,99 +515,5 @@ window.studioWindowResized = () => {
 
     display.renderer.setSize( width, height );
 }
-
-
-export class ButtonSpeed {
-
-    setupfor(element, callback) {
-        this.element = element;
-        this.callback = callback
-
-        this.mouseStillDown = true
-        this.timeout = 500; //todo?
-
-        this.mouseUp = () => {
-            this.mouseStillDown = false
-            clearInterval(this.interval)
-            document.removeEventListener("mouseup", this.mouseUp)
-        }
-
-        document.addEventListener("mouseup", this.mouseUp )
-        this.tick()
-    }
-
-    tick() {
-        if(!this.mouseStillDown) {
-            return;
-        }
-
-        this.callback()
-
-        if(this.timeout > 1) {
-            this.timeout -= 75
-        }
-        clearInterval(this.interval)
-        this.interval = setInterval(() => this.tick(), this.timeout)
-    }
-}
-
-export class LinkedElement {
-
-    constructor(elems, array = true, parseNum = true) {
-        this.array = array
-        this.parseNum = parseNum
-        this.addElement(this.elems = elems)
-        this.sliderElems = undefined
-    }
-
-    set value(value) {
-        if(this.array) {
-            value = [...value]
-        }
-        let old = this.rawValue
-        this.rawValue = value
-        this.visualValue = value
-        this.dispatchEvent({ type: "changed", old, value })
-    }
-    get value() {
-        return this.rawValue
-    }
-
-    set visualValue(value) {
-        if(this.array) {
-            this.elems.each((_i,e) => e.value = value[e.getAttribute('axis')])
-            if(this.sliderElems !== undefined) {
-                this.sliderElems.each((_i,e) => e.value = ((value[e.getAttribute("axis")] + 180) % 360) - 180)
-            }
-        } else {
-            this.elems.val(value)
-        }
-    }
-
-    onchange(listener) {
-        this.addEventListener('changed', listener)
-        return this
-    }
-
-    withsliders(sliderElems) {
-        this.addElement(this.sliderElems = sliderElems)
-        return this
-    }
-
-    addElement(elem) {
-        if(this.array) {
-            elem.on('input', e => {
-                let arr = this.value.splice(0)
-                arr[e.target.getAttribute('axis')] = this.parseNum ? parseInt(e.target.value) : e.target.value
-                this.value = arr
-            })
-        } else {
-            elem.on('input', e => this.value = this.parseNum ? parseInt(e.target.value) : e.target.value)
-        }
-    }
-}
-Object.assign( LinkedElement.prototype, EventDispatcher.prototype );
-
-
 
 init()
