@@ -217,8 +217,10 @@ export class ModelingStudio {
             }
         })
 
+        let size = Math.max(Math.max(...this.lockedChildrenCache.keys()), Math.max(...movingCubesCache.keys()))
+        
         //We need to compute everything in order so the parents matrixWorld is correct
-        for(let i = 0; i <= this.display.tbl.maxCubeLevel; i++) {
+        for(let i = 0; i <= size; i++) {
             this.lockedChildrenCache.get(i)?.forEach(lock => {
                 lock.reconstruct()
                 lock.cube.cubeGroup.updateMatrixWorld(true)
