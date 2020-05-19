@@ -77,7 +77,7 @@ export class TblCubeGroup {
         this.refreshGroup(silent)
     }
 
-    onChildrenChange(silent = false, children = this.cube) {
+    onChildrenChange(silent = false, children = this.cubeList) {
         this.cubeList = children
         this.cubeList.forEach(c => {
             c.parent = this
