@@ -62,7 +62,7 @@ export class ModelingStudio {
                     this.setMode('none')
             };
         })
-        this.selectedTransform = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.toolTransformType.value = trans)
+        this.selectedTransform = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.toolTransformType.value = translateKey)
         this.globalSpace = new ToggleableElement(dom.find('.dropdown-global-space')).onchange(e => this.transformControls.space = e.value ? "world" : "local")
         this.transformControls.addEventListener('mouseDown', () => {
             this.positionStart.fromArray(this.positions.value)
