@@ -1,6 +1,6 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { TblCube } from "./tbl_loader.js"
-import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker } from "./util.js"
+import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, isKeyDown } from "./util.js"
 import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4 } from "./three.js"
 
 const mainArea = document.getElementById("main-area")
@@ -20,17 +20,18 @@ export class ModelingStudio {
         this.prevIntersected
         this.prevSelected
         this.rotationPointSphere = this.createRotationPointObject()
-        this.lockedCubes = []
-        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, cube => {
-            if(this.lockedCubes.includes(cube)) {
-                removeItem(this.lockedCubes, cube)
-                return false
+        this.lockedCubes = new Set()
+        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, (cubeClicked, toSet = 0) => {
+            //toSet => -1 false, 0 toggle, 1 true
+            let state = toSet < 0 || (toSet === 0 && this.lockedCubes.has(cubeClicked))
+            if(state) {
+                this.lockedCubes.delete(cubeClicked)
             } else {
-                this.lockedCubes.push(cube)
-                return true
+                this.lockedCubes.add(cubeClicked)
             }
+            return state
             
-        })
+        }, () => this.createLockedCubesCache(null), cube => this.reconstructLockedCubes(cube))
         this.transformControls = transformControls
         this.transformControls.space = "local"
         this.transformControls.studioCallback = (dims, offset) => {//todo: move to an event
@@ -39,13 +40,14 @@ export class ModelingStudio {
         }
 
         //Tool Transform Types
-
         this.positionStart = new Vector3()
         this.offsetStart = new Vector3()
         this.rotationStart = new Quaternion()
-        this.lockedChildrenCache = []
+        this.lockedChildrenCache = new Map()
+        this.movingChildrenCache = new Set()
+    
         
-        this.toolTransformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false).onchange(e => {
+        this.toolTransformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false).addPredicate(e => e === undefined || this.raytracer.selected !== undefined).onchange(e => {
             switch(e.value) {
                 case translateKey: 
                     this.setTranslationTool(); 
@@ -60,8 +62,7 @@ export class ModelingStudio {
                     this.setMode('none')
             };
         })
-        this.selectedTransform = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.setTranslationTool())
-        this.clampChildren = new ToggleableElement(dom.find('.dropdown-clamp-children'))
+        this.selectedTransform = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.toolTransformType.value = trans)
         this.globalSpace = new ToggleableElement(dom.find('.dropdown-global-space')).onchange(e => this.transformControls.space = e.value ? "world" : "local")
         this.transformControls.addEventListener('mouseDown', () => {
             this.positionStart.fromArray(this.positions.value)
@@ -69,9 +70,6 @@ export class ModelingStudio {
             this.rotationStart.copy(this.raytracer.selected.parent.quaternion)
 
             this.createLockedCubesCache()
-            if(this.clampChildren.value) {
-                this.raytracer.selected.tabulaCube.children.forEach(child => this.lockedChildrenCache.push(new CubeLocker(child)))
-            }
         })
         this.transformControls.addEventListener('objectChange', () => {
             let selected = this.toolTransformType.value
@@ -179,19 +177,61 @@ export class ModelingStudio {
         this.updateAreas()
     }
 
-    createLockedCubesCache() {
-        this.lockedChildrenCache.length = 0
-        this.lockedCubes
-            .filter(cube => this.raytracer.selected === undefined || cube !== this.raytracer.selected.tabulaCube)
-            .forEach(cube => this.lockedChildrenCache.push(new CubeLocker(cube)))
+    createLockedCubesCache(selected = null) {//this.raytracer.selected?.tabulaCube
+        this.lockedChildrenCache.clear()
+        this.movingChildrenCache.clear()
+        this.lockedCubes.forEach(cube => {
+            if(selected === undefined || selected === null || cube !== selected) {
+                this.traverseUnlockedCubes(cube)
+                if(!this.lockedCubes.has(cube.parent) || cube.parent === selected) {
+                    if(this.lockedChildrenCache.has(cube.hierarchyLevel)) {
+                        this.lockedChildrenCache.get(cube.hierarchyLevel).push(new CubeLocker(cube))
+                    } else {
+                        this.lockedChildrenCache.set(cube.hierarchyLevel, [new CubeLocker(cube)])
+                    }
+                }
+            }
+        })
     }
 
-    reconstructLockedCubes() {
-        if(this.raytracer.selected !== undefined) {
-            this.raytracer.selected.parent.updateMatrixWorld(true)
+    traverseUnlockedCubes(cube) {
+        if(this.lockedCubes.has(cube)) {
+            cube.children.forEach(child => this.traverseUnlockedCubes(child))
+        } else if(this.lockedCubes.has(cube.parent)) {
+            this.movingChildrenCache.add(cube)
         }
-        this.lockedChildrenCache.forEach(lock => lock.reconstruct())
-        this.lockedChildrenCache.length = 0
+    }
+
+    reconstructLockedCubes(selected = this.raytracer.selected?.tabulaCube) {
+        if(selected !== undefined) {
+            selected.cubeGroup.parent.updateMatrixWorld(true)
+        }
+
+        //Moving cubes are cubes that SHOULD move but at some point a parent is locked preventing them from moving
+        let movingCubesCache = new Map()
+        this.movingChildrenCache.forEach(cube => {
+            if(movingCubesCache.has(cube.hierarchyLevel)) {
+                movingCubesCache.get(cube.hierarchyLevel).push(new CubeLocker(cube))
+            } else {
+                movingCubesCache.set(cube.hierarchyLevel, [new CubeLocker(cube)])
+            }
+        })
+
+        //We need to compute everything in order so the parents matrixWorld is correct
+        for(let i = 0; i <= this.display.tbl.maxCubeLevel; i++) {
+            this.lockedChildrenCache.get(i)?.forEach(lock => {
+                lock.reconstruct()
+                lock.cube.cubeGroup.updateMatrixWorld(true)
+            })
+
+            movingCubesCache.get(i)?.forEach(lock => {
+                lock.reconstruct()
+                lock.cube.cubeGroup.updateMatrixWorld(true)
+            })
+        }
+  
+        this.lockedChildrenCache.clear()
+        this.movingChildrenCache.clear()
     }
 
     setTranslationTool() {
@@ -208,9 +248,6 @@ export class ModelingStudio {
 
     setMode(mode, toAttach) {
         let newValue = mode !== "none" ? mode : undefined
-        if(this.toolTransformType.value !== newValue) {
-            this.toolTransformType.value = newValue
-        } 
         this.transformControls.visible = mode != "none"
 
         if(mode !== "none") {
@@ -244,20 +281,20 @@ export class ModelingStudio {
         if(this.prevSelected !== this.raytracer.selected) {
         
             if(this.prevSelected !== undefined) {
-                dom.find(`li[cubename='${this.prevSelected.tabulaCube.name}']`).removeClass('cube-selected')
+                dom.find(`[cubename='${this.prevSelected.tabulaCube.name}']`).removeClass('cube-selected')
             }
             if(this.raytracer.selected !== undefined) {
-                dom.find(`li[cubename='${this.raytracer.selected.tabulaCube.name}']`).addClass('cube-selected')
+                dom.find(`[cubename='${this.raytracer.selected.tabulaCube.name}']`).addClass('cube-selected')
             }
             this.prevSelected = this.raytracer.selected
         }
 
         if(this.prevIntersected !== this.raytracer.intersected) {
             if(this.prevIntersected !== undefined) {
-                dom.find(`li[cubename='${this.prevIntersected.tabulaCube.name}']`).removeClass('cube-intersected')
+                dom.find(`[cubename='${this.prevIntersected.tabulaCube.name}']`).removeClass('cube-intersected')
             }
             if(this.raytracer.intersected !== undefined) {
-                dom.find(`li[cubename='${this.raytracer.intersected.tabulaCube.name}']`).addClass('cube-intersected')
+                dom.find(`[cubename='${this.raytracer.intersected.tabulaCube.name}']`).addClass('cube-intersected')
             }
             this.prevIntersected = this.raytracer.intersected
         }
@@ -291,6 +328,7 @@ export class ModelingStudio {
             this.textureOffset.value = cube.textureOffset
             this.textureMirrored.value = cube.textureMirrored
         } else {
+            this.toolTransformType.value = undefined
             this.rotationPointSphere.visible = false
 
             this.dimensions.value = [0, 0, 0]

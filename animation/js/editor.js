@@ -441,7 +441,11 @@ async function initiateModel(model) {
     display.setMainModel(material, model)
     animationStudio = await createAnimationStudio()
     modelingStudio = await createModelingStudio()
-    model.onCubeHierarchyChanged = () => modelingStudio.cubeHierarchyChanged()
+    let old = model.onCubeHierarchyChanged
+    model.onCubeHierarchyChanged = () => {
+        modelingStudio.cubeHierarchyChanged()
+        old()
+    }
 }
 
 window.setupTexture = async(file, nameElement) => {

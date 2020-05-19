@@ -100,6 +100,8 @@ export class LinkedSelectableList {
     constructor(elements, mustSelectOne = true) {
         this.elements = elements
         this.mustSelectOne = mustSelectOne
+        this.predicate = () => true
+
         let getValue = () => this.value
         let setValue = v => this.value = v
         this.elements.click(function() { 
@@ -116,11 +118,13 @@ export class LinkedSelectableList {
     }
 
     set value(value) {
-        let old = this.rawValue
-        this.rawValue = value
-        this.elements.removeClass('is-activated')
-        this.elements.filter(`[select-list-entry='${value}']`).addClass('is-activated')
-        this.dispatchEvent({ type: "changed", old, value })
+        if(this.predicate(value)) {
+            let old = this.rawValue
+            this.rawValue = value
+            this.elements.removeClass('is-activated')
+            this.elements.filter(`[select-list-entry='${value}']`).addClass('is-activated')
+            this.dispatchEvent({ type: "changed", old, value })
+        }
     }
 
     get value() {
@@ -131,24 +135,39 @@ export class LinkedSelectableList {
         this.addEventListener('changed', listener)
         return this
     }
+
+    addPredicate(predicate) {
+        let old = this.predicate
+        this.predicate = e => old(e) && predicate(e)
+        return this
+    }
 }
 Object.assign( LinkedSelectableList.prototype, EventDispatcher.prototype );
 
 
 export class ToggleableElement {
-    constructor(elements, textActive = undefined, textUnactive = undefined) {
+    constructor(elements) {
         this.elements = elements
+        this.predicate = () => true
         let setValue = v => this.value = v
         this.elements.click(function() { setValue(!this.classList.contains("is-activated")) })
     }
 
     set value(value) {
-        this.elements.toggleClass("is-activated", value)
-        this.dispatchEvent({ type: "changed", value })
+        if(this.predicate(value)) {
+            this.elements.toggleClass("is-activated", value)
+            this.dispatchEvent({ type: "changed", value })
+        }
     }
 
     get value() {
         return this.elements.is('.is-activated')
+    }
+
+    addPredicate(predicate) {
+        let old = this.predicate
+        this.predicate = e => old(e) && predicate(e)
+        return this
     }
 
     onchange(listener) {
@@ -182,3 +201,11 @@ export class CubeLocker {
         this.cube.updateRotation(decomposeEuler.toArray().map(e => e * 180 / Math.PI))
     }
 }
+
+
+
+let pressedKeys = new Map();
+$(document).keyup(e => pressedKeys.delete(e.key)).keydown(e => pressedKeys.set(e.key, true))
+export function isKeyDown(key) {
+    return pressedKeys.has(key)
+} 

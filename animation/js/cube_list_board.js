@@ -1,10 +1,33 @@
+import { isKeyDown } from "./util.js"
+
 export class CubeListBoard {
-    constructor(cubeList, raytracer, tbl, toggleLock) {
+    constructor(cubeList, raytracer, tbl, toggleLock, createLockedCubesCache, reconstructLockedCubes) {
         this.cubeList = cubeList
         this.raytracer = raytracer
         this.tbl = tbl
         this.toggleLock = toggleLock
+        this.createLockedCubesCache = createLockedCubesCache
+        this.reconstructLockedCubes = reconstructLockedCubes
+        this.previousDragElement
         this.elementMap = new Map()
+
+        this.cubeList.ondragover = e => {
+            if(e.target == this.cubeList) {
+                this.previousDragElement?.removeAttribute("drag-state")
+                e.preventDefault()
+            }
+        }
+        this.cubeList.ondrop = e => {
+            let cube = tbl.cubeMap.get(e.dataTransfer.getData("cubename"))
+            if(e.target == this.cubeList && cube !== undefined) {
+                createLockedCubesCache()
+                cube.parent.deleteChild(cube, true)
+                tbl.rootGroup.addChild(cube)
+                reconstructLockedCubes(cube)
+            }
+            
+        }
+
         this.refreshCompleatly()
     }
 
@@ -19,27 +42,103 @@ export class CubeListBoard {
 
     createCube(parent, cube, oldMap) {
         let li = document.createElement("li")
+        let div = document.createElement("div")
         let a = document.createElement("a")
         let lock = this.createLockIcon()
 
-        li.setAttribute('cubename', cube.name)
+        a.draggable = true
+        a.ondragstart = e => e.dataTransfer.setData("cubename", cube.name)
+        div.classList.add("cube-line-controller")
+        div.setAttribute('cubename', cube.name)
+
+        let getPrevious = () => this.previousDragElement
+        let setPrevious = p => this.previousDragElement = p
+        div.ondragover = function(e) {
+            let rect = this.getBoundingClientRect()
+            let yPerc = (e.clientY - rect.top) / rect.height
+    
+            if(this !== getPrevious()) {
+                getPrevious()?.removeAttribute("drag-state")
+                setPrevious(this)
+            }
+
+            //Don't drag onto self
+            if(e.dataTransfer.getData("cubename") === cube.name) {
+                this.removeAttribute("drag-state")
+                return
+            }
+    
+            let buffer = 1/3
+            if(yPerc <= buffer) {
+                this.setAttribute("drag-state", "top")
+            } else if(yPerc > 1 - buffer) {
+                this.setAttribute("drag-state", "bottom")
+            } else {
+                this.setAttribute("drag-state", "on")
+            }
+    
+            e.preventDefault()
+        }
+        
+        let tbl = this.tbl
+        let createLockedCubesCache = this.createLockedCubesCache
+        let reconstructLockedCubes = this.reconstructLockedCubes
+        div.ondrop = function(e) {
+            let type = this.getAttribute("drag-state")
+            let draggedCube = tbl.cubeMap.get(e.dataTransfer.getData("cubename"))
+            let droppedOnto = tbl.cubeMap.get(cube.name)
+            if(draggedCube !== undefined && droppedOnto !== undefined && type !== undefined) {
+                createLockedCubesCache()
+                draggedCube.parent.deleteChild(draggedCube, true)
+                if(type === "on") {
+                    droppedOnto.addChild(draggedCube)
+                } else {
+                    let index = droppedOnto.parent.getChildren().indexOf(droppedOnto)
+                    if(type === "bottom") {
+                        index++
+                    }
+                    droppedOnto.parent.getChildren().splice(index, 0, draggedCube)
+                    droppedOnto.parent.onChildrenChange(false)
+                }
+                reconstructLockedCubes(cube)
+            }
+        }
+    
         a.style.paddingRight = "5px"
         a.innerText = cube.name
         a.oncontextmenu = () => {
-            if(this.toggleLock(cube)) {
-                lock.style.display = null
+            let ctrl = isKeyDown("Control")
+            let isHidden = this.toggleLock(cube, 0)
+            if(isHidden) {
+                if(ctrl) {
+                    cube.getAllChildrenCubes([]).forEach(cube => {
+                        this.toggleLock(cube, -1)
+                        this.elementMap.get(cube).lock.classList.remove("is-locked")
+                    })
+                }
+                lock.classList.remove("is-locked")
             } else {
-                lock.style.display = "none"
+                if(ctrl) {
+                    cube.getAllChildrenCubes([]).forEach(cube => {
+                        this.toggleLock(cube, 1)
+                        this.elementMap.get(cube).lock.classList.add("is-locked")
+                    })
+                }
+                lock.classList.add("is-locked")
             }
+
             return false
         }
         a.onclick = () => this.raytracer.clickOnMesh(cube.planesGroup)
         a.onmousemove = () => this.raytracer.mouseOverMesh(cube.planesGroup)
         a.onmouseleave = () => this.raytracer.mouseOverMesh(undefined)
-        lock.style.display = oldMap.has(cube) ? oldMap.get(cube).lock.style.display : "none"
+        if(oldMap.has(cube)) {
+            lock.classList.toggle("is-locked", oldMap.get(cube).lock.classList.contains("is-locked"))
+        }
 
-        li.appendChild(a)
-        li.appendChild(lock)
+        li.appendChild(div)
+        div.appendChild(a)
+        div.appendChild(lock)
     
         let i
         if(cube.children.length > 0) {
@@ -61,7 +160,7 @@ export class CubeListBoard {
                 collapseA.children[0].classList.toggle("fa-chevron-down")
             }
             collapseA.appendChild(i)
-            li.append(collapseA)
+            div.append(collapseA)
 
             let ul = document.createElement("ul")
             ul.style.paddingLeft = "10px"
@@ -79,7 +178,7 @@ export class CubeListBoard {
 
     createLockIcon() {
         let lockSpan = document.createElement("span")
-        lockSpan.classList.add("icon", "is-small")
+        lockSpan.classList.add("icon", "is-small", "cube-lock")
 
         let lockI = document.createElement("i")
         lockI.classList.add("fas", "fa-lock")

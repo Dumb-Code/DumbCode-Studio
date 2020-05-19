@@ -5,18 +5,21 @@ export class TBLModel {
     constructor() {
         this.texWidth = 64
         this.texHeight = 64
-        this.onchange
+        this.maxCubeLevel = 0
+        
 
         this.cubeMap = new Map()
         this.rootGroup = new TblCubeGroup(this, [], [])
 
-        this.onCubeHierarchyChanged = () => {}
+        this.onCubeHierarchyChanged = () => {
+            this.maxCubeLevel = 0
+            this.rootGroup.recalculateHierarchy()
+        }
     }
 
     parseJson(content) {
 
         let jobj = JSON.parse(content)
-
         this.texWidth = jobj.textureWidth
         this.texHeight = jobj.textureHeight
 
@@ -28,8 +31,8 @@ export class TBLModel {
         this.mat = material
         let mainCubeGroup = this.rootGroup.createGroup()
 
-        this.modelCache = new Group();
-        this.modelCache.scale.set(-1/16, -1/16, 1/16)
+        this.modelCache = new Group(); 
+        this.modelCache.scale.set(-1/16, -1/16, 1/16) //Invest in a way to remove this.
         this.modelCache.position.set(0, 1.5, 0)
         this.modelCache.add(mainCubeGroup)
 
@@ -48,18 +51,43 @@ export class TblCubeGroup {
         this.cubeList = cubes
         this.cubeGroups = cubeGroups
 
-        this.cubeList.forEach(child => child.parent = this)
+        this.cubeList.forEach(child => {
+            child.parent = this
+            child.hierarchyLevel = 0
+        })
     }
 
-    addChild(child) {
+    recalculateHierarchy() {
+        this.cubeList.forEach(child => {
+            child.hierarchyLevel = 0
+            child.parent = this
+            child.recalculateHierarchy()
+        })
+        this.cubeGroups.forEach(child => child.recalculateHierarchy())
+    }
+
+    addChild(child, silent = false) {
         this.cubeList.push(child)
-        child.parent = this
-        this.refreshGroup()
+        this.refreshGroup(silent)
     }
 
-    deleteChild(child) {
+    deleteChild(child, silent = false) {
+        child.parent = undefined
         this.cubeList = this.cubeList.filter(c => c != child)
-        this.refreshGroup()
+        this.refreshGroup(silent)
+    }
+
+    onChildrenChange(silent = false, children = this.cube) {
+        this.cubeList = children
+        this.cubeList.forEach(c => {
+            c.parent = this
+            c.hierarchyLevel = 0
+        })
+        this.refreshGroup(silent)
+    }
+
+    getChildren() {
+        return this.cubeList
     }
 
     createGroup() {
@@ -74,13 +102,18 @@ export class TblCubeGroup {
         return this.modelGroup
     }
     
-    refreshGroup(cubes = this.cubeList, cubeGroups = this.cubeGroups) {
+    refreshGroup(silent = false, cubes = this.cubeList, cubeGroups = this.cubeGroups) {
         this.cubeList = cubes
         this.cubeGroups = cubeGroups
         this.modelGroup.children.forEach(child => this.modelGroup.remove(child))
         this.cubeGroups.forEach(child => this.modelGroup.add(child.createGroup()))
-        this.cubeList.forEach(cube => this.modelGroup.add(cube.createGroup()))
-        this.tbl.onCubeHierarchyChanged()
+        this.cubeList.forEach(cube => {
+            this.modelGroup.add(cube.createGroup())
+            cube.parent = this
+        })
+        if(!silent) {
+            this.tbl.onCubeHierarchyChanged()
+        }
     }
 
     resetAnimations() {
@@ -118,8 +151,7 @@ export class TblCube {
         this.children = children
         this.tbl = tbl
         this.textureMirrored = textureMirrored
-
-        this.children.forEach(child => child.parent = this)
+        this.hierarchyLevel = 0
 
         tbl.cubeMap.set(this.name, this)
     }
@@ -134,7 +166,8 @@ export class TblCube {
 
         this.planesGroup = new Group()
         this.planesGroup.tabulaCube = this
-
+        this.planesGroup.partOfTheGroup = true
+        
         this.cubeGroup.add(this.planesGroup)
         this.cubeMesh = []
         for(let f = 0; f < 6; f++) {
@@ -153,30 +186,58 @@ export class TblCube {
         return this.cubeGroup
     }
 
-    addChild(child) {
-        this.children.push(child)
-        child.parent = this
-        this.onChildrenChange()
+    recalculateHierarchy() {
+        this.children.forEach(child => {
+            child.hierarchyLevel = this.hierarchyLevel+1
+            child.parent = this
+            child.recalculateHierarchy()
+        }) 
+        if(this.children.length === 0) {
+            this.tbl.maxCubeLevel = Math.max(this.tbl.maxCubeLevel, this.hierarchyLevel)
+        }
     }
 
-    deleteChild(child) {
+    addChild(child, silent = false) {
+        this.children.push(child)
+        this.onChildrenChange(silent)
+        
+    }
+
+    deleteChild(child, silent = false) {
+        child.parent = undefined
         this.children = this.children.filter(c => c != child)
-        this.onChildrenChange()
+        this.onChildrenChange(silent)
     }
 
     getGroup() {
         return this.cubeGroup
     }
 
-    onChildrenChange(childern = this.children) {
-        this.tbl.onCubeHierarchyChanged()
-        this.children.forEach(child => this.cubeGroup.remove(child))
+    getChildren() {
+        return this.children
+    }
+
+    onChildrenChange(silent = false, childern = this.children) {
+        if(!silent) {
+            this.tbl.onCubeHierarchyChanged()
+        }
+        this.cubeGroup.children.forEach(child => {
+            if(child.partOfTheGroup !== true) {
+                this.cubeGroup.remove(child)
+            }
+        })
         this.children = childern;
         this.children.forEach(child => this.cubeGroup.add(child.createGroup()))
     }
 
-    getAllChildrenCubes(arr = []) {
-        this.children.forEach(c => c.getAllChildrenCubes(arr))
+    getAllChildrenCubes(arr = [], includeSelf = false) {
+        if(includeSelf) {
+            arr.push(this)
+        }
+        this.children.forEach(c => {
+            c.getAllChildrenCubes(arr)
+            arr.push(c)
+        })
         return arr
     }
 
@@ -269,7 +330,8 @@ export class TblCube {
 function parseCubeJson(json, tbl) {
     let children = []
     json.children.forEach(child => { children.push( parseCubeJson( child, tbl ) ) })
-    return new TblCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
+
+    return new TblCube(json.name, json.dimensions, position, offset, roation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
 }
 
 function getUV(offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {

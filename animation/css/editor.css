@@ -83,16 +83,40 @@ li.is-collapsed ul {
     cursor: n-resize;
 }
 
-ul#cube-list li {
-    background-color: wheat;
+ul#cube-list .cube-line-controller {
+    border: solid 3px transparent
 }
 
-ul#cube-list li.cube-intersected {
+ul#cube-list .cube-line-controller.cube-intersected {
     background-color: red;
 }
 
-ul#cube-list li.cube-selected {
+ul#cube-list .cube-line-controller.cube-selected {
     background-color: blue;
+}
+
+ul#cube-list .cube-line-controller[drag-state="on"] {
+    background-color: #000000;
+    color: wheat
+}
+
+ul#cube-list .cube-line-controller[drag-state="top"] {
+    border-top-style: solid;
+    border-top-color: #000000;
+}
+
+ul#cube-list .cube-line-controller[drag-state="bottom"] {
+    border-bottom-style: solid;
+    border-bottom-color: #000000;
+}
+
+
+.cube-lock {
+    display: none;
+}
+
+.is-locked .cube-lock, .is-locked.cube-lock {
+    display: inline-flex;
 }
 
 .dropdown-entry {

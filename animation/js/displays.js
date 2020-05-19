@@ -1,4 +1,4 @@
-import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material } from "./three.js";
+import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material, BoxBufferGeometry, MeshBasicMaterial, Mesh, CylinderBufferGeometry, Matrix4 } from "./three.js";
 import { TBLModel } from "./tbl_loader.js";
 
 export class DinosaurDisplay {
@@ -12,25 +12,65 @@ export class DinosaurDisplay {
         this.camera = camera
         this.scene = scene
                
+
+        let gridSquares = 7
         //Set up the grid
         this.gridGroup = new Group()
         this.gridGroup.dontRenderGif = true
         this.scene.add(this.gridGroup)
-        let geometry = new Geometry();
-        geometry.vertices.push(new Vector3( - 15, 0 ) );
-        geometry.vertices.push(new Vector3( 15, 0 ) );
-        let linesMaterial = new LineBasicMaterial({ color: 0x787878, opacity: .2, linewidth: .1 });
-        for (let i = 0; i <= 30; i ++) {
+        let matrix = new Matrix4().makeRotationZ(Math.PI / 2)
+        let mesh1 = new Mesh(new CylinderBufferGeometry(0.005, 0.005, gridSquares), new MeshBasicMaterial({ color: 0x2C2C2C }))
+        let mesh2 = new Mesh(new CylinderBufferGeometry(0.003, 0.003, gridSquares), new MeshBasicMaterial({ color: 0x5A5A5A }))
+        let mesh3 = new Mesh(new CylinderBufferGeometry(0.002, 0.002, gridSquares), new MeshBasicMaterial({ color: 0x7B7B7B }))
 
-            let line = new Line(geometry, linesMaterial);
-            line.position.z =  i - 15
+        mesh1.geometry.applyMatrix(matrix);
+        mesh2.geometry.applyMatrix(matrix);
+        mesh3.geometry.applyMatrix(matrix);
+
+        for (let i = 0; i <= gridSquares; i ++) {
+            let line = mesh1.clone()
+            line.position.z =  i - gridSquares/2
             this.gridGroup.add( line );
 
-            line = new Line(geometry, linesMaterial);
-            line.position.x = i - 15
+            line = mesh1.clone()
+            line.position.x = i - gridSquares/2
             line.rotation.y = 90 * Math.PI / 180;
             this.gridGroup.add(line);
+            
+            if(i === 0) {
+                continue
+            }
+            for(let i2 = 1; i2 <= 4; i2++) {
+                if(i2 !== 0 && i2 !== 4) {
+                    let line = mesh2.clone()
+                    line.position.z =  i - gridSquares/2 - i2/4
+                    this.gridGroup.add( line );
+
+                    line = mesh2.clone()
+                    line.position.x = i - gridSquares/2 - i2/4
+                    line.rotation.y = 90 * Math.PI / 180;
+                    this.gridGroup.add(line);
+                }
+
+                for(let i3 = 1; i3 < 4; i3++) {
+                    let line = mesh3.clone()
+                    line.position.z =  i - gridSquares/2 - i2/4 - i3/16 + 1/4
+                    this.gridGroup.add( line );
+    
+                    line = mesh3.clone()
+                    line.position.x = i - gridSquares/2 - i2/4 - i3/16 + 1/4
+                    line.rotation.y = 90 * Math.PI / 180;
+                    this.gridGroup.add(line);
+                }
+
+            }
         }
+
+        let blockGeometry = new BoxBufferGeometry()
+        let blockMaterial = new MeshBasicMaterial({ color: 0x2251A9 })
+        this.blockElement = new Mesh(blockGeometry, blockMaterial)
+        this.blockElement.position.set(0, -0.5001, 0)
+        this.scene.add(this.blockElement)
     }
 
     /**
