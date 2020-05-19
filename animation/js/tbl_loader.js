@@ -269,12 +269,12 @@ export class TblCube {
         this.cubeMesh[3].rotation.set(Math.PI / 2, 0, 0)
         this.cubeMesh[3].position.set(0, -h/2, 0)
 
-        this.cubeMesh[4].geometry = new PlaneBufferGeometry(w, h); //+z
-        this.cubeMesh[4].position.set(0, 0, d/2)
+        this.cubeMesh[4].geometry = new PlaneBufferGeometry(w, h); //-z but actually +z
+        this.cubeMesh[4].rotation.set(0, Math.PI, 0)
+        this.cubeMesh[4].position.set(0, 0, -d/2)
 
-        this.cubeMesh[5].geometry = new PlaneBufferGeometry(w, h); //-z
-        this.cubeMesh[5].rotation.set(0, Math.PI, 0)
-        this.cubeMesh[5].position.set(0, 0, -d/2)
+        this.cubeMesh[5].geometry = new PlaneBufferGeometry(w, h); //+z but actually -z
+        this.cubeMesh[5].position.set(0, 0, d/2)
     }
 
     updateTexture() {
