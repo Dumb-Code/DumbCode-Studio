@@ -385,16 +385,16 @@ var TransformControls = function ( camera, domElement ) {
 				} else if(axis.startsWith('Y')) {
 					dims[1] = dimensionsStart[1] + Math.floor(offset.y)
 				} else if(axis.startsWith('Z')) {
-					dims[2] = dimensionsStart[2] + Math.floor(offset.z)
+					dims[2] = dimensionsStart[2] - Math.floor(offset.z)
 				}
 
-				if(axis.endsWith('N')) {					
+				if(axis.endsWith('N') !== axis.startsWith('Z')) {					
 					if(axis.startsWith('X')) {
 						offs[0] = offsetsStart[0] - Math.floor(offset.x)
 					} else if(axis.startsWith('Y')) {
 						offs[1] = offsetsStart[1] - Math.floor(offset.y)
 					} else if(axis.startsWith('Z')) {
-						offs[2] = offsetsStart[2] - Math.floor(offset.z)
+						offs[2] = offsetsStart[2] + Math.floor(offset.z)
 					}
 				}
 
