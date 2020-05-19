@@ -177,7 +177,7 @@ export class ModelingStudio {
         this.updateAreas()
     }
 
-    createLockedCubesCache(selected = null) {//this.raytracer.selected?.tabulaCube
+    createLockedCubesCache(selected = this.raytracer.selected?.tabulaCube) {
         this.lockedChildrenCache.clear()
         this.movingChildrenCache.clear()
         this.lockedCubes.forEach(cube => {
