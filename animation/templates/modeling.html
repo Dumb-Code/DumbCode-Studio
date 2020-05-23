@@ -1,4 +1,7 @@
-<div style="grid-area: left_area; color: black; ">
+<div id="panel-left" style="grid-area: left_area; color: black; position: relative">
+    <span class="popout-button icon is-small">
+        <i class="fas fa-sign-out-alt"></i>
+    </span>
     <div class="modeling-ui-entry">
         <label>Cube Name</label>
         <div style="padding: 5px;">
@@ -58,13 +61,17 @@
         <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
     </div>
 </div>
-<div id="left-divider" class="vertical-divider"></div>
-<div id="right-divider" class="vertical-divider"></div>
-<div class="editor-part", editor-tab="modeling" style="grid-area: right_area_top; background-color: black;">
+<div id="panel-right-top" class="editor-part", editor-tab="modeling" style="grid-area: right_area_top; background-color: black; position: relative">
+    <span class="popout-button icon is-small">
+        <i class="fas fa-sign-out-alt"></i>
+    </span>
     TEST
 </div>
 <div id="display-div" style="grid-area: main_area;"></div>
-<div class="editor-part", editor-tab="modeling" style="grid-area: right_area_bottom;">
+<div id="panel-right-bottom" class="editor-part", editor-tab="modeling" style="grid-area: right_area_bottom; position: relative">
+    <span class="popout-button icon is-small">
+        <i class="fas fa-sign-out-alt"></i>
+    </span>
     <div class="modeling-studio-cube-edit">
         <button class="cube-create">+</button>
         <button class="cube-delete">-</button>
@@ -112,3 +119,6 @@
         </button>
     </div>
 </div>
+<div id="left-divider" class="vertical-divider"></div>
+<div id="right-divider" class="vertical-divider"></div>
+<div id="right-horizontal-divider" class="horizontal-divider"></div>

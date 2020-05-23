@@ -1,7 +1,7 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { TblCube } from "./tbl_loader.js"
-import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, isKeyDown } from "./util.js"
-import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4 } from "./three.js"
+import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, LayoutPart } from "./util.js"
+import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4, EventDispatcher } from "./three.js"
 
 const mainArea = document.getElementById("main-area")
 
@@ -153,11 +153,44 @@ export class ModelingStudio {
             }
         })
 
+        this.selectedRequired = dom.find('.editor-require-selected')
+
+        this.leftPanel = new LayoutPart(dom.find('#panel-left'), this).onchange(e => {
+            this.leftArea = e.value ? 0 : 300
+            this.updateAreas()
+        })
+
+        let rightPanelChange = e => {
+            if(this.rightTopPanel.value && this.rightBottomPanel.value) {
+                this.rightArea = 0
+            } else {
+                if(this.rightArea === 0) {
+                    this.rightArea = 300
+                }
+                if(this.rightTopPanel.value !== this.rightBottomPanel.value) {
+                    if(!this.rightTopPanel.value) { //Top panel only
+                        this.topRArea = mainArea.clientHeight - 40
+                    } else { //Bottom panel only
+                        this.topRArea = 0
+                    }
+                } else if(!this.rightTopPanel.value) {
+                    this.topRArea = 300
+                }
+            }
+            this.updateAreas()
+        }
+
+        this.rightTopPanel = new LayoutPart(dom.find('#panel-right-top'), this).onchange(rightPanelChange)
+        this.rightBottomPanel = new LayoutPart(dom.find('#panel-right-bottom'), this).onchange(rightPanelChange)
+
         //Setup the dividers to allow for changing the panel size
         this.leftDivider = dom.find("#left-divider")
         this.rightDivider = dom.find("#right-divider")
+        this.rightHorizontalDivider = dom.find("#right-horizontal-divider")
+
         this.leftArea = 300
         this.rightArea = 300
+        this.topRArea = 300
         let clickedDivider = -1
         $(document)
             .mouseup(() => clickedDivider = 0)
@@ -167,6 +200,8 @@ export class ModelingStudio {
                         this.leftArea = e.clientX
                     } else if(clickedDivider === 2) {
                         this.rightArea = mainArea.clientWidth - e.clientX
+                    } else if(clickedDivider === 3) {
+                        this.topRArea = e.clientY - mainArea.offsetTop
                     }
                     this.updateAreas()
                 }
@@ -174,6 +209,7 @@ export class ModelingStudio {
 
         this.leftDivider.mousedown(() => clickedDivider = 1)
         this.rightDivider.mousedown(() => clickedDivider = 2)
+        this.rightHorizontalDivider.mousedown(() => clickedDivider = 3)
         this.updateAreas()
     }
 
@@ -268,10 +304,12 @@ export class ModelingStudio {
     }
 
     updateAreas() {
-        this.leftDivider.css('left', this.leftArea + "px")
-        this.rightDivider.css('right', this.rightArea + "px")
+        this.leftDivider.css('left', (this.leftArea-4) + "px")
+        this.rightDivider.css('right', (this.rightArea-4) + "px")
+        this.rightHorizontalDivider.css('top', (mainArea.offsetTop+this.topRArea-4) + "px").css('right', '0px').css('width', this.rightArea + "px").css('left', 'unset')
 
         this.domElement.style.gridTemplateColumns = this.leftArea + "px " + " calc(100% - " + (this.leftArea + this.rightArea) + "px) " + this.rightArea + "px"
+        this.domElement.style.gridTemplateRows = this.topRArea + "px " + " calc(100vh - " + (this.topRArea + 92) + "px) 40px"
 
         window.studioWindowResized()
     }
@@ -316,7 +354,8 @@ export class ModelingStudio {
     }
 
     selectedChanged() {
-        if(this.raytracer.selected !== undefined) {
+        let isSelected = this.raytracer.selected !== undefined
+        if(isSelected) {
             this.rotationPointSphere.visible = true
             this.updateSpherePosition()
 
@@ -342,6 +381,8 @@ export class ModelingStudio {
             this.textureMirrored.value = false
             this.cubeName.value = ""
         }
+
+        this.selectedRequired.prop("disabled", !isSelected).toggleClass("is-active", isSelected)
     }
 
     updateSpherePosition() {

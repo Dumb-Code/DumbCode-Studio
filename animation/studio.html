@@ -9,7 +9,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css" rel="stylesheet"/>
     <link href="css/editor.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300&display=swap" rel="stylesheet">
-    <script src="../scripts/navigation.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -53,17 +52,17 @@
                 <script src="../scripts/navdata.js"></script>
             </div>
             <div class="navbar-end">
+                <div class="navbar-item tabs" style="margin: 0;">
+                    <ul>
+                        <li class="is-active"><a onclick="setTab(this, 0)">File</a></li>
+                        <li><a onclick="setTab(this, 1)">Modeling</a></li>
+                        <li><a onclick="setTab(this, 2)">Animation</a></li>
+                    </ul>
+                </div>
                 <div class="navbar-item" style="text-transform: none" id="dumbcode-studio-version"></div>
             </div>
         </div>
 
-        <div class="tabs">
-            <ul>
-                <li class="is-active"><a onclick="setTab(this, 0)">File</a></li>
-                <li><a onclick="setTab(this, 1)">Modeling</a></li>
-                <li><a onclick="setTab(this, 2)">Animation</a></li>
-            </ul>
-        </div>
     </nav>
     </section>
     <div id="main-area"></div>
