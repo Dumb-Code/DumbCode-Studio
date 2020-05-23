@@ -211,6 +211,11 @@ export class ModelingStudio {
         this.rightDivider.mousedown(() => clickedDivider = 2)
         this.rightHorizontalDivider.mousedown(() => clickedDivider = 3)
         this.updateAreas()
+
+
+        this.canvas = dom.find('#texture-canvas').get(0)
+        $(this.canvas).mousemove(e => this.mouseOverCanvas(e.originalEvent.layerX, e.originalEvent.layerY, false))
+        $(this.canvas).click(e => this.mouseOverCanvas(e.originalEvent.layerX, e.originalEvent.layerY, true))
     }
 
     createLockedCubesCache(selected = this.raytracer.selected?.tabulaCube) {
@@ -316,7 +321,13 @@ export class ModelingStudio {
 
     runFrame() {
         this.raytracer.update()
+        this.updateCubelistColors()
+        this.drawTextureCanvas()
+        this.display.tbl.resetAnimations()
+        this.display.render()
+    }
 
+    updateCubelistColors() {
         let dom = $(this.cubeList.cubeList)
         if(this.prevSelected !== this.raytracer.selected) {
         
@@ -338,9 +349,121 @@ export class ModelingStudio {
             }
             this.prevIntersected = this.raytracer.intersected
         }
+    }
 
-        this.display.tbl.resetAnimations()
-        this.display.render()
+    drawTextureCanvas() {
+        let size = Math.min(this.rightArea, this.topRArea)
+        this.canvas.width = this.canvas.height = size
+
+        let ctx = this.canvas.getContext('2d')
+
+        ctx.fillStyle = "rgba(255, 255, 255, 255)"
+        ctx.fillRect(0, 0, size, size)
+
+        let img = this.display.material?.map?.image
+        if(img !== undefined) {
+            ctx.drawImage(img, 0, 0, size, size)
+        }
+
+        let su = this.display.tbl.texWidth/size
+        let sv = this.display.tbl.texHeight/size
+
+        this.display.tbl.cubeMap.forEach(cube => {
+
+            let r = 1.0
+            let g = 1.0
+            let b = 1.0
+            let a = 0.2
+
+            if(this.raytracer.intersected !== undefined && this.raytracer.intersected.tabulaCube === cube) {
+                g = 0.2
+                b = 0.2
+                a = 0.5
+            } else if(this.raytracer.selected !== undefined && this.raytracer.selected.tabulaCube === cube) {
+                r = 0.2
+                g = 0.2
+                a = 0.5
+            }
+
+            let u = cube.textureOffset[0]/su
+            let v = cube.textureOffset[1]/sv
+
+            let w = cube.dimension[0]
+            let h = cube.dimension[1]
+            let d = cube.dimension[2]
+
+            let uw = w/su
+            let ud = d/su
+
+            let vh = h/sv
+            let vd = d/sv
+
+            ctx.fillStyle = `rgba(${255*r}, 0, 0, ${a})`
+            ctx.fillRect(u, v+vd, ud, vh)
+
+            ctx.fillStyle = `rgba(0, ${255*g}, 0, ${a})`
+            ctx.fillRect(u+ud, v, uw, vd)
+
+            ctx.fillStyle = `rgba(0, 0, ${255*b}, ${a})`
+            ctx.fillRect(u+ud, v+vd, uw, vh)
+
+
+            ctx.fillStyle = `rgba(${127*r}, 0, 0, ${a})`
+            ctx.fillRect(u+ud+uw, v+vd, ud, vh)
+
+            ctx.fillStyle = `rgba(0, ${127*g}, 0, ${a})`
+            ctx.fillRect(u+ud+uw, v, uw, vd)
+
+            ctx.fillStyle = `rgba(0, 0, ${127*b}, ${a})`
+            ctx.fillRect(u+ud+uw+ud, v+vd, uw, vh)
+
+        })        
+    }
+
+    mouseOverCanvas(mouseX, mouseY, mouseDown = false) {
+        let mouseBetween = (x, y, w, h) => mouseX >= x && mouseX < x+w && mouseY >= y && mouseY < y+h
+
+        let size = Math.min(this.rightArea, this.topRArea)
+        let su = this.display.tbl.texWidth/size
+        let sv = this.display.tbl.texHeight/size
+
+        let overHandled = false
+
+        this.display.tbl.cubeMap.forEach(cube => {
+            if(overHandled) {
+                return
+            }
+
+            let u = cube.textureOffset[0]/su
+            let v = cube.textureOffset[1]/sv
+
+            let w = cube.dimension[0]
+            let h = cube.dimension[1]
+            let d = cube.dimension[2]
+
+            let uw = w/su
+            let ud = d/su
+
+            let vh = h/sv
+            let vd = d/sv
+            
+
+            let mouseOver = 
+                mouseBetween(u, v+vd, ud, vh) || mouseBetween(u+ud, v, uw, vd) || mouseBetween(u+ud, v+vd, uw, vh) ||
+                mouseBetween(u+ud+uw, v+vd, ud, vh) || mouseBetween(u+ud+uw, v, uw, vd) || mouseBetween(u+ud+uw+ud, v+vd, uw, vh)
+
+            if(mouseOver) {
+                overHandled = true
+                if(mouseDown) {
+                    this.raytracer.clickOnMesh(cube.planesGroup)
+                } else {
+                    this.raytracer.mouseOverMesh(cube.planesGroup)
+                }
+            }
+        })
+        if(!overHandled) {
+            this.raytracer.mouseOverMesh(undefined)
+        }
     }
 
     cubeHierarchyChanged() {

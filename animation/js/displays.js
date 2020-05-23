@@ -84,6 +84,7 @@ export class DinosaurDisplay {
         }
         this.allCubes.length = 0
         this.tbl = model
+        this.material = material
         this.scene.add(model.createModel(material))
     }
 
