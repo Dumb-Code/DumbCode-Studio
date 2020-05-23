@@ -275,6 +275,7 @@ export class TblCube {
 
         this.cubeMesh[5].geometry = new PlaneBufferGeometry(w, h); //+z but actually -z
         this.cubeMesh[5].position.set(0, 0, d/2)
+        this.updateTexture()
     }
 
     updateTexture() {
@@ -331,7 +332,7 @@ function parseCubeJson(json, tbl) {
     let children = []
     json.children.forEach(child => { children.push( parseCubeJson( child, tbl ) ) })
 
-    return new TblCube(json.name, json.dimensions, position, offset, roation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
+    return new TblCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
 }
 
 function getUV(offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {
