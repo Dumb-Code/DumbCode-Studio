@@ -290,7 +290,7 @@ export class TblCube {
     }
 
     updateDimension(values = this.dimension) {
-        this.dimension = values
+        this.dimension = values.map(e => Math.round(e))
         this.updateOffset()
         this.updateGeometry()
         this.updateTexture()
@@ -302,7 +302,7 @@ export class TblCube {
     }
 
     updateTextureOffset(values = this.textureOffset) {
-        this.textureOffset = values
+        this.textureOffset = values.map(e => Math.round(e))
         this.updateTexture()
     }
 

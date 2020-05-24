@@ -212,10 +212,19 @@ export class ModelingStudio {
         this.rightHorizontalDivider.mousedown(() => clickedDivider = 3)
         this.updateAreas()
 
-
         this.canvas = dom.find('#texture-canvas').get(0)
-        $(this.canvas).mousemove(e => this.mouseOverCanvas(e.originalEvent.layerX, e.originalEvent.layerY, false))
-        $(this.canvas).click(e => this.mouseOverCanvas(e.originalEvent.layerX, e.originalEvent.layerY, true))
+        this.canvasMatrix = new DOMMatrix([1, 0, 0, 1, 0, 0])
+        this.canvasMovingCube = null
+        this.mulMatrix(new DOMMatrix())
+        $(this.canvas)
+            .mousemove(e => this.mouseOverCanvas(e))
+            .click(e => this.mouseOverCanvas(e))
+            .mousedown(e => this.mouseOverCanvas(e))
+            .mouseup(e => this.canvasMovingCube = null)
+            .bind('mousewheel', e => {
+                let amount = e.originalEvent.wheelDelta > 0 ? 1.1 : 1/1.1
+                this.mulMatrix(new DOMMatrix().scaleSelf(amount, amount))
+            })
     }
 
     createLockedCubesCache(selected = this.raytracer.selected?.tabulaCube) {
@@ -357,6 +366,8 @@ export class ModelingStudio {
 
         let ctx = this.canvas.getContext('2d')
 
+        ctx.setTransform(this.finalCanvasMatrix)
+
         ctx.fillStyle = "rgba(255, 255, 255, 255)"
         ctx.fillRect(0, 0, size, size)
 
@@ -420,9 +431,13 @@ export class ModelingStudio {
         })        
     }
 
-    mouseOverCanvas(mouseX, mouseY, mouseDown = false) {
-        let mouseBetween = (x, y, w, h) => mouseX >= x && mouseX < x+w && mouseY >= y && mouseY < y+h
+    mouseOverCanvas(event) {
+        let mousePoint = new DOMPoint(event.originalEvent.layerX, event.originalEvent.layerY)
+        mousePoint = mousePoint.matrixTransform(this.finalCanvasMatrix.inverse())
+        let mouseX = mousePoint.x
+        let mouseY = mousePoint.y
 
+        let mouseBetween = (x, y, w, h) => mouseX >= x && mouseX < x+w && mouseY >= y && mouseY < y+h
         let size = Math.min(this.rightArea, this.topRArea)
         let su = this.display.tbl.texWidth/size
         let sv = this.display.tbl.texHeight/size
@@ -454,7 +469,9 @@ export class ModelingStudio {
 
             if(mouseOver) {
                 overHandled = true
-                if(mouseDown) {
+                if(event.type === 'mousedown') {
+                    this.canvasMovingCube = {cube, x: mouseX-u, y: mouseY-v}
+                } else if(event.type === 'click') {
                     this.raytracer.clickOnMesh(cube.planesGroup)
                 } else {
                     this.raytracer.mouseOverMesh(cube.planesGroup)
@@ -462,8 +479,27 @@ export class ModelingStudio {
             }
         })
         if(!overHandled) {
+            if(event.type === 'click') {
+                this.raytracer.clickOnMesh(undefined)
+            } else if(event.type === "mousedown") {
+                this.canvasMovingCube = null
+            }
+            if(event.buttons & 1 !== 0 && this.canvasMovingCube === null) {
+                this.mulMatrix(new DOMMatrix().translateSelf(event.originalEvent.movementX, event.originalEvent.movementY))
+            }
             this.raytracer.mouseOverMesh(undefined)
         }
+        if(this.canvasMovingCube !== null) {
+            let tex = this.canvasMovingCube.cube.textureOffset
+            tex[0] = (mouseX-this.canvasMovingCube.x)*su
+            tex[1] = (mouseY-this.canvasMovingCube.y)*sv
+            this.canvasMovingCube.cube.updateTextureOffset()
+        }
+    }
+
+    mulMatrix(matrix) {
+        this.canvasMatrix.preMultiplySelf(matrix)
+        this.finalCanvasMatrix = new DOMMatrix().translate(150, 150).multiply(this.canvasMatrix).multiply(new DOMMatrix().translate(-150, -150))
     }
 
     cubeHierarchyChanged() {
