@@ -429,7 +429,7 @@ async function createFilesPage() {
 }
 
 async function createModelingStudio() {
-    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, transformControls, renameCube)
+    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, transformControls, controls, renameCube)
 }
 
 async function createAnimationStudio() {

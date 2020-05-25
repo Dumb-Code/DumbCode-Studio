@@ -82,6 +82,11 @@ li.is-collapsed ul {
     cursor: n-resize;
 }
 
+#drag-selection-overlay {
+    position: fixed;
+    background-color: rgba(233, 42, 42, 0.5);
+}
+
 ul#cube-list .cube-line-controller {
     border: solid 3px transparent
 }

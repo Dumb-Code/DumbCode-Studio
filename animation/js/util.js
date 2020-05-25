@@ -280,8 +280,22 @@ export class CubeLocker {
 }
 
 
-let pressedKeys = new Map();
-$(document).keyup(e => pressedKeys.delete(e.key)).keydown(e => pressedKeys.set(e.key, true))
+let pressedKeys = new Set();
+let keyListeners = new Map()
+$(document)
+    .keydown(e => {
+        pressedKeys.add(e.key)
+        keyListeners.get(e.key)?.forEach(func => func(true))
+    })
+    .keyup(e => {
+        pressedKeys.delete(e.key)
+        keyListeners.get(e.key)?.forEach(func => func(false))
+    })
 export function isKeyDown(key) {
     return pressedKeys.has(key)
 } 
+export function listenForKeyChange(key, onchange) {
+    let arr = keyListeners.has(key) ? keyListeners.get(arr) : []
+    arr.push(onchange)
+    keyListeners.set(key, arr)
+}

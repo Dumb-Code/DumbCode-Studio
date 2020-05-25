@@ -56,12 +56,14 @@ export class Raytracer {
             let xMove = Math.abs(mouseClickDown.x - event.clientX)
             let yMove = Math.abs(mouseClickDown.y - event.clientY)
         
-            if(xMove < 5 && yMove < 5 && mouse.x >= -1 && mouse.x <= 1 && mouse.y >= -1 && mouse.y <= 1) 
-            if(this.intersected !== undefined) {
-                this.clickOnMesh(this.intersected)
-            } else {
-                this.deselectAll()
+            if(e.target === display.renderer.domElement && xMove < 5 && yMove < 5 && mouse.x >= -1 && mouse.x <= 1 && mouse.y >= -1 && mouse.y <= 1) {
+                if(this.intersected !== undefined) {
+                    this.clickOnMesh(this.intersected)
+                } else {
+                    this.deselectAll()
+                }
             }
+            
         }, false );
 
         this.addEventListener('select', e => e.cubes.forEach(mesh => mesh.children.forEach(c => c.material = this.selectedMaterial)))
@@ -92,7 +94,7 @@ export class Raytracer {
         console.trace("deprecated set")
     }
     
-    clickOnMesh(mesh, toSet) {
+    clickOnMesh(mesh, toSet, testPrevious = true) {
         if(mesh === undefined) {
             console.trace("deprecated click undefined")
             return
@@ -104,7 +106,7 @@ export class Raytracer {
         selectElementEvent.cubes.length = 0
         deselectElementEvent.cubes.length = 0
 
-        if(!isKeyDown("Control")) {
+        if(testPrevious === true && !isKeyDown("Control")) {
             this.selectedSet.forEach(c => deselectElementEvent.cubes.push(c))
             this.selectedSet.clear()
         }

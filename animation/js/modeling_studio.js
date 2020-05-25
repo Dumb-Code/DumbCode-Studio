@@ -1,7 +1,8 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { TblCube } from "./tbl_loader.js"
-import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, LayoutPart } from "./util.js"
+import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, LayoutPart, listenForKeyChange } from "./util.js"
 import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4, EventDispatcher, Object3D, BoxGeometry } from "./three.js"
+import { DragSelection } from "./drag_selection.js"
 
 const mainArea = document.getElementById("main-area")
 
@@ -29,7 +30,7 @@ const recomposeMatrix = new Matrix4()
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, transformControls, renameCube) {
+    constructor(domElement, display, raytracer, transformControls, orbitControls, renameCube) {
         this.domElement = domElement
         let dom = $(domElement)
         this.canvasContainer = dom.find("#display-div").get(0)
@@ -98,6 +99,14 @@ export class ModelingStudio {
             };
         })
         
+        this.dragSelection = new DragSelection(this.display, this.raytracer, dom.find('#drag-selection-overlay'))
+
+        listenForKeyChange("Shift", value => {
+            orbitControls.enabled = !value
+            this.transformControls.enabled = !value
+            this.dragSelection.enabled = value
+        })
+
         this.selectedTransform = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.toolTransformType.value = translateKey)
         this.globalSpace = new ToggleableElement(dom.find('.dropdown-global-space')).onchange(e => this.transformControls.space = e.value ? "world" : "local")
         this.transformControls.addEventListener('mouseDown', () => {
@@ -439,6 +448,7 @@ export class ModelingStudio {
         this.drawTextureCanvas()
         this.display.tbl.resetAnimations()
         this.display.render()
+        this.dragSelection.onFrame()
     }
 
     drawTextureCanvas() {
