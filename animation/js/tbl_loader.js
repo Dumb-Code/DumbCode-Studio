@@ -32,7 +32,9 @@ export class TBLModel {
         let mainCubeGroup = this.rootGroup.createGroup()
 
         this.modelCache = new Group(); 
-        this.modelCache.scale.set(-1/16, -1/16, 1/16) //Invest in a way to remove this.
+        this.modelCache.scale.set(1/16, 1/16, 1/16)
+        //Instead of scaling by [-1, -1, 1], we can just rotate by [0, 0, PI]
+        this.modelCache.rotation.set(0, 0, Math.PI)
         this.modelCache.position.set(0, 1.5, 0)
         this.modelCache.add(mainCubeGroup)
 

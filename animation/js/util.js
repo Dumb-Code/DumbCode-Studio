@@ -63,12 +63,12 @@ export class LinkedElement {
 
     set visualValue(value) {
         if(this.array) {
-            this.elems.each((_i,e) => e.value = value[e.getAttribute('axis')])
+            this.elems.each((_i,e) => e.value = value===undefined?"":value[e.getAttribute('axis')])
             if(this.sliderElems !== undefined) {
-                this.sliderElems.each((_i,e) => e.value = ((value[e.getAttribute("axis")] + 180) % 360) - 180)
+                this.sliderElems.each((_i,e) => e.value = ((value===undefined?0:value[e.getAttribute("axis")] + 180) % 360) - 180)
             }
         } else {
-            this.elems.val(value)
+            this.elems.val(value===undefined?"":value)
         }
     }
 
@@ -242,23 +242,42 @@ let decomposeScale = new Vector3()
 let decomposeEuler = new Euler()
 
 export class CubeLocker {
-    constructor(cube) {
+    //type 0: position
+    //type 1: offset
+    constructor(cube, type = 0) {
         this.cube = cube
-        this.worldMatrix = cube.cubeGroup.matrixWorld.clone()
+        this.type = type
+        switch(type) {
+            case 0:
+                this.element = cube.cubeGroup
+                break
+            case 1:
+                this.element = cube.planesGroup
+                break
+        }
+        this.worldMatrix = this.element.matrixWorld.clone()
     }
 
     reconstruct() {
+        console.log("reconstuct")
         //      parent_world_matrix * local_matrix = world_matrix
         //  =>  local_matrix = 'parent_world_matrix * world_matrix
-        resultMat.getInverse(this.cube.parent.getGroup().matrixWorld).multiply(this.worldMatrix)
+        resultMat.getInverse(this.element.parent.matrixWorld).multiply(this.worldMatrix)
         resultMat.decompose(decomposePos, decomposeRot, decomposeScale)
 
-        this.cube.updatePosition(decomposePos.toArray())
-        decomposeEuler.setFromQuaternion(decomposeRot, "ZYX")
-        this.cube.updateRotation(decomposeEuler.toArray().map(e => e * 180 / Math.PI))
+        switch(this.type) {
+            case 0:
+                this.cube.updatePosition(decomposePos.toArray())
+                decomposeEuler.setFromQuaternion(decomposeRot, "ZYX")
+                this.cube.updateRotation(decomposeEuler.toArray().map(e => e * 180 / Math.PI))
+                break
+            case 1:
+                this.cube.updateOffset(decomposePos.toArray().map((e, i) => e - this.cube.dimension[i]/2))
+                break
+        }
+
     }
 }
-
 
 
 let pressedKeys = new Map();

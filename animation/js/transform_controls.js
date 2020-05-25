@@ -67,6 +67,7 @@ var TransformControls = function ( camera, domElement ) {
 	var mouseDownEvent = { type: "mouseDown" };
 	var mouseUpEvent = { type: "mouseUp", mode: scope.mode };
 	var objectChangeEvent = { type: "objectChange" };
+	var studioRotateEvent = { dumbcode:true, type: "studioRotate" };
 
 	// Reusable utility variables
 
@@ -358,6 +359,8 @@ var TransformControls = function ( camera, domElement ) {
 
 		pointEnd.copy( planeIntersect.point ).sub( worldPositionStart );
 
+		studioRotateEvent.canceled = false
+
 		if( mode === 'dimensions') {
 			// Apply dimension change
 
@@ -582,6 +585,11 @@ var TransformControls = function ( camera, domElement ) {
 
 			this.rotationAngle = rotationAngle;
 
+			studioRotateEvent.rotationAxis = rotationAxis
+			studioRotateEvent.rotationAngle = rotationAngle
+			studioRotateEvent.parentQuaternionInv = parentQuaternionInv
+			this.dispatchEvent(studioRotateEvent)
+
 			// Apply rotate
 			if ( space === 'local' && axis !== 'E' && axis !== 'XYZE' ) {
 
@@ -593,14 +601,14 @@ var TransformControls = function ( camera, domElement ) {
 				rotationAxis.applyQuaternion( parentQuaternionInv );
 				object.quaternion.copy( _tempQuaternion.setFromAxisAngle( rotationAxis, rotationAngle ) );
 				object.quaternion.multiply( quaternionStart ).normalize();
-
 			}
-
 		}
 
-		this.dispatchEvent( changeEvent );
-		this.dispatchEvent( objectChangeEvent );
-
+		if(studioRotateEvent.canceled !== true) {
+			this.dispatchEvent( changeEvent );
+			this.dispatchEvent( objectChangeEvent );
+		}
+	
 	};
 
 	this.pointerUp = function ( pointer ) {

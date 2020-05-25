@@ -39,7 +39,7 @@ selectedMaterial.emissive.setHex( 0x0000FF )
 let mainModel
 let modeCache, rotationCache
 
-const raytracer = new Raytracer(display, material, highlightMaterial, setAsSelected)
+const raytracer = new Raytracer(display, material, highlightMaterial)
 
 const projectTabs = new ProjectTabs()
 
@@ -120,7 +120,6 @@ async function init() {
         }
     })
     display.scene.add(transformControls)
-    setMode("none", false)
 
     filesPage = await createFilesPage()
     frame()

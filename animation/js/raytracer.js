@@ -1,4 +1,5 @@
-import { Vector2, Raycaster } from "./three.js";
+import { Vector2, Raycaster, EventDispatcher } from "./three.js";
+import { isKeyDown } from "./util.js";
 
 
 document.addEventListener( 'mousemove', onMouseMove, false );
@@ -33,52 +34,112 @@ function onMouseDown( event ) {
 }
 
 
+const selectElementEvent = { type:"select", cubes:[] }
+const deselectElementEvent = { type:"deselect", cubes:[] }
+const selectChangeEvent = { type:"selectchange", }
+const intersectionChangeEvent = { type:"intersection", old:undefined, cube:undefined }
+
+
 export class Raytracer {
 
-    constructor(display, material, highlightMaterial, setSelected) {
+    constructor(display, material, highlightMaterial) {
         this.material = material
         this.highlightMaterial = highlightMaterial
         this.display = display
-        this.selected
+        this.selectedSet = new Set()
         this.intersected
         this.disableRaycast = false
-        this.setSelected = setSelected
-
 
         document.addEventListener( 'mouseup', e => {
             mouseDown = false
             let xMove = Math.abs(mouseClickDown.x - event.clientX)
             let yMove = Math.abs(mouseClickDown.y - event.clientY)
         
-            if(xMove < 5 && yMove < 5 && mouse.x > 0 && mouse.x < 1 && mouse.y > 0 && mouse.y < 1) {
+            if(xMove < 5 && yMove < 5 && mouse.x > 0 && mouse.x < 1 && mouse.y > 0 && mouse.y < 1 && this.intersected !== undefined) {
                 this.clickOnMesh(this.intersected)
             }
         }, false );
     }
+
+    anySelected() {
+        return this.selectedSet.size > 0
+    }
+
+    isSelected(group) {
+        return this.selectedSet.has(group)
+    }
+
+    isCubeSelected(cube) {
+        return this.selectedSet.has(cube.planesGroup)
+    }
+
+    firstSelected() {
+        return this.selectedSet.values().next().value
+    }
+
+    get selected() {
+        console.trace("deprecated get")
+    }
+
+    set selected(s) {
+        console.trace("deprecated set")
+    }
     
-    clickOnMesh(mesh) {
-        let old = this.selected
-        this.selected = mesh
-        this.setSelected(old, this.selected)
+    clickOnMesh(mesh, toSet) {
+        if(mesh === undefined) {
+            console.trace("deprecated click undefined")
+            return
+        }
+        let b = this.selectedSet.has(mesh)
+        if(toSet !== undefined) {
+            b = toSet
+        }
+        selectElementEvent.cubes.length = 0
+        deselectElementEvent.cubes.length = 0
+
+        if(!isKeyDown("Control")) {
+            this.selectedSet.forEach(c => deselectElementEvent.cubes.push(c))
+            this.selectedSet.clear()
+        }
+        if(b) {
+            this.selectedSet.delete(mesh)
+            deselectElementEvent.cubes.push(mesh)
+        } else {
+            this.selectedSet.add(mesh)
+            selectElementEvent.cubes.push(mesh)
+            this.dispatchEvent(selectElementEvent)
+        }
+        
+        if(deselectElementEvent.cubes.length !== 0) {
+            this.dispatchEvent(deselectElementEvent)
+        }
+
+        this.dispatchEvent(selectChangeEvent)
     }
 
     mouseOverMesh(mesh) {
         if(mesh !== undefined) {
             if(this.intersected != mesh) {
-                if(this.intersected && this.intersected != this.selected) {
+                if(this.intersected && !this.selectedSet.has(this.intersected)) {
                     this.intersected.children.forEach(c => c.material = this.material)
                 }
+                intersectionChangeEvent.old = this.intersected
+                intersectionChangeEvent.cube = mesh
                 this.intersected = mesh
+                this.dispatchEvent(intersectionChangeEvent)
                 
-                if(this.intersected != this.selected) {
+                if(!this.selectedSet.has(this.intersected)) {
                     this.intersected.children.forEach(c => c.material = this.highlightMaterial)
                 } 
             } 
         } else if(this.intersected) {
-            if(this.intersected != this.selected) {
+            if(!this.selectedSet.has(this.intersected)) {
                 this.intersected.children.forEach(c => c.material = this.material)
             }
+            intersectionChangeEvent.old = this.intersected
+            intersectionChangeEvent.cube = undefined
             this.intersected = undefined
+            this.dispatchEvent(intersectionChangeEvent)
         }
     }
 
@@ -116,3 +177,4 @@ export class Raytracer {
     }
 
 }
+Object.assign( Raytracer.prototype, EventDispatcher.prototype );
