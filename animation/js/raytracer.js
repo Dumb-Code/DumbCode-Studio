@@ -42,9 +42,10 @@ const intersectionChangeEvent = { type:"intersection", old:undefined, cube:undef
 
 export class Raytracer {
 
-    constructor(display, material, highlightMaterial) {
+    constructor(display, material, highlightMaterial, selectedMaterial) {
         this.material = material
         this.highlightMaterial = highlightMaterial
+        this.selectedMaterial = selectedMaterial
         this.display = display
         this.selectedSet = new Set()
         this.intersected
@@ -55,10 +56,16 @@ export class Raytracer {
             let xMove = Math.abs(mouseClickDown.x - event.clientX)
             let yMove = Math.abs(mouseClickDown.y - event.clientY)
         
-            if(xMove < 5 && yMove < 5 && mouse.x > 0 && mouse.x < 1 && mouse.y > 0 && mouse.y < 1 && this.intersected !== undefined) {
+            if(xMove < 5 && yMove < 5 && mouse.x >= -1 && mouse.x <= 1 && mouse.y >= -1 && mouse.y <= 1) 
+            if(this.intersected !== undefined) {
                 this.clickOnMesh(this.intersected)
+            } else {
+                this.deselectAll()
             }
         }, false );
+
+        this.addEventListener('select', e => e.cubes.forEach(mesh => mesh.children.forEach(c => c.material = this.selectedMaterial)))
+        this.addEventListener('deselect', e => e.cubes.forEach(mesh => mesh.children.forEach(c => c.material = this.material)))
     }
 
     anySelected() {
@@ -90,9 +97,9 @@ export class Raytracer {
             console.trace("deprecated click undefined")
             return
         }
-        let b = this.selectedSet.has(mesh)
+        let shouldRemove = this.selectedSet.has(mesh)
         if(toSet !== undefined) {
-            b = toSet
+            shouldRemove = !toSet
         }
         selectElementEvent.cubes.length = 0
         deselectElementEvent.cubes.length = 0
@@ -101,7 +108,7 @@ export class Raytracer {
             this.selectedSet.forEach(c => deselectElementEvent.cubes.push(c))
             this.selectedSet.clear()
         }
-        if(b) {
+        if(shouldRemove) {
             this.selectedSet.delete(mesh)
             deselectElementEvent.cubes.push(mesh)
         } else {
@@ -109,11 +116,21 @@ export class Raytracer {
             selectElementEvent.cubes.push(mesh)
             this.dispatchEvent(selectElementEvent)
         }
+
         
         if(deselectElementEvent.cubes.length !== 0) {
             this.dispatchEvent(deselectElementEvent)
         }
 
+        this.dispatchEvent(selectChangeEvent)
+    }
+
+
+    deselectAll() {
+        deselectElementEvent.cubes.length = 0
+        this.selectedSet.forEach(c => deselectElementEvent.cubes.push(c))
+        this.selectedSet.clear()
+        this.dispatchEvent(deselectElementEvent)
         this.dispatchEvent(selectChangeEvent)
     }
 

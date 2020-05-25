@@ -25,7 +25,12 @@ export class CubeListBoard {
                 tbl.rootGroup.addChild(cube)
                 reconstructLockedCubes(cube)
             }
-            
+        }
+
+        this.cubeList.onclick = e => {
+            if(e.target.nodeName == 'UL') {
+                this.raytracer.deselectAll()
+            }
         }
 
         this.refreshCompleatly()

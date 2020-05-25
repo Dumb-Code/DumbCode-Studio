@@ -39,7 +39,7 @@ selectedMaterial.emissive.setHex( 0x0000FF )
 let mainModel
 let modeCache, rotationCache
 
-const raytracer = new Raytracer(display, material, highlightMaterial)
+const raytracer = new Raytracer(display, material, highlightMaterial, selectedMaterial)
 
 const projectTabs = new ProjectTabs()
 

@@ -184,7 +184,6 @@ export class ModelingStudio {
                                 }
                                 break
                             case 'rotation_point':
-                                // cube.updateOffset(rotChangedInv.map((e, i) => e + data.offset[i]))
                             case 'position':
                                 cube.updatePosition(pos)
                                 break
@@ -250,7 +249,7 @@ export class ModelingStudio {
             if(this.raytracer.anySelected()) {
                 this.raytracer.selectedSet.forEach(cube => {
                     cube.parent.deleteChild(cube)
-                    this.raytracer.clickOnMesh(cube)
+                    this.raytracer.clickOnMesh(cube, false)
                 })
             }
         })
@@ -430,17 +429,6 @@ export class ModelingStudio {
             let elem = this.transformSelectParents ? cube.parent : cube
             elem.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
 
-            // //Im sorry for the following
-            // decomposeRotation.set(0, 0, 0, 1)
-            // let e = elem
-            // while(e !== null) {
-            //     decomposeRotation.premultiply(e.quaternion)
-            //     decomposeEuler.setFromQuaternion(e.quaternion, "ZYX")
-            //     console.log(decomposeEuler)
-
-            //     e = e.parent
-            // }
-
             totalPosition.add(decomposePosition)
 
             decomposeEuler.setFromQuaternion(decomposeRotation, "ZYX")
@@ -605,7 +593,7 @@ export class ModelingStudio {
         })
         if(!overHandled) {
             if(event.type === 'click') {
-                this.raytracer.clickOnMesh(undefined)
+                this.raytracer.deselectAll()
             } else if(event.type === "mousedown") {
                 this.canvasMovingCube = null
             }
@@ -642,7 +630,7 @@ export class ModelingStudio {
         // this.updateTransformPoints()
         if(isSelected) {
             this.rotationPointSphere.visible = true
-            this.updateSpherePosition()
+            this.updateTransformPoints()
 
             let cube = this.raytracer.firstSelected().tabulaCube
             this.cubeName.visualValue = cube.name
@@ -666,6 +654,7 @@ export class ModelingStudio {
             this.cubeName.visualValue = undefined
         }
         
+        this.updateSpherePosition()
         if(!this.raytracer.anySelected()) {
             this.toolTransformType.value = undefined
         }
@@ -674,6 +663,7 @@ export class ModelingStudio {
     }
 
     updateSpherePosition() {
+        this.rotationPointSphere.visible = this.raytracer.anySelected()
         if(this.raytracer.anySelected()) {
             let cube = this.raytracer.firstSelected().tabulaCube
             cube.cubeGroup.updateMatrix()
