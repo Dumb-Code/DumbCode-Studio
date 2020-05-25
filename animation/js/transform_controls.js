@@ -1,7 +1,8 @@
 /**
  * @author arodic / https://github.com/arodic
- * modified by Wyn Price to change aesthetics for Dumbcode Animaion Editor
+ * modified by Wyn Price to change aesthetics for Dumbcode Animation Editor (now called Dumbcode Studio)
  * modified by Wyn Price to add the ability to change cube dimensions
+ * modified by Wyn Price to add the studioRotate and studioTranslate events 
  */
 
 import {
@@ -68,6 +69,7 @@ var TransformControls = function ( camera, domElement ) {
 	var mouseUpEvent = { type: "mouseUp", mode: scope.mode };
 	var objectChangeEvent = { type: "objectChange" };
 	var studioRotateEvent = { dumbcode:true, type: "studioRotate" };
+	var studioTranslateEvent = { dumbcode:true, type: "studioTranslate" };
 
 	// Reusable utility variables
 
@@ -359,8 +361,6 @@ var TransformControls = function ( camera, domElement ) {
 
 		pointEnd.copy( planeIntersect.point ).sub( worldPositionStart );
 
-		studioRotateEvent.canceled = false
-
 		if( mode === 'dimensions') {
 			// Apply dimension change
 
@@ -418,9 +418,16 @@ var TransformControls = function ( camera, domElement ) {
 
 			}
 
+
 			if ( axis.indexOf( 'X' ) === - 1 ) offset.x = 0;
 			if ( axis.indexOf( 'Y' ) === - 1 ) offset.y = 0;
 			if ( axis.indexOf( 'Z' ) === - 1 ) offset.z = 0;
+
+
+			studioTranslateEvent.axis = _tempVector.copy(offset).normalize()
+			studioTranslateEvent.parentQuaternionInv = parentQuaternionInv
+			studioTranslateEvent.length = parentScale.clone().divideScalar(offset.length())
+			this.dispatchEvent(studioTranslateEvent)
 
 			if ( space === 'local' && axis !== 'XYZ' ) {
 
@@ -604,10 +611,8 @@ var TransformControls = function ( camera, domElement ) {
 			}
 		}
 
-		if(studioRotateEvent.canceled !== true) {
-			this.dispatchEvent( changeEvent );
-			this.dispatchEvent( objectChangeEvent );
-		}
+		this.dispatchEvent( changeEvent );
+		this.dispatchEvent( objectChangeEvent );
 	
 	};
 

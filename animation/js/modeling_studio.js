@@ -104,16 +104,11 @@ export class ModelingStudio {
             this.startingCache.clear()
             this.raytracer.selectedSet.forEach(cube => {
                 let elem = this.transformSelectParents ? cube.tabulaCube.cubeGroup : cube.tabulaCube.planesGroup
-                elem.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
-                this.startingCache.set(cube.tabulaCube, 
-                    { 
-                        position: decomposePosition.clone(), 
-                        localPosition: [...cube.tabulaCube.rotationPoint], 
-                        offset: [...cube.tabulaCube.offset],
-
-                        quaternion: elem.quaternion.clone()
-                    }
-                )
+                this.startingCache.set(cube.tabulaCube, { 
+                    position: [...cube.tabulaCube.rotationPoint], 
+                    offset: [...cube.tabulaCube.offset],
+                    quaternion: elem.quaternion.clone()
+                })
             })
             this.createLockedCubesCache()
             if(this.toolTransformType.value === translateKey && this.selectedTransform.value === 'rotation_point') {
@@ -128,80 +123,62 @@ export class ModelingStudio {
                 })
             }
         })
-        this.transformControls.addEventListener('mouseUp', () => this.updateTransformPoints())
-        this.transformControls.addEventListener('studioRotate', e => {
-            let elem  = this.raytracer.firstSelected()
+        this.transformControls.addEventListener('mouseUp', () => {
+            this.updateTransformPoints()
+            this.lockedChildrenCache.clear()
+            this.movingChildrenCache.clear()
+        })
+        let forEachCube = (axisIn, callback) => {
+            let selected  = this.raytracer.firstSelected()
             if(this.transformSelectParents) {
-                elem = elem.parent
+                selected = selected.parent
             }
-
-            elem.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
-
+            selected.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
             this.startingCache.forEach((data, cube) => {
                 let elem = this.transformSelectParents ? cube.cubeGroup : cube.planesGroup
 
                 elem.parent.matrixWorld.decompose(decomposePosition2, decomposeRotation2, decomposeScale2)
-                let axis = e.rotationAxis.clone()
+                let axis = axisIn.clone()
                 if(this.transformControls.space === 'local') {
                     axis.applyQuaternion(decomposeRotation)
                 }
-                axis.applyQuaternion(decomposeRotation2.clone().inverse())
+                axis.applyQuaternion(decomposeRotation2.inverse())
+                callback(axis, cube, data)
+            })
+        }
+        this.transformControls.addEventListener('studioRotate', e => {
+            forEachCube(e.rotationAxis, (axis, cube, data) => {
                 decomposeRotation2.setFromAxisAngle(axis, e.rotationAngle)
                 decomposeRotation2.multiply(data.quaternion).normalize()
 
                 decomposeEuler.setFromQuaternion(decomposeRotation2, "ZYX")
                 cube.updateRotation(decomposeEuler.toArray().map(v => v * 180 / Math.PI))
             })
-            this.reconstructLockedCubes()
-            e.canceled = true
+           
         })
-        this.transformControls.addEventListener('objectChange', () => {
-            let selected = this.toolTransformType.value
-            
-            this.transformAnchor.updateMatrixWorld(true)
-
-            this.transformPoint.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
-            this.transformAnchor.matrixWorld.decompose(decomposePosition2, decomposeRotation2, decomposeScale2)
-
-            decomposePosition.sub(decomposePosition2)
-
-            this.startingCache.forEach((data, cube) => {
-                let elem = this.transformSelectParents ? cube.cubeGroup : cube.planesGroup
-
-                let position = data.position.clone()
-
-                recomposeMatrix.compose(position.add(decomposePosition), decomposeRotation, decomposeScale)
-                inverseMatrix.getInverse(elem.parent.matrixWorld).multiply(recomposeMatrix)
-                inverseMatrix.decompose(decomposePosition2, decomposeRotation2, decomposeScale2)
-
-                let pos = decomposePosition2.toArray()//.map(v => v/16)
-                switch(selected) {
-                    case translateKey: 
-                        switch(this.selectedTransform.value) {
-                            case 'offset':
-                                if(!this.lockedCubes.has(cube)) {
-                                    cube.updateOffset(pos.map((e, i) => e - cube.dimension[i]/2))
-                                }
-                                break
-                            case 'rotation_point':
-                            case 'position':
-                                cube.updatePosition(pos)
-                                break
+        this.transformControls.addEventListener('studioTranslate', e => {
+            forEachCube(e.axis, (axis, cube, data) => {
+                axis.divide(e.length)
+                let pos = axis.toArray()
+                switch(this.selectedTransform.value) {
+                    case 'offset':
+                        if(!this.lockedCubes.has(cube)) {
+                            cube.updateOffset(pos.map((e, i) => e + data.offset[i]))
                         }
                         break
-                }
-
-                if(this.raytracer.selectedSet.size === 1 && this.raytracer.isCubeSelected(cube)) {
-                    this.selectedChanged()
+                    case 'rotation_point':
+                    case 'position':
+                        cube.updatePosition(pos.map((e, i) => e + data.position[i]))
+                        break
                 }
             })
-            
-            if(selected === translateKey || selected === rotateKey) {
-                this.reconstructLockedCubes()
-            }
+        })
+        this.transformControls.addEventListener('objectChange', () => {
+            this.reconstructLockedCubes()
+            this.selectedChanged()
             this.updateSpherePosition()
             this.runFrame()
-        });
+        })
 
         //All hooks on the left panel
         let cube = () => raytracer.selectedSet.size === 1 ? raytracer.selectedSet.values().next().value.tabulaCube : undefined
@@ -421,30 +398,20 @@ export class ModelingStudio {
         this.transformPoint.rotation.set(0, 0, 0)
 
         totalPosition.set(0, 0, 0)
-        totalRotation.set(0, 0, 0)
-        totalScale.set(0, 0, 0)
-        let test = false
+        let firstSelected = this.raytracer.firstSelected()
         this.raytracer.selectedSet.forEach(cube => {
-            if(test) return
             let elem = this.transformSelectParents ? cube.parent : cube
             elem.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
 
             totalPosition.add(decomposePosition)
 
-            decomposeEuler.setFromQuaternion(decomposeRotation, "ZYX")
-            totalRotation.x += decomposeEuler.x          
-            totalRotation.y += decomposeEuler.y
-            totalRotation.z += decomposeEuler.z
-
-
-            totalScale.add(decomposeScale)  
-            test = true
+            if(cube === firstSelected) {
+                this.transformAnchor.quaternion.copy(decomposeRotation)
+                this.transformAnchor.scale.copy(decomposeScale)
+            }
         })
 
-        let size = 1
-        this.transformAnchor.position.set(totalPosition.x/size, totalPosition.y/size, totalPosition.z/size)
-        this.transformAnchor.rotation.set(totalRotation.x/size, totalRotation.y/size, totalRotation.z/size)
-        this.transformAnchor.scale.set(totalScale.x/size, totalScale.y/size, totalScale.z/size)
+        this.transformAnchor.position.copy(totalPosition).divideScalar(this.raytracer.selectedSet.size)
     }
 
     createRotationPointObject() {
@@ -627,10 +594,9 @@ export class ModelingStudio {
 
     selectedChanged() {
         let isSelected = this.raytracer.selectedSet.size === 1
-        // this.updateTransformPoints()
+        this.updateTransformPoints()
         if(isSelected) {
             this.rotationPointSphere.visible = true
-            this.updateTransformPoints()
 
             let cube = this.raytracer.firstSelected().tabulaCube
             this.cubeName.visualValue = cube.name
