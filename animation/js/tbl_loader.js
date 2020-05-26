@@ -344,7 +344,7 @@ function getUV(offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {
     //4 -> 4 vertices per face
     //2 -> 2 data per vertex (u, v)
     let uvData = new Array(6 * 4 * 2)
-    let texBottomOrder = [ 1, 5, 0, 4 ]
+    let texBottomOrder = [ 1, 4, 0, 5 ]
     let texUpperOrder = [3, 2]
 
     let offX = 0
