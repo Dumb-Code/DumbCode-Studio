@@ -460,7 +460,7 @@ window.setupTexture = async(file, nameElement) => {
 
         tex.flipY = false
         tex.magFilter = NearestFilter;
-        tex.minFilter = LinearMipMapLinearFilter;
+        tex.minFilter = NearestFilter;
 
 
         material.map = tex
