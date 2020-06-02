@@ -107,14 +107,8 @@ async function init() {
         let textDiv = document.getElementById("editor-mouseover")
         if(e.value === null) {
             textDiv.style.display = "block"
-            if(raytracer.intersected && raytracer.intersected != raytracer.selected) {
-                raytracer.intersected.material = material
-            }
             raytracer.disableRaycast = false
         } else {
-            if(raytracer.intersected && raytracer.intersected != raytracer.selected) {
-                raytracer.intersected.material = highlightMaterial
-            }
             textDiv.style.display = "none"
             raytracer.disableRaycast = true
         }
@@ -173,40 +167,6 @@ function runFrame() {
     activeTab.runFrame()
 }
 
-function setAsSelected(oldSelected, selectedElem) {
-    // console.trace(selectedElem)
-    let isSelected = selectedElem !== undefined;
-
-    if(oldSelected) {
-        oldSelected.children.forEach(c => c.material = material)
-        if(!isSelected) {
-            transformControls.detach(oldSelected);
-        }
-    }
-    if(selectedElem) {
-        selectedElem.children.forEach(c => c.material = selectedMaterial)
-    }
-    let visible = transformControls.visible
-    setMode(visible ? transformControls.mode : "none", false);
-    [...document.getElementsByClassName("editor-require-selected")].forEach(elem => {
-        elem.disabled = !isSelected
-        elem.classList.toggle("is-active", isSelected)
-    })
-
-    if(isSelected) {
-        //Don't add history stuff, as we handle it ourselves
-        setPosition(getSelectedPos(), false, false)
-        setRotation(getSelectedRot(), false, false)
-    } else {
-        setPosition([0, 0, 0])
-        setRotation([0, 0, 0])
-    }
-
-    if(activeTab === modelingStudio) {
-        modelingStudio.selectedChanged()
-    }
-}
-
 function renameCube(oldValue, newValue) {
     if(display.tbl.cubeMap.has(newValue) && display.tbl.cubeMap.get(newValue) !== raytracer.selected.tabulaCube) {
         return true
@@ -218,44 +178,6 @@ function renameCube(oldValue, newValue) {
         modelingStudio.cubeList.elementMap.get(tabulaCube).a.innerText = newValue
     }   
     return false
-}
-
-function setPosition(values, displaysonly = false) {
-    [...document.getElementsByClassName("input-position")].forEach(elem => {
-        elem.value = values[elem.getAttribute("axis")]
-        elem.checkValidity()
-    });
-    if(!displaysonly && raytracer.selected) {
-        raytracer.selected.parent.position.set(values[0], values[1], values[2])
-        
-        if(activeTab === animationStudio) {
-            animationStudio.positionChanged(raytracer.selected.tabulaCube, values)
-        }        
-        if(activeTab == modelingStudio) {
-            raytracer.selected.tabulaCube.updatePosition(values)
-        }
-    }
-}
-
-function setRotation(values, displaysonly = false) {
-    [...document.getElementsByClassName("input-rotation")].forEach(elem => {
-        elem.value = values[elem.getAttribute("axis")]
-    });
-
-    [...document.getElementsByClassName("input-rotation-slider")].forEach(elem => {
-        elem.value = ((values[elem.getAttribute("axis")] + 180) % 360) - 180
-    });
-
-    if(!displaysonly && raytracer.selected) {
-        raytracer.selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
-
-        if(activeTab === animationStudio) {
-            animationStudio.rotationChanged(raytracer.selected.tabulaCube, values)
-        }
-        if(activeTab == modelingStudio) {
-            raytracer.selected.tabulaCube.updateRotation(values)
-        }
-    }
 }
 
 function updateCamera(camera, width, height) {
@@ -295,117 +217,6 @@ window.changeCamera = elem => {
 
 }
 
-window.toggleTranslate = () => {
-    if(transformControls.visible && transformControls.mode == "translate") {
-        setMode("none")
-    } else {
-        setMode("translate")
-    }
-}
-
-window.toggleRotate = () => {
-    if(transformControls.visible && transformControls.mode == "rotate") {
-        setMode("none")
-    } else {
-        setMode("rotate")
-    }
-}
-
-window.toggleGlobal = (elem, addHistory = true) => {
-    let wasLocal = transformControls.space == "local"
-    setGlobal(elem, wasLocal)
-    if(addHistory) {
-        daeHistory.addAction(() => setGlobal(elem, !wasLocal), () => setGlobal(elem, wasLocal));
-    }
-    
-}
-
-function setGlobal(elem, world) {
-    transformControls.space = world ? "world" : "local"
-    elem.classList.toggle("is-active", world)
-}
-
-function setMode(mode) {
-    modeCache = mode
-    if(!raytracer.selected) {
-        mode = "none"
-    }
-    transformControls.visible = mode != "none"
-    if(mode != "none") {
-        let toAttach = raytracer.selected.parent
-        if(mode === 'dimensions') {
-            toAttach = raytracer.selected
-        }
-        transformControls.attach(toAttach);
-        transformControls.mode = mode
-
-        let oldelement = document.getElementById("control-rotate")
-        let newelement = document.getElementById("control-translate")
-        if(mode == "rotate") {
-            let e = oldelement
-            oldelement = newelement
-            newelement = e
-        }
-
-        // oldelement.classList.toggle("is-active", false)
-        // newelement.classList.toggle("is-active", true)
-    } else {
-        [...document.getElementsByClassName("transform-control-tool")].forEach(elem => elem.classList.toggle("is-active", false))
-    }
-}
-
-
-window.setPosition = elem => {
-    let num = Number(elem.value)
-    if(Number.isNaN(num)) {
-        return
-    }
-    let point = getSelectedPos()
-    point[elem.getAttribute("axis")] = num
-    setPosition(point)
-}
-
-function getSelectedPos() {
-    let point
-    if(activeTab === animationStudio && animationStudio.manager.selectedKeyFrame) {
-        point = animationStudio.manager.selectedKeyFrame.getPosition(raytracer.selected.tabulaCube.name)
-    } else {
-        point = raytracer.selected.parent.position.toArray()
-    }
-    return point
-}
-
-window.setRotation = elem => {
-    let num = Number(elem.value)
-    if(Number.isNaN(num)) {
-        return
-    }
-    let angles = getSelectedRot()
-    angles[elem.getAttribute("axis")] = num
-    setRotation(angles, false)
-}
-
-
-function getSelectedRot() {
-    let angles
-    if(activeTab === animationStudio && animationStudio.manager.selectedKeyFrame) {
-        angles = animationStudio.manager.selectedKeyFrame.getRotation(raytracer.selected.tabulaCube.name)
-    } else {
-        let rawr = raytracer.selected.parent.rotation
-        angles = [rawr.x, rawr.y, rawr.z].map(a => a * 180 / Math.PI)
-    }
-    return angles
-}
-
-window.setRotationHistory = () => {
-    let rotation = getSelectedRot().splice(0)
-    daeHistory.addAction(() => setRotation(rotationCache, false, false), () => setRotation(rotation, false, false))
-}
-
-window.storeRotationHistory = () => {
-    rotationCache = getSelectedRot().splice(0)
-}
-
 window.createNewModel = () => {
     initiateModel(new TBLModel())
 }
@@ -433,7 +244,7 @@ async function createModelingStudio() {
 }
 
 async function createAnimationStudio() {
-    return new AnimationStudio(await loadHtml(projectTabs.animation) , raytracer, display, setPosition, setRotation)
+    return new AnimationStudio(await loadHtml(projectTabs.animation) , raytracer, display)
 }
 
 async function initiateModel(model) {
@@ -479,31 +290,6 @@ window.setupTexture = async(file, nameElement) => {
 
 
     imgtag.src = await readFile(file, (reader, file) => reader.readAsDataURL(file))
-}
-
-window.setInertia = elem => display.animationHandler.inertia = elem.checked
-window.setLooped = elem => display.animationHandler.looping = elem.checked
-window.setGrid = elem => display.gridGroup.visible = elem.checked
-window.addValue = elem => {
-    if(raytracer.selected) {
-        let axis = elem.getAttribute("axis")
-        new ButtonSpeed().setupfor(elem, () => {
-            let poss = getSelectedPos()
-            poss[axis] += 0.1
-            setPosition(poss)
-        })
-    }
-}
-
-window.subtractValue = elem => {
-    if(raytracer.selected) {
-        let axis = elem.getAttribute("axis")
-        new ButtonSpeed().setupfor(elem, () => {
-            let poss = getSelectedPos()
-            poss[axis] -= 0.1
-            setPosition(poss)
-        })
-    }
 }
 
 window.addEventListener( 'resize', e => window.studioWindowResized(), false );

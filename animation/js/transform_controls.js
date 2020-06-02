@@ -70,6 +70,7 @@ var TransformControls = function ( camera, domElement ) {
 	var objectChangeEvent = { type: "objectChange" };
 	var studioRotateEvent = { dumbcode:true, type: "studioRotate" };
 	var studioTranslateEvent = { dumbcode:true, type: "studioTranslate" };
+	var studioDimensionEvent = { dumbcode:true, type: "studioDimension" };
 
 	// Reusable utility variables
 
@@ -374,36 +375,23 @@ var TransformControls = function ( camera, domElement ) {
 
 			offset.applyQuaternion( quaternionStart ).divide( parentScale );
 
-
-			if(this.object.tabulaCube !== undefined && dimensionsStart !== undefined && offsetsStart !== undefined) {
-				let dims = this.object.tabulaCube.dimension
-				let offs = this.object.tabulaCube.offset
-				
-				if(axis.endsWith('N')) {
-					offset.multiplyScalar(-1)
-				}
-
-				if(axis.startsWith('X')) {
-					dims[0] = dimensionsStart[0] + Math.floor(offset.x)
-				} else if(axis.startsWith('Y')) {
-					dims[1] = dimensionsStart[1] + Math.floor(offset.y)
-				} else if(axis.startsWith('Z')) {
-					dims[2] = dimensionsStart[2] - Math.floor(offset.z)
-				}
-
-				if(axis.endsWith('N') !== axis.startsWith('Z')) {					
-					if(axis.startsWith('X')) {
-						offs[0] = offsetsStart[0] - Math.floor(offset.x)
-					} else if(axis.startsWith('Y')) {
-						offs[1] = offsetsStart[1] - Math.floor(offset.y)
-					} else if(axis.startsWith('Z')) {
-						offs[2] = offsetsStart[2] + Math.floor(offset.z)
-					}
-				}
-
-				this.studioCallback(dims, offs)
-		
+			if(axis.endsWith('N')) {
+				offset.multiplyScalar(-1)
 			}
+
+			
+			let v = axis.endsWith('N') ? -1 : 1
+			if(axis.startsWith('X')) {
+				_tempVector.set(v, 0, 0)
+			} else if(axis.startsWith('Y')) {
+				_tempVector.set(0, v, 0)
+			} else if(axis.startsWith('Z')) {
+				_tempVector.set(0, 0, -v)
+			}
+
+			studioDimensionEvent.length = offset.x+offset.y+offset.z
+			studioDimensionEvent.axis = _tempVector.normalize()
+			this.dispatchEvent(studioDimensionEvent)
 		}
 
 		if ( mode === 'translate' ) {

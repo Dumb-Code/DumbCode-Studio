@@ -1,8 +1,9 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { TblCube } from "./tbl_loader.js"
-import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, LayoutPart, listenForKeyChange } from "./util.js"
+import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, LayoutPart, listenForKeyChange, isKeyDown } from "./util.js"
 import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4, EventDispatcher, Object3D, BoxGeometry } from "./three.js"
 import { DragSelection } from "./drag_selection.js"
+import { TexturemapCanvas } from "./texturemap_canvas.js"
 
 const mainArea = document.getElementById("main-area")
 
@@ -11,8 +12,6 @@ const rotateKey = "rotate"
 const dimensionKey = "dimensions"
 
 const totalPosition = new Vector3()
-const totalRotation = new Vector3()
-const totalScale = new Vector3()
 
 const decomposePosition = new Vector3()
 const decomposeRotation = new Quaternion()
@@ -21,12 +20,10 @@ const decomposeScale = new Vector3()
 
 const decomposePosition2 = new Vector3()
 const decomposeRotation2 = new Quaternion()
-const decomposeEuler2 = new Euler()
 const decomposeScale2 = new Vector3()
 
-const inverseMatrix = new Matrix4()
-const tabulaInverseMatrix = new Matrix4()
-const recomposeMatrix = new Matrix4()
+const tempVec3 = new Vector3()
+
 
 export class ModelingStudio {
 
@@ -116,6 +113,7 @@ export class ModelingStudio {
                 this.startingCache.set(cube.tabulaCube, { 
                     position: [...cube.tabulaCube.rotationPoint], 
                     offset: [...cube.tabulaCube.offset],
+                    dimension: [...cube.tabulaCube.dimension],
                     quaternion: elem.quaternion.clone()
                 })
             })
@@ -179,6 +177,17 @@ export class ModelingStudio {
                     case 'position':
                         cube.updatePosition(pos.map((e, i) => e + data.position[i]))
                         break
+                }
+            })
+        })
+        this.transformControls.addEventListener('studioDimension', e => {
+            let length = Math.floor(Math.abs(e.length))
+            forEachCube(e.axis, (axis, cube, data) => {
+                this.alignAxis(axis)
+
+                cube.updateDimension(axis.toArray().map((e, i) => Math.abs(e)*length + data.dimension[i]))
+                if(e.axis.x+e.axis.y+e.axis.z < 0) {
+                    cube.updateOffset(e.axis.toArray().map((e, i) => e*length + data.offset[i]))
                 }
             })
         })
@@ -299,26 +308,24 @@ export class ModelingStudio {
         this.rightHorizontalDivider.mousedown(() => clickedDivider = 3)
         this.updateAreas()
 
-        this.canvas = dom.find('#texture-canvas').get(0)
-        this.canvasMatrix = new DOMMatrix([1, 0, 0, 1, 0, 0])
-        this.canvasMovingCube = null
-        this.mulMatrix(new DOMMatrix())
-        $(this.canvas)
-            .mousemove(e => this.mouseOverCanvas(e))
-            .click(e => this.mouseOverCanvas(e))
-            .mousedown(e => this.mouseOverCanvas(e))
-            .mouseup(e => this.canvasMovingCube = null)
-            .bind('mousewheel DOMMouseScroll', e => {
-                let direction = e.originalEvent.wheelDelta
-                let amount =  1.1
-                if(direction === undefined) { //Firefox >:(
-                    direction = -e.detail
-                }
-                if(direction !== 0) {
-                    this.mulMatrix(new DOMMatrix().scaleSelf(direction > 0 ? amount : 1/amount))
-                }
-                
-            })
+        this.canvas = new TexturemapCanvas(dom.find('#texture-canvas'), display, raytracer, () => Math.min(this.rightArea, this.topRArea))
+        
+    }
+
+    alignAxis(axis) {
+        let xn = Math.abs(axis.x);
+        let yn = Math.abs(axis.y);
+        let zn = Math.abs(axis.z);
+
+        if ((xn >= yn) && (xn >= zn)) {
+            axis.set(axis.x > 0 ? 1 : -1, 0, 0)
+        } else if ( (yn > xn) && (yn >= zn) ) {
+            axis.set(0, axis.y > 0 ? 1 : -1, 0)
+        } else if ( (zn > xn) && (zn > yn) ) {
+            axis.set(0, 0, axis.z > 0 ? 1 : -1)
+        } else {
+            axis.set(0, 0, 0)
+        }
     }
 
     createLockedCubesCache() {
@@ -445,151 +452,10 @@ export class ModelingStudio {
 
     runFrame() {
         this.raytracer.update()
-        this.drawTextureCanvas()
+        this.canvas.drawTextureCanvas(this.rightArea, this.topRArea)
         this.display.tbl.resetAnimations()
         this.display.render()
         this.dragSelection.onFrame()
-    }
-
-    drawTextureCanvas() {
-        let size = Math.min(this.rightArea, this.topRArea)
-        this.canvas.width = this.canvas.height = size
-
-        let ctx = this.canvas.getContext('2d')
-
-        ctx.setTransform(this.finalCanvasMatrix)
-
-        ctx.fillStyle = "rgba(255, 255, 255, 255)"
-        ctx.fillRect(0, 0, size, size)
-
-        let img = this.display.material?.map?.image
-        if(img !== undefined) {
-            ctx.drawImage(img, 0, 0, size, size)
-        }
-
-        let su = this.display.tbl.texWidth/size
-        let sv = this.display.tbl.texHeight/size
-
-        this.display.tbl.cubeMap.forEach(cube => {
-            let r = 1.0
-            let g = 1.0
-            let b = 1.0
-            let a = 0.2
-
-            if(this.raytracer.intersected !== undefined && this.raytracer.intersected.tabulaCube === cube) {
-                g = 0.2
-                b = 0.2
-                a = 0.5
-            } else if(this.raytracer.isCubeSelected(cube)) {
-                r = 0.2
-                g = 0.2
-                a = 0.5
-            }
-
-            let u = cube.textureOffset[0]/su
-            let v = cube.textureOffset[1]/sv
-
-            let w = cube.dimension[0]
-            let h = cube.dimension[1]
-            let d = cube.dimension[2]
-
-            let uw = w/su
-            let ud = d/su
-
-            let vh = h/sv
-            let vd = d/sv
-
-            ctx.fillStyle = `rgba(${255*r}, 0, 0, ${a})`
-            ctx.fillRect(u, v+vd, ud, vh)
-
-            ctx.fillStyle = `rgba(0, ${255*g}, 0, ${a})`
-            ctx.fillRect(u+ud, v, uw, vd)
-
-            ctx.fillStyle = `rgba(0, 0, ${255*b}, ${a})`
-            ctx.fillRect(u+ud, v+vd, uw, vh)
-
-
-            ctx.fillStyle = `rgba(${127*r}, 0, 0, ${a})`
-            ctx.fillRect(u+ud+uw, v+vd, ud, vh)
-
-            ctx.fillStyle = `rgba(0, ${127*g}, 0, ${a})`
-            ctx.fillRect(u+ud+uw, v, uw, vd)
-
-            ctx.fillStyle = `rgba(0, 0, ${127*b}, ${a})`
-            ctx.fillRect(u+ud+uw+ud, v+vd, uw, vh)
-
-        })        
-    }
-
-    mouseOverCanvas(event) {
-        let mousePoint = new DOMPoint(event.originalEvent.layerX, event.originalEvent.layerY)
-        mousePoint = mousePoint.matrixTransform(this.finalCanvasMatrix.inverse())
-        let mouseX = mousePoint.x
-        let mouseY = mousePoint.y
-
-        let mouseBetween = (x, y, w, h) => mouseX >= x && mouseX < x+w && mouseY >= y && mouseY < y+h
-        let size = Math.min(this.rightArea, this.topRArea)
-        let su = this.display.tbl.texWidth/size
-        let sv = this.display.tbl.texHeight/size
-
-        let overHandled = false
-
-        this.display.tbl.cubeMap.forEach(cube => {
-            if(overHandled) {
-                return
-            }
-
-            let u = cube.textureOffset[0]/su
-            let v = cube.textureOffset[1]/sv
-
-            let w = cube.dimension[0]
-            let h = cube.dimension[1]
-            let d = cube.dimension[2]
-
-            let uw = w/su
-            let ud = d/su
-
-            let vh = h/sv
-            let vd = d/sv
-            
-
-            let mouseOver = 
-                mouseBetween(u, v+vd, ud, vh) || mouseBetween(u+ud, v, uw, vd) || mouseBetween(u+ud, v+vd, uw, vh) ||
-                mouseBetween(u+ud+uw, v+vd, ud, vh) || mouseBetween(u+ud+uw, v, uw, vd) || mouseBetween(u+ud+uw+ud, v+vd, uw, vh)
-
-            if(mouseOver) {
-                overHandled = true
-                if(event.type === 'mousedown') {
-                    this.canvasMovingCube = {cube, x: mouseX-u, y: mouseY-v}
-                } else if(event.type === 'click') {
-                    this.raytracer.clickOnMesh(cube.planesGroup)
-                } else {
-                    this.raytracer.mouseOverMesh(cube.planesGroup)
-                }
-            }
-        })
-        if(!overHandled) {
-            if(event.type === 'click') {
-                this.raytracer.deselectAll()
-            } else if(event.type === "mousedown") {
-                this.canvasMovingCube = null
-            }
-            if(event.buttons & 1 !== 0 && this.canvasMovingCube === null) {
-                this.mulMatrix(new DOMMatrix().translateSelf(event.originalEvent.movementX, event.originalEvent.movementY))
-            }
-            this.raytracer.mouseOverMesh(undefined)
-        }
-        if(this.canvasMovingCube !== null) {
-            let tex = this.canvasMovingCube.cube.textureOffset
-            tex[0] = (mouseX-this.canvasMovingCube.x)*su
-            tex[1] = (mouseY-this.canvasMovingCube.y)*sv
-            this.canvasMovingCube.cube.updateTextureOffset()
-        }
-    }
-
-    mulMatrix(matrix) {
-        this.canvasMatrix.preMultiplySelf(matrix)
-        this.finalCanvasMatrix = new DOMMatrix().translate(150, 150).multiply(this.canvasMatrix).multiply(new DOMMatrix().translate(-150, -150))
     }
 
     cubeHierarchyChanged() {
@@ -631,7 +497,7 @@ export class ModelingStudio {
         }
         
         this.updateSpherePosition()
-        if(!this.raytracer.anySelected()) {
+        if(!this.raytracer.anySelected() || (this.toolTransformType.value === dimensionKey && !isSelected)) {
             this.toolTransformType.value = undefined
         }
 
