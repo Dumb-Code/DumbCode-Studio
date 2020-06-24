@@ -1,9 +1,11 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { TblCube } from "./tbl_loader.js"
 import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, LayoutPart, listenForKeyChange, isKeyDown } from "./util.js"
-import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4, EventDispatcher, Object3D, BoxGeometry } from "./three.js"
+import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4, EventDispatcher, Object3D, BoxGeometry, Color } from "./three.js"
 import { DragSelection } from "./drag_selection.js"
 import { TexturemapCanvas } from "./texturemap_canvas.js"
+import { TransformControls } from './transform_controls.js'
+
 
 const mainArea = document.getElementById("main-area")
 
@@ -22,12 +24,12 @@ const decomposePosition2 = new Vector3()
 const decomposeRotation2 = new Quaternion()
 const decomposeScale2 = new Vector3()
 
-const tempVec3 = new Vector3()
+const tempMatrix = new Matrix4()
 
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, transformControls, orbitControls, renameCube) {
+    constructor(domElement, display, raytracer, orbitControls, renameCube) {
         this.domElement = domElement
         let dom = $(domElement)
         this.canvasContainer = dom.find("#display-div").get(0)
@@ -59,8 +61,7 @@ export class ModelingStudio {
             return state
             
         }, () => this.createLockedCubesCache(null), cube => this.reconstructLockedCubes(cube))
-        this.transformControls = transformControls
-        this.transformControls.space = "local"
+        this.transformControls = display.createTransformControls()
         this.transformControls.studioCallback = (dims, offset) => {//todo: move to an event
             this.dimensions.value = dims
             this.offsets.value = offset
@@ -68,10 +69,10 @@ export class ModelingStudio {
         
         this.transformSelectParents = false
         this.transformAnchor = new Object3D()
-        this.transformPoint = new Object3D()
-        this.transformPoint.rotation.order = "ZYX"
         this.transformAnchor.rotation.order = "ZYX"
-        this.transformAnchor.add(this.transformPoint)
+
+        this.transformAnchor.add(this.rotationPointSphere)
+
         display.scene.add(this.transformAnchor)
 
         //Tool Transform Types
@@ -104,8 +105,32 @@ export class ModelingStudio {
             this.dragSelection.enabled = value
         })
 
-        this.selectedTransform = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.toolTransformType.value = translateKey)
-        this.globalSpace = new ToggleableElement(dom.find('.dropdown-global-space')).onchange(e => this.transformControls.space = e.value ? "world" : "local")
+        this.selectedTranslate = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.toolTransformType.value = translateKey)
+        this.selectedRotation = new LinkedSelectableList(dom.find('.dropdown-rotation > .dropdown-item')).onchange(() => this.toolTransformType.value = rotateKey)
+        this.globalSpaceMode = new LinkedSelectableList(dom.find('.dropdown-transform-mode > .dropdown-item')).onchange(e => {
+            this.transformControls.space = e.value
+            this.gumballRotateTool.space = e.value
+            this.gumballTranslateTool.space = e.value
+        })
+        this.gumballRotateTool = display.createTransformControls()
+        this.gumballRotateTool.mode = 'rotate'
+        this.gumballTranslateTool = display.createTransformControls()
+        this.gumballTranslateTool.mode = 'translate'
+        dom.find('.gumball-movement-freely').click(() => {
+            this.toolTransformType.value = undefined
+            this.gumballRotateTool.attach(this.transformAnchor)
+            this.gumballTranslateTool.attach(this.transformAnchor)
+        })
+        dom.find('.gumball-movement-selected').click(() => this.updateTransformPoints())
+
+        this.gumballRotateTool.traverse(e => e.material?.color?.addScalar(0.25))
+        this.gumballTranslateTool.traverse(e => e.material?.color?.addScalar(0.25))
+
+        this.gumballRotateTool.addEventListener('mouseDown', () => this.gumballTranslateTool.enabled = false)
+        this.gumballTranslateTool.addEventListener('mouseDown', () => this.gumballRotateTool.enabled = false)
+        this.gumballRotateTool.addEventListener('mouseUp', () => this.gumballTranslateTool.enabled = true)
+        this.gumballTranslateTool.addEventListener('mouseUp', () => this.gumballRotateTool.enabled = true)
+
         this.transformControls.addEventListener('mouseDown', () => {
             this.startingCache.clear()
             this.raytracer.selectedSet.forEach(cube => {
@@ -118,7 +143,7 @@ export class ModelingStudio {
                 })
             })
             this.createLockedCubesCache()
-            if(this.toolTransformType.value === translateKey && this.selectedTransform.value === 'rotation_point') {
+            if(this.toolTransformType.value === translateKey && this.selectedTranslate.value === 'rotation_point') {
                 this.raytracer.selectedSet.forEach(cube => {
                     let tabula = cube.tabulaCube
                     if(this.lockedCubes.has(tabula)) {
@@ -131,16 +156,11 @@ export class ModelingStudio {
             }
         })
         this.transformControls.addEventListener('mouseUp', () => {
-            this.updateTransformPoints()
             this.lockedChildrenCache.clear()
             this.movingChildrenCache.clear()
         })
         let forEachCube = (axisIn, callback) => {
-            let selected  = this.raytracer.firstSelected()
-            if(this.transformSelectParents) {
-                selected = selected.parent
-            }
-            selected.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+            this.transformAnchor.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
             this.startingCache.forEach((data, cube) => {
                 let elem = this.transformSelectParents ? cube.cubeGroup : cube.planesGroup
 
@@ -154,20 +174,43 @@ export class ModelingStudio {
             })
         }
         this.transformControls.addEventListener('studioRotate', e => {
-            forEachCube(e.rotationAxis, (axis, cube, data) => {
-                decomposeRotation2.setFromAxisAngle(axis, e.rotationAngle)
-                decomposeRotation2.multiply(data.quaternion).normalize()
+            if(this.selectedRotation.value === 'axis') {
+                forEachCube(e.rotationAxis, (axis, cube, data) => {
+                    decomposeRotation2.setFromAxisAngle(axis, e.rotationAngle)
+                    decomposeRotation2.multiply(data.quaternion).normalize()
+    
+                    decomposeEuler.setFromQuaternion(decomposeRotation2, "ZYX")
+                    cube.updateRotation(decomposeEuler.toArray().map(v => v * 180 / Math.PI))
+                })
+            } else if(this.selectedRotation.value === 'point')  {
+                forEachCube(e.rotationAxis, (axis, cube, data) => {
+                    let elem = cube.cubeGroup
+                    let diff = decomposePosition.copy(elem.position).sub(this.transformAnchor.position)
+                    elem.matrixWorld
+                        .premultiply(tempMatrix.makeTranslation(-diff.x, -diff.y, -diff.z))
+                        .premultiply(tempMatrix.makeRotationAxis(axis, e.rotationAngle))
+                        .premultiply(tempMatrix.makeTranslation(diff.x, diff.y, diff.z))
 
-                decomposeEuler.setFromQuaternion(decomposeRotation2, "ZYX")
-                cube.updateRotation(decomposeEuler.toArray().map(v => v * 180 / Math.PI))
-            })
-           
+
+                    elem.matrixWorld.decompose(decomposePosition2, decomposeRotation2, decomposeScale2)
+
+
+                    //TODO: make the "rotate around a point work"
+
+                    elem.position.copy(decomposePosition2)
+                    elem.rotation.copy(decomposeRotation2)
+
+                    decomposeEuler.setFromQuaternion(decomposeRotation2, "ZYX")
+                    cube.updateRotation(decomposeEuler.toArray().map(v => v * 180 / Math.PI))
+                    cube.updatePosition(decomposePosition2.toArray())
+                })
+            }
         })
         this.transformControls.addEventListener('studioTranslate', e => {
             forEachCube(e.axis, (axis, cube, data) => {
-                axis.divide(e.length)
+                axis.multiplyScalar(e.length)
                 let pos = axis.toArray()
-                switch(this.selectedTransform.value) {
+                switch(this.selectedTranslate.value) {
                     case 'offset':
                         if(!this.lockedCubes.has(cube)) {
                             cube.updateOffset(pos.map((e, i) => e + data.offset[i]))
@@ -193,8 +236,7 @@ export class ModelingStudio {
         })
         this.transformControls.addEventListener('objectChange', () => {
             this.reconstructLockedCubes()
-            this.selectedChanged()
-            this.updateSpherePosition()
+            this.updateCubeValues()
             this.runFrame()
         })
 
@@ -208,7 +250,6 @@ export class ModelingStudio {
             this.createLockedCubesCache()
             cube()?.updatePosition(e.value)
             this.reconstructLockedCubes()
-            this.updateSpherePosition()
         })
         this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => cube()?.updateOffset(e.value))
         this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e => cube()?.updateCubeGrow(e.value))
@@ -382,7 +423,7 @@ export class ModelingStudio {
     }
 
     setTranslationTool() {
-        this.setMode(translateKey, this.selectedTransform.value !== 'offset')
+        this.setMode(translateKey, this.selectedTranslate.value !== 'offset')
     }
 
     setRotationTool() {
@@ -395,23 +436,21 @@ export class ModelingStudio {
 
     setMode(mode, parent = this.transformSelectParents) {
         this.transformSelectParents = parent
-        this.transformControls.visible = mode != "none"
 
-        this.updateTransformPoints()
-
-        if(mode !== "none") {
-            this.transformControls.attach(this.transformPoint);
+        if(mode === "none") {
+            this.transformControls.detach()
+        } else {
+            this.gumballRotateTool.detach()
+            this.gumballTranslateTool.detach()
+            this.transformControls.attach(this.transformAnchor);
             this.transformControls.mode = mode
         }
     }
 
     updateTransformPoints() {
         if(!this.raytracer.anySelected() && this.transformControls.visible === true) {
-            this.setMode("none")
             return
         }
-        this.transformPoint.position.set(0, 0, 0)
-        this.transformPoint.rotation.set(0, 0, 0)
 
         totalPosition.set(0, 0, 0)
         let firstSelected = this.raytracer.firstSelected()
@@ -423,7 +462,6 @@ export class ModelingStudio {
 
             if(cube === firstSelected) {
                 this.transformAnchor.quaternion.copy(decomposeRotation)
-                this.transformAnchor.scale.copy(decomposeScale)
             }
         })
 
@@ -469,34 +507,10 @@ export class ModelingStudio {
     }
 
     selectedChanged() {
+        this.gumballRotateTool.detach()
+        this.gumballTranslateTool.detach()
         let isSelected = this.raytracer.selectedSet.size === 1
-        this.updateTransformPoints()
-        if(isSelected) {
-            this.rotationPointSphere.visible = true
-
-            let cube = this.raytracer.firstSelected().tabulaCube
-            this.cubeName.visualValue = cube.name
-            this.positions.visualValue = cube.rotationPoint
-            this.dimensions.visualValue = cube.dimension
-            this.rotation.visualValue = cube.rotation
-            this.offsets.visualValue = cube.offset
-            this.cubeGrow.visualValue = cube.mcScale
-            this.textureOffset.visualValue = cube.textureOffset
-            this.textureMirrored.visualValue = cube.textureMirrored
-        } else {
-            this.rotationPointSphere.visible = false
-
-            this.dimensions.visualValue = undefined
-            this.positions.visualValue = undefined
-            this.offsets.visualValue = undefined
-            this.rotation.visualValue = undefined
-            this.cubeGrow.visualValue = undefined
-            this.textureOffset.visualValue = undefined
-            this.textureMirrored.visualValue = undefined
-            this.cubeName.visualValue = undefined
-        }
-        
-        this.updateSpherePosition()
+        this.updateCubeValues()
         if(!this.raytracer.anySelected() || (this.toolTransformType.value === dimensionKey && !isSelected)) {
             this.toolTransformType.value = undefined
         }
@@ -504,12 +518,32 @@ export class ModelingStudio {
         this.selectedRequired.prop("disabled", !isSelected).toggleClass("is-active", isSelected)
     }
 
-    updateSpherePosition() {
-        this.rotationPointSphere.visible = this.raytracer.anySelected()
-        if(this.raytracer.anySelected()) {
+    updateCubeValues() {
+        let isSelected = this.raytracer.selectedSet.size === 1
+        if(isSelected) {
+            this.rotationPointSphere.visible = true
+
             let cube = this.raytracer.firstSelected().tabulaCube
-            cube.cubeGroup.updateMatrix()
-            cube.cubeGroup.getWorldPosition(this.rotationPointSphere.position)
+            this.cubeName.setInternalValue(cube.name)
+            this.positions.setInternalValue(cube.rotationPoint)
+            this.dimensions.setInternalValue(cube.dimension)
+            this.rotation.setInternalValue(cube.rotation)
+            this.offsets.setInternalValue(cube.offset)
+            this.cubeGrow.setInternalValue(cube.mcScale)
+            this.textureOffset.setInternalValue(cube.textureOffset)
+            this.textureMirrored.setInternalValue(cube.textureMirrored)
+        } else {
+            this.rotationPointSphere.visible = false
+
+            this.dimensions.setInternalValue(undefined)
+            this.positions.setInternalValue(undefined)
+            this.offsets.setInternalValue(undefined)
+            this.rotation.setInternalValue(undefined)
+            this.cubeGrow.setInternalValue(undefined)
+            this.textureOffset.setInternalValue(undefined)
+            this.textureMirrored.setInternalValue(undefined)
+            this.cubeName.setInternalValue(undefined)
         }
+        
     }
 }

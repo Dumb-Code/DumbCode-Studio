@@ -12,24 +12,24 @@
         <label>Dimensions</label>
         <div class="modeling-input-3" style="padding: 5px;">
             <input axis="0" class="input-dimension editor-require-selected" style="grid-area: l" type="number" name="X Dimension" disabled>
-            <input axis="1" class="input-dimension editor-require-selected" style="grid-area: m" type="number" name="X Dimension" disabled>
-            <input axis="2" class="input-dimension editor-require-selected" style="grid-area: r" type="number" name="X Dimension" disabled>
+            <input axis="1" class="input-dimension editor-require-selected" style="grid-area: m" type="number" name="Y Dimension" disabled>
+            <input axis="2" class="input-dimension editor-require-selected" style="grid-area: r" type="number" name="Z Dimension" disabled>
         </div>
     </div>
     <div class="modeling-ui-entry">
         <label>Position</label>
         <div class="modeling-input-3" style="padding: 5px;">
             <input axis="0" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Position" disabled>
-            <input axis="1" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="X Position" disabled>
-            <input axis="2" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: r" type="number" name="X Position" disabled>
+            <input axis="1" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="Y Position" disabled>
+            <input axis="2" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: r" type="number" name="Z Position" disabled>
         </div>
     </div>
     <div class="modeling-ui-entry">
         <label>Offset</label>
         <div class="modeling-input-3" style="padding: 5px;">
             <input axis="0" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Offet" disabled>
-            <input axis="1" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="X Offet" disabled>
-            <input axis="2" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: r" type="number" name="X Offet" disabled>
+            <input axis="1" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="Y Offet" disabled>
+            <input axis="2" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: r" type="number" name="Z Offet" disabled>
         </div>
     </div>
     <div class="modeling-ui-entry">
@@ -83,7 +83,7 @@
 <div id="editor-transform-tools" style="grid-area: bottom_bar;">
     <div class="bottombar-element dropdown is-hoverable is-up">
         <div class="dropdown-trigger">
-          <button class="button is-dark transform-control-tool" select-list-entry="translate">
+          <button class="button button-activateable is-dark transform-control-tool" select-list-entry="translate">
             <span class="icon is-small">
                 <i class="fas fa-arrows-alt"></i>
             </span>
@@ -91,34 +91,59 @@
         </div>
         <div class="dropdown-menu" role="menu">
             <div class="dropdown-content">
-                <span class="dropdown-entry dropdown-translation">
+                <div class="dropdown-entry dropdown-translation">
                     <div select-list-entry="position" class="dropdown-item dropdown-activateable">Position</div>
                     <div select-list-entry="offset" class="dropdown-item dropdown-activateable">Offset</div>
                     <div select-list-entry="rotation_point" class="dropdown-item dropdown-activateable">Rotation Point</div>
-                </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottombar-element dropdown is-hoverable is-up">
+        <div class="dropdown-trigger">
+          <button class="button button-activateable is-dark transform-control-tool" select-list-entry="rotate">
+            <span class="icon is-small">
+                <i class="fas fa-sync-alt"></i>
+            </span>
+          </button>
+        </div>
+        <div class="dropdown-menu" role="menu">
+            <div class="dropdown-content">
+                <div class="dropdown-entry dropdown-rotation">
+                    <div select-list-entry="axis" class="dropdown-item dropdown-activateable">Around Axis</div>
+                    <div select-list-entry="point" class="dropdown-item dropdown-activateable">Around Rotation Point</div>
+                </div>
             </div>
         </div>
     </div>
     <div class="bottombar-element">
-        <button class="button is-dark transform-control-tool" select-list-entry="rotate">
-            <span class="icon is-small">
-                <i class="fas fa-sync-alt"></i>
-            </span>
-        </button>
-    </div>
-    <div class="bottombar-element">
-        <button class="button is-dark transform-control-tool" select-list-entry="dimensions">
+        <button class="button button-activateable is-dark transform-control-tool" select-list-entry="dimensions">
             <span class="icon is-small">
                 <i class="fas fa-expand"></i>
             </span>
         </button>
     </div>
-    <div class="bottombar-element">
-        <button class="button is-dark dropdown-global-space">
-            <span class="icon is-small">
-                <i class="fas fa-globe-americas"></i>
-            </span>
-        </button>
+    <div class="bottombar-element dropdown is-hoverable is-up">
+        <div class="dropdown-trigger">
+            <button class="button is-dark dropdown-global-space">
+                <span class="icon is-small">
+                    <i class="fab fa-hornbill"></i>
+                </span>
+            </button>
+        </div>
+        <div class="dropdown-menu" role="menu">
+            <div class="dropdown-content">
+                <div class="dropdown-entry dropdown-transform-mode">
+                    <div select-list-entry="local" class="dropdown-item dropdown-activateable">Local</div>
+                    <div select-list-entry="world" class="dropdown-item dropdown-activateable">World</div>
+                </div>
+                <div class="dropdown-entry">
+                    <button class="dropdown-item dropdown-activateable gumball-movement-selected">Move To Selected</button>
+                    <button class="dropdown-item dropdown-activateable gumball-movement-freely">Move Freely Gumball</button>
+                </div>
+            </div>
+        </div>
+        
     </div>
 </div>
 <div id="left-divider" class="vertical-divider"></div>

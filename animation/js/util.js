@@ -39,7 +39,7 @@ export class LinkedElement {
     constructor(elems, array = true, parseNum = true) {
         this.array = array
         this.parseNum = parseNum
-        this.addElement(this.elems = elems)
+        this.addElement(this.elems = elems, true)
         this.sliderElems = undefined
         if(this.array) {
             this.rawValue = [0, 0, 0]
@@ -48,28 +48,51 @@ export class LinkedElement {
         }
     }
 
+    //todo: remove
     set value(value) {
-        if(this.array) {
-            value = [...value]
-        }
+        this.setValue(value)
+    }
+    setValue(value, ignore = -1) {
         let old = this.rawValue
-        this.rawValue = value
-        this.visualValue = value
+        this.setInternalValue(value, ignore)
         this.dispatchEvent({ type: "changed", old, value })
     }
+
     get value() {
         return this.rawValue
     }
 
-    set visualValue(value) {
-        if(this.array) {
-            this.elems.each((_i,e) => e.value = value===undefined?"":value[e.getAttribute('axis')])
-            if(this.sliderElems !== undefined) {
-                this.sliderElems.each((_i,e) => e.value = ((value===undefined?0:value[e.getAttribute("axis")] + 180) % 360) - 180)
+    setInternalValue(value, ignore = -1) {
+        this.rawValue = value
+        
+        if(this.array && value !== undefined) {
+            value = [...value]
+            if(typeof value[0] == 'number') {
+                value = value.map(v => this.makeKashHappy(v.toFixed(2)))
             }
-        } else {
+        } else if(typeof value == 'number') {
+            value = this.makeKashHappy(value.toFixed(2))
+        }
+
+        if(this.array) {
+            this.elems.each((idx,e) => {
+                if(idx != ignore) {
+                    e.value = value===undefined?"":value[e.getAttribute('axis')]
+                }
+            })
+            if(this.sliderElems !== undefined) {
+                this.sliderElems.each((_i,e) => e.value = ((value===undefined?0:this.rawValue[e.getAttribute("axis")] + 180) % 360) - 180)
+            }
+        } else if(ignore != 0) {
             this.elems.val(value===undefined?"":value)
         }
+    }
+
+    makeKashHappy(value) {
+        if(value == '-0.00') {
+            return '0.00'
+        }
+        return value
     }
 
     onchange(listener) {
@@ -78,20 +101,24 @@ export class LinkedElement {
     }
 
     withsliders(sliderElems) {
-        this.addElement(this.sliderElems = sliderElems)
+        this.addElement(this.sliderElems = sliderElems, false)
         return this
     }
 
-    addElement(elem) {
+    addElement(elem, runIgnore) {
         if(this.array) {
             elem.on('input', e => {
-                let arr = this.value.splice(0)
-                arr[e.target.getAttribute('axis')] = this.parseNum ? parseInt(e.target.value) : e.target.value
-                this.value = arr
+                let arr = this.rawValue.splice(0)
+                let idx = e.target.getAttribute('axis')
+                arr[idx] = this.parseNum ? parseFloat(e.target.value) : e.target.value
+                this.setValue(arr, runIgnore?idx:undefined)
             })
         } else {
-            elem.on('input', e => this.value = this.parseNum ? parseInt(e.target.value) : e.target.value)
+            elem.on('input', e => this.setValue(this.parseNum ? parseFloat(e.target.value) : e.target.value, runIgnore?0:undefined))
         }
+
+        //Ensure when the boxes are deselected, the text inside them should be updated and formatted
+        elem.focusout(() => this.setValue(this.value))
     }
 }
 Object.assign( LinkedElement.prototype, EventDispatcher.prototype );

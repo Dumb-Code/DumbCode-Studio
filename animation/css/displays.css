@@ -179,7 +179,7 @@
    pointer-events: none;
 }
 
-.button.is-activated {
+.button.button-activateable.is-activated {
    color: #4CAF50 !important;
 }
 

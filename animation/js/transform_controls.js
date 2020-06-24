@@ -414,7 +414,7 @@ var TransformControls = function ( camera, domElement ) {
 
 			studioTranslateEvent.axis = _tempVector.copy(offset).normalize()
 			studioTranslateEvent.parentQuaternionInv = parentQuaternionInv
-			studioTranslateEvent.length = parentScale.clone().divideScalar(offset.length())
+			studioTranslateEvent.length = 16*offset.length()
 			this.dispatchEvent(studioTranslateEvent)
 
 			if ( space === 'local' && axis !== 'XYZ' ) {
@@ -1090,6 +1090,7 @@ var TransformControlsGizmo = function () {
 				object.geometry = tempGeometry;
 				object.renderOrder = Infinity;
 
+				object.material = object.material?.clone()
 				object.position.set( 0, 0, 0 );
 				object.rotation.set( 0, 0, 0 );
 				object.scale.set( 1, 1, 1 );

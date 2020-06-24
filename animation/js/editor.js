@@ -21,7 +21,7 @@ let canvasContainer = undefined //document.getElementById("display-div");
 const mainArea = document.getElementById("main-area")
 const display = new DinosaurDisplay()
 
-let controls, transformControls
+let controls
 
 let material = new MeshLambertMaterial( {
     color: 0x777777,
@@ -88,7 +88,25 @@ async function init() {
     controls.screenSpacePanning = true
     controls.addEventListener('change', () => runFrame())
 
-    transformControls = new TransformControls(camera, renderer.domElement)
+    display.createTransformControls = () => {
+        let transformControls = new TransformControls(camera, renderer.domElement)
+        transformControls.addEventListener('dragging-changed', e => {
+            controls.enabled = !e.value;
+        });
+        transformControls.addEventListener('axis-changed', e => {
+            let textDiv = document.getElementById("editor-mouseover")
+            if(e.value === null) {
+                textDiv.style.display = "block"
+                raytracer.disableRaycast = false
+            } else {
+                textDiv.style.display = "none"
+                raytracer.disableRaycast = true
+            }
+        })
+        transformControls.space = "local"
+        display.scene.add(transformControls)
+        return transformControls
+    }
     // transformControls.addEventListener('objectChange', () => {
     //     let pos = raytracer.selected.parent.position
     //     let rot = raytracer.selected.parent.rotation
@@ -100,20 +118,7 @@ async function init() {
     //     setPosition(positions, false, false)
     //     runFrame()
     // } );
-    transformControls.addEventListener('dragging-changed', e => {
-        controls.enabled = !e.value;
-    });
-    transformControls.addEventListener('axis-changed', e => {
-        let textDiv = document.getElementById("editor-mouseover")
-        if(e.value === null) {
-            textDiv.style.display = "block"
-            raytracer.disableRaycast = false
-        } else {
-            textDiv.style.display = "none"
-            raytracer.disableRaycast = true
-        }
-    })
-    display.scene.add(transformControls)
+    
 
     filesPage = await createFilesPage()
     frame()
@@ -240,7 +245,7 @@ async function createFilesPage() {
 }
 
 async function createModelingStudio() {
-    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, transformControls, controls, renameCube)
+    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, controls, renameCube)
 }
 
 async function createAnimationStudio() {
