@@ -33,12 +33,18 @@ function onMouseDown( event ) {
    mouseClickDown.y = event.clientY
 }
 
+export function raytraceUnderMouse(camera, elements, recursive = false) {
+    raycaster.setFromCamera(mouse, camera)
+    return raycaster.intersectObjects(elements, recursive)
+}
+
 
 const selectElementEvent = { type:"select", cubes:[] }
 const deselectElementEvent = { type:"deselect", cubes:[] }
 const selectChangeEvent = { type:"selectchange", }
 const intersectionChangeEvent = { type:"intersection", old:undefined, cube:undefined }
 
+const raycaster = new Raycaster()
 
 export class Raytracer {
 
@@ -49,6 +55,7 @@ export class Raytracer {
         this.display = display
         this.selectedSet = new Set()
         this.intersected
+        this.intersectedDistance
         this.disableRaycast = false
 
         document.addEventListener( 'mouseup', e => {
@@ -136,7 +143,7 @@ export class Raytracer {
         this.dispatchEvent(selectChangeEvent)
     }
 
-    mouseOverMesh(mesh) {
+    mouseOverMesh(mesh, distance = -1) {
         if(mesh !== undefined) {
             if(this.intersected != mesh) {
                 if(this.intersected && !this.selectedSet.has(this.intersected)) {
@@ -145,6 +152,7 @@ export class Raytracer {
                 intersectionChangeEvent.old = this.intersected
                 intersectionChangeEvent.cube = mesh
                 this.intersected = mesh
+                this.intersectedDistance = distance
                 this.dispatchEvent(intersectionChangeEvent)
                 
                 if(!this.selectedSet.has(this.intersected)) {
@@ -177,7 +185,6 @@ export class Raytracer {
             style.top = rawMouse.y - 35 + "px"
         }
 
-        let raycaster = new Raycaster()
         raycaster.setFromCamera(mouse, this.display.camera);
         
 
@@ -185,7 +192,7 @@ export class Raytracer {
             let intersects = raycaster.intersectObjects(this.display.tbl.modelCache.children , true);
             if(!mouseDown) {
                 if(intersects.length > 0) {
-                    this.mouseOverMesh(intersects[0].object.parent)
+                    this.mouseOverMesh(intersects[0].object.parent, intersects[0].distance)
                     textDiv.style.display = "block"
                 } else {
                     this.mouseOverMesh(undefined)

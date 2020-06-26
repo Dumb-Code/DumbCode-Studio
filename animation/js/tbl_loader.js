@@ -174,6 +174,7 @@ export class TblCube {
         this.cubeMesh = []
         for(let f = 0; f < 6; f++) {
             let mesh = new Mesh(undefined, this.tbl.mat)
+            mesh.isTabulaPlane = true
             this.cubeMesh.push(mesh)
             this.planesGroup.add(mesh)
         }
@@ -251,9 +252,9 @@ export class TblCube {
     }
 
     updateGeometry() {
-        let w = this.dimension[0] + this.mcScale*2 + 0.02
-        let h = this.dimension[1] + this.mcScale*2 + 0.02
-        let d = this.dimension[2] + this.mcScale*2 + 0.02
+        let w = this.dimension[0] + this.mcScale*2 + 0.0001
+        let h = this.dimension[1] + this.mcScale*2 + 0.0001
+        let d = this.dimension[2] + this.mcScale*2 + 0.0001
 
         this.cubeMesh[0].geometry = new PlaneBufferGeometry(d, h); //+x
         this.cubeMesh[0].rotation.set(0, Math.PI / 2, 0)

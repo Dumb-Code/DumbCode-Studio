@@ -1,10 +1,11 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { TblCube } from "./tbl_loader.js"
 import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, LayoutPart, listenForKeyChange, isKeyDown } from "./util.js"
-import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4, EventDispatcher, Object3D, BoxGeometry, Color } from "./three.js"
+import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4, EventDispatcher, Object3D, BoxGeometry, Color, Group } from "./three.js"
 import { DragSelection } from "./drag_selection.js"
 import { TexturemapCanvas } from "./texturemap_canvas.js"
 import { TransformControls } from './transform_controls.js'
+import { CubePointTracker } from "./cube_point_tracker.js"
 
 
 const mainArea = document.getElementById("main-area")
@@ -48,7 +49,7 @@ export class ModelingStudio {
         this.raytracer.addEventListener('deselect', e => e.cubes.forEach(cube => dom.find(`[cubename='${cube.tabulaCube.name}']`).removeClass('cube-selected')))
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
 
-        this.rotationPointSphere = this.createRotationPointObject()
+        display.scene.add(this.rotationPointSpheres = new Group())
         this.lockedCubes = new Set()
         this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, (cubeClicked, toSet = 0) => {
             //toSet => -1 false, 0 toggle, 1 true
@@ -70,8 +71,6 @@ export class ModelingStudio {
         this.transformSelectParents = false
         this.transformAnchor = new Object3D()
         this.transformAnchor.rotation.order = "ZYX"
-
-        this.transformAnchor.add(this.rotationPointSphere)
 
         display.scene.add(this.transformAnchor)
 
@@ -105,6 +104,8 @@ export class ModelingStudio {
             this.dragSelection.enabled = value
         })
 
+        this.pointTracker = new CubePointTracker(raytracer, display)
+
         this.selectedTranslate = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.toolTransformType.value = translateKey)
         this.selectedRotation = new LinkedSelectableList(dom.find('.dropdown-rotation > .dropdown-item')).onchange(() => this.toolTransformType.value = rotateKey)
         this.globalSpaceMode = new LinkedSelectableList(dom.find('.dropdown-transform-mode > .dropdown-item')).onchange(e => {
@@ -121,7 +122,15 @@ export class ModelingStudio {
             this.gumballRotateTool.attach(this.transformAnchor)
             this.gumballTranslateTool.attach(this.transformAnchor)
         })
-        dom.find('.gumball-movement-selected').click(() => this.updateTransformPoints())
+        this.gumballAutomaticallyMove = new ToggleableElement(dom.find('.gumball-movement-selected')).onchange(e => {
+            if(e.value) {
+                this.moveGumballToSelected()
+            }
+        })
+        dom.find('.gumball-movement-point').click(() => {
+            this.pointTracker.enable(p => this.transformAnchor.position.copy(p))
+        })
+        this.gumballAutomaticallyMove.value = true
 
         this.gumballRotateTool.traverse(e => e.material?.color?.addScalar(0.25))
         this.gumballTranslateTool.traverse(e => e.material?.color?.addScalar(0.25))
@@ -237,6 +246,7 @@ export class ModelingStudio {
         this.transformControls.addEventListener('objectChange', () => {
             this.reconstructLockedCubes()
             this.updateCubeValues()
+            this.updateSpheres()
             this.runFrame()
         })
 
@@ -436,6 +446,7 @@ export class ModelingStudio {
 
     setMode(mode, parent = this.transformSelectParents) {
         this.transformSelectParents = parent
+        this.moveGumballToSelected()
 
         if(mode === "none") {
             this.transformControls.detach()
@@ -447,7 +458,7 @@ export class ModelingStudio {
         }
     }
 
-    updateTransformPoints() {
+    moveGumballToSelected() {
         if(!this.raytracer.anySelected() && this.transformControls.visible === true) {
             return
         }
@@ -471,10 +482,7 @@ export class ModelingStudio {
     createRotationPointObject() {
         let geometry = new SphereGeometry(1/32, 32, 32);
         let material = new MeshBasicMaterial({ color: 0x0624cf});
-        let sphere = new Mesh(geometry, material);
-        this.display.scene.add(sphere);
-        sphere.visible = false
-        return sphere
+        return new Mesh(geometry, material);
     }
 
     updateAreas() {
@@ -489,6 +497,7 @@ export class ModelingStudio {
     }
 
     runFrame() {
+        this.pointTracker.update()
         this.raytracer.update()
         this.canvas.drawTextureCanvas(this.rightArea, this.topRArea)
         this.display.tbl.resetAnimations()
@@ -506,11 +515,30 @@ export class ModelingStudio {
         window.studioWindowResized()
     }
 
+    updateSpheres() {
+        this.rotationPointSpheres.children.forEach(child => {
+            if(child.linkedUpObject !== undefined) {
+                child.position.setFromMatrixPosition(child.linkedUpObject.matrixWorld)
+            }
+        })
+    }
+
     selectedChanged() {
+        this.rotationPointSpheres.remove(...this.rotationPointSpheres.children)
+        this.raytracer.selectedSet.forEach(cube => {
+            let sph = this.createRotationPointObject()
+            this.rotationPointSpheres.add(sph)
+            sph.linkedUpObject = cube.tabulaCube.cubeGroup
+            sph.position.setFromMatrixPosition(cube.tabulaCube.cubeGroup.matrixWorld)
+        })
+
         this.gumballRotateTool.detach()
         this.gumballTranslateTool.detach()
         let isSelected = this.raytracer.selectedSet.size === 1
         this.updateCubeValues()
+        if(this.gumballAutomaticallyMove.value) {
+            this.moveGumballToSelected()
+        }
         if(!this.raytracer.anySelected() || (this.toolTransformType.value === dimensionKey && !isSelected)) {
             this.toolTransformType.value = undefined
         }
@@ -521,8 +549,6 @@ export class ModelingStudio {
     updateCubeValues() {
         let isSelected = this.raytracer.selectedSet.size === 1
         if(isSelected) {
-            this.rotationPointSphere.visible = true
-
             let cube = this.raytracer.firstSelected().tabulaCube
             this.cubeName.setInternalValue(cube.name)
             this.positions.setInternalValue(cube.rotationPoint)
@@ -533,8 +559,6 @@ export class ModelingStudio {
             this.textureOffset.setInternalValue(cube.textureOffset)
             this.textureMirrored.setInternalValue(cube.textureMirrored)
         } else {
-            this.rotationPointSphere.visible = false
-
             this.dimensions.setInternalValue(undefined)
             this.positions.setInternalValue(undefined)
             this.offsets.setInternalValue(undefined)

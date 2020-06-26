@@ -286,7 +286,6 @@ export class CubeLocker {
     }
 
     reconstruct() {
-        console.log("reconstuct")
         //      parent_world_matrix * local_matrix = world_matrix
         //  =>  local_matrix = 'parent_world_matrix * world_matrix
         resultMat.getInverse(this.element.parent.matrixWorld).multiply(this.worldMatrix)
