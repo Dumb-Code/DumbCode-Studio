@@ -1,7 +1,4 @@
 import { CubeListBoard } from "./cube_list_board.js"
-import { TblCube } from "../tbl_loader.js"
-import { LinkedElement, LinkedSelectableList, ToggleableElement, CubeLocker, LayoutPart, listenForKeyChange, isKeyDown } from "../util.js"
-import { Vector3, SphereGeometry, MeshBasicMaterial, Mesh, PlaneGeometry, Quaternion, Euler, Matrix4, EventDispatcher, Object3D, BoxGeometry, Color, Group } from "../three.js"
 import { DragSelection } from "./drag_selection.js"
 import { TexturemapCanvas } from "./texturemap_canvas.js"
 import { CubePointTracker } from "./cube_point_tracker.js"
