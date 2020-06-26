@@ -15,6 +15,7 @@ export class CubeValueDisplay {
             lockedCubes.createLockedCubesCache()
             this.getCube()?.updatePosition(e.value)
             lockedCubes.reconstructLockedCubes()
+            studio.rotationPointMarkers.updateSpheres()
         })
         this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => this.getCube()?.updateOffset(e.value))
         this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e => this.getCube()?.updateCubeGrow(e.value))
@@ -24,6 +25,7 @@ export class CubeValueDisplay {
             lockedCubes.createLockedCubesCache()
             this.getCube()?.updateRotation(e.value)
             lockedCubes.reconstructLockedCubes()
+            studio.rotationPointMarkers.updateSpheres()
         })
 
         studio.transformControls.addEventListener('objectChange', () => this.updateCubeValues())

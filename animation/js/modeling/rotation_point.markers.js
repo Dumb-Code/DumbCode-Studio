@@ -4,17 +4,16 @@ export class RotationPointMarkers {
 
     constructor(studio) {
         this.raytracer = studio.raytracer
-
         studio.display.scene.add(this.rotationPointSpheres = new Group())
+        studio.transformControls.addEventListener('objectChange', () => this.updateSpheres())
+    }
 
-        studio.transformControls.addEventListener('objectChange', () => {
-            this.rotationPointSpheres.children.forEach(child => {
-                if(child.linkedUpObject !== undefined) {
-                    child.position.setFromMatrixPosition(child.linkedUpObject.matrixWorld)
-                }
-            })
+    updateSpheres() {
+        this.rotationPointSpheres.children.forEach(child => {
+            if(child.linkedUpObject !== undefined) {
+                child.position.setFromMatrixPosition(child.linkedUpObject.matrixWorld)
+            }
         })
-
     }
 
     selectChanged() {
