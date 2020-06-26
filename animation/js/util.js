@@ -204,63 +204,6 @@ export class ToggleableElement {
 }
 Object.assign( ToggleableElement.prototype, EventDispatcher.prototype );
 
-let activeSet = new Set()
-//This is to make sure when the main window is unloaded (closed/refreshed), all the open windows are also closed
-window.onbeforeunload = () => activeSet.forEach(e => e.win?.close())
-export class LayoutPart {
-    constructor(rootDom) {
-        this.rootDom = rootDom
-        this.parentNode = rootDom.parent()
-        this.win = null
-        this.value = false
-        rootDom.find('.popout-button').click(() => this.value = !this.value)
-    }
-
-    get value() {
-        return this.poppedOut
-    }
-
-    set value(popped) {
-        if(this.poppedOut === popped) {
-            return
-        }
-        this.poppedOut = popped
-        if(popped) {
-            activeSet.add(this)
-            if(this.win === null) {
-                let width = this.rootDom.width()
-                let height = this.rootDom.height()
-                let offset = this.rootDom.offset()
-                let top = window.screenY + offset.top
-                let left = window.screenX + offset.left
-                this.rootDom.detach()
-                this.win = window.open('templates/popped_out.html', 'Test Window ' + Math.random(), `top=${top},screenY=${top},left=${left},screenX=${left},height=${height},width=${width}`)
-                this.win.onload = () => this.rootDom.appendTo(this.win.document.body)
-                this.win.onbeforeunload  = () => {
-                    if(this.value) {
-                        this.value = false
-                    }
-                }
-            }
-        } else {
-            activeSet.delete(this)
-            if(this.win !== null) {
-                this.win.close()
-                this.win = null
-                this.rootDom.detach().appendTo(this.parentNode)
-            }
-        }
-        this.dispatchEvent({ type: "changed", value: popped })
-    }
-
-    onchange(listener) {
-        this.addEventListener('changed', listener)
-        return this
-    }
-}
-Object.assign( LayoutPart.prototype, EventDispatcher.prototype );
-
-
 let resultMat = new Matrix4()
 let decomposePos = new Vector3()
 let decomposeRot = new Quaternion()

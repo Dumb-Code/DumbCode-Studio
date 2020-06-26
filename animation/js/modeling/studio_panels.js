@@ -1,19 +1,15 @@
-import { LayoutPart } from "../util.js"
-
 const mainArea = document.getElementById("main-area")
 
 export class StudioPanels {
     constructor(dom, studio) {
         this.domElement = studio.domElement
 
-
-        this.leftPanel = new LayoutPart(dom.find('#panel-left'), this).onchange(e => {
-            this.leftArea = e.value ? 0 : 300
+        this.leftPanel = new LayoutPart(dom.find('#panel-left'), e => {
+            this.leftArea = e ? 0 : 300
             this.updateAreas()
         })
-
-        this.rightTopPanel = new LayoutPart(dom.find('#panel-right-top'), this).onchange(() => this.rightPanelChange())
-        this.rightBottomPanel = new LayoutPart(dom.find('#panel-right-bottom'), this).onchange(() => this.rightPanelChange())
+        this.rightTopPanel = new LayoutPart(dom.find('#panel-right-top'), () => this.rightPanelChange())
+        this.rightBottomPanel = new LayoutPart(dom.find('#panel-right-bottom'), () => this.rightPanelChange())
 
         //Setup the dividers to allow for changing the panel size
         this.leftDivider = dom.find("#left-divider")
@@ -46,19 +42,19 @@ export class StudioPanels {
     }
 
     rightPanelChange() {
-        if(this.rightTopPanel.value && this.rightBottomPanel.value) {
+        if(this.rightTopPanel.popped && this.rightBottomPanel.popped) {
             this.rightArea = 0
         } else {
             if(this.rightArea === 0) {
                 this.rightArea = 300
             }
-            if(this.rightTopPanel.value !== this.rightBottomPanel.value) {
-                if(!this.rightTopPanel.value) { //Top panel only
+            if(this.rightTopPanel.popped !== this.rightBottomPanel.popped) {
+                if(!this.rightTopPanel.popped) { //Top panel only
                     this.topRArea = mainArea.clientHeight - 40
                 } else { //Bottom panel only
                     this.topRArea = 0
                 }
-            } else if(!this.rightTopPanel.value) {
+            } else if(!this.rightTopPanel.popped) {
                 this.topRArea = 300
             }
         }
@@ -74,5 +70,58 @@ export class StudioPanels {
         this.domElement.style.gridTemplateRows = this.topRArea + "px " + " calc(100vh - " + (this.topRArea + 92) + "px) 40px"
 
         window.studioWindowResized()
+    }
+}
+
+
+let activeSet = new Set()
+//This is to make sure when the main window is unloaded (closed/refreshed), all the open windows are also closed
+window.onbeforeunload = () => activeSet.forEach(e => e.win?.close())
+
+class LayoutPart {
+    constructor(rootDom, onChanged) {
+        this.rootDom = rootDom
+        this.onChanged = onChanged
+        this.parentNode = rootDom.parent()
+        this.win = null
+        this.poppedOut = false
+        rootDom.find('.popout-button').click(() => this.popped = !this.popped)
+    }
+
+    get popped() {
+        return this.poppedOut
+    }
+
+    set popped(popped) {
+        if(this.poppedOut === popped) {
+            return
+        }
+        this.poppedOut = popped
+        if(popped) {
+            activeSet.add(this)
+            if(this.win === null) {
+                let width = this.rootDom.width()
+                let height = this.rootDom.height()
+                let offset = this.rootDom.offset()
+                let top = window.screenY + offset.top
+                let left = window.screenX + offset.left
+                this.rootDom.detach()
+                this.win = window.open('templates/popped_out.html', 'Test Window ' + Math.random(), `top=${top},screenY=${top},left=${left},screenX=${left},height=${height},width=${width}`)
+                this.win.onload = () => this.rootDom.appendTo(this.win.document.body)
+                this.win.onbeforeunload  = () => {
+                    if(this.popped) {
+                        this.popped = false
+                    }
+                }
+            }
+        } else {
+            activeSet.delete(this)
+            if(this.win !== null) {
+                this.win.close()
+                this.win = null
+                this.rootDom.detach().appendTo(this.parentNode)
+            }
+        }
+        this.onChanged(popped)
     }
 }
