@@ -33,7 +33,7 @@ export class Gumball {
 
         this.startingCache = new Map()
         
-        this.transformSelectParents = false
+        this.transformSelectParents = true
         this.toolTransformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false).addPredicate(e => e === undefined || this.raytracer.anySelected()).onchange(e => {
             switch(e.value) {
                 case translateKey: 
@@ -71,7 +71,7 @@ export class Gumball {
         this.gumballTranslateTool.addEventListener('mouseUp', () => this.gumballRotateTool.enabled = true)
 
         dom.find('.gumball-movement-freely').click(() => {
-            this.toolTransformType.value = undefined
+            // this.toolTransformType.value = undefined
             this.gumballRotateTool.attach(this.transformAnchor)
             this.gumballTranslateTool.attach(this.transformAnchor)
         })
@@ -95,7 +95,8 @@ export class Gumball {
                     position: [...cube.tabulaCube.rotationPoint], 
                     offset: [...cube.tabulaCube.offset],
                     dimension: [...cube.tabulaCube.dimension],
-                    quaternion: elem.quaternion.clone()
+                    quaternion: elem.quaternion.clone(),
+                    threePos: elem.getWorldPosition(elem.position.clone())
                 })
             })
         })
@@ -119,37 +120,20 @@ export class Gumball {
         })
 
         this.transformControls.addEventListener('studioRotate', e => {
-            if(this.selectedRotation.value === 'axis') {
-                this.forEachCube(e.rotationAxis, (axis, cube, data) => {
-                    decomposeRotation2.setFromAxisAngle(axis, e.rotationAngle)
-                    decomposeRotation2.multiply(data.quaternion).normalize()
-    
-                    decomposeEuler.setFromQuaternion(decomposeRotation2, "ZYX")
-                    cube.updateRotation(decomposeEuler.toArray().map(v => v * 180 / Math.PI))
-                })
-            } else if(this.selectedRotation.value === 'point')  {
-                this.forEachCube(e.rotationAxis, (axis, cube, data) => {
-                    let elem = cube.cubeGroup
-                    let diff = decomposePosition.copy(elem.position).sub(this.transformAnchor.position)
-                    elem.matrixWorld
-                        .premultiply(tempMatrix.makeTranslation(-diff.x, -diff.y, -diff.z))
-                        .premultiply(tempMatrix.makeRotationAxis(axis, e.rotationAngle))
-                        .premultiply(tempMatrix.makeTranslation(diff.x, diff.y, diff.z))
+            this.forEachCube(e.rotationAxis, (axis, cube, data) => {
+                decomposeRotation2.setFromAxisAngle(axis, e.rotationAngle)
+                decomposeRotation2.multiply(data.quaternion).normalize()
 
+                decomposeEuler.setFromQuaternion(decomposeRotation2, "ZYX")
+                cube.updateRotation(decomposeEuler.toArray().map(v => v * 180 / Math.PI))
 
-                    elem.matrixWorld.decompose(decomposePosition2, decomposeRotation2, decomposeScale2)
-
-
-                    //TODO: make the "rotate around a point work"
-
-                    elem.position.copy(decomposePosition2)
-                    elem.rotation.copy(decomposeRotation2)
-
-                    decomposeEuler.setFromQuaternion(decomposeRotation2, "ZYX")
-                    cube.updateRotation(decomposeEuler.toArray().map(v => v * 180 / Math.PI))
-                    cube.updatePosition(decomposePosition2.toArray())
-                })
-            }
+                if(this.selectedRotation.value === 'point')  {
+                    let diff = decomposePosition.copy(data.threePos).sub(this.transformAnchor.position).multiply(decomposePosition2.set(-16, -16, 16))
+                    let rotatedPos = decomposePosition2.copy(diff).applyAxisAngle(axis, e.rotationAngle)
+                    let rotatedDiff = rotatedPos.sub(diff)
+                    cube.updatePosition(rotatedDiff.toArray().map((v, i) => v + data.position[i]))
+                }
+            })
         })
 
         this.transformControls.addEventListener('studioDimension', e => {
@@ -213,7 +197,7 @@ export class Gumball {
 
     setMode(mode, parent = this.transformSelectParents) {
         this.transformSelectParents = parent
-
+        
         if(mode === "none") {
             this.transformControls.detach()
         } else {
@@ -259,7 +243,9 @@ export class Gumball {
         this.gumballRotateTool.detach()
         this.gumballTranslateTool.detach()
         if(!this.raytracer.anySelected() || (this.toolTransformType.value === dimensionKey && !isSelected)) {
-            this.toolTransformType.value = undefined
+            this.setMode("none")
+        } else {
+            this.toolTransformType.value = this.toolTransformType.value
         }
         if(this.gumballAutomaticallyMove.value) {
             this.moveGumballToSelected()
