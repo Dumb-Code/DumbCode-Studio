@@ -1,13 +1,11 @@
-import { isKeyDown } from "./util.js"
+import { isKeyDown } from "../util.js"
 
 export class CubeListBoard {
-    constructor(cubeList, raytracer, tbl, toggleLock, createLockedCubesCache, reconstructLockedCubes) {
+    constructor(cubeList, raytracer, tbl, lockedCubes) {
         this.cubeList = cubeList
         this.raytracer = raytracer
         this.tbl = tbl
-        this.toggleLock = toggleLock
-        this.createLockedCubesCache = createLockedCubesCache
-        this.reconstructLockedCubes = reconstructLockedCubes
+        this.lockedCubes = lockedCubes
         this.previousDragElement
         this.elementMap = new Map()
 
@@ -20,10 +18,10 @@ export class CubeListBoard {
         this.cubeList.ondrop = e => {
             let cube = tbl.cubeMap.get(e.dataTransfer.getData("cubename"))
             if(e.target == this.cubeList && cube !== undefined) {
-                createLockedCubesCache()
+                this.lockedCubes.createLockedCubesCache()
                 cube.parent.deleteChild(cube, true)
                 tbl.rootGroup.addChild(cube)
-                reconstructLockedCubes(cube)
+                this.lockedCubes.reconstructLockedCubes()
             }
         }
 
@@ -86,14 +84,13 @@ export class CubeListBoard {
         }
         
         let tbl = this.tbl
-        let createLockedCubesCache = this.createLockedCubesCache
-        let reconstructLockedCubes = this.reconstructLockedCubes
+        let lockedCubes = this.lockedCubes
         div.ondrop = function(e) {
             let type = this.getAttribute("drag-state")
             let draggedCube = tbl.cubeMap.get(e.dataTransfer.getData("cubename"))
             let droppedOnto = tbl.cubeMap.get(cube.name)
             if(draggedCube !== undefined && droppedOnto !== undefined && type !== undefined) {
-                createLockedCubesCache()
+                this.lockedCubes.createLockedCubesCache()
                 draggedCube.parent.deleteChild(draggedCube, true)
                 if(type === "on") {
                     droppedOnto.addChild(draggedCube)
@@ -105,7 +102,7 @@ export class CubeListBoard {
                     droppedOnto.parent.getChildren().splice(index, 0, draggedCube)
                     droppedOnto.parent.onChildrenChange(false)
                 }
-                reconstructLockedCubes(cube)
+                this.lockedCubes.reconstructLockedCubes()
             }
         }
     
@@ -179,6 +176,17 @@ export class CubeListBoard {
 
         parent.appendChild(li)
         this.elementMap.set(cube, {li, a, i, lock})
+    }
+
+    //toSet => -1 false, 0 toggle, 1 true
+    toggleLock(cubeClicked, toSet) {
+        let state = toSet < 0 || (toSet === 0 && this.lockedCubes.isLocked(cubeClicked))
+        if(state) {
+            this.lockedCubes.unlock(cubeClicked)
+        } else {
+            this.lockedCubes.lock(cubeClicked)
+        }
+        return state
     }
 
     createLockIcon() {

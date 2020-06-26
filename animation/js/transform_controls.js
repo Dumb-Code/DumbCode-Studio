@@ -1173,7 +1173,7 @@ var TransformControlsGizmo = function () {
 		handles = handles.concat( this.gizmo[ this.mode ].children );
 		handles = handles.concat( this.helper[ this.mode ].children );
 
-		let centerFace = this.mode === 'dimensions' && this.object.tabulaCube !== undefined
+		let centerFace = this.mode === 'dimensions' && this.object !== undefined && this.object.tabulaCube !== undefined
 
 		for ( var i = 0; i < handles.length; i ++ ) {
 

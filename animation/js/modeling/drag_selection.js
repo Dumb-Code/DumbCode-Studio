@@ -1,4 +1,5 @@
-import { Raycaster, Vector2 } from "./three.js"
+import { Raycaster, Vector2 } from "../three.js"
+import { listenForKeyChange } from "../util.js"
 
 const raycaster = new Raycaster()
 
@@ -16,13 +17,19 @@ $(document)
     .mouseup(() => mousedown = false)
 
 export class DragSelection {
-    constructor(display, raytracer, selectionElement) {
-        this.display = display
-        this.raytracer = raytracer
+    constructor(studio, selectionElement, orbitControls) {
+        this.display = studio.display
+        this.raytracer = studio.raytracer
         this.selectionElement = selectionElement
         this.previousIntersected = new Set()
         this.raytraceCache = new Map()
         this.enabled = false
+
+        listenForKeyChange("Shift", value => {
+            orbitControls.enabled = !value
+            studio.transformControls.enabled = !value
+            this.enabled = value
+        })
     }
 
     onFrame() { 
@@ -42,7 +49,7 @@ export class DragSelection {
         //todo: maybe make the cubes intersected rather than selected before the mouse is released
         let intersectedObjects = new Set()
         let step = 5
-        let calcsLeft = 75
+        let calcsLeft = Math.max(500 / this.display.tbl.cubeMap.size, 75)
         for(let x = left; x <= left+width; x+=step) {
             for(let y = top; y <= top+height; y+=step) {
                 let key = x+','+y

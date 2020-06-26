@@ -208,10 +208,9 @@ let activeSet = new Set()
 //This is to make sure when the main window is unloaded (closed/refreshed), all the open windows are also closed
 window.onbeforeunload = () => activeSet.forEach(e => e.win?.close())
 export class LayoutPart {
-    constructor(rootDom, modelingStudio) {
+    constructor(rootDom) {
         this.rootDom = rootDom
         this.parentNode = rootDom.parent()
-        this.modelingStudio = modelingStudio
         this.win = null
         this.value = false
         rootDom.find('.popout-button').click(() => this.value = !this.value)

@@ -1,9 +1,9 @@
 export class TexturemapCanvas {
-    constructor(domElement, display, raytracer, sizeGetter) {
+    constructor(domElement, display, raytracer, studioPanels) {
         this.canvas = domElement.get(0)
         this.display = display
         this.raytracer = raytracer
-        this.sizeGetter = sizeGetter
+        this.studioPanels = studioPanels
         this.canvasMatrix = new DOMMatrix([1, 0, 0, 1, 0, 0])
         this.canvasMovingCube = null
         this.hasMoved = false
@@ -26,7 +26,7 @@ export class TexturemapCanvas {
     }
 
     drawTextureCanvas() {
-        let size = this.sizeGetter()
+        let size = Math.min(this.studioPanels.rightArea, this.studioPanels.topRArea)
         this.canvas.width = this.canvas.height = size
 
         let ctx = this.canvas.getContext('2d')
@@ -102,7 +102,7 @@ export class TexturemapCanvas {
         let mouseY = mousePoint.y
 
         let mouseBetween = (x, y, w, h) => mouseX >= x && mouseX < x+w && mouseY >= y && mouseY < y+h
-        let size = this.sizeGetter()
+        let size = Math.min(this.studioPanels.rightArea, this.studioPanels.topRArea)
         let su = this.display.tbl.texWidth/size
         let sv = this.display.tbl.texHeight/size
 
@@ -179,11 +179,14 @@ export class TexturemapCanvas {
         if(event.type === "mouseup") {
             this.canvasMovingCube = null
         }
-        
     }
 
     mulMatrix(matrix) {
         this.canvasMatrix.preMultiplySelf(matrix)
         this.finalCanvasMatrix = new DOMMatrix().translate(150, 150).multiply(this.canvasMatrix).multiply(new DOMMatrix().translate(-150, -150))
+    }
+
+    getSize() {
+
     }
 }

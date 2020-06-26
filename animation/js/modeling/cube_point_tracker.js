@@ -1,5 +1,5 @@
-import { Mesh, SphereGeometry, MeshBasicMaterial, Quaternion, Vector3, Raycaster } from "./three.js";
-import { raytraceUnderMouse } from "./raytracer.js";
+import { Mesh, SphereGeometry, MeshBasicMaterial, Quaternion, Vector3, Raycaster } from "../three.js";
+import { raytraceUnderMouse } from "../raytracer.js";
 
 const raycaster = new Raycaster()
 
@@ -47,7 +47,7 @@ export class CubePointTracker {
         }
     }
 
-    enable(callback = pos => {}) {
+    enable(callback = () => {}) {
         this.enabled = true
         this.points.forEach(p => p.mesh.onClickCallback = () => {
             this.enabled = false
@@ -74,7 +74,7 @@ export class CubePointTracker {
             this.helperPoints.forEach(p => p.visible = false)
             if(intersected.length > 0) {
                 let closest = intersected[0].object
-                if(intersected[0].distance < this.raytracer.intersectedDistance || this.raytracer.intersectedDistance === -1) {
+                if(true) {//intersected[0].distance < this.raytracer.intersectedDistance || this.raytracer.intersectedDistance === -1
                     if(this.intersected !== closest) {
                         if(this.intersected !== null) {
                             this.intersected.material.color.setHex(normalColor)

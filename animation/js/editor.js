@@ -6,7 +6,7 @@ import { TransformControls } from './transform_controls.js'
 import { HistoryList } from "./history.js";
 import { ProjectTabs } from "./project_tabs.js";
 import { AnimationStudio } from "./animation_studio.js";
-import { ModelingStudio } from "./modeling_studio.js";
+import { ModelingStudio } from "./modeling/modeling_studio.js";
 import { FilesPage } from "./files_page.js";
 import { Raytracer } from "./raytracer.js";
 
