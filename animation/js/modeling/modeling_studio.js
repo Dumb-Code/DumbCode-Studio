@@ -20,7 +20,7 @@ export class ModelingStudio {
         this.display = display
         this.raytracer = raytracer
 
-        this.commandRoot = new CommandRoot()
+        this.commandRoot = new CommandRoot(dom)
 
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
         this.selectedRequired = dom.find('.editor-require-selected')
@@ -45,6 +45,7 @@ export class ModelingStudio {
         this.raytracer.update()
         this.canvas.drawTextureCanvas(this.rightArea, this.topRArea)
         this.display.tbl.resetAnimations()
+        this.cubeValues.onRender()
         this.display.render()
         this.dragSelection.onFrame()
     }

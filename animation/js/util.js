@@ -88,7 +88,11 @@ export class LinkedElement {
                 this.sliderElems.each((_i,e) => e.value = ((value===undefined?0:this.rawValue[e.getAttribute("axis")] + 180) % 360) - 180)
             }
         } else if(ignore != 0) {
-            this.elems.val(value===undefined?"":value)
+            if(this.checkbox) {
+                this.elems.prop('checked', value===undefined?false:value)
+            } else {
+                this.elems.val(value===undefined?"":value)
+            }
         }
     }
 

@@ -42,7 +42,12 @@ export class TBLModel {
     }
 
     resetAnimations() {
-        this.rootGroup.resetAnimations()
+        //todo: rename
+        this.resetVisuals()
+    }
+
+    resetVisuals() {
+        this.rootGroup.resetVisuals()
     }
 }
 
@@ -118,9 +123,9 @@ export class TblCubeGroup {
         }
     }
 
-    resetAnimations() {
-        this.cubeGroups.forEach(child => child.resetAnimations())
-        this.cubeList.forEach(child => child.resetAnimations())
+    resetVisuals() {
+        this.cubeGroups.forEach(child => child.resetVisuals())
+        this.cubeList.forEach(child => child.resetVisuals())
     }
 
     getGroup() {
@@ -244,17 +249,22 @@ export class TblCube {
         return arr
     }
 
-    resetAnimations() {
-        this.children.forEach(child => child.resetAnimations())
+    resetVisuals(children = false) {
+        if(children === true) {
+            this.children.forEach(child => child.resetVisuals(true))
+        }
 
-        this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
-        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)    
+        this.updateGeometry()
+        this.updatePlanesGroup()
+        this.updatePositionVisuals()
+        this.updateRotationVisuals()
+        this.updateTexture()  
     }
 
-    updateGeometry() {
-        let w = this.dimension[0] + this.mcScale*2 + 0.0001
-        let h = this.dimension[1] + this.mcScale*2 + 0.0001
-        let d = this.dimension[2] + this.mcScale*2 + 0.0001
+    updateGeometry( { dimension = this.dimension, mcScale = this.mcScale } = {}) {
+        let w = dimension[0] + mcScale*2 + 0.0001
+        let h = dimension[1] + mcScale*2 + 0.0001
+        let d = dimension[2] + mcScale*2 + 0.0001
 
         this.cubeMesh[0].geometry = new PlaneBufferGeometry(d, h); //+x
         this.cubeMesh[0].rotation.set(0, Math.PI / 2, 0)
@@ -281,8 +291,20 @@ export class TblCube {
         this.updateTexture()
     }
 
-    updateTexture() {
-        let uvData = getUV(this.textureOffset[0], this.textureOffset[1], this.dimension[0], this.dimension[1], this.dimension[2], this.tbl.texWidth, this.tbl.texHeight, this.textureMirrored)
+    updatePlanesGroup( { dimension = this.dimension, offset = this.offset } = {} ) {
+        this.planesGroup.position.set( dimension[0] / 2 + offset[0], dimension[1] / 2 + offset[1], dimension[2] / 2 + offset[2] )
+    }
+
+    updatePositionVisuals(position = this.rotationPoint) {
+        this.cubeGroup.position.set(position[0], position[1], position[2])
+    }
+
+    updateRotationVisuals(rotation = this.rotation) {
+        this.cubeGroup.rotation.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180)
+    }
+
+    updateTexture({ textureOffset = this.textureOffset, dimension = this.dimension, texWidth = this.tbl.texWidth, texHeight = this.tbl.texHeight, textureMirrored = this.textureMirrored } = {}) {
+        let uvData = getUV(textureOffset[0], textureOffset[1], dimension[0], dimension[1], dimension[2], texWidth, texHeight, textureMirrored)
         for(let f = 0; f < 6; f++) {
             this.cubeMesh[f].geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uvData.slice(f*8, (f+1)*8)), 2))
         }
@@ -292,41 +314,55 @@ export class TblCube {
         this.name = value;
     }
 
-    updateDimension(values = this.dimension) {
-        this.dimension = values.map(e => Math.round(e))
-        this.updateOffset()
-        this.updateGeometry()
-        this.updateTexture()
+    updateDimension(values = this.dimension, visualOnly = false) {
+        if(visualOnly !== true) {
+            this.dimension = values.map(e => Math.round(e))
+        }
+        this.updatePlanesGroup( { dimension:values } )
+        this.updateGeometry( { dimension:values } )
+        this.updateTexture( { dimension:values } )
     }
 
-    updateCubeGrow(value = this.mcScale) {
-        this.mcScale = value
-        this.updateGeometry()
+    updateCubeGrow(value = this.mcScale, visualOnly = false) {
+        if(visualOnly !== true) {
+            this.mcScale = value
+        }
+        this.updateGeometry( {mcScale:value} )
     }
 
-    updateTextureOffset(values = this.textureOffset) {
-        this.textureOffset = values.map(e => Math.round(e))
-        this.updateTexture()
+    updateTextureOffset(values = this.textureOffset, visualOnly = false) {
+        if(visualOnly !== true) {
+            this.textureOffset = values.map(e => Math.round(e))
+        }
+        this.updateTexture( { textureOffset:values } )
     }
 
-    updateTextureMirrored(value = this.textureMirrored) {
-        this.textureMirrored = value
-        this.updateTexture()
+    updateTextureMirrored(value = this.textureMirrored, visualOnly = false) {
+        if(visualOnly !== true) {
+            this.textureMirrored = value
+        }
+        this.updateTexture( { textureMirrored: value } )
     }
 
-    updateOffset(values = this.offset) {
-        this.offset = values
-        this.planesGroup.position.set( this.dimension[0] / 2 + this.offset[0], this.dimension[1] / 2 + this.offset[1], this.dimension[2] / 2 + this.offset[2] )
+    updateOffset(values = this.offset, visualOnly = false) {
+        if(visualOnly !== true) {
+            this.offset = values
+        }
+        this.updatePlanesGroup( { offset:values } )
     }
 
-    updatePosition(values = this.rotationPoint) {
-        this.rotationPoint = values
-        this.cubeGroup.position.set(this.rotationPoint[0], this.rotationPoint[1], this.rotationPoint[2])
+    updatePosition(values = this.rotationPoint, visualOnly = false) {
+        if(visualOnly !== true) {
+            this.rotationPoint = values
+        }
+        this.updatePositionVisuals(values)
     }
 
-    updateRotation(values = this.rotation) {
-        this.rotation = values
-        this.cubeGroup.rotation.set(this.rotation[0] * Math.PI / 180, this.rotation[1] * Math.PI / 180, this.rotation[2] * Math.PI / 180)
+    updateRotation(values = this.rotation, visualOnly = false) {
+        if(visualOnly !== true) {
+            this.rotation = values
+        }
+        this.updateRotationVisuals(values)
     }
 
 }

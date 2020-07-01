@@ -1,5 +1,5 @@
 import { LinkedElement } from "../util.js"
-import { indexHandler, numberHandler, enumHandler, booleanHandler } from "../command_handler.js"
+import { indexHandler, numberHandler, enumHandler, booleanHandler, ArgumentHandler, stringHandler, axisNumberHandler } from "../command_handler.js"
 
 const xyzAxis = "xyz"
 const uvAxis = "uv"
@@ -8,30 +8,23 @@ export class CubeValueDisplay {
 
     constructor(dom, studio, renameCube) {
         this.raytracer = studio.raytracer
+        this.display = studio.display
         this.root = studio.commandRoot
+        this.commandResultChangeCache = null
 
-        let lockedCubes = studio.lockedCubes
+        this.lockedCubes = studio.lockedCubes
+        this.rotationPointMarkers = studio.rotationPointMarkers
 
         this.cubeName = new LinkedElement(dom.find('.input-cube-name'), false, false).onchange(e => {
             dom.find('.input-cube-name').toggleClass('input-invalid', renameCube(e.old, e.value))
         })
         this.dimensions = new LinkedElement(dom.find('.input-dimension')).onchange(e => this.runArrayCommand('dim', xyzAxis, e))
-        this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => {
-            lockedCubes.createLockedCubesCache()
-            this.runArrayCommand('pos', xyzAxis, e)
-            lockedCubes.reconstructLockedCubes()
-            studio.rotationPointMarkers.updateSpheres()
-        })
+        this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => this.runArrayCommand('pos', xyzAxis, e))
         this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => this.runArrayCommand('off', xyzAxis, e))
-        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e =>  this.root.runCommand(`cg set ${e.value}`))
+        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e =>  this.root.runCommand(`cubegrow set ${e.value}`))
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => this.runArrayCommand('tex', uvAxis, e))
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false, true).onchange(e => this.root.runCommand(`mirror ${e.value}`))
-        this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => {
-            lockedCubes.createLockedCubesCache()
-            this.runArrayCommand('rot', xyzAxis, e)
-            lockedCubes.reconstructLockedCubes()
-            studio.rotationPointMarkers.updateSpheres()
-        })
+        this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => this.runArrayCommand('rot', xyzAxis, e))
 
         studio.transformControls.addEventListener('objectChange', () => this.updateCubeValues())
 
@@ -47,53 +40,117 @@ export class CubeValueDisplay {
     }
 
     setCommands(root) {
-        this.createArrayCommand(root, cube => cube.dimension, (cube, values) => cube.updateDimension(values), xyzAxis, 'dim', 'dimension')
-        this.createArrayCommand(root, cube => cube.rotationPoint, (cube, values) => cube.updatePosition(values), xyzAxis, 'pos', 'position')
-        this.createArrayCommand(root, cube => cube.offset, (cube, values) => cube.updateOffset(values), xyzAxis, 'off', 'offset')
-        this.createArrayCommand(root, cube => cube.rotation, (cube, values) => cube.updateRotation(values), xyzAxis, 'rot', 'rotation')
-        this.createArrayCommand(root, cube => cube.textureOffset, (cube, values) => cube.updateTextureOffset(values), 'uv', 'tex', 'textureoff')
-
-        root.command('cg', 'cubegrow')
-            .argument('mode', enumHandler('set', 'add'))
-            .endSubCommands()
-            .argument('value', numberHandler())
+        root.command('with', 'w')
+            .argument('cube', this.cubeArgumentHandler())
+            .argument('cmd', stringHandler(), true)
             .onRun(args => {
-                let mode = args.get('mode')
-                let value = args.get('value')
-                let cube = this.commandCube()
-                cube.updateCubeGrow(value + (mode === 0 ? 0 : cube.cubeGrow))
+                let ctx = args.context
+                ctx.cube = args.get('cube')
+                root.runCommandSplit(args.get('cmd'), ctx)
             })
 
-        root.command('mirror', 'texturemirror')
-            .argument('value', booleanHandler())
-            .onRun(args => this.commandCube().updateTextureMirrored(args.get('value')))
-    }
+        this.createArrayCommand(root, cube => cube.dimension, (cube, values, visualOnly) => cube.updateDimension(values, visualOnly), xyzAxis, 'dim', true)
+        this.createArrayCommand(root, cube => cube.rotationPoint, (cube, values, visualOnly) => {
+            this.lockedCubes.createLockedCubesCache()
+            cube.updatePosition(values, visualOnly)
+            this.lockedCubes.reconstructLockedCubes()
+            this.rotationPointMarkers.updateSpheres()
+        }, xyzAxis, 'pos')
+        this.createArrayCommand(root, cube => cube.offset, (cube, values, visualOnly) => cube.updateOffset(values, visualOnly), xyzAxis, 'off')
+        this.createArrayCommand(root, cube => cube.rotation, (cube, values, visualOnly) => {
+            this.lockedCubes.createLockedCubesCache()
+            cube.updateRotation(values, visualOnly)
+            this.lockedCubes.reconstructLockedCubes()
+            this.rotationPointMarkers.updateSpheres()
+        }, xyzAxis, 'rot')
+        this.createArrayCommand(root, cube => cube.textureOffset, (cube, values, visualOnly) => cube.updateTextureOffset(values, visualOnly), 'uv', 'tex')
 
-    createArrayCommand(root, cubeGetter, cubeSetter, axisNames, ...names) {
-        root.command(...names)
+        root.command('cubegrow')
             .argument('mode', enumHandler('set', 'add'))
             .endSubCommands()
-            .argument('axis', indexHandler(axisNames))
-            .argument("values", numberHandler(), true)
+            .addCommandBuilder(`setcubegrow`, 'set')
+            .addCommandBuilder(`addcubegrow`, 'add')
+            .argument('value', numberHandler())
+            .onRun(args => {
+                let cube = this.commandCube(args.context)
+                let mode = args.get('mode')
+                let value = args.get('value') + (mode === 0 ? 0 : cube.mcScale)
+                if(args.context.dummy === true) {
+                    this.commandResultChangeCache = { cube, func: () => cube.updateCubeGrow(value, true) }
+                } else {
+                    cube.updateCubeGrow(value)
+                    this.updateCubeValues()
+                }
+            })
+            .onExit(() => this.onCommandExit())
+
+
+        root.command('mirror')
+            .addCommandBuilder(`mirror`)
+            .argument('value', booleanHandler())
+            .onRun(args => {
+                let cube = this.commandCube(args.context)
+                let value = args.get('value')
+
+                if(args.context.dummy === true) {
+                    this.commandResultChangeCache = { cube, func: () => cube.updateTextureMirrored(value, true) }
+                } else {
+                    cube.updateTextureMirrored(value)
+                    this.updateCubeValues()
+                }
+            })
+            .onExit(() => this.onCommandExit())
+    }
+
+    createArrayCommand(root, cubeGetter, cubeSetter, axisNames, name, integer = false) {
+        root.command(name)
+            .argument('mode', enumHandler('set', 'add'))
+            .endSubCommands()
+            .addCommandBuilder(`set${name}`, 'set')
+            .addCommandBuilder(`add${name}`, 'add')
+            .argument('axis', axisNumberHandler(axisNames, integer))
             .onRun(args => {
                 let mode = args.get('mode')
                 let axis = args.get('axis')
-                let values = args.get('values')
-                if(axis.length < values.length) {
-                    throw new Error(`${axis.length} axis provided, but only ${values.length} values provided.`)
-                }
-                let cube = this.commandCube()
-                let cubeValues = cubeGetter(cube)
+
+                let cube = this.commandCube(args.context)
+                let cubeValues = [...cubeGetter(cube)]
                 if(mode === 0) {
-                    axis.forEach((a, idx) => cubeValues[a] = values[idx])
+                    axis.forEach(a => cubeValues[a.axisID] = a.value)
                 } else {
-                    axis.forEach((a, idx) => cubeValues[a] += values[idx])
+                    axis.forEach(a => cubeValues[a.axisID] += a.value)
                 }
-                cubeSetter(cube, cubeValues)
+
+
+                if(args.context.dummy === true) {
+                    this.commandResultChangeCache = { cube, func: () => cubeSetter(cube, cubeValues, true) }
+                } else {
+                    cubeSetter(cube, cubeValues, false)
+                    this.updateCubeValues()
+                }
             })
+            .onExit(() => this.onCommandExit())
     }
 
-    commandCube() {
+    onCommandExit() {
+        if(this.commandResultChangeCache !== null) {
+            this.commandResultChangeCache.cube.resetVisuals()
+            this.commandResultChangeCache.cube.cubeGroup.updateMatrixWorld(true)
+            this.commandResultChangeCache = null
+            this.rotationPointMarkers.updateSpheres()
+        }
+    }
+
+    onRender() {
+        if(this.commandResultChangeCache !== null) {
+            this.commandResultChangeCache.func()
+        }
+    }
+ 
+    commandCube(context) {
+        if(context.cube !== undefined) {
+            return context.cube
+        }
         if(this.raytracer.selectedSet.size === 0) {
             throw new Error("No cube selected")
         }
@@ -126,6 +183,16 @@ export class CubeValueDisplay {
             this.cubeName.setInternalValue(undefined)
         }
         
+    }
+
+    cubeArgumentHandler() {
+        return new ArgumentHandler(p => {
+            let cube = this.display.tbl.cubeMap.get(p)
+            if(cube === undefined) {
+                throw Error(`Cube ${p} does not exist`)
+            }
+            return cube
+        }, p => [...this.display.tbl.cubeMap.keys()])
     }
 
 }

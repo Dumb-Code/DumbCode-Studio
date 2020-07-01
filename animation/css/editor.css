@@ -156,10 +156,29 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
 
  .bottombar-element {
      display: inline-block;
+     vertical-align: top;
  }
 
  .popout-button {
      position: absolute;
      top: 0;
      right: 0;
+ }
+
+ .command-line-container {
+     width: calc(100% - 175px);
+     float: right;
+ }
+
+ .command-line-field {
+     width: calc(100% - 19px);
+     height: 30px;
+ }
+
+ .cli-text {
+     position: relative;
+     top: -75px;
+     color: #000000;
+     font-weight: bold;
+     width: 100%;
  }

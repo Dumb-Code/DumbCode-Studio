@@ -21,6 +21,7 @@ const tempMatrix = new Matrix4()
 export class Gumball {
 
     constructor(dom, studio) {
+        let root = studio.commandRoot
         this.transformControls = studio.transformControls
         this.raytracer = studio.raytracer
         this.pointTracker = studio.pointTracker
@@ -108,7 +109,7 @@ export class Gumball {
                 switch(this.selectedTranslate.value) {
                     case 'offset':
                         if(!this.isCubeLocked(cube)) {
-                            cube.updateOffset(pos.map((e, i) => e + data.offset[i]))
+                            root.runCommand(`with ${cube.name} off set xyz ${pos.map((e, i) => e + data.offset[i]).join(' ')}`)
                         }
                         break
                     case 'rotation_point':
