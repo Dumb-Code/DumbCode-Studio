@@ -39,7 +39,7 @@ export class LinkedElement {
     constructor(elems, array = true, parseNum = true) {
         this.array = array
         this.parseNum = parseNum
-        this.addElement(this.elems = elems, true)
+        this.addElement(this.elems = elems)
         this.sliderElems = undefined
         if(this.array) {
             this.rawValue = [0, 0, 0]
@@ -55,7 +55,7 @@ export class LinkedElement {
     setValue(value, ignore = -1) {
         let old = this.rawValue
         this.setInternalValue(value, ignore)
-        this.dispatchEvent({ type: "changed", old, value })
+        this.dispatchEvent({ type: "changed", old, value, idx:ignore })
     }
 
     get value() {
@@ -63,10 +63,13 @@ export class LinkedElement {
     }
 
     setInternalValue(value, ignore = -1) {
+        if(this.array && value !== undefined) {
+            value = [...value]
+        }
+        
         this.rawValue = value
         
         if(this.array && value !== undefined) {
-            value = [...value]
             if(typeof value[0] == 'number') {
                 value = value.map(v => this.makeKashHappy(v.toFixed(2)))
             }
@@ -101,24 +104,24 @@ export class LinkedElement {
     }
 
     withsliders(sliderElems) {
-        this.addElement(this.sliderElems = sliderElems, false)
+        this.addElement(this.sliderElems = sliderElems)
         return this
     }
 
-    addElement(elem, runIgnore) {
+    addElement(elem) {
         if(this.array) {
             elem.on('input', e => {
                 let arr = this.rawValue.splice(0)
                 let idx = e.target.getAttribute('axis')
                 arr[idx] = this.parseNum ? parseFloat(e.target.value) : e.target.value
-                this.setValue(arr, runIgnore?idx:undefined)
+                this.setValue(arr, idx)
             })
         } else {
-            elem.on('input', e => this.setValue(this.parseNum ? parseFloat(e.target.value) : e.target.value, runIgnore?0:undefined))
+            elem.on('input', e => this.setValue(this.parseNum ? parseFloat(e.target.value) : e.target.value, 0))
         }
 
         //Ensure when the boxes are deselected, the text inside them should be updated and formatted
-        elem.focusout(() => this.setValue(this.value))
+        elem.focusout(() => this.setInternalValue(this.value))
     }
 }
 Object.assign( LinkedElement.prototype, EventDispatcher.prototype );

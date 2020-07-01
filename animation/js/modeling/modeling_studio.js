@@ -9,6 +9,7 @@ import { StudioPanels } from "./studio_panels.js"
 import { applyCubeStateHighlighting } from "./cube_state_highlighting.js"
 import { RotationPointMarkers } from "./rotation_point.markers.js"
 import { applyCubeAddingDeleting } from "./cube_create_delete.js"
+import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 
 export class ModelingStudio {
 
@@ -18,6 +19,8 @@ export class ModelingStudio {
         this.canvasContainer = dom.find("#display-div").get(0)
         this.display = display
         this.raytracer = raytracer
+
+        this.commandRoot = new CommandRoot()
 
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
         this.selectedRequired = dom.find('.editor-require-selected')
@@ -36,8 +39,6 @@ export class ModelingStudio {
         this.canvas = new TexturemapCanvas(dom.find('#texture-canvas'), display, raytracer, this.studioPanels)
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
     }
-
-    
 
     runFrame() {
         this.pointTracker.update()
