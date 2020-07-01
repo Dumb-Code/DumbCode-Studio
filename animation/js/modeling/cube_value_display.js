@@ -1,5 +1,5 @@
 import { LinkedElement } from "../util.js"
-import { indexHandler, numberHandler, enumHandler } from "../command_handler.js"
+import { indexHandler, numberHandler, enumHandler, booleanHandler } from "../command_handler.js"
 
 const xyzAxis = "xyz"
 const uvAxis = "uv"
@@ -23,9 +23,9 @@ export class CubeValueDisplay {
             studio.rotationPointMarkers.updateSpheres()
         })
         this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => this.runArrayCommand('off', xyzAxis, e))
-        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e => this.getCube()?.updateCubeGrow(e.value))
+        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e =>  this.root.runCommand(`cg set ${e.value}`))
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => this.runArrayCommand('tex', uvAxis, e))
-        this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => this.getCube()?.updateTextureMirrored(e.value))
+        this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false, true).onchange(e => this.root.runCommand(`mirror ${e.value}`))
         this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => {
             lockedCubes.createLockedCubesCache()
             this.runArrayCommand('rot', xyzAxis, e)
@@ -52,6 +52,21 @@ export class CubeValueDisplay {
         this.createArrayCommand(root, cube => cube.offset, (cube, values) => cube.updateOffset(values), xyzAxis, 'off', 'offset')
         this.createArrayCommand(root, cube => cube.rotation, (cube, values) => cube.updateRotation(values), xyzAxis, 'rot', 'rotation')
         this.createArrayCommand(root, cube => cube.textureOffset, (cube, values) => cube.updateTextureOffset(values), 'uv', 'tex', 'textureoff')
+
+        root.command('cg', 'cubegrow')
+            .argument('mode', enumHandler('set', 'add'))
+            .endSubCommands()
+            .argument('value', numberHandler())
+            .onRun(args => {
+                let mode = args.get('mode')
+                let value = args.get('value')
+                let cube = this.commandCube()
+                cube.updateCubeGrow(value + (mode === 0 ? 0 : cube.cubeGrow))
+            })
+
+        root.command('mirror', 'texturemirror')
+            .argument('value', booleanHandler())
+            .onRun(args => this.commandCube().updateTextureMirrored(args.get('value')))
     }
 
     createArrayCommand(root, cubeGetter, cubeSetter, axisNames, ...names) {
@@ -86,10 +101,6 @@ export class CubeValueDisplay {
             throw new Error("More than one cube selected")
         }
         return this.raytracer.firstSelected().tabulaCube
-    }
-
-    getCube() {
-        return this.raytracer.selectedSet.size === 1 ? this.raytracer.firstSelected().tabulaCube : undefined
     }
 
     updateCubeValues() {

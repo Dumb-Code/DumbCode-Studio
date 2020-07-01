@@ -120,12 +120,7 @@ export function indexHandler(str) {
             }
             return idx
         }),
-        p => {
-            if(p.length === 0) {
-                return [...str]
-            }
-            return []
-        }
+        () => [...str]
     )
 }
 
@@ -138,9 +133,7 @@ export function enumHandler(...values) {
             }
             return idx
         },
-        p => {
-            return values.filter(v => v.startsWith(p))
-        }
+        () => values
     )
 }
 
@@ -155,4 +148,19 @@ export function numberHandler(integer = false) {
         }
         return num
     })
+}
+
+export function booleanHandler() {
+    return new ArgumentHandler(
+        p => {
+            if(p == 'true') {
+                return true
+            }
+            if(p == 'false') {
+                return false
+            }
+            throw new Error(`${p} is neither 'true' or 'false'`)
+        },
+        p => ['true', 'false']
+    )
 }

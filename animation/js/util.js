@@ -36,9 +36,10 @@ export class ButtonSpeed {
 
 export class LinkedElement {
 
-    constructor(elems, array = true, parseNum = true) {
+    constructor(elems, array = true, parseNum = true, checkbox = false) {
         this.array = array
         this.parseNum = parseNum
+        this.checkbox = checkbox
         this.addElement(this.elems = elems)
         this.sliderElems = undefined
         if(this.array) {
@@ -117,7 +118,7 @@ export class LinkedElement {
                 this.setValue(arr, idx)
             })
         } else {
-            elem.on('input', e => this.setValue(this.parseNum ? parseFloat(e.target.value) : e.target.value, 0))
+            elem.on('input', e => this.setValue(this.parseNum ? parseFloat(e.target.value) : (this.checkbox ? e.target.checked : e.target.value), 0))
         }
 
         //Ensure when the boxes are deselected, the text inside them should be updated and formatted
