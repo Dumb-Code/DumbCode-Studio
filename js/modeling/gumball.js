@@ -72,7 +72,7 @@ export class Gumball {
         this.gumballTranslateTool.addEventListener('mouseUp', () => this.gumballRotateTool.enabled = true)
 
         dom.find('.gumball-movement-freely').click(() => {
-            // this.toolTransformType.value = undefined
+            this.toolTransformType.value = undefined
             this.gumballRotateTool.attach(this.transformAnchor)
             this.gumballTranslateTool.attach(this.transformAnchor)
         })
