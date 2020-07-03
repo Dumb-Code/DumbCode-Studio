@@ -76,7 +76,7 @@ export class CubeValueDisplay {
 
             if(mode === 0) { //Set
                 cube.cubeGroup.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
-                axisValues.forEach((e, idx) => e === undefined ? null : decomposePosition.setComponent(idx, e / 16 + idx==1?1.5:0))
+                axisValues.forEach((e, idx) => e === undefined ? null : decomposePosition.setComponent(idx, (idx==1?1.5:0) + (e/16)))
                 resultMat.compose(decomposePosition, decomposeRotation, decomposeScale)
 
                 resultMat2.getInverse(cube.cubeGroup.parent.matrixWorld).multiply(resultMat)
