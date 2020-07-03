@@ -16,5 +16,5 @@ jobs:
       with:
         ftp-server: sftp://51.222.31.214/var/www/dumbcode.net/studio
         ftp-username: ubuntu
-        ftp-password: ${{ secrets.FTP_PASSWORD }}
-        known-hosts: ${{ secrets.FTP_KNOWN_HOSTS }}
+        ftp-password: ${{ secrets.WEBSITE_FTP_PASSWORD }}
+        known-hosts: ${{ secrets.WEBSITE_FTP_KNOWN_HOSTS }}
