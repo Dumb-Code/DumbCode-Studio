@@ -1,8 +1,22 @@
 import { LinkedElement } from "../util.js"
 import { indexHandler, numberHandler, enumHandler, booleanHandler, ArgumentHandler, stringHandler, axisNumberHandler } from "../command_handler.js"
+import { Vector3, Quaternion, Matrix4, Euler } from "../three.js"
 
 const xyzAxis = "xyz"
 const uvAxis = "uv"
+
+const tempVec = new Vector3()
+const tempQuat = new Quaternion()
+const tempEuler = new Euler()
+
+const decomposePosition = new Vector3()
+const decomposeRotation = new Quaternion()
+const decomposeEuler = new Euler()
+const decomposeScale = new Vector3()
+
+const resultMat = new Matrix4()
+const resultMat2 = new Matrix4()
+
 
 export class CubeValueDisplay {
 
@@ -49,20 +63,84 @@ export class CubeValueDisplay {
                 root.runCommandSplit(args.get('cmd'), ctx)
             })
 
-        this.createArrayCommand(root, cube => cube.dimension, (cube, values, visualOnly) => cube.updateDimension(values, visualOnly), xyzAxis, 'dim', true)
-        this.createArrayCommand(root, cube => cube.rotationPoint, (cube, values, visualOnly) => {
+        let posChanged = (cube, values, visualOnly) => {
             this.lockedCubes.createLockedCubesCache()
             cube.updatePosition(values, visualOnly)
             this.lockedCubes.reconstructLockedCubes()
             this.rotationPointMarkers.updateSpheres()
-        }, xyzAxis, 'pos')
-        this.createArrayCommand(root, cube => cube.offset, (cube, values, visualOnly) => cube.updateOffset(values, visualOnly), xyzAxis, 'off')
-        this.createArrayCommand(root, cube => cube.rotation, (cube, values, visualOnly) => {
+        }
+        this.createArrayCommand(root, cube => cube.rotationPoint, posChanged, xyzAxis, 'pos')
+        this.createArrayCommand(root, cube => cube.rotationPoint, posChanged, xyzAxis, 'posworld', false, (mode, axisValues, cube) => {
+            cube.resetVisuals()
+            cube.parent.resetVisuals()
+
+            if(mode === 0) { //Set
+                cube.cubeGroup.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+                axisValues.forEach((e, idx) => e === undefined ? null : decomposePosition.setComponent(idx, e / 16 + idx==1?1.5:0))
+                resultMat.compose(decomposePosition, decomposeRotation, decomposeScale)
+
+                resultMat2.getInverse(cube.cubeGroup.parent.matrixWorld).multiply(resultMat)
+                resultMat2.decompose(decomposePosition, decomposeRotation, decomposeScale)
+
+                decomposePosition.toArray(axisValues)
+            } else { //Add
+                tempVec.fromArray(axisValues.map(e => e===undefined?0:e))
+                cube.cubeGroup.parent.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+                tempVec.applyQuaternion(decomposeRotation.inverse()).toArray(axisValues)
+            }
+        })
+
+        let rotChanged = (cube, values, visualOnly) => {
             this.lockedCubes.createLockedCubesCache()
             cube.updateRotation(values, visualOnly)
             this.lockedCubes.reconstructLockedCubes()
             this.rotationPointMarkers.updateSpheres()
-        }, xyzAxis, 'rot')
+        }
+        this.createArrayCommand(root, cube => cube.rotation, rotChanged, xyzAxis, 'rot')
+        this.createArrayCommand(root, cube => cube.rotation, rotChanged, xyzAxis, 'rotworld', false, (mode, axisValues, cube) => {
+            cube.parent.resetVisuals()
+            cube.resetVisuals()
+
+            if(mode === 0) { //Set
+                cube.cubeGroup.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+                decomposeEuler.setFromQuaternion(decomposeRotation, "ZYX").toVector3(tempVec)
+                axisValues.forEach((e, idx) => e === undefined ? null : tempVec.setComponent(idx, e * Math.PI / 180))
+                resultMat.compose(decomposePosition, decomposeRotation.setFromEuler(decomposeEuler.setFromVector3(tempVec, "ZYX")), decomposeScale)
+
+                resultMat2.getInverse(cube.cubeGroup.parent.matrixWorld).multiply(resultMat)
+                resultMat2.decompose(decomposePosition, decomposeRotation, decomposeScale)
+
+                decomposeEuler.setFromQuaternion(decomposeRotation, "ZYX").toArray(axisValues)
+                axisValues.forEach((v, idx) => axisValues[idx] = v * 180 / Math.PI) // :/
+            } else { //Add
+                let result = [0, 0, 0]
+                for(let i = 0; i < 3; i++) {
+                    if(axisValues[i] === undefined) {
+                        continue
+                    }
+                    cube.cubeGroup.parent.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+                    let axis = tempVec.set(i==0?1:0, i==1?1:0, i==2?1:0).applyQuaternion(decomposeRotation.inverse())
+
+                    tempQuat.setFromAxisAngle(axis, axisValues[i] * Math.PI / 180)
+                    tempQuat.multiply(cube.cubeGroup.quaternion).normalize()
+
+                    tempEuler.setFromQuaternion(cube.cubeGroup.quaternion, "ZYX")
+                    decomposeEuler.setFromQuaternion(tempQuat, "ZYX")
+
+                    result[0] += (decomposeEuler.x - tempEuler.x) * 180 / Math.PI
+                    result[1] += (decomposeEuler.y - tempEuler.y) * 180 / Math.PI
+                    result[2] += (decomposeEuler.z - tempEuler.z) * 180 / Math.PI
+                }
+
+
+                result.forEach((e, idx) => axisValues[idx] = e)
+            }
+
+        })
+
+
+        this.createArrayCommand(root, cube => cube.dimension, (cube, values, visualOnly) => cube.updateDimension(values, visualOnly), xyzAxis, 'dim', true)
+        this.createArrayCommand(root, cube => cube.offset, (cube, values, visualOnly) => cube.updateOffset(values, visualOnly), xyzAxis, 'off')
         this.createArrayCommand(root, cube => cube.textureOffset, (cube, values, visualOnly) => cube.updateTextureOffset(values, visualOnly), 'uv', 'tex')
 
         root.command('cubegrow')
@@ -102,7 +180,7 @@ export class CubeValueDisplay {
             .onExit(() => this.onCommandExit())
     }
 
-    createArrayCommand(root, cubeGetter, cubeSetter, axisNames, name, integer = false) {
+    createArrayCommand(root, cubeGetter, cubeSetter, axisNames, name, integer = false, axisEditor = (_mode, _axisValues, _cube) => {}) {
         root.command(name)
             .argument('mode', enumHandler('set', 'add'))
             .endSubCommands()
@@ -112,16 +190,20 @@ export class CubeValueDisplay {
             .onRun(args => {
                 let mode = args.get('mode')
                 let axis = args.get('axis')
-
                 let cube = this.commandCube(args.context)
                 let cubeValues = [...cubeGetter(cube)]
+
+                let axisValues = [ undefined, undefined, undefined ]
+                axis.forEach(a => axisValues[a.axisID] = a.value)
+
+                axisEditor(mode, axisValues, cube)
+
                 if(mode === 0) {
-                    axis.forEach(a => cubeValues[a.axisID] = a.value)
+                    axisValues.forEach((a, idx) => a === undefined ? null : cubeValues[idx] = a)
                 } else {
-                    axis.forEach(a => cubeValues[a.axisID] += a.value)
+                    axisValues.forEach((a, idx) => a === undefined ? null : cubeValues[idx] += a)
                 }
-
-
+                
                 if(args.context.dummy === true) {
                     this.commandResultChangeCache = { cube, func: () => cubeSetter(cube, cubeValues, true) }
                 } else {

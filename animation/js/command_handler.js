@@ -26,7 +26,7 @@ export class CommandRoot {
             throw new Error(`Command ${cmdName} is invalid.`)
         }
         if(found.length !== 1) {
-            throw new Error(`Command ${cmdName} is ambigious: ${found.map(c => `[${c.names}]`)}. Please report this to dumbcode`)
+            throw new Error(`Command ${cmdName} is ambigious: ${found.map(c => c.name)}. Please report this to dumbcode`)
         }
         found[0].parseAndRun(cmdName, split, ctx)
     }
@@ -82,6 +82,7 @@ class CommandLine {
                 this.currentCommandBuilder = null
                 this.topline.text('Done')
                 this.bottomline.text('')
+                this.parsedBuilderArguments = 0
                 this.root.runCommand(this.constructedCommand)
             } else {
                 let value = await arg.handler.commandHandler(this)
@@ -158,12 +159,12 @@ class Command {
 
     argument(name, handler, repeating = false) {
         if(this.callback !== null) {
-            throw new Error(`Internal error for command '${this.names}', setting up argument '${name}': Run callback has been set`)
+            throw new Error(`Internal error for command '${this.name}', setting up argument '${name}': Run callback has been set`)
         }
         let arg = new Argument(name, handler)
         if(repeating === true) {
             if(this.repeatingArgument !== null) {
-                throw new Error(`Internal error for command '${this.names}', setting up argument '${name}': Repeating argument has already been set.`)
+                throw new Error(`Internal error for command '${this.name}', setting up argument '${name}': Repeating argument has already been set.`)
             }
             this.repeatingArgument = arg
         } else {
