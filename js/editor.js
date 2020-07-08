@@ -167,10 +167,14 @@ function renameCube(oldValue, newValue) {
     if(oldValue !== newValue && selected !== null && selected.tabulaCube.name == oldValue) {
         let tabulaCube = selected.tabulaCube
         tabulaCube.updateCubeName(newValue)
-        animationStudio.animationHandler.renameCube(oldValue, newValue)
+        animationStudio.animationTabHandler.allTabs.forEach(tab => tab.handler.renameCube(oldValue, newValue))
         modelingStudio.cubeList.elementMap.get(tabulaCube).a.innerText = newValue
     }   
     return false
+}
+
+function refreshKeyframes() {
+    animationStudio.animationTabHandler.allTabs.forEach(tab => tab.handler.keyframesDirty())
 }
 
 function updateCamera(camera, width, height) {
@@ -233,7 +237,7 @@ async function createFilesPage() {
 }
 
 async function createModelingStudio() {
-    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, controls, renameCube)
+    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, controls, renameCube, refreshKeyframes)
 }
 
 async function createAnimationStudio() {

@@ -378,23 +378,11 @@ Generating...
                         <i class="fas fa-trash-alt"></i>
                     </span>
                 </a>
-                <a class="button is-dark is-medium tooltip modal-button" data-tooltip="Progression" data-target="modal-progression" aria-haspopup="true" onclick="redrawProgressionCanvas()">
+                <a class="button is-dark is-medium tooltip popup-modal-button popup-animator-progression" data-tooltip="Progression" modal-target="animator/progression">
                     <span class="icon is-medium">
                         <i class="fas fa-percentage"></i>
                     </span>
                 </a>
-                <div class="modal" id="modal-progression" style="text-transform: none">
-                    <div class="modal-background"></div>
-                    <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
-                        <h3 class="title is-3" style="color: whitesmoke">Progression</h3>
-                        <div style="padding-bottom: 20px">
-                            <button class="modal-close" aria-label="close" style="position: absolute"></button>
-                        </div>
-                        <div>
-                           <canvas id="progression_canvas" width="600px" height="600px" style="border:1px solid #d3d3d3; background-color: #161616;"></canvas>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div style="padding-top: 10px;">
                 Start Time:
@@ -406,7 +394,7 @@ Generating...
             </div>
         </div>
     </div>
-    <div class="keyframe-board-container">
+    <div class="keyframe-board">
     </div>
 </div>
 <div id="animation-divider" class="horizontal-divider"></div>

@@ -13,8 +13,9 @@ import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, orbitControls, renameCube) {
+    constructor(domElement, display, raytracer, orbitControls, renameCube, refreshKeyframes) {
         this.domElement = domElement
+        this.refreshKeyframes = refreshKeyframes
         let dom = $(domElement)
         this.canvasContainer = dom.find("#display-div").get(0)
         this.display = display
@@ -52,6 +53,7 @@ export class ModelingStudio {
 
     cubeHierarchyChanged() {
         this.cubeList.refreshCompleatly()
+        this.refreshKeyframes()
     }
 
     setActive() {

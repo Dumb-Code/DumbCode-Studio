@@ -1,4 +1,4 @@
-import { KeyframeManger } from '../keyframe_manager.js'
+import { KeyframeManager } from '../keyframe_manager.js'
 import { AnimationHandler } from '../animations.js'
 import { JavaMethodExporter } from '../java_method_exporter.js'
 import { Clock } from '../three.js'
@@ -7,6 +7,7 @@ import { AnimationPanel } from './animation_panel.js'
 import { AnimationCubeValues } from './animation_cube_values.js'
 import { AnimationTabHandler } from './animation_tabs.js'
 import { PanelButtons } from './panel_buttons.js'
+import { ProgressionCanvas } from './progression_canvas.js'
 
 const mainArea = document.getElementById("main-area")
 
@@ -29,12 +30,13 @@ export class AnimationStudio {
         this.transformControls = display.createTransformControls()
         this.gumball = new Gumball(dom, this)
         this.animationPanel = new AnimationPanel(dom)
+        this.keyframeManager = new KeyframeManager(this, dom.find('.keyframe-board').get(0))
         this.panelButtons = new PanelButtons(dom, this)
         this.cubeDisplayValues = new AnimationCubeValues(dom, this)
         this.display = display
         this.methodExporter = new JavaMethodExporter()
         this.animationTabHandler = new AnimationTabHandler(dom, this)
-
+        this.progressionCanvas = new ProgressionCanvas(dom, this)
         this.clock = new Clock()
     }
 
@@ -47,10 +49,10 @@ export class AnimationStudio {
             this.rotationCache = values
             selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
 
-            let active = this.animationTabHandler.active
-            if(active !== null) {
-                active.manager.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
-                active.animationHandler.keyframesDirty()
+            let handler = this.animationTabHandler.active
+            if(handler !== null) {
+                handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
+                handler.keyframesDirty()
             }
         }
     }
@@ -64,10 +66,10 @@ export class AnimationStudio {
             this.positionCache = values
             selected.parent.position.set(values[0], values[1], values[2])
 
-            let active = this.animationTabHandler.active
-            if(active !== null) {
-                active.manager.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
-                active.animationHandler.keyframesDirty()
+            let handler = this.animationTabHandler.active
+            if(handler !== null) {
+                handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
+                handler.keyframesDirty()
             }
         }
     }
@@ -92,13 +94,12 @@ export class AnimationStudio {
     runFrame() {
         this.raytracer.update()
 
-        let active = this.animationTabHandler.active
-        if(active !== null) {
-            active.manager.ensureFramePosition()
-            active.animationHandler.animate(this.clock.getDelta())
-            active.manager.setupSelectedPose()
+        let handler = this.animationTabHandler.active
+        if(handler !== null) {
+            this.keyframeManager.ensureFramePosition()
+            handler.animate(this.clock.getDelta())
+            this.keyframeManager.setupSelectedPose()
         }
-
 
         this.display.render()
         
@@ -304,17 +305,17 @@ export class AnimationStudio {
 
 // window.deleteKeyframe = () => {
 //     if(activeStudio !== undefined && activeStudio.manager.selectedKeyFrame) {
-//         let index = activeStudio.animationHandler.keyframes.indexOf(activeStudio.manager.selectedKeyFrame)
-//         if(index >= 0) {
-//             let keyframe = activeStudio.manager.selectedKeyFrame
+//         
+//         
+//         
 
-//             activeStudio.animationHandler.keyframes.splice(index, 1)
-//             activeStudio.manager.entryBoard.removeChild(keyframe.element)
-//             activeStudio.animationHandler.keyframesDirty()
-            
-//             keyframe.selectChange(false)
-//             activeStudio.manager.reframeKeyframes()
-//         }
+//         
+//         
+//         
+           
+//         
+//         
+//         
 //     }
 // }
 
@@ -362,92 +363,3 @@ export class AnimationStudio {
 //     }
 // }
 
-// progressionCanvas.onmousedown = e => {
-//     if(activeStudio !== undefined) {
-//         let manager = activeStudio.manager
-//         if(manager.selectedKeyFrame !== undefined) {
-//             let points = manager.selectedKeyFrame.progressionPoints
-    
-//             let width = progressionCanvas.width
-//             let height = progressionCanvas.height
-    
-//             let clickedOn = points.find(p => !p.required && Math.pow(width*p.x-e.offsetX, 2) + Math.pow(height*p.y-e.offsetY, 2) <= 3*radius*radius) //The 3 is just for comedic effect.
-    
-//             if(clickedOn !== undefined) {
-//                 clickedOn.startX = clickedOn.x
-//                 clickedOn.startY = clickedOn.y
-//                 activeStudio.selectedPoint = clickedOn
-//             } else {
-//                 let newPoint = { x: e.offsetX / width, y: e.offsetY / height }
-//                 points.push( newPoint )
-//                 manager.selectedKeyFrame.resortPointsDirty()
-//                 activeStudio.selectedPoint = newPoint
-//             }
-    
-//             redrawProgressionCanvas()
-//         }
-//     }
-// }
-
-// progressionCanvas.onmousemove = e => {
-//     if(activeStudio !== undefined) {
-//         let manager = activeStudio.manager
-//         let selectedPoint = activeStudio.selectedPoint
-//         if(selectedPoint !== undefined) {
-//             selectedPoint.x = e.offsetX / progressionCanvas.width
-//             selectedPoint.y = e.offsetY / progressionCanvas.height
-//             redrawProgressionCanvas()
-//             manager.selectedKeyFrame.resortPointsDirty()
-//         }
-//     }
-// }
-
-// progressionCanvas.onmouseup = () => {
-//     if(activeStudio !== undefined) {
-//         let manager = activeStudio.manager
-//         let selectedPoint = activeStudio.selectedPoint
-//         let width = progressionCanvas.width
-//         let height = progressionCanvas.height
-
-//         if(selectedPoint !== undefined) {
-//             if(selectedPoint.startX !== undefined && selectedPoint.startY !== undefined) {
-//                 let distX = width*(selectedPoint.startX - selectedPoint.x)
-//                 let distY = height*(selectedPoint.startY - selectedPoint.y)
-//                 if(distX*distX + distY*distY < radius*radius*3) {
-//                     manager.selectedKeyFrame.progressionPoints = manager.selectedKeyFrame.progressionPoints.filter(p => p !== selectedPoint)
-//                     manager.selectedKeyFrame.resortPointsDirty()
-//                 }
-//             }
-//             activeStudio.selectedPoint = undefined
-//             redrawProgressionCanvas()
-//         }
-//     }
-// }
-
-// window.redrawProgressionCanvas = () => {
-//     if(activeStudio !== undefined) {
-//         if(manager.selectedKeyFrame !== undefined) {
-//             let width = progressionCanvas.width
-//             let height = progressionCanvas.height
-        
-//             ctx.clearRect(0, 0, width, height);
-//             ctx.strokeStyle = "#363636";
-//             let points = manager.selectedKeyFrame.progressionPoints
-        
-//             for(let i = 0; i < points.length; i++) {
-//                 let point = points[i]
-//                 let next = points[i+1]
-        
-//                 ctx.beginPath();
-//                 ctx.arc(point.x * width, point.y * height, radius, 0, 2 * Math.PI);
-        
-//                 if(next !== undefined) {
-//                     ctx.moveTo(point.x * width, point.y * height);
-//                     ctx.lineTo(next.x * width, next.y * height);
-//                 }
-        
-//                 ctx.stroke();
-//             }
-//         }
-//     }
-// }

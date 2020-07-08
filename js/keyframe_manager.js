@@ -6,11 +6,10 @@ const pixelsPerTick = sectionWidth / ticksPerSection
 const resolution = 10
 
 
-export class KeyframeManger {
+export class KeyframeManager {
 
-    constructor(animationHandler, keyframeBoard) {
-        this.selectedKeyFrame = null
-        this.animationHandler = animationHandler
+    constructor(studio, keyframeBoard) {
+        this.getHandler = () => studio.animationTabHandler.active
         this.lables = new Map()
         this.playstate = new PlayState()
 
@@ -33,32 +32,36 @@ export class KeyframeManger {
         this.updateLables()
 
         let mouseMove = e => {
-            if(this.selectedKeyFrame && e.shiftKey) {
-                this.selectedKeyFrame.moved = true
-                let pixelDiff = e.screenX - this.xHold
-                this.xHold = e.screenX
-                this.selectedKeyFrame.startTimeNoSnap += pixelDiff / pixelsPerTick
-
-                this.selectedKeyFrame.startTime = this.selectedKeyFrame.startTimeNoSnap
-
-                const snappingTicks = 0.5
-                this.animationHandler.keyframes.filter(kf => kf != this.selectedKeyFrame).forEach(kf =>{
-                    if(Math.abs(this.selectedKeyFrame.startTimeNoSnap - (kf.startTime + kf.duration)) < snappingTicks) {
-                        this.selectedKeyFrame.startTime = kf.startTime + kf.duration
-                    } else if(Math.abs(this.selectedKeyFrame.startTimeNoSnap + this.selectedKeyFrame.duration - (kf.startTime)) < snappingTicks) {
-                        this.selectedKeyFrame.startTime = kf.startTime - this.selectedKeyFrame.duration
-                    }
-                })
-
-                this.selectedKeyFrame.updateInfo()
-                this.updateKeyFrame(this.selectedKeyFrame)
-                this.animationHandler.keyframesDirty()
-            } else {
-                this.scroll -= e.screenX - this.xHold
-                this.scroll = this.scroll < 0 ? 0 : this.scroll
-                this.xHold = e.screenX
-                this.updateScroll()
+            let handler = this.getHandler()
+            if(handler !== null) {
+                if(handler.selectedKeyFrame !== undefined && e.shiftKey) {
+                    handler.selectedKeyFrame.moved = true
+                    let pixelDiff = e.screenX - this.xHold
+                    this.xHold = e.screenX
+                    handler.selectedKeyFrame.startTimeNoSnap += pixelDiff / pixelsPerTick
+    
+                    handler.selectedKeyFrame.startTime = handler.selectedKeyFrame.startTimeNoSnap
+    
+                    const snappingTicks = 0.5
+                    handler.keyframes.filter(kf => kf != handler.selectedKeyFrame).forEach(kf =>{
+                        if(Math.abs(handler.selectedKeyFrame.startTimeNoSnap - (kf.startTime + kf.duration)) < snappingTicks) {
+                            handler.selectedKeyFrame.startTime = kf.startTime + kf.duration
+                        } else if(Math.abs(handler.selectedKeyFrame.startTimeNoSnap + handler.selectedKeyFrame.duration - (kf.startTime)) < snappingTicks) {
+                            handler.selectedKeyFrame.startTime = kf.startTime - handler.selectedKeyFrame.duration
+                        }
+                    })
+    
+                    handler.selectedKeyFrame.updateInfo()
+                    this.updateKeyFrame(handler.selectedKeyFrame)
+                    handler.keyframesDirty()
+                } else {
+                    this.scroll -= e.screenX - this.xHold
+                    this.scroll = this.scroll < 0 ? 0 : this.scroll
+                    this.xHold = e.screenX
+                    this.updateScroll()
+                }
             }
+            
         }
 
         let markerMouseMove = e => {
@@ -73,12 +76,13 @@ export class KeyframeManger {
         this.entryBoard.addEventListener("mousedown", e => {
             e.preventDefault ? e.preventDefault() : e.returnValue = false
             this.xHold = e.screenX
-            if(this.selectedKeyFrame) {
-                this.selectedKeyFrame.startTimeNoSnap = this.selectedKeyFrame.startTime
-                this.selectedKeyFrame.mouseDownStartTimeNoSnap = this.selectedKeyFrame.startTime
+            let handler = this.getHandler()
+            if(handler !== null && handler.selectedKeyFrame !== undefined) {
+                handler.selectedKeyFrame.startTimeNoSnap = handler.selectedKeyFrame.startTime
+                handler.selectedKeyFrame.mouseDownStartTimeNoSnap = handler.selectedKeyFrame.startTime
 
-                this.selectedKeyFrame.durationNoSnap = this.selectedKeyFrame.duration
-                this.selectedKeyFrame.mouseDownDurationNoSnap = this.selectedKeyFrame.duration
+                handler.selectedKeyFrame.durationNoSnap = handler.selectedKeyFrame.duration
+                handler.selectedKeyFrame.mouseDownDurationNoSnap = handler.selectedKeyFrame.duration
             }
             this.entryBoard.addEventListener("mousemove", mouseMove, false);
         }, false);
@@ -101,36 +105,6 @@ export class KeyframeManger {
         }, false)
         
         document.addEventListener("mouseup", () => {
-
-            if(this.selectedKeyFrame) {
-                if(this.selectedKeyFrame.moved) { 
-                    let startTime = this.selectedKeyFrame.mouseDownStartTimeNoSnap
-                    let duration = this.selectedKeyFrame.mouseDownDurationNoSnap
-
-                    let startTimeEnd = this.selectedKeyFrame.startTime
-                    let durationEnd = this.selectedKeyFrame.duration
-
-                    daeHistory.addAction(() => {
-                        this.selectedKeyFrame.startTime = startTime
-                        this.selectedKeyFrame.duration = duration
-
-                        this.selectedKeyFrame.updateInfo()
-                        this.updateKeyFrame(this.selectedKeyFrame)
-                        this.animationHandler.keyframesDirty()
-                    }, () => {
-                        this.selectedKeyFrame.startTime = startTimeEnd
-                        this.selectedKeyFrame.duration = durationEnd
-
-                        this.selectedKeyFrame.updateInfo()
-                        this.updateKeyFrame(this.selectedKeyFrame)
-                        this.animationHandler.keyframesDirty()
-                    })
-  
-                }
-                this.selectedKeyFrame.moved = false
-            }
-            
-
             this.entryBoard.removeEventListener("mousemove", mouseMove, false)
             document.removeEventListener("mousemove", markerMouseMove, false)
             markerMouseMove.enabled = false
@@ -154,23 +128,35 @@ export class KeyframeManger {
     }
 
     reframeKeyframes() {
-        if(this.animationHandler) {
-            this.animationHandler.keyframes.forEach(kf => this.updateKeyFrame(kf))
+        this.ensureFramePosition()
+        let handler = this.getHandler()
+        this.entryBoard.innerHTML = ""
+
+        if(handler !== null) {
+            handler.keyframes.forEach(kf => {
+                this.updateKeyFrame(kf, handler)
+                this.entryBoard.appendChild(kf.element)
+            })
         }
+        
     }
 
     setupSelectedPose() {
-        if(this.selectedKeyFrame && !this.playstate.playing) {
-            this.animationHandler.tbl.cubeMap.forEach((tabulaCube, cubename) => {
-                let baseRot = [0, 0, 0]
-                let irot = this.selectedKeyFrame.getRotation(cubename)
-                tabulaCube.cubeGroup.rotation.set((baseRot[0] + irot[0]) * Math.PI / 180, (baseRot[1] + irot[1]) * Math.PI / 180, (baseRot[2] + irot[2]) * Math.PI / 180)
-    
-                let basePos = [0, 0, 0]
-                let ipos = this.selectedKeyFrame.getPosition(cubename)
-                tabulaCube.cubeGroup.position.set(basePos[0] + ipos[0], basePos[1] + ipos[1], basePos[2] + ipos[2])
-            })
+        let handler = this.getHandler()
+        if(handler !== null) {
+            if(handler.selectedKeyFrame && !this.playstate.playing) {
+                handler.tbl.cubeMap.forEach((tabulaCube, cubename) => {
+                    let baseRot = [0, 0, 0]
+                    let irot = handler.selectedKeyFrame.getRotation(cubename)
+                    tabulaCube.cubeGroup.rotation.set((baseRot[0] + irot[0]) * Math.PI / 180, (baseRot[1] + irot[1]) * Math.PI / 180, (baseRot[2] + irot[2]) * Math.PI / 180)
+        
+                    let basePos = [0, 0, 0]
+                    let ipos = handler.selectedKeyFrame.getPosition(cubename)
+                    tabulaCube.cubeGroup.position.set(basePos[0] + ipos[0], basePos[1] + ipos[1], basePos[2] + ipos[2])
+                })
+            }
         }
+        
     }
 
     ensureFramePosition() {
@@ -195,9 +181,8 @@ export class KeyframeManger {
         this.playbackMarker.style.left = this.getLeft() + xpos + "px"
     }
 
-    updateKeyFrame(kf) {
+    updateKeyFrame(kf, handler) {
         if(!kf.element) {
-
             let wrapper = document.createElement("div")
             wrapper.draggable = false
             this.entryBoard.appendChild(wrapper)
@@ -230,29 +215,21 @@ export class KeyframeManger {
 
                 if(select) {
                     kf.updateInfo()
-                    if(recursive && this.selectedKeyFrame && this.selectedKeyFrame != kf) {
-                        this.selectedKeyFrame.selectChange(false, false)
+                    if(recursive && handler.selectedKeyFrame !== undefined && handler.selectedKeyFrame != kf) {
+                        handler.selectedKeyFrame.selectChange(false, false)
                     }
-                    this.selectedKeyFrame = kf
+                    handler.selectedKeyFrame = kf
 
                 } else {
-                    this.selectedKeyFrame = null
+                    handler.selectedKeyFrame = undefined
                 }
             }
             
             marker.onmousedown = () => {
-                let oldKf = this.selectedKeyFrame
-                daeHistory.addAction(() => {
-                    if(oldKf) {
-                        oldKf.selectChange(true)
-                    } else {
-                        kf.selectChange(false)
-                    }
-                }, () => kf.selectChange(true))
-                kf.selectChange(true)
+                kf.selectChange(handler.selectedKeyFrame !== kf)
             }
             marker.onmouseenter = () => {
-                if(!this.selectedKeyFrame) {
+                if(handler.selectedKeyFrame !== undefined) {
                     kf.hoverChange(true)
                 }
             }
