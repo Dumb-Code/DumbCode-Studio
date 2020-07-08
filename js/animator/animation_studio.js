@@ -1,99 +1,113 @@
-import { KeyframeManger } from './keyframe_manager.js'
-import { AnimationHandler } from './animations.js'
-import { JavaMethodExporter } from './java_method_exporter.js'
-import { Clock } from './three.js'
+import { KeyframeManger } from '../keyframe_manager.js'
+import { AnimationHandler } from '../animations.js'
+import { JavaMethodExporter } from '../java_method_exporter.js'
+import { Clock } from '../three.js'
+import { Gumball } from './gumball.js'
+import { AnimationPanel } from './animation_panel.js'
+import { AnimationCubeValues } from './animation_cube_values.js'
+import { AnimationTabHandler } from './animation_tabs.js'
+import { PanelButtons } from './panel_buttons.js'
 
 const mainArea = document.getElementById("main-area")
 
 export class AnimationStudio {
 
-    constructor(domElement, raytracer, display, setPosition, setRotation) {
+    constructor(domElement, raytracer, display) {
         this.domElement = domElement
-        this.clickY
-        this.panelHeight = 320
+        let dom  = $(domElement)
         this.raytracer = raytracer
+
+        this.selectedRequired = dom.find('.editor-require-selected')
+        this.raytracer.addEventListener('selectchange', () => {
+            let isSelected = this.raytracer.selectedSet.size === 1
+            this.selectedRequired.prop("disabled", !isSelected).toggleClass("is-active", isSelected)
+        })
+
+        this.positionCache = null
+        this.rotationCache = null
+
+        this.transformControls = display.createTransformControls()
+        this.gumball = new Gumball(dom, this)
+        this.animationPanel = new AnimationPanel(dom)
+        this.panelButtons = new PanelButtons(dom, this)
+        this.cubeDisplayValues = new AnimationCubeValues(dom, this)
         this.display = display
-        this.setPosition = setPosition
-        this.setRotation = setRotation
         this.methodExporter = new JavaMethodExporter()
-        this.animationHandler = new AnimationHandler(display.tbl)
-        this.manager = new KeyframeManger(this.animationHandler, $(domElement).find("#keyframe-board").get(0))
+        this.animationTabHandler = new AnimationTabHandler(dom, this)
+
         this.clock = new Clock()
-        this.animationHandler.playstate = this.manager.playstate
-
-        let clickedDivider = false
-        this.divider = $(domElement).find('#animation-divider')
-    
-        $(document)
-            .mouseup(() => clickedDivider = false)
-            .mousemove(e => {
-                if(clickedDivider) {
-                    this.panelHeight = Math.min(Math.max(window.innerHeight - e.clientY + this.domElement.getBoundingClientRect().top, 100), 500)
-                    this.updateAreas()
-                }
-            })
-        this.divider.mousedown(() => clickedDivider = true)
-        this.updateAreas()
     }
 
-    updateAreas() {
-        this.divider.css('bottom', this.panelHeight+4 + "px");
-        $(this.domElement).find("#editor").css("height", this.panelHeight + "px");
-        $(this.domElement).find("#display-div").css("height", (window.innerHeight - this.panelHeight) + "px");
-        window.studioWindowResized()
+    setRotation(values, updateDisplay = true) {
+        let selected = this.raytracer.oneSelected()
+        if(selected !== null) {
+            if(updateDisplay) {
+                this.cubeDisplayValues.rotation.value = values
+            }
+            this.rotationCache = values
+            selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
+
+            let active = this.animationTabHandler.active
+            if(active !== null) {
+                active.manager.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
+                active.animationHandler.keyframesDirty()
+            }
+        }
     }
+
+    setPosition(values, updateDisplay = true) {
+        let selected = this.raytracer.oneSelected()
+        if(selected !== null) {
+            if(updateDisplay) {
+                this.cubeDisplayValues.position.value = values
+            }
+            this.positionCache = values
+            selected.parent.position.set(values[0], values[1], values[2])
+
+            let active = this.animationTabHandler.active
+            if(active !== null) {
+                active.manager.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
+                active.animationHandler.keyframesDirty()
+            }
+        }
+    }
+
 
 
     setActive() {
         window.studioWindowResized()
-        if(this.raytracer.selected !== undefined) {
-            if(this.rotationCache !== undefined) {
-                this.raytracer.selected.parent.rotation.set(this.rotationCache[0] * Math.PI / 180, this.rotationCache[1] * Math.PI / 180, this.rotationCache[2] * Math.PI / 180)
-                this.rotationCache = undefined
+        let selected = this.raytracer.oneSelected()
+        if(selected !== null) {
+            if(this.rotationCache !== null) {
+                selected.parent.rotation.set(this.rotationCache[0] * Math.PI / 180, this.rotationCache[1] * Math.PI / 180, this.rotationCache[2] * Math.PI / 180)
+                this.rotationCache = null
             }
-            if(this.positionCache !== undefined) {
-                this.raytracer.selected.parent.position.set(this.positionCache[0], this.positionCache[1], this.positionCache[2])
-                this.positionCache = undefined
+            if(this.positionCache !== null) {
+                selected.parent.position.set(this.positionCache[0], this.positionCache[1], this.positionCache[2])
+                this.positionCache = null
             }
-        }
-    }
-
-    rotationChanged(tabulaCube, values) {
-        if(this.manager.selectedKeyFrame) {
-            this.rotationCache = values
-            this.manager.selectedKeyFrame.rotationMap.set(tabulaCube.name, values.map((v, i) => v - tabulaCube.rotation[i]))
-            this.animationHandler.keyframesDirty()
-        }
-    }
-
-    positionChanged(tabulaCube, values) {
-        if(this.manager.selectedKeyFrame) {
-            this.positionCache = values
-            this.manager.selectedKeyFrame.rotationPointMap.set(tabulaCube.name, values.map((v, i) => v - tabulaCube.rotationPoint[i]))
-            this.animationHandler.keyframesDirty()
         }
     }
 
     runFrame() {
         this.raytracer.update()
-        if(this.animationHandler) {
-            this.manager.ensureFramePosition()
+
+        let active = this.animationTabHandler.active
+        if(active !== null) {
+            active.manager.ensureFramePosition()
+            active.animationHandler.animate(this.clock.getDelta())
+            active.manager.setupSelectedPose()
         }
 
-        if(this.animationHandler) {
-            this.animationHandler.animate(this.clock.getDelta())
-        }
-    
-        this.manager.setupSelectedPose()
 
         this.display.render()
         
-        if(this.raytracer.selected && this.animationHandler.playstate.playing) {
-            let pos = this.raytracer.selected.parent.position
-            let rot = this.raytracer.selected.parent.rotation
-            this.setPosition([pos.x, pos.y, pos.z], true)
-            this.setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), true)
-        }
+        // if(this.raytracer.selected && this.animationHandler.playstate.playing) {
+        //     let pos = this.raytracer.selected.parent.position
+        //     let rot = this.raytracer.selected.parent.rotation
+        //     this.setPosition([pos.x, pos.y, pos.z], true)
+        //     this.setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), true)
+        // }
     }
     
 }

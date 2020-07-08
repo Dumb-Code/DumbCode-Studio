@@ -9,7 +9,7 @@ const resolution = 10
 export class KeyframeManger {
 
     constructor(animationHandler, keyframeBoard) {
-
+        this.selectedKeyFrame = null
         this.animationHandler = animationHandler
         this.lables = new Map()
         this.playstate = new PlayState()
@@ -236,7 +236,7 @@ export class KeyframeManger {
                     this.selectedKeyFrame = kf
 
                 } else {
-                    this.selectedKeyFrame = undefined
+                    this.selectedKeyFrame = null
                 }
             }
             

@@ -75,7 +75,7 @@ li.is-collapsed ul {
 }
   
 .horizontal-divider {
-    position: absolute;
+    position: relative;
     left: 0;
     width: 100%;
     height: 8px;
@@ -182,3 +182,13 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
      font-weight: bold;
      width: 100%;
  }
+
+ .editor-tab {
+     padding: 0px 5px;
+     border-style: solid;
+     cursor: pointer;
+ }
+
+ .editor-tab.tab-selected {
+     background-color: yellow;
+}

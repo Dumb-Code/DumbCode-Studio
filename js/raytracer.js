@@ -93,6 +93,10 @@ export class Raytracer {
         return this.selectedSet.values().next().value
     }
 
+    oneSelected() {
+        return this.selectedSet.size === 1 ? this.firstSelected() : null
+    }
+
     get selected() {
         console.trace("deprecated get")
     }
@@ -100,6 +104,7 @@ export class Raytracer {
     set selected(s) {
         console.trace("deprecated set")
     }
+    
     
     clickOnMesh(mesh, toSet, testPrevious = true) {
         if(mesh === undefined) {

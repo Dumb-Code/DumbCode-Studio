@@ -5,7 +5,7 @@ import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
 import { HistoryList } from "./history.js";
 import { ProjectTabs } from "./project_tabs.js";
-import { AnimationStudio } from "./animation_studio.js";
+import { AnimationStudio } from "./animator/animation_studio.js";
 import { ModelingStudio } from "./modeling/modeling_studio.js";
 import { FilesPage } from "./files_page.js";
 import { Raytracer } from "./raytracer.js";
@@ -107,19 +107,6 @@ async function init() {
         display.scene.add(transformControls)
         return transformControls
     }
-    // transformControls.addEventListener('objectChange', () => {
-    //     let pos = raytracer.selected.parent.position
-    //     let rot = raytracer.selected.parent.rotation
-
-    //     let rotations = rot.toArray().map(a => a * 180 / Math.PI)
-    //     let positions = [pos.x, pos.y, pos.z]
-
-    //     setRotation(rotations, false, false)
-    //     setPosition(positions, false, false)
-    //     runFrame()
-    // } );
-    
-
     filesPage = await createFilesPage()
     frame()
 }
@@ -173,11 +160,12 @@ function runFrame() {
 }
 
 function renameCube(oldValue, newValue) {
-    if(display.tbl.cubeMap.has(newValue) && display.tbl.cubeMap.get(newValue) !== raytracer.selected.tabulaCube) {
+    let selected = raytracer.selectedSet.size === 1 ? raytracer.firstSelected() : null
+    if(selected !== null && display.tbl.cubeMap.has(newValue) && display.tbl.cubeMap.get(newValue) !== selected.tabulaCube) {
         return true
     }
-    if(oldValue !== newValue && raytracer.selected && raytracer.selected.tabulaCube.name == oldValue) {
-        let tabulaCube = raytracer.selected.tabulaCube
+    if(oldValue !== newValue && selected !== null && selected.tabulaCube.name == oldValue) {
+        let tabulaCube = selected.tabulaCube
         tabulaCube.updateCubeName(newValue)
         animationStudio.animationHandler.renameCube(oldValue, newValue)
         modelingStudio.cubeList.elementMap.get(tabulaCube).a.innerText = newValue
