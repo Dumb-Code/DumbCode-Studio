@@ -173,6 +173,13 @@ export class AnimationHandler {
     }
     
     keyframesDirty() {
+        if(this.keyframes.length === 0) {
+            this.sortedTimes.length = 0
+            this.totalTime = 0
+            this.loopKeyframe = false
+            this.tbl.resetAnimations()
+            return
+        }
         this.keyframes.forEach(kf => kf.setup = false)
         this.sortedTimes = new Array(...this.keyframes).sort((a, b) => a.startTime - b.startTime);
 

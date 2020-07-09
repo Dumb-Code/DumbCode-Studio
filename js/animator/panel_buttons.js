@@ -16,9 +16,9 @@ export class PanelButtons {
         dom.find('.button-delete-keyframe').click(() => {
             let handler = studio.animationTabHandler.active
             if(handler !== null) {
-                let index = handler.keyframes.indexOf(studio.keyframeManager.selectedKeyFrame)
+                let index = handler.keyframes.indexOf(handler.selectedKeyFrame)
                 if(index >= 0) {
-                    let keyframe = studio.keyframeManager.selectedKeyFrame
+                    let keyframe = handler.selectedKeyFrame
                     handler.keyframes.splice(index, 1)
                     studio.keyframeManager.entryBoard.removeChild(keyframe.element)
                     handler.keyframesDirty()
