@@ -9,8 +9,8 @@ export class ProgressionCanvas {
     }
 
     async waitAndSetCanvas(studio) {
-        let pc = $(await getModal(studio.domElement, 'animator/progression'))
-        this.progressionCanvas = pc.find('#progression_canvas').get(0)
+        let pc = $(await getModal(studio.domElement, 'animator/progression')).find('#progression_canvas')
+        this.progressionCanvas = pc.get(0)
         this.canvasCtx = this.progressionCanvas.getContext("2d")
 
         pc.mousedown(e => {
