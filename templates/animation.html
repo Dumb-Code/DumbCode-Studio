@@ -298,8 +298,8 @@ Generating...
             </a>         
         </div>
         <div class="column">
-            <a class="button is-dark" onmousedown="keyframesPressed(this)">Play</a>
-            <a class="button is-dark" onmousedown="resetKeyFrames()">Reset</a>
+            <a class="button is-dark button-pause-play">Play</a>
+            <a class="button is-dark button-reset-keyframes">Reset</a>
             <a id="control-translate" class="button button-activateable is-dark tooltip transform-control-tool" data-tooltip="Toggle Translate Mode" select-list-entry="translate">
                 <span class="icon is-medium">
                     <i class="fas fa-arrows-alt"></i>
@@ -323,7 +323,7 @@ Generating...
                     1
                 </span>
             </div>
-            <input class="input-rotation-slider is-active" type="range" step="0.01" min="-2" max="2" value="0" oninput="setSpeed(this.value)">
+            <input class="input-slider is-active input-playback-speed" type="range" step="0.01" min="-2" max="2" value="0">
         </div>
     </div>
     <div class="toplayer-columns columns">
@@ -331,17 +331,17 @@ Generating...
             Rotation
             <div class="editor-slider editor-entry">
                 X: 
-                <input axis="0" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
+                <input axis="0" class="input-rotation-slider input-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
                 <input axis="0" class="input is-small editor-require-selected input-rotation" type="text" placeholder="X" disabled>
             </div>
             <div class="editor-slider editor-entry">
                 Y: 
-                <input axis="1" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
+                <input axis="1" class="input-rotation-slider input-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
                 <input axis="1" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Y" disabled>
             </div>
             <div class="editor-slider editor-entry">
                 Z: 
-                <input axis="2" class="input-rotation-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
+                <input axis="2" class="input-rotation-slider input-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
                 <input axis="2" class="input is-small editor-require-selected input-rotation" type="text" placeholder="Z" disabled>
             </div>
         </div>
@@ -386,11 +386,11 @@ Generating...
             </div>
             <div style="padding-top: 10px;">
                 Start Time:
-                <input id="editor-kf-startime" class="editor-text-value input is-small" style="width: 50px" type="text" onfocusout="setStartTime(this.value)">
+                <input id="editor-kf-startime" class="editor-text-value input is-small input-keyframe-starttime" style="width: 50px" type="text">
             </div>
             <div style="padding-top: 10px;">
                 Duration:
-                <input id="editor-kf-duration" class="editor-text-value input is-small" style="width: 50px" type="text" onfocusout="setDuration(this.value)">
+                <input id="editor-kf-duration" class="editor-text-value input is-small input-keyframe-duration" style="width: 50px" type="text">
             </div>
         </div>
     </div>

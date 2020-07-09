@@ -40,34 +40,42 @@ export class AnimationStudio {
         this.clock = new Clock()
     }
 
-    setRotation(values, updateDisplay = true) {
+    setRotation(values, updateDisplay = true, updateSilent = false) {
         let selected = this.raytracer.oneSelected()
         if(selected !== null) {
             if(updateDisplay) {
-                this.cubeDisplayValues.rotation.value = values
+                if(updateSilent) {
+                    this.cubeDisplayValues.rotation.setInternalValue(values)
+                } else {
+                    this.cubeDisplayValues.rotation.value = values
+                }
             }
             this.rotationCache = values
             selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
 
             let handler = this.animationTabHandler.active
-            if(handler !== null) {
+            if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
                 handler.keyframesDirty()
             }
         }
     }
 
-    setPosition(values, updateDisplay = true) {
+    setPosition(values, updateDisplay = true, updateSilent = false) {
         let selected = this.raytracer.oneSelected()
         if(selected !== null) {
             if(updateDisplay) {
-                this.cubeDisplayValues.position.value = values
+                if(updateSilent) {
+                    this.cubeDisplayValues.position.setInternalValue(values)
+                } else {
+                    this.cubeDisplayValues.position.value = values
+                }
             }
             this.positionCache = values
             selected.parent.position.set(values[0], values[1], values[2])
 
             let handler = this.animationTabHandler.active
-            if(handler !== null) {
+            if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
                 handler.keyframesDirty()
             }
@@ -78,6 +86,7 @@ export class AnimationStudio {
 
     setActive() {
         window.studioWindowResized()
+        this.cubeDisplayValues.updateSelected()
         let selected = this.raytracer.oneSelected()
         if(selected !== null) {
             if(this.rotationCache !== null) {
@@ -103,12 +112,13 @@ export class AnimationStudio {
 
         this.display.render()
         
-        // if(this.raytracer.selected && this.animationHandler.playstate.playing) {
-        //     let pos = this.raytracer.selected.parent.position
-        //     let rot = this.raytracer.selected.parent.rotation
-        //     this.setPosition([pos.x, pos.y, pos.z], true)
-        //     this.setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), true)
-        // }
+        let selected = this.raytracer.oneSelected()
+        if(selected !== null && this.keyframeManager.playstate.playing) {
+             let pos = selected.parent.position
+             let rot = selected.parent.rotation
+             this.setPosition([pos.x, pos.y, pos.z], true, true)
+             this.setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), true, true)
+        }
     }
     
 }
@@ -133,14 +143,6 @@ export class AnimationStudio {
 
 //         //todo: remove all previous elements
 //         activeStudio.manager.reframeKeyframes()
-//     }
-// }
-
-// window.setSpeed = valueIn => {
-//     if(activeStudio !== undefined) {
-//         let value = Math.round(Math.pow(2, valueIn) * 100) / 100
-//         document.getElementById("playback-speed").innerHTML = value
-//         activeStudio.manager.playstate.speed = value
 //     }
 // }
 
@@ -203,41 +205,6 @@ export class AnimationStudio {
 //     return true
 // }
 
-// window.resetKeyFrames = () => {
-//     if(activeStudio !== undefined) {
-//         activeStudio.manager.playstate.ticks = 0
-//         activeStudio.display.tbl.resetAnimations()
-//     }
-    
-// }
-
-// document.addEventListener("mouseup", () => {
-//     document.removeEventListener("mousemove", resize, false)
-//     document.body.className = undefined
-// }, false);
-
-// window.addEventListener( 'resize', () => setHeights(), false );
-
-// function resize(e) {
-//     let range = window.innerHeight + canvasContainer.offsetTop
-//     let height = range - (e.y) + activeStudio.clickY
-
-//     let panelHeight = Math.min(Math.max(height, 100), 500)
-//     setHeights(panelHeight)
-// }
-
-// function setHeights(height) {
-//     if(activeStudio !== undefined) {
-//         if(height == undefined) {
-//             height = activeStudio.panelHeight
-//         } else {
-//             activeStudio.panelHeight = height
-//         }
-//         panel.style.height = activeStudio.panelHeight + "px";
-//         canvasContainer.style.height = (window.innerHeight - activeStudio.panelHeight) + "px"
-//         window.studioWindowResized()
-//     }
-// }
 
 // window.onAnimationFileChange = async(files) => {
 //     if(activeStudio !== undefined) {
@@ -255,11 +222,6 @@ export class AnimationStudio {
 //         window.generateJavaMethod()
 //     }
 // }
-
-
-
-// let ctx = progressionCanvas.getContext("2d");
-// let radius = 7.5
 
 // const keyframeCallback = () => {
 //     if(activeStudio !== undefined && activeStudio.manager.selectedKeyFrame) {
@@ -292,74 +254,4 @@ export class AnimationStudio {
 //         }
 //     }
 // })
-
-// container.addEventListener("mousedown", e => {
-//     if(activeStudio !== undefined) {
-//         if (e.offsetY < 0) {
-//             activeStudio.clickY = 15 + e.offsetY
-//             document.addEventListener("mousemove", resize, false);
-//             document.body.className = "disable-select"
-//         }
-//     }
-// }, false);
-
-// window.deleteKeyframe = () => {
-//     if(activeStudio !== undefined && activeStudio.manager.selectedKeyFrame) {
-//         
-//         
-//         
-
-//         
-//         
-//         
-           
-//         
-//         
-//         
-//     }
-// }
-
-// window.addKeyframe = () => {
-//     if(activeStudio !== undefined && activeStudio.animationHandler) {
-
-//         let kf = activeStudio.animationHandler.createKeyframe()
-
-//         kf.duration = 5
-//         kf.startTime = activeStudio.manager.playstate.ticks
-
-//         activeStudio.animationHandler.keyframes.push(kf)
-//         activeStudio.animationHandler.keyframesDirty()
-    
-//         activeStudio.manager.reframeKeyframes()
-    
-//         kf.selectChange(true)
-
-//     }
-// }
-
-// window.setStartTime = value => {
-//     value = Number(value)
-//     if(activeStudio !== undefined) {
-//         let manager = activeStudio.manager
-//         if(manager.selectedKeyFrame) {
-//             manager.selectedKeyFrame.startTime = value
-//             activeStudio.animationHandler.keyframesDirty()
-//             manager.updateKeyFrame(manager.selectedKeyFrame)
-//         }
-//     }
-// }
-
-// window.setDuration = value => {
-//     value = Number(value)
-//     if(activeStudio !== undefined) {
-//         let manager = activeStudio.manager
-//         if(manager.selectedKeyFrame) {
-//             let diff = value - manager.selectedKeyFrame.duration
-//             manager.selectedKeyFrame.duration = value
-//             manager.selectedKeyFrame.startTime -= diff
-//             activeStudio.animationHandler.keyframesDirty()
-//             manager.updateKeyFrame(manager.selectedKeyFrame)
-//         }
-//     }
-// }
 

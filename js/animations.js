@@ -13,15 +13,6 @@ export class AnimationHandler {
         this.sortedTimes = []
         this.loopKeyframe = false
         this.playstate = new PlayState()
-
-        window.keyframesPressed = (elem) => {
-            if(this.playstate.playing) {
-                elem.innerHTML = "Play"
-            } else {
-                elem.innerHTML = "Pause"
-            }
-            this.playstate.playing = !this.playstate.playing
-        }
     }
 
     renameCube(oldName, newName) {
