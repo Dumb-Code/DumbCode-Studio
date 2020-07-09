@@ -4,7 +4,7 @@ export class RotationPointMarkers {
 
     constructor(studio) {
         this.raytracer = studio.raytracer
-        studio.display.scene.add(this.rotationPointSpheres = new Group())
+        studio.group.add(this.rotationPointSpheres = new Group())
         studio.transformControls.addEventListener('objectChange', () => this.updateSpheres())
     }
 

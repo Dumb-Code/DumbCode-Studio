@@ -1,7 +1,7 @@
 import { KeyframeManager } from '../keyframe_manager.js'
 import { AnimationHandler } from '../animations.js'
 import { JavaMethodExporter } from '../java_method_exporter.js'
-import { Clock } from '../three.js'
+import { Clock, Group } from '../three.js'
 import { Gumball } from './gumball.js'
 import { AnimationPanel } from './animation_panel.js'
 import { AnimationCubeValues } from './animation_cube_values.js'
@@ -17,6 +17,7 @@ export class AnimationStudio {
         this.domElement = domElement
         let dom  = $(domElement)
         this.raytracer = raytracer
+        this.group = new Group()
 
         this.selectedRequired = dom.find('.editor-require-selected')
         this.raytracer.addEventListener('selectchange', () => {
@@ -28,6 +29,8 @@ export class AnimationStudio {
         this.rotationCache = null
 
         this.transformControls = display.createTransformControls()
+        this.group.add(this.transformControls)
+
         this.gumball = new Gumball(dom, this)
         this.animationPanel = new AnimationPanel(dom)
         this.keyframeManager = new KeyframeManager(this, dom.find('.keyframe-board').get(0))
@@ -98,7 +101,15 @@ export class AnimationStudio {
                 this.positionCache = null
             }
         }
+        this.display.scene.add(this.group)
+        this.transformControls.enableReason('tab')
     }
+    
+    setUnactive() {
+        this.display.scene.remove(this.group)
+        this.transformControls.disableReason('tab')
+    }
+
 
     runFrame() {
         this.raytracer.update()

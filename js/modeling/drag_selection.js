@@ -27,7 +27,7 @@ export class DragSelection {
 
         listenForKeyChange("Shift", value => {
             orbitControls.enabled = !value
-            studio.transformControls.enabled = !value
+            studio.transformControls.reason('drag', !value)
             this.enabled = value
         })
     }

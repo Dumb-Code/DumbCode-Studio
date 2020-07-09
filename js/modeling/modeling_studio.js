@@ -10,6 +10,7 @@ import { applyCubeStateHighlighting } from "./cube_state_highlighting.js"
 import { RotationPointMarkers } from "./rotation_point.markers.js"
 import { applyCubeAddingDeleting } from "./cube_create_delete.js"
 import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
+import { Group } from "../three.js"
 
 export class ModelingStudio {
 
@@ -21,19 +22,23 @@ export class ModelingStudio {
         this.display = display
         this.raytracer = raytracer
 
+        this.group = new Group()
+
         this.commandRoot = new CommandRoot(dom)
 
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
         this.selectedRequired = dom.find('.editor-require-selected')
 
         this.transformControls = display.createTransformControls()
+        this.group.add(this.transformControls)
+
         applyCubeStateHighlighting(dom, this)
         applyCubeAddingDeleting(dom, this)
         this.rotationPointMarkers = new RotationPointMarkers(this)
         this.lockedCubes = new LockedCubes(this)    
         this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, this.lockedCubes)
         this.dragSelection = new DragSelection(this, dom.find('#drag-selection-overlay'), orbitControls)
-        this.pointTracker = new CubePointTracker(raytracer, display)
+        this.pointTracker = new CubePointTracker(raytracer, display, this.group)
         this.gumball = new Gumball(dom, this)
         this.cubeValues = new CubeValueDisplay(dom, this, renameCube)
         this.studioPanels = new StudioPanels(dom, this)
@@ -58,6 +63,13 @@ export class ModelingStudio {
 
     setActive() {
         window.studioWindowResized()
+        this.display.scene.add(this.group)
+        this.transformControls.enableReason('tab')
+    }
+    
+    setUnactive() {
+        this.display.scene.remove(this.group)
+        this.transformControls.disableReason('tab')
     }
 
     selectedChanged() {

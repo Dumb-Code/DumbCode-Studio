@@ -63,6 +63,7 @@ var TransformControls = function ( camera, domElement ) {
 	defineProperty( "showX", true );
 	defineProperty( "showY", true );
 	defineProperty( "showZ", true );
+	defineProperty( "disabledReasons", new Set())
 
 	var changeEvent = { type: "change" };
 	var mouseDownEvent = { type: "mouseDown" };
@@ -169,6 +170,29 @@ var TransformControls = function ( camera, domElement ) {
 		} );
 
 	};
+
+	this.enableReason = function ( reason ) {
+		if(this.disabledReasons.has(reason)) {
+			this.disabledReasons.delete(reason)
+		}
+		this.enabled = this.disabledReasons.size === 0
+	}
+
+	this.disableReason = function ( reason ) {
+		if(!this.disabledReasons.has(reason)) {
+			this.disabledReasons.add(reason)
+		}
+		this.enabled = this.disabledReasons.size === 0
+	}
+
+	this.reason = function( reason, value ) {
+		if(value === true) {
+			this.enableReason( reason )
+		} else {
+			this.disableReason( reason )
+		}
+	}
+
 
 	// Set current object
 	this.attach = function ( object ) {
@@ -1391,7 +1415,6 @@ var TransformControlsGizmo = function () {
 
 			handle.material.color.copy( handle.material._color );
 			handle.material.opacity = handle.material._opacity;
-
 			if ( ! this.enabled ) {
 
 				handle.material.opacity *= 0.5;

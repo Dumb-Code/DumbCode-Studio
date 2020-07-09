@@ -30,7 +30,7 @@ export class Gumball {
         this.transformAnchor = new Object3D()
         this.transformAnchor.rotation.order = "ZYX"
 
-        studio.display.scene.add(this.transformAnchor)
+        studio.group.add(this.transformAnchor)
 
         this.startingCache = new Map()
         
@@ -60,16 +60,19 @@ export class Gumball {
         })
 
         this.gumballRotateTool = studio.display.createTransformControls()
+        studio.group.add(this.gumballRotateTool)
         this.gumballRotateTool.mode = 'rotate'
+        
         this.gumballTranslateTool = studio.display.createTransformControls()
+        studio.group.add(this.gumballTranslateTool)
         this.gumballTranslateTool.mode = 'translate'
 
         this.gumballRotateTool.traverse(e => e.material?.color?.addScalar(0.25))
         this.gumballTranslateTool.traverse(e => e.material?.color?.addScalar(0.25))
-        this.gumballRotateTool.addEventListener('mouseDown', () => this.gumballTranslateTool.enabled = false)
-        this.gumballTranslateTool.addEventListener('mouseDown', () => this.gumballRotateTool.enabled = false)
-        this.gumballRotateTool.addEventListener('mouseUp', () => this.gumballTranslateTool.enabled = true)
-        this.gumballTranslateTool.addEventListener('mouseUp', () => this.gumballRotateTool.enabled = true)
+        this.gumballRotateTool.addEventListener('mouseDown', () => this.gumballRotateTool.disableReason('rotate-active'))
+        this.gumballTranslateTool.addEventListener('mouseDown', () => this.gumballRotateTool.disableReason('translate-active'))
+        this.gumballRotateTool.addEventListener('mouseUp', () => this.gumballRotateTool.enableReason('rotate-active'))
+        this.gumballTranslateTool.addEventListener('mouseUp', () => this.gumballRotateTool.enableReason('translate-active'))
 
         dom.find('.gumball-movement-freely').click(() => {
             this.toolTransformType.value = undefined

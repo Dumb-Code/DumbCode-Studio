@@ -11,7 +11,7 @@ const highlightColor = 0x15c1d4
 const selectColor = 0xd11573
 
 export class CubePointTracker {
-    constructor(raytracer, display) {
+    constructor(raytracer, display, group) {
         this.raytracer = raytracer
         this.display = display
         this.enabled = false
@@ -34,7 +34,7 @@ export class CubePointTracker {
 
                     let mesh = new Mesh(geometry, material)
                     mesh.visible = false
-                    display.scene.add(mesh)
+                    group.add(mesh)
 
                     let helperMesh = new Mesh(helperGeometry, material)
                     helperMesh.visible = false

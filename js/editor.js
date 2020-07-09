@@ -104,7 +104,6 @@ async function init() {
             }
         })
         transformControls.space = "local"
-        display.scene.add(transformControls)
         return transformControls
     }
     filesPage = await createFilesPage()
@@ -131,6 +130,9 @@ function frame() {
     if(newTab !== activeTab && newTab !== undefined) {
         if(activeTab !== undefined) {
             $(activeTab.domElement).detach()
+            if(activeTab.setUnactive) {
+                activeTab.setUnactive()
+            }
         }
         if(canvasContainer !== undefined) {
             $(display.renderer.domElement).detach()
