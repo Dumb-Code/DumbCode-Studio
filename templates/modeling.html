@@ -61,12 +61,34 @@
         <input axis="2" class="input-rotation-slider input-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
     </div>
 </div>
-<div id="panel-right-top" class="editor-part", editor-tab="modeling" style="grid-area: right_area_top; background-color: black; position: relative">
+<div id="panel-right-top" class="editor-part", editor-tab="modeling" style="grid-area: right_area_top; background-color: black; position: relative;">
     <span class="popout-button icon is-small">
         <i class="fas fa-sign-out-alt"></i>
     </span>
     <div class="texture-container-class">
         <canvas id="texture-canvas"></canvas>
+    </div>
+</div>
+<div id="panel-right-middle" class="editor-part", editor-tab="modeling" style="grid-area: right_area_middle; background-color: black; position: relative;">
+    <span class="popout-button icon is-small">
+        <i class="fas fa-sign-out-alt"></i>
+    </span>
+    <div class="texture-upload-container">
+        <ul class="texture-upload">
+            <li class="texture-file-input-entry">
+                <label class="file-label" style="display: block">
+                    <input class="file-input texture-file-input" type="file">
+                    <span class="file-cta" style="border-color: #dbdbdb">
+                        <span class="file-icon">
+                            <i class="fas fa-upload"></i>
+                        </span>
+                        <span class="file-label">
+                            Add Texture
+                        </span>
+                    </span>
+                </label>    
+            </li>
+        </ul>
     </div>
 </div>
 <div id="display-div" style="grid-area: main_area;"></div>
@@ -153,5 +175,6 @@
 </div>
 <div id="left-divider" class="vertical-divider"></div>
 <div id="right-divider" class="vertical-divider"></div>
-<div id="right-horizontal-divider" class="horizontal-divider"></div>
+<div id="right-horizontal-top-divider" class="horizontal-divider"></div>
+<div id="right-horizontal-bottom-divider" class="horizontal-divider"></div>
 <div id="drag-selection-overlay"></div>

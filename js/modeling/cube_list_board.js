@@ -90,7 +90,7 @@ export class CubeListBoard {
             let draggedCube = tbl.cubeMap.get(e.dataTransfer.getData("cubename"))
             let droppedOnto = tbl.cubeMap.get(cube.name)
             if(draggedCube !== undefined && droppedOnto !== undefined && type !== undefined) {
-                this.lockedCubes.createLockedCubesCache()
+                lockedCubes.createLockedCubesCache()
                 draggedCube.parent.deleteChild(draggedCube, true)
                 if(type === "on") {
                     droppedOnto.addChild(draggedCube)
@@ -102,7 +102,7 @@ export class CubeListBoard {
                     droppedOnto.parent.getChildren().splice(index, 0, draggedCube)
                     droppedOnto.parent.onChildrenChange(false)
                 }
-                this.lockedCubes.reconstructLockedCubes()
+                lockedCubes.reconstructLockedCubes()
             }
         }
     

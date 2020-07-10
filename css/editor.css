@@ -46,6 +46,7 @@
     display: grid;
     grid-template-areas: 
     "left_area main_area right_area_top"
+    "left_area main_area right_area_middle"
     "left_area main_area right_area_bottom"
     "left_area bottom_bar right_area_bottom"
     ;
@@ -75,7 +76,7 @@ li.is-collapsed ul {
 }
   
 .horizontal-divider {
-    position: relative;
+    position: absolute;
     left: 0;
     width: 100%;
     height: 8px;
@@ -191,4 +192,40 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
 
  .editor-tab.tab-selected {
      background-color: yellow;
+}
+
+.texture-upload {
+    height: 100%;
+    overflow-y: scroll; 
+    background-color: tomato;
+}
+
+.texture-upload-container {
+    height: 100%;
+}
+
+.texture-upload li {
+    border-style: solid;
+}
+
+.texture-container-class {
+    display: flex;
+}
+
+.texture-file-entry {
+    border: solid 3px transparent
+}
+
+.texture-file-entry.entry-hidden {
+    text-decoration: line-through;
+}
+
+.texture-file-entry[drag-state="top"] {
+    border-top-style: solid;
+    border-top-color: #000000;
+}
+
+.texture-file-entry[drag-state="bottom"] {
+    border-bottom-style: solid;
+    border-bottom-color: #000000;
 }

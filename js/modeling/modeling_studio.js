@@ -11,10 +11,11 @@ import { RotationPointMarkers } from "./rotation_point.markers.js"
 import { applyCubeAddingDeleting } from "./cube_create_delete.js"
 import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 import { Group } from "../three.js"
+import { TextureManager } from "./texture_manager.js"
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, orbitControls, renameCube, refreshKeyframes) {
+    constructor(domElement, display, raytracer, orbitControls, renameCube, refreshKeyframes, setTexture) {
         this.domElement = domElement
         this.refreshKeyframes = refreshKeyframes
         let dom = $(domElement)
@@ -34,6 +35,7 @@ export class ModelingStudio {
 
         applyCubeStateHighlighting(dom, this)
         applyCubeAddingDeleting(dom, this)
+        this.textureManager = new TextureManager(dom, this, setTexture)
         this.rotationPointMarkers = new RotationPointMarkers(this)
         this.lockedCubes = new LockedCubes(this)    
         this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, this.lockedCubes)

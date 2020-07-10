@@ -179,6 +179,16 @@ function refreshKeyframes() {
     animationStudio.animationTabHandler.allTabs.forEach(tab => tab.handler.keyframesDirty())
 }
 
+function setTexture(tex) {
+    material.map = tex
+    selectedMaterial.map = tex
+    highlightMaterial.map = tex
+
+    material.needsUpdate = true
+    selectedMaterial.needsUpdate = true
+    highlightMaterial.needsUpdate = true
+}
+
 function updateCamera(camera, width, height) {
     if(camera.isPerspectiveCamera) {
         camera.aspect = width / height;
@@ -239,7 +249,7 @@ async function createFilesPage() {
 }
 
 async function createModelingStudio() {
-    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, controls, renameCube, refreshKeyframes)
+    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, controls, renameCube, refreshKeyframes, setTexture)
 }
 
 async function createAnimationStudio() {
@@ -255,40 +265,6 @@ async function initiateModel(model) {
         modelingStudio.cubeHierarchyChanged()
         old()
     }
-}
-
-window.setupTexture = async(file, nameElement) => {
-    let imgtag = document.createElement("img")
-    nameElement.classList.toggle("tooltip", true)
-    nameElement.dataset.tooltip = file.name
-
-    imgtag.onload = () => {
-
-        let tex = new Texture(imgtag)
-
-        tex.needsUpdate = true
-
-        tex.flipY = false
-        tex.magFilter = NearestFilter;
-        tex.minFilter = NearestFilter;
-
-
-        material.map = tex
-        selectedMaterial.map = tex
-        highlightMaterial.map = tex
-
-        material.needsUpdate = true
-        selectedMaterial.needsUpdate = true
-        highlightMaterial.needsUpdate = true
-    }
-
-    imgtag.onerror = () => {
-        nameElement.dataset.tooltip = "ERROR!"
-        console.error(`Unable to define image from file: ${file.name}`)
-    }
-
-
-    imgtag.src = await readFile(file, (reader, file) => reader.readAsDataURL(file))
 }
 
 window.addEventListener( 'resize', e => window.studioWindowResized(), false );

@@ -262,9 +262,9 @@ export class TblCube {
     }
 
     updateGeometry( { dimension = this.dimension, mcScale = this.mcScale } = {}) {
-        let w = dimension[0] + mcScale*2 + 0.0001
-        let h = dimension[1] + mcScale*2 + 0.0001
-        let d = dimension[2] + mcScale*2 + 0.0001
+        let w = dimension[0] + mcScale*2 + 0.01
+        let h = dimension[1] + mcScale*2 + 0.01
+        let d = dimension[2] + mcScale*2 + 0.01
 
         this.cubeMesh[0].geometry = new PlaneBufferGeometry(d, h); //+x
         this.cubeMesh[0].rotation.set(0, Math.PI / 2, 0)
