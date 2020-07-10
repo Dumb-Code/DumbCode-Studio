@@ -115,7 +115,7 @@ export class TextureManager {
             ctx.fillRect(0, 0, 1, 1)
         }
 
-        [...this.textures].reverse().filter(t => !t.isHidden).forEach(t => ctx.drawImage(t.img, 0, 0, width, height))
+        this.textures.filter(t => !t.isHidden).reverse().forEach(t => ctx.drawImage(t.img, 0, 0, width, height))
 
         let tex = new CanvasTexture(canvas)
         tex.needsUpdate = true
