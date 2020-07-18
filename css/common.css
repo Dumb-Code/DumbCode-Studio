@@ -1,0 +1,13 @@
+.center {
+    margin-left: auto;
+    text-align: center;
+    align-items: center;
+}
+
+.tab-area {
+    display: none;
+}
+
+.is-file #files-area, .is-modeling #modeling-area, .is-animation #animation-area {
+    display: unset;
+}

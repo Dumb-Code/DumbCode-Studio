@@ -42,7 +42,7 @@
     border-bottom-color: yellow !important;
 }
 
-#main-area.is-modeling > div#template-div {
+#main-area.is-modeling > div#modeling-area {
     display: grid;
     grid-template-areas: 
     "left_area main_area right_area_top"

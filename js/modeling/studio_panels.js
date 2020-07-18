@@ -2,7 +2,6 @@ const mainArea = document.getElementById("main-area")
 
 export class StudioPanels {
     constructor(dom, studio) {
-        this.domElement = studio.domElement
 
         this.leftPanel = new LayoutPart(dom.find('#panel-left'), e => {
             this.leftArea = e ? 0 : 300
@@ -22,7 +21,7 @@ export class StudioPanels {
         this.rightArea = 300
         this.topRArea = 300
         this.topMArea = 100
-        let clickedDivider = -1
+        let clickedDivider = 0
         $(document)
             .mouseup(() => clickedDivider = 0)
             .mousemove(e => {
@@ -106,8 +105,10 @@ export class StudioPanels {
             this.rightHorizontalBottomDivider.css('top', (mainArea.offsetTop+this.topRArea+this.topMArea-4) + "px").css('right', '0px').css('width', this.rightArea + "px").css('left', 'unset')
         }
 
-        this.domElement.style.gridTemplateColumns = this.leftArea + "px " + " calc(100% - " + (this.leftArea + this.rightArea) + "px) " + this.rightArea + "px"
-        this.domElement.style.gridTemplateRows = this.topRArea + "px " + this.topMArea +  "px " + "calc(100vh - " + (this.topRArea + this.topMArea + 92) + "px) 40px"
+        let d = document.getElementById('modeling-area')
+        $('#modeling-area')
+            .css('grid-template-columns', `${this.leftArea}px calc(100% - ${this.leftArea + this.rightArea}px) ${this.rightArea}px`) 
+            .css('grid-template-rows', `${this.topRArea}px ${this.topMArea}px calc(100vh - ${this.topRArea + this.topMArea + 92}px) 40px`) 
 
         window.studioWindowResized()
     }

@@ -13,19 +13,8 @@ export class KeyframeManager {
         this.lables = new Map()
         this.playstate = new PlayState()
 
-        this.board = keyframeBoard
-
-        const createContainer = classname => {
-            let div = document.createElement("div")
-            div.draggable = false
-            div.className = classname
-            this.board.appendChild(div)
-            return div
-        }
-        
-        this.playbackMarker = createContainer("keyframe-playback-marker tooltip")
-        this.labelBoard = createContainer("keyframe-board-labels")
-        this.entryBoard = createContainer("keyframe-board-entries")
+        this.playbackMarker = keyframeBoard.find('.keyframe-playback-marker')
+        this.emptyKeyframe = keyframeBoard.find('.empty-keyframe')
 
         this.scroll = 0
 

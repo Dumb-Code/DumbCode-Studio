@@ -222,6 +222,8 @@ class KeyFrame {
     constructor(handler) {
         this.handler = handler
 
+        this.layerId = 0
+
         this.startTime = 0
         this.duration = 0
 

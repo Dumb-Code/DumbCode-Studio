@@ -8,6 +8,7 @@ import { AnimationCubeValues } from './animation_cube_values.js'
 import { AnimationTabHandler } from './animation_tabs.js'
 import { PanelButtons } from './panel_buttons.js'
 import { ProgressionCanvas } from './progression_canvas.js'
+import { KeyframeBoardManager } from './keyframe_board_manager.js'
 
 const mainArea = document.getElementById("main-area")
 
@@ -33,7 +34,7 @@ export class AnimationStudio {
 
         this.gumball = new Gumball(dom, this)
         this.animationPanel = new AnimationPanel(dom)
-        this.keyframeManager = new KeyframeManager(this, dom.find('.keyframe-board').get(0))
+        this.keyframeManager = new KeyframeBoardManager(this, dom.find('.keyframe-board'))
         this.panelButtons = new PanelButtons(dom, this)
         this.cubeDisplayValues = new AnimationCubeValues(dom, this)
         this.display = display

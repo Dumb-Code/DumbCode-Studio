@@ -1,0 +1,107 @@
+<style>
+.layer {
+    height: 22px;
+    padding-left: 10px;
+    padding-right: 100px;
+}
+.layer-name {
+    padding: 1px; 
+    margin:0px; 
+    margin-bottom: 3px;
+}
+
+.keyframe-container {
+   background: repeating-linear-gradient( 
+       90deg,
+       #363636  0px,
+       #363636  20px,
+       #4A4A4A  20px,
+       #4A4A4A  40px);
+   background-size: 40px;
+   margin-bottom: 3px;
+   height: 20px;
+   padding: 0px;
+   display: flex;
+}
+
+.eventpoint {
+    z-index: 1;
+    position: relative;
+    top: -20px;
+    display: inline-flex;
+    margin-left: -1px;
+}
+.keyframe {
+    height: 12px;
+    border-radius: 6px;
+    z-index: 1;
+    position: relative;
+    top: 4px;
+    display: inline-flex;
+}
+.keypoint {
+    height: 18px;
+    width: 18px;
+    border-radius: 9px;
+    z-index: 2;
+    position: relative;
+    top: -3px;
+}
+
+.empty-keyframe .kf-layer-visible, .empty-keyframe .kf-layer-lock {
+    display: none;
+}
+
+.keyframe-icon-box span {
+    cursor: pointer;
+}
+
+</style>
+<div class="keyframe-playback-marker tooltip"></div>
+<div class="columns is-mobile layer">
+    <div class="column is-narrow">
+        <div class="notification has-background-black-ter layer-name">
+            <p class="heading is-size-8" style="margin-bottom: 3px; width: 100px;">Events</p>
+        </div>
+    </div>
+
+    <div class="column is-narrow has-text-grey" style="width: 90px;">
+    </div>
+
+    <div class="column">
+        <div class="notification is-fullwidth has-background-black-ter">
+            <span class="eventpoint icon is-small" style="left: 100px; top: -20px;"><i class="fas fa-map-marker"></i></span>
+            <span class="eventpoint icon is-small" style="left: 140px; top: -20px;"><i class="fas fa-map-marker"></i></span>
+            <span class="eventpoint icon is-small" style="left: 200px; top: -20px;"><i class="fas fa-map-marker"></i></span>
+            <span class="eventpoint icon is-small" style="left: 240px; top: -20px;"><i class="fas fa-map-marker"></i></span>
+            <span class="eventpoint icon is-small" style="left: 360px; top: -20px;"><i class="fas fa-map-marker"></i></span>
+            <span class="eventpoint icon is-small" style="left: 400px; top: -20px;"><i class="fas fa-map-marker"></i></span>
+        </div>
+    </div>
+</div>
+<div class="keyframe-board-columns">
+</div>
+<div class="columns is-mobile layer column-blue empty-keyframe">
+    <div class="column is-narrow">
+        <div class="notification has-background-black-ter layer-name">
+            <p class="heading is-size-8 layer-text" style="margin-bottom: 3px; width: 100px;">Layer 1</p>
+        </div>
+    </div>
+
+    <div class="column is-narrow has-text-grey keyframe-icon-box" style="width: 90px;">
+        <span class="icon is-small kf-layer-add">
+            <i class="fas fa-plus"></i>
+        </span>
+        <span class="icon is-small kf-layer-visible">
+            <i class="far fa-eye"></i>
+        </span>
+        <span class="icon is-small kf-layer-lock">
+            <i class="fas fa-lock-open"></i>
+        </span>
+    </div>
+
+    <div class="column">
+        <div class="notification is-fullwidth has-background-dark keyframe-container">
+        </div>
+    </div>
+</div>
