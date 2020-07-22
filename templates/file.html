@@ -1,15 +1,128 @@
-<label class="file-label" style="display: block">
-    <input class="file-input" type="file" name="tabula-main-model" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
-    <span class="file-cta" style="border-color: #dbdbdb">
-        <span class="file-icon">
-            <i class="fas fa-upload"></i>
-        </span>
-        <span class="file-label">
-            Main Model
-        </span>
-    </span>
-</label>
-<button onclick="createNewModel()">
-    Create new model
-</button>
-
+<section class="section is-mobile has-background-black-ter" style="height: 100vh">
+    <div class="columns">
+        <div class="column is-1"></div>
+        <div class="column">
+            <div class="notification is-dark">
+                <h1 class="title is-5">PROJECT</h1>
+                <div class="tags has-addons mb-2">
+                    <div class="tag is-warning">Note</div>
+                    <div class="tag is-link">Projects are a not yet implemented feature.</div>
+                </div>
+                <div class="columns">
+                    <div class="column is-narrow">
+                      <i class="fas fa-cubes"></i>
+                    </div>
+                    <div class="column">
+                        <p>parasaur.dcproj</p>
+                    </div>
+                </div>
+            </div>
+            <div class="notification is-dark">
+                <h1 class="title is-5">MODEL</h1>
+                <div class="tags has-addons mb-2">
+                    <div class="tag is-warning">Note</div>
+                    <div class="tag is-link">Model functionality not final.</div>
+                </div>
+                <div class="columns">
+                    <div class="column is-narrow">
+                      <i class="fas fa-cube"></i>
+                    </div>
+                    <div class="column">
+                        <p>parasaur_adult.dcm</p>
+                    </div>
+                </div>
+                <div class="notification is-warning">
+                    <div class="content is-small">
+                        <p>TEMPORARY MODEL CONTROLS</p>
+                    </div>
+                    <div class="columns">
+                        <div class="column is-narrow">
+                            <label class="file-label">
+                                <input class="file-input" type="file" name="tabula-main-model" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
+                                <span class="file-cta">
+                                    <span class="file-icon"><i class="fas fa-upload"></i></span>
+                                    <span class="file-label">Main Model</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="column is-narrow">
+                            <label class="file-label">
+                                <input class="file-input" type="submit" onclick="createNewModel()">
+                                <span class="file-cta">
+                                    <span class="file-icon"><i class="fas fa-plus"></i></span>
+                                    <span class="file-label">New Model</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="content is-small">
+                        <p>This will be moved to a more user friendly format in the future.</p>
+                    </div>
+                </div>
+              </div>
+        </div>
+        <div class="column">
+            <div class="notification is-dark">
+                <div class="columns">
+                    <div class="column">
+                        <h1 class="title is-5">ANIMATIONS</h1>
+                    </div>
+                    <div class="column is-narrow">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                </div>
+                <div class="tags has-addons mb-2">
+                    <div class="tag is-warning">Note</div>
+                    <div class="tag is-link">List not yet reflective of current animations.</div>
+                </div>
+            
+                <div class="columns">
+                    <div class="column is-narrow">
+                    <i class="fas fa-bars"></i>
+                    </div>
+                    <div class="column">
+                    <p>walk.dca</p>
+                    </div>
+                </div>
+                
+                <div class="columns">
+                    <div class="column is-narrow">
+                    <i class="fas fa-bars"></i>
+                    </div>
+                    <div class="column">
+                    <p>run.dca</p>
+                    </div>
+                </div>
+                
+                <div class="columns">
+                    <div class="column is-narrow">
+                    <i class="fas fa-bars"></i>
+                    </div>
+                    <div class="column">
+                    <p>eat.dca</p>
+                    </div>
+                </div>
+                
+                <div class="columns">
+                    <div class="column is-narrow">
+                    <i class="fas fa-bars"></i>
+                    </div>
+                    <div class="column">
+                    <p>drink.dca</p>
+                    </div>
+                </div>
+                
+                <div class="columns">
+                    <div class="column is-narrow">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                    <div class="column">
+                    <p>death.dca</p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <div class="column is-1"></div>
+    </div>
+</section>
