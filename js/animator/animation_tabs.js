@@ -3,27 +3,29 @@ import { AnimationHandler } from "../animations.js"
 export class AnimationTabHandler {
     constructor(dom, studio) {
         this.manager = studio.keyframeManager
+        this.tbl = studio.display.tbl
         this._internalTab = -1
         this.allTabs = []
         
-        let tabContainer = dom.find('.tab-container')
-        dom.find('.tab-add').click(() => {
-            let id = this.allTabs.length
+        this.tabContainer = dom.find('.tab-container')
+        dom.find('.tab-add').click(() => this.createNewTab())
+    }
 
-            let element = document.createElement('span')
-            element.classList.add('editor-tab')
-            element.innerText = "Tab " + this.allTabs.length
-            tabContainer.append(element)
-            element.onclick = () => this.activeTab = id
+    createNewTab() {
+        let id = this.allTabs.length
 
-            this.allTabs.push({
-                handler: new AnimationHandler(studio.display.tbl),
-                element
-            })
+        let element = document.createElement('span')
+        element.classList.add('editor-tab')
+        element.innerText = "Tab " + this.allTabs.length
+        this.tabContainer.append(element)
+        element.onclick = () => this.activeTab = id
 
-            this.activeTab = id
-
+        this.allTabs.push({
+            handler: new AnimationHandler(this.tbl),
+            element
         })
+
+        this.activeTab = id
     }
 
     set activeTab(activeTab) {
@@ -43,11 +45,17 @@ export class AnimationTabHandler {
             this.manager.reframeKeyframes()
 
         }
-
     }
 
     get active() {
+        if(this._internalTab === -1) {
+            this.createNewTab()
+        }
         return this.getIndex(this._internalTab)?.handler || null
+    }
+
+    isAny() {
+        return this._internalTab !== -1
     }
 
     getIndex(index) {

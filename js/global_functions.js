@@ -13,15 +13,19 @@ loadHtml = async file => {
 const _htmlCache = new Map()
 
 applyModalPopups = async(html) => {
-    $(html).find('.popup-modal-button').click(async function(e) {
-        let modal = await getModal(html, this.getAttribute('modal-target'))
-
-        modal.classList.add('modal', 'is-active')
-
-        const parentHTML = document.getElementById('modal-area')
-        parentHTML.innerHTML = ""
-        parentHTML.appendChild(modal)
+    $(html).find('.popup-modal-button').click(async function() {
+        openModal(this.getAttribute('modal-target'))
     })
+}
+
+openModal = async name => {
+    let modal = await getModal(html, name)
+
+    modal.classList.add('modal', 'is-active')
+
+    const parentHTML = document.getElementById('modal-area')
+    parentHTML.innerHTML = ""
+    parentHTML.appendChild(modal)
 }
 
 

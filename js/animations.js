@@ -12,6 +12,7 @@ export class AnimationHandler {
         this.keyframes = []
         this.sortedTimes = []
         this.loopKeyframe = false
+        this.events = []
         this.playstate = new PlayState()
     }
 

@@ -27,6 +27,21 @@ export class KeyframeBoardManager {
 
         this.playbackMarker = keyframeBoard.find('.keyframe-playback-marker')
 
+        this.emptyPoint = keyframeBoard.find('.empty-event-point')
+        this.eventPointBoard = keyframeBoard.find('.event-points-board')
+        this.eventPointBoard.click(e => {
+            let left = this.eventPointBoard.offset().left
+            let time = (e.clientX - left + this.scroll) / pixelsPerTick
+
+            let handler = this.getHandler()
+            let newPoint = { time, data: [] }
+
+            handler.events.push(newPoint)
+
+            this.updateEventPoints()
+        
+        })
+
         this.emptyLayer.find('.kf-layer-add').click(() => {
             let info = this.getLayerInfo()
             if(info !== null) {
@@ -57,7 +72,30 @@ export class KeyframeBoardManager {
                 this.getLayerDom(kf.layer).find('.keyframe-container').append(kf.element)
             })
         }
-        
+        this.updateEventPoints()
+    }
+
+    //TODO: make an event modal that allows you to add events in a type:data format
+    updateEventPoints() {
+        this.eventPointBoard.html('')
+        this.getHandler().events.forEach(evt => {
+            if(evt.element === undefined) {
+                evt.element = this.emptyPoint.clone()[0]
+                evt.element.classList.remove('empty-event-point')
+                onElementDrag(evt.element, () => evt.time, (dx, time) => {
+                    evt.time = time + (dx / pixelsPerTick )
+                    this.updateEventPoints()
+                }, max => {
+                    if(max < 2) {
+                        let evts = this.getHandler().events
+                        evts.splice(evts.indexOf(evt), 1)                        
+                        this.updateEventPoints()
+                    }
+                })
+            }
+            evt.element.style.left = (evt.time * pixelsPerTick) - this.scroll + "px"
+            this.eventPointBoard.append(evt.element)
+        })
     }
 
     updateKeyFrame(kf) {
@@ -136,7 +174,7 @@ export class KeyframeBoardManager {
         } )
     
         onElementDrag($(newKF).find('.keyframe-container').get(0), () => this.scroll, (dx, scroll) => {
-            this.scroll = scroll - dx
+            this.scroll = Math.max(scroll - dx, 0)
             this.reframeKeyframes()
         })
 

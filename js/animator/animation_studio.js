@@ -115,12 +115,15 @@ export class AnimationStudio {
     runFrame() {
         this.raytracer.update()
 
-        let handler = this.animationTabHandler.active
-        if(handler !== null) {
-            this.keyframeManager.ensureFramePosition()
-            handler.animate(this.clock.getDelta())
-            this.keyframeManager.setupSelectedPose()
+        if(this.animationTabHandler.isAny()) {
+            let handler = this.animationTabHandler.active
+            if(handler !== null) {
+                this.keyframeManager.ensureFramePosition()
+                handler.animate(this.clock.getDelta())
+                this.keyframeManager.setupSelectedPose()
+            }
         }
+        
 
         this.display.render()
         
