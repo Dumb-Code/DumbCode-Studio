@@ -1,4 +1,5 @@
 import { PlayState } from "../animations.js"
+import { onElementDrag } from "../util.js"
 
 const sectionWidth = 20
 const ticksPerSection = 1 
@@ -49,7 +50,7 @@ export class KeyframeBoardManager {
             info.forEach(layer => {
                 let dom = this.getLayerDom(layer.id)
                 this.layerConatiner.append(dom)
-                dom.find('.keyframe-container').html('') //Clear children
+                dom.find('.keyframe-container').css('background-position-x', -this.scroll + 'px').html('') //Clear children
             })
             handler.keyframes.forEach(kf => {
                 this.updateKeyFrame(kf, handler)
@@ -61,23 +62,31 @@ export class KeyframeBoardManager {
 
     updateKeyFrame(kf) {
         if(kf.element === undefined) {
-            console.log(colors[Math.min(Math.max(0 || kf.layer, 0), colors.length)])
-            let color = colors[Math.min(Math.max(0 || kf.layer, 0), colors.length)]
-            //<div class="keyframe"><div class="keypoint"></div></div>
-            kf.element = document.createElement('div')
-            kf.element.classList.add('keyframe')
-            kf.element.style.backgroundColor = color[0]
-
-            let point = document.createElement('div')
-            point.classList.add('keypoint')
-            point.style.backgroundColor = color[1]
-
-            kf.element.appendChild(point)
+            kf.element = this.createKeyFrameElement(kf)
         }
 
         let left = kf.startTime * pixelsPerTick
         kf.element.style.width = kf.duration * pixelsPerTick + "px"
         kf.element.style.left = left - this.scroll + "px"
+    }
+
+    createKeyFrameElement(kf) {
+        let color = colors[Math.min(Math.max(0 || kf.layer, 0), colors.length)]
+        let element = document.createElement('div')
+        element.classList.add('keyframe')
+        element.style.backgroundColor = color[0]
+
+        onElementDrag(element, () => kf.startTime, (dx, startTime) => {
+            kf.startTime = startTime + ( dx / pixelsPerTick )
+            this.updateKeyFrame(kf)
+        })
+
+        let point = document.createElement('div')
+        point.classList.add('keypoint')
+        point.style.backgroundColor = color[1]
+
+        element.appendChild(point)
+        return element
     }
 
     setupSelectedPose() {
@@ -126,6 +135,11 @@ export class KeyframeBoardManager {
             name: `Layer ${layer}` 
         } )
     
+        onElementDrag($(newKF).find('.keyframe-container').get(0), () => this.scroll, (dx, scroll) => {
+            this.scroll = scroll - dx
+            this.reframeKeyframes()
+        })
+
         $(newKF).find('.kf-layer-add').click(() => {
             let kf = handler.createKeyframe()
             kf.duration = 5

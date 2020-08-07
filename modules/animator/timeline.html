@@ -22,6 +22,7 @@
    height: 20px;
    padding: 0px;
    display: flex;
+   clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)
 }
 
 .eventpoint {
@@ -48,8 +49,12 @@
     top: -3px;
 }
 
-.empty-keyframe .kf-layer-visible, .empty-keyframe .kf-layer-lock {
+.empty-keyframe .kf-layer-visible, .empty-keyframe .kf-layer-lock, .empty-keyframe .keyframe-container {
     display: none;
+}
+
+.empty-keyframe {
+    padding-top: 12px;
 }
 
 .keyframe-icon-box span {
@@ -84,7 +89,7 @@
 <div class="columns is-mobile layer column-blue empty-keyframe">
     <div class="column is-narrow">
         <div class="notification has-background-black-ter layer-name">
-            <p class="heading is-size-8 layer-text" style="margin-bottom: 3px; width: 100px;">Layer 1</p>
+            <p class="heading is-size-8 layer-text" style="margin-bottom: 3px; width: 100px;">New Layer</p>
         </div>
     </div>
 

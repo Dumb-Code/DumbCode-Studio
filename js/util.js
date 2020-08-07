@@ -275,3 +275,24 @@ export function listenForKeyChange(key, onchange) {
     arr.push(onchange)
     keyListeners.set(key, arr)
 }
+
+export function onElementDrag(element, infoClickGetter = () => {}, callback = (dx, info) => {}) {
+    element.onmousedown = e => {
+        let doc = element.ownerDocument
+        let cx = e.clientX
+        let info = infoClickGetter()
+        let mousemove = evt => {
+            let dx = evt.clientX - cx
+            callback(dx, info)
+            evt.stopPropagation()
+        }
+        let mouseup = evt => {
+            doc.removeEventListener('mousemove', mousemove)
+            doc.removeEventListener('mouseup', mouseup)
+            evt.stopPropagation()
+        }
+        doc.addEventListener('mousemove', mousemove)
+        doc.addEventListener('mouseup', mouseup)
+        e.stopPropagation()
+    }
+}
