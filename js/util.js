@@ -278,7 +278,7 @@ export function listenForKeyChange(key, onchange) {
 
 const disableSelect = e => e.preventDefault()
 
-export function onElementDrag(element, infoClickGetter = () => {}, callback = (dx, info) => {}, onreleased = (max, dx) => {}) {
+export function onElementDrag(element, infoClickGetter = () => {}, callback = (dx, dy, info, x, y) => {}, onreleased = (max, dx, dy, x, y) => {}) {
     element.onmousedown = e => {
         let doc = element.ownerDocument
         let cx = e.clientX
@@ -291,14 +291,14 @@ export function onElementDrag(element, infoClickGetter = () => {}, callback = (d
 
             max = Math.max(max, dx*dx + dy*dy)
             
-            callback(dx, info)
+            callback(dx, dy, info, evt.clientX, evt.clientY)
             evt.stopPropagation()
         }
         let mouseup = evt => {
             doc.removeEventListener('mousemove', mousemove)
             doc.removeEventListener('mouseup', mouseup)
             doc.removeEventListener('selectstart', disableSelect)
-            onreleased(Math.sqrt(max), evt.clientX - cx)
+            onreleased(Math.sqrt(max), evt.clientX - cx, evt.clientY - cy, evt.clientX, evt.clientY)
             evt.stopPropagation()
         }
         doc.addEventListener('mousemove', mousemove)

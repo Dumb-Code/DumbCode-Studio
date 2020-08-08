@@ -96,6 +96,9 @@
 .keyframe-board {
    margin-left: 10px;
    margin-right: 10px;
+   overflow-x: hidden;
+   overflow-y: scroll;
+   height: 120px;
 }
 
 .keyframe-board-entries {

@@ -6,14 +6,6 @@ const ticksPerSection = 1
 const pixelsPerTick = sectionWidth / ticksPerSection
 const resolution = 10
 
-//todo: generate color based of ID
-const colors = [
-    ['#5096f2', '#0081e3'],
-    ['#78e673', '#34de2c'],
-    ['#fae37d', '#ffcc24'],
-    ['#ed7261', '#cc422f']
-]
-
 export class KeyframeBoardManager {
 
     
@@ -66,6 +58,7 @@ export class KeyframeBoardManager {
                 let dom = this.getLayerDom(layer.id)
                 this.layerConatiner.append(dom)
                 dom.find('.keyframe-container').css('background-position-x', -this.scroll + 'px').html('') //Clear children
+                dom.find('.layer-text').text(layer.name)
             })
             handler.keyframes.forEach(kf => {
                 this.updateKeyFrame(kf, handler)
@@ -82,7 +75,7 @@ export class KeyframeBoardManager {
             if(evt.element === undefined) {
                 evt.element = this.emptyPoint.clone()[0]
                 evt.element.classList.remove('empty-event-point')
-                onElementDrag(evt.element, () => evt.time, (dx, time) => {
+                onElementDrag(evt.element, () => evt.time, (dx, _, time) => {
                     evt.time = time + (dx / pixelsPerTick )
                     this.updateEventPoints()
                 }, max => {
@@ -93,7 +86,7 @@ export class KeyframeBoardManager {
                     }
                 })
             }
-            evt.element.style.left = (evt.time * pixelsPerTick) - this.scroll + "px"
+            evt.element.style.left = (evt.time * pixelsPerTick) - this.scroll - 8 + "px"
             this.eventPointBoard.append(evt.element)
         })
     }
@@ -103,25 +96,42 @@ export class KeyframeBoardManager {
             kf.element = this.createKeyFrameElement(kf)
         }
 
+        let color = (kf.layer * 64) % 360
+        kf.element.style.backgroundColor = `hsl(${color}, 100%, 70%)`
+        kf.element._keyframePointer.style.backgroundColor = `hsl(${color}, 100%, 50%)`
+
         let left = kf.startTime * pixelsPerTick
         kf.element.style.width = kf.duration * pixelsPerTick + "px"
         kf.element.style.left = left - this.scroll + "px"
     }
 
     createKeyFrameElement(kf) {
-        let color = colors[Math.min(Math.max(0 || kf.layer, 0), colors.length)]
         let element = document.createElement('div')
         element.classList.add('keyframe')
-        element.style.backgroundColor = color[0]
 
-        onElementDrag(element, () => kf.startTime, (dx, startTime) => {
+        onElementDrag(element, () => kf.startTime, (dx, _dy, startTime, x, y) => {
             kf.startTime = startTime + ( dx / pixelsPerTick )
             this.updateKeyFrame(kf)
+
+            let info = this.getLayerInfo()
+            if(info !== null) {
+                info.forEach(layer => {
+                    let dom = this.getLayerDom(layer.id).get(0)
+                    let rect = dom.getBoundingClientRect()
+
+                    if(y >= rect.top && y <= rect.bottom && kf.layer !== layer.id) {
+                        kf.layer = layer.id
+                        this.reframeKeyframes()
+                    }
+                })
+            }
+
         })
 
         let point = document.createElement('div')
         point.classList.add('keypoint')
-        point.style.backgroundColor = color[1]
+
+        element._keyframePointer = point
 
         element.appendChild(point)
         return element
@@ -156,6 +166,7 @@ export class KeyframeBoardManager {
     createNewLayer(handler, layer) {
         let newKF = this.emptyLayer.clone()[0]
         newKF.classList.remove('empty-keyframe')
+        let dom = $(newKF)
 
         let info = this.getLayerInfo()
         if(info === null) {
@@ -166,19 +177,39 @@ export class KeyframeBoardManager {
             return
         }
 
-        this.elementDoms.set(layer, $(newKF))
+        this.elementDoms.set(layer, dom)
 
-        info.push( { 
+        let data = { 
             id: layer, 
             name: `Layer ${layer}` 
-        } )
+        }
+        info.push(data)
     
-        onElementDrag($(newKF).find('.keyframe-container').get(0), () => this.scroll, (dx, scroll) => {
+        onElementDrag(dom.find('.keyframe-container').get(0), () => this.scroll, (dx, _, scroll) => {
             this.scroll = Math.max(scroll - dx, 0)
             this.reframeKeyframes()
         })
 
-        $(newKF).find('.kf-layer-add').click(() => {
+        let layerText = dom.find('.layer-text-edit')
+
+        dom.find('.layer-name').dblclick(() => {
+            newKF.classList.add('is-editing')
+            layerText.val(data.name)
+            layerText.select()
+        })
+        layerText
+            .on('input', e => {
+                data.name = e.target.value
+                dom.find('.layer-text').text(data.name)
+            })
+            .focusout(() => newKF.classList.remove('is-editing'))
+            .keyup(e => {
+                if(e.key === "Enter") {
+                    newKF.classList.remove('is-editing')
+                }
+            })
+
+        dom.find('.kf-layer-add').click(() => {
             let kf = handler.createKeyframe()
             kf.duration = 5
             kf.layer = layer

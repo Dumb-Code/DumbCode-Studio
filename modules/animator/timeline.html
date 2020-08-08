@@ -70,6 +70,19 @@
     height: 20px;
 }
 
+.keyframe-layer.is-editing .layer-text {
+    display: none;
+}
+
+.keyframe-layer:not(.is-editing) .layer-text-edit {
+    display: none;
+}
+
+.layer-text-edit {
+    /* height: 16px; */
+    width: 100px;
+}
+
 </style>
 <div class="keyframe-playback-marker tooltip"></div>
 <div class="columns is-mobile layer">
@@ -91,10 +104,11 @@
 </div>
 <div class="keyframe-board-columns">
 </div>
-<div class="columns is-mobile layer column-blue empty-keyframe">
+<div class="columns is-mobile layer column-blue keyframe-layer empty-keyframe">
     <div class="column is-narrow">
         <div class="notification has-background-black-ter layer-name">
             <p class="heading is-size-8 layer-text" style="margin-bottom: 3px; width: 100px;">New Layer</p>
+            <input class="layer-text-edit" type="text">
         </div>
     </div>
 
