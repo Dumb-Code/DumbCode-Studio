@@ -19,15 +19,21 @@ export class KeyframeBoardManager {
 
         this.playbackMarker = keyframeBoard.find('.keyframe-playback-marker')
 
+        this.editingPoint = null
+
         this.emptyPoint = keyframeBoard.find('.empty-event-point')
         this.eventPointBoard = keyframeBoard.find('.event-points-board')
         this.eventPointBoard.click(e => {
+            if(e.target !== this.eventPointBoard.get(0)) {
+                return
+            }
             let left = this.eventPointBoard.offset().left
             let time = (e.clientX - left + this.scroll) / pixelsPerTick
 
             let handler = this.getHandler()
             let newPoint = { time, data: [] }
 
+            this.editEventPoint(newPoint)
             handler.events.push(newPoint)
 
             this.updateEventPoints()
@@ -44,6 +50,47 @@ export class KeyframeBoardManager {
         this.scroll = 0
 
         this.updateLables()
+
+        this.waitAndSetEventModal()
+    }
+
+    editEventPoint(point) {
+        this.editingPoint = point
+
+        this.eventPointList.html('') //clear
+        point.data.forEach(d => this.createEventListEntry(d))
+
+        openModal('animator/eventpoint')
+    }
+
+    createEventListEntry(data) {
+        let dom = this.emptyEventEntry.clone()
+        dom.removeClass('empty-entry')
+        dom.find('.edit-type').val(data.type).on('input', e => data.type = e.target.value)
+        dom.find('.edit-data').val(data.data).on('input', e => data.data = e.target.value)
+        this.eventPointList.append(dom)
+
+        dom.find('.delete-event').click(() => {
+            dom.detach()
+            this.editingPoint.data = this.editingPoint.data.filter(d => d !== data)
+        })
+    }
+
+    async waitAndSetEventModal() {
+        let dom = $(await getModal('animator/eventpoint'))
+        this.emptyEventEntry = dom.find('.empty-entry')
+        this.eventPointList = dom.find('.event-point-list')
+
+        dom.find('.add-event').click(() => {
+            let data = { type:"", data:"" }
+            this.editingPoint.data.push(data)
+            this.createEventListEntry(data)
+        })
+        dom.find('.remove-event').click(() => {
+            let evts = this.getHandler().events
+            evts.splice(evts.indexOf(this.editingPoint), 1)     
+            this.updateEventPoints()
+        })
     }
 
     reframeKeyframes() {
@@ -68,7 +115,6 @@ export class KeyframeBoardManager {
         this.updateEventPoints()
     }
 
-    //TODO: make an event modal that allows you to add events in a type:data format
     updateEventPoints() {
         this.eventPointBoard.html('')
         this.getHandler().events.forEach(evt => {
@@ -80,9 +126,7 @@ export class KeyframeBoardManager {
                     this.updateEventPoints()
                 }, max => {
                     if(max < 2) {
-                        let evts = this.getHandler().events
-                        evts.splice(evts.indexOf(evt), 1)                        
-                        this.updateEventPoints()
+                        this.editEventPoint(evt)
                     }
                 })
             }

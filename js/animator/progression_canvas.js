@@ -4,12 +4,12 @@ export class ProgressionCanvas {
     constructor(dom, studio) {
         this.animationTabHandler = studio.animationTabHandler
         this.selectedPoint = null
-        this.waitAndSetCanvas(studio)
+        this.waitAndSetCanvas()
         dom.find('.popup-animator-progression').click(() => this.redrawProgressionCanvas())
     }
 
-    async waitAndSetCanvas(studio) {
-        let pc = $(await getModal(studio.domElement, 'animator/progression')).find('#progression_canvas')
+    async waitAndSetCanvas() {
+        let pc = $(await getModal('animator/progression')).find('#progression_canvas')
         this.progressionCanvas = pc.get(0)
         this.canvasCtx = this.progressionCanvas.getContext("2d")
 

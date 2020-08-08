@@ -25,6 +25,9 @@ function includeModules() {
           if (this.readyState == 4) {
             if (this.status == 200) {
               element.innerHTML = this.responseText;
+              if(applyModalPopups) {
+                applyModalPopups(element)
+              }
             }
             if (this.status == 404) {element.innerHTML = "Error loading module: " + file;}
             //Remove the attribute, and call this function again

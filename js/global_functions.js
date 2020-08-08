@@ -19,7 +19,7 @@ applyModalPopups = async(html) => {
 }
 
 openModal = async name => {
-    let modal = await getModal(html, name)
+    let modal = await getModal(name)
 
     modal.classList.add('modal', 'is-active')
 
@@ -29,25 +29,20 @@ openModal = async name => {
 }
 
 
-getModal = async (dom, name) => {
-    if(!_htmlCache.has(dom)) {
-        _htmlCache.set(dom, new Map())
-    }
-
-    let map = _htmlCache.get(dom)
-    if(!map.has(name)) {
+getModal = async (name) => {
+    if(!_htmlCache.has(name)) {
         let h = await loadHtml(name)
         $(h).click(e => {
             if(e.target.classList.contains('modal-background')) {
                 document.getElementById('modal-area').innerHTML = ""
             }
         })
-        .find('.modal-close').click(() => document.getElementById('modal-area').innerHTML = "")
+        .find('.modal-close, .modal-close-button').click(() => document.getElementById('modal-area').innerHTML = "")
         
-        map.set(name, h)
+        _htmlCache.set(name, h)
     }
 
-    return map.get(name)
+    return _htmlCache.get(name)
 }
 
 removeItem = (array, item) => {
