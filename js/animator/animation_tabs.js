@@ -2,10 +2,19 @@ import { AnimationHandler } from "../animations.js"
 
 export class AnimationTabHandler {
     constructor(dom, studio) {
-        this.manager = studio.keyframeManager
         this.tbl = studio.display.tbl
         this._internalTab = -1
         this.allTabs = []
+    
+        this.onchange = newElement => {
+            let manager = studio.keyframeManager
+            manager.playstate = newElement.handler.playstate
+            manager.reframeKeyframes()
+
+            let values = studio.cubeDisplayValues
+            values.updateKeyframeSelected()
+            values.updateSelected()
+        }
         
         this.tabContainer = dom.find('.tab-container')
         dom.find('.tab-add').click(() => this.createNewTab())
@@ -41,9 +50,7 @@ export class AnimationTabHandler {
         let newElement = this.getIndex(newValue)
         if(newElement !== null) {
             newElement.element.classList.add('tab-selected')
-            this.manager.playstate = newElement.handler.playstate
-            this.manager.reframeKeyframes()
-
+            this.onchange(newElement)
         }
     }
 

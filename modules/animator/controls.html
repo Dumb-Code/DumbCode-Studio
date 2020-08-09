@@ -56,10 +56,10 @@
           <a class="button is-small">X</a>
         </div>
         <div class="control is-small" style="width: 100%;">
-          <input class="input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0">
+          <input axis="0" class="animation-input-rotation-slider input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0">
         </div>
         <div class="control is-small">
-          <input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
+          <input axis="0" class="animation-input-rotation input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
         </div>
       </div>
       <div class="field has-addons is-marginless">
@@ -67,10 +67,10 @@
           <a class="button is-small is-static">Y</a>
         </div>
         <div class="control is-small" style="width: 100%;">
-          <input class="input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0">
+          <input axis="1" class="animation-input-rotation-slider input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0">
         </div>
         <div class="control is-small">
-          <input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
+          <input axis="1" class="animation-input-rotation input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
         </div>
       </div>
       <div class="field has-addons is-marginless">
@@ -78,10 +78,10 @@
           <a class="button is-small is-static">Z</a>
         </div>
         <div class="control is-small" style="width: 100%;">
-          <input class="input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0">
+          <input axis="2" class="animation-input-rotation-slider input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0">
         </div>
         <div class="control is-small">
-          <input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
+          <input axis="2" class="animation-input-rotation input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
         </div>
       </div>
     </div>
@@ -95,7 +95,7 @@
           <a class="button is-small is-static">X</a>
         </div>
         <div class="control is-small">
-          <input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
+          <input axis="0" class="animation-input-position input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
         </div>
       </div>
       <div class="field has-addons is-marginless">
@@ -103,7 +103,7 @@
           <a class="button is-small is-static">Y</a>
         </div>
         <div class="control is-small">
-          <input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
+          <input axis="1" class="animation-input-position input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
         </div>
       </div>
       <div class="field has-addons is-marginless">
@@ -111,7 +111,7 @@
           <a class="button is-small is-static">Z</a>
         </div>
         <div class="control is-small">
-          <input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
+          <input axis="2" class="animation-input-position input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
         </div>
       </div>
 
@@ -165,6 +165,12 @@
                   <i class="fas fa-trash-alt"></i>
                 </span>
               </div>
+
+              <div class="column tooltip popup-modal-button popup-animator-progression" data-tooltip="Progression" modal-target="animator/progression">
+                <span class="icon is-small">
+                  <i class="fas fa-percentage"></i>
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -174,7 +180,7 @@
             <p class="heading is-size-8">Frame Start</p>
             <div class="field has-addons is-marginless">
               <div class="control is-small number-input">
-                <input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="20" style="width: 7rem;">
+                <input class="input is-small has-background-black-ter is-dark has-text-light input-frame-start editor-require-keyframe" type="number" value="20" style="width: 7rem;" disabled>
               </div>
             </div>
           </div>
@@ -185,7 +191,7 @@
             <p class="heading is-size-8">Frame Length</p>
             <div class="field has-addons is-marginless">
               <div class="control is-small number-input">
-                <input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="20" style="width: 7rem;">
+                <input class="input is-small has-background-black-ter is-dark has-text-light input-frame-length editor-require-keyframe" type="number" value="20" style="width: 7rem;" disabled>
               </div>
             </div>
           </div>

@@ -109,17 +109,17 @@ export class LinkedElement {
     }
 
     withsliders(sliderElems) {
-        this.addElement(this.sliderElems = sliderElems)
+        this.addElement(this.sliderElems = sliderElems, false)
         return this
     }
 
-    addElement(elem) {
+    addElement(elem, ensure = true) {
         if(this.array) {
             elem.on('input', e => {
                 let arr = this.rawValue.splice(0)
                 let idx = e.target.getAttribute('axis')
                 arr[idx] = this.parseNum ? parseFloat(e.target.value) : e.target.value
-                this.setValue(arr, idx)
+                this.setValue(arr, ensure ? idx : -1)
             })
         } else {
             elem.on('input', e => this.setValue(this.parseNum ? parseFloat(e.target.value) : (this.checkbox ? e.target.checked : e.target.value), 0))

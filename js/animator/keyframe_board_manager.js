@@ -11,16 +11,19 @@ export class KeyframeBoardManager {
     
     constructor(studio, keyframeBoard) {
         this.getHandler = () => studio.animationTabHandler.active
+        this.selectKeyframe = keyframe => studio.selectKeyframe(keyframe)
         this.playstate = new PlayState()
         this.elementDoms = new Map()
+
+        this.updateKeyframeSelected = () => studio.cubeDisplayValues.updateKeyframeSelected()
 
         this.layerConatiner = keyframeBoard.find('.keyframe-board-columns')
         this.emptyLayer = keyframeBoard.find('.empty-keyframe')
 
         this.playbackMarker = keyframeBoard.find('.keyframe-playback-marker')
-
+        
         this.editingPoint = null
-
+        //todo: link up all the of controls to the animator. Most of them will be changing the class name
         this.emptyPoint = keyframeBoard.find('.empty-event-point')
         this.eventPointBoard = keyframeBoard.find('.event-points-board')
         this.eventPointBoard.click(e => {
@@ -153,8 +156,9 @@ export class KeyframeBoardManager {
         let element = document.createElement('div')
         element.classList.add('keyframe')
 
-        onElementDrag(element, () => kf.startTime, (dx, _dy, startTime, x, y) => {
+        onElementDrag(element, () => kf.startTime, (dx, _dy, startTime, _x, y) => {
             kf.startTime = startTime + ( dx / pixelsPerTick )
+            this.updateKeyframeSelected()
             this.updateKeyFrame(kf)
 
             let info = this.getLayerInfo()
@@ -169,7 +173,10 @@ export class KeyframeBoardManager {
                     }
                 })
             }
-
+        }, max => {
+            if(max < 2) {
+                this.selectKeyframe(this.getHandler().selectedKeyFrame === kf ? undefined : kf)
+            } 
         })
 
         let point = document.createElement('div')
@@ -261,6 +268,7 @@ export class KeyframeBoardManager {
             handler.keyframes.push(kf)
             handler.keyframesDirty()
             this.reframeKeyframes()
+            this.selectKeyframe(kf)
             // kf.selectChange(true)
         })
 

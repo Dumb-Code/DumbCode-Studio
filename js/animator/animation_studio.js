@@ -34,9 +34,9 @@ export class AnimationStudio {
 
         this.gumball = new Gumball(dom, this)
         this.animationPanel = new AnimationPanel(dom)
+        this.cubeDisplayValues = new AnimationCubeValues(dom, this)
         this.keyframeManager = new KeyframeBoardManager(this, dom.find('.keyframe-board'))
         this.panelButtons = new PanelButtons(dom, this)
-        this.cubeDisplayValues = new AnimationCubeValues(dom, this)
         this.display = display
         this.methodExporter = new JavaMethodExporter()
         this.animationTabHandler = new AnimationTabHandler(dom, this)
@@ -86,6 +86,17 @@ export class AnimationStudio {
         }
     }
 
+    selectKeyframe(keyframe) {
+        let handler = this.animationTabHandler.active
+        if(handler.selectedKeyFrame !== undefined && handler.selectedKeyFrame.element !== undefined) {
+            handler.selectedKeyFrame.element.classList.remove('is-selected')
+        }
+        handler.selectedKeyFrame = keyframe
+        if(keyframe !== undefined && keyframe.element !== undefined) {
+            keyframe.element.classList.add('is-selected')
+        }
+        this.cubeDisplayValues.updateKeyframeSelected()
+    }
 
 
     setActive() {
