@@ -21,6 +21,20 @@ export class KeyframeBoardManager {
         this.emptyLayer = keyframeBoard.find('.empty-keyframe')
 
         this.playbackMarker = keyframeBoard.find('.keyframe-playback-marker')
+        onElementDrag(this.playbackMarker.get(0), undefined, (_dx, _dy, _info, x) => {
+            let marker = x - 250;
+
+            let conatainerWidth = this.eventPointBoard.width()
+
+            if(marker < 0) {
+                marker = 0
+            }
+            if(marker > conatainerWidth) {
+                marker = conatainerWidth
+            }
+            
+            this.playstate.ticks = (marker + this.scroll) / pixelsPerTick
+        })
         
         this.editingPoint = null
         //todo: link up all the of controls to the animator. Most of them will be changing the class name
@@ -277,7 +291,31 @@ export class KeyframeBoardManager {
     }
 
     ensureFramePosition() {
+        let ticks = this.playstate.ticks
+        let left = this.scroll / pixelsPerTick
 
+        let conatainerWidth = this.eventPointBoard.width()
+        let ticksInContainer = conatainerWidth / pixelsPerTick
+
+        let xpos = 0
+        //Not on screen, we need to move screen to fit
+        if(this.playstate.playing && (ticks < left || ticks > left + ticksInContainer)) {
+            this.scroll = ticks * pixelsPerTick
+            this.updateScroll()
+        } else {
+            xpos = (ticks - left) / ticksInContainer
+        }
+        
+        this.playbackMarker.css('display', xpos < 0 || xpos > 1 ? 'none' : 'unset').css('left', (250 + (xpos * conatainerWidth)) + "px")
+
+
+        let rounded = Math.round(ticks * 10) / 10;
+        this.playbackMarker.attr('data-tooltip', `${rounded} ticks`)
+    }
+
+    updateScroll() {
+        this.updateLables()
+        this.reframeKeyframes()
     }
 
     updateLables() {

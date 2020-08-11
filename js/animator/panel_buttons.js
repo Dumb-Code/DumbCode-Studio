@@ -20,33 +20,42 @@ export class PanelButtons {
                 if(index >= 0) {
                     let keyframe = handler.selectedKeyFrame
                     handler.keyframes.splice(index, 1)
-                    studio.keyframeManager.entryBoard.removeChild(keyframe.element)
                     handler.keyframesDirty()
                 
-                    keyframe.selectChange(false)
+                    studio.selectKeyframe(undefined)
                     studio.keyframeManager.reframeKeyframes()
                 }
             }
         })
 
-        dom.find('.button-reset-keyframes').click(() => {
+        let playstateRoot = dom.find('.toggle-timeline-playstate')
+        let updatePlaystate = () => {
+            let playing = studio.keyframeManager.playstate.playing === true
+            playstateRoot.find('.play-pause-symbol').toggleClass('fa-pause', playing).toggleClass('fa-play', !playing)
+        }
+
+
+        dom.find('.button-restart-time').click(() => {
             studio.keyframeManager.playstate.ticks = 0
-            studio.display.tbl.resetAnimations()
+            studio.keyframeManager.playstate.playing = true
+            updatePlaystate()
+        })
+        dom.find('.button-reset-time').click(() => {
+            studio.keyframeManager.playstate.ticks = 0
+            studio.keyframeManager.playstate.playing = false
+            updatePlaystate()
         })
 
-        dom.find('.button-pause-play').click(e => {
-            if(studio.keyframeManager.playstate.playing === true) {
-                e.target.innerHTML = "Play"
-            } else {
-                e.target.innerHTML = "Pause"
-            }
-            studio.keyframeManager.playstate.playing = !studio.keyframeManager.playstate.playing
+        playstateRoot.click(() => {
+            let playing = studio.keyframeManager.playstate.playing === true
+            studio.keyframeManager.playstate.playing = !playing
+            updatePlaystate()
         })
 
-        let speedText = dom.find('#playback-speed')
-        dom.find('.input-playback-speed').on('input', e => {
-            let value = Math.round(Math.pow(2, e.target.value) * 100) / 100
-            speedText.text(value)
+        let inputSpeedSlider = dom.find('.input-playback-speed')
+        inputSpeedSlider.on('input', e => {
+            let value = Math.round(Math.pow(2, e.target.value) * 10) / 10
+            inputSpeedSlider.parent().attr('data-tooltip', 'Speed: ' + (value === 1 ? 'Normal' : 'x ' + value))
             studio.keyframeManager.playstate.speed = value
         })
 

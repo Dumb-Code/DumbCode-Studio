@@ -124,6 +124,7 @@ export class AnimationStudio {
 
 
     runFrame() {
+        this.display.tbl.resetAnimations()
         this.raytracer.update()
 
         if(this.animationTabHandler.isAny()) {
