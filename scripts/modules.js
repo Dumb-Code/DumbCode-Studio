@@ -40,4 +40,7 @@ function includeModules() {
         return;
       }
     }
+    if(window.onModulesFinished) {
+      window.onModulesFinished()
+    }
   }

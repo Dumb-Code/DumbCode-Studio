@@ -7,7 +7,6 @@ const pixelsPerTick = sectionWidth / ticksPerSection
 const resolution = 10
 
 export class KeyframeBoardManager {
-
     
     constructor(studio, keyframeBoard) {
         this.getHandler = () => studio.animationTabHandler.active
@@ -119,6 +118,7 @@ export class KeyframeBoardManager {
         let info = this.getLayerInfo()
 
         if(handler != null && info !== null) {
+            handler.keyframes.forEach(kf => this.getLayerDom(kf.layer))
             info.forEach(layer => {
                 let dom = this.getLayerDom(layer.id)
                 this.layerConatiner.append(dom)
@@ -234,22 +234,23 @@ export class KeyframeBoardManager {
     }
 
     createNewLayer(handler, layer) {
-        let newKF = this.emptyLayer.clone()[0]
-        newKF.classList.remove('empty-keyframe')
-        let dom = $(newKF)
-
         let info = this.getLayerInfo()
         if(info === null) {
             return
         }
-        if(info.some(l => l.id == layer)) {
-            console.warn("Tried to create a layer that already existed: " + layer)
-            return
-        }
+
+        let newKF = this.emptyLayer.clone()[0]
+        newKF.classList.remove('empty-keyframe')
+        let dom = $(newKF)
 
         this.elementDoms.set(layer, dom)
 
-        let data = handler.createLayerInfo(layer)
+        let data 
+        if(info.some(l => l.id == layer)) {
+            data = info.find(l => l.id == layer)
+        } else {
+            data = handler.createLayerInfo(layer)
+        }
     
         onElementDrag(dom.find('.keyframe-container').get(0), () => this.scroll, (dx, _, scroll) => {
             this.scroll = Math.max(scroll - dx, 0)

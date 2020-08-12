@@ -1,3 +1,24 @@
+<style>
+    .empty-column {
+        display: none !important;
+    }
+
+    .animation-name-container.is-editing .animation-name {
+        display: none;
+    }
+
+    .animation-name-container:not(.is-editing) .animation-name-edit {
+        display: none;
+    }
+
+    .file-input-hidden {
+        display: none !important;
+    }
+
+    .clickable {
+        cursor: pointer !important;
+    }
+</style>
 <section class="section is-mobile has-background-black-ter" style="height: 100vh">
     <div class="columns">
         <div class="column is-1"></div>
@@ -68,59 +89,35 @@
                         <h1 class="title is-5">ANIMATIONS</h1>
                     </div>
                     <div class="column is-narrow">
-                        <i class="fas fa-plus"></i>
+                        <span class="new-animation-button icon is-small clickable tooltip" data-tooltip="Create New Animation">
+                            <i class="fas fa-plus"></i>
+                        </span>
                     </div>
-                </div>
-                <div class="tags has-addons mb-2">
-                    <div class="tag is-warning">Note</div>
-                    <div class="tag is-link">List not yet reflective of current animations.</div>
-                </div>
-            
-                <div class="columns">
                     <div class="column is-narrow">
-                    <i class="fas fa-bars"></i>
-                    </div>
-                    <div class="column">
-                    <p>walk.dca</p>
-                    </div>
-                </div>
-                
-                <div class="columns">
-                    <div class="column is-narrow">
-                    <i class="fas fa-bars"></i>
-                    </div>
-                    <div class="column">
-                    <p>run.dca</p>
+                        <div class="image-upload clickable tooltip" data-tooltip="Upload New Animation">
+                            <label for="animation-file-input">
+                                <div class="icon is-small">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                            </label>
+                            <input id="animation-file-input" class="file-input-hidden" type="file" />
+                        </div>
                     </div>
                 </div>
-                
-                <div class="columns">
-                    <div class="column is-narrow">
-                    <i class="fas fa-bars"></i>
-                    </div>
-                    <div class="column">
-                    <p>eat.dca</p>
-                    </div>
-                </div>
-                
-                <div class="columns">
-                    <div class="column is-narrow">
-                    <i class="fas fa-bars"></i>
-                    </div>
-                    <div class="column">
-                    <p>drink.dca</p>
-                    </div>
-                </div>
-                
-                <div class="columns">
+                <div class="animation-list-entry columns empty-column">
                     <div class="column is-narrow">
                         <i class="fas fa-bars"></i>
                     </div>
-                    <div class="column">
-                    <p>death.dca</p>
+                    <div class="column animation-name-container">
+                        <p class="animation-name"></p>
+                        <input class="animation-name-edit" type="text">
+                    </div>
+                    <div class="column is-narrow">
+                        <span class="download-animation-file icon is-small clickable tooltip " data-tooltip="Download Animation">
+                            <i class="fas fa-file-download"></i>
+                        </span>
                     </div>
                 </div>
-                
             </div>
         </div>
         <div class="column is-1"></div>

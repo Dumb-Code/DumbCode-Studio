@@ -101,6 +101,10 @@ export class AnimationHandler {
 
             kf.startTime = buffer.readNumber()
             kf.duration  = buffer.readNumber()
+            if(version >= 4) {
+                kf.layer = Math.round(buffer.readNumber())
+            }
+              
 
             let rotSize = buffer.readNumber()
             for(let r = 0; r < rotSize; r++) {
@@ -123,6 +127,7 @@ export class AnimationHandler {
 
             keyframes.push(kf)
         }
+        
         return keyframes
     }
 
@@ -151,7 +156,7 @@ export class AnimationHandler {
             let ticks = this.playstate.ticks % this.totalTime
             //todo: looping
         } else {
-            this.keyframes.filter(kf => lockedFrames.includes(kf.layerId)).forEach(kf => kf.animate(this.playstate.ticks))
+            this.keyframes.filter(kf => lockedFrames.includes(kf.layer)).forEach(kf => kf.animate(this.playstate.ticks))
         }
     }
 
@@ -169,6 +174,13 @@ export class AnimationHandler {
         this.keyframeInfo.push(data)
         return data
     }
+
+    ensureLayer(id) {
+        if(!this.keyframeInfo.some(layer => layer.id === id)) {
+            return this.createLayerInfo(id)
+        }
+        return this.keyframeInfo.find(layer => layer.id === id)
+    }
 }
 
 class KeyFrame {
@@ -176,7 +188,7 @@ class KeyFrame {
     constructor(handler) {
         this.handler = handler
 
-        this.layerId = 0
+        this.layer = 0
 
         this.startTime = 0
         this.duration = 0
@@ -227,14 +239,18 @@ class KeyFrame {
         }
 
         this.rotationMap.forEach((values, key) => {
-            let cube = this.handler.tbl.cubeMap.get(key).cubeGroup
-            let m = percentageDone*Math.PI/180
-            cube.rotation.set(cube.rotation.x + values[0]*m, cube.rotation.y + values[1]*m, cube.rotation.z + values[2]*m)
+            let cube = this.handler.tbl.cubeMap.get(key)?.cubeGroup
+            if(cube) {
+                let m = percentageDone*Math.PI/180
+                cube.rotation.set(cube.rotation.x + values[0]*m, cube.rotation.y + values[1]*m, cube.rotation.z + values[2]*m)
+            }
         })
 
         this.rotationPointMap.forEach((values, key) => {
-            let cube = this.handler.tbl.cubeMap.get(key).cubeGroup
-            cube.position.set(cube.position.x + values[0]*percentageDone, cube.position.y + values[1]*percentageDone, cube.position.z + values[2]*percentageDone)
+            let cube = this.handler.tbl.cubeMap.get(key)?.cubeGroup
+            if(cube) {
+                cube.position.set(cube.position.x + values[0]*percentageDone, cube.position.y + values[1]*percentageDone, cube.position.z + values[2]*percentageDone)
+            }
         })
     }
 
@@ -322,6 +338,16 @@ export class ByteBuffer {
 
         this.offset += length
         return new TextDecoder().decode(this.buffer.slice(this.offset - length, this.offset))
+    }
+
+    downloadAsFile(name) {
+        let blob = new Blob([this.buffer]);
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = name;
+        a.click();
+        window.URL.revokeObjectURL(url);
     }
 }
 

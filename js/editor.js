@@ -106,6 +106,9 @@ async function init() {
         transformControls.space = "local"
         return transformControls
     }
+}
+
+window.onModulesFinished = async() => {
     filesPage = await createFilesPage()
     frame()
 }
@@ -239,7 +242,7 @@ window.setupMainModel = async(file, nameElement) => {
 }
 
 async function createFilesPage() {
-    return new FilesPage($('#files-area'))
+    return new FilesPage($('#files-area'), () => modelingStudio, () => animationStudio)
 }
 
 async function createModelingStudio() {

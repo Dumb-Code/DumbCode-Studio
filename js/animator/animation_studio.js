@@ -59,7 +59,7 @@ export class AnimationStudio {
 
             let handler = this.animationTabHandler.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
-                handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layerId).some(l => !l.locked)) {
+                handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layer).some(l => !l.locked)) {
                 handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
             }
         }
@@ -80,7 +80,7 @@ export class AnimationStudio {
 
             let handler = this.animationTabHandler.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
-                handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layerId).some(l => !l.locked)) {
+                handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layer).some(l => !l.locked)) {
                 handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
             }
         }

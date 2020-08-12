@@ -25,16 +25,19 @@ export class AnimationTabHandler {
 
         let element = document.createElement('span')
         element.classList.add('editor-tab')
-        element.innerText = "Tab " + this.allTabs.length
+        element.innerText = "Tab " + id
         this.tabContainer.append(element)
         element.onclick = () => this.activeTab = id
 
-        this.allTabs.push({
+        let data = {
             handler: new AnimationHandler(this.tbl),
-            element
-        })
+            element,
+            name: "Tab " + id
+        }
+        this.allTabs.push(data)
 
         this.activeTab = id
+        return data
     }
 
     set activeTab(activeTab) {
