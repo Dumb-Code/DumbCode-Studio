@@ -15,7 +15,7 @@ function onMouseMove( event ) {
     rawMouse.x = event.clientX
     rawMouse.y = event.clientY
 
-    let div = $('#display-div').get(0)
+    let div = $('.tab-area.is-active #display-div').get(0)
     if(div !== undefined) {
         let rect = div.getBoundingClientRect()
         mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;

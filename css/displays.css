@@ -96,6 +96,9 @@
 .keyframe-board {
    margin-left: 10px;
    margin-right: 10px;
+   overflow-x: hidden;
+   overflow-y: scroll;
+   height: 120px;
 }
 
 .keyframe-board-entries {
@@ -161,13 +164,6 @@
    background-color: #ffaaff;
 }
 
-.keyframe-playback-marker {
-   position:absolute;
-   width: 5px;
-   height: 150px;
-   background-color: #4CAF50;
-}
-
 .keyframe-board-labels {
    height:25px;
    background: #121212;
@@ -179,7 +175,7 @@
    pointer-events: none;
 }
 
-.button.button-activateable.is-activated {
+.button-activateable.is-activated {
    color: #4CAF50 !important;
 }
 

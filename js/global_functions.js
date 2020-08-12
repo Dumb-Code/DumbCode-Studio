@@ -13,37 +13,36 @@ loadHtml = async file => {
 const _htmlCache = new Map()
 
 applyModalPopups = async(html) => {
-    $(html).find('.popup-modal-button').click(async function(e) {
-        let modal = await getModal(html, this.getAttribute('modal-target'))
-
-        modal.classList.add('modal', 'is-active')
-
-        const parentHTML = document.getElementById('modal-area')
-        parentHTML.innerHTML = ""
-        parentHTML.appendChild(modal)
+    $(html).find('.popup-modal-button').click(async function() {
+        openModal(this.getAttribute('modal-target'))
     })
 }
 
+openModal = async name => {
+    let modal = await getModal(name)
 
-getModal = async (dom, name) => {
-    if(!_htmlCache.has(dom)) {
-        _htmlCache.set(dom, new Map())
-    }
+    modal.classList.add('modal', 'is-active')
 
-    let map = _htmlCache.get(dom)
-    if(!map.has(name)) {
+    const parentHTML = document.getElementById('modal-area')
+    parentHTML.innerHTML = ""
+    parentHTML.appendChild(modal)
+}
+
+
+getModal = async (name) => {
+    if(!_htmlCache.has(name)) {
         let h = await loadHtml(name)
         $(h).click(e => {
             if(e.target.classList.contains('modal-background')) {
                 document.getElementById('modal-area').innerHTML = ""
             }
         })
-        .find('.modal-close').click(() => document.getElementById('modal-area').innerHTML = "")
+        .find('.modal-close, .modal-close-button').click(() => document.getElementById('modal-area').innerHTML = "")
         
-        map.set(name, h)
+        _htmlCache.set(name, h)
     }
 
-    return map.get(name)
+    return _htmlCache.get(name)
 }
 
 removeItem = (array, item) => {

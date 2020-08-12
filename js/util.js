@@ -109,17 +109,17 @@ export class LinkedElement {
     }
 
     withsliders(sliderElems) {
-        this.addElement(this.sliderElems = sliderElems)
+        this.addElement(this.sliderElems = sliderElems, false)
         return this
     }
 
-    addElement(elem) {
+    addElement(elem, ensure = true) {
         if(this.array) {
             elem.on('input', e => {
                 let arr = this.rawValue.splice(0)
                 let idx = e.target.getAttribute('axis')
                 arr[idx] = this.parseNum ? parseFloat(e.target.value) : e.target.value
-                this.setValue(arr, idx)
+                this.setValue(arr, ensure ? idx : -1)
             })
         } else {
             elem.on('input', e => this.setValue(this.parseNum ? parseFloat(e.target.value) : (this.checkbox ? e.target.checked : e.target.value), 0))
@@ -274,4 +274,36 @@ export function listenForKeyChange(key, onchange) {
     let arr = keyListeners.has(key) ? keyListeners.get(arr) : []
     arr.push(onchange)
     keyListeners.set(key, arr)
+}
+
+const disableSelect = e => e.preventDefault()
+
+export function onElementDrag(element, infoClickGetter = () => {}, callback = (dx, dy, info, x, y) => {}, onreleased = (max, dx, dy, x, y) => {}) {
+    element.onmousedown = e => {
+        let doc = element.ownerDocument
+        let cx = e.clientX
+        let cy = e.clientY
+        let max = 0
+        let info = infoClickGetter()
+        let mousemove = evt => {
+            let dx = evt.clientX - cx
+            let dy = evt.clientY - cy
+
+            max = Math.max(max, dx*dx + dy*dy)
+            
+            callback(dx, dy, info, evt.clientX, evt.clientY)
+            evt.stopPropagation()
+        }
+        let mouseup = evt => {
+            doc.removeEventListener('mousemove', mousemove)
+            doc.removeEventListener('mouseup', mouseup)
+            doc.removeEventListener('selectstart', disableSelect)
+            onreleased(Math.sqrt(max), evt.clientX - cx, evt.clientY - cy, evt.clientX, evt.clientY)
+            evt.stopPropagation()
+        }
+        doc.addEventListener('mousemove', mousemove)
+        doc.addEventListener('mouseup', mouseup)
+        doc.addEventListener('selectstart', disableSelect)
+        e.stopPropagation()
+    }
 }

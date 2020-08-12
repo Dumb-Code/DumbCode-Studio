@@ -33,7 +33,16 @@
     white-space: pre;
 }
 
-#main-area.is-modeling > div#template-div {
+.tabs a {
+    color: antiquewhite !important;
+}
+
+.tabs li.is-active a {
+    color: yellow !important;
+    border-bottom-color: yellow !important;
+}
+
+#main-area.is-modeling > div#modeling-area {
     display: grid;
     grid-template-areas: 
     "left_area main_area right_area_top"

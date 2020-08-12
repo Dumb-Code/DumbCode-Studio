@@ -1,4 +1,4 @@
-import { LinkedSelectableList } from "../util.js";
+import { LinkedSelectableList, LinkedElement, ToggleableElement } from "../util.js";
 
 export class Gumball {
     constructor(dom, studio) {
@@ -21,6 +21,7 @@ export class Gumball {
         } );
 
         this.transformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false).onchange(() => this.selectChanged())
+        this.globalMode = new ToggleableElement(dom.find('.transform-control-global')).onchange(e => this.transformControls.space = e.value ? 'world' : 'local')
     }
 
     selectChanged() {

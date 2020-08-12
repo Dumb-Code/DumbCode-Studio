@@ -129,7 +129,6 @@ function frame() {
     let newTab = projectTabs.getActive(filesPage, modelingStudio, animationStudio)
     if(newTab !== activeTab && newTab !== undefined) {
         if(activeTab !== undefined) {
-            $(activeTab.domElement).detach()
             if(activeTab.setUnactive) {
                 activeTab.setUnactive()
             }
@@ -146,7 +145,6 @@ function frame() {
         if(canvasContainer !== undefined) {
             $(display.renderer.domElement).appendTo(canvasContainer)
         }
-        $(activeTab.domElement).appendTo('#main-area')
 
         Array.from(document.getElementsByClassName("editor-part")).forEach(elem => {
             elem.classList.toggle("is-active", elem.getAttribute("editor-tab").split(",").includes(projectTabs.activeTab))
@@ -173,10 +171,6 @@ function renameCube(oldValue, newValue) {
         modelingStudio.cubeList.elementMap.get(tabulaCube).a.innerText = newValue
     }   
     return false
-}
-
-function refreshKeyframes() {
-    animationStudio.animationTabHandler.allTabs.forEach(tab => tab.handler.keyframesDirty())
 }
 
 function setTexture(tex) {
@@ -245,15 +239,15 @@ window.setupMainModel = async(file, nameElement) => {
 }
 
 async function createFilesPage() {
-    return new FilesPage(await loadHtml(projectTabs.files))
+    return new FilesPage($('#files-area'))
 }
 
 async function createModelingStudio() {
-    return new ModelingStudio(await loadHtml(projectTabs.modeling), display, raytracer, controls, renameCube, refreshKeyframes, setTexture)
+    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, setTexture)
 }
 
 async function createAnimationStudio() {
-    return new AnimationStudio(await loadHtml(projectTabs.animation) , raytracer, display)
+    return new AnimationStudio($('#animation-area') , raytracer, display)
 }
 
 async function initiateModel(model) {

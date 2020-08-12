@@ -19,7 +19,9 @@
     <script src="https://bulma.io/lib/main.js?v=201907050846"></script>
 
     <link href="./css/displays.css" rel="stylesheet">
-
+    <link href="css/common.css" rel="stylesheet">
+    <script src="scripts/modules.js"></script>
+    <!-- <link rel="stylesheet" href="css/common.css" /> -->
     <script src="js/jszip.js"></script>
     <script src="js/gif.js"></script>
 
@@ -29,13 +31,19 @@
     <script type="module" src="js/editor.js"></script>
 </head>
 <body style="font-family: 'Montserrat', sans-serif; font-weight: 300;">
+<section class="is-fullheight is-mobile">
+    <nav aria-label="main navigation" class="navbar is-dark is-mobile is-marginless heading has-text-weight-bold"
+         role="navigation">
+        <div class="navbar-brand">
+            <div class="navbar-start">
+                <div class="navbar-item tabs" style="margin: 0;">
+                    <ul>
+                        <li class="is-active"><a onclick="setTab(this, 0)">File</a></li>
+                        <li><a onclick="setTab(this, 1)">Modeling</a></li>
+                        <li><a onclick="setTab(this, 2)">Animation</a></li>
+                    </ul>
+                </div>
 
-    <section class="is-mobile">
-        <nav aria-label="main navigation" class="navbar is-dark has-background-black-bis is-mobile is-marginless heading has-text-weight-bold" role="navigation">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="https://www.dumbcode.net/studio">
-                    <img src="../images/brand/logo.svg" width="20" height="20" style="margin-right: 10px;">STUDIO
-                </a>
             </div>
             <div style="width: 30px;"></div>
             <div class="navbar-menu is-fullhd" id="navbarBasicExample">
@@ -50,8 +58,28 @@
             </div>
         </nav>
     </section>
-    <section class="has-background-grey-darker" style="height: 6px;"></section>
-    <div id="main-area"></div>
+    <div id="main-area">
+        <div id="files-area" class="tab-area editor-part" editor-tab="files" module="templates/file.html"></div>
+        <div id="modeling-area" class="tab-area editor-part" editor-tab="modeling" module="templates/modeling.html"></div>
+        <div id="animation-area" class="tab-area editor-part" editor-tab="animation">
+            <div class="tab-div" id="tab-div">
+                <span class="tab-container"></span>
+                <span class="tab-add icon is-small">
+                    <i class="fas fa-plus"></i>
+                </span> 
+            </div>
+            <div id="display-div"></div>
+            <div class="editor" id="editor">
+                <section class="is-mobile has-background-black-ter is-paddingless"style="height: 16vh;">
+                    <div class="keyframe-board" module="modules/animator/timeline.html"></div>
+                </section>
+              
+                <section class="is-mobile has-background-dark is-paddingless" style="height: 14vh;">
+                    <div module="modules/animator/controls.html"></div>
+                </section>
+            </div>
+        </div>
+    </div>
     <div id="editor-mouseover"></div>
     <div id="modal-area"></div>
 </body>

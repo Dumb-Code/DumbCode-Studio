@@ -1,10 +1,6 @@
 export class FilesPage { 
 
-    constructor(domElement, ...materials) {
-        this.domElement = domElement
-
-        let dom = $(domElement)
-
+    constructor(dom, ...materials) {
         dom.find('.new-texture-upload').click(() => {
             let li = document.createElement('li')
             // let div = 

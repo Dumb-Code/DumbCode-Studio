@@ -8,6 +8,7 @@ import { AnimationCubeValues } from './animation_cube_values.js'
 import { AnimationTabHandler } from './animation_tabs.js'
 import { PanelButtons } from './panel_buttons.js'
 import { ProgressionCanvas } from './progression_canvas.js'
+import { KeyframeBoardManager } from './keyframe_board_manager.js'
 
 const mainArea = document.getElementById("main-area")
 
@@ -33,9 +34,9 @@ export class AnimationStudio {
 
         this.gumball = new Gumball(dom, this)
         this.animationPanel = new AnimationPanel(dom)
-        this.keyframeManager = new KeyframeManager(this, dom.find('.keyframe-board').get(0))
-        this.panelButtons = new PanelButtons(dom, this)
         this.cubeDisplayValues = new AnimationCubeValues(dom, this)
+        this.keyframeManager = new KeyframeBoardManager(this, dom.find('.keyframe-board'))
+        this.panelButtons = new PanelButtons(dom, this)
         this.display = display
         this.methodExporter = new JavaMethodExporter()
         this.animationTabHandler = new AnimationTabHandler(dom, this)
@@ -59,7 +60,6 @@ export class AnimationStudio {
             let handler = this.animationTabHandler.active
             if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
-                handler.keyframesDirty()
             }
         }
     }
@@ -80,11 +80,21 @@ export class AnimationStudio {
             let handler = this.animationTabHandler.active
             if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
-                handler.keyframesDirty()
             }
         }
     }
 
+    selectKeyframe(keyframe) {
+        let handler = this.animationTabHandler.active
+        if(handler.selectedKeyFrame !== undefined && handler.selectedKeyFrame.element !== undefined) {
+            handler.selectedKeyFrame.element.classList.remove('is-selected')
+        }
+        handler.selectedKeyFrame = keyframe
+        if(keyframe !== undefined && keyframe.element !== undefined) {
+            keyframe.element.classList.add('is-selected')
+        }
+        this.cubeDisplayValues.updateKeyframeSelected()
+    }
 
 
     setActive() {
@@ -112,14 +122,19 @@ export class AnimationStudio {
 
 
     runFrame() {
+        this.display.tbl.resetAnimations()
         this.raytracer.update()
 
-        let handler = this.animationTabHandler.active
-        if(handler !== null) {
-            this.keyframeManager.ensureFramePosition()
-            handler.animate(this.clock.getDelta())
-            this.keyframeManager.setupSelectedPose()
+        if(this.animationTabHandler.isAny()) {
+            let handler = this.animationTabHandler.active
+            if(handler !== null) {
+                this.keyframeManager.ensureFramePosition()
+                if(this.keyframeManager.setupSelectedPose() === false) {
+                    handler.animate(this.clock.getDelta())
+                }
+            }
         }
+        
 
         this.display.render()
         
