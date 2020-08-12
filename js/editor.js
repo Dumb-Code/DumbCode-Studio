@@ -10,9 +10,9 @@ import { ModelingStudio } from "./modeling/modeling_studio.js";
 import { FilesPage } from "./files_page.js";
 import { Raytracer } from "./raytracer.js";
 
-const major = -1
-const minor = -1
-const patch = -1
+const major = 0
+const minor = 1
+const patch = 0
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
