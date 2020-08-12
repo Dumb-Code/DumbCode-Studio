@@ -15,9 +15,8 @@ import { TextureManager } from "./texture_manager.js"
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, orbitControls, renameCube, refreshKeyframes, setTexture) {
+    constructor(domElement, display, raytracer, orbitControls, renameCube, setTexture) {
         this.domElement = domElement
-        this.refreshKeyframes = refreshKeyframes
         let dom = $(domElement)
         this.canvasContainer = dom.find("#display-div").get(0)
         this.display = display
@@ -60,7 +59,6 @@ export class ModelingStudio {
 
     cubeHierarchyChanged() {
         this.cubeList.refreshCompleatly()
-        this.refreshKeyframes()
     }
 
     setActive() {

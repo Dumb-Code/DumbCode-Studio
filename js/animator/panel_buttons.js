@@ -1,27 +1,12 @@
 export class PanelButtons {
     constructor(dom, studio) {
-        // dom.find('.button-add-keyframe').click(() => {
-        //     let handler = studio.animationTabHandler.active
-        //     if(handler !== null) {
-        //         let kf = handler.createKeyframe()
-        //         kf.duration = 5
-        //         kf.startTime = studio.keyframeManager.playstate.ticks
-        //         handler.keyframes.push(kf)
-        //         handler.keyframesDirty()
-        //         studio.keyframeManager.reframeKeyframes()
-        //         kf.selectChange(true)
-        //     }
-        // })
-
         dom.find('.button-delete-keyframe').click(() => {
             let handler = studio.animationTabHandler.active
             if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 let index = handler.keyframes.indexOf(handler.selectedKeyFrame)
                 if(index >= 0) {
-                    let keyframe = handler.selectedKeyFrame
                     handler.keyframes.splice(index, 1)
-                    handler.keyframesDirty()
-                
+            
                     studio.selectKeyframe(undefined)
                     studio.keyframeManager.reframeKeyframes()
                 }
@@ -68,7 +53,6 @@ export class PanelButtons {
 
             if(handler !== null && !isNaN(value) && handler.selectedKeyFrame !== undefined) {
                 handler.selectedKeyFrame.startTime = value
-                handler.keyframesDirty()
                 studio.keyframeManager.updateKeyFrame(handler.selectedKeyFrame)
             }
         })
@@ -83,7 +67,6 @@ export class PanelButtons {
                 handler.selectedKeyFrame.duration = value
                 handler.selectedKeyFrame.startTime -= diff
                 startTimeField.val(handler.selectedKeyFrame.startTime)
-                handler.keyframesDirty()
                 studio.keyframeManager.updateKeyFrame(handler.selectedKeyFrame)
             }
         })

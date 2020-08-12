@@ -20,8 +20,9 @@ export class KeyframeBoardManager {
         this.layerConatiner = keyframeBoard.find('.keyframe-board-columns')
         this.emptyLayer = keyframeBoard.find('.empty-keyframe')
 
+        this.scrubbingPlaybackMarker = false
         this.playbackMarker = keyframeBoard.find('.keyframe-playback-marker')
-        onElementDrag(this.playbackMarker.get(0), undefined, (_dx, _dy, _info, x) => {
+        onElementDrag(this.playbackMarker.get(0), () => this.scrubbingPlaybackMarker = true, (_dx, _dy, _info, x) => {
             let marker = x - 250;
 
             let conatainerWidth = this.eventPointBoard.width()
@@ -34,7 +35,7 @@ export class KeyframeBoardManager {
             }
             
             this.playstate.ticks = (marker + this.scroll) / pixelsPerTick
-        })
+        }, () => this.scrubbingPlaybackMarker = false)
         
         this.editingPoint = null
         //todo: link up all the of controls to the animator. Most of them will be changing the class name
@@ -203,7 +204,14 @@ export class KeyframeBoardManager {
     }
 
     setupSelectedPose() {
-
+        let handler = this.getHandler()
+        if(handler !== null) {
+            if(handler.selectedKeyFrame && !this.playstate.playing && !this.scrubbingPlaybackMarker) {
+                handler.selectedKeyFrame.animatePercentage(1)
+                return true
+            }
+        }
+        return false
     }
 
     getLayerInfo() {
@@ -280,7 +288,6 @@ export class KeyframeBoardManager {
             kf.layer = layer
             kf.startTime = this.playstate.ticks
             handler.keyframes.push(kf)
-            handler.keyframesDirty()
             this.reframeKeyframes()
             this.selectKeyframe(kf)
             // kf.selectChange(true)

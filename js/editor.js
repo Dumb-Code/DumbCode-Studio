@@ -173,10 +173,6 @@ function renameCube(oldValue, newValue) {
     return false
 }
 
-function refreshKeyframes() {
-    animationStudio.animationTabHandler.allTabs.forEach(tab => tab.handler.keyframesDirty())
-}
-
 function setTexture(tex) {
     material.map = tex
     selectedMaterial.map = tex
@@ -247,7 +243,7 @@ async function createFilesPage() {
 }
 
 async function createModelingStudio() {
-    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, refreshKeyframes, setTexture)
+    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, setTexture)
 }
 
 async function createAnimationStudio() {

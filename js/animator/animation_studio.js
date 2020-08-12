@@ -60,7 +60,6 @@ export class AnimationStudio {
             let handler = this.animationTabHandler.active
             if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
-                handler.keyframesDirty()
             }
         }
     }
@@ -81,7 +80,6 @@ export class AnimationStudio {
             let handler = this.animationTabHandler.active
             if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
-                handler.keyframesDirty()
             }
         }
     }
@@ -131,8 +129,9 @@ export class AnimationStudio {
             let handler = this.animationTabHandler.active
             if(handler !== null) {
                 this.keyframeManager.ensureFramePosition()
-                handler.animate(this.clock.getDelta())
-                this.keyframeManager.setupSelectedPose()
+                if(this.keyframeManager.setupSelectedPose() === false) {
+                    handler.animate(this.clock.getDelta())
+                }
             }
         }
         

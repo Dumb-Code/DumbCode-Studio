@@ -258,7 +258,6 @@ window.playAnimation = anim => {
     let kfs = name2Animation.get(anim)
     if(kfs !== undefined) {
         display.animationHandler.keyframes = kfs.map(k => k.cloneKeyframe())
-        display.animationHandler.keyframesDirty()
         playstate.ticks = 0
         togglePlaying(true)
     }

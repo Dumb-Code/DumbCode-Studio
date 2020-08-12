@@ -42,7 +42,6 @@ export class KeyframeManager {
     
                     handler.selectedKeyFrame.updateInfo()
                     this.updateKeyFrame(handler.selectedKeyFrame)
-                    handler.keyframesDirty()
                 } else {
                     this.scroll -= e.screenX - this.xHold
                     this.scroll = this.scroll < 0 ? 0 : this.scroll
