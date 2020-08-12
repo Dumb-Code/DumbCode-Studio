@@ -58,7 +58,8 @@ export class AnimationStudio {
             selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
 
             let handler = this.animationTabHandler.active
-            if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent) {
+            if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
+                handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layerId).some(l => !l.locked)) {
                 handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
             }
         }
@@ -78,7 +79,8 @@ export class AnimationStudio {
             selected.parent.position.set(values[0], values[1], values[2])
 
             let handler = this.animationTabHandler.active
-            if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent) {
+            if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
+                handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layerId).some(l => !l.locked)) {
                 handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
             }
         }

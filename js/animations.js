@@ -12,6 +12,7 @@ export class AnimationHandler {
         this.keyframes = []
         this.loopKeyframe = false
         this.events = []
+        this.keyframeInfo = []
         this.playstate = new PlayState()
     }
 
@@ -144,16 +145,29 @@ export class AnimationHandler {
     animate(deltaTime) {
         this.playstate.onFrame(deltaTime)
 
+        let lockedFrames = this.keyframeInfo.filter(i => i.visible).map(i => i.id)
+
         if(this.looping) {
             let ticks = this.playstate.ticks % this.totalTime
             //todo: looping
         } else {
-            this.keyframes.forEach(kf => kf.animate(this.playstate.ticks))
+            this.keyframes.filter(kf => lockedFrames.includes(kf.layerId)).forEach(kf => kf.animate(this.playstate.ticks))
         }
     }
 
     createKeyframe() {
         return new KeyFrame(this)
+    }
+
+    createLayerInfo(id) {
+        let data = { 
+            id, 
+            visible: true,
+            locked: false,
+            name: `Layer ${id}` 
+        }
+        this.keyframeInfo.push(data)
+        return data
     }
 }
 

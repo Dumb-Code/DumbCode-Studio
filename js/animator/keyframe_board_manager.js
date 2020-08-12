@@ -219,9 +219,6 @@ export class KeyframeBoardManager {
         if(handler === null) {
             return null
         }
-        if(handler.keyframeInfo === undefined) {
-            handler.keyframeInfo = []
-        }
         return handler.keyframeInfo.sort((a, b) => a.id - b.id)
     }
 
@@ -252,11 +249,7 @@ export class KeyframeBoardManager {
 
         this.elementDoms.set(layer, dom)
 
-        let data = { 
-            id: layer, 
-            name: `Layer ${layer}` 
-        }
-        info.push(data)
+        let data = handler.createLayerInfo(layer)
     
         onElementDrag(dom.find('.keyframe-container').get(0), () => this.scroll, (dx, _, scroll) => {
             this.scroll = Math.max(scroll - dx, 0)
@@ -290,7 +283,18 @@ export class KeyframeBoardManager {
             handler.keyframes.push(kf)
             this.reframeKeyframes()
             this.selectKeyframe(kf)
-            // kf.selectChange(true)
+        })
+
+        let layerVisible = dom.find('.kf-layer-visible')
+        layerVisible.click(() => {
+            data.visible = !data.visible
+            layerVisible.find('.icon-symbol').toggleClass('fa-eye', data.visible).toggleClass('fa-eye-slash', !data.visible)
+        })
+
+        let layerLocked = dom.find('.kf-layer-lock')
+        layerLocked.click(() => {
+            data.locked = !data.locked
+            layerLocked.find('.icon-symbol').toggleClass('fa-lock', data.locked).toggleClass('fa-lock-open', !data.locked)
         })
 
         this.reframeKeyframes()
