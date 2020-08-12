@@ -94,7 +94,7 @@ export class AnimationHandler {
 
         let length = buffer.readNumber()
 
-        let keyframes = []
+        this.keyframes = []
 
         for(let i = 0; i < length; i++) {
             let kf = this.createKeyframe()
@@ -123,12 +123,24 @@ export class AnimationHandler {
                 }
                 kf.resortPointsDirty()
             }
+
             this.repairKeyframe(kf, version)
 
-            keyframes.push(kf)
+            this.keyframes.push(kf)
         }
-        
-        return keyframes
+
+        if(version >= 4) {
+            let eventSize = buffer.readNumber()
+            for(let e = 0; e < eventSize; e++) {
+                let time = buffer.readNumber()
+                let data = []
+                let dataSize = buffer.readNumber()
+                for(let d = 0; d < dataSize; d++) {
+                    data.push({ type: buffer.readString(), data: buffer.readString() })
+                }
+                this.events.push({ time, data })
+            }
+        }        
     }
 
     repairKeyframe(kf, version) {

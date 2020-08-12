@@ -14,8 +14,7 @@ export class FilesPage {
                 let animator = this.animatorGetter()
                 if(tab) {
                     let buffer = new ByteBuffer(await readFile(file, (reader, file) => reader.readAsArrayBuffer(file)))
-                    tab.handler.keyframes = tab.handler.readDCAFile(buffer)
-                    console.log(tab.handler.keyframes)
+                    tab.handler.readDCAFile(buffer)
                     tab.handler.keyframes.forEach(kf => tab.handler.createLayerInfo(kf.layer))
                     animator.keyframeManager.reframeKeyframes()
                 }
@@ -97,6 +96,16 @@ export class FilesPage {
                     kf.progressionPoints.forEach(p => {
                         buffer.writeNumber(p.x)
                         buffer.writeNumber(p.y)
+                    })
+                })
+
+                buffer.writeNumber(handler.events.length)
+                handler.events.forEach(event => {
+                    buffer.writeNumber(event.time)
+                    buffer.writeNumber(event.data.length)
+                    event.data.forEach(datum => {
+                        buffer.writeString(datum.type)
+                        buffer.writeString(datum.data)
                     })
                 })
                 buffer.downloadAsFile(tab.name + ".dca")
