@@ -31,7 +31,6 @@
     <script type="module" src="js/editor.js"></script>
 </head>
 <body style="font-family: 'Montserrat', sans-serif; font-weight: 300;">
-
 <section class="is-fullheight is-mobile">
     <nav aria-label="main navigation" class="navbar is-dark is-mobile is-marginless heading has-text-weight-bold"
          role="navigation">
@@ -44,13 +43,20 @@
                         <li><a onclick="setTab(this, 2)">Animation</a></li>
                     </ul>
                 </div>
-            </div>
-            <div class="navbar-end">
-                <div class="navbar-item" style="text-transform: none" id="dumbcode-studio-version"></div>
-            </div>
-        </div>
 
-    </nav>
+            </div>
+            <div style="width: 30px;"></div>
+            <div class="navbar-menu is-fullhd" id="navbarBasicExample">
+                <div class="navbar-start">
+                    <a class="navbar-item is-active" onclick="setTab(this, 0)">Project</a>
+                    <a class="navbar-item" onclick="setTab(this, 1)">Modeling</a>
+                    <a class="navbar-item" onclick="setTab(this, 2)">Animation</a>
+                </div>
+                <div class="navbar-end">
+                    <div class="navbar-item" style="text-transform: none" id="dumbcode-studio-version"></div>
+                </div>
+            </div>
+        </nav>
     </section>
     <div id="main-area">
         <div id="files-area" class="tab-area editor-part" editor-tab="files" module="templates/file.html"></div>
