@@ -89,11 +89,17 @@ export class AnimationStudio {
     selectKeyframe(keyframe) {
         let handler = this.animationTabHandler.active
         if(handler.selectedKeyFrame !== undefined && handler.selectedKeyFrame.element !== undefined) {
-            handler.selectedKeyFrame.element.classList.remove('is-selected')
+            let kf = handler.selectedKeyFrame
+            let color = (kf.layer * 64) % 360
+            kf.element.style.backgroundColor = `hsl(${color}, 100%, 70%)`
+            kf.element._keyframePointer.style.backgroundColor = `hsl(${color}, 100%, 50%)`
         }
         handler.selectedKeyFrame = keyframe
         if(keyframe !== undefined && keyframe.element !== undefined) {
-            keyframe.element.classList.add('is-selected')
+            let kf = handler.selectedKeyFrame
+            let color = (kf.layer * 64) % 360
+            kf.element.style.backgroundColor = `hsl(${color}, 100%, 25%)`
+            kf.element._keyframePointer.style.backgroundColor = `hsl(${color}, 100%, 10%)`
         }
         this.cubeDisplayValues.updateKeyframeSelected()
     }
