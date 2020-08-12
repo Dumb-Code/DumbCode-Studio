@@ -44,7 +44,6 @@ export class PanelButtons {
             studio.keyframeManager.playstate.speed = value
         })
 
-        
         let startTimeField = dom.find('.input-keyframe-starttime')
 
         startTimeField.on('input', e => {
@@ -70,5 +69,11 @@ export class PanelButtons {
                 studio.keyframeManager.updateKeyFrame(handler.selectedKeyFrame)
             }
         })
+
+        this.onTabChange = () => {
+            let value = studio.keyframeManager.playstate.speed
+            inputSpeedSlider.val(Math.round(Math.log2(value) * 10) / 10)
+            inputSpeedSlider.parent().attr('data-tooltip', 'Speed: ' + (value === 1 ? 'Normal' : 'x ' + value))
+        }
     }
 }

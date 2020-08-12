@@ -14,6 +14,8 @@ export class AnimationTabHandler {
             let values = studio.cubeDisplayValues
             values.updateKeyframeSelected()
             values.updateSelected()
+
+            studio.panelButtons.onTabChange()
         }
         
         this.tabContainer = dom.find('.tab-container')
