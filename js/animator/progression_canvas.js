@@ -1,3 +1,5 @@
+import { LinkedSelectableList } from "../util.js"
+
 const radius = 7.5
 
 export class ProgressionCanvas {
@@ -5,13 +7,27 @@ export class ProgressionCanvas {
         this.animationTabHandler = studio.animationTabHandler
         this.selectedPoint = null
         this.waitAndSetCanvas()
-        dom.find('.popup-animator-progression').click(() => this.redrawProgressionCanvas())
+        dom.find('.popup-animator-progression').click(() =>         {
+            let handler = this.animationTabHandler.active
+            if(handler !== null && handler.selectedKeyFrame !== undefined) {
+                this.easingFunction.value = "sine"
+                this.easingFunctionType.value = "in"
+                this.redrawProgressionCanvas()
+            }
+        })
     }
 
     async waitAndSetCanvas() {
-        let pc = $(await getModal('animator/progression')).find('#progression_canvas')
+        let dom = $(await getModal('animator/progression'))
+        let pc = dom.find('#progression_canvas')
         this.progressionCanvas = pc.get(0)
         this.canvasCtx = this.progressionCanvas.getContext("2d")
+
+        this.easingFunction = new LinkedSelectableList(dom.find('.easing-function-entry'), false)
+        this.easingFunctionType = new LinkedSelectableList(dom.find('.easing-function-type-entry'))
+        this.easingFunctionAmount = dom.find('.easing-function-number')
+
+        dom.find('.generate-points-button').click(() => this.generateEasingFunction())
 
         pc.mousedown(e => {
             let handler = this.animationTabHandler.active
@@ -67,7 +83,6 @@ export class ProgressionCanvas {
 
     }
 
-
     redrawProgressionCanvas() {
         let handler = this.animationTabHandler.active
 
@@ -94,6 +109,112 @@ export class ProgressionCanvas {
                 this.canvasCtx.stroke();
             }
         }
+    }
+
+    generateEasingFunction() {
+        let handler = this.animationTabHandler.active
+        let points = this.easingFunctionAmount.val()
+
+        if(handler === null || handler.selectedKeyFrame === undefined || points <= 0) {
+            return
+        }
+
+        let funcRaw
+        switch(this.easingFunction.value) {
+            case "sine":
+                funcRaw = x => 1 - Math.cos((x * Math.PI) / 2)
+                break
+            
+            case "quad":
+                funcRaw = x => x*x
+                break
+            
+            case "cubic":
+                funcRaw = x => x*x*x
+                break
+                
+            case "quart":
+                funcRaw = x => x*x*x*x
+                break
+            
+            case "quint":
+                funcRaw = x => x*x*x*x*x
+                break
+            
+            case "expo":
+                funcRaw = x => Math.pow(2, 10*x - 10)
+                break
+            
+            case "circ":
+                funcRaw = x => 1 - Math.sqrt(1 - Math.pow(x, 2))
+                break
+
+            case "back":
+                funcRaw = x => 2.70158*x*x*x - 1.70158*x*x
+                break
+            
+            case "elastic":
+                funcRaw = x => -Math.pow(2, 10*x-10) * Math.sin((x*10-10.75)*(2*Math.PI)/3)
+                break
+            
+            case "bounce":
+                funcRaw = xIn => {
+                    let x = 1 - xIn
+                    
+                    const n1 = 7.5625;
+                    const d1 = 2.75;
+
+                    let res
+                    if (x < 1 / d1) {
+                        res = n1 * x * x;
+                    } else if (x < 2 / d1) {
+                        res = n1 * (x -= 1.5 / d1) * x + 0.75;
+                    } else if (x < 2.5 / d1) {
+                        res = n1 * (x -= 2.25 / d1) * x + 0.9375;
+                    } else {
+                        res = n1 * (x -= 2.625 / d1) * x + 0.984375;
+                    }
+                    return 1 - res
+                }
+                break
+        }
+
+        let func
+        switch(this.easingFunctionType.value) {
+            case "in":
+                func = x => funcRaw(x)
+                break
+
+            case "out":
+                func = x => 1 - funcRaw(1 - x)
+                break
+            
+            case "inout":
+                func = x => x < 0.5 ? funcRaw(2*x)/2 : 1 - funcRaw(2-2*x)/2
+                break
+        }
+
+
+        let xValues = []
+        if(points == 1) {
+            xValues.push(0.5)
+        } else {
+            let toGen = points - 1
+            for(let i = 1; i < toGen; i++) {
+                xValues.push(i / toGen)
+            }
+        }
+
+        let progressionPoints = handler.selectedKeyFrame.progressionPoints.filter(p => p.required)
+        
+        xValues.forEach(x => {
+            let y = 1 - func(x)
+            progressionPoints.push({ x, y })
+        })
+        
+        handler.selectedKeyFrame.progressionPoints = progressionPoints.sort((p1, p2) => p1.x - p2.x)
+        this.redrawProgressionCanvas()
+
     }
     
 }

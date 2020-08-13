@@ -229,3 +229,7 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
     border-bottom-style: solid;
     border-bottom-color: #000000;
 }
+
+.modal-content {
+    width: unset !important;
+}
