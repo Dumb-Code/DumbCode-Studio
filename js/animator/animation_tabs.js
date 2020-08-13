@@ -1,8 +1,9 @@
 import { AnimationHandler } from "../animations.js"
 
 export class AnimationTabHandler {
-    constructor(dom, studio) {
+    constructor(dom, studio, filesPage) {
         this.tbl = studio.display.tbl
+        this.filesPage = filesPage
         this._internalTab = -1
         this.allTabs = []
     
@@ -19,7 +20,11 @@ export class AnimationTabHandler {
         }
         
         this.tabContainer = dom.find('.tab-container')
-        dom.find('.tab-add').click(() => this.createNewTab())
+        dom.find('.tab-add').click(() => this.initiateNewTab())
+    }
+
+    initiateNewTab() {
+        this.filesPage.createNewAnimationTab()
     }
 
     createNewTab() {
@@ -61,7 +66,7 @@ export class AnimationTabHandler {
 
     get active() {
         if(this._internalTab === -1) {
-            this.createNewTab()
+            this.initiateNewTab()
         }
         return this.getIndex(this._internalTab)?.handler || null
     }

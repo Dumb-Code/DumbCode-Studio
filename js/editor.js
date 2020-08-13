@@ -250,7 +250,7 @@ async function createModelingStudio() {
 }
 
 async function createAnimationStudio() {
-    return new AnimationStudio($('#animation-area') , raytracer, display)
+    return new AnimationStudio($('#animation-area') , raytracer, display, filesPage)
 }
 
 async function initiateModel(model) {

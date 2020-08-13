@@ -14,7 +14,7 @@ const mainArea = document.getElementById("main-area")
 
 export class AnimationStudio {
 
-    constructor(domElement, raytracer, display) {
+    constructor(domElement, raytracer, display, filesPage) {
         this.domElement = domElement
         let dom  = $(domElement)
         this.raytracer = raytracer
@@ -39,7 +39,7 @@ export class AnimationStudio {
         this.panelButtons = new PanelButtons(dom, this)
         this.display = display
         this.methodExporter = new JavaMethodExporter()
-        this.animationTabHandler = new AnimationTabHandler(dom, this)
+        this.animationTabHandler = new AnimationTabHandler(dom, this, filesPage)
         this.progressionCanvas = new ProgressionCanvas(dom, this)
         this.clock = new Clock()
     }
