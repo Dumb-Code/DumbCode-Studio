@@ -136,10 +136,10 @@ export class TexturemapCanvas {
                     this.canvasMovingCube = {cube, x: mouseX-u, y: mouseY-v, moved: false}
                 } else if(event.type === 'mouseup') {
                     if(this.canvasMovingCube === null || this.canvasMovingCube.moved !== true) {
-                        this.raytracer.clickOnMesh(cube.planesGroup)
+                        this.raytracer.clickOnMesh(cube.cubeMesh)
                     }
                 } else {
-                    this.raytracer.mouseOverMesh(cube.planesGroup)
+                    this.raytracer.mouseOverMesh(cube.cubeMesh)
                 }
                 overHandled = true
             }

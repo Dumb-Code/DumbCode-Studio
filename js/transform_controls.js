@@ -1132,6 +1132,8 @@ var TransformControlsGizmo = function () {
 	// Reusable utility variables
 
 	var tempVector = new Vector3( 0, 0, 0 );
+	var tempVector2 = new Vector3( 0, 0, 0 );
+	var tempVector3 = new Vector3( 0, 0, 0 );
 	var tempEuler = new Euler();
 	var alignVector = new Vector3( 0, 1, 0 );
 	var zeroVector = new Vector3( 0, 0, 0 );
@@ -1198,6 +1200,11 @@ var TransformControlsGizmo = function () {
 		handles = handles.concat( this.helper[ this.mode ].children );
 
 		let centerFace = this.mode === 'dimensions' && this.object !== undefined && this.object.tabulaCube !== undefined
+		
+		if(centerFace) {
+			this.object.tabulaCube.cubeMesh.matrixWorld.decompose(tempVector2, tempQuaternion, tempVector3)
+			tempVector3.fromArray(this.object.tabulaCube.dimension).divideScalar(32)
+		}
 
 		for ( var i = 0; i < handles.length; i ++ ) {
 
@@ -1211,12 +1218,10 @@ var TransformControlsGizmo = function () {
 			handle.position.copy( this.worldPosition );
 
 			if(centerFace && handle.name.length == 2) {
-				let order = ['XP', 'XN', 'YP', 'YN', 'ZP', 'ZN']
-				let index = order.indexOf(handle.name)
-				if(index !== -1) {
-					this.object.tabulaCube.cubeMesh[index].getWorldPosition(handle.position);
-				}
-
+				handle.position.setComponent(0, handle.name.startsWith('X') ? (handle.name == 'XP' ? 1 : -1) : 0)
+				handle.position.setComponent(1, handle.name.startsWith('Y') ? (handle.name == 'YP' ? 1 : -1) : 0)
+				handle.position.setComponent(2, handle.name.startsWith('Z') ? (handle.name == 'ZP' ? -1 : 1) : 0)
+				handle.position.multiply(tempVector3).applyQuaternion(tempQuaternion).add(tempVector2)
 			}
 
 			var eyeDistance = this.worldPosition.distanceTo( this.cameraPosition );

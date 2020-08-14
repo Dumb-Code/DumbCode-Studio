@@ -73,8 +73,8 @@ export class Raytracer {
             
         }, false );
 
-        this.addEventListener('select', e => e.cubes.forEach(mesh => mesh.children.forEach(c => c.material = this.selectedMaterial)))
-        this.addEventListener('deselect', e => e.cubes.forEach(mesh => mesh.children.forEach(c => c.material = this.material)))
+        this.addEventListener('select', e => e.cubes.forEach(mesh => mesh.material = this.selectedMaterial))
+        this.addEventListener('deselect', e => e.cubes.forEach(mesh => mesh.material = this.material))
     }
 
     anySelected() {
@@ -86,7 +86,7 @@ export class Raytracer {
     }
 
     isCubeSelected(cube) {
-        return this.selectedSet.has(cube.planesGroup)
+        return this.selectedSet.has(cube.cubeMesh)
     }
 
     firstSelected() {
@@ -152,7 +152,7 @@ export class Raytracer {
         if(mesh !== undefined) {
             if(this.intersected != mesh) {
                 if(this.intersected && !this.selectedSet.has(this.intersected)) {
-                    this.intersected.children.forEach(c => c.material = this.material)
+                    this.intersected.material = this.material
                 }
                 intersectionChangeEvent.old = this.intersected
                 intersectionChangeEvent.cube = mesh
@@ -161,12 +161,12 @@ export class Raytracer {
                 this.dispatchEvent(intersectionChangeEvent)
                 
                 if(!this.selectedSet.has(this.intersected)) {
-                    this.intersected.children.forEach(c => c.material = this.highlightMaterial)
+                    this.intersected.material = this.highlightMaterial
                 } 
             } 
         } else if(this.intersected) {
             if(!this.selectedSet.has(this.intersected)) {
-                this.intersected.children.forEach(c => c.material = this.material)
+                this.intersected.material = this.material
             }
             intersectionChangeEvent.old = this.intersected
             intersectionChangeEvent.cube = undefined
@@ -197,7 +197,7 @@ export class Raytracer {
             let intersects = raycaster.intersectObjects(this.display.tbl.modelCache.children , true);
             if(!mouseDown) {
                 if(intersects.length > 0) {
-                    this.mouseOverMesh(intersects[0].object.parent, intersects[0].distance)
+                    this.mouseOverMesh(intersects[0].object, intersects[0].distance)
                     textDiv.style.display = "block"
                 } else {
                     this.mouseOverMesh(undefined)

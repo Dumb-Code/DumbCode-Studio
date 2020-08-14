@@ -38,6 +38,8 @@ export class TBLModel {
         this.modelCache.position.set(0, 1.5, 0)
         this.modelCache.add(mainCubeGroup)
 
+        console.log(this.modelCache)
+
         return this.modelCache
     }
 
@@ -171,18 +173,10 @@ export class TblCube {
         this.cubeGroup = new Group();
         this.cubeGroup.tabulaCube = this
 
-        this.planesGroup = new Group()
-        this.planesGroup.tabulaCube = this
-        this.planesGroup.partOfTheGroup = true
+        this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.tbl.mat)
+        this.cubeMesh.tabulaCube = this
         
-        this.cubeGroup.add(this.planesGroup)
-        this.cubeMesh = []
-        for(let f = 0; f < 6; f++) {
-            let mesh = new Mesh(undefined, this.tbl.mat)
-            mesh.isTabulaPlane = true
-            this.cubeMesh.push(mesh)
-            this.planesGroup.add(mesh)
-        }
+        this.cubeGroup.add(this.cubeMesh)
         this.updateDimension()
 
         this.cubeGroup.rotation.order = "ZYX"
@@ -229,11 +223,7 @@ export class TblCube {
         if(!silent) {
             this.tbl.onCubeHierarchyChanged()
         }
-        this.cubeGroup.children.forEach(child => {
-            if(child.partOfTheGroup !== true) {
-                this.cubeGroup.remove(child)
-            }
-        })
+        this.children.forEach(child => child.cubeGroup ? this.cubeGroup.add(child.cubeGroup) : 0)
         this.children = childern;
         this.children.forEach(child => this.cubeGroup.add(child.createGroup()))
     }
@@ -249,13 +239,10 @@ export class TblCube {
         return arr
     }
 
-    resetVisuals(children = false) {
-        if(children === true) {
-            this.children.forEach(child => child.resetVisuals(true))
-        }
-
+    resetVisuals() {
+        this.children.forEach(child => child.resetVisuals())
         this.updateGeometry()
-        this.updatePlanesGroup()
+        this.updateCubePosition()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
         this.updateTexture()  
@@ -266,33 +253,12 @@ export class TblCube {
         let h = dimension[1] + mcScale*2 + 0.01
         let d = dimension[2] + mcScale*2 + 0.01
 
-        this.cubeMesh[0].geometry = new PlaneBufferGeometry(d, h); //+x
-        this.cubeMesh[0].rotation.set(0, Math.PI / 2, 0)
-        this.cubeMesh[0].position.set(w/2, 0, 0)
-
-        this.cubeMesh[1].geometry = new PlaneBufferGeometry(d, h); //-x
-        this.cubeMesh[1].rotation.set(0, -Math.PI / 2, 0)
-        this.cubeMesh[1].position.set(-w/2, 0, 0)
-
-        this.cubeMesh[2].geometry = new PlaneBufferGeometry(w, d); //+y
-        this.cubeMesh[2].rotation.set(-Math.PI / 2, 0, 0)
-        this.cubeMesh[2].position.set(0, h/2, 0)
-
-        this.cubeMesh[3].geometry = new PlaneBufferGeometry(w, d); //-y
-        this.cubeMesh[3].rotation.set(Math.PI / 2, 0, 0)
-        this.cubeMesh[3].position.set(0, -h/2, 0)
-
-        this.cubeMesh[4].geometry = new PlaneBufferGeometry(w, h); //-z but actually +z
-        this.cubeMesh[4].rotation.set(0, Math.PI, 0)
-        this.cubeMesh[4].position.set(0, 0, -d/2)
-
-        this.cubeMesh[5].geometry = new PlaneBufferGeometry(w, h); //+z but actually -z
-        this.cubeMesh[5].position.set(0, 0, d/2)
+        this.cubeMesh.scale.set(w, h, d)
         this.updateTexture()
     }
 
-    updatePlanesGroup( { dimension = this.dimension, offset = this.offset } = {} ) {
-        this.planesGroup.position.set( dimension[0] / 2 + offset[0], dimension[1] / 2 + offset[1], dimension[2] / 2 + offset[2] )
+    updateCubePosition( { dimension = this.dimension, offset = this.offset } = {} ) {
+        this.cubeMesh.position.set( dimension[0] / 2 + offset[0], dimension[1] / 2 + offset[1], dimension[2] / 2 + offset[2] )
     }
 
     updatePositionVisuals(position = this.rotationPoint) {
@@ -305,9 +271,7 @@ export class TblCube {
 
     updateTexture({ textureOffset = this.textureOffset, dimension = this.dimension, texWidth = this.tbl.texWidth, texHeight = this.tbl.texHeight, textureMirrored = this.textureMirrored } = {}) {
         let uvData = getUV(textureOffset[0], textureOffset[1], dimension[0], dimension[1], dimension[2], texWidth, texHeight, textureMirrored)
-        for(let f = 0; f < 6; f++) {
-            this.cubeMesh[f].geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uvData.slice(f*8, (f+1)*8)), 2))
-        }
+        this.cubeMesh.geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uvData), 2))
     }
 
     updateCubeName(value = this.name) {
@@ -318,7 +282,7 @@ export class TblCube {
         if(visualOnly !== true) {
             this.dimension = values.map(e => Math.round(e))
         }
-        this.updatePlanesGroup( { dimension:values } )
+        this.updateCubePosition( { dimension:values } )
         this.updateGeometry( { dimension:values } )
         this.updateTexture( { dimension:values } )
     }
@@ -348,7 +312,7 @@ export class TblCube {
         if(visualOnly !== true) {
             this.offset = values
         }
-        this.updatePlanesGroup( { offset:values } )
+        this.updateCubePosition( { offset:values } )
     }
 
     updatePosition(values = this.rotationPoint, visualOnly = false) {

@@ -234,7 +234,7 @@ export class Gumball {
     }
 
     getObject(cube) {
-        return this.transformSelectParents === true ? cube.cubeGroup : cube.planesGroup
+        return this.transformSelectParents === true ? cube.cubeGroup : cube.cubeMesh
     }
 
     isTranslateRotationPoint() {

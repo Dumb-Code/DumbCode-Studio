@@ -58,7 +58,7 @@ export class CubePointTracker {
     update() {
         if(this.enabled && this.raytracer.intersected !== undefined) {
             let cube = this.raytracer.intersected.tabulaCube
-            let group = cube.planesGroup
+            let group = cube.cubeMesh
             
             this.points.forEach(p => {
                 p.mesh.visible = true

@@ -131,8 +131,8 @@ export class CubeListBoard {
 
             return false
         }
-        a.onclick = () => this.raytracer.clickOnMesh(cube.planesGroup)
-        a.onmousemove = () => this.raytracer.mouseOverMesh(cube.planesGroup)
+        a.onclick = () => this.raytracer.clickOnMesh(cube.cubeMesh)
+        a.onmousemove = () => this.raytracer.mouseOverMesh(cube.cubeMesh)
         a.onmouseleave = () => this.raytracer.mouseOverMesh(undefined)
         if(oldMap.has(cube)) {
             lock.classList.toggle("is-locked", oldMap.get(cube).lock.classList.contains("is-locked"))

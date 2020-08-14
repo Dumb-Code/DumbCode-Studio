@@ -229,7 +229,7 @@ export class CubeLocker {
                 this.element = cube.cubeGroup
                 break
             case 1:
-                this.element = cube.planesGroup
+                this.element = cube.cubeMesh
                 break
         }
         this.worldMatrix = this.element.matrixWorld.clone()
