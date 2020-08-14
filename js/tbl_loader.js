@@ -245,7 +245,6 @@ export class TblCube {
         this.updateCubePosition()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
-        this.updateTexture()  
     }
 
     updateGeometry( { dimension = this.dimension, mcScale = this.mcScale } = {}) {
