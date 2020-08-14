@@ -8,6 +8,7 @@ export class AnimationHandler {
         this.inertia = false
         this.looping = false
 
+        this.forcedAnimationTicks = null
         this.totalTime = 0
         this.keyframes = []
         this.loopKeyframe = false
@@ -162,13 +163,13 @@ export class AnimationHandler {
     animate(deltaTime) {
         this.playstate.onFrame(deltaTime)
 
-        let lockedFrames = this.keyframeInfo.filter(i => i.visible).map(i => i.id)
+        let visibleFrames = this.keyframeInfo.filter(i => i.visible).map(i => i.id)
 
+        let ticks = this.forcedAnimationTicks === null ? this.playstate.ticks : this.forcedAnimationTicks
         if(this.looping) {
-            let ticks = this.playstate.ticks % this.totalTime
             //todo: looping
         } else {
-            this.keyframes.filter(kf => lockedFrames.includes(kf.layer)).forEach(kf => kf.animate(this.playstate.ticks))
+            this.keyframes.filter(kf => visibleFrames.includes(kf.layer)).forEach(kf => kf.animate(ticks))
         }
     }
 
@@ -242,6 +243,9 @@ class KeyFrame {
     }
 
     animatePercentage(percentageDone) {
+        if(this.skip) {
+            return
+        }
         if(percentageDone < 0) {
             return
         }

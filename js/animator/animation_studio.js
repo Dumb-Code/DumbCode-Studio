@@ -55,12 +55,18 @@ export class AnimationStudio {
                 }
             }
             this.rotationCache = values
-            selected.parent.rotation.set(values[0] * Math.PI / 180, values[1] * Math.PI / 180, values[2] * Math.PI / 180)
 
             let handler = this.animationTabHandler.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
                 handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layer).some(l => !l.locked)) {
-                handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values)
+                    handler.selectedKeyFrame.skip = true
+                    this.display.tbl.resetAnimations()
+                    handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
+                    handler.animate(0)
+                    let arr = selected.parent.rotation.toArray()
+                    handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]*180/Math.PI))
+                    handler.selectedKeyFrame.skip = false
+                    handler.forcedAnimationTicks = null
             }
         }
     }
@@ -76,12 +82,18 @@ export class AnimationStudio {
                 }
             }
             this.positionCache = values
-            selected.parent.position.set(values[0], values[1], values[2])
 
             let handler = this.animationTabHandler.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
                 handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layer).some(l => !l.locked)) {
-                handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values)
+                    handler.selectedKeyFrame.skip = true
+                    this.display.tbl.resetAnimations()
+                    handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
+                    handler.animate(0)
+                    let arr = selected.parent.position.toArray()
+                    handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]))
+                    handler.selectedKeyFrame.skip = false
+                    handler.forcedAnimationTicks = null
             }
         }
     }
@@ -138,9 +150,8 @@ export class AnimationStudio {
             let handler = this.animationTabHandler.active
             if(handler !== null) {
                 this.keyframeManager.ensureFramePosition()
-                if(this.keyframeManager.setupSelectedPose() === false) {
-                    handler.animate(delta)
-                }
+                this.keyframeManager.setupSelectedPose()
+                handler.animate(delta)
             }
         }
         
@@ -148,7 +159,7 @@ export class AnimationStudio {
         this.display.render()
         
         let selected = this.raytracer.oneSelected()
-        if(selected !== null && this.keyframeManager.playstate.playing) {
+        if(selected !== null) {
              let pos = selected.parent.position
              let rot = selected.parent.rotation
              this.setPosition([pos.x, pos.y, pos.z], true, true)

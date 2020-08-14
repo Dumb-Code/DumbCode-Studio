@@ -207,11 +207,11 @@ export class KeyframeBoardManager {
         let handler = this.getHandler()
         if(handler !== null) {
             if(handler.selectedKeyFrame && !this.playstate.playing && !this.scrubbingPlaybackMarker) {
-                handler.selectedKeyFrame.animatePercentage(1)
-                return true
+                handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
+                return
             }
         }
-        return false
+        handler.forcedAnimationTicks = null
     }
 
     getLayerInfo() {

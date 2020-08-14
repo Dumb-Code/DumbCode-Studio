@@ -241,13 +241,14 @@ export class TblCube {
 
     resetVisuals() {
         this.children.forEach(child => child.resetVisuals())
-        this.updateGeometry()
-        this.updateCubePosition()
+
+        // this.updateGeometry()
+        // this.updateCubePosition()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
     }
 
-    updateGeometry( { dimension = this.dimension, mcScale = this.mcScale } = {}) {
+    updateGeometry( { dimension = this.dimension, mcScale = this.mcScale, updateTexture = true } = {}) {
         let w = dimension[0] + mcScale*2 + 0.01
         let h = dimension[1] + mcScale*2 + 0.01
         let d = dimension[2] + mcScale*2 + 0.01

@@ -34,9 +34,10 @@ export class AnimationCubeValues {
 
     updateSelected() {
         let selected = this.raytracer.oneSelected()
-        if(selected !== null) {
-            this.position.setInternalValue(selected.parent.position.toArray())
-            this.rotation.setInternalValue(selected.parent.rotation.toArray().map(v => v * 180 / Math.PI))
+
+        if(selected === null && this.getActiveKeyframe() === null) {
+            this.position.setInternalValue(undefined)
+            this.rotation.setInternalValue(undefined)
         }
 
         let isSelected = this.raytracer.selectedSet.size === 1
