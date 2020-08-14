@@ -8,7 +8,7 @@ let mouseDownPoint = new Vector2()
 let mousePoint = new Vector2()
 let mouse = new Vector2()
 
-$(document)
+$()
     .mousedown(e => {
         mouseDownPoint.set(e.clientX, e.clientY)
         mousedown = true
