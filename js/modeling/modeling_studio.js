@@ -65,11 +65,13 @@ export class ModelingStudio {
         window.studioWindowResized()
         this.display.scene.add(this.group)
         this.transformControls.enableReason('tab')
+        this.dragSelection.onActive()
     }
     
     setUnactive() {
         this.display.scene.remove(this.group)
         this.transformControls.disableReason('tab')
+        this.dragSelection.onInactive()
     }
 
     selectedChanged() {
