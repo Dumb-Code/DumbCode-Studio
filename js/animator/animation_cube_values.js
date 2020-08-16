@@ -6,7 +6,7 @@ export class AnimationCubeValues {
         this.raytracer = studio.raytracer
         this.keyframeSelectionRequired = dom.find('.editor-require-keyframe')
         this.cubeSelectionRequired = dom.find('.editor-require-selection')
-        this.getActiveKeyframe = () => studio.animationTabHandler.active?.selectedKeyFrame
+        this.getActiveKeyframe = () => studio.animationTabHandler.isAny() ? studio.animationTabHandler.active.selectedKeyFrame : null
         this.activeKeyframeFunc = cons => {
             let keyframe = this.getActiveKeyframe()
             if((keyframe || null) !== null) {

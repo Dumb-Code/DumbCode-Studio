@@ -1,28 +1,14 @@
+import { CanvasTransformControls } from "../util.js"
+
 export class TexturemapCanvas {
     constructor(domElement, display, raytracer, studioPanels) {
         this.canvas = domElement.get(0)
         this.display = display
         this.raytracer = raytracer
         this.studioPanels = studioPanels
-        this.canvasMatrix = new DOMMatrix([1, 0, 0, 1, 0, 0])
         this.canvasMovingCube = null
-        this.hasMoved = false
-        this.mulMatrix(new DOMMatrix())
-        domElement
-            .mousemove(e => this.mouseOverCanvas(e))
-            .mousedown(e => this.mouseOverCanvas(e))
-            .mouseup(e => this.mouseOverCanvas(e))
-            .bind('mousewheel DOMMouseScroll', e => {
-                let direction = e.originalEvent.wheelDelta
-                let amount =  1.1
-                if(direction === undefined) { //Firefox >:(
-                    direction = -e.detail
-                }
-                if(direction !== 0) {
-                    this.mulMatrix(new DOMMatrix().scaleSelf(direction > 0 ? amount : 1/amount))
-                }
-                
-            })
+
+        this.canvasTransformControls = new CanvasTransformControls(this.canvas, (a, b, c, d, e) => this.mouseOverCanvas(a, b, c, d, e))
     }
 
     drawTextureCanvas() {
@@ -31,7 +17,7 @@ export class TexturemapCanvas {
 
         let ctx = this.canvas.getContext('2d')
 
-        ctx.setTransform(this.finalCanvasMatrix)
+        this.canvasTransformControls.applyTransforms()
 
         ctx.fillStyle = "rgba(255, 255, 255, 255)"
         ctx.fillRect(0, 0, size, size)
@@ -95,12 +81,7 @@ export class TexturemapCanvas {
         })        
     }
 
-    mouseOverCanvas(event) {
-        let mousePoint = new DOMPoint(event.originalEvent.layerX, event.originalEvent.layerY)
-        mousePoint = mousePoint.matrixTransform(this.finalCanvasMatrix.inverse())
-        let mouseX = mousePoint.x
-        let mouseY = mousePoint.y
-
+    mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback) {
         let mouseBetween = (x, y, w, h) => mouseX >= x && mouseX < x+w && mouseY >= y && mouseY < y+h
         let size = Math.min(this.studioPanels.rightArea, this.studioPanels.topRArea)
         let su = this.display.tbl.texWidth/size
@@ -132,9 +113,9 @@ export class TexturemapCanvas {
                 mouseBetween(u+ud+uw, v+vd, ud, vh) || mouseBetween(u+ud+uw, v, uw, vd) || mouseBetween(u+ud+uw+ud, v+vd, uw, vh)
 
             if(mouseOver) {
-                if(event.type === 'mousedown') {
+                if(type === 'mousedown') {
                     this.canvasMovingCube = {cube, x: mouseX-u, y: mouseY-v, moved: false}
-                } else if(event.type === 'mouseup') {
+                } else if(type === 'mouseup') {
                     if(this.canvasMovingCube === null || this.canvasMovingCube.moved !== true) {
                         this.raytracer.clickOnMesh(cube.cubeMesh)
                     }
@@ -146,21 +127,13 @@ export class TexturemapCanvas {
         })
         
         if(!overHandled) {
-            if(event.type === 'mouseup') {
-                if(this.hasMoved !== true) {
+            misscallback(this.canvasMovingCube === null && buttons & 1 !== 0)
+            if(type === 'mouseup') {
+                if(this.canvasTransformControls.hasMoved !== true) {
                     this.raytracer.deselectAll()
                 }
             } else if(event.type === "mousedown") {
                 this.canvasMovingCube = null
-                this.hasMoved = false
-            }
-            if(event.buttons & 1 !== 0 && this.canvasMovingCube === null) {
-                let x = event.originalEvent.movementX
-                let y = event.originalEvent.movementY
-                if(x !== 0 && y !== 0) {
-                    this.hasMoved = true
-                    this.mulMatrix(new DOMMatrix().translateSelf(x, y))
-                }
             }
             this.raytracer.mouseOverMesh(undefined)
         }
@@ -176,14 +149,9 @@ export class TexturemapCanvas {
             } 
         }
 
-        if(event.type === "mouseup") {
+        if(type === "mouseup") {
             this.canvasMovingCube = null
         }
-    }
-
-    mulMatrix(matrix) {
-        this.canvasMatrix.preMultiplySelf(matrix)
-        this.finalCanvasMatrix = new DOMMatrix().translate(150, 150).multiply(this.canvasMatrix).multiply(new DOMMatrix().translate(-150, -150))
     }
 
     getSize() {

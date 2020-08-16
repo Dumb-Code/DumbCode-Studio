@@ -49,8 +49,6 @@ export class DragSelection {
             return
         }
 
-        console.log("e")
-
         let left = Math.min(mousePoint.x, mouseDownPoint.x)
         let top = Math.min(mousePoint.y, mouseDownPoint.y)
         let width = Math.abs(mousePoint.x - mouseDownPoint.x)

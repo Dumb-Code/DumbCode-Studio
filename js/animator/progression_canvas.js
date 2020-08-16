@@ -1,4 +1,4 @@
-import { LinkedSelectableList } from "../util.js"
+import { LinkedSelectableList, CanvasTransformControls } from "../util.js"
 
 const radius = 7.5
 
@@ -23,74 +23,84 @@ export class ProgressionCanvas {
         this.progressionCanvas = pc.get(0)
         this.canvasCtx = this.progressionCanvas.getContext("2d")
 
+        this.canvasTransformControls = new CanvasTransformControls(this.progressionCanvas, (a, b, c, d, e) => this.mouseOverCanvas(a, b, c, d, e), () => this.redrawProgressionCanvas())
+
         this.easingFunction = new LinkedSelectableList(dom.find('.easing-function-entry'), false)
         this.easingFunctionType = new LinkedSelectableList(dom.find('.easing-function-type-entry'))
         this.easingFunctionAmount = dom.find('.easing-function-number')
 
         dom.find('.generate-points-button').click(() => this.generateEasingFunction())
 
-        pc.mousedown(e => {
-            let handler = this.animationTabHandler.active
-            if(handler !== null && handler.selectedKeyFrame !== undefined) {
-                let points = handler.selectedKeyFrame.progressionPoints
-            
-                let width = this.progressionCanvas.width
-                let height = this.progressionCanvas.height
-            
-                let clickedOn = points.find(p => !p.required && Math.pow(width*p.x-e.offsetX, 2) + Math.pow(height*p.y-e.offsetY, 2) <= 3*radius*radius) //The 3 is just for comedic effect.
+    }
+
+    mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback) {
+        let handler = this.animationTabHandler.active
+        if(handler === null || handler.selectedKeyFrame === undefined) {
+            return
+        }
+        let points = handler.selectedKeyFrame.progressionPoints
+
+        let width = this.progressionCanvas.width
+        let height = this.progressionCanvas.height
+
+        if(type === 'mousedown') {
+            if((buttons & 1) === 1) {
+                let clickedOn = points.find(p => Math.pow(width*p.x-mouseX, 2) + Math.pow(height*p.y-mouseY, 2) <= 3*radius*radius) //The 3 is just for comedic effect.
             
                 if(clickedOn !== undefined) {
                     clickedOn.startX = clickedOn.x
                     clickedOn.startY = clickedOn.y
                     this.selectedPoint = clickedOn
                 } else {
-                    let newPoint = { x: e.offsetX / width, y: e.offsetY / height }
+                    let newPoint = { x: mouseX / width, y: mouseY / height }
                     points.push( newPoint )
                     handler.selectedKeyFrame.resortPointsDirty()
                     this.selectedPoint = newPoint
                 }
-            
                 this.redrawProgressionCanvas()
             }
-        }).mousemove(e => {
-            let handler = this.animationTabHandler.active
-            if(handler !== undefined && this.selectedPoint !== null) {
-                this.selectedPoint.x = e.offsetX / this.progressionCanvas.width
-                this.selectedPoint.y = e.offsetY / this.progressionCanvas.height
+        } else if(type === 'mousemove') {
+            if((buttons & 1) === 1 && this.selectedPoint !== null) {
+                if(!this.selectedPoint.required) {
+                    this.selectedPoint.x = mouseX / width
+                }
+                this.selectedPoint.y = mouseY / height
                 this.redrawProgressionCanvas()
                 handler.selectedKeyFrame.resortPointsDirty()
+            } else if((buttons & 2) === 2) {
+                misscallback()
             }
-        }).mouseup(() => {
-            let handler = this.animationTabHandler.active
-
-            if(handler !== undefined) {
-                let width = this.progressionCanvas.width
-                let height = this.progressionCanvas.height
-                if(this.selectedPoint !== null) {
-                    if(this.selectedPoint.startX !== undefined && this.selectedPoint.startY !== undefined) {
-                        let distX = width*(this.selectedPoint.startX - this.selectedPoint.x)
-                        let distY = height*(this.selectedPoint.startY - this.selectedPoint.y)
-                        if(distX*distX + distY*distY < radius*radius*3) {
-                            handler.selectedKeyFrame.progressionPoints = handler.selectedKeyFrame.progressionPoints.filter(p => p !== this.selectedPoint)
-                            handler.selectedKeyFrame.resortPointsDirty()
-                        }
-                    }
-                    this.selectedPoint = null
-                    this.redrawProgressionCanvas()
+        } else if(this.selectedPoint !== null) {
+            if(this.selectedPoint.startX !== undefined && this.selectedPoint.startY !== undefined && !this.selectedPoint.required) {
+                let distX = width*(this.selectedPoint.startX - this.selectedPoint.x)
+                let distY = height*(this.selectedPoint.startY - this.selectedPoint.y)
+                if(distX*distX + distY*distY < radius*radius*3) {
+                    handler.selectedKeyFrame.progressionPoints = handler.selectedKeyFrame.progressionPoints.filter(p => p !== this.selectedPoint)
+                    handler.selectedKeyFrame.resortPointsDirty()
                 }
             }
-        })
-
+            this.selectedPoint = null
+            this.redrawProgressionCanvas()
+        }
     }
 
     redrawProgressionCanvas() {
+        //TODO: scrolling and moving like the texture tab
         let handler = this.animationTabHandler.active
 
         if(handler !== null && handler.selectedKeyFrame !== undefined) {
             let width = this.progressionCanvas.width
             let height = this.progressionCanvas.height
         
+            this.canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
             this.canvasCtx.clearRect(0, 0, width, height);
+
+            this.canvasTransformControls.applyTransforms()
+
+            this.canvasCtx.beginPath();
+            this.canvasCtx.rect(0, 0, width, height)
+            this.canvasCtx.stroke();
+
             this.canvasCtx.strokeStyle = "#363636";
             let points = handler.selectedKeyFrame.progressionPoints
         

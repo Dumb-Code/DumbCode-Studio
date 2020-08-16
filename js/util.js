@@ -271,7 +271,7 @@ export function isKeyDown(key) {
     return pressedKeys.has(key)
 } 
 export function listenForKeyChange(key, onchange) {
-    let arr = keyListeners.has(key) ? keyListeners.get(arr) : []
+    let arr = keyListeners.has(key) ? keyListeners.get(key) : []
     arr.push(onchange)
     keyListeners.set(key, arr)
 }
@@ -305,5 +305,92 @@ export function onElementDrag(element, infoClickGetter = () => {}, callback = (d
         doc.addEventListener('mouseup', mouseup)
         doc.addEventListener('selectstart', disableSelect)
         e.stopPropagation()
+    }
+}
+
+export class CanvasTransformControls {
+    constructor(canvas, mouseCallback, redrawCallback = () => {}) {
+        this.mouseCallback = mouseCallback
+        this.redrawCallback = redrawCallback
+        this.canvasMatrix = new DOMMatrix([1, 0, 0, 1, 0, 0])
+        this.canvas = canvas
+        this.hasMoved = false
+
+        this.mulMatrix(new DOMMatrix())
+
+        this.previousWidth = -1
+        this.previousHeight = -1
+
+        $(canvas)
+            .mousemove(e => this.mouseEvent(e))
+            .mousedown(e => this.mouseEvent(e))
+            .mouseup(e => this.mouseEvent(e))
+            .contextmenu(e => e.preventDefault())
+            .bind('mousewheel DOMMouseScroll', e => {
+                let direction = e.originalEvent.wheelDelta
+                let amount =  1.1
+                if(direction === undefined) { //Firefox >:(
+                    direction = -e.detail
+                }
+                if(direction !== 0) {
+                    this.mulMatrix(new DOMMatrix().scaleSelf(direction > 0 ? amount : 1/amount))
+                    this.redrawCallback()
+                }
+            })
+    }
+    
+    applyTransforms() {
+        let ctx = this.canvas.getContext('2d')
+        ctx.setTransform(this.getFinalMatrix())
+    }
+
+    mouseEvent(e) {
+        let mousePoint = new DOMPoint(e.originalEvent.layerX, e.originalEvent.layerY)
+        mousePoint = mousePoint.matrixTransform(this.getFinalMatrix().inverse())
+        let mouseX = mousePoint.x
+        let mouseY = mousePoint.y
+
+        this.mouseCallback(e.type, mouseX, mouseY, e.buttons, v => this.misscallback(e, v === null || v === undefined ? true : v))
+    }
+
+    misscallback(e, v) {
+        if(e.type === "mousedown") {
+            this.hasMoved = false
+        }
+        if(v) {
+            let x = e.originalEvent.movementX
+            let y = e.originalEvent.movementY
+            if(x !== 0 && y !== 0) {
+                this.hasMoved = true
+                this.mulMatrix(new DOMMatrix().translateSelf(x, y))
+                this.redrawCallback()
+            }
+        }
+    }
+
+    getFinalMatrix() {
+        let width = this.canvas.clientWidth
+        let height = this.canvas.clientHeight
+
+        if(width !== this.previousWidth || height !== this.previousHeight) {
+            this.previousWidth = width
+            this.previousHeight = height
+            this.computeFinalMatrix()
+        }
+        
+        return this.finalCanvasMatrix
+    }
+
+
+    mulMatrix(matrix) {
+        this.canvasMatrix.preMultiplySelf(matrix)
+        this.computeFinalMatrix()
+    }
+
+    computeFinalMatrix() {
+        let width = this.canvas.clientWidth
+        let height = this.canvas.clientHeight
+
+        this.finalCanvasMatrix = new DOMMatrix().translate(width/2, height/2).multiply(this.canvasMatrix).multiply(new DOMMatrix().translate(-width/2, -height/2))
     }
 }
