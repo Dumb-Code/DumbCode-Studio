@@ -38,7 +38,6 @@ export class TBLModel {
         this.modelCache.position.set(0, 1.5, 0)
         this.modelCache.add(mainCubeGroup)
 
-        console.log(this.modelCache)
 
         return this.modelCache
     }
