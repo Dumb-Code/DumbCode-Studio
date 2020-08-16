@@ -12,6 +12,7 @@ export class AnimationCubeValues {
             if((keyframe || null) !== null) {
                 cons(keyframe)
             }
+            studio.keyframeManager.updateKeyFrame(keyframe)
         }
         this.position = new LinkedElement(dom.find('.animation-input-position')).onchange(e => studio.setPosition(e.value, false))
         this.rotation = new LinkedElement(dom.find('.animation-input-rotation')).withsliders(dom.find('.animation-input-rotation-slider')).onchange(e => studio.setRotation(e.value, false))

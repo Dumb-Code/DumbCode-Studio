@@ -157,10 +157,14 @@ export class KeyframeBoardManager {
         if(kf.element === undefined) {
             kf.element = this.createKeyFrameElement(kf)
         }
+        
+        let selected = this.getHandler().selectedKeyFrame === kf
+        let lightnessMain = selected ? 25 : 70 
+        let lightnessPointer = selected ? 10 : 50 
 
         let color = (kf.layer * 64) % 360
-        kf.element.style.backgroundColor = `hsl(${color}, 100%, 70%)`
-        kf.element._keyframePointer.style.backgroundColor = `hsl(${color}, 100%, 50%)`
+        kf.element.style.backgroundColor = `hsl(${color}, 100%, ${lightnessMain}%)`
+        kf.element._keyframePointer.style.backgroundColor = `hsl(${color}, 100%, ${lightnessPointer}%)`
 
         let left = kf.startTime * pixelsPerTick
         kf.element.style.width = kf.duration * pixelsPerTick + "px"
