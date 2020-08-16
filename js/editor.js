@@ -12,7 +12,7 @@ import { Raytracer } from "./raytracer.js";
 
 const major = 0
 const minor = 1
-const patch = 2
+const patch = 3
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
