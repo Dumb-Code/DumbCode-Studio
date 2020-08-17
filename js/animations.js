@@ -145,7 +145,7 @@ export class AnimationHandler {
     }
 
     repairKeyframe(kf, version) {
-        if(version < 3) {
+        if(version <= 3) {
             //transform from absolute to relative by subtracting the base tbl model
             let map = this.tbl.cubeMap
 
