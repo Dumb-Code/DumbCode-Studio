@@ -421,3 +421,51 @@ export function doubleClickToEdit(container, callback, current) {
         text.text(current)
     }
 }
+
+export class DraggableElementList {
+
+    constructor(isThreeValues, callback) {
+        let previousElement = null
+        let draggedData = null
+
+        this.removePreviousState = () => previousElement?.removeAttribute("drag-state")
+        this.getDraggedData = () => draggedData
+
+        this.addElement = (element, dataGetter) => {
+            element.ondragstart = () => draggedData = dataGetter() 
+            element.ondragover = function(e) {
+                let rect = this.getBoundingClientRect()
+                let yPerc = (e.clientY - rect.top) / rect.height
+        
+                if(this !== previousElement) {
+                    previousElement?.removeAttribute("drag-state")
+                    previousElement = this
+                }
+
+                if(draggedData === dataGetter()) {
+                    this.removeAttribute("drag-state")
+                    return
+                }
+        
+                if(yPerc <= (isThreeValues ? 1/3 : 1/2)) {
+                    this.setAttribute("drag-state", "top")
+                } else if(!isThreeValues || yPerc > 2/3) {
+                    this.setAttribute("drag-state", "bottom")
+                } else if(isThreeValues) {
+                    this.setAttribute("drag-state", "on")
+                }
+
+                e.preventDefault()
+            }
+            element.ondrop = function() {
+                let drop = this.getAttribute("drag-state")
+                if(draggedData !== null && drop !== undefined) {
+                    callback(drop, draggedData, dataGetter())
+                }
+                this.removeAttribute("drag-state")
+                draggedData = null
+            }
+        }
+    }
+
+}

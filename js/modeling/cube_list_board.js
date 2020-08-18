@@ -1,4 +1,4 @@
-import { isKeyDown } from "../util.js"
+import { isKeyDown, DraggableElementList } from "../util.js"
 
 export class CubeListBoard {
     constructor(cubeList, raytracer, tbl, lockedCubes) {
@@ -9,14 +9,30 @@ export class CubeListBoard {
         this.previousDragElement
         this.elementMap = new Map()
 
+        this.dragElementList = new DraggableElementList(true, (drop, draggedCube, droppedOnto) => {
+            lockedCubes.createLockedCubesCache()
+            draggedCube.parent.deleteChild(draggedCube, true)
+            if(drop === "on") {
+                droppedOnto.addChild(draggedCube)
+            } else {
+                let index = droppedOnto.parent.getChildren().indexOf(droppedOnto)
+                if(drop === "bottom") {
+                    index++
+                }
+                droppedOnto.parent.getChildren().splice(index, 0, draggedCube)
+                droppedOnto.parent.onChildrenChange(false)
+            }
+            lockedCubes.reconstructLockedCubes()
+        })
+
         this.cubeList.ondragover = e => {
             if(e.target == this.cubeList) {
-                this.previousDragElement?.removeAttribute("drag-state")
+                this.dragElementList.removePreviousState()
                 e.preventDefault()
             }
         }
         this.cubeList.ondrop = e => {
-            let cube = tbl.cubeMap.get(e.dataTransfer.getData("cubename"))
+            let cube = this.dragElementList.getDraggedData()
             if(e.target == this.cubeList && cube !== undefined) {
                 this.lockedCubes.createLockedCubesCache()
                 cube.parent.deleteChild(cube, true)
@@ -50,62 +66,11 @@ export class CubeListBoard {
         let lock = this.createLockIcon()
 
         a.draggable = true
-        a.ondragstart = e => e.dataTransfer.setData("cubename", cube.name)
         div.classList.add("cube-line-controller")
         div.setAttribute('cubename', cube.name)
 
-        let getPrevious = () => this.previousDragElement
-        let setPrevious = p => this.previousDragElement = p
-        div.ondragover = function(e) {
-            let rect = this.getBoundingClientRect()
-            let yPerc = (e.clientY - rect.top) / rect.height
-    
-            if(this !== getPrevious()) {
-                getPrevious()?.removeAttribute("drag-state")
-                setPrevious(this)
-            }
+        this.dragElementList.addElement(div, () => cube)
 
-            //Don't drag onto self
-            if(e.dataTransfer.getData("cubename") === cube.name) {
-                this.removeAttribute("drag-state")
-                return
-            }
-    
-            let buffer = 1/3
-            if(yPerc <= buffer) {
-                this.setAttribute("drag-state", "top")
-            } else if(yPerc > 1 - buffer) {
-                this.setAttribute("drag-state", "bottom")
-            } else {
-                this.setAttribute("drag-state", "on")
-            }
-    
-            e.preventDefault()
-        }
-        
-        let tbl = this.tbl
-        let lockedCubes = this.lockedCubes
-        div.ondrop = function(e) {
-            let type = this.getAttribute("drag-state")
-            let draggedCube = tbl.cubeMap.get(e.dataTransfer.getData("cubename"))
-            let droppedOnto = tbl.cubeMap.get(cube.name)
-            if(draggedCube !== undefined && droppedOnto !== undefined && type !== undefined) {
-                lockedCubes.createLockedCubesCache()
-                draggedCube.parent.deleteChild(draggedCube, true)
-                if(type === "on") {
-                    droppedOnto.addChild(draggedCube)
-                } else {
-                    let index = droppedOnto.parent.getChildren().indexOf(droppedOnto)
-                    if(type === "bottom") {
-                        index++
-                    }
-                    droppedOnto.parent.getChildren().splice(index, 0, draggedCube)
-                    droppedOnto.parent.onChildrenChange(false)
-                }
-                lockedCubes.reconstructLockedCubes()
-            }
-        }
-    
         a.style.paddingRight = "5px"
         a.innerText = cube.name
         a.oncontextmenu = () => {
