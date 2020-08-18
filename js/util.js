@@ -424,7 +424,7 @@ export function doubleClickToEdit(container, callback, current) {
 
 export class DraggableElementList {
 
-    constructor(isThreeValues, callback) {
+    constructor(canDropOnElement, callback) {
         let previousElement = null
         let draggedData = null
 
@@ -447,11 +447,11 @@ export class DraggableElementList {
                     return
                 }
         
-                if(yPerc <= (isThreeValues ? 1/3 : 1/2)) {
+                if(yPerc <= (canDropOnElement ? 1/3 : 1/2)) {
                     this.setAttribute("drag-state", "top")
-                } else if(!isThreeValues || yPerc > 2/3) {
+                } else if(!canDropOnElement || yPerc > 2/3) {
                     this.setAttribute("drag-state", "bottom")
-                } else if(isThreeValues) {
+                } else if(canDropOnElement) {
                     this.setAttribute("drag-state", "on")
                 }
 
