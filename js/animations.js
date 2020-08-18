@@ -153,6 +153,14 @@ export class AnimationHandler {
             }
             let sorted = [...this.keyframes].sort((a, b) => a.startTime - b.startTime)
 
+            for(let i = 0; i < sorted.length - 1; i++) {
+                let kf = sorted[i]
+                let next = sorted[i + 1]
+
+                kf.duration = Math.min(kf.duration, next.startTime - kf.startTime)
+                next.startTime = Math.max(next.startTime, kf.startTime + kf.duration)
+            }
+
             let rotArr = new Array(3)
             let posArr = new Array(3)
 
