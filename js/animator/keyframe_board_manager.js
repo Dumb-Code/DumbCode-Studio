@@ -1,5 +1,5 @@
 import { PlayState } from "../animations.js"
-import { onElementDrag } from "../util.js"
+import { onElementDrag, doubleClickToEdit } from "../util.js"
 
 const sectionWidth = 20
 const ticksPerSection = 1 
@@ -123,7 +123,7 @@ export class KeyframeBoardManager {
                 let dom = this.getLayerDom(layer.id)
                 this.layerConatiner.append(dom)
                 dom.find('.keyframe-container').css('background-position-x', -this.scroll + 'px').html('') //Clear children
-                dom.find('.layer-text').text(layer.name)
+                dom.find('.layer-name .dbl-text').text(layer.name)
             })
             handler.keyframes.forEach(kf => {
                 this.updateKeyFrame(kf, handler)
@@ -261,25 +261,9 @@ export class KeyframeBoardManager {
             this.reframeKeyframes()
         })
 
-        let layerText = dom.find('.layer-text-edit')
+        doubleClickToEdit(dom.find('.layer-name-conatiner'), v => data.name = v, data.name)
 
-        dom.find('.layer-name').dblclick(() => {
-            newKF.classList.add('is-editing')
-            layerText.val(data.name)
-            layerText.select()
-        })
-        layerText
-            .on('input', e => {
-                data.name = e.target.value
-                dom.find('.layer-text').text(data.name)
-            })
-            .focusout(() => newKF.classList.remove('is-editing'))
-            .keyup(e => {
-                if(e.key === "Enter") {
-                    newKF.classList.remove('is-editing')
-                }
-            })
-
+      
         dom.find('.kf-layer-add').click(() => {
             let kf = handler.createKeyframe()
             kf.duration = 5

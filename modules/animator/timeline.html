@@ -70,15 +70,7 @@
     height: 20px;
 }
 
-.keyframe-layer.is-editing .layer-text {
-    display: none;
-}
-
-.keyframe-layer:not(.is-editing) .layer-text-edit {
-    display: none;
-}
-
-.layer-text-edit {
+.dbl-text-edit {
     /* height: 16px; */
     width: 100px;
 }
@@ -114,9 +106,9 @@
 </div>
 <div class="columns is-mobile layer column-blue keyframe-layer empty-keyframe">
     <div class="column is-narrow">
-        <div class="notification has-background-black-ter layer-name">
-            <p class="heading is-size-8 layer-text" style="margin-bottom: 3px; width: 100px;">New Layer</p>
-            <input class="layer-text-edit" type="text">
+        <div class="notification dbl-click-container has-background-black-ter layer-name layer-name-conatiner">
+            <p class="heading is-size-8 dbl-text" style="margin-bottom: 3px; width: 100px;">New Layer</p>
+            <input class="dbl-text-edit" type="text">
         </div>
     </div>
 

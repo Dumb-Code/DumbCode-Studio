@@ -3,14 +3,6 @@
         display: none !important;
     }
 
-    .animation-name-container.is-editing .animation-name {
-        display: none;
-    }
-
-    .animation-name-container:not(.is-editing) .animation-name-edit {
-        display: none;
-    }
-
     .file-input-hidden {
         display: none !important;
     }
@@ -86,6 +78,45 @@
             <div class="notification is-dark">
                 <div class="columns">
                     <div class="column">
+                        <h1 class="title is-5">TEXTURE LAYERS</h1>
+                        <div class="tags has-addons mb-2">
+                            <div class="tag is-warning">Note</div>
+                            <div class="tag is-link">Textures are not yet on the Project Tab. Refer to Modeling tab</div>
+                        </div>
+                    </div>
+                    <div class="column is-narrow">
+                        <span class="new-texture-button icon is-small clickable tooltip" data-tooltip="Create New Texture">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                    </div>
+                    <div class="column is-narrow">
+                        <div class="clickable tooltip" data-tooltip="Upload New Texture">
+                            <label for="texture-file-input">
+                                <div class="icon is-small">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                            </label>
+                            <input id="texture-file-input" class="file-input-hidden" type="file" accept=".png" multiple/>
+                        </div>
+                    </div>
+                </div>
+                <div class="texture-list-entry columns empty-column">
+                    <div class="column is-narrow">
+                    </div>
+                    <div class="column dbl-click-container texture-name-container">
+                        <p class="dbl-text"></p>
+                        <input class="dbl-text-edit" type="text">
+                    </div>
+                    <div class="column is-narrow">
+                        <span class="download-texture-file icon is-small clickable tooltip " data-tooltip="Download Texture">
+                            <i class="fas fa-file-download"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="notification is-dark">
+                <div class="columns">
+                    <div class="column">
                         <h1 class="title is-5">ANIMATIONS</h1>
                     </div>
                     <div class="column is-narrow">
@@ -94,13 +125,23 @@
                         </span>
                     </div>
                     <div class="column is-narrow">
-                        <div class="image-upload clickable tooltip" data-tooltip="Upload New Animation">
+                        <div class="clickable tooltip" data-tooltip="Upload New Animation">
                             <label for="animation-file-input">
                                 <div class="icon is-small">
                                     <i class="fas fa-upload"></i>
                                 </div>
                             </label>
-                            <input id="animation-file-input" class="file-input-hidden" type="file" />
+                            <input id="animation-file-input" class="file-input-hidden" type="file" accept=".dca" multiple/>
+                        </div>
+                    </div>
+                    <div class="column is-narrow">
+                        <div class="clickable tooltip" data-tooltip="Upload From .tbl Files">
+                            <label for="animation-tbl-files">
+                                <div class="icon is-small">
+                                    <i class="fas fa-folder"></i>
+                                </div>
+                            </label>
+                            <input id="animation-tbl-files" class="file-input-hidden" type="file" accept=".tbl,.json" multiple/>
                         </div>
                     </div>
                 </div>
@@ -108,9 +149,9 @@
                     <div class="column is-narrow">
                         <i class="fas fa-bars"></i>
                     </div>
-                    <div class="column animation-name-container">
-                        <p class="animation-name"></p>
-                        <input class="animation-name-edit" type="text">
+                    <div class="column dbl-click-container animation-name">
+                        <p class="dbl-text"></p>
+                        <input class="dbl-text-edit" type="text">
                     </div>
                     <div class="column is-narrow">
                         <span class="download-animation-file icon is-small clickable tooltip " data-tooltip="Download Animation">

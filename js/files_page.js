@@ -1,5 +1,7 @@
 import { readFile } from "./displays.js"
 import { ByteBuffer } from "./animations.js"
+import { TBLModel } from "./tbl_loader.js"
+import { doubleClickToEdit } from "./util.js"
 
 export class FilesPage { 
 
@@ -9,7 +11,7 @@ export class FilesPage {
         dom.find('.new-animation-button').click(() => this.createNewAnimationTab())
 
         dom.find('#animation-file-input').on('input', e => {
-            [...e.target.files].filter(f => f.name.endsWith('.dca')).forEach(async(file) => {
+            [...e.target.files].forEach(async(file) => {
                 let tab = this.createNewAnimationTab(file.name.substring(0, file.name.length - 4))
                 let animator = this.animatorGetter()
                 if(tab) {
@@ -19,7 +21,61 @@ export class FilesPage {
                     animator.keyframeManager.reframeKeyframes()
                 }
             })
-        })        
+        })
+
+        dom.find('#animation-tbl-files').on('input', async(e) => {
+            let files = [...e.target.files]
+            let name = this.sharedStart(files.map(f => f.name))
+
+            if(name.endsWith('_')) {
+                name = name.substring(0, name.length - 1)
+            } else if(name.length === 0) {
+                name = files[0].name
+                name = name.substring(0, name.length - 4)
+            }
+
+            let tblFiles = []
+            let infoFile
+
+            files.forEach(file => {
+                if(file.name.endsWith(".tbl")) {
+                    tblFiles.push(file)
+                }
+                if(file.name == "animation.json") {
+                    infoFile = file
+                }
+            })
+        
+            if(files.length == 0) {
+                alert("No poses uploaded")
+                return
+            }
+           
+            let tab = this.createNewAnimationTab(name)
+            let animator = this.animatorGetter()
+            if(tab) {
+                let promiseFiles = [...tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))]
+                if(infoFile) {
+                    promiseFiles.push(readFile(infoFile))
+                }
+        
+                let result = await Promise.all(promiseFiles)
+        
+                let info = infoFile ? JSON.parse(result.pop()) : { base_time: 5 }
+
+                tab.handler.readFromTblFiles(result, info)
+                tab.handler.keyframes.forEach(kf => tab.handler.createLayerInfo(kf.layer))
+                animator.keyframeManager.reframeKeyframes()
+            }
+        })
+    }
+
+    //https://stackoverflow.com/a/1917041
+    sharedStart(array){
+        var A= array.concat().sort(), 
+        a1= A[0], a2= A[A.length-1], L= a1.length, i= 0;
+        while(i<L && a1.charAt(i)=== a2.charAt(i)) i++;
+        return a1.substring(0, i);
     }
 
     createNewAnimationTab(name) {
@@ -33,10 +89,6 @@ export class FilesPage {
             cloned.insertBefore(this.empty)
             
             let dom = $(cloned)
-            let animationNameContainer = dom.find('.animation-name-container')
-            let animationName = dom.find('.animation-name')
-            let animationNameEdit = dom.find('.animation-name-edit')
-
 
             if(name === undefined || name === null) {
                 name = tab.name
@@ -44,26 +96,12 @@ export class FilesPage {
                 tab.name = name
             }
 
-            animationName.text(tab.name)
             element.innerText = tab.name
 
-            animationNameContainer.dblclick(() => {
-                animationNameContainer.addClass('is-editing')
-                animationNameEdit.val(tab.name)
-                animationNameEdit.select()
-            })
-            animationNameEdit
-                .on('input', e => {
-                    tab.name = e.target.value
-                    element.innerText = tab.name
-                    animationName.text(tab.name)
-                })
-                .focusout(() => animationNameContainer.removeClass('is-editing'))
-                .keyup(e => {
-                    if(e.key === "Enter") {
-                        animationNameContainer.removeClass('is-editing')
-                    }
-                })
+            doubleClickToEdit(dom.find('.animation-name'), name => {
+                tab.name = name
+                element.innerText = name
+            }, name)
 
             let handler = tab.handler
             dom.find('.download-animation-file').click(() => {

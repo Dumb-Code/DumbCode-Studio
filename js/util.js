@@ -394,3 +394,30 @@ export class CanvasTransformControls {
         this.finalCanvasMatrix = new DOMMatrix().translate(width/2, height/2).multiply(this.canvasMatrix).multiply(new DOMMatrix().translate(-width/2, -height/2))
     }
 }
+
+export function doubleClickToEdit(container, callback, current) {
+    let text = container.find('.dbl-text')
+    let textEdit = container.find('.dbl-text-edit')
+
+    container.dblclick(() => {
+        container.addClass('is-editing')
+        textEdit.val(text.text())
+        textEdit.select()
+    })
+    textEdit
+        .on('input', e => {
+            let t = e.target.value
+            text.text(t)
+            callback(t)
+        })
+        .focusout(() => container.removeClass('is-editing'))
+        .keyup(e => {
+            if(e.key === "Enter") {
+                container.removeClass('is-editing')
+            }
+        })
+
+    if(current !== undefined) {
+        text.text(current)
+    }
+}

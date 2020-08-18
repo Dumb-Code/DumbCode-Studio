@@ -11,3 +11,11 @@
 .is-file #files-area, .is-modeling #modeling-area, .is-animation #animation-area {
     display: unset;
 }
+
+.dbl-click-container.is-editing .dbl-text {
+    display: none;
+}
+
+.dbl-click-container:not(.is-editing) .dbl-text-edit {
+    display: none;
+}

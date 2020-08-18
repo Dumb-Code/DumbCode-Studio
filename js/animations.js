@@ -1,5 +1,5 @@
-import { TBLModel } from './tbl_loader.js'
-import { readFile } from './displays.js';
+const rotArr = new Array(3)
+const posArr = new Array(3)
 
 export class AnimationHandler {
     
@@ -24,39 +24,8 @@ export class AnimationHandler {
         }
     }
 
-
-    async onAnimationFileChange(files) {
-        let tblFiles = []
-        let infoFile
-
-        for (let i = 0; i < files.length; i++) {
-            let file = files.item(i)
-            if(file.name.endsWith(".tbl")) {
-                tblFiles.push(file)
-            }
-            if(file.name == "animation.json") {
-                infoFile = file
-            }
-        }
-
-        if(files.length == 0) {
-            alert("No poses uploaded")
-            return
-        }
-
-        let promiseFiles = [...tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))]
-        if(infoFile) {
-            promiseFiles.push(readFile(infoFile))
-        }
-
-        let result = await Promise.all(promiseFiles)
-
-        let info = infoFile ? JSON.parse(result.pop()) : { base_time: 5 }
-        this.keyframes = this.readFromAnimationFiles(result, info)
-    }
-
-    readFromAnimationFiles(files, meta = { base_time: 5 }) {
-        let keyframes = []
+    readFromTblFiles(files, meta = { base_time: 5 }) {
+        this.keyframes = []
 
         let baseTime = meta.base_time
 
@@ -72,18 +41,16 @@ export class AnimationHandler {
             keyframe.duration = baseTime
 
             pose.cubeMap.forEach(poseCube => {
-                let posArr = this.tbl.cubeMap.get(poseCube.name).rotationPoint
-                let rotArr = this.tbl.cubeMap.get(poseCube.name).rotation
-                keyframe.rotationPointMap.set(poseCube.name, poseCube.rotationPoint.map((item, index) => item - posArr[index]))
-                keyframe.rotationMap.set(poseCube.name, poseCube.rotation.map((item, index) => item - rotArr[index]))
+                keyframe.rotationPointMap.set(poseCube.name, poseCube.rotationPoint)
+                keyframe.rotationMap.set(poseCube.name, poseCube.rotation)
             })
 
             startTime += baseTime; //todo: time overrides ???
 
-            keyframes.push(keyframe)
-
+            this.keyframes.push(keyframe)
         }
-        return keyframes
+        this.repairKeyframes(2)
+        return this.keyframes
     }
 
     readDCAFile(buffer) {
@@ -141,7 +108,11 @@ export class AnimationHandler {
                 this.events.push({ time, data })
             }
         }
-        
+
+        this.repairKeyframes(version)
+    }
+
+    repairKeyframes(version) {
         if(version <= 3) {
             let map = this.tbl.cubeMap
             if(version === 3) {
@@ -152,9 +123,6 @@ export class AnimationHandler {
     
             }
             let sorted = [...this.keyframes].sort((a, b) => a.startTime - b.startTime)
-
-            let rotArr = new Array(3)
-            let posArr = new Array(3)
 
             sorted.forEach((kf, index) => {
                 this.tbl.resetAnimations()
