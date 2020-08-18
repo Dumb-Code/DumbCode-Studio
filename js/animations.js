@@ -153,32 +153,36 @@ export class AnimationHandler {
             }
             let sorted = [...this.keyframes].sort((a, b) => a.startTime - b.startTime)
 
-            for(let i = 0; i < sorted.length - 1; i++) {
-                let kf = sorted[i]
-                let next = sorted[i + 1]
-
-                kf.duration = Math.min(kf.duration, next.startTime - kf.startTime)
-                next.startTime = Math.max(next.startTime, kf.startTime + kf.duration)
-            }
-
             let rotArr = new Array(3)
             let posArr = new Array(3)
 
-            sorted.forEach(kf => {
+            sorted.forEach((kf, index) => {
                 this.tbl.resetAnimations()
                 this.keyframes.forEach(_kf => _kf.animate(kf.startTime))
 
+                let next = sorted[index+1]
+
+                let mod = 1
+                if(next !== undefined) {
+                    let dist = next.startTime - kf.startTime
+                    //Keyframes intersect
+                    if(dist < kf.duration) {
+                        mod = dist / kf.duration
+                        kf.duration = dist
+                    }
+                }
+
                 kf.rotationMap.forEach((arr, key) => {
                     map.get(key)?.cubeGroup.rotation.toArray(rotArr)
-                    arr[0] -= rotArr[0]*180/Math.PI
-                    arr[1] -= rotArr[1]*180/Math.PI
-                    arr[2] -= rotArr[2]*180/Math.PI
+                    for(let i = 0; i < 3; i++) {
+                        arr[i] = (arr[i] - rotArr[i]*180/Math.PI) * mod
+                    }
                 })
                 kf.rotationPointMap.forEach((arr, key) => {
                     map.get(key)?.cubeGroup.position.toArray(posArr)
-                    arr[0] -= posArr[0]
-                    arr[1] -= posArr[1]
-                    arr[2] -= posArr[2]
+                    for(let i = 0; i < 3; i++) {
+                        arr[i] = (arr[i] - posArr[i]) * mod
+                    }
                 })
             })
         }
