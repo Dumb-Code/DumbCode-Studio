@@ -125,7 +125,6 @@ export class AnimationHandler {
                 kf.resortPointsDirty()
             }
 
-            this.repairKeyframe(kf, version)
 
             this.keyframes.push(kf)
         }
@@ -141,22 +140,48 @@ export class AnimationHandler {
                 }
                 this.events.push({ time, data })
             }
-        }        
-    }
-
-    repairKeyframe(kf, version) {
+        }
+        
         if(version <= 3) {
-            //transform from absolute to relative by subtracting the base tbl model
             let map = this.tbl.cubeMap
+            if(version === 3) {
+                this.keyframes.forEach(kf => {
+                    kf.rotationMap.forEach((arr, key) => this.transformArr(arr, map.get(key)?.rotation))
+                    kf.rotationPointMap.forEach((arr, key) => this.transformArr(arr, map.get(key)?.rotationPoint))
+                })
+    
+            }
+            let sorted = [...this.keyframes].sort((a, b) => a.startTime - b.startTime)
 
-            kf.rotationMap.forEach((arr, key) => this.transformArr(arr, (item, index) => item - map.get(key).rotation[index]))
-            kf.rotationPointMap.forEach((arr, key) => this.transformArr(arr, (item, index) => item - map.get(key).rotationPoint[index]))
+            let rotArr = new Array(3)
+            let posArr = new Array(3)
+
+            sorted.forEach(kf => {
+                this.tbl.resetAnimations()
+                this.keyframes.forEach(_kf => _kf.animate(kf.startTime))
+
+                kf.rotationMap.forEach((arr, key) => {
+                    map.get(key)?.cubeGroup.rotation.toArray(rotArr)
+                    arr[0] -= rotArr[0]*180/Math.PI
+                    arr[1] -= rotArr[1]*180/Math.PI
+                    arr[2] -= rotArr[2]*180/Math.PI
+                })
+                kf.rotationPointMap.forEach((arr, key) => {
+                    map.get(key)?.cubeGroup.position.toArray(posArr)
+                    arr[0] -= posArr[0]
+                    arr[1] -= posArr[1]
+                    arr[2] -= posArr[2]
+                })
+            })
         }
     }
 
-    transformArr(arr, func) {
-        for(let i = 0; i < arr.length; i++) {
-            arr[i] = func(arr[i], i)
+    transformArr(arr, subValue) {
+        if(subValue === null) {
+            return
+        }
+        for(let i = 0; i < 3; i++) {
+            arr[i] = arr[i] + subValue[i]
         }
     }
 
@@ -253,6 +278,7 @@ class KeyFrame {
         if(percentageDone > 1) {
             percentageDone = 1
         }
+
 
         this.rotationMap.forEach((values, key) => {
             let cube = this.handler.tbl.cubeMap.get(key)?.cubeGroup
