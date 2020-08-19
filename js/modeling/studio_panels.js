@@ -9,7 +9,7 @@ export class StudioPanels {
             this.leftArea = e ? 0 : 300
             this.updateAreas()
         })
-        this.rightPanel = new LayoutPart(dom.find('#panel-right'), () => {
+        this.rightPanel = new LayoutPart(dom.find('#panel-right'), e => {
             this.rightArea = e ? 0 : 300
             this.updateAreas()
         })

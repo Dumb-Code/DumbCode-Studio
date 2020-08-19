@@ -41,7 +41,7 @@ export class TexturePanels {
     }
 
     panelChange() {
-        if(this.rightTotopPanelpPanel.popped && this.middlePanel.popped && this.bottomPanel.popped) {
+        if(this.topPanel.popped && this.middlePanel.popped && this.bottomPanel.popped) {
             this.rightArea = 0
         } else {
             let top = this.topPanel.popped
