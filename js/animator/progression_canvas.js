@@ -125,7 +125,7 @@ export class ProgressionCanvas {
         let handler = this.animationTabHandler.active
         let points = this.easingFunctionAmount.val()
 
-        if(handler === null || handler.selectedKeyFrame === undefined || points <= 0) {
+        if(handler === null || handler.selectedKeyFrame === undefined || points <= 5) {
             return
         }
 
@@ -204,14 +204,37 @@ export class ProgressionCanvas {
                 break
         }
 
+        const resolution = 10000
+        const step = 1 / resolution
+        let array = new Array(resolution + 1)
+        for(let i = 0; i < array.length; i++) {
+            array[i] = func(i / resolution)
+        }
+
+        let distances = array.map((y, i) => {
+            let next = array[i + 1]
+            if(next === undefined) {
+                return 0
+            }
+            let dy = next - y
+            return Math.sqrt(dy*dy + step*step)
+        })
 
         let xValues = []
-        if(points == 1) {
-            xValues.push(0.5)
-        } else {
-            let toGen = points - 1
-            for(let i = 1; i < toGen; i++) {
-                xValues.push(i / toGen)
+
+        let length = distances.reduce((a, b) => a + b)
+        let xStep = length / (points - 1)
+        for(let i = 0; i < points; i++) {
+            let distToMove = i*xStep
+
+            for(let d = 0; d < distances.length; d++) {
+                let dist = distances[d]
+                if(distToMove < dist) {
+                    xValues.push((d + dist/distToMove)*step)
+                    break
+                } else {
+                    distToMove -= dist
+                }
             }
         }
 
