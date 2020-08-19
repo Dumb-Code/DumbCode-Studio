@@ -8,7 +8,7 @@
     display: none;
 }
 
-.is-file #files-area, .is-modeling #modeling-area, .is-animation #animation-area {
+.is-file #files-area, .is-modeling #modeling-area, .is-animation #animation-area, .is-texture #texture-area {
     display: unset;
 }
 

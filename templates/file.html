@@ -10,6 +10,20 @@
     .clickable {
         cursor: pointer !important;
     }
+
+    .texture-list-entry {
+        border: solid 3px transparent
+    }
+
+    .texture-list-entry[drag-state="top"] {
+        border-top-style: solid;
+        border-top-color: #000000;
+    }
+
+    .texture-list-entry[drag-state="bottom"] {
+        border-bottom-style: solid;
+        border-bottom-color: #000000;
+    }
 </style>
 <section class="section is-mobile has-background-black-ter" style="height: 100vh">
     <div class="columns">
@@ -76,13 +90,9 @@
         </div>
         <div class="column">
             <div class="notification is-dark">
-                <div class="columns">
+                <div class="columns texture-layer-topbar">
                     <div class="column">
                         <h1 class="title is-5">TEXTURE LAYERS</h1>
-                        <div class="tags has-addons mb-2">
-                            <div class="tag is-warning">Note</div>
-                            <div class="tag is-link">Textures are not yet on the Project Tab. Refer to Modeling tab</div>
-                        </div>
                     </div>
                     <div class="column is-narrow">
                         <span class="new-texture-button icon is-small clickable tooltip" data-tooltip="Create New Texture">

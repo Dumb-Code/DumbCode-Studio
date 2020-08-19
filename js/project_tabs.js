@@ -2,15 +2,19 @@ export class ProjectTabs {
     constructor() {
         this.files = "file"
         this.modeling = "modeling"
+        this.texture = "texture"
         this.animation = "animation"
         this.activeTab = this.files
-        this.tabs = [this.files, this.modeling, this.animation]
+        this.tabs = [this.files, this.modeling, this.texture, this.animation]
         this.setActive()
     }
 
-    getActive(files, modeling, animation) {
+    getActive(files, modeling, texture, animation) {
         if(this.activeTab == this.modeling) {
             return modeling
+        }
+        if(this.activeTab == this.texture) {
+            return texture
         }
         if(this.activeTab == this.animation) {
             return animation

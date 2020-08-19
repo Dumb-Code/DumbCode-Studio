@@ -12,7 +12,7 @@ export class TexturemapCanvas {
     }
 
     drawTextureCanvas() {
-        let size = Math.min(this.studioPanels.rightArea, this.studioPanels.topRArea)
+        let size = Math.min(this.studioPanels.rightArea, this.studioPanels.topArea)
         this.canvas.width = this.canvas.height = size
 
         let ctx = this.canvas.getContext('2d')
@@ -83,7 +83,7 @@ export class TexturemapCanvas {
 
     mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback) {
         let mouseBetween = (x, y, w, h) => mouseX >= x && mouseX < x+w && mouseY >= y && mouseY < y+h
-        let size = Math.min(this.studioPanels.rightArea, this.studioPanels.topRArea)
+        let size = Math.min(this.studioPanels.rightArea, this.studioPanels.topArea)
         let su = this.display.tbl.texWidth/size
         let sv = this.display.tbl.texHeight/size
 
@@ -107,10 +107,12 @@ export class TexturemapCanvas {
             let vh = h/sv
             let vd = d/sv
             
-
+            //todo: this can be optimised to just be the bottom rectangle and the top rectangle
             let mouseOver = 
                 mouseBetween(u, v+vd, ud, vh) || mouseBetween(u+ud, v, uw, vd) || mouseBetween(u+ud, v+vd, uw, vh) ||
                 mouseBetween(u+ud+uw, v+vd, ud, vh) || mouseBetween(u+ud+uw, v, uw, vd) || mouseBetween(u+ud+uw+ud, v+vd, uw, vh)
+
+
 
             if(mouseOver) {
                 if(type === 'mousedown') {

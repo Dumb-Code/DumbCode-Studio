@@ -7,12 +7,13 @@ import { HistoryList } from "./history.js";
 import { ProjectTabs } from "./project_tabs.js";
 import { AnimationStudio } from "./animator/animation_studio.js";
 import { ModelingStudio } from "./modeling/modeling_studio.js";
-import { FilesPage } from "./files_page.js";
+import { FilesPage } from "./project/files_page.js";
 import { Raytracer } from "./raytracer.js";
+import { TextureStudio } from "./texture/texture_studio.js";
 
 const major = 0
-const minor = 1
-const patch = 7
+const minor = 2
+const patch = 0
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -44,7 +45,7 @@ const raytracer = new Raytracer(display, material, highlightMaterial, selectedMa
 const projectTabs = new ProjectTabs()
 
 let activeTab
-let filesPage, modelingStudio, animationStudio
+let filesPage, modelingStudio, textureStudio, animationStudio
 
 window.daeHistory = new HistoryList()
 
@@ -129,7 +130,7 @@ function createScene() {
 }
 
 function frame() {
-    let newTab = projectTabs.getActive(filesPage, modelingStudio, animationStudio)
+    let newTab = projectTabs.getActive(filesPage, modelingStudio, textureStudio, animationStudio)
     if(newTab !== activeTab && newTab !== undefined) {
         if(activeTab !== undefined) {
             if(activeTab.setUnactive) {
@@ -241,22 +242,27 @@ window.setupMainModel = async(file, nameElement) => {
 
 }
 
-async function createFilesPage() {
-    return new FilesPage($('#files-area'), () => modelingStudio, () => animationStudio)
+function createFilesPage() {
+    return new FilesPage($('#files-area'), () => modelingStudio, () => textureStudio, () => animationStudio)
 }
 
-async function createModelingStudio() {
+function createModelingStudio() {
     return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, setTexture)
 }
 
-async function createAnimationStudio() {
+function createTextureStudio() {
+    return new TextureStudio($('#texture-area'), filesPage, display, raytracer, controls, setTexture)
+}
+
+function createAnimationStudio() {
     return new AnimationStudio($('#animation-area') , raytracer, display, filesPage)
 }
 
-async function initiateModel(model) {
+function initiateModel(model) {
     display.setMainModel(material, model)
-    animationStudio = await createAnimationStudio()
-    modelingStudio = await createModelingStudio()
+    animationStudio = createAnimationStudio()
+    modelingStudio = createModelingStudio()
+    textureStudio = createTextureStudio()
     let old = model.onCubeHierarchyChanged
     model.onCubeHierarchyChanged = () => {
         modelingStudio.cubeHierarchyChanged()

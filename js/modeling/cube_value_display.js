@@ -29,28 +29,33 @@ export class CubeValueDisplay {
         this.lockedCubes = studio.lockedCubes
         this.rotationPointMarkers = studio.rotationPointMarkers
 
+
+        let getCube = () => this.raytracer.selectedSet.size === 1 ? this.raytracer.firstSelected().tabulaCube : undefined
+
         this.cubeName = new LinkedElement(dom.find('.input-cube-name'), false, false).onchange(e => {
             dom.find('.input-cube-name').toggleClass('input-invalid', renameCube(e.old, e.value))
         })
-        this.dimensions = new LinkedElement(dom.find('.input-dimension')).onchange(e => this.runArrayCommand('dim', xyzAxis, e))
-        this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => this.runArrayCommand('pos', xyzAxis, e))
-        this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => this.runArrayCommand('off', xyzAxis, e))
-        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e =>  this.root.runCommand(`cubegrow set ${e.value}`))
-        this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => this.runArrayCommand('tex', uvAxis, e))
-        this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false, true).onchange(e => this.root.runCommand(`mirror ${e.value}`))
-        this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => this.runArrayCommand('rot', xyzAxis, e))
+        this.dimensions = new LinkedElement(dom.find('.input-dimension')).onchange(e => getCube()?.updateDimension(e.value))
+        this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => {
+            lockedCubes.createLockedCubesCache()
+            getCube()?.updatePosition(e.value)
+            lockedCubes.reconstructLockedCubes()
+            studio.rotationPointMarkers.updateSpheres()
+        })
+        this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => getCube()?.updateOffset(e.value))
+        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e => getCube()?.updateCubeGrow(e.value))
+        this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => getCube()?.updateTextureOffset(e.value))
+        this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => getCube()?.updateTextureMirrored(e.value))
+        this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => {
+            lockedCubes.createLockedCubesCache()
+            getCube()?.updateRotation(e.value)
+            lockedCubes.reconstructLockedCubes()
+            studio.rotationPointMarkers.updateSpheres()
+        })
 
         studio.transformControls.addEventListener('objectChange', () => this.updateCubeValues())
 
         this.setCommands(studio.commandRoot)
-    }
-
-    runArrayCommand(name, axis, e) {
-        if(e.idx !== -1) {
-            this.root.runCommand(`${name} set ${axis[e.idx]} ${e.value[e.idx]}`)
-        } else {
-            this.root.runCommand(`${name} set ${axis} ${e.value.join(' ')}`)
-        }
     }
 
     setCommands(root) {

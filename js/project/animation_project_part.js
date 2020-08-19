@@ -1,15 +1,14 @@
-import { readFile } from "./displays.js"
-import { ByteBuffer } from "./animations.js"
-import { TBLModel } from "./tbl_loader.js"
-import { doubleClickToEdit } from "./util.js"
+import { readFile } from "../displays.js"
+import { ByteBuffer } from "../animations.js"
+import { TBLModel } from "../tbl_loader.js"
+import { doubleClickToEdit } from "../util.js"
 
-export class FilesPage { 
+export class AnimationProjectPart {
 
-    constructor(dom, modellingGetter, animatorGetter) {
+    constructor(dom, animatorGetter) {
         this.animatorGetter = animatorGetter
-        this.empty = dom.find('.animation-list-entry.empty-column')
+        this.emptyAnimationList = dom.find('.animation-list-entry.empty-column')
         dom.find('.new-animation-button').click(() => this.createNewAnimationTab())
-
         dom.find('#animation-file-input').on('input', e => {
             [...e.target.files].forEach(async(file) => {
                 let tab = this.createNewAnimationTab(file.name.substring(0, file.name.length - 4))
@@ -70,23 +69,15 @@ export class FilesPage {
         })
     }
 
-    //https://stackoverflow.com/a/1917041
-    sharedStart(array){
-        var A= array.concat().sort(), 
-        a1= A[0], a2= A[A.length-1], L= a1.length, i= 0;
-        while(i<L && a1.charAt(i)=== a2.charAt(i)) i++;
-        return a1.substring(0, i);
-    }
-
     createNewAnimationTab(name) {
         let animator = this.animatorGetter()
         if(animator) {
             let tab = animator.animationTabHandler.createNewTab()
             let element = tab.element
 
-            let cloned = this.empty.clone()
+            let cloned = this.emptyAnimationList.clone()
             cloned.removeClass('empty-column')
-            cloned.insertBefore(this.empty)
+            cloned.insertBefore(this.emptyAnimationList)
             
             let dom = $(cloned)
 
@@ -152,15 +143,12 @@ export class FilesPage {
         }
     }
 
-    runFrame() {
-
+    //https://stackoverflow.com/a/1917041
+    sharedStart(array){
+        var A= array.concat().sort(), 
+        a1= A[0], a2= A[A.length-1], L= a1.length, i= 0;
+        while(i<L && a1.charAt(i)=== a2.charAt(i)) i++;
+        return a1.substring(0, i);
     }
 
-    setActive() {
-        
-    }
-
-    setUnactive() {
-        
-    }
 }

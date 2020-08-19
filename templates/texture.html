@@ -1,0 +1,52 @@
+<div id="panel-top" class="" style="grid-area: top_area; background-color: black; position: relative;">
+    <span class="popout-button icon is-small">
+        <i class="fas fa-sign-out-alt"></i>
+    </span>
+    <div class="texture-container-class">
+        <canvas id="texture-canvas"></canvas>
+    </div>
+</div>
+<div id="panel-middle" class="" style="grid-area: middle_area; background-color: black; position: relative;">
+    <span class="popout-button icon is-small">
+        <i class="fas fa-sign-out-alt"></i>
+    </span>
+
+    <div class="texture-upload-container">
+        <ul class="texture-upload">
+            <li class="texture-file-input-entry">
+                <label class="file-label" style="display: block">
+                    <input class="file-input texture-file-input" type="file">
+                    <span class="file-cta" style="border-color: #dbdbdb">
+                        <span class="file-icon">
+                            <i class="fas fa-upload"></i>
+                        </span>
+                        <span class="file-label">
+                            Add Texture
+                        </span>
+                    </span>
+                </label>    
+            </li>
+        </ul>
+    </div>
+</div>
+<div id="panel-bottom" class="" style="grid-area: bottom_area; background-color: black; position: relative;">
+    <span class="popout-button icon is-small">
+        <i class="fas fa-sign-out-alt"></i>
+    </span>
+    <div class="modeling-ui-entry">
+        <label>Offset</label>
+        <div class="modeling-input-3" style="padding: 5px;">
+            <input axis="0" class="input-texure-offset modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Tex Offet">
+            <input axis="1" class="input-texure-offset modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="Y Tex Offet">
+            <div style="grid-area: r" class="b-checkbox is-inline">
+                <input class="input-texture-mirrored editor-require-selected" id="checkbox-tex-mirrored" class="styled" type="checkbox">
+                <label for="checkbox-tex-mirrored">Mirror</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="display-div" style="grid-area: main_area;"></div>
+<div id="vertical-divider" class="vertical-divider"></div>
+<div id="top-divider" class="horizontal-divider"></div>
+<div id="bottom-divider" class="horizontal-divider"></div>

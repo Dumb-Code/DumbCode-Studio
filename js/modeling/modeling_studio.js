@@ -1,6 +1,5 @@
 import { CubeListBoard } from "./cube_list_board.js"
 import { DragSelection } from "./drag_selection.js"
-import { TexturemapCanvas } from "./texturemap_canvas.js"
 import { CubePointTracker } from "./cube_point_tracker.js"
 import { Gumball } from "./gumball.js"
 import { LockedCubes } from "./locked_cubes.js"
@@ -11,7 +10,6 @@ import { RotationPointMarkers } from "./rotation_point.markers.js"
 import { applyCubeAddingDeleting } from "./cube_create_delete.js"
 import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 import { Group } from "../three.js"
-import { TextureManager } from "./texture_manager.js"
 
 export class ModelingStudio {
 
@@ -34,7 +32,7 @@ export class ModelingStudio {
 
         applyCubeStateHighlighting(dom, this)
         applyCubeAddingDeleting(dom, this)
-        this.textureManager = new TextureManager(dom, this, setTexture)
+
         this.rotationPointMarkers = new RotationPointMarkers(this)
         this.lockedCubes = new LockedCubes(this)    
         this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, this.lockedCubes)
@@ -42,15 +40,13 @@ export class ModelingStudio {
         this.pointTracker = new CubePointTracker(raytracer, display, this.group)
         this.gumball = new Gumball(dom, this)
         this.cubeValues = new CubeValueDisplay(dom, this, renameCube)
-        this.studioPanels = new StudioPanels(dom, this)
-        this.canvas = new TexturemapCanvas(dom.find('#texture-canvas'), display, raytracer, this.studioPanels)
+        this.studioPanels = new StudioPanels(dom, 300, 300)
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
     }
 
     runFrame() {
         this.pointTracker.update()
         this.raytracer.update()
-        this.canvas.drawTextureCanvas(this.rightArea, this.topRArea)
         this.display.tbl.resetAnimations()
         this.cubeValues.onRender()
         this.display.render()
@@ -63,6 +59,7 @@ export class ModelingStudio {
 
     setActive() {
         window.studioWindowResized()
+        this.cubeValues.updateCubeValues()
         this.display.scene.add(this.group)
         this.transformControls.enableReason('tab')
         this.dragSelection.onActive()
