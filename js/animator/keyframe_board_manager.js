@@ -60,7 +60,11 @@ export class KeyframeBoardManager {
         this.emptyLayer.find('.kf-layer-add').click(() => {
             let info = this.getLayerInfo()
             if(info !== null) {
-                this.getLayerDom(info.length)
+                let layer = info.length
+                this.getLayerDom(layer)
+                this.getHandler()?.ensureLayer(layer)
+
+                this.reframeKeyframes()
             }
         })
 
@@ -232,39 +236,38 @@ export class KeyframeBoardManager {
             return null
         }
         if(!this.elementDoms.has(layer)) {
-            this.createNewLayer(handler, layer)
+            this.createNewLayer(layer)
         }
         return this.elementDoms.get(layer)
     }
 
-    createNewLayer(handler, layer) {
-        let info = this.getLayerInfo()
-        if(info === null) {
-            return
-        }
-
+    createNewLayer(layer) {
         let newKF = this.emptyLayer.clone()[0]
         newKF.classList.remove('empty-keyframe')
         let dom = $(newKF)
 
         this.elementDoms.set(layer, dom)
 
-        let data 
-        if(info.some(l => l.id == layer)) {
-            data = info.find(l => l.id == layer)
-        } else {
-            data = handler.createLayerInfo(layer)
-        }
+        let dataGetter = () => this.getHandler()?.ensureLayer(layer)
     
         onElementDrag(dom.find('.keyframe-container').get(0), () => this.scroll, (dx, _, scroll) => {
             this.scroll = Math.max(scroll - dx, 0)
             this.reframeKeyframes()
         })
 
-        doubleClickToEdit(dom.find('.layer-name-conatiner'), v => data.name = v, data.name)
+        doubleClickToEdit(dom.find('.layer-name-conatiner'), v => {
+            let data = dataGetter()
+            if(data !== null) {
+                data.name = v
+            }
+        }, dataGetter()?.name)
 
       
         dom.find('.kf-layer-add').click(() => {
+            let handler = this.getHandler()
+            if(handler === null) {
+                return
+            }
             let kf = handler.createKeyframe()
             kf.duration = 5
             kf.layer = layer
@@ -276,18 +279,23 @@ export class KeyframeBoardManager {
 
         let layerVisible = dom.find('.kf-layer-visible')
         layerVisible.click(() => {
+            let data = dataGetter()
+            if(data === null) {
+                return
+            }
             data.visible = !data.visible
             layerVisible.find('.icon-symbol').toggleClass('fa-eye', data.visible).toggleClass('fa-eye-slash', !data.visible)
         })
 
         let layerLocked = dom.find('.kf-layer-lock')
         layerLocked.click(() => {
+            let data = dataGetter()
+            if(data === null) {
+                return
+            }
             data.locked = !data.locked
             layerLocked.find('.icon-symbol').toggleClass('fa-lock', data.locked).toggleClass('fa-lock-open', !data.locked)
         })
-
-        this.reframeKeyframes()
-
     }
 
     ensureFramePosition() {
