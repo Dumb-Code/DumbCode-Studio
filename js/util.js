@@ -117,7 +117,7 @@ export class LinkedElement {
         if(this.array) {
             elem.on('input', e => {
                 let arr = this.rawValue.splice(0)
-                let idx = e.target.getAttribute('axis')
+                let idx = parseInt(e.target.getAttribute('axis'))
                 arr[idx] = this.parseNum ? parseFloat(e.target.value) : e.target.value
                 this.setValue(arr, ensure ? idx : -1)
             })
