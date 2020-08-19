@@ -1,8 +1,6 @@
 import { readFile } from "../displays.js"
 import { DraggableElementList, doubleClickToEdit } from "../util.js"
 
-$(document).select(e => console.log(e.target))
-
 export class TextureProjectPart {
 
     constructor(dom, textureGetter) {
