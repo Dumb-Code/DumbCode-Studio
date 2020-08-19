@@ -13,7 +13,7 @@ import { TextureStudio } from "./texture/texture_studio.js";
 
 const major = 0
 const minor = 2
-const patch = 2
+const patch = 3
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -36,9 +36,6 @@ highlightMaterial.emissive.setHex( 0xFF0000 )
 
 let selectedMaterial = material.clone()
 selectedMaterial.emissive.setHex( 0x0000FF )
-
-let mainModel
-let modeCache, rotationCache
 
 const raytracer = new Raytracer(display, material, highlightMaterial, selectedMaterial)
 
@@ -234,12 +231,15 @@ window.setupMainModel = async(file, nameElement) => {
     nameElement.dataset.tooltip = file.name
 
     try {
-        initiateModel(await TBLModel.loadModel(readFile(file)))
+        initiateModel(await TBLModel.loadModel(readFile(file), file.name))
     } catch(err) {
         nameElement.dataset.tooltip = "ERROR!"
         console.error(`Error from file ${file.name}: ${err.message}`)
     }
+}
 
+window.downloadModel = () => {
+    TBLModel.writeModel(display.tbl)
 }
 
 function createFilesPage() {

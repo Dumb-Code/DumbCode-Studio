@@ -519,3 +519,13 @@ export class LayoutPart {
         this.onChanged(popped)
     }
 }
+
+let a = document.createElement("a");
+
+export function downloadBlob(name, blob) {
+    let url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = name;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}

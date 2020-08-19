@@ -1,8 +1,11 @@
 import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3 } from "./three.js";
+import { downloadBlob } from "./util.js";
 
 export class TBLModel {
 
     constructor() {
+        this.modelName = "New Model"
+        this.author = "???"
         this.texWidth = 64
         this.texHeight = 64
         this.maxCubeLevel = 0
@@ -337,6 +340,29 @@ function parseCubeJson(json, tbl) {
     return new TblCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
 }
 
+function writeCubeJson(cube) {
+    let obj = {
+        name: cube.name,
+        dimensions: cube.dimension, 
+        position: cube.rotationPoint,
+        offset: cube.offset,
+        rotation: cube.rotation,
+        scale: cube.scale,
+        txOffset: cube.textureOffset,
+        txMirror: cube.textureMirrored,
+        mcScale: cube.mcScale,
+        opacity: 100,
+        hidden: false,
+        metadata: [],
+        children: cube.children.map(child => writeCubeJson(child)),
+        identifier: cube.name //lol
+    }
+    if(cube.parent) {
+        obj.parentIdentifier = cube.parent.name
+    }
+    return obj
+}
+
 function getUV(offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {
 
     //Uv data goes west, east, down, up, south, north (+x, -x, +y, -y, +z, -z)
@@ -406,4 +432,26 @@ TBLModel.loadModel = async(data, name = "") => {
         model.fileName = name
     }
     return model
+}
+
+TBLModel.writeModel = tbl => {
+    let zip = new JSZip()
+
+    zip.file("model.json", JSON.stringify({ 
+        modelName: tbl.modelName, 
+        authorName: tbl.author, 
+        projVersion: 4,
+        metadata: [],
+        textureWidth: tbl.textureWidth,
+        textureHeight: tbl.textureHeight,
+        scale: [1,1,1],
+        cubeGroups:[],
+        anims: [],
+        cubes: tbl.rootGroup.cubeList.map(cube => writeCubeJson(cube)),
+        cubeCount: tbl.cubeMap.size 
+    }))
+    zip.generateAsync({type:"blob"})
+    .then(content => downloadBlob(tbl.fileName ? tbl.fileName : "model.tbl", content))
+        
+
 }
