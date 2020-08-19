@@ -23,6 +23,10 @@ export class TBLModel {
     parseJson(content) {
 
         let jobj = JSON.parse(content)
+
+        this.modelName = jobj.modelName
+        this.author = jobj.authorName
+
         this.texWidth = jobj.textureWidth
         this.texHeight = jobj.textureHeight
 
