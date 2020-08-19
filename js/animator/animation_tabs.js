@@ -32,6 +32,8 @@ export class AnimationTabHandler {
 
         let element = document.createElement('span')
         element.classList.add('editor-tab')
+        element.classList.add('heading')
+        element.style.float = "left";
         element.innerText = "Tab " + id
         this.tabContainer.append(element)
         element.onclick = () => this.activeTab = id

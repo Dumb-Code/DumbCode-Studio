@@ -19,9 +19,9 @@ export class DinosaurDisplay {
         this.gridGroup.dontRenderGif = true
         this.scene.add(this.gridGroup)
         let matrix = new Matrix4().makeRotationZ(Math.PI / 2)
-        let mesh1 = new Mesh(new CylinderBufferGeometry(0.005, 0.005, gridSquares), new MeshBasicMaterial({ color: 0x2C2C2C }))
-        let mesh2 = new Mesh(new CylinderBufferGeometry(0.003, 0.003, gridSquares), new MeshBasicMaterial({ color: 0x5A5A5A }))
-        let mesh3 = new Mesh(new CylinderBufferGeometry(0.002, 0.002, gridSquares), new MeshBasicMaterial({ color: 0x7B7B7B }))
+        let mesh1 = new Mesh(new CylinderBufferGeometry(0.005, 0.005, gridSquares), new MeshBasicMaterial({ color: 0x121212 }))
+        let mesh2 = new Mesh(new CylinderBufferGeometry(0.003, 0.003, gridSquares), new MeshBasicMaterial({ color: 0x1c1c1c }))
+        let mesh3 = new Mesh(new CylinderBufferGeometry(0.002, 0.002, gridSquares), new MeshBasicMaterial({ color: 0x292929 }))
 
         mesh1.geometry.applyMatrix(matrix);
         mesh2.geometry.applyMatrix(matrix);

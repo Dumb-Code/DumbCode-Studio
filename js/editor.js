@@ -13,7 +13,7 @@ import { TextureStudio } from "./texture/texture_studio.js";
 
 const major = 0
 const minor = 2
-const patch = 0
+const patch = 1
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -117,7 +117,7 @@ window.onModulesFinished = async() => {
 function createScene() {
     //Set up the Scene
     let scene = new Scene();
-    scene.background = new Color(0xaaaaaa);
+    scene.background = new Color(0x363636);
 
     //Set up lighting
     scene.add(new HemisphereLight());

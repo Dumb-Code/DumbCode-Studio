@@ -190,13 +190,17 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
  }
 
  .editor-tab {
-     padding: 0px 5px;
-     border-style: solid;
+     font-weight: bold;
+     margin: 0px 2px -5px;
+     padding: 2px 15px 8px;
      cursor: pointer;
+     color: lightgray;
+     border-radius: 5px 5px 0px 0px;
  }
 
  .editor-tab.tab-selected {
-     background-color: yellow;
+     background-color: #363636;
+     color: white;
 }
 
 .texture-upload {
