@@ -14,7 +14,7 @@ export class TextureManager {
         this.dragElementList = new DraggableElementList(false, (a, b, c) => this.textureDragged(a, b, c))
 
         this.textureUpload = dom.find('.texture-file-input-entry')
-        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadAnimationFiles(e))
+        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFiles(e))
     }
 
     textureDragged(drop, movedData, droppedOnData) {
@@ -23,14 +23,16 @@ export class TextureManager {
     }
     
     addImage(name, img) {
-        let width = img.naturalWidth
-        let height = img.naturalHeight
+
+        let width = this.display.tbl.texWidth
+        let height = this.display.tbl.texHeight
 
         if(name === undefined) {
             name = "New Layer " + this.textures.length
             img = document.createElement("img")
-            width = this.display.tbl.texWidth
-            height = this.display.tbl.texHeight
+        } else {
+            width = img.naturalWidth
+            height = img.naturalHeight
         }
 
         let data = {}
@@ -60,6 +62,7 @@ export class TextureManager {
 
         data.width = width
         data.height = height
+        data.img = img
         
         data.canvas = document.createElement("canvas")
         data.canvas.width = width

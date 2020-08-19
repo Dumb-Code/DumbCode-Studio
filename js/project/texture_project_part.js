@@ -1,6 +1,8 @@
 import { readFile } from "../displays.js"
 import { DraggableElementList, doubleClickToEdit } from "../util.js"
 
+$(document).select(e => console.log(e.target))
+
 export class TextureProjectPart {
 
     constructor(dom, textureGetter) {
@@ -14,10 +16,38 @@ export class TextureProjectPart {
             texture.textureManager.textureDragged(a, b, c)
 
         })
-        dom.find('#texture-file-input').on('input', e => this.uploadAnimationFiles(e))
+        dom.find('#texture-file-input').on('input', e => this.uploadTextureFiles(e))
+        dom.find('.new-texture-button').click(() => {
+            let texture = this.textureGetter()
+            if(texture === undefined) {
+                return
+            }
+            this.createTextureElement(texture)
+            texture.textureManager.refresh()
+        })
+    }
+    
+    createTextureElement(texture, name, img) {
+        let data = texture.textureManager.addImage(name, img)
+        let cloned = this.emptyTextureList.clone()
+        cloned.removeClass('empty-column')
+        cloned.insertBefore(this.emptyTextureList)    
+
+        cloned.find('.texture-preview').append(data.img)
+
+        let element = cloned.get(0)
+        element.draggable = true
+
+        data._projectElement = cloned
+        this.dragableElementList.addElement(element, () => data.idx)
+
+        doubleClickToEdit(cloned.find('.texture-name-container'), name => {
+            data.name = name
+            data.li.innerText = name
+        }, data.name)
     }
 
-    async uploadAnimationFiles(element) {
+    async uploadTextureFiles(element) {
         let texture = this.textureGetter()
         if(texture === undefined) {
             return
@@ -28,24 +58,9 @@ export class TextureProjectPart {
                 img.src = await readFile(file, (reader, f) => reader.readAsDataURL(f))
                 resolve({ name: file.name,  img} )
             })
-        })).then(files => files.forEach(file => {
-            let cloned = this.emptyTextureList.clone()
-            cloned.removeClass('empty-column')
-            cloned.insertBefore(this.emptyTextureList)    
-
-            let element = cloned.get(0)
-            element.draggable = true
-
-            let data = texture.textureManager.addImage(file.name, file.img)
-            data._projectElement = cloned
-            this.dragableElementList.addElement(element, () => data.idx)
-
-            doubleClickToEdit(cloned.find('.texture-name-container'), name => {
-                data.name = name
-                texture.textureManager.refresh()
-            }, data.name)
-
-        })).then(() => texture.textureManager.refresh())
+        }))
+        .then(files => files.forEach(file => this.createTextureElement(texture, file.name, file.img)))
+        .then(() => texture.textureManager.refresh())
     }
 
     refreshTextureLayers() {
