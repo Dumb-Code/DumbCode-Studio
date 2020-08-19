@@ -37,9 +37,9 @@ export class CubeValueDisplay {
         })
         this.dimensions = new LinkedElement(dom.find('.input-dimension')).onchange(e => getCube()?.updateDimension(e.value))
         this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => {
-            lockedCubes.createLockedCubesCache()
+            this.lockedCubes.createLockedCubesCache()
             getCube()?.updatePosition(e.value)
-            lockedCubes.reconstructLockedCubes()
+            this.lockedCubes.reconstructLockedCubes()
             studio.rotationPointMarkers.updateSpheres()
         })
         this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => getCube()?.updateOffset(e.value))
@@ -47,9 +47,9 @@ export class CubeValueDisplay {
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => getCube()?.updateTextureOffset(e.value))
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => getCube()?.updateTextureMirrored(e.value))
         this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => {
-            lockedCubes.createLockedCubesCache()
+            this.lockedCubes.createLockedCubesCache()
             getCube()?.updateRotation(e.value)
-            lockedCubes.reconstructLockedCubes()
+            this.lockedCubes.reconstructLockedCubes()
             studio.rotationPointMarkers.updateSpheres()
         })
 
