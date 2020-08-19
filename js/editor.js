@@ -259,6 +259,9 @@ function createAnimationStudio() {
 }
 
 function initiateModel(model) {
+    if(display.tbl !== undefined) { //TODO: tabs
+        return
+    }
     display.setMainModel(material, model)
     animationStudio = createAnimationStudio()
     modelingStudio = createModelingStudio()
