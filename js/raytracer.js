@@ -190,11 +190,8 @@ export class Raytracer {
             style.top = rawMouse.y - 35 + "px"
         }
 
-        raycaster.setFromCamera(mouse, this.display.camera);
-        
-
         if(this.display.tbl) {
-            let intersects = raycaster.intersectObjects(this.display.tbl.modelCache.children , true);
+            let intersects = this.gatherIntersections();
             if(!mouseDown) {
                 if(intersects.length > 0) {
                     this.mouseOverMesh(intersects[0].object, intersects[0].distance)
@@ -207,5 +204,13 @@ export class Raytracer {
         }
     }
 
+    gatherIntersections() {
+        raycaster.setFromCamera(mouse, this.display.camera);
+        return raycaster.intersectObjects(this.display.tbl.modelCache.children , true)
+    }
+
+    isMouseDown() {
+        return mouseDown
+    }
 }
 Object.assign( Raytracer.prototype, EventDispatcher.prototype );

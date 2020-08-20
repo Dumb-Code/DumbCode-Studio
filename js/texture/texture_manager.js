@@ -10,6 +10,9 @@ export class TextureManager {
         this.filesPage = filesPage
         this.textures = []
         this.aspect = -1
+        this.canvas = document.createElement('canvas')
+        this.context = this.canvas.getContext('2d')
+        this.context.imageSmoothingEnabled = false
 
         this.dragElementList = new DraggableElementList(false, (a, b, c) => this.textureDragged(a, b, c))
 
@@ -27,9 +30,12 @@ export class TextureManager {
         let width = this.display.tbl.texWidth
         let height = this.display.tbl.texHeight
 
+        let empty = false
+
         if(name === undefined) {
             name = "New Layer " + this.textures.length
             img = document.createElement("img")
+            empty = true
         } else {
             width = img.naturalWidth
             height = img.naturalHeight
@@ -63,12 +69,26 @@ export class TextureManager {
         data.width = width
         data.height = height
         data.img = img
+
+        data.onCanvasChange = () => {
+            data.img.src = data.canvas.toDataURL()
+            data.img.width = data.canvas.width
+            data.img.height = data.canvas.height
+            this.refresh()
+        }
         
         data.canvas = document.createElement("canvas")
         data.canvas.width = width
         data.canvas.height = height
         let ctx = data.canvas.getContext("2d")
-        ctx.drawImage(img, 0, 0, width, height)
+
+        if(empty) {
+            ctx.fillStyle = "rgba(255, 255, 255, 1)"
+            ctx.fillRect(0, 0, width, height)
+            data.onCanvasChange()
+        } else {
+            ctx.drawImage(img, 0, 0, width, height)
+        }
 
         this.textures.unshift(data)
         return data
@@ -87,20 +107,18 @@ export class TextureManager {
         let width = this.textures.filter(t => !t.isHidden).map(t => t.width).reduce((a, c) => Math.max(a, c), 1)
         let height = Math.max(width / this.aspect, 1)
 
-        let canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        let ctx = canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = false
+        
+        this.canvas.width = width
+        this.canvas.height = height
 
         if(!this.textures.find(t => !t.isHidden)) {
-            ctx.fillStyle = `rgba(255, 255, 255, 255)`
-            ctx.fillRect(0, 0, 1, 1)
+            this.context.fillStyle = `rgba(255, 255, 255, 255)`
+            this.context.fillRect(0, 0, 1, 1)
         }
 
-        this.textures.filter(t => !t.isHidden).reverse().forEach(t => ctx.drawImage(t.canvas, 0, 0, width, height))
+        this.textures.filter(t => !t.isHidden).reverse().forEach(t => this.context.drawImage(t.canvas, 0, 0, width, height))
 
-        let tex = new CanvasTexture(canvas)
+        let tex = new CanvasTexture(this.canvas)
         tex.needsUpdate = true
         tex.flipY = false
         tex.magFilter = NearestFilter;

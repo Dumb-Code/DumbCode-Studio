@@ -249,6 +249,10 @@ var OrbitControls = function ( object, domElement ) {
 
 	};
 
+	this.turnOff = function() {
+		onMouseUp()
+	}
+
 	//
 	// internals
 	//

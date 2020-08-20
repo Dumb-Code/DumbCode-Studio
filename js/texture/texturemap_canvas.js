@@ -16,6 +16,7 @@ export class TexturemapCanvas {
         this.canvas.width = this.canvas.height = size
 
         let ctx = this.canvas.getContext('2d')
+        ctx.imageSmoothingEnabled = false
 
         this.canvasTransformControls.applyTransforms()
 
