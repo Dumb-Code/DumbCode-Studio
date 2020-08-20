@@ -225,7 +225,7 @@ export class ProgressionCanvas {
         let length = distances.reduce((a, b) => a + b)
         let xStep = length / (points - 1)
         for(let i = 0; i < points; i++) {
-            let distToMove = i*xStep
+            let distToMove = (i+1)*xStep
 
             for(let d = 0; d < distances.length; d++) {
                 let dist = distances[d]
