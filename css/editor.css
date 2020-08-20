@@ -50,9 +50,10 @@
 #main-area.is-texture > div#texture-area {
     display: grid;
     grid-template-areas: 
-    "main_area top_area"
-    "main_area middle_area"
-    "main_area bottom_area";
+    "main_area texture_map texture_map"
+    "main_area offset_editing offset_editing"
+    "main_area colour_picker texture_layers"
+    "main_area colour_palette texture_layers";
     width: 100%;
     height: 100vh;
 }
@@ -78,6 +79,7 @@ li.is-collapsed ul {
     height: 100%;
     width: 8px;
     cursor: e-resize;
+    z-index: 5
 }
   
 .horizontal-divider {
@@ -86,6 +88,7 @@ li.is-collapsed ul {
     width: 100%;
     height: 8px;
     cursor: n-resize;
+    z-index: 5
 }
 
 #drag-selection-overlay {
@@ -165,11 +168,17 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
      vertical-align: top;
  }
 
- .popout-button {
+ .switch-canvas-button {
      position: absolute;
      top: 0;
-     right: 0;
+     right: 20px;
  }
+
+ .popout-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
 
  .command-line-container {
      width: calc(100% - 175px);

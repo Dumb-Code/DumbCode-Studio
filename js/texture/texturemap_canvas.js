@@ -1,18 +1,19 @@
 import { CanvasTransformControls } from "../util.js"
 
 export class TexturemapCanvas {
-    constructor(domElement, display, raytracer, studioPanels) {
+    constructor(domElement, display, raytracer) {
         this.canvas = domElement.get(0)
+        this.parnetNode = domElement.parent().parent()
         this.display = display
         this.raytracer = raytracer
-        this.studioPanels = studioPanels
         this.canvasMovingCube = null
 
         this.canvasTransformControls = new CanvasTransformControls(this.canvas, (a, b, c, d, e) => this.mouseOverCanvas(a, b, c, d, e))
     }
 
     drawTextureCanvas() {
-        let size = Math.min(this.studioPanels.rightArea, this.studioPanels.topArea)
+        //TODO: don't do this. Make sure the canvas aspect ratio is the same as the tabula model.
+        let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
         this.canvas.width = this.canvas.height = size
 
         let ctx = this.canvas.getContext('2d')
@@ -84,7 +85,7 @@ export class TexturemapCanvas {
 
     mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback) {
         let mouseBetween = (x, y, w, h) => mouseX >= x && mouseX < x+w && mouseY >= y && mouseY < y+h
-        let size = Math.min(this.studioPanels.rightArea, this.studioPanels.topArea)
+        let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
         let su = this.display.tbl.texWidth/size
         let sv = this.display.tbl.texHeight/size
 

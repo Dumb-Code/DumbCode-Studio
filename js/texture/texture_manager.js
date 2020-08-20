@@ -10,6 +10,14 @@ export class TextureManager {
         this.filesPage = filesPage
         this.textures = []
         this.aspect = -1
+
+        this.highlightCanvas = document.createElement('canvas')
+        this.highlightCanvas.width = this.display.tbl.texWidth
+        this.highlightCanvas.height = this.display.tbl.texHeight
+        this.highlightContext = this.highlightCanvas.getContext('2d')
+        this.highlightContext.imageSmoothingEnabled = false
+        this.highlighPixel = null
+
         this.canvas = document.createElement('canvas')
         this.context = this.canvas.getContext('2d')
         this.context.imageSmoothingEnabled = false
@@ -18,6 +26,22 @@ export class TextureManager {
 
         this.textureUpload = dom.find('.texture-file-input-entry')
         dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFiles(e))
+    }
+
+    mouseOverPixel(u, v) {
+        let pixel = u === undefined ? null : { u, v}
+        if(this.highlighPixel?.u === u && this.highlighPixel?.v === v) {
+            return
+        }
+        if(this.highlighPixel !== null) {
+            this.highlightContext.clearRect(this.highlighPixel.u, this.highlighPixel.v, 1, 1)
+        }
+        this.highlighPixel = pixel
+        if(this.highlighPixel !== null) {
+            this.highlightContext.fillStyle = "rgba(150, 100, 200, 1)"
+            this.highlightContext.fillRect(this.highlighPixel.u, this.highlighPixel.v, 1, 1)
+        }
+        this.refresh()
     }
 
     textureDragged(drop, movedData, droppedOnData) {
@@ -103,20 +127,25 @@ export class TextureManager {
             $(t.li).text(t.name).detach().insertBefore(this.textureUpload)
         })
 
-
         let width = this.textures.filter(t => !t.isHidden).map(t => t.width).reduce((a, c) => Math.max(a, c), 1)
         let height = Math.max(width / this.aspect, 1)
 
-        
+        if(this.textures.length === 0) {
+            width = this.display.tbl.texWidth
+            height = this.display.tbl.texHeight
+        }
+
         this.canvas.width = width
         this.canvas.height = height
 
         if(!this.textures.find(t => !t.isHidden)) {
             this.context.fillStyle = `rgba(255, 255, 255, 255)`
-            this.context.fillRect(0, 0, 1, 1)
+            this.context.fillRect(0, 0, width, height)
         }
 
         this.textures.filter(t => !t.isHidden).reverse().forEach(t => this.context.drawImage(t.canvas, 0, 0, width, height))
+
+        this.context.drawImage(this.highlightCanvas, 0, 0, width, height)
 
         let tex = new CanvasTexture(this.canvas)
         tex.needsUpdate = true
