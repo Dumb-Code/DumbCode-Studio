@@ -234,6 +234,10 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
     border: solid 3px transparent
 }
 
+.texture-file-entry.is-activated {
+    background-color: red;
+}
+
 .texture-file-entry.entry-hidden {
     text-decoration: line-through;
 }

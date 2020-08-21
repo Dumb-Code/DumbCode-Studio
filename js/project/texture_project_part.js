@@ -15,14 +15,16 @@ export class TextureProjectPart {
 
         })
         dom.find('#texture-file-input').on('input', e => this.uploadTextureFiles(e))
-        dom.find('.new-texture-button').click(() => {
-            let texture = this.textureGetter()
-            if(texture === undefined) {
-                return
-            }
-            this.createTextureElement(texture)
-            texture.textureManager.refresh()
-        })
+        dom.find('.new-texture-button').click(() => this.createEmptyTexture())
+    }
+
+    createEmptyTexture() {
+        let texture = this.textureGetter()
+        if(texture === undefined) {
+            return
+        }
+        this.createTextureElement(texture)
+        texture.textureManager.refresh()
     }
     
     createTextureElement(texture, name, img) {

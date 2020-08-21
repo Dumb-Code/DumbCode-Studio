@@ -1,14 +1,27 @@
 import { CanvasTransformControls } from "../util.js"
 
 export class TexturemapCanvas {
-    constructor(domElement, display, raytracer) {
+    constructor(domElement, display, raytracer, textureTools) {
         this.canvas = domElement.get(0)
         this.parnetNode = domElement.parent().parent()
         this.display = display
         this.raytracer = raytracer
         this.canvasMovingCube = null
+        this.textureTools = textureTools
 
-        this.canvasTransformControls = new CanvasTransformControls(this.canvas, (a, b, c, d, e) => this.mouseOverCanvas(a, b, c, d, e))
+        this.canvasTransformControls = new CanvasTransformControls(this.canvas, (type, mouseX, mouseY, buttons, misscallback) => {
+            if(type == "mouseleave") {
+                textureTools.mouseOverPixel()
+                return
+            }
+            let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
+            if(buttons & 1 === 1 && textureTools.canDraw()) {
+                textureTools.mouseDown(mouseX/size, mouseY/size)
+                return
+            }
+            this.mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback)
+            textureTools.mouseOverPixel(mouseX/size, mouseY/size)
+        })
     }
 
     drawTextureCanvas() {

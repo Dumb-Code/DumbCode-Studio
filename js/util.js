@@ -133,23 +133,28 @@ Object.assign( LinkedElement.prototype, EventDispatcher.prototype );
 
 export class LinkedSelectableList {
     constructor(elements, mustSelectOne = true) {
-        this.elements = elements
+        this.elements = $()
         this.mustSelectOne = mustSelectOne
         this.predicate = () => true
+        this.addElement(elements)        
+        if(this.mustSelectOne) {
+            this.elements.first().addClass('is-activated').each((_i, elem) => this.value = elem.getAttribute('select-list-entry'))
+        }
+    }
 
+    addElement(elements) {
         let getValue = () => this.value
         let setValue = v => this.value = v
-        this.elements.click(function() { 
+
+        elements.click(function() { 
             let val = this.getAttribute('select-list-entry')
-            if(val === getValue() && !mustSelectOne) {
+            if(val === getValue() && !this.mustSelectOne) {
                 setValue(undefined)
             } else {
                 setValue(val)
             }
-         })
-        if(this.mustSelectOne) {
-            this.elements.first().addClass('is-activated').each((_i, elem) => this.value = elem.getAttribute('select-list-entry'))
-        }
+        })
+        this.elements = this.elements.add(elements)
     }
 
     set value(value) {
@@ -325,6 +330,7 @@ export class CanvasTransformControls {
             .mousemove(e => this.mouseEvent(e))
             .mousedown(e => this.mouseEvent(e))
             .mouseup(e => this.mouseEvent(e))
+            .mouseleave(e => this.mouseEvent(e))
             .contextmenu(e => e.preventDefault())
             .bind('mousewheel DOMMouseScroll', e => {
                 let direction = e.originalEvent.wheelDelta

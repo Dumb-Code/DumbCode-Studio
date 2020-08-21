@@ -1,3 +1,5 @@
+import { LinkedSelectableList } from "../util.js"
+
 export class TextureTools {
 
     constructor(dom, display, textureManager, orbitControls, raytracer) {
@@ -7,8 +9,10 @@ export class TextureTools {
         this.orbitControls  = orbitControls 
         
         this.tabInUse = false
-        this.previousOrbit = true
+        this.previousMouseOver = true
         this.isInUse = false
+
+        this.paintMode = new LinkedSelectableList(dom.find('.button-paint-mode'), false)
 
         let mouseUp = () => {
             orbitControls.enabled = true
@@ -29,24 +33,40 @@ export class TextureTools {
     runFrame() {
         let intersections = this.raytracer.gatherIntersections()
 
-        if(intersections.length > 0) {
+        if(intersections.length > 0 && this.paintMode.value !== undefined) {
             let uv = intersections[0].uv
-
-            let uPixel = Math.floor(uv.x * this.display.tbl.texWidth)
-            let vPixel = Math.floor(uv.y * this.display.tbl.texHeight)
-
-            //TODO: selected textures
-            if(this.isInUse && this.textureManager.textures.length > 0) {
-                let texture = this.textureManager.textures[0]
-                let ctx = texture.canvas.getContext('2d')
-
-                ctx.fillStyle = "rgba(0, 0, 0, 1)"
-                ctx.fillRect(uPixel, vPixel, 1, 1)
-                texture.onCanvasChange()
+            if(this.isInUse) {
+                this.mouseDown(uv.x, uv.y)
             }
-            this.textureManager.mouseOverPixel(uPixel, vPixel)
-        } else {
+            this.textureManager.mouseOverPixel(uv.x, uv.y)
+            this.previousMouseOver = true
+        } else if(this.previousMouseOver) {
             this.textureManager.mouseOverPixel()
+            this.previousMouseOver = false
+        }
+    }
+
+    canDraw() {
+        return this.textureManager.getSelectedLayer() !== undefined && this.paintMode.value !== undefined
+    }
+
+    mouseOverPixel(u, v) {
+        if(this.paintMode.value !== undefined) {
+            this.textureManager.mouseOverPixel(u, v)
+        }
+    }
+    
+    mouseDown(u, v) {
+        let selected = this.textureManager.getSelectedLayer()
+        if(selected !== undefined) {
+            if(this.paintMode.value == 'pixel') {
+                let ctx = selected.canvas.getContext('2d')
+                ctx.fillStyle = "rgba(0, 0, 0, 1)"
+                ctx.fillRect(Math.floor(u*selected.width), Math.floor(v*selected.height), 1, 1)
+                selected.onCanvasChange()
+                return
+            }
+            
         }
     }
 

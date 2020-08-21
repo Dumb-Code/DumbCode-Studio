@@ -30,6 +30,21 @@
         <i class="fas fa-sign-out-alt"></i>
     </span>
 Picker
+<button class="button button-activateable is-dark button-paint-mode tooltip" select-list-entry="pixel" data-tooltip="Paint Pixel">
+    <span class="icon is-small">
+        <i class="fas fa-paint-brush"></i>
+    </span>
+</button>
+<button class="button button-activateable is-dark button-paint-mode tooltip" select-list-entry="face" data-tooltip="Paint Face">
+    <span class="icon is-small">
+        <i class="fas fa-brush"></i>
+    </span>
+</button>
+<button class="button button-activateable is-dark button-paint-mode tooltip" select-list-entry="cube" data-tooltip="Fill Cube">
+    <span class="icon is-small">
+        <i class="fas fa-fill"></i>
+    </span>
+</button>
 </div>
 <div id="panel-colour-palette" style="grid-area: colour_palette; position: relative;">
     <span class="popout-button icon is-small">
@@ -41,7 +56,6 @@ Palette
     <span class="popout-button icon is-small">
         <i class="fas fa-sign-out-alt"></i>
     </span>
-
     <div class="texture-upload-container">
         <ul class="texture-upload">
             <li class="texture-file-input-entry">
@@ -55,7 +69,10 @@ Palette
                             Add Texture
                         </span>
                     </span>
-                </label>    
+                </label>  
+                <span class="new-texture-button icon is-small clickable tooltip" data-tooltip="Create New Texture">
+                    <i class="fas fa-plus"></i>
+                </span>  
             </li>
         </ul>
     </div>

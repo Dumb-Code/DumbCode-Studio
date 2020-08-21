@@ -1,6 +1,6 @@
 import { readFile } from "../displays.js"
 import { Texture, NearestFilter, Vector2, DataTexture, RGBAFormat, CanvasTexture } from "../three.js"
-import { DraggableElementList } from "../util.js"
+import { DraggableElementList, LinkedSelectableList } from "../util.js"
 
 export class TextureManager {
 
@@ -23,14 +23,30 @@ export class TextureManager {
         this.context.imageSmoothingEnabled = false
 
         this.dragElementList = new DraggableElementList(false, (a, b, c) => this.textureDragged(a, b, c))
+        this.selectedLayer = new LinkedSelectableList($(),false).onchange(e => {
+            let layer = this.textures[e.value]
+            if(layer) {
+                this.highlightCanvas.width = layer.width
+                this.highlightCanvas.height = layer.height
+            }
+        })
 
         this.textureUpload = dom.find('.texture-file-input-entry')
         dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFiles(e))
+        dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
+    }
+
+    getSelectedLayer() {
+        return this.textures[this.selectedLayer.value]
     }
 
     mouseOverPixel(u, v) {
-        let pixel = u === undefined ? null : { u, v}
-        if(this.highlighPixel?.u === u && this.highlighPixel?.v === v) {
+        if(this.selectedLayer.value === undefined) {
+            return
+        }
+        let layer = this.textures[this.selectedLayer.value]
+        let pixel = u === undefined ? null : { u: Math.floor(u*layer.width), v:Math.floor(v*layer.height) }
+        if(this.highlighPixel?.u === pixel?.u && this.highlighPixel?.v === pixel?.v) {
             return
         }
         if(this.highlighPixel !== null) {
@@ -69,6 +85,7 @@ export class TextureManager {
 
         let li = document.createElement('li')
         data.li = li
+        this.selectedLayer.addElement($(li))
         data.name = name
         data.isHidden = false
         this.dragElementList.addElement(li, () => data.idx)
@@ -124,6 +141,7 @@ export class TextureManager {
         this.textureUpload.siblings().detach()
         this.textures.forEach((t, id) => {
             t.idx = id
+            t.li.setAttribute('select-list-entry', t.idx)
             $(t.li).text(t.name).detach().insertBefore(this.textureUpload)
         })
 
@@ -145,7 +163,9 @@ export class TextureManager {
 
         this.textures.filter(t => !t.isHidden).reverse().forEach(t => this.context.drawImage(t.canvas, 0, 0, width, height))
 
-        this.context.drawImage(this.highlightCanvas, 0, 0, width, height)
+        if(this.selectedLayer.value !== undefined) {
+            this.context.drawImage(this.highlightCanvas, 0, 0, width, height)
+        }
 
         let tex = new CanvasTexture(this.canvas)
         tex.needsUpdate = true
