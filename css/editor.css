@@ -212,10 +212,15 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
      color: white;
 }
 
+.pcr-app[data-theme=nano] .pcr-selection .pcr-color-palette {
+    z-index: 0 !important;
+}
+
 .texture-upload {
     height: 100%;
     overflow-y: scroll; 
     background-color: tomato;
+    z-index: -2;
 }
 
 .texture-upload-container {

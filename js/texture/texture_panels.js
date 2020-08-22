@@ -39,9 +39,9 @@ export class TexturePanels {
 
         this.rightArea = 500
         this.topArea = 300
-        this.offsetArea = 200
-        this.pickerArea = 200
-        this.layersArea = 300
+        this.offsetArea = 70
+        this.pickerArea = 100
+        this.layersArea = 250
 
         let clickedDivider = 0
         $(document)
@@ -49,7 +49,10 @@ export class TexturePanels {
             .mousemove(e => {
                 if(clickedDivider !== 0) {
                     if(clickedDivider === 1) {
-                        this.rightArea = mainArea.clientWidth - e.clientX
+                        let newDist = mainArea.clientWidth - e.clientX
+                        let diff = newDist - this.rightArea
+                        this.layersArea += diff * (this.layersArea / this.rightArea)
+                        this.rightArea = newDist
                     } else if(clickedDivider === 2) {
                         this.topArea = e.clientY - mainArea.offsetTop
                     }  else if(clickedDivider === 3) {
@@ -130,7 +133,7 @@ export class TexturePanels {
             if(bottom) {
                 if(picker) {
                     if(palette) {
-                        this.pickerArea = 200
+                        this.pickerArea = 100
                     } else {
                         this.pickerArea = mainArea.clientHeight - this.topArea - this.offsetArea
                     }
@@ -151,10 +154,10 @@ export class TexturePanels {
                 if(middle) {
                     if(top) {
                         this.topArea = 300
-                        this.offsetArea = 200
+                        this.offsetArea = 70
                     } else {
                         if(this.topArea === 0) {
-                            this.offsetArea = 200
+                            this.offsetArea = 70
                         } else {
                             this.offsetArea += this.topArea
                         }

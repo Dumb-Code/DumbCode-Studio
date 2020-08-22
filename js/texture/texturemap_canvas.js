@@ -6,8 +6,9 @@ export class TexturemapCanvas {
         this.parnetNode = domElement.parent().parent()
         this.display = display
         this.raytracer = raytracer
-        this.canvasMovingCube = null
         this.textureTools = textureTools
+        this.canvasMovingCube = null
+        this._mouseOverContext = null
 
         this.canvasTransformControls = new CanvasTransformControls(this.canvas, (type, mouseX, mouseY, buttons, misscallback) => {
             if(type == "mouseleave") {
@@ -15,12 +16,12 @@ export class TexturemapCanvas {
                 return
             }
             let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
+            textureTools.mouseOverPixel(mouseX/size, mouseY/size, this._mouseOverContext)
             if(buttons & 1 === 1 && textureTools.canDraw()) {
                 textureTools.mouseDown(mouseX/size, mouseY/size)
                 return
             }
             this.mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback)
-            textureTools.mouseOverPixel(mouseX/size, mouseY/size)
         })
     }
 
@@ -96,8 +97,8 @@ export class TexturemapCanvas {
         })        
     }
 
+
     mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback) {
-        let mouseBetween = (x, y, w, h) => mouseX >= x && mouseX < x+w && mouseY >= y && mouseY < y+h
         let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
         let su = this.display.tbl.texWidth/size
         let sv = this.display.tbl.texHeight/size
@@ -122,14 +123,19 @@ export class TexturemapCanvas {
             let vh = h/sv
             let vd = d/sv
             
-            //todo: this can be optimised to just be the bottom rectangle and the top rectangle
-            let mouseOver = 
-                mouseBetween(u, v+vd, ud, vh) || mouseBetween(u+ud, v, uw, vd) || mouseBetween(u+ud, v+vd, uw, vh) ||
-                mouseBetween(u+ud+uw, v+vd, ud, vh) || mouseBetween(u+ud+uw, v, uw, vd) || mouseBetween(u+ud+uw+ud, v+vd, uw, vh)
 
+            let faceAreas = [
+                [u+ud+uw, v+vd, ud, vh], //0
+                [u, v+vd, ud, vh], //1
+                [u+ud+uw, v, uw, vd], //2
+                [u+ud, v, uw, vd],  //3
+                [u+ud, v+vd, uw, vh],  //4
+                [u+ud+uw+ud, v+vd, uw, vh] //5
+            ]
+            
+            let mouseOverArea = faceAreas.findIndex(arr => mouseX >= arr[0] && mouseX < arr[0]+arr[2] && mouseY >= arr[1] && mouseY < arr[1]+arr[3])
 
-
-            if(mouseOver) {
+            if(mouseOverArea !== -1) {
                 if(type === 'mousedown') {
                     this.canvasMovingCube = {cube, x: mouseX-u, y: mouseY-v, moved: false}
                 } else if(type === 'mouseup') {
@@ -139,12 +145,15 @@ export class TexturemapCanvas {
                 } else {
                     this.raytracer.mouseOverMesh(cube.cubeMesh)
                 }
+                this._mouseOverContext = { cube, face: mouseOverArea }
+                this.textureTools.mouseOverPixel(mouseX/size, mouseY/size, this._mouseOverContext)
                 overHandled = true
             }
         })
         
         if(!overHandled) {
-            misscallback(this.canvasMovingCube === null && buttons & 1 !== 0)
+            this._mouseOverContext = null
+            misscallback(this.canvasMovingCube === null && ((buttons & 1) !== 0 || (buttons & 2) !== 0))
             if(type === 'mouseup') {
                 if(this.canvasTransformControls.hasMoved !== true) {
                     this.raytracer.deselectAll()

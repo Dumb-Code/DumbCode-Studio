@@ -40,7 +40,7 @@ export class TextureManager {
         return this.textures[this.selectedLayer.value]
     }
 
-    mouseOverPixel(u, v) {
+    hightlightPixelBounds(u, v, bounds) {
         if(this.selectedLayer.value === undefined) {
             return
         }
@@ -49,16 +49,20 @@ export class TextureManager {
         if(this.highlighPixel?.u === pixel?.u && this.highlighPixel?.v === pixel?.v) {
             return
         }
-        if(this.highlighPixel !== null) {
-            this.highlightContext.clearRect(this.highlighPixel.u, this.highlighPixel.v, 1, 1)
-        }
+
+        this.highlightContext.clearRect(0, 0, this.highlightCanvas.width, this.highlightCanvas.height)
+
         this.highlighPixel = pixel
         if(this.highlighPixel !== null) {
             this.highlightContext.fillStyle = "rgba(150, 100, 200, 1)"
-            this.highlightContext.fillRect(this.highlighPixel.u, this.highlighPixel.v, 1, 1)
+
+            if(bounds) {
+                bounds.forEach(b => this.highlightContext.fillRect(Math.floor(b.u), Math.floor(b.v), Math.round(b.w), Math.round(b.h)))
+            }
         }
         this.refresh()
     }
+
 
     textureDragged(drop, movedData, droppedOnData) {
         this.textures.splice(droppedOnData + (drop == 'bottom' ? 1 : 0), 0, ...this.textures.splice(movedData, 1))
