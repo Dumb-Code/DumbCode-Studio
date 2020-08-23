@@ -127,6 +127,8 @@ export class TextureManager {
         let ctx = data.canvas.getContext("2d")
 
         if(empty) {
+            ctx.fillStyle = "rgba(255, 255, 255, 1)"
+            ctx.fillRect(0, 0, width, height)
             data.onCanvasChange()
         } else {
             ctx.drawImage(img, 0, 0, width, height)
@@ -157,8 +159,10 @@ export class TextureManager {
         this.canvas.width = width
         this.canvas.height = height
 
-        this.context.fillStyle = `rgba(255, 255, 255, 1)`
-        this.context.fillRect(0, 0, width, height)
+        if(!this.textures.find(t => !t.isHidden)) {
+            this.context.fillStyle = `rgba(255, 255, 255, 1)`
+            this.context.fillRect(0, 0, width, height)
+        }
 
         this.textures.filter(t => !t.isHidden).reverse().forEach(t => this.context.drawImage(t.canvas, 0, 0, width, height))
 
