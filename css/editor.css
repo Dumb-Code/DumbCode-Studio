@@ -212,7 +212,7 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
      color: white;
 }
 
-.pcr-app[data-theme=nano] .pcr-selection .pcr-color-palette {
+.pcr-app .pcr-selection .pcr-color-palette {
     z-index: 0 !important;
 }
 
