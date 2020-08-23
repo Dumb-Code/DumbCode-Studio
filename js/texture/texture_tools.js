@@ -1,4 +1,4 @@
-import { LinkedSelectableList } from "../util.js"
+import { LinkedSelectableList, lineIntersection } from "../util.js"
 
 export class TextureTools {
 
@@ -41,7 +41,7 @@ export class TextureTools {
         }
 
         display.renderer.domElement.addEventListener( 'mousedown', () => {
-            if(this.tabInUse && this.raytracer.gatherIntersections().length > 0) {
+            if(this.tabInUse && this.raytracer.gatherIntersections(true).length > 0) {
                 orbitControls.turnOff()
                 orbitControls.enabled = false
                 this.isInUse = true
@@ -51,20 +51,22 @@ export class TextureTools {
     }
 
     runFrame() {
+        this.raytracer.disableRaycast = this.canDraw()
         if(this.frameReset-- <= 0) {
             this.previousPixel = null
         }
-        let intersections = this.raytracer.gatherIntersections()
+        let intersections = this.raytracer.gatherIntersections(true)
 
-        if(intersections.length > 0 && this.paintMode.value !== undefined) {
-            let obj = intersections[0]
-            
-            let uv = obj.uv
+        if(intersections.length > 0 && this.canDraw()) {
+            intersections.forEach(obj => {
 
-            if(this.isInUse) {
-                this.mouseDown(uv.x, uv.y, false)
-            }
-            this.mouseOverPixel(uv.x, uv.y, { cube: obj.object.tabulaCube, face: Math.floor(obj.faceIndex / 2) })
+                let uv = obj.uv
+
+                this.mouseOverPixel(uv.x, uv.y, { cube: obj.object.tabulaCube, face: Math.floor(obj.faceIndex / 2) })
+                if(this.isInUse) {
+                    this.mouseDown(uv.x, uv.y, false)
+                }
+            })
             this.previousMouseOver = true
         } else if(this.previousMouseOver) {
             this.mouseOverPixel()
@@ -110,6 +112,31 @@ export class TextureTools {
                     h: Math.abs(array[1] - array[7])*layer.height,
                     
                 }]
+            case "cube":
+                if(!this.mouseOverContext) {
+                    return
+                }
+                let modW = layer.width / this.display.tbl.texWidth
+                let modH = layer.height / this.display.tbl.texHeight
+
+                let tu = cube.textureOffset[0]
+                let tv = cube.textureOffset[1]
+                
+
+                let w = cube.dimension[0]
+                let h = cube.dimension[1]
+                let d = cube.dimension[2]
+
+                return [
+                    {
+                        u: tu*modW, v: (tv+d)*modH,
+                        w: 2*(d+w)*modW, h: h*modH
+                    }, 
+                    {
+                        u: (tu+d)*modW, v: tv*modH,
+                        w: 2*w*modW, h: d*modW
+                    }
+                ] 
         }
     }
     
@@ -126,39 +153,11 @@ export class TextureTools {
             this._drawPixel(mode, ctx, u, v)
 
             if(allowPrevious && this.previousPixel !== null && (this.previousPixel.u !== u || this.previousPixel.v !== v)) {
-                this.lineIntersection(u, v, this.previousPixel.u, this.previousPixel.v, (u, v) => this._drawPixel(mode, ctx, u, v))
+                lineIntersection(u, v, this.previousPixel.u, this.previousPixel.v, (u, v) => this._drawPixel(mode, ctx, u, v))
             }
             this.previousPixel = { u, v }
 
             selected.onCanvasChange()
-        }
-    }
-
-    //https://stackoverflow.com/a/4672319
-    lineIntersection(x0, y0, x1, y1, callback) {
-        let dots = [];
-        let dx = Math.abs(x1 - x0);
-        let dy = Math.abs(y1 - y0);
-        let sx = (x0 < x1) ? 1 : -1;
-        let sy = (y0 < y1) ? 1 : -1;
-        let err = dx - dy;
-
-        callback(x0, y0)
-
-        while(!((x0 == x1) && (y0 == y1))) {
-            let e2 = err << 1;
-
-            if (e2 > -dy) {
-                err -= dy;
-                x0 += sx;
-            }
-
-            if (e2 < dx) {
-                err += dx;
-                y0 += sy;
-            }
-
-            callback(x0, y0)
         }
     }
     

@@ -1,5 +1,5 @@
 import { Vector2, Raycaster, EventDispatcher } from "./three.js";
-import { isKeyDown } from "./util.js";
+import { isKeyDown, lineIntersection } from "./util.js";
 
 
 document.addEventListener( 'mousemove', onMouseMove, false );
@@ -7,24 +7,32 @@ document.addEventListener( 'mousedown', onMouseDown, false );
 
 let mouse = new Vector2(-5, -5);
 let mouseClickDown = new Vector2(-5, -5)
+let previousRawMouse = new Vector2()
 let rawMouse = new Vector2();
 let mouseDown = false
 let mouseOnDiv = false
 
 function onMouseMove( event ) {
+    previousRawMouse.copy(rawMouse)
     rawMouse.x = event.clientX
     rawMouse.y = event.clientY
+    setMouseFromPoint(rawMouse.x, rawMouse.y, true)
+}
 
+function setMouseFromPoint(x, y, updateOnDiv) {
     let div = $('.tab-area.is-active #display-div').get(0)
+    mouse.set(-5, -5)
     if(div !== undefined) {
         let rect = div.getBoundingClientRect()
-        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
-        mouseOnDiv = event.clientX > rect.left && event.clientX < rect.right && event.clientY > rect.top && event.clientY < rect.bottom
-    } else {
+        mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
+        mouse.y = - ((y - rect.top) / rect.height) * 2 + 1;
+        if(updateOnDiv) {
+            mouseOnDiv = x > rect.left && x < rect.right && y > rect.top && y < rect.bottom
+        }
+    } else if(updateOnDiv) {
         mouseOnDiv = false
     }
-
+    return mouse
 }
 
 function onMouseDown( event ) {
@@ -191,7 +199,7 @@ export class Raytracer {
         }
 
         if(this.display.tbl) {
-            let intersects = this.gatherIntersections();
+            let intersects = this.gatherIntersections(false);
             if(!mouseDown) {
                 if(intersects.length > 0) {
                     this.mouseOverMesh(intersects[0].object, intersects[0].distance)
@@ -204,9 +212,21 @@ export class Raytracer {
         }
     }
 
-    gatherIntersections() {
-        raycaster.setFromCamera(mouse, this.display.camera);
-        return raycaster.intersectObjects(this.display.tbl.modelCache.children , true)
+    gatherIntersections(usePrevious) {
+        if(usePrevious) {
+            let arr = []
+            lineIntersection(previousRawMouse.x, previousRawMouse.y, rawMouse.x, rawMouse.y, (x, y) => {
+                raycaster.setFromCamera(setMouseFromPoint(x, y, false), this.display.camera)
+                let inters = raycaster.intersectObjects(this.display.tbl.modelCache.children, true)
+                if(inters.length > 0) {
+                    arr.push(inters[0])
+                }
+            }, 3)
+            return arr
+        } else {
+            raycaster.setFromCamera(mouse, this.display.camera);
+            return raycaster.intersectObjects(this.display.tbl.modelCache.children , true)
+        }
     }
 
     isMouseDown() {

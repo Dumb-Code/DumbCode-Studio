@@ -3,6 +3,7 @@ import { CanvasTransformControls } from "../util.js"
 export class TexturemapCanvas {
     constructor(domElement, display, raytracer, textureTools) {
         this.canvas = domElement.get(0)
+        this.canvas.width = this.canvas.height = 1
         this.parnetNode = domElement.parent().parent()
         this.display = display
         this.raytracer = raytracer
@@ -17,17 +18,17 @@ export class TexturemapCanvas {
             }
             let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
             textureTools.mouseOverPixel(mouseX/size, mouseY/size, this._mouseOverContext)
-            if(buttons & 1 === 1 && textureTools.canDraw()) {
-                textureTools.mouseDown(mouseX/size, mouseY/size)
-                return
+            let mouseDown = buttons & 1 === 1 && textureTools.canDraw()
+            if(mouseDown) {
+                textureTools.mouseDown(mouseX/size, mouseY/size, true)
             }
-            this.mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback)
+            this.mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback, mouseDown)
         })
     }
 
     drawTextureCanvas() {
         //TODO: don't do this. Make sure the canvas aspect ratio is the same as the tabula model.
-        let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
+        let size = Math.max(Math.min(this.parnetNode.width(), this.parnetNode.height()), 1)
         this.canvas.width = this.canvas.height = size
 
         let ctx = this.canvas.getContext('2d')
@@ -98,7 +99,7 @@ export class TexturemapCanvas {
     }
 
 
-    mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback) {
+    mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback, onlyUpdateContext) {
         let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
         let su = this.display.tbl.texWidth/size
         let sv = this.display.tbl.texHeight/size
@@ -139,10 +140,10 @@ export class TexturemapCanvas {
                 if(type === 'mousedown') {
                     this.canvasMovingCube = {cube, x: mouseX-u, y: mouseY-v, moved: false}
                 } else if(type === 'mouseup') {
-                    if(this.canvasMovingCube === null || this.canvasMovingCube.moved !== true) {
+                    if((this.canvasMovingCube === null || this.canvasMovingCube.moved !== true) && !this.raytracer.disableRaycast) {
                         this.raytracer.clickOnMesh(cube.cubeMesh)
                     }
-                } else {
+                } else if(!this.raytracer.disableRaycast) {
                     this.raytracer.mouseOverMesh(cube.cubeMesh)
                 }
                 this._mouseOverContext = { cube, face: mouseOverArea }
@@ -150,6 +151,10 @@ export class TexturemapCanvas {
                 overHandled = true
             }
         })
+
+        if(onlyUpdateContext) {
+            return
+        }
         
         if(!overHandled) {
             this._mouseOverContext = null

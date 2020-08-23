@@ -535,3 +535,29 @@ export function downloadBlob(name, blob) {
     a.click();
     window.URL.revokeObjectURL(url);
 }
+
+
+//https://stackoverflow.com/a/4672319
+export function lineIntersection(x0, y0, x1, y1, callback, skip = 1) {
+    let dx = Math.abs(x1 - x0);
+    let dy = Math.abs(y1 - y0);
+    let sx = (x0 < x1) ? 1 : -1;
+    let sy = (y0 < y1) ? 1 : -1;
+    let err = dx - dy;
+    let count = 1
+    callback(x0, y0)
+    while(!((x0 == x1) && (y0 == y1))) {
+        let e2 = err << 1;
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+        if((count++ % skip) === 0) {
+            callback(x0, y0)
+        }
+    }
+}
