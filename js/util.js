@@ -529,11 +529,19 @@ export class LayoutPart {
 let a = document.createElement("a");
 
 export function downloadBlob(name, blob) {
-    let url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = name;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    let url = window.URL.createObjectURL(blob)
+    downloadHref(name, url)
+    window.URL.revokeObjectURL(url)
+}
+
+export function downloadCanvas(name, canvas) {
+    downloadHref(name, canvas.toDataURL("image/png;base64"))
+}
+
+export function downloadHref(name, href) {
+    a.href = href
+    a.download = name
+    a.click()
 }
 
 

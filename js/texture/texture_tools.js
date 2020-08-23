@@ -2,11 +2,11 @@ import { LinkedSelectableList, lineIntersection } from "../util.js"
 
 export class TextureTools {
 
-    constructor(dom, display, textureManager, orbitControls, raytracer) {
-        this.display = display
-        this.raytracer = raytracer
-        this.textureManager = textureManager
-        this.orbitControls  = orbitControls 
+    constructor(dom, studio) {
+        this.display = studio.display
+        this.raytracer = studio.raytracer
+        this.textureManager = studio.textureManager
+        this.orbitControls  = studio.orbitControls 
         
         this.tabInUse = false
         this.previousMouseOver = true
@@ -14,6 +14,15 @@ export class TextureTools {
 
         this.frameReset = 0
         this.previousPixel = null
+
+        dom.find('.button-generate-texturemap').click(() => {
+            let layer = this.textureManager.getSelectedLayer()
+            if(layer === undefined) {
+                return
+            }
+            studio.texturemapCanvas.drawCubesToCanvas(layer.canvas, false)
+            layer.onCanvasChange()
+        })
 
         this.paintMode = new LinkedSelectableList(dom.find('.button-paint-mode'), false)
 
@@ -35,19 +44,19 @@ export class TextureTools {
          })
 
         let mouseUp = () => {
-            orbitControls.enabled = true
+            this.orbitControls.enabled = true
             this.isInUse = false
             document.removeEventListener('mouseup', mouseUp)
         }
 
-        display.renderer.domElement.addEventListener( 'mousedown', () => {
+        this.display.renderer.domElement.addEventListener('mousedown', () => {
             if(this.tabInUse && this.raytracer.gatherIntersections(true).length > 0) {
-                orbitControls.turnOff()
-                orbitControls.enabled = false
+                this.orbitControls.turnOff()
+                this.orbitControls.enabled = false
                 this.isInUse = true
                 document.addEventListener('mouseup', mouseUp, false)
             }
-        }, false );
+        }, false);
     }
 
     runFrame() {
@@ -59,9 +68,7 @@ export class TextureTools {
 
         if(intersections.length > 0 && this.canDraw()) {
             intersections.forEach(obj => {
-
                 let uv = obj.uv
-
                 this.mouseOverPixel(uv.x, uv.y, { cube: obj.object.tabulaCube, face: Math.floor(obj.faceIndex / 2) })
                 if(this.isInUse) {
                     this.mouseDown(uv.x, uv.y, false)

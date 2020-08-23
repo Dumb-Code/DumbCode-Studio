@@ -15,14 +15,14 @@ export class TextureStudio {
         this.studioPanels = new TexturePanels(dom, 300, 300)
         this.textureManager = new TextureManager(dom, this, setTexture, filesPage)
         this.cubeValues = new TextureCubeValues(dom, raytracer)
-        this.textureTools = new TextureTools(dom, display, this.textureManager, orbitControls, raytracer)
-        this.canvas = new TexturemapCanvas(dom.find('#texture-canvas'), display, raytracer, this.textureTools)
+        this.textureTools = new TextureTools(dom, this)
+        this.texturemapCanvas = new TexturemapCanvas(dom.find('#texture-canvas'), display, raytracer, this.textureTools, this.cubeValues)
     }
 
     runFrame() {
         this.raytracer.update()
         this.display.tbl.resetAnimations()
-        this.canvas.drawTextureCanvas(this.rightArea, this.topRArea)
+        this.texturemapCanvas.drawTextureCanvas(this.rightArea, this.topRArea)
         this.textureTools.runFrame()
         this.display.render()
     }

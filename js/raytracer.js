@@ -221,7 +221,7 @@ export class Raytracer {
                 if(inters.length > 0) {
                     arr.push(inters[0])
                 }
-            }, 3)
+            }, 5)
             return arr
         } else {
             raycaster.setFromCamera(mouse, this.display.camera);

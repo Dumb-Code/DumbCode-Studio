@@ -20,9 +20,6 @@ export class TextureCubeValues {
         } else {
             this.textureOffset.setInternalValue(undefined)
             this.textureMirrored.setInternalValue(undefined)
-        }
-        
+        }   
     }
-
-
 }

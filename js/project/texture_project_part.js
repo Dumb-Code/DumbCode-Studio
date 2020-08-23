@@ -1,5 +1,5 @@
 import { readFile } from "../displays.js"
-import { DraggableElementList, doubleClickToEdit } from "../util.js"
+import { DraggableElementList, doubleClickToEdit, downloadCanvas, downloadHref } from "../util.js"
 
 export class TextureProjectPart {
 
@@ -45,6 +45,8 @@ export class TextureProjectPart {
             data.name = name
             data.li.innerText = name
         }, data.name)
+
+        cloned.find('.download-texture-file').click(() => downloadCanvas(data.name + ".png", data.canvas))
     }
 
     async uploadTextureFiles(element) {

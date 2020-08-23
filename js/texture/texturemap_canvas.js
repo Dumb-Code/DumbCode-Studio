@@ -1,13 +1,14 @@
 import { CanvasTransformControls } from "../util.js"
 
 export class TexturemapCanvas {
-    constructor(domElement, display, raytracer, textureTools) {
+    constructor(domElement, display, raytracer, textureTools, cubeValues) {
         this.canvas = domElement.get(0)
         this.canvas.width = this.canvas.height = 1
         this.parnetNode = domElement.parent().parent()
         this.display = display
         this.raytracer = raytracer
         this.textureTools = textureTools
+        this.updateCubeValues = () => cubeValues.updateCubeValues()
         this.canvasMovingCube = null
         this._mouseOverContext = null
 
@@ -44,23 +45,28 @@ export class TexturemapCanvas {
             ctx.drawImage(img, 0, 0, size, size)
         }
 
-        let su = this.display.tbl.texWidth/size
-        let sv = this.display.tbl.texHeight/size
+        this.drawCubesToCanvas(this.canvas, true)
+    }
+
+    drawCubesToCanvas(canvas, opacity) {
+        let ctx = canvas.getContext('2d')
+        let su = this.display.tbl.texWidth/canvas.width
+        let sv = this.display.tbl.texHeight/canvas.height
 
         this.display.tbl.cubeMap.forEach(cube => {
             let r = 1.0
             let g = 1.0
             let b = 1.0
-            let a = 0.2
+            let a = opacity ? 0.2 : 1.0
 
             if(this.raytracer.intersected !== undefined && this.raytracer.intersected.tabulaCube === cube) {
                 g = 0.2
                 b = 0.2
-                a = 0.5
+                a = opacity ? 0.5 : 1.0
             } else if(this.raytracer.isCubeSelected(cube)) {
                 r = 0.2
                 g = 0.2
-                a = 0.5
+                a = opacity ? 0.5 : 1.0
             }
 
             let u = cube.textureOffset[0]/su
@@ -94,8 +100,7 @@ export class TexturemapCanvas {
 
             ctx.fillStyle = `rgba(0, 0, ${127*b}, ${a})`
             ctx.fillRect(u+ud+uw+ud, v+vd, uw, vh)
-
-        })        
+        })
     }
 
 
@@ -177,6 +182,7 @@ export class TexturemapCanvas {
                 tex[1] = v
                 this.canvasMovingCube.moved = true
                 this.canvasMovingCube.cube.updateTextureOffset()
+                this.updateCubeValues()
             } 
         }
 
