@@ -1,5 +1,3 @@
-import { KeyframeManager } from '../keyframe_manager.js'
-import { AnimationHandler } from '../animations.js'
 import { JavaMethodExporter } from '../java_method_exporter.js'
 import { Clock, Group } from '../three.js'
 import { Gumball } from './gumball.js'
@@ -9,6 +7,7 @@ import { AnimationTabHandler } from './animation_tabs.js'
 import { PanelButtons } from './panel_buttons.js'
 import { ProgressionCanvas } from './progression_canvas.js'
 import { KeyframeBoardManager } from './keyframe_board_manager.js'
+import { AnimationMemento } from './animation_memento.js'
 
 const mainArea = document.getElementById("main-area")
 
@@ -42,6 +41,18 @@ export class AnimationStudio {
         this.animationTabHandler = new AnimationTabHandler(dom, this, filesPage)
         this.progressionCanvas = new ProgressionCanvas(dom, this)
         this.clock = new Clock()
+
+        dom.find('.button-undo').click(() => {
+            if(this.animationTabHandler.isAny()) {
+                this.animationTabHandler.activeData.mementoTraverser.undo()
+            }
+        })
+
+        dom.find('.button-redo').click(() => {
+            if(this.animationTabHandler.isAny()) {
+                this.animationTabHandler.activeData.mementoTraverser.redo()
+            }
+        })
     }
 
     setRotation(values, updateDisplay = true, updateSilent = false) {
@@ -142,11 +153,13 @@ export class AnimationStudio {
 
         let delta = this.clock.getDelta()
         if(this.animationTabHandler.isAny()) {
-            let handler = this.animationTabHandler.active
-            if(handler !== null) {
+            let data = this.animationTabHandler.activeData
+            if(data !== null) {
                 this.keyframeManager.ensureFramePosition()
                 this.keyframeManager.setupSelectedPose()
-                handler.animate(delta)
+                data.handler.animate(delta)
+
+                data.mementoTraverser.onFrame(() => new AnimationMemento(this, data))
             }
         }
         

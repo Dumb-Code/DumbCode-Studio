@@ -272,7 +272,6 @@ export class KeyframeBoardManager {
             kf.duration = 5
             kf.layer = layer
             kf.startTime = this.playstate.ticks
-            handler.keyframes.push(kf)
             this.reframeKeyframes()
             this.selectKeyframe(kf)
         })

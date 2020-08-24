@@ -91,9 +91,6 @@ export class AnimationHandler {
                 }
                 kf.resortPointsDirty()
             }
-
-
-            this.keyframes.push(kf)
         }
 
         if(version >= 4) {
@@ -179,7 +176,9 @@ export class AnimationHandler {
     }
 
     createKeyframe() {
-        return new KeyFrame(this)
+        let kf = new KeyFrame(this)
+        this.keyframes.push(kf)
+        return kf
     }
 
     createLayerInfo(id) {
@@ -215,8 +214,6 @@ class KeyFrame {
         this.rotationPointMap = new Map();
 
         this.progressionPoints = [{required: true, x: 0, y: 1}, {required: true, x: 1, y: 0}]
-
-        this.setup = false
     }
 
     renameCube(oldName, newName) {
@@ -284,7 +281,7 @@ class KeyFrame {
         kf.rotationMap = new Map(this.rotationMap)
         kf.rotationPointMap = new Map(this.rotationPointMap)
 
-        kf.progressionPoints = [...this.progressionPoints]
+        kf.progressionPoints = this.progressionPoints.map(p => { return {...p} })
 
         return kf
     }

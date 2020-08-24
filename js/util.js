@@ -569,3 +569,36 @@ export function lineIntersection(x0, y0, x1, y1, callback, skip = 1) {
         }
     }
 }
+
+export function objectEquals(obj1, obj2, deep = false) {
+    if(typeof obj1 != typeof obj2) {
+        return false
+    }
+    if(typeof obj1 == "object") {
+        for (var i in obj1) {
+            if (obj1.hasOwnProperty(i)) {
+                if (!obj2.hasOwnProperty(i)) {
+                    return false
+                }
+                if(deep === true ? !objectEquals(obj1[i], obj2[i], true) : obj1[i] != obj2[i]) {
+                    return false
+                }
+            }
+        }
+        for (var i in obj2) {
+            if (obj2.hasOwnProperty(i)) {
+                if (!obj1.hasOwnProperty(i)) {
+                    return false
+                }
+                if(deep === true ? !objectEquals(obj1[i], obj2[i], true) : obj1[i] != obj2[i]) {
+                    return false
+                }
+            }
+        }
+        return true;
+    } else if(typeof obj1 == "function") {
+        return true //don't compare functions
+    } else {
+        return obj1 == obj2
+    }
+  }
