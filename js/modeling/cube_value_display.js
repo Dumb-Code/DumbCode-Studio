@@ -43,7 +43,7 @@ export class CubeValueDisplay {
             studio.rotationPointMarkers.updateSpheres()
         })
         this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => getCube()?.updateOffset(e.value))
-        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow'), false).onchange(e => getCube()?.updateCubeGrow(e.value))
+        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow')).onchange(e => getCube()?.updateCubeGrow(e.value))
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => getCube()?.updateTextureOffset(e.value))
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => getCube()?.updateTextureMirrored(e.value))
         this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => {
@@ -147,26 +147,7 @@ export class CubeValueDisplay {
         this.createArrayCommand(root, cube => cube.dimension, (cube, values, visualOnly) => cube.updateDimension(values, visualOnly), xyzAxis, 'dim', true)
         this.createArrayCommand(root, cube => cube.offset, (cube, values, visualOnly) => cube.updateOffset(values, visualOnly), xyzAxis, 'off')
         this.createArrayCommand(root, cube => cube.textureOffset, (cube, values, visualOnly) => cube.updateTextureOffset(values, visualOnly), 'uv', 'tex')
-
-        root.command('cubegrow')
-            .argument('mode', enumHandler('set', 'add'))
-            .endSubCommands()
-            .addCommandBuilder(`setcubegrow`, 'set')
-            .addCommandBuilder(`addcubegrow`, 'add')
-            .argument('value', numberHandler())
-            .onRun(args => {
-                let cube = this.commandCube(args.context)
-                let mode = args.get('mode')
-                let value = args.get('value') + (mode === 0 ? 0 : cube.mcScale)
-                if(args.context.dummy === true) {
-                    this.commandResultChangeCache = { cube, func: () => cube.updateCubeGrow(value, true) }
-                } else {
-                    cube.updateCubeGrow(value)
-                    this.updateCubeValues()
-                }
-            })
-            .onExit(() => this.onCommandExit())
-
+        this.createArrayCommand(root, cube => cube.cubeGrow, (cube, values, visualOnly) => cube.updateCubeGrow(values, visualOnly), xyzAxis, 'cg')
 
         root.command('mirror')
             .addCommandBuilder(`mirror`)
@@ -256,7 +237,7 @@ export class CubeValueDisplay {
             this.dimensions.setInternalValue(cube.dimension)
             this.rotation.setInternalValue(cube.rotation)
             this.offsets.setInternalValue(cube.offset)
-            this.cubeGrow.setInternalValue(cube.mcScale)
+            this.cubeGrow.setInternalValue(cube.cubeGrow)
             this.textureOffset.setInternalValue(cube.textureOffset)
             this.textureMirrored.setInternalValue(cube.textureMirrored)
         } else {

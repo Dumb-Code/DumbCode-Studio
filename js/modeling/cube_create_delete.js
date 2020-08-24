@@ -12,7 +12,7 @@ export function applyCubeAddingDeleting(dom, studio) {
             }
             name = newName
         }
-        let cube = new TblCube(name, [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 1], [0, 0], 0, [], false, studio.display.tbl)
+        let cube = new TblCube(name, [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 1], [0, 0], [0, 0, 0], [], false, studio.display.tbl)
         if(studio.raytracer.anySelected()) {
             studio.raytracer.firstSelected().tabulaCube.addChild(cube)
         } else {

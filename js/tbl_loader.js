@@ -154,7 +154,7 @@ function parseGroupJson(json, tbl) {
 
 export class TblCube {
 
-    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureOffset, mcScale, children, textureMirrored, tbl) {
+    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureOffset, cubeGrow, children, textureMirrored, tbl) {
         this.name = name
         this.dimension = dimension
         this.rotationPoint = rotationPoint
@@ -162,7 +162,7 @@ export class TblCube {
         this.rotation = rotation
         this.scale = scale
         this.textureOffset = textureOffset
-        this.mcScale = mcScale
+        this.cubeGrow = cubeGrow
         this.children = children
         this.tbl = tbl
         this.textureMirrored = textureMirrored
@@ -260,10 +260,10 @@ export class TblCube {
         this.updateRotationVisuals()
     }
 
-    updateGeometry( { dimension = this.dimension, mcScale = this.mcScale, updateTexture = true } = {}) {
-        let w = dimension[0] + mcScale*2 + 0.01
-        let h = dimension[1] + mcScale*2 + 0.01
-        let d = dimension[2] + mcScale*2 + 0.01
+    updateGeometry( { dimension = this.dimension, cubeGrow = this.cubeGrow, updateTexture = true } = {}) {
+        let w = dimension[0] + cubeGrow[0]*2 + 0.01
+        let h = dimension[1] + cubeGrow[1]*2 + 0.01
+        let d = dimension[2] + cubeGrow[2]*2 + 0.01
 
         this.cubeMesh.scale.set(w, h, d)
         this.updateTexture()
@@ -299,11 +299,11 @@ export class TblCube {
         this.updateTexture( { dimension:values } )
     }
 
-    updateCubeGrow(value = this.mcScale, visualOnly = false) {
+    updateCubeGrow(value = this.cubeGrow, visualOnly = false) {
         if(visualOnly !== true) {
-            this.mcScale = value
+            this.cubeGrow = value
         }
-        this.updateGeometry( {mcScale:value} )
+        this.updateGeometry( {cubeGrow:value} )
     }
 
     updateTextureOffset(values = this.textureOffset, visualOnly = false) {
@@ -347,7 +347,12 @@ function parseCubeJson(json, tbl) {
     let children = []
     json.children.forEach(child => { children.push( parseCubeJson( child, tbl ) ) })
 
-    return new TblCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.mcScale, children, json.txMirror, tbl)
+    let cubeGrow = json.cubeGrow
+    if(cubeGrow === undefined) {
+        cubeGrow = [json.mcScale, json.mcScale, json.mcScale]
+    }
+
+    return new TblCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.cubeGrow, children, json.txMirror, tbl)
 }
 
 function writeCubeJson(cube) {
@@ -360,7 +365,8 @@ function writeCubeJson(cube) {
         scale: cube.scale,
         txOffset: cube.textureOffset,
         txMirror: cube.textureMirrored,
-        mcScale: cube.mcScale,
+        cubeGrow: cube.cubeGrow,
+        mcScale: cube.cubeGrow.reduce((a,b) => a+b, 0) / 3, //For tabula support
         opacity: 100,
         hidden: false,
         metadata: [],
