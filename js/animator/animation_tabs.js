@@ -1,8 +1,10 @@
 import { AnimationHandler } from "../animations.js"
 import { MementoTraverser } from "../memento_traverser.js"
+import { AnimationMemento } from "./animation_memento.js"
 
 export class AnimationTabHandler {
     constructor(dom, studio, filesPage) {
+        this.studio = studio
         this.tbl = studio.display.tbl
         this.filesPage = filesPage
         this._internalTab = -1
@@ -42,9 +44,9 @@ export class AnimationTabHandler {
         let data = {
             handler: new AnimationHandler(this.tbl),
             element,
-            name: "Tab " + id,
-            mementoTraverser: new MementoTraverser()
+            name: "Tab " + id
         }
+        data.mementoTraverser = new MementoTraverser(() => new AnimationMemento(this.studio, data))
         this.allTabs.push(data)
 
         this.activeTab = id

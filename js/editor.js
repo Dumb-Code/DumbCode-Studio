@@ -3,7 +3,6 @@ import { TBLModel } from "./tbl_loader.js";
 import { DinosaurDisplay, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
-import { HistoryList } from "./history.js";
 import { ProjectTabs } from "./project_tabs.js";
 import { AnimationStudio } from "./animator/animation_studio.js";
 import { ModelingStudio } from "./modeling/modeling_studio.js";
@@ -13,7 +12,7 @@ import { TextureStudio } from "./texture/texture_studio.js";
 
 const major = 0
 const minor = 2
-const patch = 10
+const patch = 11
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -43,28 +42,6 @@ const projectTabs = new ProjectTabs()
 
 let activeTab
 let filesPage, modelingStudio, textureStudio, animationStudio
-
-window.daeHistory = new HistoryList()
-
-window.studioEscapeCallback = () => {}
-
-document.onkeydown = e => {
-    if(e.keyCode === 27) { //escape
-        window.studioEscapeCallback()
-    }
-
-    if(e.ctrlKey && e.keyCode === 90) { //z
-        if(e.shiftKey) {
-            daeHistory.redo()
-        } else {
-            daeHistory.undo()
-        }
-    }
-
-    if(e.ctrlKey && e.keyCode === 89) { //y
-        daeHistory.redo()
-    }
-}
 
 async function init() {
     //Set up the renderer

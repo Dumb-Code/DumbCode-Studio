@@ -7,7 +7,6 @@ import { AnimationTabHandler } from './animation_tabs.js'
 import { PanelButtons } from './panel_buttons.js'
 import { ProgressionCanvas } from './progression_canvas.js'
 import { KeyframeBoardManager } from './keyframe_board_manager.js'
-import { AnimationMemento } from './animation_memento.js'
 
 const mainArea = document.getElementById("main-area")
 
@@ -53,6 +52,23 @@ export class AnimationStudio {
                 this.animationTabHandler.activeData.mementoTraverser.redo()
             }
         })
+
+        this.onKeyDown = (e) => {
+            if(this.animationTabHandler.isAny()) {
+                let traverser = this.animationTabHandler.activeData.mementoTraverser
+                if(e.ctrlKey && e.keyCode === 90) { //z
+                    if(e.shiftKey) {
+                        traverser.redo()
+                    } else {
+                        traverser.undo()
+                    }
+                }
+            
+                if(e.ctrlKey && e.keyCode === 89) { //y
+                    traverser.redo()
+                }
+            }        
+        }
     }
 
     setRotation(values, updateDisplay = true, updateSilent = false) {
@@ -139,13 +155,16 @@ export class AnimationStudio {
         }
         this.display.scene.add(this.group)
         this.transformControls.enableReason('tab')
+
+        document.addEventListener('keydown', this.onKeyDown)
     }
     
     setUnactive() {
         this.display.scene.remove(this.group)
         this.transformControls.disableReason('tab')
-    }
 
+        document.removeEventListener('keydown', this.onKeyDown)
+    }
 
     runFrame() {
         this.display.tbl.resetAnimations()
@@ -159,7 +178,7 @@ export class AnimationStudio {
                 this.keyframeManager.setupSelectedPose()
                 data.handler.animate(delta)
 
-                data.mementoTraverser.onFrame(() => new AnimationMemento(this, data))
+                data.mementoTraverser.onFrame()
             }
         }
         

@@ -3,7 +3,8 @@ import { objectEquals } from "./util.js"
 
 export class MementoTraverser {
 
-    constructor( { maxLimit = 50, timeTillCheck = 5 } = {} ) {
+    constructor( mementoCreator, { maxLimit = 50, timeTillCheck = 5 } = {} ) {
+        this.mementoCreator = mementoCreator
         this.maxLimit = maxLimit
         this.timeTillCheck = timeTillCheck
         this.mementoList = []
@@ -12,18 +13,24 @@ export class MementoTraverser {
         this._internalClock = new Clock()
     }
 
-    onFrame(mementoCreator) {
+    onFrame() {
         let time = this._internalClock.getElapsedTime()
         if(time >= this.timeTillCheck || this.mementoList.length == 0) {
-            let memento = mementoCreator()
-            let current = this.mementoList[this.index]
-
-            if(!objectEquals(current, memento, true)) {
-                this._internalClock.elapsedTime = 0
-                this.mementoList.length = ++this.index
-                this.mementoList.push(memento)
-            }            
+            this.attemptPush()        
         }
+    }
+
+    attemptPush() {
+        let memento = this.mementoCreator()
+        let current = this.mementoList[this.index]
+
+        if(!objectEquals(current, memento, true)) {
+            this._internalClock.elapsedTime = 0
+            this.mementoList.length = ++this.index
+            this.mementoList.push(memento)
+            return true
+        }
+        return false
     }
 
     canUndo() {
@@ -36,6 +43,9 @@ export class MementoTraverser {
 
     undo() {
         if(this.canUndo()) {
+            if(this.mementoList.length === this.index + 1 && this.attemptPush() === true) {
+                this.index--
+            }
             this.mementoList[--this.index].reconstruct()
         }
     }
