@@ -12,7 +12,7 @@ import { TextureStudio } from "./texture/texture_studio.js";
 
 const major = 0
 const minor = 2
-const patch = 11
+const patch = 12
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -27,6 +27,7 @@ let material = new MeshLambertMaterial( {
     color: 0x777777,
     transparent: true,
     side: DoubleSide,
+    alphaTest: 0.5,
 } )
 
 
@@ -211,7 +212,7 @@ window.setupMainModel = async(file, nameElement) => {
         initiateModel(await TBLModel.loadModel(readFile(file), file.name))
     } catch(err) {
         nameElement.dataset.tooltip = "ERROR!"
-        console.error(`Error from file ${file.name}: ${err.message}`)
+        console.error(`Error from file ${file.name}: ${err.message}`, err)
     }
 }
 
