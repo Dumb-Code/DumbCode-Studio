@@ -11,6 +11,7 @@ export class TextureStudio {
         let dom = $(domElement)
         this.display = display
         this.raytracer = raytracer
+        this.orbitControls = orbitControls
 
         this.studioPanels = new TexturePanels(dom, 300, 300)
         this.textureManager = new TextureManager(dom, this, setTexture, filesPage)

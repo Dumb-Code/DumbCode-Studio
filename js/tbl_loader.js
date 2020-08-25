@@ -352,7 +352,7 @@ function parseCubeJson(json, tbl) {
         cubeGrow = [json.mcScale, json.mcScale, json.mcScale]
     }
 
-    return new TblCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, json.cubeGrow, children, json.txMirror, tbl)
+    return new TblCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, cubeGrow, children, json.txMirror, tbl)
 }
 
 function writeCubeJson(cube) {
