@@ -9,12 +9,15 @@ export class AnimationHandler {
         this.looping = false
 
         this.forcedAnimationTicks = null
-        this.totalTime = 0
         this.keyframes = []
         this.loopKeyframe = false
         this.events = []
         this.keyframeInfo = []
         this.playstate = new PlayState()
+    }
+
+    get totalTime() {
+        return this.keyframes.map(kf => kf.startTime + kf.duration).reduce((a,b) => Math.max(a,b), 0)
     }
 
     renameCube(oldName, newName) {

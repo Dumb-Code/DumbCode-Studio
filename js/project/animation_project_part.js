@@ -2,11 +2,13 @@ import { readFile } from "../displays.js"
 import { ByteBuffer } from "../animations.js"
 import { TBLModel } from "../tbl_loader.js"
 import { doubleClickToEdit } from "../util.js"
+import { GifExporter } from "./gif_export.js"
 
 export class AnimationProjectPart {
 
     constructor(dom, animatorGetter) {
         this.animatorGetter = animatorGetter
+        this.gifExporter = new GifExporter(animatorGetter)
         this.emptyAnimationList = dom.find('.animation-list-entry.empty-column')
         dom.find('.new-animation-button').click(() => this.createNewAnimationTab())
         dom.find('#animation-file-input').on('input', e => {
@@ -95,6 +97,7 @@ export class AnimationProjectPart {
             }, name)
 
             let handler = tab.handler
+            dom.find('.download-animation-gif').click(() => this.gifExporter.onOpenModal(handler, tab.name))
             dom.find('.download-animation-file').click(() => {
                 let buffer = new ByteBuffer()
                 buffer.writeNumber(4)

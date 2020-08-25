@@ -12,7 +12,7 @@ import { TextureStudio } from "./texture/texture_studio.js";
 
 const major = 0
 const minor = 2
-const patch = 12
+const patch = 13
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -89,7 +89,7 @@ window.onModulesFinished = async() => {
     frame()
 }
 
-function createScene() {
+export function createScene() {
     //Set up the Scene
     let scene = new Scene();
     scene.background = new Color(0x363636);
@@ -162,7 +162,7 @@ function setTexture(tex) {
     highlightMaterial.needsUpdate = true
 }
 
-function updateCamera(camera, width, height) {
+export function updateCamera(camera, width, height) {
     if(camera.isPerspectiveCamera) {
         camera.aspect = width / height;
     }

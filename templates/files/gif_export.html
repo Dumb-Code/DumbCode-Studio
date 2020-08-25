@@ -1,0 +1,58 @@
+<div id="modal-gif-export" style="text-transform: none; width: 500px">
+    <div class="modal-background"></div>
+    <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+        <h3 class="title is-3" style="color: whitesmoke">Gif Settings</h3>
+        <div style="padding-bottom: 20px">
+            <button class="modal-close" aria-label="close" style="position: absolute"></button>
+        </div>
+        <div class="settings-entry entry-top">
+            <div class="field">
+                <h5 class="title is-5" style="color: whitesmoke">Export Settings</h5>
+                <div class="settings-entry-field">
+                    <div class="control">
+                        <span> Frames Per Second:</span>
+                        <input class="gif-fps" type="number" value="15" step="1">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="settings-entry entry-top">
+            <div class="field">
+                <div class="settings-entry-field">
+                    <div class="control">
+                        <span>Transparancy Texture:</span>
+                        <input type="color" class="gif-transparent-texture" value="#000000">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="settings-entry entry-top">
+            <div class="field">
+                <div class="settings-entry-field">
+                    <div class="control">
+                        <span>Dimensions:</span>
+                        <input class="gif-width" type="number", value="500" step="1">
+                        <span>x</span>
+                        <input class="gif-height" type="number" value="200" step="1">
+                    </div>
+                    <div>
+                        <button class="gif-set-to-screen-height">Set To Screen</button>
+                        <label>Lock Aspect Ratio:</label>
+                        <div class="b-checkbox is-inline">
+                            <input id="checkbox-lock-aspect-ratio" class="styled" type="checkbox">
+                            <label for="checkbox-lock-aspect-ratio"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="settings-entry">
+            <span class="generate-gif-button" style="cursor: pointer; background-color: red;">
+                Generate
+            </span>
+            <div>
+                Stage: <span class="gif-generate-stage">Not Started</span>
+            </div>
+        </div>
+    </div>
+</div>

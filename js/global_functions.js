@@ -26,10 +26,11 @@ openModal = async name => {
     const parentHTML = document.getElementById('modal-area')
     parentHTML.innerHTML = ""
     parentHTML.appendChild(modal)
+    return $(modal)
 }
 
 
-getModal = async (name) => {
+getModal = async(name) => {
     if(!_htmlCache.has(name)) {
         let h = await loadHtml(name)
         $(h).click(e => {

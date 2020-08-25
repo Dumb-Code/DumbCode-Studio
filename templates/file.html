@@ -71,7 +71,7 @@
                     <div class="columns">
                         <div class="column is-narrow">
                             <label class="file-label">
-                                <input class="file-input" type="file" name="tabula-main-model" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
+                                <input class="file-input" type="file" name="tabula-main-model" accept=".tbl" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
                                 <span class="file-cta">
                                     <span class="file-icon"><i class="fas fa-upload"></i></span>
                                     <span class="file-label">Main Model</span>
@@ -177,6 +177,11 @@
                     <div class="column dbl-click-container animation-name">
                         <p class="dbl-text"></p>
                         <input class="dbl-text-edit" type="text">
+                    </div>
+                    <div class="column is-narrow">
+                        <span class="download-animation-gif icon is-small clickable tooltip " data-tooltip="Record As Gif">
+                            <i class="fas fa-file-video"></i>
+                        </span>
                     </div>
                     <div class="column is-narrow">
                         <span class="download-animation-file icon is-small clickable tooltip " data-tooltip="Download Animation">
