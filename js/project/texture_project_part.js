@@ -58,7 +58,7 @@ export class TextureProjectPart {
             let img = document.createElement("img")
             return new Promise(async(resolve) => {
                 img.src = await readFile(file, (reader, f) => reader.readAsDataURL(f))
-                resolve({ name: file.name,  img} )
+                img.onload = () => { resolve({ name: file.name, img} ) }
             })
         }))
         .then(files => files.forEach(file => this.createTextureElement(texture, file.name, file.img)))
