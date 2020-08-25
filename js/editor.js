@@ -27,7 +27,7 @@ let material = new MeshLambertMaterial( {
     color: 0x777777,
     transparent: true,
     side: DoubleSide,
-    alphaTest: 0.5,
+    alphaTest: 0.0001,
 } )
 
 
