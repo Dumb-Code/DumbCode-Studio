@@ -1,7 +1,8 @@
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D } from "./three.js";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D, Quaternion } from "./three.js";
 import { downloadBlob } from "./util.js";
 
 const tempVector = new Vector3()
+const tempQuaterion = new Quaternion()
 
 export class TBLModel {
 
@@ -204,6 +205,15 @@ export class TblCube {
         this.onChildrenChange()
 
         return this.cubeGroup
+    }
+
+    getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3(), quat) {
+        let w = this.dimension[0] + this.cubeGrow[0]*2 + 0.01
+        let h = this.dimension[1] + this.cubeGrow[1]*2 + 0.01
+        let d = this.dimension[2] + this.cubeGrow[2]*2 + 0.01
+        tempVector.set(xDelta*w/16, yDelta*h/16, zDelta*d/16).applyQuaternion(this.cubeMesh.getWorldQuaternion(tempQuaterion))
+        this.cubeMesh.getWorldPosition(vector).add(tempVector)
+        return vector
     }
 
     recalculateHierarchy() {

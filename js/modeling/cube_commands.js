@@ -1,7 +1,7 @@
 import { TblCube } from "../tbl_loader.js"
 import { axisNumberHandler, indexHandler } from "../command_handler.js"
 import { CubeLocker } from "../util.js"
-import { Vector3, Quaternion, Euler, Matrix4 } from "../three.js"
+import { Vector3, Quaternion, Euler, Matrix4, Group, SphereGeometry, MeshBasicMaterial, Mesh } from "../three.js"
 
 const baseQuaternionInvese = new Quaternion()
 const worldPosVector = new Vector3()
@@ -10,20 +10,55 @@ const planeNormal = new Vector3()
 const tempMirrorVec = new Vector3()
 const tempCubePos = new Vector3()
 const tempCubeQuat = new Quaternion()
-const tempCubeQuatForAxis = new Quaternion()
-const tempCubeAxisStatic = new Vector3()
+const tempCubeAxisBase = new Vector3()
+const tempCubeXAxis = new Vector3()
+const tempCubeYAxis = new Vector3()
+const tempCubeZAxis = new Vector3()
 const tempCubeScale = new Vector3()
-const tempCubeQuatAxis = new Vector3()
-const tempCubeRotationPoint = new Vector3()
-const tempCubeRotationPoint2 = new Vector3()
+const tempScaleMatrix = new Matrix4()
+const tempPositionMatrix = new Matrix4()
+const tempRotationMatrix = new Matrix4()
+const tempRotationMatrixInverse = new Matrix4()
 const tempResultMatrix = new Matrix4()
-const tempCubeOffset = new Vector3()
-const tempCubeDimensions = new Vector3()
+const tempCubeOldBase = new Vector3()
+const tempCubeNewBase0 = new Vector3()
+const tempCubeNewBase1 = new Vector3()
+
 
 export class CubeCommands {
     constructor(root, studio) {
         this.commandResultChangeCache = null
+        let geometry = new SphereGeometry(1/64, 16, 16);
 
+        let group = new Group()
+        studio.display.scene.add(group)
+
+        this.points = []
+        this.points2 = []
+        for(let x = 0; x <= 1; x++) {
+            for(let y = 0; y <= 1; y++) {
+                for(let z = 0; z <= 1; z++) {
+                    let color = 0xFF000000
+                    if(x+y+z === 0) {
+                        color = 0xFFFFFFFF
+                    } else if(x === 1 && y+z === 0) {
+                        color = 0xFFFF0000
+                    } else if(y === 1 && x+z === 0) {
+                        color = 0xFF00FF00
+                    } else if(z === 1 && x+y === 0) {
+                        color = 0xFF0000FF
+                    }
+                    let material = new MeshBasicMaterial({ color })
+                    let mesh = new Mesh(geometry, material)
+                    let mesh2 = new Mesh(geometry, material)
+                    group.add(mesh)
+                    group.add(mesh2)
+
+                    this.points.push( { x, y, z, mesh } )
+                    this.points2.push( { x, y, z, mesh:mesh2 } )
+                }
+            }
+        }
         this.applycopypaste(root, studio.raytracer)
         this.applyMirrorCommand(root)
     }
@@ -58,7 +93,7 @@ export class CubeCommands {
                 let worldPos = rootCube.cubeGroup.getWorldPosition(worldPosVector)
                 let worldQuat = rootCube.cubeGroup.getWorldQuaternion(worldRotQuat)
 
-                let normal = planeNormal.set(axis===0?1:0, axis===1?1:0, axis===2?1:0).applyQuaternion(worldQuat).normalize()
+                let normal = planeNormal.set(axis===0?1:0, axis===1?1:0, axis===2?1:0).normalize()//.applyQuaternion(worldQuat)
 
                 //Definition of a plane at point (x0, y0, z0) (var: worldPos) with normal (A, B, C) (var: normal): 
                 //A(x − x0) + B(y − y0) + C(z − z0) = 0
@@ -73,8 +108,6 @@ export class CubeCommands {
                 //
                 //Once t is found, I can put it back into (x+At, y+Bt, z+Ct) to give me the projection point on the plane.
                 //With the projection point on the plane, I can find the difference between that and the starting point, and move the point by that distance again.
-
-
                 let mirrorPoint = vec => {
                     let t = (normal.x*(worldPos.x - vec.x) + normal.y*(worldPos.y - vec.y) + normal.z*(worldPos.z - vec.z)) / normal.lengthSq()
                     let diff = tempMirrorVec.set(normal.x*t, normal.y*t, normal.z*t).multiplyScalar(2)
@@ -82,80 +115,71 @@ export class CubeCommands {
                     return vec
                 }
 
-
+                let startDataCache = new Map()
                 rootCube.traverse(cube => {
                     cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
                     let newPosition = mirrorPoint(tempCubePos)
                     
-            
-                    //Get a random vector perpendicular to the axis and store in 2 places then rotate one of those variables by the cube's global rotation (tempCubeQuat)
-                    //This will give the information to apply quaternion.setFromUnitVectors(vec1, vec2).
-                    //If we then mirror those points and subtract the new position from before, we'll be able to see where those 2 points en up mirroring to.
-                    //We'll then be able to then calculate the rotation quaternion.
+                    let oldCorner = mirrorPoint(cube.getWorldPosition(1, 1, 1), tempCubeOldBase)
 
+                    //Get the mirrored positions of all 3 axis points, take that away from the cube origin then create a rotation matrix from that.
+                    //Using that rotation matrix, a translation matrix and a scale matrix, construct a full matrix for the cube. Then use the cube locker
+                    //To turn that into the cubes position and rotation.
+                    let base = mirrorPoint(cube.getWorldPosition(0, 0, 0, tempCubeAxisBase))
+                    let xAxis = mirrorPoint(cube.getWorldPosition(1, 0, 0, tempCubeXAxis)).sub(base).normalize()
+                    let yAxis = mirrorPoint(cube.getWorldPosition(0, 1, 0, tempCubeYAxis)).sub(base).normalize()
+                    let zAxis = mirrorPoint(cube.getWorldPosition(0, 0, 1, tempCubeZAxis)).sub(base).normalize()
 
-                    //The reason I do the quaternion to axis angle, as we need a point that'll rotate the most, otherwise too much precision is lost and the end quatenion is off.
-                    let movementAxis = this.quaternionToAxis(tempCubeQuatForAxis.copy(tempCubeQuat).premultiply(baseQuaternionInvese), tempCubeQuatAxis)
+                    //Construct the matricies
+                    let scaleMatrix = tempScaleMatrix.makeScale(tempCubeScale.x, tempCubeScale.y, tempCubeScale.z)
+                    let positionMatrix = tempPositionMatrix.makeTranslation(newPosition.x, newPosition.y, newPosition.z)
+                    let rotationMatrix = tempRotationMatrix.set(
+                        xAxis.x, yAxis.x, zAxis.x, 0,
+                        xAxis.y, yAxis.y, zAxis.y, 0,
+                        xAxis.z, yAxis.z, zAxis.z, 0,
+                        0,       0,       0,       1
+                    )
+
+                    let newMatrix = tempResultMatrix.copy(scaleMatrix).premultiply(rotationMatrix).premultiply(positionMatrix)
+
+                    startDataCache.set(cube, { 
+                        oldCorner: oldCorner.toArray(), 
+                        base: base.toArray(), 
+                        newMatrix: newMatrix.toArray(), 
+                        rotationMatrix: rotationMatrix.toArray() 
+                    })
+                })
+
+                rootCube.traverse(cube => {
+                    let cache = startDataCache.get(cube)
                     
-                    //We need to find a random vector (v) different to `movementAxis` (from here called a)
-                    do {
-                        tempCubeAxisStatic.set(Math.random() * 10 + 1, Math.random() * 10 + 1, Math.random() * 10 + 1)
-                    } while(movementAxis.distanceTo(tempCubeAxisStatic) < 0.01)
-                    
-                    //We then cross the random vector and the axis vector to get a vector perpendicular to the movement axis.
-                    //The 50 is to allow for more precision
-                    let perpendicular = tempCubeAxisStatic.cross(movementAxis).multiplyScalar(50)
+                    CubeLocker.reconstructLocker(cube, 0, tempResultMatrix.fromArray(cache.newMatrix))
+                    cube.cubeGroup.updateMatrixWorld(true)
 
+                    //Get opposite corners on the cube (0, 0, 0) -> (1, 1, 1), and get the difference between where the mirrored position is,
+                    //and where it is currently. The avarage between those two differences will be how much to change the offset by.
+                    //Transform that into local space, then add it onto the offset. 
+                    let inverseRotation = tempRotationMatrixInverse.getInverse(tempResultMatrix.fromArray(cache.rotationMatrix))
 
-                    let newRotation = tempCubeQuat
-                    //If the perpendicular is length 0 there is no rotation
-                    if(perpendicular.lengthSq() !== 0) {
-                        let point1 = tempCubeRotationPoint.copy(perpendicular).applyQuaternion(baseQuaternion)
-                        let point2 = tempCubeRotationPoint2.copy(perpendicular).applyQuaternion(tempCubeQuat)
-    
-                        let mirror1 = mirrorPoint(point1.add(tempCubePos)).sub(newPosition)
-                        let mirror2 = mirrorPoint(point2.add(tempCubePos)).sub(newPosition)
+                     //The point at (0, 0, 0)
+                    let currentPoint0 = cube.getWorldPosition(0, 0, 0, tempCubeNewBase0)
+                    let toMove0 = currentPoint0.sub(tempCubePos.fromArray(cache.base))
 
-                        //The reason I flip mirror1 and mirror2 around here is as quaternions work in reverse
-                        newRotation.setFromUnitVectors(mirror2.normalize(), mirror1.normalize()).premultiply(baseQuaternionInvese)
-                    }
+                    //The point at (1, 1, 1)
+                    let currentPoint1 = cube.getWorldPosition(1, 1, 1, tempCubeNewBase1)
+                    let toMove1 = currentPoint1.sub(tempCubePos.fromArray(cache.oldCorner))
 
-                    CubeLocker.reconstructLocker(cube, 0, tempResultMatrix.compose(newPosition, newRotation, tempCubeScale))
-                    
-
-                    //Apply the offset:
-                    cube.cubeMesh.matrixWorld.decompose(tempCubeOffset, tempCubeQuat, tempCubeScale)
-                    let cubeOffset = mirrorPoint(tempCubeOffset)
-        
-                    // let mirroredOffset = cubeOffset.sub(newPosition).applyQuaternion(tempCubeQuat.premultiply(baseQuaternionInvese)).add(newPosition)
-                    CubeLocker.reconstructLocker(cube, 1, tempResultMatrix.compose(cubeOffset, tempCubeQuat, tempCubeScale))
-
-                    // let dimensions = tempCubeDimensions.fromArray(cube.dimensions).divideScalar(16).multiply(normal)
-                    // dimensions.setComponent(axis, cube.dimensions[axis] / 16)
-
-                    //localVector = worldVector * worldRotation
-
-
-                    // cube.updateOffset()
-                    // cube.cubeGroup.updateMatrixWorld(true)
+                     //Add the points together and rotate them into local space.
+                    //As we have a offsets in terms of 16 rather than 1, we need to multiply by 16.
+                    //As this is a sum of the 2 points, we need to find the avarage, so we divide by 2.
+                    //This can be simplified to multiplying by 8 ( * 16 / 2)
+                    let toMove = toMove0.add(toMove1).applyMatrix4(inverseRotation).multiplyScalar(8) //8 = 16 /2
+                    cube.updateOffset(cube.offset.map((v, i) => v + toMove.getComponent(i)))
 
                 })
 
             })
     }
-
-    quaternionToAxis(quat, axis) {
-        if(quat.w > 1) {
-            quat.normalize()
-        }
-        axis.set(quat.x, quat.y, quat.z)
-        let s = Math.sqrt(1-quat.w*quat.w)
-        if(s > 0.001) {
-            axis.divideScalar(s)
-        }
-        return axis
-    }
-
     
     onCommandExit() {
         if(this.commandResultChangeCache !== null) {
