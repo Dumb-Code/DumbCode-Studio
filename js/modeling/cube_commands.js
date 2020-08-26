@@ -1,7 +1,6 @@
-import { TblCube } from "../tbl_loader.js"
-import { axisNumberHandler, indexHandler } from "../command_handler.js"
+import { indexHandler } from "../command_handler.js"
 import { CubeLocker } from "../util.js"
-import { Vector3, Quaternion, Euler, Matrix4, Group, SphereGeometry, MeshBasicMaterial, Mesh } from "../three.js"
+import { Vector3, Quaternion, Matrix4 } from "../three.js"
 
 const baseQuaternionInvese = new Quaternion()
 const worldPosVector = new Vector3()
@@ -28,37 +27,7 @@ const tempCubeNewBase1 = new Vector3()
 export class CubeCommands {
     constructor(root, studio) {
         this.commandResultChangeCache = null
-        let geometry = new SphereGeometry(1/64, 16, 16);
 
-        let group = new Group()
-        studio.display.scene.add(group)
-
-        this.points = []
-        this.points2 = []
-        for(let x = 0; x <= 1; x++) {
-            for(let y = 0; y <= 1; y++) {
-                for(let z = 0; z <= 1; z++) {
-                    let color = 0xFF000000
-                    if(x+y+z === 0) {
-                        color = 0xFFFFFFFF
-                    } else if(x === 1 && y+z === 0) {
-                        color = 0xFFFF0000
-                    } else if(y === 1 && x+z === 0) {
-                        color = 0xFF00FF00
-                    } else if(z === 1 && x+y === 0) {
-                        color = 0xFF0000FF
-                    }
-                    let material = new MeshBasicMaterial({ color })
-                    let mesh = new Mesh(geometry, material)
-                    let mesh2 = new Mesh(geometry, material)
-                    group.add(mesh)
-                    group.add(mesh2)
-
-                    this.points.push( { x, y, z, mesh } )
-                    this.points2.push( { x, y, z, mesh:mesh2 } )
-                }
-            }
-        }
         this.applycopypaste(root, studio.raytracer)
         this.applyMirrorCommand(root)
     }
@@ -116,6 +85,7 @@ export class CubeCommands {
                 }
 
                 let startDataCache = new Map()
+                let endDataCache = new Map()
                 rootCube.traverse(cube => {
                     cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
                     let newPosition = mirrorPoint(tempCubePos)
@@ -146,7 +116,11 @@ export class CubeCommands {
                         oldCorner: oldCorner.toArray(), 
                         base: base.toArray(), 
                         newMatrix: newMatrix.toArray(), 
-                        rotationMatrix: rotationMatrix.toArray() 
+                        rotationMatrix: rotationMatrix.toArray(),
+
+                        rotationPoint: [...cube.rotationPoint],
+                        rotation: [...cube.rotation],
+                        offset: [...cube.offset]
                     })
                 })
 
@@ -176,23 +150,53 @@ export class CubeCommands {
                     let toMove = toMove0.add(toMove1).applyMatrix4(inverseRotation).multiplyScalar(8) //8 = 16 /2
                     cube.updateOffset(cube.offset.map((v, i) => v + toMove.getComponent(i)))
 
+                    endDataCache.set(cube, {
+                        rotationPoint: [...cube.rotationPoint],
+                        rotation: [...cube.rotation],
+                        offset: [...cube.offset],
+                    })
                 })
 
-            })
+                if(args.context.dummy === true) {
+                    let resetVisuals = (dummy) => {
+                        rootCube.traverse(cube => {
+                            let cache = startDataCache.get(cube)
+                            cube.updatePosition([...cache.rotationPoint], dummy)
+                            cube.updateRotation([...cache.rotation], dummy)
+                            cube.updateOffset([...cache.offset], dummy)
+                        })
+                    }
+
+                    resetVisuals(false)
+                    this.commandResultChangeCache = { 
+                        onExit: () => {
+                            resetVisuals(true)
+                            rootCube.cubeGroup.updateMatrixWorld(true)
+                        },
+                        applyOnFrame: () => {    
+                            rootCube.traverse(cube => {
+                                let cache = endDataCache.get(cube)
+                                cube.updatePosition([...cache.rotationPoint], true)
+                                cube.updateRotation([...cache.rotation], true)
+                                cube.updateOffset([...cache.offset], true)
+                            })
+                            rootCube.cubeGroup.updateMatrixWorld(true)
+                        }
+                     }
+                }
+            }).onExit(() => this.onCommandExit())
     }
     
     onCommandExit() {
         if(this.commandResultChangeCache !== null) {
-            this.commandResultChangeCache.cube.resetVisuals()
-            this.commandResultChangeCache.cube.cubeGroup.updateMatrixWorld(true)
+            this.commandResultChangeCache.onExit()
             this.commandResultChangeCache = null
-            this.rotationPointMarkers.updateSpheres()
         }
     }
 
     onFrame() {
         if(this.commandResultChangeCache !== null) {
-            this.commandResultChangeCache.func()
+            this.commandResultChangeCache.applyOnFrame()
         }
     }
 }

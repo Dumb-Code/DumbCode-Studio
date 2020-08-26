@@ -48,13 +48,13 @@ export class ModelingStudio {
     }
 
     runFrame() {
+        this.display.tbl.resetAnimations()
         this.pointTracker.update()
         this.raytracer.update()
-        this.display.tbl.resetAnimations()
         this.cubeValues.onRender()
+        this.cubeCommands.onFrame()
         this.display.render()
         this.dragSelection.onFrame()
-        this.cubeCommands.onFrame()
     }
 
     cubeHierarchyChanged() {
