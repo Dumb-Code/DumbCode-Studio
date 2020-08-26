@@ -1,7 +1,8 @@
 export class CommandRoot {
 
-    constructor(dom) {
+    constructor(dom, raytracer) {
         this.commands = []
+        this.raytracer = raytracer
         this.commandLine = new CommandLine(dom, this)
     }
 
@@ -16,19 +17,32 @@ export class CommandRoot {
         if(split.length === 0) {
             throw new Error(`String is empty ?`)
         }
-        this.runCommandSplit(split, ctx)
+        return this.runCommandSplit(split, ctx)
     }
 
     runCommandSplit(split, ctx = {}) {
+        ctx.getCube = () => {
+            if(ctx.cube !== undefined) {
+                return ctx.cube
+            }
+            if(this.raytracer.selectedSet.size === 0) {
+                throw new Error("No cube selected")
+            }
+            if(this.raytracer.selectedSet.size !== 1) {
+                throw new Error("More than one cube selected")
+            }
+            return this.raytracer.firstSelected().tabulaCube
+        }
         let cmdName = split.shift()
         let found = this.commands.filter(c => c.name === cmdName)
         if(found.length === 0) {
-            throw new Error(`Command ${cmdName} is invalid.`)
+            return {code:0, msg: `Command ${cmdName} is invalid.`}
         }
         if(found.length !== 1) {
-            throw new Error(`Command ${cmdName} is ambigious: ${found.map(c => c.name)}. Please report this to dumbcode`)
+            return {code:1, msg: `Command ${cmdName} is ambigious: ${found.map(c => c.name)}. Please report this to dumbcode`}
         }
         found[0].parseAndRun(cmdName, split, ctx)
+        return {code:-1}
     }
 }
 
@@ -49,7 +63,7 @@ class CommandLine {
                 let val = input.val()
                 input.val('')
                 if(this.currentCommandBuilder === null) {
-                    this.findCommandBuilder(val)
+                    this.startCommand(val)
                 } else {
                     this.readNextLine(val)
                 }
@@ -117,12 +131,16 @@ class CommandLine {
         }
     }
 
-    findCommandBuilder(val) {
+    startCommand(val) {
         this.constructedCommand = ""
         this.currentResolver = null
         let cmds = []
-        this.root.commands.map(cmd => cmd.builders).forEach(builders => builders.filter(b => b.name === val).forEach(b => cmds.push(b)))
+        this.root.commands.map(cmd => cmd.builders).forEach(builders => builders.filter(b => b.name == val).forEach(b => cmds.push(b)))
         if(cmds.length === 0) {
+            let res = this.root.runCommand(val)
+            if(res.code < 0) {
+                return
+            }
             this.bottomline.text(`Command ${val} not found`)
         } else if(cmds.length !== 1) {
             this.bottomline.text(`Command ${val} is ambigous! Contact dumbcode.`)
@@ -330,15 +348,16 @@ export function booleanHandler() {
 }
 
 export function indexHandler(str) {
+    let parseIndex = p => {
+        let idx = str.indexOf(p)
+        if(idx == -1) {
+            throw new Error(`${p} does not exist in [${str}]`)
+        }
+        return idx
+    }
     return new ArgumentHandler(
-        split => [...split.shift()].map(c => {
-            let idx = str.indexOf(c)
-            if(idx == -1) {
-                throw new Error(`${c} does not exist in [${str}]`)
-            }
-            return idx
-        }),
-        () => [...str]
+        split => parseIndex(split.shift()),
+        async(cli) => await cli.nextInput("Value", p => parseIndex(p), v => cli.updateArgument(v))
     )
 }
 

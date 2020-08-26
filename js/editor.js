@@ -1,4 +1,4 @@
-import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./three.js";
+import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, Quaternion } from "./three.js";
 import { TBLModel } from "./tbl_loader.js";
 import { DinosaurDisplay, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'

@@ -149,11 +149,11 @@ export class CubeValueDisplay {
         this.createArrayCommand(root, cube => cube.textureOffset, (cube, values, visualOnly) => cube.updateTextureOffset(values, visualOnly), 'uv', 'tex')
         this.createArrayCommand(root, cube => cube.cubeGrow, (cube, values, visualOnly) => cube.updateCubeGrow(values, visualOnly), xyzAxis, 'cg')
 
-        root.command('mirror')
-            .addCommandBuilder(`mirror`)
+        root.command('texmirror')
+            .addCommandBuilder(`texmirror`)
             .argument('value', booleanHandler())
             .onRun(args => {
-                let cube = this.commandCube(args.context)
+                let cube = args.context.getCube()
                 let value = args.get('value')
 
                 if(args.context.dummy === true) {
@@ -176,7 +176,7 @@ export class CubeValueDisplay {
             .onRun(args => {
                 let mode = args.get('mode')
                 let axis = args.get('axis')
-                let cube = this.commandCube(args.context)
+                let cube = args.context.getCube()
                 let cubeValues = [...cubeGetter(cube)]
 
                 let axisValues = [ undefined, undefined, undefined ]
@@ -213,19 +213,6 @@ export class CubeValueDisplay {
         if(this.commandResultChangeCache !== null) {
             this.commandResultChangeCache.func()
         }
-    }
- 
-    commandCube(context) {
-        if(context.cube !== undefined) {
-            return context.cube
-        }
-        if(this.raytracer.selectedSet.size === 0) {
-            throw new Error("No cube selected")
-        }
-        if(this.raytracer.selectedSet.size !== 1) {
-            throw new Error("More than one cube selected")
-        }
-        return this.raytracer.firstSelected().tabulaCube
     }
 
     updateCubeValues() {

@@ -19,7 +19,7 @@ export class TexturemapCanvas {
             }
             let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
             textureTools.mouseOverPixel(mouseX/size, mouseY/size, this._mouseOverContext)
-            let mouseDown = buttons & 1 === 1 && textureTools.canDraw()
+            let mouseDown = ((buttons & 1) === 1) && textureTools.canDraw()
             if(mouseDown) {
                 textureTools.mouseDown(mouseX/size, mouseY/size, true)
             }

@@ -229,34 +229,40 @@ export class CubeLocker {
     constructor(cube, type = 0) {
         this.cube = cube
         this.type = type
-        switch(type) {
-            case 0:
-                this.element = cube.cubeGroup
-                break
-            case 1:
-                this.element = cube.cubeMesh
-                break
-        }
-        this.worldMatrix = this.element.matrixWorld.clone()
+        this.worldMatrix = getElementFromCube(this.cube, this.type).matrixWorld.clone()
     }
 
     reconstruct() {
+        CubeLocker.reconstructLocker(this.cube, this.type, this.worldMatrix)
+    }
+}
+
+CubeLocker.reconstructLocker = (cube, type, matrix) => {
         //      parent_world_matrix * local_matrix = world_matrix
         //  =>  local_matrix = 'parent_world_matrix * world_matrix
-        resultMat.getInverse(this.element.parent.matrixWorld).multiply(this.worldMatrix)
+        resultMat.getInverse(getElementFromCube(cube, type).parent.matrixWorld).multiply(matrix)
         resultMat.decompose(decomposePos, decomposeRot, decomposeScale)
 
-        switch(this.type) {
+        switch(type) {
             case 0:
-                this.cube.updatePosition(decomposePos.toArray())
+                cube.updatePosition(decomposePos.toArray())
                 decomposeEuler.setFromQuaternion(decomposeRot, "ZYX")
-                this.cube.updateRotation(decomposeEuler.toArray().map(e => e * 180 / Math.PI))
+                cube.updateRotation(decomposeEuler.toArray().map(e => e * 180 / Math.PI))
                 break
             case 1:
-                this.cube.updateOffset(decomposePos.toArray().map((e, i) => e - this.cube.dimension[i]/2))
+                cube.updateOffset(decomposePos.toArray())
                 break
         }
+}
 
+function getElementFromCube(cube, type) {
+    switch(type) {
+        case 0:
+            return cube.cubeGroup
+            break
+        case 1:
+            return cube.cubeMesh
+            break
     }
 }
 

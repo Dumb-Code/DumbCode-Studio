@@ -1,5 +1,7 @@
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3 } from "./three.js";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D } from "./three.js";
 import { downloadBlob } from "./util.js";
+
+const tempVector = new Vector3()
 
 export class TBLModel {
 
@@ -10,7 +12,6 @@ export class TBLModel {
         this.texHeight = 64
         this.maxCubeLevel = 0
         
-
         this.cubeMap = new Map()
         this.rootGroup = new TblCubeGroup(this, [], [])
 
@@ -187,7 +188,12 @@ export class TblCube {
 
         this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.tbl.mat)
         this.cubeMesh.tabulaCube = this
-        
+
+        this.cubeMesh.position.set(0.5, 0.5, 0.5)
+        this.cubeMesh.updateMatrix();
+        this.cubeMesh.geometry.applyMatrix(this.cubeMesh.matrix);
+        this.cubeMesh.position.set(0, 0, 0)
+
         this.cubeGroup.add(this.cubeMesh)
         this.updateDimension()
 
@@ -231,6 +237,18 @@ export class TblCube {
         return this.children
     }
 
+    cloneCube() {
+         return new TblCube(this.name, this.dimension, this.rotationPoint, this.offset, 
+            this.rotation, this.scale, this.textureOffset, this.cubeGrow, 
+            this.children.map(c => c.cloneCube()),
+            this.textureMirrored, this.tbl)
+    }
+
+    traverse(callback) {
+        callback(this)
+        this.children.forEach(c => c.traverse(callback))
+    }
+
     onChildrenChange(silent = false, childern = this.children) {
         if(!silent) {
             this.tbl.onCubeHierarchyChanged()
@@ -269,8 +287,8 @@ export class TblCube {
         this.updateTexture()
     }
 
-    updateCubePosition( { dimension = this.dimension, offset = this.offset } = {} ) {
-        this.cubeMesh.position.set( dimension[0] / 2 + offset[0], dimension[1] / 2 + offset[1], dimension[2] / 2 + offset[2] )
+    updateCubePosition( { offset = this.offset } = {} ) {
+        this.cubeMesh.position.set(offset[0], offset[1], offset[2] )
     }
 
     updatePositionVisuals(position = this.rotationPoint) {
@@ -294,7 +312,7 @@ export class TblCube {
         if(visualOnly !== true) {
             this.dimension = values.map(e => Math.round(e))
         }
-        this.updateCubePosition( { dimension:values } )
+        this.updateCubePosition()
         this.updateGeometry( { dimension:values } )
         this.updateTexture( { dimension:values } )
     }

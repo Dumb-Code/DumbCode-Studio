@@ -10,6 +10,7 @@ import { RotationPointMarkers } from "./rotation_point.markers.js"
 import { applyCubeAddingDeleting } from "./cube_create_delete.js"
 import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 import { Group } from "../three.js"
+import { CubeCommands } from "./cube_commands.js"
 
 export class ModelingStudio {
 
@@ -22,7 +23,7 @@ export class ModelingStudio {
 
         this.group = new Group()
 
-        this.commandRoot = new CommandRoot(dom)
+        this.commandRoot = new CommandRoot(dom, this.raytracer)
 
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
         this.selectedRequired = dom.find('.editor-require-selected')
@@ -42,6 +43,8 @@ export class ModelingStudio {
         this.cubeValues = new CubeValueDisplay(dom, this, renameCube)
         this.studioPanels = new StudioPanels(dom, 300, 300)
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
+
+        this.cubeCommands = new CubeCommands(this.commandRoot, this)
     }
 
     runFrame() {
@@ -51,6 +54,7 @@ export class ModelingStudio {
         this.cubeValues.onRender()
         this.display.render()
         this.dragSelection.onFrame()
+        this.cubeCommands.onFrame()
     }
 
     cubeHierarchyChanged() {
