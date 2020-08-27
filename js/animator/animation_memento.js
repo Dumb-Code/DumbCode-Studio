@@ -25,6 +25,7 @@ export class AnimationMemento {
             })
             studio.selectKeyframe(selectedKeyframe)
             studio.keyframeManager.reframeKeyframes()
+            studio.progressionCanvas.redrawProgressionCanvas()
         }
     }
 
