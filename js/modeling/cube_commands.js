@@ -2,7 +2,6 @@ import { indexHandler } from "../command_handler.js"
 import { CubeLocker } from "../util.js"
 import { Vector3, Quaternion, Matrix4 } from "../three.js"
 
-const baseQuaternionInvese = new Quaternion()
 const worldPosVector = new Vector3()
 const worldRotQuat = new Quaternion()
 const planeNormal = new Vector3()
@@ -55,9 +54,6 @@ export class CubeCommands {
             .onRun(args => {
                 let rootCube = args.context.getCube()
                 let axis = args.get('axis')
-
-                let baseQuaternion = rootCube.tbl.modelCache.quaternion
-                baseQuaternionInvese.copy(baseQuaternion).inverse()
 
                 let worldPos = rootCube.cubeGroup.getWorldPosition(worldPosVector)
                 let worldQuat = rootCube.cubeGroup.getWorldQuaternion(worldRotQuat)
