@@ -357,7 +357,8 @@ export class CanvasTransformControls {
     }
 
     mouseEvent(e) {
-        let mousePoint = new DOMPoint(e.originalEvent.layerX, e.originalEvent.layerY)
+        let rect = this.canvas.getBoundingClientRect()
+        let mousePoint = new DOMPoint(e.originalEvent.clientX - rect.left, e.originalEvent.clientY - rect.top)
         mousePoint = mousePoint.matrixTransform(this.getFinalMatrix().inverse())
         let mouseX = mousePoint.x
         let mouseY = mousePoint.y

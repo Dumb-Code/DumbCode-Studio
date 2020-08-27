@@ -22,7 +22,7 @@ export class KeyframeBoardManager {
         this.scrubbingPlaybackMarker = false
         this.playbackMarker = keyframeBoard.find('.keyframe-playback-marker')
         onElementDrag(this.playbackMarker.get(0), () => this.scrubbingPlaybackMarker = true, (_dx, _dy, _info, x) => {
-            let marker = x - 250;
+            let marker = x - 235;
 
             let conatainerWidth = this.eventPointBoard.width()
 
@@ -313,7 +313,7 @@ export class KeyframeBoardManager {
             xpos = (ticks - left) / ticksInContainer
         }
         
-        this.playbackMarker.css('display', xpos < 0 || xpos > 1 ? 'none' : 'unset').css('left', (250 + (xpos * conatainerWidth)) + "px")
+        this.playbackMarker.css('display', xpos < 0 || xpos > 1 ? 'none' : 'unset').css('left', (235 + (xpos * conatainerWidth)) + "px")
 
 
         let rounded = Math.round(ticks * 10) / 10;
