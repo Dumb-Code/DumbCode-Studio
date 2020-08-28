@@ -108,7 +108,10 @@ export class CubeListBoard {
         nameSpan.appendChild(nameTextEdit)
         div.appendChild(nameSpan)
 
-        doubleClickToEdit($(nameSpan), name => this.renameCube(cube, name), cube.name)
+        doubleClickToEdit($(nameSpan), name => {
+            div.setAttribute('cubename', name)
+            this.renameCube(cube, name)
+        }, cube.name)
 
         let hideIconSpan = document.createElement("span")
         let hideIconI = document.createElement("i")
