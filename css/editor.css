@@ -40,11 +40,12 @@
 
 #main-area.is-modeling > div#modeling-area {
     display: grid;
-    grid-template-areas: 
-    "left_area main_area right_area"
-    "left_area bottom_bar right_area";
-    grid-template-rows: calc(100vh - 92px) 40px;;
-    width: 100%;
+    grid-template-areas:
+    "command command right_top" 
+    "toolbar main_area right_top" 
+    "toolbar main_area right_bottom" 
+    "toolbar gumball right_bottom" 
+    "options options right_bottom" 
 }
 
 #main-area.is-texture > div#texture-area {

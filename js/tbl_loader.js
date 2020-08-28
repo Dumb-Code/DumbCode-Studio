@@ -90,6 +90,7 @@ export class TblCubeGroup {
 
     deleteChild(child, silent = false) {
         child.parent = undefined
+
         this.cubeList = this.cubeList.filter(c => c != child)
         this.refreshGroup(silent)
     }
@@ -131,6 +132,7 @@ export class TblCubeGroup {
         if(!silent) {
             this.tbl.onCubeHierarchyChanged()
         }
+
     }
 
     resetVisuals() {

@@ -1,80 +1,400 @@
-<div id="panel-left" style="grid-area: left_area; color: black; position: relative">
+<style>
+    ul, #layer-pannel {
+      list-style-type: none;
+    }
+    
+    #layer-pannel {
+      margin: 0;
+      padding: 0;
+    }
+    
+    .caret {
+      cursor: pointer;
+      -webkit-user-select: none; /* Safari 3.1+ */
+      -moz-user-select: none; /* Firefox 2+ */
+      -ms-user-select: none; /* IE 10+ */
+      user-select: none;
+    }
+    
+    .caret::before {
+      content: "\25B6";
+      color: gray;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    
+    .cube-line-controller:not(.children-hidden) .caret::before {
+      -ms-transform: rotate(90deg); /* IE 9 */
+      -webkit-transform: rotate(90deg); /* Safari */
+      transform: rotate(90deg);  
+    }
+    
+    .nested {
+      display: none;
+    }
+    
+    :not(.children-hidden)+.nested {
+      display: block;
+    }
+
+    .nested li {
+      margin-left: 10px;
+    }
+
+
+    .control:not(.keep-size) {
+        width: 100%
+    }
+
+
+    .input-title {
+      clear: both;
+      padding: 22px 0px 0px 0px;
+      font-size: 16px;
+      color: rgba(255,255,255,.6);
+      font-weight: 300;
+    }
+
+
+
+
+/* Styling Checkbox Starts */
+.checkbox-label {
+  display: block;
+  position: relative;
+  margin: auto;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 24px;
+  height: 24px;
+  width: 24px;
+  clear: both;
+}
+
+.checkbox-label input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkbox-label .checkbox-custom {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 24px;
+  width: 24px;
+  background-color: transparent;
+  border-radius: 5px;
+  transition: all 0.1s ease-out;
+  -webkit-transition: all 0.1s ease-out;
+  -moz-transition: all 0.1s ease-out;
+  -ms-transition: all 0.1s ease-out;
+  -o-transition: all 0.1s ease-out;
+  border: 2px solid #363636;
+}
+
+
+.checkbox-label input:checked ~ .checkbox-custom {
+  background-color: #209cee;
+  border-radius: 5px;
+  -webkit-transform: rotate(0deg) scale(1);
+  -ms-transform: rotate(0deg) scale(1);
+  transform: rotate(0deg) scale(1);
+  opacity:1;
+  border: 1px solid #209cee;
+}
+
+
+.checkbox-label .checkbox-custom::after {
+  position: absolute;
+  content: "";
+  left: 12px;
+  top: 12px;
+  height: 0px;
+  width: 0px;
+  border-radius: 5px;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(0deg) scale(0);
+  -ms-transform: rotate(0deg) scale(0);
+  transform: rotate(0deg) scale(0);
+  opacity:1;
+  transition: all 0.1s ease-out;
+  -webkit-transition: all 0.1s ease-out;
+  -moz-transition: all 0.1s ease-out;
+  -ms-transition: all 0.1s ease-out;
+  -o-transition: all 0.1s ease-out;
+}
+
+
+.checkbox-label input:checked ~ .checkbox-custom::after {
+    -webkit-transform: rotate(45deg) scale(1);
+    -ms-transform: rotate(45deg) scale(1);
+    transform: rotate(45deg) scale(1);
+    opacity:1;
+    left: 8px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid #f5f5f5;
+    border-width: 0 2px 2px 0;
+    background-color: transparent;
+    border-radius: 0;
+}
+
+
+
+
+.lock-icon {
+height: 12px; 
+position: absolute; 
+right: 10px; 
+margin-top: 5px;
+}
+
+.hide-icon {
+height: 12px; 
+position: absolute; 
+right: 30px; 
+margin-top: 6px;
+}
+
+/* //padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    margin-left: -14px;
+    border: 1px solid #121212;
+    font-size: 14px;
+    border-top: 0px;
+    border-right: none;
+    bottom: 0px;
+    position: absolute;
+    left: 0px;
+    bottom: 0px; */
+
+
+</style>
+<div class="has-background-black-ter" style="grid-area: command; position: relative;">
+    <div style="position:absolute; bottom: 0; width: 100%;">
+        <!--Command Log-->
+        <div class="section py-0 my-0 pt-2" style="border: 1px solid #121212; font-size: 14px; border-top: none; border-right: none;">test<br>test2</div>
+        <!--Command Field-->
+        <div class="section py-0 my-0 has-text-light" style="padding-top: 5px !important; padding-bottom: 5px !important; margin-left: -14px; border: 1px solid #121212; font-size: 14px; border-top: none; border-right: none;">&#x0003E; command</div>
+    </div>
+</div>
+<div class="has-background-black-ter" style="grid-area: toolbar">
+    <!--Common Commands Area-->
+    <div class="has-background-black-ter has-text-gray-light is-narrow" style="border-right: 1px solid #121212;">
+        <div class="icon is-medium">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="icon is-medium">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="icon is-medium">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="icon is-medium">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="icon is-medium">
+            <i class="fas fa-home"></i>
+        </div>
+    </div>
+
+</div>
+<div id="panel-bottom" class="section has-background-black-ter is-marginless is-paddingless pt-1" style="grid-area: right_bottom; position: relative; padding-top: 20px !important; border-top: solid 1px black">
     <span class="popout-button icon is-small">
         <i class="fas fa-sign-out-alt"></i>
     </span>
+
+    <div class="has-background-black-ter is-marginless is-paddingless columns is-gapless">
+        <div class="column notification has-background-danger has-text-light has-text-centered mx-1">X</div>
+        <div class="column notification has-background-success has-text-light has-text-centered">Y</div>
+        <div class="column notification has-background-info has-text-light has-text-centered mx-1">Z</div>
+      </div>
     <div class="modeling-ui-entry">
-        <label>Cube Name</label>
-        <div style="padding: 5px;">
-            <input class="input-cube-name editor-require-selected" type="text" name="Cube Name" disabled>
-        </div>
-    </div>
-    <div class="modeling-ui-entry">
-        <label>Dimensions</label>
-        <div class="modeling-input-3" style="padding: 5px;">
-            <input axis="0" class="input-dimension editor-require-selected" style="grid-area: l" type="number" name="X Dimension" disabled>
-            <input axis="1" class="input-dimension editor-require-selected" style="grid-area: m" type="number" name="Y Dimension" disabled>
-            <input axis="2" class="input-dimension editor-require-selected" style="grid-area: r" type="number" name="Z Dimension" disabled>
-        </div>
-    </div>
-    <div class="modeling-ui-entry">
-        <label>Position</label>
-        <div class="modeling-input-3" style="padding: 5px;">
-            <input axis="0" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Position" disabled>
-            <input axis="1" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="Y Position" disabled>
-            <input axis="2" class="input-position modeling-ui-changeable editor-require-selected" style="grid-area: r" type="number" name="Z Position" disabled>
-        </div>
-    </div>
-    <div class="modeling-ui-entry">
-        <label>Offset</label>
-        <div class="modeling-input-3" style="padding: 5px;">
-            <input axis="0" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Offet" disabled>
-            <input axis="1" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="Y Offet" disabled>
-            <input axis="2" class="input-offset modeling-ui-changeable editor-require-selected" style="grid-area: r" type="number" name="Z Offet" disabled>
-        </div>
-    </div>
-    <div class="modeling-ui-entry">
-        <label>Cube Grow</label>
-        <div class="modeling-input-3" style="padding: 5px;">
-            <input axis="0" class="input-cube-grow modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" step="0.1" name="X Cube Grow" disabled>
-            <input axis="1" class="input-cube-grow modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" step="0.1" name="Y Cube Grow" disabled>
-            <input axis="2" class="input-cube-grow modeling-ui-changeable editor-require-selected" style="grid-area: r" type="number" step="0.1" name="Z Cube Grow" disabled>
-        </div>
-    </div>
-    <div class="modeling-ui-entry">
-        <label>Offset</label>
-        <div class="modeling-input-3" style="padding: 5px;">
-            <input axis="0" class="input-texure-offset modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Tex Offet" disabled>
-            <input axis="1" class="input-texure-offset modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="Y Tex Offet" disabled>
-            <div style="grid-area: r" class="b-checkbox is-inline">
-                <input class="input-texture-mirrored editor-require-selected" id="checkbox-tex-mirrored" class="styled" type="checkbox">
-                <label for="checkbox-tex-mirrored">Mirror</label>
+        <p class="heading is-size-8 px-1 mt-2 has-text-grey-light">Dimensions</p>
+        <div class="has-background-dark is-marginless is-paddingless columns is-gapless">
+            <div class="column">
+                <div class="field has-addons is-marginless">
+                    <div class="control is-small">
+                        <input axis="0" class="input-dimension editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="field has-addons is-marginless">
+                  <div class="control is-small">
+                    <input axis="1" class="input-dimension editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                  </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="field has-addons is-marginless">
+                    <div class="control is-small">
+                      <input axis="2" class="input-dimension editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     <div class="modeling-ui-entry">
-        <label>Rotation</label>
-        <div class="modeling-input-3" style="padding: 5px;">
-            <input axis="0" class="input-rotation editor-require-selected" style="grid-area: l" type="number" name="X Rotation" disabled>
-            <input axis="1" class="input-rotation editor-require-selected" style="grid-area: m" type="number" name="X Rotation" disabled>
-            <input axis="2" class="input-rotation editor-require-selected" style="grid-area: r" type="number" name="X Rotation" disabled>
+        <p class="heading is-size-8 px-1 mt-1 has-text-grey-light">Position</p>
+        <div class="has-background-dark is-marginless is-paddingless columns is-gapless">
+            <div class="column">
+                <div class="field has-addons is-marginless">
+                  <div class="control is-small">
+                    <input axis="0" class="input-position editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                  </div>
+                </div>
+            </div>
+            <div class="column">
+              <div class="field has-addons is-marginless">
+                <div class="control is-small">
+                  <input axis="1" class="input-position editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="field has-addons is-marginless">
+                <div class="control is-small">
+                  <input axis="2" class="input-position editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                </div>
+              </div>
+            </div>
+        </div>   
+    </div>
+    <div class="modeling-ui-entry">
+        <p class="heading is-size-8 px-1 mt-1 has-text-grey-light">Offset</p>
+        <div class="has-background-dark is-marginless is-paddingless columns is-gapless">
+            <div class="column">
+              <div class="field has-addons is-marginless">
+                <div class="control is-small">
+                  <input axis="0" class="input-offset editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="field has-addons is-marginless">
+                <div class="control is-small">
+                  <input axis="1" class="input-offset editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="field has-addons is-marginless">
+                <div class="control is-small">
+                  <input axis="2" class="input-offset editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                </div>
+              </div>
+            </div>
         </div>
-        <input axis="0" class="input-rotation-slider input-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
-        <input axis="1" class="input-rotation-slider input-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
-        <input axis="2" class="input-rotation-slider input-slider editor-require-selected" type="range" step="0.1" min="-180" max="180" value="0" disabled>
+    </div>
+    <div class="modeling-ui-entry">
+        <p class="heading is-size-8 px-1 my-0 mt-1 has-text-grey-light">Cube Grow</p>
+        <div class="has-background-dark is-marginless is-paddingless columns is-gapless">
+            <div class="column">
+              <div class="field has-addons is-marginless">
+                <div class="control is-small">
+                  <input axis="0" class="input-cube-grow editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="field has-addons is-marginless">
+                <div class="control is-small">
+                  <input axis="1" class="input-cube-grow editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="field has-addons is-marginless">
+                <div class="control is-small">
+                  <input axis="2" class="input-cube-grow editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="border-left: none;" disabled>
+                </div>
+              </div>
+            </div>
+            <div class="column is-narrow has-background-black-ter pl-5 has-text-grey-light">
+              <span class="icon is-small ml-3 mt-2">
+                <i class="fas fa-lock"></i>
+              </span>
+            </div>
+        </div>
+    </div>
+    <div class="modeling-ui-entry">
+        <p class="heading is-size-8 px-0 mt-1 ml-1 has-text-grey-light">Rotation</p>
+        <div class="notification has-background-black-ter is-marginless no-border is-paddingless">
+            <div class="field has-addons is-marginless mb-1 ml-1">
+              <div class="control keep-size">
+                <a class="button is-small is-static has-background-danger has-text-light" style="border: none;">X</a>
+              </div>
+              <div class="control is-small" style="width: 100%;">
+                <input axis="0" class="input-rotation-slider editor-require-selected input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0" disabled>
+              </div>
+              <div class="control is-small keep-size">
+                <input axis="0" class="input-rotation editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" disabled>
+              </div>
+            </div>
+            <div class="field has-addons is-marginless mb-1 ml-1">
+              <div class="control keep-size">
+                <a class="button is-small is-static has-background-success has-text-light" style="border: none;">Y</a>
+              </div>
+              <div class="control is-small" style="width: 100%;">
+                <input axis="1" class="input-rotation-slider editor-require-selected input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0" disabled>
+              </div>
+              <div class="control is-small keep-size">
+                <input axis="1" class="input-rotation editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" disabled>
+              </div>
+            </div>
+            <div class="field has-addons is-marginless mb-1 ml-1">
+              <div class="control keep-size">
+                <a class="button is-small is-static has-background-info has-text-light" style="border: none;">Z</a>
+              </div>
+              <div class="control is-small" style="width: 100%;">
+                <input axis="2" class="input-rotation-slider editor-require-selected input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0" disabled>
+              </div>
+              <div class="control is-small keep-size">
+                <input axis="2" class="input-rotation editor-require-selected input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" disabled>
+              </div>
+            </div>
+        </div>
     </div>
 </div>
 <div id="display-div" style="grid-area: main_area;"></div>
-<div id="panel-right" class="editor-part", editor-tab="modeling" style="grid-area: right_area; position: relative">
-    <span class="popout-button icon is-small">
-        <i class="fas fa-sign-out-alt"></i>
-    </span>
-    <div class="modeling-studio-cube-edit">
-        <button class="cube-create">+</button>
-        <button class="cube-delete">-</button>
+<div id="panel-top" class="editor-part has-background-black-ter", editor-tab="modeling" style="grid-area: right_top; position: relative">
+
+    <p class="heading is-size-8 px-1 has-text-grey-light mt-1">Layers</p>
+
+    <div class="section is-marginless is-paddingless">
+      <div class="buttons has-addons mx-1 mb-0" style="float:left">
+        <!--Create cube in same level heirarchy-->
+        <button class="button is-info create-cube-sibling tooltip" style="height: 24px; border-right: 4px solid #363636" data-tooltip="Create a sibling cube">
+          <i class="fas fa-plus has-text-light mr-1"></i><i class="fas fa-cube has-text-light"></i>
+        </button>
+        <!--Create new child cube of current selected-->
+        <button class="button is-info create-cube tooltip" style="height: 24px;"  data-tooltip="Create a child cube">
+          <i class="fas fa-plus has-text-light mr-1"></i><i class="fas fa-cube has-text-light"></i><i class="fas fa-cube has-text-light" style="height: 10px;" ></i>
+        </button>
+      </div>
+
+      <div class="buttons has-addons" >
+        <!-- Delete the cube, moving it's children to the parent cube -->
+        <button class="button is-info delete-cube tooltip" style="height: 24px; border-right: 4px solid #363636" data-tooltip="Delete selected cube only">
+          <i class="fas fa-trash has-text-light mr-1" style="height: 14px;"></i>
+        </button>
+        <!-- Delete the cube and it's children -->
+        <button class="button is-info delete-cube-and-children tooltip" style="height: 24px;"  data-tooltip="Delete selected cube and children">
+          <i class="fas fa-trash has-text-light mr-1" style="height: 14px;"></i><i class="fas fa-cubes has-text-light"></i>
+        </button>
+      </div>
     </div>
-    <ul id="cube-list" style="overflow-y: scroll; height: 100%;"></ul>
+
+    <!--Layers Tree-->
+    <div class="section is-paddingless pt-3 pl-1" style="flex-grow: 1;">
+      <ul id="cube-list" class="has-text-grey-lighter ">
+      </ul>
+    </div>
 </div>
-<div id="editor-transform-tools" style="grid-area: bottom_bar;">
+<!-- <div id="editor-transform-tools" style="grid-area: bottom_bar;">
     <div class="bottombar-element dropdown is-hoverable is-up">
         <div class="dropdown-trigger">
           <button class="button button-activateable is-dark transform-control-tool" select-list-entry="translate">
@@ -144,7 +464,129 @@
         <div class="cli-text input-line-top"></div>
         <div class="cli-text input-line-lower"></div>
     </div>
+</div> -->
+<div class="has-background-black-ter" style="grid-area: gumball">
+    <div class="section has-background-black-ter is-paddingless is-marginless is-gapless" style="height: 3.5vh; border-top: 1px solid #121212;" id="gb-object">
+
+        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+          <button class="button is-success" style="height: 24px; font-size: 14px;">Object</button>
+          <button class="button is-dark" style="height: 24px; font-size: 14px;" onClick="gumball()">Gumball</button>
+        </div>
+
+        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+          <button class="button is-info" style="height: 24px; font-size: 14px;" onClick="setMove()" id="move-button">Move</button>
+          <button class="button is-dark" style="height: 24px; font-size: 14px;" onClick="setRotate()" id="rotate-button">Rotate</button>
+          <button class="button is-dark" style="height: 24px; font-size: 14px;" onClick="setDimension()" id="dimension-button">Dimension</button>
+        </div>
+
+        <div id="move-tools">
+          <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+            <button class="button is-info" style="height: 24px; font-size: 14px;">World</button>
+            <button class="button is-dark" style="height: 24px; font-size: 14px;">Oject</button>
+            <button class="button is-dark" style="height: 24px; font-size: 14px;">Independent</button>
+          </div>
+          <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+            <button class="button is-info" style="height: 24px; font-size: 14px;">Position</button>
+            <button class="button is-dark" style="height: 24px; font-size: 14px;">Offset</button>
+            <button class="button is-dark" style="height: 24px; font-size: 14px;">Rotation Point</button>
+          </div>
+        </div>
+
+        <div id="rotate-tools" style="display:none;">
+          <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+            <button class="button is-info" style="height: 24px; font-size: 14px;">World</button>
+            <button class="button is-dark" style="height: 24px; font-size: 14px;">Oject</button>
+            <button class="button is-dark" style="height: 24px; font-size: 14px;">Independent</button>
+          </div>
+        </div>
+      </div>
+      <div class="section has-background-black-ter is-paddingless is-marginless is-gapless" style="height: 3.5vh; border-top: 1px solid #121212; display: none;" id="gb-gumball">
+
+        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+          <button class="button is-dark" style="height: 24px; font-size: 14px;" onClick="object()">Object</button>
+          <button class="button is-success" style="height: 24px; font-size: 14px;">Gumball</button>
+        </div>
+
+        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+          <div class="checkbox-container">
+            <label class="checkbox-label">
+              <input type="checkbox">
+              <span class="checkbox-custom rectangular"></span>
+            </label>
+          </div>
+        </div>
+        <p class="has-text-light mt-1 px-2" style="float:left; font-size: 14px; padding-top: 1px;">Auto Move</p>
+        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+          <button class="button is-info" style="height: 24px; font-size: 14px;">Position</button>
+          <button class="button is-dark" style="height: 24px; font-size: 14px;">Rotation</button>
+        </div>
+
+      </div>
 </div>
-<div id="left-divider" class="vertical-divider"></div>
+<div class="has-background-black-ter" style="grid-area: options;">
+    <div class="section has-background-black-ter py-0 my-0 pl-1 has-text-light" style="height: 4vh; border: 1px solid #121212; font-size: 14px; border-right: none;">
+        <div class="columns is-gapless">
+          <div class="column is-narrow">
+            
+            <div class="dropdown is-hoverable is-up">
+              <div class="dropdown-trigger">
+                <button class="button is-dark" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
+                  <span>Textured</span>
+                  <span class="icon is-small">
+                    <i class="fas fa-angle-up" aria-hidden="true"></i>
+                  </span>
+                </button>
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+                <div class="dropdown-content has-background-black-bis">
+                  <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Display Mode</p></div>
+                  <hr class="dropdown-divider">
+                  <a href="#" class="dropdown-item has-text-info">Textured</a>
+                  <a href="#" class="dropdown-item">UV</a>
+                  <a href="#" class="dropdown-item">White</a>
+                  <a href="#" class="dropdown-item">Outline?</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column is-narrow">
+            <div class="dropdown is-hoverable is-up">
+              <div class="dropdown-trigger">
+                <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
+                  <span>Perspective</span>
+                  <span class="icon is-small">
+                    <i class="fas fa-angle-up" aria-hidden="true"></i>
+                  </span>
+                </button>
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+                <div class="dropdown-content has-background-black-bis">
+                  <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Render Mode</p></div>
+                  <hr class="dropdown-divider">
+                  <a href="#" class="dropdown-item has-text-info">Perspective</a>
+                  <a href="#" class="dropdown-item">Isometric</a>
+                  <a href="#" class="dropdown-item">Two Point Perspective</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column is-narrow">
+            <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
+              <span><i class="far fa-lightbulb"></i></span>
+            </button>
+          </div>
+          <div class="column is-narrow">
+            <div class="button is-paddingless is-dark px-3 ml-1" style="height: 20px; font-size: 14px;">Body_Base_1</div>
+          </div>
+          <div class="column is-narrow">
+            <div class="button is-paddingless is-dark px-3 mx-1" style="height: 20px; font-size: 14px;">15 Child Objects</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+</div>
 <div id="right-divider" class="vertical-divider"></div>
+<div id="controls-divider" class="horizontal-divider"></div>
+<div id="command-divider" class="horizontal-divider"></div>
 <div id="drag-selection-overlay"></div>

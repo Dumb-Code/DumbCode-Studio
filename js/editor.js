@@ -138,16 +138,14 @@ function runFrame() {
     activeTab.runFrame()
 }
 
-function renameCube(oldValue, newValue) {
-    let selected = raytracer.selectedSet.size === 1 ? raytracer.firstSelected() : null
-    if(selected !== null && display.tbl.cubeMap.has(newValue) && display.tbl.cubeMap.get(newValue) !== selected.tabulaCube) {
+function renameCube(cube, newValue) {
+    if(display.tbl.cubeMap.has(newValue)) {
         return true
     }
-    if(oldValue !== newValue && selected !== null && selected.tabulaCube.name == oldValue) {
-        let tabulaCube = selected.tabulaCube
-        tabulaCube.updateCubeName(newValue)
+    let oldValue = cube.name
+    if(oldValue !== newValue) {
+        cube.updateCubeName(newValue)
         animationStudio.animationTabHandler.allTabs.forEach(tab => tab.handler.renameCube(oldValue, newValue))
-        modelingStudio.cubeList.elementMap.get(tabulaCube).a.innerText = newValue
     }   
     return false
 }
