@@ -170,6 +170,9 @@ margin-top: 6px;
     left: 0px;
     bottom: 0px; */
 
+.option-select.is-activated {
+  color: #3298dc;
+}
 
 </style>
 <div class="has-background-black-ter" style="grid-area: command; position: relative;">
@@ -389,82 +392,11 @@ margin-top: 6px;
     </div>
 
     <!--Layers Tree-->
-    <div class="section is-paddingless pt-3 pl-1" style="flex-grow: 1;">
+    <div class="section is-paddingless pt-3 pl-1" style="overflow-y: scroll; height: calc(100% - 48px); position: absolute; width: 100%;">
       <ul id="cube-list" class="has-text-grey-lighter ">
       </ul>
     </div>
 </div>
-<!-- <div id="editor-transform-tools" style="grid-area: bottom_bar;">
-    <div class="bottombar-element dropdown is-hoverable is-up">
-        <div class="dropdown-trigger">
-          <button class="button button-activateable is-dark transform-control-tool" select-list-entry="translate">
-            <span class="icon is-small">
-                <i class="fas fa-arrows-alt"></i>
-            </span>
-          </button>
-        </div>
-        <div class="dropdown-menu" role="menu">
-            <div class="dropdown-content">
-                <div class="dropdown-entry dropdown-translation">
-                    <div select-list-entry="position" class="dropdown-item dropdown-activateable">Position</div>
-                    <div select-list-entry="offset" class="dropdown-item dropdown-activateable">Offset</div>
-                    <div select-list-entry="rotation_point" class="dropdown-item dropdown-activateable">Rotation Point</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="bottombar-element dropdown is-hoverable is-up">
-        <div class="dropdown-trigger">
-          <button class="button button-activateable is-dark transform-control-tool" select-list-entry="rotate">
-            <span class="icon is-small">
-                <i class="fas fa-sync-alt"></i>
-            </span>
-          </button>
-        </div>
-        <div class="dropdown-menu" role="menu">
-            <div class="dropdown-content">
-                <div class="dropdown-entry dropdown-rotation">
-                    <div select-list-entry="axis" class="dropdown-item dropdown-activateable">Around Axis</div>
-                    <div select-list-entry="point" class="dropdown-item dropdown-activateable">Around Rotation Point</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="bottombar-element">
-        <button class="button button-activateable is-dark transform-control-tool" select-list-entry="dimensions">
-            <span class="icon is-small">
-                <i class="fas fa-expand"></i>
-            </span>
-        </button>
-    </div>
-    <div class="bottombar-element dropdown is-hoverable is-up">
-        <div class="dropdown-trigger">
-            <button class="button is-dark dropdown-global-space">
-                <span class="icon is-small">
-                    <i class="fab fa-hornbill"></i>
-                </span>
-            </button>
-        </div>
-        <div class="dropdown-menu" role="menu">
-            <div class="dropdown-content">
-                <div class="dropdown-entry dropdown-transform-mode">
-                    <div select-list-entry="local" class="dropdown-item dropdown-activateable">Local</div>
-                    <div select-list-entry="world" class="dropdown-item dropdown-activateable">World</div>
-                </div>
-                <div class="dropdown-entry">
-                    <div class="dropdown-item dropdown-activateable gumball-movement-selected">Autimatically move to selected</div>
-                    <button class="dropdown-item dropdown-activateable gumball-movement-point">Move To Point</button>
-                    <button class="dropdown-item dropdown-activateable gumball-movement-freely">Move Freely</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="bottombar-element command-line-container">
-        <input class="command-line-field" type="text"></input>
-        <div class="cli-text input-line-top"></div>
-        <div class="cli-text input-line-lower"></div>
-    </div>
-</div> -->
 <div class="has-background-black-ter" style="grid-area: gumball">
     <div class="section has-background-black-ter is-paddingless is-marginless is-gapless" style="height: 3.5vh; border-top: 1px solid #121212;" id="gb-object">
 
@@ -525,63 +457,67 @@ margin-top: 6px;
 </div>
 <div class="has-background-black-ter" style="grid-area: options;">
     <div class="section has-background-black-ter py-0 my-0 pl-1 has-text-light" style="height: 4vh; border: 1px solid #121212; font-size: 14px; border-right: none;">
-        <div class="columns is-gapless">
-          <div class="column is-narrow">
-            
-            <div class="dropdown is-hoverable is-up">
-              <div class="dropdown-trigger">
-                <button class="button is-dark" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
-                  <span>Textured</span>
-                  <span class="icon is-small">
-                    <i class="fas fa-angle-up" aria-hidden="true"></i>
-                  </span>
-                </button>
-              </div>
-              <div class="dropdown-menu" id="dropdown-menu4" role="menu">
-                <div class="dropdown-content has-background-black-bis">
-                  <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Display Mode</p></div>
-                  <hr class="dropdown-divider">
-                  <a href="#" class="dropdown-item has-text-info">Textured</a>
-                  <a href="#" class="dropdown-item">UV</a>
-                  <a href="#" class="dropdown-item">White</a>
-                  <a href="#" class="dropdown-item">Outline?</a>
-                </div>
+      <div class="columns is-gapless">
+        <div class="column is-narrow">
+          <div class="dropdown is-hoverable is-up">
+            <div class="dropdown-trigger">
+              <button class="button is-dark" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
+                <span>Textured</span>
+                <span class="icon is-small">
+                  <i class="fas fa-angle-up" aria-hidden="true"></i>
+                </span>
+              </button>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+              <div class="dropdown-content has-background-black-bis">
+                <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Display Mode</p></div>
+                <hr class="dropdown-divider">
+                <a class="dropdown-item option-select select-texture-mode" select-list-entry="textured">Textured</a>
+                <!-- <a class="dropdown-item option-select select-texture-mode">UV</a> -->
+                <a class="dropdown-item option-select select-texture-mode" select-list-entry="untextured">White</a>
+                <a class="dropdown-item option-select select-texture-mode" select-list-entry="outline">Outline</a>
               </div>
             </div>
-          </div>
-          <div class="column is-narrow">
-            <div class="dropdown is-hoverable is-up">
-              <div class="dropdown-trigger">
-                <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
-                  <span>Perspective</span>
-                  <span class="icon is-small">
-                    <i class="fas fa-angle-up" aria-hidden="true"></i>
-                  </span>
-                </button>
-              </div>
-              <div class="dropdown-menu" id="dropdown-menu4" role="menu">
-                <div class="dropdown-content has-background-black-bis">
-                  <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Render Mode</p></div>
-                  <hr class="dropdown-divider">
-                  <a href="#" class="dropdown-item has-text-info">Perspective</a>
-                  <a href="#" class="dropdown-item">Isometric</a>
-                  <a href="#" class="dropdown-item">Two Point Perspective</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="column is-narrow">
-            <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
-              <span><i class="far fa-lightbulb"></i></span>
-            </button>
-          </div>
-          <div class="column is-narrow">
-            <div class="button is-paddingless is-dark px-3 ml-1" style="height: 20px; font-size: 14px;">Body_Base_1</div>
-          </div>
-          <div class="column is-narrow">
-            <div class="button is-paddingless is-dark px-3 mx-1" style="height: 20px; font-size: 14px;">15 Child Objects</div>
           </div>
         </div>
+        <div class="column is-narrow">
+          <div class="dropdown is-hoverable is-up">
+            <div class="dropdown-trigger">
+              <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
+                <span>Perspective</span>
+                <span class="icon is-small">
+                  <i class="fas fa-angle-up" aria-hidden="true"></i>
+                </span>
+              </button>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+              <div class="dropdown-content has-background-black-bis">
+                <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Render Mode</p></div>
+                <hr class="dropdown-divider">
+                <a class="dropdown-item option-select select-camera-mode" select-list-entry="perspective">
+                  <span>Perspective</span>
+                  <span>
+                    <span class="has-text-grey-lighter">Fov:</span>
+                    <input class="perspective-camera-fov" style="width: 50px;" type="number" value="65">
+                  </span>
+                </a>
+                <a class="dropdown-item option-select select-camera-mode" select-list-entry="orthographic">Orthographic</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column is-narrow">
+          <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
+            <span><i class="far fa-lightbulb"></i></span>
+          </button>
+        </div>
+        <div class="column is-narrow">
+          <div class="button is-paddingless is-dark px-3 ml-1 cube-name-display" style="height: 20px; font-size: 14px; display: none;"></div>
+        </div>
+        <div class="column is-narrow">
+          <div class="button is-paddingless is-dark px-3 mx-1 cube-children-display" style="height: 20px; font-size: 14px; display: none;"></div>
+        </div>
+      </div>
       </div>
 
     </div>

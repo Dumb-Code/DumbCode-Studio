@@ -146,18 +146,26 @@ function renameCube(cube, newValue) {
     if(oldValue !== newValue) {
         cube.updateCubeName(newValue)
         animationStudio.animationTabHandler.allTabs.forEach(tab => tab.handler.renameCube(oldValue, newValue))
+        modelingStudio.modelerOptions.refreshOptionTexts()
     }   
     return false
 }
 
-function setTexture(tex) {
-    material.map = tex
-    selectedMaterial.map = tex
-    highlightMaterial.map = tex
+function updateTexture(callback) {
+    callback(material)
+    callback(selectedMaterial)
+    callback(highlightMaterial)
 
     material.needsUpdate = true
     selectedMaterial.needsUpdate = true
     highlightMaterial.needsUpdate = true
+}
+
+function setTexture(tex) {
+    updateTexture(m => {
+        m.map = tex
+        m._mapCache = tex
+    })
 }
 
 export function updateCamera(camera, width, height) {
@@ -172,29 +180,6 @@ export function updateCamera(camera, width, height) {
         camera.bottom = height / -2
     }
     camera.updateProjectionMatrix();
-}
-
-window.changeCamera = elem => {
-    if(canvasContainer === undefined) {
-        return
-    }
-    let cam
-    switch(elem.value) {
-        case "perspective":
-            cam = new PerspectiveCamera( 65, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 700 )
-            break;
-        case "orthographic":
-            cam = new OrthographicCamera(canvasContainer.clientWidth / -2, canvasContainer.clientWidth / 2, canvasContainer.clientHeight / 2, canvasContainer.clientHeight / -2, 0.1, 700)
-            cam.zoom = 100
-            cam.updateProjectionMatrix()
-            break
-    }
-    cam.position.set(-3.745472848477101, 0.9616311452213426, -4.53288230701089)
-    cam.lookAt(0, 0, 0)
-
-    controls.object = cam
-    display.camera = cam
-
 }
 
 window.createNewModel = () => {
@@ -223,11 +208,11 @@ function createFilesPage() {
 }
 
 function createModelingStudio() {
-    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, setTexture)
+    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, updateTexture)
 }
 
 function createTextureStudio() {
-    return new TextureStudio($('#texture-area'), filesPage, display, raytracer, controls, setTexture)
+    return new TextureStudio($('#texture-area'), filesPage, display, raytracer, controls, setTexture, updateTexture)
 }
 
 function createAnimationStudio() {

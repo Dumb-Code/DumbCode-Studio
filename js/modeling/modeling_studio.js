@@ -11,10 +11,11 @@ import { applyCubeAddingDeleting } from "./cube_create_delete.js"
 import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 import { Group } from "../three.js"
 import { CubeCommands } from "./cube_commands.js"
+import { ModelerOptions } from "./modeler_options.js"
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, orbitControls, renameCube, setTexture) {
+    constructor(domElement, display, raytracer, orbitControls, renameCube, updateTexture) {
         this.domElement = domElement
         let dom = $(domElement)
         this.canvasContainer = dom.find("#display-div").get(0)
@@ -44,6 +45,8 @@ export class ModelingStudio {
         this.studioPanels = new StudioPanels(dom, 300, 300)
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
 
+        this.modelerOptions = new ModelerOptions(dom, this, orbitControls, updateTexture)
+
         this.cubeCommands = new CubeCommands(this.commandRoot, this)
     }
 
@@ -59,6 +62,7 @@ export class ModelingStudio {
 
     cubeHierarchyChanged() {
         this.cubeList.refreshCompleatly()
+        this.modelerOptions.refreshOptionTexts()
     }
 
     setActive() {

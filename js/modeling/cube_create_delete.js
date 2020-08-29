@@ -24,10 +24,9 @@ export function applyCubeAddingDeleting(dom, studio) {
         if(studio.raytracer.anySelected()) {
             studio.raytracer.selectedSet.forEach(cube => {
                 let tbl = cube.tabulaCube
-                let childrenCubes = tbl.getAllChildrenCubes([])
-                let lockers = childrenCubes.map(cube => new CubeLocker(cube, 0))
+                let lockers = tbl.children.map(cube => new CubeLocker(cube, 0))
                 
-                childrenCubes.forEach((cube, index) => {
+                tbl.children.forEach(cube => {
                     tbl.deleteChild(cube, true)
                     tbl.parent.addChild(cube) 
                 })

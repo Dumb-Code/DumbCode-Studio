@@ -79,7 +79,9 @@ export class CubeListBoard {
             let caratSpan = document.createElement("span")
             caratSpan.classList.add("caret")
             div.appendChild(caratSpan)
-            div.classList.toggle('children-hidden', oldMap.get(cube).div.classList.contains('children-hidden'))
+            if(oldMap.has(cube)) {
+                div.classList.toggle('children-hidden', oldMap.get(cube).div.classList.contains('children-hidden'))
+            }
             $(caratSpan).click(e => {
                 let val = div.classList.toggle('children-hidden')
                 if(isKeyDown("Control")) {
@@ -87,14 +89,14 @@ export class CubeListBoard {
                 }
                 e.stopPropagation()
             })
-        } else {
-            let cubesSpan = document.createElement("span")
-            cubesSpan.style.marginRight = "6px"
-            let cubesI = document.createElement("i")
-            cubesI.classList.add("fas", "fa-cube") //cube.children.length === 0 ? "fa-cube" : "fa-cubes"
-            cubesSpan.appendChild(cubesI)
-            div.appendChild(cubesSpan)
         }
+        
+        let cubesSpan = document.createElement("span")
+        cubesSpan.style.marginRight = "6px"
+        let cubesI = document.createElement("i")
+        cubesI.classList.add("fas", cube.children.length === 0 ? "fa-cube" : "fa-cubes")
+        cubesSpan.appendChild(cubesI)
+        div.appendChild(cubesSpan)
         
         let nameSpan = document.createElement("span")
         nameSpan.draggable = true
@@ -131,7 +133,7 @@ export class CubeListBoard {
         $(lockIconSpan).click(e => {
             let isHidden = this.toggleLock(cube, 0)
             if(isKeyDown("Control")) {
-                cube.getAllChildrenCubes([]).forEach(cube => this.toggleLock(cube, isHidden ? -1 : 1))
+                cube.getAllChildrenCubes().forEach(cube => this.toggleLock(cube, isHidden ? -1 : 1))
             }
             e.stopPropagation()
         })

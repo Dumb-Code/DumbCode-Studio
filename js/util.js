@@ -145,10 +145,11 @@ export class LinkedSelectableList {
     addElement(elements) {
         let getValue = () => this.value
         let setValue = v => this.value = v
+        let mustSelectOne = this.mustSelectOne
 
         elements.click(function() { 
             let val = this.getAttribute('select-list-entry')
-            if(val === getValue() && !this.mustSelectOne) {
+            if(val === getValue() && !mustSelectOne) {
                 setValue(undefined)
             } else {
                 setValue(val)
