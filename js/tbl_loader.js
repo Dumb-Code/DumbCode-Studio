@@ -299,8 +299,8 @@ export class TblCube {
         this.updateTexture()
     }
 
-    updateCubePosition( { offset = this.offset } = {} ) {
-        this.cubeMesh.position.set(offset[0], offset[1], offset[2] )
+    updateCubePosition( { offset = this.offset, cubeGrow = this.cubeGrow } = {} ) {
+        this.cubeMesh.position.set(offset[0] - cubeGrow[0], offset[1]- cubeGrow[1], offset[2] - cubeGrow[2] )
     }
 
     updatePositionVisuals(position = this.rotationPoint) {
@@ -334,6 +334,7 @@ export class TblCube {
             this.cubeGrow = value
         }
         this.updateGeometry( {cubeGrow:value} )
+        this.updateCubePosition( { cubeGrow:values } )
     }
 
     updateTextureOffset(values = this.textureOffset, visualOnly = false) {
