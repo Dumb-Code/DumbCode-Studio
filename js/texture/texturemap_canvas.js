@@ -29,8 +29,16 @@ export class TexturemapCanvas {
 
     drawTextureCanvas() {
         //TODO: don't do this. Make sure the canvas aspect ratio is the same as the tabula model.
-        let size = Math.max(Math.min(this.parnetNode.width(), this.parnetNode.height()), 1)
-        this.canvas.width = this.canvas.height = size
+        // let size = Math.max(Math.min(this.parnetNode.width(), this.parnetNode.height()), 1)
+        // this.canvas.width = this.canvas.height = size
+
+        let aspect = this.display.tbl.texWidth / this.display.tbl.texHeight
+
+        let drawWidth = Math.min(this.parnetNode.width(), this.parnetNode.height() * aspect)
+        let drawHeight = drawWidth / aspect
+
+        this.canvas.width = this.parnetNode.width()
+        this.canvas.height = this.parnetNode.height()
 
         let ctx = this.canvas.getContext('2d')
         ctx.imageSmoothingEnabled = false
@@ -38,11 +46,11 @@ export class TexturemapCanvas {
         this.canvasTransformControls.applyTransforms()
 
         ctx.fillStyle = "rgba(255, 255, 255, 255)"
-        ctx.fillRect(0, 0, size, size)
+        ctx.fillRect(0, 0, drawWidth, drawHeight)
 
-        let img = this.display.material?.map?.image
-        if(img !== undefined) {
-            ctx.drawImage(img, 0, 0, size, size)
+        let canvas = this.display.material?.map?.image
+        if(canvas !== undefined) {
+            ctx.drawImage(img, 0, 0, drawWidth, drawHeight)
         }
 
         this.drawCubesToCanvas(this.canvas, true)

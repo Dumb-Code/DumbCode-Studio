@@ -9,7 +9,6 @@ export class TextureManager {
         this.setTexture = setTexture
         this.filesPage = filesPage
         this.textures = []
-        this.aspect = -1
 
         this.highlightCanvas = document.createElement('canvas')
         this.highlightCanvas.width = this.display.tbl.texWidth
@@ -101,15 +100,6 @@ export class TextureManager {
         li.classList.add('texture-file-entry')
         li.draggable = true
 
-        let a = width / height
-
-        if(this.aspect === -1) {
-            this.aspect = a
-        } else if(a !== this.aspect) {
-            console.error(`Aspect Ratio is wrong: Expected ${this.aspect} found ${a}`)
-            return
-        }
-
         data.width = width
         data.height = height
         data.img = img
@@ -151,8 +141,6 @@ export class TextureManager {
 
         let width = this.textures.filter(t => !t.isHidden).map(t => t.width).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
         let height = this.textures.filter(t => !t.isHidden).map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
-
-        // let height = Math.max(width / this.aspect, 1)
 
         if(this.textures.length === 0) {
             width = this.display.tbl.texWidth
