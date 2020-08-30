@@ -436,6 +436,27 @@ export function doubleClickToEdit(container, callback, current) {
     }
 }
 
+export function fileUploadBox(dom, callback) {
+    dom.on('dragenter', e => {
+        dom.addClass('is-dragging')
+        e.originalEvent.preventDefault()
+        e.originalEvent.stopPropagation()
+    }).on('dragover', e => {
+        dom.addClass('is-dragging')
+        e.originalEvent.preventDefault()
+        e.originalEvent.stopPropagation()
+    }).on('dragleave', e => {
+        dom.removeClass('is-dragging')
+        e.originalEvent.preventDefault()
+        e.originalEvent.stopPropagation()
+    }).on('drop', e => {
+        callback(e.originalEvent.dataTransfer.files)
+        dom.removeClass('is-dragging')
+        e.originalEvent.preventDefault()
+        e.originalEvent.stopPropagation()
+    })
+}
+
 export class DraggableElementList {
 
     constructor(canDropOnElement, callback) {
