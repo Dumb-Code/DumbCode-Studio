@@ -15,7 +15,7 @@ import { ModelerOptions } from "./modeler_options.js"
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, orbitControls, renameCube, updateTexture) {
+    constructor(domElement, display, raytracer, orbitControls, renameCube, setCamera, updateTexture) {
         this.domElement = domElement
         let dom = $(domElement)
         this.canvasContainer = dom.find("#display-div").get(0)
@@ -45,9 +45,14 @@ export class ModelingStudio {
         this.studioPanels = new StudioPanels(dom, 300, 300)
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
 
-        this.modelerOptions = new ModelerOptions(dom, this, orbitControls, updateTexture)
+        this.modelerOptions = new ModelerOptions(dom, this, setCamera, updateTexture)
 
         this.cubeCommands = new CubeCommands(this.commandRoot, this)
+    }
+
+    setCamera(camera) {
+        this.transformControls.camera = camera
+        this.gumball.gumballTransformControls.camera = camera
     }
 
     runFrame() {

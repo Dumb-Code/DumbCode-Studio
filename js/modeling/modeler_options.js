@@ -3,7 +3,7 @@ import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture } from ".
 
 export class ModelerOptions {
 
-    constructor(dom, studio, orbitControls, updateTexture) {
+    constructor(dom, studio, setCamera, updateTexture) {
         this.raytracer = studio.raytracer
         this.textureMode = new LinkedSelectableList(dom.find('.select-texture-mode')).onchange(e => {
             switch(e.value) {
@@ -48,8 +48,7 @@ export class ModelerOptions {
             cam.position.copy(studio.display.camera.position)
             cam.rotation.copy(studio.display.camera.rotation)   
         
-            orbitControls.object = cam
-            studio.display.camera = cam
+            setCamera(cam)
 
         })
         this.perspectiveFov.on('input', () => {

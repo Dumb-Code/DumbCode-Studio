@@ -398,77 +398,80 @@ margin-top: 6px;
     </div>
 </div>
 <div class="has-background-black-ter" style="grid-area: gumball">
+  <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+      <button class="button is-dark option-display-type" select-list-entry="object" style="height: 24px; font-size: 14px;">Object</button>
+      <button class="button is-dark option-display-type" select-list-entry="gumball" style="height: 24px; font-size: 14px;" >Gumball</button>
+    </div>
+
     <div class="section has-background-black-ter is-paddingless is-marginless is-gapless" style="height: 3.5vh; border-top: 1px solid #121212;" id="gb-object">
-
-        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
-          <button class="button is-success" style="height: 24px; font-size: 14px;">Object</button>
-          <button class="button is-dark" style="height: 24px; font-size: 14px;" onClick="gumball()">Gumball</button>
+        <div class="has-addons mt-1 is-narrow ml-4 object-no-cube-selected" style="float: left;">
+          No Cube Selected
+        </div>
+        <div class="buttons has-addons mt-1 is-narrow ml-4 object-need-selection" style="float: left">
+          <button class="button is-dark transform-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="translate">Move</button>
+          <button class="button is-dark transform-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="rotate">Rotate</button>
+          <button class="button is-dark transform-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="dimensions">Dimension</button>
         </div>
 
-        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
-          <button class="button is-info" style="height: 24px; font-size: 14px;" onClick="setMove()" id="move-button">Move</button>
-          <button class="button is-dark" style="height: 24px; font-size: 14px;" onClick="setRotate()" id="rotate-button">Rotate</button>
-          <button class="button is-dark" style="height: 24px; font-size: 14px;" onClick="setDimension()" id="dimension-button">Dimension</button>
+        <div class="buttons has-addons mt-1 is-narrow ml-4 object-space-mode object-need-selection" style="float: left">
+          <button class="button is-dark object-space-tool" select-list-entry="world" style="height: 24px; font-size: 14px;">World</button>
+          <button class="button is-dark object-space-tool" select-list-entry="local" style="height: 24px; font-size: 14px;">Local</button>
         </div>
 
-        <div id="move-tools">
-          <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
-            <button class="button is-info" style="height: 24px; font-size: 14px;">World</button>
-            <button class="button is-dark" style="height: 24px; font-size: 14px;">Oject</button>
-            <button class="button is-dark" style="height: 24px; font-size: 14px;">Independent</button>
-          </div>
-          <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
-            <button class="button is-info" style="height: 24px; font-size: 14px;">Position</button>
-            <button class="button is-dark" style="height: 24px; font-size: 14px;">Offset</button>
-            <button class="button is-dark" style="height: 24px; font-size: 14px;">Rotation Point</button>
-          </div>
+        <div class="buttons has-addons mt-1 is-narrow ml-4 object-translation-type object-need-selection" style="float: left">
+          <button class="button is-dark object-translate-type-entry" select-list-entry="position" style="height: 24px; font-size: 14px;">Position</button>
+          <button class="button is-dark object-translate-type-entry" select-list-entry="offset" style="height: 24px; font-size: 14px;">Offset</button>
+          <button class="button is-dark object-translate-type-entry" select-list-entry="rotation_point" style="height: 24px; font-size: 14px;">Rotation Point</button>
         </div>
 
-        <div id="rotate-tools" style="display:none;">
-          <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
-            <button class="button is-info" style="height: 24px; font-size: 14px;">World</button>
-            <button class="button is-dark" style="height: 24px; font-size: 14px;">Oject</button>
-            <button class="button is-dark" style="height: 24px; font-size: 14px;">Independent</button>
-          </div>
+        <div class="buttons has-addons mt-1 is-narrow ml-4 object-rotation-type object-need-selection" style="float: left">
+          <button class="button is-dark object-rotate-type-entry" select-list-entry="rotate" style="height: 24px; font-size: 14px;">Rotate</button>
+          <button class="button is-dark object-rotate-type-entry" select-list-entry="point" style="height: 24px; font-size: 14px;">Rotate Around Point</button>
         </div>
-      </div>
-      <div class="section has-background-black-ter is-paddingless is-marginless is-gapless" style="height: 3.5vh; border-top: 1px solid #121212; display: none;" id="gb-gumball">
-
-        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
-          <button class="button is-dark" style="height: 24px; font-size: 14px;" onClick="object()">Object</button>
-          <button class="button is-success" style="height: 24px; font-size: 14px;">Gumball</button>
-        </div>
-
+    </div>
+    <div class="section has-background-black-ter is-paddingless is-marginless is-gapless" style="height: 3.5vh; border-top: 1px solid #121212; display:none" id="gb-gumball">
         <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
           <div class="checkbox-container">
             <label class="checkbox-label">
-              <input type="checkbox">
+              <input class="gumball-automove-checkbox" type="checkbox" checked>
               <span class="checkbox-custom rectangular"></span>
             </label>
           </div>
         </div>
         <p class="has-text-light mt-1 px-2" style="float:left; font-size: 14px; padding-top: 1px;">Auto Move</p>
         <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
-          <button class="button is-info" style="height: 24px; font-size: 14px;">Position</button>
-          <button class="button is-dark" style="height: 24px; font-size: 14px;">Rotation</button>
+          <button class="button is-dark gumball-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="translate">Position</button>
+          <button class="button is-dark gumball-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="rotate">Rotation</button>
+        </div>
+        
+        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+          <button class="button is-dark gumball-space-tool" select-list-entry="world" style="height: 24px; font-size: 14px;">World</button>
+          <button class="button is-dark gumball-space-tool" select-list-entry="local" style="height: 24px; font-size: 14px;">Local</button>
         </div>
 
-      </div>
+        <div class="buttons has-addons mt-1 is-narrow ml-4" style="float: left;">
+          <button class="button is-dark gumball-reset-world" style="height: 24px; font-size: 14px;">Reset To World</button>
+        </div>
+
+        <div class="buttons has-addons mt-1 is-narrow ml-4 object-need-selection" style="float: left;">
+          <button class="button is-dark gumball-reset-local" style="height: 24px; font-size: 14px;">Reset To Cube</button>
+        </div>
+    </div>
 </div>
 <div class="has-background-black-ter" style="grid-area: options;">
     <div class="section has-background-black-ter py-0 my-0 pl-1 has-text-light" style="height: 4vh; border: 1px solid #121212; font-size: 14px; border-right: none;">
       <div class="columns is-gapless">
         <div class="column is-narrow">
-          <div class="dropdown is-hoverable is-up">
+          <div class="dropdown is-up">
             <div class="dropdown-trigger">
-              <button class="button is-dark" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
+              <button class="button is-dark" aria-haspopup="true" aria-controls="dropdown-display" style="height: 20px; font-size: 14px;">
                 <span>Textured</span>
                 <span class="icon is-small">
                   <i class="fas fa-angle-up" aria-hidden="true"></i>
                 </span>
               </button>
             </div>
-            <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+            <div class="dropdown-menu" id="dropdown-display" role="menu">
               <div class="dropdown-content has-background-black-bis">
                 <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Display Mode</p></div>
                 <hr class="dropdown-divider">
@@ -481,16 +484,16 @@ margin-top: 6px;
           </div>
         </div>
         <div class="column is-narrow">
-          <div class="dropdown is-hoverable is-up">
+          <div class="dropdown is-up">
             <div class="dropdown-trigger">
-              <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
+              <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-camera" style="height: 20px; font-size: 14px;">
                 <span>Perspective</span>
                 <span class="icon is-small">
                   <i class="fas fa-angle-up" aria-hidden="true"></i>
                 </span>
               </button>
             </div>
-            <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+            <div class="dropdown-menu" id="dropdown-camera" role="menu">
               <div class="dropdown-content has-background-black-bis">
                 <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Render Mode</p></div>
                 <hr class="dropdown-divider">
@@ -507,7 +510,7 @@ margin-top: 6px;
           </div>
         </div>
         <div class="column is-narrow">
-          <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-menu7" style="height: 20px; font-size: 14px;">
+          <button class="button is-dark ml-1" style="height: 20px; font-size: 14px;">
             <span><i class="far fa-lightbulb"></i></span>
           </button>
         </div>

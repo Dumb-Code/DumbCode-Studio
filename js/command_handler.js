@@ -59,7 +59,7 @@ class CommandLine {
 
         let input = dom.find('.command-line-field')
         $(document).on('keypress', e => {
-            if(e.which == 13 && false) {
+            if(e.which == 13) {
                 let val = input.val()
                 input.val('')
                 if(this.currentCommandBuilder === null) {

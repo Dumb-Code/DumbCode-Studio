@@ -151,6 +151,13 @@ function renameCube(cube, newValue) {
     return false
 }
 
+function setCamera(camera) {
+    modelingStudio.setCamera(camera)
+    animationStudio.setCamera(camera)
+    controls.object = camera
+    display.camera = camera
+}
+
 function updateTexture(callback) {
     callback(material)
     callback(selectedMaterial)
@@ -208,7 +215,7 @@ function createFilesPage() {
 }
 
 function createModelingStudio() {
-    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, updateTexture)
+    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, setCamera, updateTexture)
 }
 
 function createTextureStudio() {

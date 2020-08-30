@@ -33,58 +33,99 @@ export class Gumball {
 
         this.startingCache = new Map()
         
+        let objectSettings = dom.find('#gb-object')
+        let gumballSettings = dom.find('#gb-gumball')
+
+        this.optionDisplayType = new LinkedSelectableList(dom.find('.option-display-type'), true, "is-success").onchange(e => {
+            switch(e.value) {
+                case "object":
+                    if(this.raytracer.anySelected() && this.toolTransformType.value !== undefined) {
+                        this.transformControls.attach(this.transformAnchor)
+                    } else {
+                        this.transformControls.detach()
+                    }
+                    this.gumballTransformControls.detach()
+                    objectSettings.css('display', '')
+                    gumballSettings.css('display', 'none')
+                    break;
+                
+                case "gumball":
+                    this.transformControls.detach()
+                    this.gumballTransformControls.attach(this.transformAnchor)
+                    objectSettings.css('display', 'none')
+                    gumballSettings.css('display', '')
+                    break;
+            }
+        })
+
+        this.gumballTransformControls = studio.display.createTransformControls()
+        studio.group.add(this.gumballTransformControls)
+
+        this.gumballTransformMode = new LinkedSelectableList(dom.find('.gumball-control-tool'), true, 'is-info').onchange(e => this.gumballTransformControls.mode = e.value)
+
+        let objectNoCubeSelected = dom.find('.object-no-cube-selected')
+        let objectNeedSelection = dom.find('.object-need-selection')
+        objectNeedSelection.css('display', 'none')
+        this.raytracer.addEventListener('selectchange', () => {
+            objectNoCubeSelected.css('display', this.raytracer.anySelected() ? 'none' : '')
+            objectNeedSelection.css('display', this.raytracer.anySelected() ? '' : 'none')
+        })
+
+        let objectSpaceOption = dom.find('.object-space-mode')
+        let translateTypeOption = dom.find('.object-translation-type')
+        let rotateTypeOption = dom.find('.object-rotation-type')
+
         this.transformSelectParents = true
-        this.toolTransformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false).addPredicate(e => e === undefined || this.raytracer.anySelected()).onchange(e => {
+        this.toolTransformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false, 'is-info').addPredicate(e => e === undefined || this.raytracer.anySelected()).onchange(e => {
             switch(e.value) {
                 case translateKey: 
                     this.setTranslationTool(); 
+                    objectSpaceOption.css('display', '')
+                    translateTypeOption.css('display', '')
+                    rotateTypeOption.css('display', 'none')
                     break
                 case rotateKey: 
                     this.setRotationTool(); 
+                    objectSpaceOption.css('display', '')
+                    translateTypeOption.css('display', 'none')
+                    rotateTypeOption.css('display', '')
                     break
                 case dimensionKey: 
                     this.setDimensionsTool(); 
+                    objectSpaceOption.css('display', 'none')
+                    translateTypeOption.css('display', 'none')
+                    rotateTypeOption.css('display', 'none')
                     break
                 default:
                     this.setMode('none')
+                    objectSpaceOption.css('display', 'none')
+                    translateTypeOption.css('display', 'none')
+                    rotateTypeOption.css('display', 'none')
             };
         })
 
-        this.selectedTranslate = new LinkedSelectableList(dom.find('.dropdown-translation > .dropdown-item')).onchange(() => this.toolTransformType.value = translateKey)
-        this.selectedRotation = new LinkedSelectableList(dom.find('.dropdown-rotation > .dropdown-item')).onchange(() => this.toolTransformType.value = rotateKey)
-        this.globalSpaceMode = new LinkedSelectableList(dom.find('.dropdown-transform-mode > .dropdown-item')).onchange(e => {
-            this.transformControls.space = e.value
-            this.gumballRotateTool.space = e.value
-            this.gumballTranslateTool.space = e.value
+        dom.find('.gumball-reset-world').click(() => {
+            this.transformAnchor.position.set(0, 0, 0)
+            this.transformAnchor.rotation.set(0, 0, 0)
         })
+        dom.find('.gumball-reset-local').click(() => this.moveGumballToSelected())
 
-        this.gumballRotateTool = studio.display.createTransformControls()
-        studio.group.add(this.gumballRotateTool)
-        this.gumballRotateTool.mode = 'rotate'
-        
-        this.gumballTranslateTool = studio.display.createTransformControls()
-        studio.group.add(this.gumballTranslateTool)
-        this.gumballTranslateTool.mode = 'translate'
+        this.spaceMode = new LinkedSelectableList(dom.find('.object-space-tool'), true, "is-info").onchange(e =>  this.transformControls.space = e.value)
+        this.spaceMode.value = "local"
 
-        this.gumballRotateTool.traverse(e => e.material?.color?.addScalar(0.25))
-        this.gumballTranslateTool.traverse(e => e.material?.color?.addScalar(0.25))
-        this.gumballRotateTool.addEventListener('mouseDown', () => this.gumballRotateTool.disableReason('rotate-active'))
-        this.gumballTranslateTool.addEventListener('mouseDown', () => this.gumballRotateTool.disableReason('translate-active'))
-        this.gumballRotateTool.addEventListener('mouseUp', () => this.gumballRotateTool.enableReason('rotate-active'))
-        this.gumballTranslateTool.addEventListener('mouseUp', () => this.gumballRotateTool.enableReason('translate-active'))
+        this.gumballSpaceMode = new LinkedSelectableList(dom.find('.gumball-space-tool'), true, "is-info").onchange(e =>  this.gumballTransformControls.space = e.value)
+        this.gumballSpaceMode.value = "local"
 
-        dom.find('.gumball-movement-freely').click(() => {
-            this.toolTransformType.value = undefined
-            this.gumballRotateTool.attach(this.transformAnchor)
-            this.gumballTranslateTool.attach(this.transformAnchor)
-        })
 
-        this.gumballAutomaticallyMove = new ToggleableElement(dom.find('.gumball-movement-selected')).onchange(e => {
-            if(e.value) {
+        this.selectedTranslate = new LinkedSelectableList(dom.find('.object-translate-type-entry'), true, "is-info").onchange(() => this.toolTransformType.value = translateKey)
+        this.selectedRotation = new LinkedSelectableList(dom.find('.object-rotate-type-entry'), true, "is-info").onchange(() => this.toolTransformType.value = rotateKey)
+
+        this.gumballAutomaticallyMove = dom.find('.gumball-automove-checkbox')
+        .on('input', () => {
+            if(this.gumballAutomaticallyMove.is(':checked')) {
                 this.moveGumballToSelected()
             }
         })
-        this.gumballAutomaticallyMove.value = true
 
         dom.find('.gumball-movement-point').click(() => {
             this.pointTracker.enable(p => this.transformAnchor.position.copy(p))
@@ -204,15 +245,14 @@ export class Gumball {
         if(mode === "none") {
             this.transformControls.detach()
         } else {
-            this.gumballRotateTool.detach()
-            this.gumballTranslateTool.detach()
+            this.gumballTransformControls.detach()
             this.transformControls.attach(this.transformAnchor);
             this.transformControls.mode = mode
         }
     }
 
     moveGumballToSelected() {
-        if(!this.raytracer.anySelected() && this.transformControls.visible === true) {
+        if(!this.raytracer.anySelected()) { // && this.transformControls.visible === true
             return
         }
 
@@ -243,14 +283,12 @@ export class Gumball {
     selectChange() {
         let isSelected = this.raytracer.selectedSet.size === 1
 
-        this.gumballRotateTool.detach()
-        this.gumballTranslateTool.detach()
-        if(!this.raytracer.anySelected() || (this.toolTransformType.value === dimensionKey && !isSelected)) {
+        if(!this.raytracer.anySelected()) {
             this.setMode("none")
         } else {
             this.toolTransformType.value = this.toolTransformType.value
         }
-        if(this.gumballAutomaticallyMove.value) {
+        if(this.gumballAutomaticallyMove.is(':checked')) {
             this.moveGumballToSelected()
         }
 

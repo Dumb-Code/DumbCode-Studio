@@ -71,6 +71,10 @@ export class AnimationStudio {
         }
     }
 
+    setCamera(camera) {
+        this.transformControls.camera = camera
+    }
+
     setRotation(values, updateDisplay = true, updateSilent = false) {
         let selected = this.raytracer.oneSelected()
         if(selected !== null) {

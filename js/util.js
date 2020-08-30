@@ -132,13 +132,14 @@ export class LinkedElement {
 Object.assign( LinkedElement.prototype, EventDispatcher.prototype );
 
 export class LinkedSelectableList {
-    constructor(elements, mustSelectOne = true) {
+    constructor(elements, mustSelectOne = true, className = 'is-activated') {
         this.elements = $()
         this.mustSelectOne = mustSelectOne
+        this.className = className
         this.predicate = () => true
         this.addElement(elements)        
         if(this.mustSelectOne) {
-            this.elements.first().addClass('is-activated').each((_i, elem) => this.value = elem.getAttribute('select-list-entry'))
+            this.elements.first().each((_i, elem) => this.value = elem.getAttribute('select-list-entry'))
         }
     }
 
@@ -162,8 +163,8 @@ export class LinkedSelectableList {
         if(this.predicate(value)) {
             let old = this.rawValue
             this.rawValue = value
-            this.elements.removeClass('is-activated')
-            this.elements.filter(`[select-list-entry='${value}']`).addClass('is-activated')
+            this.elements.removeClass(this.className)
+            this.elements.filter(`[select-list-entry='${value}']`).addClass(this.className)
             this.dispatchEvent({ type: "changed", old, value })
         }
     }
