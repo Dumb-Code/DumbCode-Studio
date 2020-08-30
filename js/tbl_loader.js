@@ -213,6 +213,15 @@ export class TblCube {
         let w = this.dimension[0] + this.cubeGrow[0]*2 + 0.01
         let h = this.dimension[1] + this.cubeGrow[1]*2 + 0.01
         let d = this.dimension[2] + this.cubeGrow[2]*2 + 0.01
+        if(w === 0) {
+            w === 0.001
+        }
+        if(h === 0) {
+            h === 0.001
+        }
+        if(d === 0) {
+            d === 0.001
+        }
         tempVector.set(xDelta*w/16, yDelta*h/16, zDelta*d/16).applyQuaternion(this.cubeMesh.getWorldQuaternion(tempQuaterion))
         this.cubeMesh.getWorldPosition(vector).add(tempVector)
         return vector
