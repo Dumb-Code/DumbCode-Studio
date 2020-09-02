@@ -135,8 +135,8 @@ export class TexturemapCanvas {
                 [u, v+vd, ud, vh], //1
                 [u+ud+uw, v, uw, vd], //2
                 [u+ud, v, uw, vd],  //3
-                [u+ud, v+vd, uw, vh],  //4
-                [u+ud+uw+ud, v+vd, uw, vh] //5
+                [u+ud+uw+ud, v+vd, uw, vh], //4
+                [u+ud, v+vd, uw, vh]  //5
             ]
             
             let mouseOverArea = faceAreas.findIndex(arr => mouseX >= arr[0] && mouseX < arr[0]+arr[2] && mouseY >= arr[1] && mouseY < arr[1]+arr[3])
