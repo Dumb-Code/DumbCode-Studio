@@ -69,53 +69,41 @@ export class Gumball {
         this.raytracer.addEventListener('selectchange', () => {
             objectNoCubeSelected.css('display', this.raytracer.anySelected() ? 'none' : '')
             objectNeedSelection.css('display', this.raytracer.anySelected() ? '' : 'none')
+            this.updateObjectModeVisibleElemenets()
         })
 
-        let objectSpaceOption = dom.find('.object-space-mode')
-        let translateTypeOption = dom.find('.object-translation-type')
-        let rotateTypeOption = dom.find('.object-rotation-type')
+        this.objectSpaceOption = dom.find('.object-space-mode')
+        this.translateTypeOption = dom.find('.object-translation-type')
+        this.rotateTypeOption = dom.find('.object-rotation-type')
 
         this.transformSelectParents = true
         this.toolTransformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false, 'is-info').addPredicate(e => e === undefined || this.raytracer.anySelected()).onchange(e => {
             switch(e.value) {
                 case translateKey: 
                     this.setTranslationTool(); 
-                    objectSpaceOption.css('display', '')
-                    translateTypeOption.css('display', '')
-                    rotateTypeOption.css('display', 'none')
                     break
                 case rotateKey: 
                     this.setRotationTool(); 
-                    objectSpaceOption.css('display', '')
-                    translateTypeOption.css('display', 'none')
-                    rotateTypeOption.css('display', '')
                     break
                 case dimensionKey: 
                     this.setDimensionsTool(); 
-                    objectSpaceOption.css('display', 'none')
-                    translateTypeOption.css('display', 'none')
-                    rotateTypeOption.css('display', 'none')
                     break
                 default:
                     this.setMode('none')
-                    objectSpaceOption.css('display', 'none')
-                    translateTypeOption.css('display', 'none')
-                    rotateTypeOption.css('display', 'none')
-            };
+            }
+            this.updateObjectModeVisibleElemenets()
         })
+        this.toolTransformType.value = undefined
 
-        dom.find('.gumball-reset-world').click(() => {
-            this.transformAnchor.position.set(0, 0, 0)
-            this.transformAnchor.rotation.set(0, 0, 0)
-        })
-        dom.find('.gumball-reset-local').click(() => this.moveGumballToSelected())
+        dom.find('.gumball-reset-position-world').click(() => this.transformAnchor.position.set(0, 0, 0))
+        dom.find('.gumball-reset-rotation-world').click(() => this.transformAnchor.rotation.set(0, 0, 0))
+
+        dom.find('.gumball-reset-position-cube').click(() => this.moveGumballToSelected( { rotation: false } ))
+        dom.find('.gumball-reset-rotation-cube').click(() => this.moveGumballToSelected( { position: false } ))
+
 
         this.spaceMode = new LinkedSelectableList(dom.find('.object-space-tool'), true, "is-info").onchange(e =>  this.transformControls.space = e.value)
         this.spaceMode.value = "local"
-
-        this.gumballSpaceMode = new LinkedSelectableList(dom.find('.gumball-space-tool'), true, "is-info").onchange(e =>  this.gumballTransformControls.space = e.value)
-        this.gumballSpaceMode.value = "local"
-
 
         this.selectedTranslate = new LinkedSelectableList(dom.find('.object-translate-type-entry'), true, "is-info").onchange(() => this.toolTransformType.value = translateKey)
         this.selectedRotation = new LinkedSelectableList(dom.find('.object-rotate-type-entry'), true, "is-info").onchange(() => this.toolTransformType.value = rotateKey)
@@ -194,6 +182,30 @@ export class Gumball {
     
     }
 
+    updateObjectModeVisibleElemenets() {
+        switch(this.optionDisplayType.value === 'object' && this.raytracer.anySelected() ? this.toolTransformType.value : undefined) {
+            case translateKey: 
+                this.objectSpaceOption.css('display', '')
+                this.translateTypeOption.css('display', '')
+                this.rotateTypeOption.css('display', 'none')
+                break
+            case rotateKey: 
+                this.objectSpaceOption.css('display', '')
+                this.translateTypeOption.css('display', 'none')
+                this.rotateTypeOption.css('display', '')
+                break
+            case dimensionKey: 
+                this.objectSpaceOption.css('display', 'none')
+                this.translateTypeOption.css('display', 'none')
+                this.rotateTypeOption.css('display', 'none')
+                break
+            default:
+                this.objectSpaceOption.css('display', 'none')
+                this.translateTypeOption.css('display', 'none')
+                this.rotateTypeOption.css('display', 'none')
+        };
+    }
+
 
     forEachCube(axisIn, callback) {
         this.transformAnchor.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
@@ -251,7 +263,7 @@ export class Gumball {
         }
     }
 
-    moveGumballToSelected() {
+    moveGumballToSelected({ position = true, rotation = true } = {}) {
         if(!this.raytracer.anySelected()) { // && this.transformControls.visible === true
             return
         }
@@ -264,12 +276,14 @@ export class Gumball {
 
             totalPosition.add(decomposePosition)
 
-            if(cube === firstSelected) {
+            if(cube === firstSelected && rotation === true) {
                 this.transformAnchor.quaternion.copy(decomposeRotation)
             }
         })
 
-        this.transformAnchor.position.copy(totalPosition).divideScalar(this.raytracer.selectedSet.size)
+        if(position === true) {
+            this.transformAnchor.position.copy(totalPosition).divideScalar(this.raytracer.selectedSet.size)
+        }
     }
 
     getObject(cube) {
