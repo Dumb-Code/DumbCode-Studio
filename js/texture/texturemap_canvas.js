@@ -50,16 +50,16 @@ export class TexturemapCanvas {
 
         let canvas = this.display.material?.map?.image
         if(canvas !== undefined) {
-            ctx.drawImage(img, 0, 0, drawWidth, drawHeight)
+            ctx.drawImage(canvas, 0, 0, drawWidth, drawHeight)
         }
 
-        this.drawCubesToCanvas(this.canvas, true)
+        this.drawCubesToCanvas(this.canvas, drawWidth, drawHeight, true)
     }
 
-    drawCubesToCanvas(canvas, opacity) {
+    drawCubesToCanvas(canvas, drawWidth, drawHeight, opacity) {
         let ctx = canvas.getContext('2d')
-        let su = this.display.tbl.texWidth/canvas.width
-        let sv = this.display.tbl.texHeight/canvas.height
+        let su = this.display.tbl.texWidth/drawWidth
+        let sv = this.display.tbl.texHeight/drawHeight
 
         this.display.tbl.cubeMap.forEach(cube => {
             let r = 1.0
