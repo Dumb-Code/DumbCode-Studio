@@ -106,9 +106,12 @@ export class GifExporter {
             // }
     
             let ticks = handler.playstate.ticks
+            let forcedTicks = handler.forcedAnimationTicks
         
             handler.playstate.ticks = start
             handler.playstate.playing = true
+            handler.forcedAnimationTicks = null
+
     
             let gifFrame = () => {
                 for(let i = 0; i < gifFramesPerFrame && handler.playstate.ticks <= end; i++) {
@@ -123,6 +126,7 @@ export class GifExporter {
                 } else {
                     handler.playstate.playing = false
                     handler.playstate.ticks = ticks
+                    handler.forcedAnimationTicks = forcedTicks
                     display.scene.add(handler.tbl.modelCache)
                     
                     gif.on("progress", v => processProcess.onUpdate(v))
