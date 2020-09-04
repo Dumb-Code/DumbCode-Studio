@@ -293,8 +293,8 @@ export class TblCube {
     resetVisuals() {
         this.children.forEach(child => child.resetVisuals())
 
-        // this.updateGeometry()
-        // this.updateCubePosition()
+        this.updateGeometry()
+        this.updateCubePosition()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
     }

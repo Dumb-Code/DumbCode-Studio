@@ -34,6 +34,8 @@ export class StudioPanels {
                     this.updateAreas()
                 }
             })
+        
+            $(window).resize(() => this.updateAreas())
 
         this.rightDivider.mousedown(() => clickedDivider = 1)
         this.controlsDivider.mousedown(() => clickedDivider = 2)

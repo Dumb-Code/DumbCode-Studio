@@ -1,8 +1,9 @@
 export class CommandRoot {
 
-    constructor(dom, raytracer) {
+    constructor(dom, raytracer, display) {
         this.commands = []
         this.raytracer = raytracer
+        this.display = display
         this.commandLine = new CommandLine(dom, this)
     }
 
@@ -16,6 +17,10 @@ export class CommandRoot {
         let split = splitStr(str)
         if(split.length === 0) {
             throw new Error(`String is empty ?`)
+        }
+        if(ctx.dummy !== true) {
+            this.commandLine.outputLines.push(str)
+            this.commandLine.onLinesChanged()
         }
         return this.runCommandSplit(split, ctx)
     }
@@ -33,6 +38,13 @@ export class CommandRoot {
             }
             return this.raytracer.firstSelected().tabulaCube
         }
+        ctx.getAllCubes = () => {
+            if(this.raytracer.selectedSet.size === 0) {
+                throw new Error("No cube selected")
+            }
+            return [...this.raytracer.selectedSet].map(c => c.tabulaCube)
+        }
+        ctx.getTblModel = () => this.display.tbl
         let cmdName = split.shift()
         let found = this.commands.filter(c => c.name === cmdName)
         if(found.length === 0) {
@@ -41,7 +53,12 @@ export class CommandRoot {
         if(found.length !== 1) {
             return {code:1, msg: `Command ${cmdName} is ambigious: ${found.map(c => c.name)}. Please report this to dumbcode`}
         }
-        found[0].parseAndRun(cmdName, split, ctx)
+        try {
+            found[0].parseAndRun(cmdName, split, ctx)
+        } catch(err) {
+            this.commandLine.editingLine = err.message
+            this.commandLine.onLinesChanged() 
+        }
         return {code:-1}
     }
 }
@@ -54,8 +71,10 @@ class CommandLine {
         this.currentCommandBuilder = null
         this.parsedBuilderArguments = 0
 
-        this.topline = dom.find('.input-line-top')
-        this.bottomline = dom.find('.input-line-lower')
+        this.outputLinesDom = dom.find('.command-output-lines')
+        this.outputLines = []
+        this.editingLine = null
+
 
         let input = dom.find('.command-line-field')
         $(document).on('keypress', e => {
@@ -75,18 +94,23 @@ class CommandLine {
                 try {
                     this.currentResolver.parser(val)
                     this.currentResolver.onkey(val)
-                    this.bottomline.text(`${this.currentResolver.text}:`)
+                    this.editingLine = `${this.currentResolver.text}:`
                 } catch(err) {
-                    this.bottomline.text(err.message)
+                    this.editingLine = err.message
                     this.currentResolver.onkey('')
                 }
+                this.onLinesChanged() 
             }
         })
     }
 
+    onLinesChanged() {
+        this.outputLinesDom.html(this.outputLines.join('<br>') + (this.editingLine === null ? '' : ('<br>' + this.editingLine)))
+    }
+
     async activateNextLine() {
         if(this.currentCommandBuilder !== null) {
-            this.topline.text(this.constructedCommand)
+            this.editingLine = this.constructedCommand 
             let arg = this.currentCommandBuilder.command.arguments[this.currentCommandBuilder.index + this.parsedBuilderArguments]
             if(arg === undefined) {
                 let exit = this.currentCommandBuilder.command.exitCallback
@@ -94,8 +118,7 @@ class CommandLine {
                     exit()
                 }
                 this.currentCommandBuilder = null
-                this.topline.text('Done')
-                this.bottomline.text('')
+                this.editingLine = null
                 this.parsedBuilderArguments = 0
                 this.root.runCommand(this.constructedCommand)
             } else {
@@ -104,12 +127,14 @@ class CommandLine {
                 this.parsedBuilderArguments++
                 this.activateNextLine()
             }
+            this.onLinesChanged()
         }
     }
 
     updateArgument(constructed) {
         let cmd = this.constructedCommand + " " + constructed
-        this.topline.text(cmd)
+        this.editingLine = cmd
+        this.onLinesChanged() 
         try {
             this.root.runCommand(cmd, { dummy:true })
         } catch(error) {
@@ -126,7 +151,8 @@ class CommandLine {
                 this.currentResolver.parser(val)//check it can be parsed
                 this.currentResolver.resolver(val)
             } catch (error) {
-                this.bottomline.text(error.message)
+                this.editingLine = error.message
+                this.onLinesChanged() 
             }
         }
     }
@@ -141,18 +167,20 @@ class CommandLine {
             if(res.code < 0) {
                 return
             }
-            this.bottomline.text(`Command ${val} not found`)
+            this.editingLine = `Command ${val} not found`
         } else if(cmds.length !== 1) {
-            this.bottomline.text(`Command ${val} is ambigous! Contact dumbcode.`)
+            this.editingLine = `Command ${val} is ambigous! Contact dumbcode.`
         } else {
             this.constructedCommand = cmds[0].command.name + ' ' + cmds[0].previousArgs.join(' ')
             this.currentCommandBuilder = cmds[0]
             setTimeout(() => this.activateNextLine())
         }
+        this.onLinesChanged()
     }
 
     async nextInput(text, parser, onkey) {
-        this.bottomline.text(`${text}:`)
+        this.editingLine = `${text}:`
+        this.onLinesChanged()
         return new Promise(resolver => {
             this.currentResolver = { resolver, parser, onkey, text }
         })
@@ -347,7 +375,7 @@ export function booleanHandler() {
     )
 }
 
-export function indexHandler(str) {
+export function indexHandler(str, single = false) {
     let parseIndex = p => {
         let idx = str.indexOf(p)
         if(idx == -1) {
@@ -355,10 +383,15 @@ export function indexHandler(str) {
         }
         return idx
     }
+    let parseIndexes = p => [...p.split('')].map(c => parseIndex(c)) 
+
+    let func = single ? parseIndex : parseIndexes
+
     return new ArgumentHandler(
-        split => parseIndex(split.shift()),
-        async(cli) => await cli.nextInput("Value", p => parseIndex(p), v => cli.updateArgument(v))
+        split => func(split.shift()),
+        async(cli) => await cli.nextInput(`Value [${str}]`, p => func(p), v => cli.updateArgument(v))
     )
+    
 }
 
 export function enumHandler(...values) {

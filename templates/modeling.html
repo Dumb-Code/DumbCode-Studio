@@ -178,9 +178,12 @@ margin-top: 6px;
 <div class="has-background-black-ter" style="grid-area: command; position: relative;">
     <div style="position:absolute; bottom: 0; width: 100%;">
         <!--Command Log-->
-        <div class="section py-0 my-0 pt-2" style="border: 1px solid #121212; font-size: 14px; border-top: none; border-right: none;">test<br>test2</div>
+        <div class="section py-0 my-0 pt-2 command-output-lines" style="border: 1px solid #121212; font-size: 14px; border-top: none; border-right: none;">test<br/>test2</div>
         <!--Command Field-->
-        <div class="section py-0 my-0 has-text-light" style="padding-top: 5px !important; padding-bottom: 5px !important; margin-left: -14px; border: 1px solid #121212; font-size: 14px; border-top: none; border-right: none;">&#x0003E; command</div>
+        <div class="section py-0 my-0 has-text-light" style="padding-top: 5px !important; padding-bottom: 5px !important; margin-left: -14px; border: 1px solid #121212; font-size: 14px; border-top: none; border-right: none; padding-right: 0.5rem">
+          <span style="position: absolute;">&#x0003E;</span>
+          <input type="text" class="has-background-black-ter has-text-light command-line-field" style="border: 0px; font-size: 14px; outline: none; width: 100%; padding-left: 16px;">
+        </div>
     </div>
 </div>
 <div class="has-background-black-ter" style="grid-area: toolbar; border-right: solid 1px black">

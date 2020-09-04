@@ -24,7 +24,7 @@ export class ModelingStudio {
 
         this.group = new Group()
 
-        this.commandRoot = new CommandRoot(dom, this.raytracer)
+        this.commandRoot = new CommandRoot(dom, this.raytracer, this.display)
 
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
         this.selectedRequired = dom.find('.editor-require-selected')
