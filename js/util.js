@@ -42,6 +42,7 @@ export class LinkedElement {
         this.checkbox = checkbox
         this.addElement(this.elems = elems)
         this.sliderElems = undefined
+        this.indexSelected = -1
         if(this.array) {
             this.rawValue = [0, 0, 0]
         } else {
@@ -115,6 +116,7 @@ export class LinkedElement {
 
     addElement(elem, ensure = true) {
         if(this.array) {
+            elem.focusin(e => this.indexSelected = parseInt(e.target.getAttribute('axis')))
             elem.on('input', e => {
                 let arr = this.rawValue.splice(0)
                 let idx = parseInt(e.target.getAttribute('axis'))
@@ -122,11 +124,15 @@ export class LinkedElement {
                 this.setValue(arr, ensure ? idx : -1)
             })
         } else {
+            elem.focusin(() => this.indexSelected = 0)
             elem.on('input', e => this.setValue(this.parseNum ? parseFloat(e.target.value) : (this.checkbox ? e.target.checked : e.target.value), 0))
         }
 
         //Ensure when the boxes are deselected, the text inside them should be updated and formatted
-        elem.focusout(() => this.setInternalValue(this.value))
+        elem.focusout(() => {
+            this.setInternalValue(this.value)
+            this.indexSelected = -1
+        })
     }
 }
 Object.assign( LinkedElement.prototype, EventDispatcher.prototype );

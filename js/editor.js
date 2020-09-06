@@ -12,7 +12,7 @@ import { TextureStudio } from "./texture/texture_studio.js";
 
 const major = 0
 const minor = 2
-const patch = 16
+const patch = 17
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`

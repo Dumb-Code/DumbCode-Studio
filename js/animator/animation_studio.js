@@ -76,7 +76,7 @@ export class AnimationStudio {
         if(selected !== null) {
             if(updateDisplay) {
                 if(updateSilent) {
-                    this.cubeDisplayValues.rotation.setInternalValue(values)
+                    this.cubeDisplayValues.rotation.setInternalValue(values, this.cubeDisplayValues.rotation.indexSelected)
                 } else {
                     this.cubeDisplayValues.rotation.value = values
                 }
@@ -103,7 +103,7 @@ export class AnimationStudio {
         if(selected !== null) {
             if(updateDisplay) {
                 if(updateSilent) {
-                    this.cubeDisplayValues.position.setInternalValue(values)
+                    this.cubeDisplayValues.position.setInternalValue(values, this.cubeDisplayValues.position.indexSelected)
                 } else {
                     this.cubeDisplayValues.position.value = values
                 }
