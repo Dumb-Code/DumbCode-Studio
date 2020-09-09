@@ -1,5 +1,5 @@
 import { readFile } from "../displays.js"
-import { DraggableElementList, doubleClickToEdit, downloadCanvas, downloadHref } from "../util.js"
+import { DraggableElementList, doubleClickToEdit, downloadCanvas, downloadHref, fileUploadBox } from "../util.js"
 
 export class TextureProjectPart {
 
@@ -14,8 +14,11 @@ export class TextureProjectPart {
             texture.textureManager.textureDragged(a, b, c)
 
         })
-        dom.find('#texture-file-input').on('input', e => this.uploadTextureFiles(e))
+        dom.find('#texture-file-input').on('input', e => this.uploadTextureFile(e.target.files))
         dom.find('.new-texture-button').click(() => this.createEmptyTexture())
+
+        fileUploadBox(dom.find('.texture-drop-area'), files => this.uploadTextureFile(files))
+        
     }
 
     createEmptyTexture() {
@@ -49,12 +52,12 @@ export class TextureProjectPart {
         cloned.find('.download-texture-file').click(() => downloadCanvas(data.name + ".png", data.canvas))
     }
 
-    async uploadTextureFiles(element) {
+    async uploadTextureFile(files) {
         let texture = this.textureGetter()
         if(texture === undefined) {
             return
         }
-        Promise.all([...element.target.files].map(file => {
+        Promise.all([...files].map(file => {
             let img = document.createElement("img")
             return new Promise(async(resolve) => {
                 img.src = await readFile(file, (reader, f) => reader.readAsDataURL(f))

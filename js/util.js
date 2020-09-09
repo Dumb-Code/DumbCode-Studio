@@ -138,23 +138,25 @@ export class LinkedElement {
 Object.assign( LinkedElement.prototype, EventDispatcher.prototype );
 
 export class LinkedSelectableList {
-    constructor(elements, mustSelectOne = true) {
+    constructor(elements, mustSelectOne = true, className = 'is-activated') {
         this.elements = $()
         this.mustSelectOne = mustSelectOne
+        this.className = className
         this.predicate = () => true
         this.addElement(elements)        
         if(this.mustSelectOne) {
-            this.elements.first().addClass('is-activated').each((_i, elem) => this.value = elem.getAttribute('select-list-entry'))
+            this.elements.first().each((_i, elem) => this.value = elem.getAttribute('select-list-entry'))
         }
     }
 
     addElement(elements) {
         let getValue = () => this.value
         let setValue = v => this.value = v
+        let mustSelectOne = this.mustSelectOne
 
         elements.click(function() { 
             let val = this.getAttribute('select-list-entry')
-            if(val === getValue() && !this.mustSelectOne) {
+            if(val === getValue() && !mustSelectOne) {
                 setValue(undefined)
             } else {
                 setValue(val)
@@ -167,8 +169,8 @@ export class LinkedSelectableList {
         if(this.predicate(value)) {
             let old = this.rawValue
             this.rawValue = value
-            this.elements.removeClass('is-activated')
-            this.elements.filter(`[select-list-entry='${value}']`).addClass('is-activated')
+            this.elements.removeClass(this.className)
+            this.elements.filter(`[select-list-entry='${value}']`).addClass(this.className)
             this.dispatchEvent({ type: "changed", old, value })
         }
     }
@@ -439,6 +441,27 @@ export function doubleClickToEdit(container, callback, current) {
     if(current !== undefined) {
         text.text(current)
     }
+}
+
+export function fileUploadBox(dom, callback) {
+    dom.on('dragenter', e => {
+        dom.addClass('is-dragging')
+        e.originalEvent.preventDefault()
+        e.originalEvent.stopPropagation()
+    }).on('dragover', e => {
+        dom.addClass('is-dragging')
+        e.originalEvent.preventDefault()
+        e.originalEvent.stopPropagation()
+    }).on('dragleave', e => {
+        dom.removeClass('is-dragging')
+        e.originalEvent.preventDefault()
+        e.originalEvent.stopPropagation()
+    }).on('drop', e => {
+        callback(e.originalEvent.dataTransfer.files)
+        dom.removeClass('is-dragging')
+        e.originalEvent.preventDefault()
+        e.originalEvent.stopPropagation()
+    })
 }
 
 export class DraggableElementList {

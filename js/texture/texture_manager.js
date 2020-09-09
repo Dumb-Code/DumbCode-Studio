@@ -9,7 +9,6 @@ export class TextureManager {
         this.setTexture = setTexture
         this.filesPage = filesPage
         this.textures = []
-        this.aspect = -1
 
         this.highlightCanvas = document.createElement('canvas')
         this.highlightCanvas.width = this.display.tbl.texWidth
@@ -32,7 +31,7 @@ export class TextureManager {
         })
 
         this.textureUpload = dom.find('.texture-file-input-entry')
-        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFiles(e))
+        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(e.target.files))
         dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
     }
 
@@ -101,15 +100,6 @@ export class TextureManager {
         li.classList.add('texture-file-entry')
         li.draggable = true
 
-        let a = width / height
-
-        if(this.aspect === -1) {
-            this.aspect = a
-        } else if(a !== this.aspect) {
-            console.error(`Aspect Ratio is wrong: Expected ${this.aspect} found ${a}`)
-            return
-        }
-
         data.width = width
         data.height = height
         data.img = img
@@ -125,6 +115,7 @@ export class TextureManager {
         data.canvas.width = width
         data.canvas.height = height
         let ctx = data.canvas.getContext("2d")
+        ctx.imageSmoothingEnabled = false
 
         if(empty) {
             ctx.fillStyle = "rgba(255, 255, 255, 1)"
@@ -148,8 +139,8 @@ export class TextureManager {
             $(t.li).text(t.name).detach().insertBefore(this.textureUpload)
         })
 
-        let width = this.textures.filter(t => !t.isHidden).map(t => t.width).reduce((a, c) => Math.max(a, c), 1)
-        let height = Math.max(width / this.aspect, 1)
+        let width = this.textures.filter(t => !t.isHidden).map(t => t.width).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
+        let height = this.textures.filter(t => !t.isHidden).map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
 
         if(this.textures.length === 0) {
             width = this.display.tbl.texWidth
@@ -158,6 +149,7 @@ export class TextureManager {
 
         this.canvas.width = width
         this.canvas.height = height
+        this.context.imageSmoothingEnabled = false
 
         if(!this.textures.find(t => !t.isHidden)) {
             this.context.fillStyle = `rgba(255, 255, 255, 1)`
@@ -178,4 +170,12 @@ export class TextureManager {
         this.setTexture(tex)
         
     }
+
+    gcd(a, b) {
+        if (!b) {
+          return Math.abs(a);
+        }
+      
+        return this.gcd(b, a % b);
+      }
 }

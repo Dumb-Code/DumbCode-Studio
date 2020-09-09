@@ -90,6 +90,7 @@ export class TblCubeGroup {
 
     deleteChild(child, silent = false) {
         child.parent = undefined
+
         this.cubeList = this.cubeList.filter(c => c != child)
         this.refreshGroup(silent)
     }
@@ -131,6 +132,7 @@ export class TblCubeGroup {
         if(!silent) {
             this.tbl.onCubeHierarchyChanged()
         }
+
     }
 
     resetVisuals() {
@@ -207,10 +209,19 @@ export class TblCube {
         return this.cubeGroup
     }
 
-    getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3(), quat) {
+    getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3()) {
         let w = this.dimension[0] + this.cubeGrow[0]*2 + 0.01
         let h = this.dimension[1] + this.cubeGrow[1]*2 + 0.01
         let d = this.dimension[2] + this.cubeGrow[2]*2 + 0.01
+        if(w === 0) {
+            w === 0.001
+        }
+        if(h === 0) {
+            h === 0.001
+        }
+        if(d === 0) {
+            d === 0.001
+        }
         tempVector.set(xDelta*w/16, yDelta*h/16, zDelta*d/16).applyQuaternion(this.cubeMesh.getWorldQuaternion(tempQuaterion))
         this.cubeMesh.getWorldPosition(vector).add(tempVector)
         return vector
@@ -282,8 +293,8 @@ export class TblCube {
     resetVisuals() {
         this.children.forEach(child => child.resetVisuals())
 
-        // this.updateGeometry()
-        // this.updateCubePosition()
+        this.updateGeometry()
+        this.updateCubePosition()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
     }
@@ -297,8 +308,8 @@ export class TblCube {
         this.updateTexture()
     }
 
-    updateCubePosition( { offset = this.offset } = {} ) {
-        this.cubeMesh.position.set(offset[0], offset[1], offset[2] )
+    updateCubePosition( { offset = this.offset, cubeGrow = this.cubeGrow } = {} ) {
+        this.cubeMesh.position.set(offset[0] - cubeGrow[0], offset[1]- cubeGrow[1], offset[2] - cubeGrow[2] )
     }
 
     updatePositionVisuals(position = this.rotationPoint) {
@@ -332,6 +343,7 @@ export class TblCube {
             this.cubeGrow = value
         }
         this.updateGeometry( {cubeGrow:value} )
+        this.updateCubePosition( { cubeGrow:values } )
     }
 
     updateTextureOffset(values = this.textureOffset, visualOnly = false) {

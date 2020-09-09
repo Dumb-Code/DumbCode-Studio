@@ -11,10 +11,11 @@ import { applyCubeAddingDeleting } from "./cube_create_delete.js"
 import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 import { Group } from "../three.js"
 import { CubeCommands } from "./cube_commands.js"
+import { ModelerOptions } from "./modeler_options.js"
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, orbitControls, renameCube, setTexture) {
+    constructor(domElement, display, raytracer, orbitControls, renameCube, setCamera, updateTexture) {
         this.domElement = domElement
         let dom = $(domElement)
         this.canvasContainer = dom.find("#display-div").get(0)
@@ -23,7 +24,7 @@ export class ModelingStudio {
 
         this.group = new Group()
 
-        this.commandRoot = new CommandRoot(dom, this.raytracer)
+        this.commandRoot = new CommandRoot(dom, this.raytracer, this.display)
 
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
         this.selectedRequired = dom.find('.editor-require-selected')
@@ -36,7 +37,7 @@ export class ModelingStudio {
 
         this.rotationPointMarkers = new RotationPointMarkers(this)
         this.lockedCubes = new LockedCubes(this)    
-        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, this.lockedCubes)
+        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, this.lockedCubes, renameCube)
         this.dragSelection = new DragSelection(this, dom.find('#drag-selection-overlay'), orbitControls)
         this.pointTracker = new CubePointTracker(raytracer, display, this.group)
         this.gumball = new Gumball(dom, this)
@@ -44,7 +45,14 @@ export class ModelingStudio {
         this.studioPanels = new StudioPanels(dom, 300, 300)
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
 
+        this.modelerOptions = new ModelerOptions(dom, this, setCamera, updateTexture)
+
         this.cubeCommands = new CubeCommands(this.commandRoot, this)
+    }
+
+    setCamera(camera) {
+        this.transformControls.camera = camera
+        this.gumball.gumballTransformControls.camera = camera
     }
 
     runFrame() {
@@ -59,6 +67,7 @@ export class ModelingStudio {
 
     cubeHierarchyChanged() {
         this.cubeList.refreshCompleatly()
+        this.modelerOptions.refreshOptionTexts()
     }
 
     setActive() {

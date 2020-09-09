@@ -21,7 +21,7 @@ export class TextureTools {
                 return
             }
             layer.canvas.getContext('2d').clearRect(0, 0, layer.width, layer.height)
-            studio.texturemapCanvas.drawCubesToCanvas(layer.canvas, false)
+            studio.texturemapCanvas.drawCubesToCanvas(layer.canvas, layer.width, layer.height, false)
             layer.onCanvasChange()
         })
 
@@ -96,7 +96,7 @@ export class TextureTools {
     gatherPixelBounds(u, v) {
         let layer = this.textureManager.getSelectedLayer()
         if(layer === undefined) {
-            return
+            return []
         }
 
         let cube = this.mouseOverContext?.cube

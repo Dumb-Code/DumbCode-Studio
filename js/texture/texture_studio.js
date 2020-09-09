@@ -6,8 +6,9 @@ import { TextureTools } from "./texture_tools.js"
 
 export class TextureStudio {
 
-    constructor(domElement, filesPage, display, raytracer, orbitControls, setTexture) {
+    constructor(domElement, filesPage, display, raytracer, orbitControls, setTexture, updateTexture) {
         this.domElement = domElement
+        this.updateTexture = updateTexture
         let dom = $(domElement)
         this.display = display
         this.raytracer = raytracer
@@ -29,6 +30,12 @@ export class TextureStudio {
     }
 
     setActive() {
+        this.updateTexture(m => {
+            this.isTextureSeleted = m.map !== null
+            m._oldTextureStudioWireframe = m.wireframe
+            m.map = m._mapCache
+            m.wireframe = false
+        })
         window.studioWindowResized()
         this.cubeValues.updateCubeValues()
         this.textureTools.tabInUse = true
@@ -36,6 +43,18 @@ export class TextureStudio {
     }
 
     setUnactive() {
+        this.updateTexture(m => {
+            //Texture can be updated, so we can't just cache it
+            if(this.isTextureSeleted === true) {
+                m.map = m._mapCache 
+            } else {
+                m.map = null
+            }
+            m.wireframe = m._oldTextureStudioWireframe
+
+            m._oldTextureStudioMap = undefined
+            m._oldTextureStudioWireframe = undefined
+        })
         this.textureTools.tabInUse = false
     }
 

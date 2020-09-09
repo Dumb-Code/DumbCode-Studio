@@ -1202,8 +1202,8 @@ var TransformControlsGizmo = function () {
 		let centerFace = this.mode === 'dimensions' && this.object !== undefined && this.object.tabulaCube !== undefined
 		
 		if(centerFace) {
-			this.object.tabulaCube.cubeMesh.matrixWorld.decompose(tempVector2, tempQuaternion, tempVector3)
-			tempVector3.fromArray(this.object.tabulaCube.dimension).divideScalar(32)
+			// this.object.tabulaCube.cubeMesh.matrixWorld.decompose(tempVector2, tempQuaternion, tempVector3)
+			// tempVector3.fromArray(this.object.tabulaCube.dimension).divideScalar(32)
 		}
 
 		for ( var i = 0; i < handles.length; i ++ ) {
@@ -1218,10 +1218,12 @@ var TransformControlsGizmo = function () {
 			handle.position.copy( this.worldPosition );
 
 			if(centerFace && handle.name.length == 2) {
-				handle.position.setComponent(0, handle.name.startsWith('X') ? (handle.name == 'XP' ? 1 : -1) : 0)
-				handle.position.setComponent(1, handle.name.startsWith('Y') ? (handle.name == 'YP' ? 1 : -1) : 0)
-				handle.position.setComponent(2, handle.name.startsWith('Z') ? (handle.name == 'ZP' ? -1 : 1) : 0)
-				handle.position.multiply(tempVector3).applyQuaternion(tempQuaternion).add(tempVector2)
+				this.object.tabulaCube.getWorldPosition (
+					handle.name.startsWith('X') ? (handle.name == 'XP' ? 1 : 0) : 0.5, 
+					handle.name.startsWith('Y') ? (handle.name == 'YP' ? 1 : 0) : 0.5,
+					handle.name.startsWith('Z') ? (handle.name == 'ZP' ? 0 : 1) : 0.5,
+					handle.position
+				)
 			}
 
 			var eyeDistance = this.worldPosition.distanceTo( this.cameraPosition );
