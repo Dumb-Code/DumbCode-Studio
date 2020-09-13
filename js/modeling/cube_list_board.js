@@ -37,7 +37,7 @@ export class CubeListBoard {
             if(e.target == this.cubeList && cube !== undefined) {
                 this.lockedCubes.createLockedCubesCache()
                 cube.parent.deleteChild(cube, true)
-                tbl.rootGroup.addChild(cube)
+                tbl.addChild(cube)
                 this.lockedCubes.reconstructLockedCubes()
             }
         }
@@ -55,9 +55,8 @@ export class CubeListBoard {
         let oldMap = new Map(this.elementMap)
         this.elementMap.clear()
         this.cubeList.innerHTML = "" //Remove all the children
-        let root = this.tbl.rootGroup
 
-        root.cubeList.forEach(c => this.createCube(this.cubeList, c, oldMap))
+        this.tbl.children.forEach(c => this.createCube(this.cubeList, c, oldMap))
     }
 
     createCube(parent, cube, oldMap) {

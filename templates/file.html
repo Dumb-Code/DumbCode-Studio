@@ -75,7 +75,7 @@
                     <div class="columns">
                         <div class="column is-narrow">
                             <label class="file-label">
-                                <input class="file-input" type="file" name="tabula-main-model" accept=".tbl" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
+                                <input class="file-input" type="file" name="tabula-main-model" accept=".tbl,.dcm" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
                                 <span class="file-cta">
                                     <span class="file-icon"><i class="fas fa-upload"></i></span>
                                     <span class="file-label">Main Model</span>
@@ -164,13 +164,13 @@
                         </div>
                     </div>
                     <div class="column is-narrow">
-                        <div class="clickable tooltip" data-tooltip="Upload From .tbl Files">
+                        <div class="clickable tooltip" data-tooltip="Upload From Model Files">
                             <label for="animation-tbl-files">
                                 <div class="icon is-small">
                                     <i class="fas fa-folder"></i>
                                 </div>
                             </label>
-                            <input id="animation-tbl-files" class="file-input-hidden" type="file" accept=".tbl,.json" multiple/>
+                            <input id="animation-tbl-files" class="file-input-hidden" type="file" accept=".tbl,.dcm,.json" multiple/>
                         </div>
                     </div>
                 </div>

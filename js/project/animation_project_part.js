@@ -3,6 +3,7 @@ import { ByteBuffer } from "../animations.js"
 import { TBLModel } from "../tbl_loader.js"
 import { doubleClickToEdit } from "../util.js"
 import { GifExporter } from "./gif_export.js"
+import { DCMModel } from "../model_format/dcm_loader.js"
 
 export class AnimationProjectPart {
 
@@ -16,7 +17,7 @@ export class AnimationProjectPart {
                 let tab = this.createNewAnimationTab(file.name.substring(0, file.name.length - 4))
                 let animator = this.animatorGetter()
                 if(tab) {
-                    let buffer = new ByteBuffer(await readFile(file, (reader, file) => reader.readAsArrayBuffer(file)))
+                    let buffer = new ByteBuffer(await readFile(file))
                     tab.handler.readDCAFile(buffer)
                     tab.handler.keyframes.forEach(kf => tab.handler.createLayerInfo(kf.layer))
                     animator.keyframeManager.reframeKeyframes()
@@ -39,7 +40,7 @@ export class AnimationProjectPart {
             let infoFile
 
             files.forEach(file => {
-                if(file.name.endsWith(".tbl")) {
+                if(file.name.endsWith(".dcm") || file.name.endsWith(".tbl")) {
                     tblFiles.push(file)
                 }
                 if(file.name == "animation.json") {
@@ -55,7 +56,7 @@ export class AnimationProjectPart {
             let tab = this.createNewAnimationTab(name)
             let animator = this.animatorGetter()
             if(tab) {
-                let promiseFiles = [...tblFiles.map(file => TBLModel.loadModel(readFile(file), file.name))]
+                let promiseFiles = [...tblFiles.map(file => DCMModel.loadModel(readFile(file), file.name))]
                 if(infoFile) {
                     promiseFiles.push(readFile(infoFile))
                 }

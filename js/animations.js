@@ -340,11 +340,22 @@ export class ByteBuffer {
         this._addBuffer(arr)
     }
 
+    writeBool(bool) {
+        let buffer = new ArrayBuffer(1)
+        let view = new DataView(buffer)
+        view.setInt8(0, bool ? 1 : 0)
+        this._addBuffer(buffer)
+    }
+
     readNumber() {
         let veiw = new DataView(this.buffer)
         let num = veiw.getFloat32(this.offset)
         this.offset += 4
         return num
+    }
+
+    readInteger() {
+        return Math.round(this.readNumber())
     }
 
     readString() {
@@ -360,6 +371,17 @@ export class ByteBuffer {
 
         this.offset += length
         return new TextDecoder().decode(this.buffer.slice(this.offset - length, this.offset))
+    }
+
+    readBool() {
+        let veiw = new DataView(this.buffer)
+        let bool = veiw.getInt8(this.offset) === 1 ? true : false
+        this.offset += 1
+        return bool
+    }
+
+    getAsBlob() {
+        return new Blob([this.buffer])
     }
 
     downloadAsFile(name) {

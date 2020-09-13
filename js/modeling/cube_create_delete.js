@@ -7,7 +7,7 @@ export function applyCubeAddingDeleting(dom, studio) {
         if(studio.raytracer.anySelected()) {
             studio.raytracer.firstSelected().tabulaCube.addChild(cube)
         } else {
-            studio.display.tbl.rootGroup.addChild(cube)
+            studio.display.tbl.addChild(cube)
         }
     })
 
@@ -16,7 +16,7 @@ export function applyCubeAddingDeleting(dom, studio) {
         if(studio.raytracer.anySelected()) {
             studio.raytracer.firstSelected().tabulaCube.parent.addChild(cube)
         } else {
-            studio.display.tbl.rootGroup.addChild(cube)
+            studio.display.tbl.addChild(cube)
         }
     })
 

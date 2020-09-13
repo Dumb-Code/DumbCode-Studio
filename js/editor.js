@@ -1,5 +1,4 @@
 import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, Quaternion } from "./three.js";
-import { TBLModel } from "./tbl_loader.js";
 import { DinosaurDisplay, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
@@ -9,6 +8,7 @@ import { ModelingStudio } from "./modeling/modeling_studio.js";
 import { FilesPage } from "./project/files_page.js";
 import { Raytracer } from "./raytracer.js";
 import { TextureStudio } from "./texture/texture_studio.js";
+import { DCMModel } from "./model_format/dcm_loader.js";
 
 const major = 0
 const minor = 2
@@ -190,7 +190,7 @@ export function updateCamera(camera, width, height) {
 }
 
 window.createNewModel = () => {
-    initiateModel(new TBLModel())
+    initiateModel(new DCMModel())
 }
 
 window.setupMainModel = async(file, nameElement) => {
@@ -199,7 +199,7 @@ window.setupMainModel = async(file, nameElement) => {
     nameElement.dataset.tooltip = file.name
 
     try {
-        initiateModel(await TBLModel.loadModel(readFile(file), file.name))
+        initiateModel(await DCMModel.loadModel(readFile(file), file.name))
     } catch(err) {
         nameElement.dataset.tooltip = "ERROR!"
         console.error(`Error from file ${file.name}: ${err.message}`, err)
@@ -207,7 +207,7 @@ window.setupMainModel = async(file, nameElement) => {
 }
 
 window.downloadModel = () => {
-    TBLModel.writeModel(display.tbl)
+    DCMModel.writeModel(display.tbl).downloadAsFile(display.tbl.fileName ? (display.tbl.fileName + ".dcm") : "model.dcm" )
 }
 
 function createFilesPage() {

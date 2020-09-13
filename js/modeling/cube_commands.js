@@ -60,148 +60,8 @@ export class CubeCommands {
                 let worldQuat = this.gumballObject.getWorldQuaternion(worldRotQuat)
     
                 let normal = planeNormal.set(axis===0?1:0, axis===1?1:0, axis===2?1:0).normalize()//.applyQuaternion(worldQuat)
-                this.runMirrorMath(worldPos, normal, cubes, args.context.getTblModel(), args.context.dummy)
+                this.commandResultChangeCache = runMirrorMath(worldPos, normal, cubes, args.context.getTblModel(), args.context.dummy)
             }).onExit(() => this.onCommandExit())
-    }
-
-    runMirrorMath(worldPos, normal, cubesToApplyTo, tbl, dummy) {
-        tbl.resetVisuals()
-        
-        let totalCubesToApplyTo = []
-        let cubes = cubesToApplyTo.sort((a, b) => a.hierarchyLevel - b.hierarchyLevel)
-        cubes.forEach(cube => totalCubesToApplyTo.push({type:0, cube}))
-
-        let wrongFullyMovedCubes = cubes.map(c => c.children).flat().filter(c => !cubes.includes(c))
-        wrongFullyMovedCubes.forEach(cube => totalCubesToApplyTo.push({type:1, cube}))
-
-        let lockets = new Map()
-        wrongFullyMovedCubes.forEach(cube => lockets.set(cube, new CubeLocker(cube)))
-
-        //Definition of a plane at point (x0, y0, z0) (var: worldPos) with normal (A, B, C) (var: normal): 
-        //A(x − x0) + B(y − y0) + C(z − z0) = 0
-        //
-        //I want to find the projection point (x,y,z) (var: vec) onto the plane. This would be defined as (x+At, y+Bt, z+Ct), where t is a random variable
-        //Putting that back into the plane equation:
-        //      A((x+At)-x0) + B((y+Bt)-y0) + C((z+Ct)-z0) = 0
-        //  =>  A(x+At-x0) + B(y+Bt-y0) + C(z+Ct-z0) = 0
-        //  =>  Ax+AAt-Ax0 + By+BBt-By0 + Cz+CCT-Cz0 = 0
-        //  =>  AAt + BBt + CCt = Ax0-Ax + By0-By + Cz0-Cz
-        //  =>  t = (Ax0-Ax + By0-By + Cz0-Cz) / (AA+BB+CC) - It's worth noting that AA+BB+CC is the same as `normal.lengthSquared()`
-        //
-        //Once t is found, I can put it back into (x+At, y+Bt, z+Ct) to give me the projection point on the plane.
-        //With the projection point on the plane, I can find the difference between that and the starting point, and move the point by that distance again.
-        let mirrorPoint = vec => {
-            let t = (normal.x*(worldPos.x - vec.x) + normal.y*(worldPos.y - vec.y) + normal.z*(worldPos.z - vec.z)) / normal.lengthSq()
-            let diff = tempMirrorVec.set(normal.x*t, normal.y*t, normal.z*t).multiplyScalar(2)
-            vec.add(diff)
-            return vec
-        }
-        
-        let startDataCache = new Map()
-        cubes.forEach(cube => {
-            cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
-            let newPosition = mirrorPoint(tempCubePos)
-            
-            let oldCorner = mirrorPoint(cube.getWorldPosition(1, 1, 1), tempCubeOldBase)
-
-            //Get the mirrored positions of all 3 axis points, take that away from the cube origin then create a rotation matrix from that.
-            //Using that rotation matrix, a translation matrix and a scale matrix, construct a full matrix for the cube. Then use the cube locker
-            //To turn that into the cubes position and rotation.
-            let base = mirrorPoint(cube.getWorldPosition(0, 0, 0, tempCubeAxisBase))
-            let xAxis = mirrorPoint(cube.getWorldPosition(1, 0, 0, tempCubeXAxis)).sub(base).normalize()
-            let yAxis = mirrorPoint(cube.getWorldPosition(0, 1, 0, tempCubeYAxis)).sub(base).normalize()
-            let zAxis = mirrorPoint(cube.getWorldPosition(0, 0, 1, tempCubeZAxis)).sub(base).normalize()
-
-            //Construct the matricies
-            let scaleMatrix = tempScaleMatrix.makeScale(tempCubeScale.x, tempCubeScale.y, tempCubeScale.z)
-            let positionMatrix = tempPositionMatrix.makeTranslation(newPosition.x, newPosition.y, newPosition.z)
-            let rotationMatrix = tempRotationMatrix.set(
-                xAxis.x, yAxis.x, zAxis.x, 0,
-                xAxis.y, yAxis.y, zAxis.y, 0,
-                xAxis.z, yAxis.z, zAxis.z, 0,
-                0,       0,       0,       1
-            )
-
-            let newMatrix = tempResultMatrix.copy(scaleMatrix).premultiply(rotationMatrix).premultiply(positionMatrix)
-
-            startDataCache.set(cube, { 
-                oldCorner: oldCorner.toArray(), 
-                base: base.toArray(), 
-                newMatrix: newMatrix.toArray(), 
-                rotationMatrix: rotationMatrix.toArray(),
-
-                rotationPoint: [...cube.rotationPoint],
-                rotation: [...cube.rotation],
-                offset: [...cube.offset]
-            })
-        })
-
-        let endDataCache = new Map()
-        totalCubesToApplyTo.forEach(data => {
-            let cube = data.cube
-            if(data.type === 1) {
-                lockets.get(cube).reconstruct()
-            } else if(data.type === 0) {
-                let cache = startDataCache.get(cube)
-
-                CubeLocker.reconstructLocker(cube, 0, tempResultMatrix.fromArray(cache.newMatrix))
-                cube.cubeGroup.updateMatrixWorld(true)
-
-                //Get opposite corners on the cube (0, 0, 0) -> (1, 1, 1), and get the difference between where the mirrored position is,
-                //and where it is currently. The avarage between those two differences will be how much to change the offset by.
-                //Transform that into local space, then add it onto the offset. 
-                let inverseRotation = tempRotationMatrixInverse.getInverse(tempResultMatrix.fromArray(cache.rotationMatrix))
-
-                 //The point at (0, 0, 0)
-                let currentPoint0 = cube.getWorldPosition(0, 0, 0, tempCubeNewBase0)
-                let toMove0 = currentPoint0.sub(tempCubePos.fromArray(cache.base))
-
-                //The point at (1, 1, 1)
-                let currentPoint1 = cube.getWorldPosition(1, 1, 1, tempCubeNewBase1)
-                let toMove1 = currentPoint1.sub(tempCubePos.fromArray(cache.oldCorner))
-
-                 //Add the points together and rotate them into local space.
-                //As we have a offsets in terms of 16 rather than 1, we need to multiply by 16.
-                //As this is a sum of the 2 points, we need to find the avarage, so we divide by 2.
-                //This can be simplified to multiplying by 8 ( * 16 / 2)
-                let toMove = toMove0.add(toMove1).applyMatrix4(inverseRotation).multiplyScalar(8) //8 = 16 /2
-                cube.updateOffset(cube.offset.map((v, i) => v + toMove.getComponent(i)))
-            }
-            endDataCache.set(cube, {
-                rotationPoint: [...cube.rotationPoint],
-                rotation: [...cube.rotation],
-                offset: [...cube.offset],
-            })
-        })
-
-        if(dummy === true) {
-            let resetVisuals = (visualOnly) => {
-                startDataCache.forEach((cache, cube) => {
-                    cube.updatePosition([...cache.rotationPoint], visualOnly)
-                    cube.updateRotation([...cache.rotation], visualOnly)
-                    cube.updateOffset([...cache.offset], visualOnly)
-                })
-            }
-
-            resetVisuals(false)
-            this.commandResultChangeCache = { 
-                onExit: () => {
-                    resetVisuals(true)
-                    tbl.modelCache.updateMatrixWorld(true)
-                    // totalCubesToApplyTo.forEach(d => d.cube.cubeGroup.updateMatrixWorld(true))
-                },
-                applyOnFrame: () => {    
-                    endDataCache.forEach((cache, cube) => {
-                        cube.updatePosition([...cache.rotationPoint], true)
-                        cube.updateRotation([...cache.rotation], true)
-                        cube.updateOffset([...cache.offset], true)
-                    })
-                    tbl.modelCache.updateMatrixWorld(true)
-                    // totalCubesToApplyTo.forEach(d => d.cube.cubeGroup.updateMatrixWorld(true))
-                }
-             }
-        }
-
     }
     
     onCommandExit() {
@@ -216,6 +76,146 @@ export class CubeCommands {
             this.commandResultChangeCache.applyOnFrame()
         }
     }
+}
+
+export function runMirrorMath(worldPos, normal, cubesToApplyTo, tbl, dummy) {
+    tbl.resetVisuals()
+    
+    let totalCubesToApplyTo = []
+    let cubes = cubesToApplyTo.sort((a, b) => a.hierarchyLevel - b.hierarchyLevel)
+    cubes.forEach(cube => totalCubesToApplyTo.push({type:0, cube}))
+
+    let wrongFullyMovedCubes = cubes.map(c => c.children).flat().filter(c => !cubes.includes(c))
+    wrongFullyMovedCubes.forEach(cube => totalCubesToApplyTo.push({type:1, cube}))
+
+    let lockets = new Map()
+    wrongFullyMovedCubes.forEach(cube => lockets.set(cube, new CubeLocker(cube)))
+
+    //Definition of a plane at point (x0, y0, z0) (var: worldPos) with normal (A, B, C) (var: normal): 
+    //A(x − x0) + B(y − y0) + C(z − z0) = 0
+    //
+    //I want to find the projection point (x,y,z) (var: vec) onto the plane. This would be defined as (x+At, y+Bt, z+Ct), where t is a random variable
+    //Putting that back into the plane equation:
+    //      A((x+At)-x0) + B((y+Bt)-y0) + C((z+Ct)-z0) = 0
+    //  =>  A(x+At-x0) + B(y+Bt-y0) + C(z+Ct-z0) = 0
+    //  =>  Ax+AAt-Ax0 + By+BBt-By0 + Cz+CCT-Cz0 = 0
+    //  =>  AAt + BBt + CCt = Ax0-Ax + By0-By + Cz0-Cz
+    //  =>  t = (Ax0-Ax + By0-By + Cz0-Cz) / (AA+BB+CC) - It's worth noting that AA+BB+CC is the same as `normal.lengthSquared()`
+    //
+    //Once t is found, I can put it back into (x+At, y+Bt, z+Ct) to give me the projection point on the plane.
+    //With the projection point on the plane, I can find the difference between that and the starting point, and move the point by that distance again.
+    let mirrorPoint = vec => {
+        let t = (normal.x*(worldPos.x - vec.x) + normal.y*(worldPos.y - vec.y) + normal.z*(worldPos.z - vec.z)) / normal.lengthSq()
+        let diff = tempMirrorVec.set(normal.x*t, normal.y*t, normal.z*t).multiplyScalar(2)
+        vec.add(diff)
+        return vec
+    }
+    
+    let startDataCache = new Map()
+    cubes.forEach(cube => {
+        cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
+        let newPosition = mirrorPoint(tempCubePos)
+        
+        let oldCorner = mirrorPoint(cube.getWorldPosition(1, 1, 1), tempCubeOldBase)
+
+        //Get the mirrored positions of all 3 axis points, take that away from the cube origin then create a rotation matrix from that.
+        //Using that rotation matrix, a translation matrix and a scale matrix, construct a full matrix for the cube. Then use the cube locker
+        //To turn that into the cubes position and rotation.
+        let base = mirrorPoint(cube.getWorldPosition(0, 0, 0, tempCubeAxisBase))
+        let xAxis = mirrorPoint(cube.getWorldPosition(1, 0, 0, tempCubeXAxis)).sub(base).normalize()
+        let yAxis = mirrorPoint(cube.getWorldPosition(0, 1, 0, tempCubeYAxis)).sub(base).normalize()
+        let zAxis = mirrorPoint(cube.getWorldPosition(0, 0, 1, tempCubeZAxis)).sub(base).normalize()
+
+        //Construct the matricies
+        let scaleMatrix = tempScaleMatrix.makeScale(tempCubeScale.x, tempCubeScale.y, tempCubeScale.z)
+        let positionMatrix = tempPositionMatrix.makeTranslation(newPosition.x, newPosition.y, newPosition.z)
+        let rotationMatrix = tempRotationMatrix.set(
+            xAxis.x, yAxis.x, zAxis.x, 0,
+            xAxis.y, yAxis.y, zAxis.y, 0,
+            xAxis.z, yAxis.z, zAxis.z, 0,
+            0,       0,       0,       1
+        )
+
+        let newMatrix = tempResultMatrix.copy(scaleMatrix).premultiply(rotationMatrix).premultiply(positionMatrix)
+
+        startDataCache.set(cube, { 
+            oldCorner: oldCorner.toArray(), 
+            base: base.toArray(), 
+            newMatrix: newMatrix.toArray(), 
+            rotationMatrix: rotationMatrix.toArray(),
+
+            rotationPoint: [...cube.rotationPoint],
+            rotation: [...cube.rotation],
+            offset: [...cube.offset]
+        })
+    })
+
+    let endDataCache = new Map()
+    totalCubesToApplyTo.forEach(data => {
+        let cube = data.cube
+        if(data.type === 1) {
+            lockets.get(cube).reconstruct()
+        } else if(data.type === 0) {
+            let cache = startDataCache.get(cube)
+
+            CubeLocker.reconstructLocker(cube, 0, tempResultMatrix.fromArray(cache.newMatrix))
+            cube.cubeGroup.updateMatrixWorld(true)
+
+            //Get opposite corners on the cube (0, 0, 0) -> (1, 1, 1), and get the difference between where the mirrored position is,
+            //and where it is currently. The avarage between those two differences will be how much to change the offset by.
+            //Transform that into local space, then add it onto the offset. 
+            let inverseRotation = tempRotationMatrixInverse.getInverse(tempResultMatrix.fromArray(cache.rotationMatrix))
+
+             //The point at (0, 0, 0)
+            let currentPoint0 = cube.getWorldPosition(0, 0, 0, tempCubeNewBase0)
+            let toMove0 = currentPoint0.sub(tempCubePos.fromArray(cache.base))
+
+            //The point at (1, 1, 1)
+            let currentPoint1 = cube.getWorldPosition(1, 1, 1, tempCubeNewBase1)
+            let toMove1 = currentPoint1.sub(tempCubePos.fromArray(cache.oldCorner))
+
+             //Add the points together and rotate them into local space.
+            //As we have a offsets in terms of 16 rather than 1, we need to multiply by 16.
+            //As this is a sum of the 2 points, we need to find the avarage, so we divide by 2.
+            //This can be simplified to multiplying by 8 ( * 16 / 2)
+            let toMove = toMove0.add(toMove1).applyMatrix4(inverseRotation).multiplyScalar(8) //8 = 16 /2
+            cube.updateOffset(cube.offset.map((v, i) => v + toMove.getComponent(i)))
+        }
+        endDataCache.set(cube, {
+            rotationPoint: [...cube.rotationPoint],
+            rotation: [...cube.rotation],
+            offset: [...cube.offset],
+        })
+    })
+
+    if(dummy === true) {
+        let resetVisuals = (visualOnly) => {
+            startDataCache.forEach((cache, cube) => {
+                cube.updatePosition([...cache.rotationPoint], visualOnly)
+                cube.updateRotation([...cache.rotation], visualOnly)
+                cube.updateOffset([...cache.offset], visualOnly)
+            })
+        }
+
+        resetVisuals(false)
+        return { 
+            onExit: () => {
+                resetVisuals(true)
+                tbl.modelCache.updateMatrixWorld(true)
+                // totalCubesToApplyTo.forEach(d => d.cube.cubeGroup.updateMatrixWorld(true))
+            },
+            applyOnFrame: () => {    
+                endDataCache.forEach((cache, cube) => {
+                    cube.updatePosition([...cache.rotationPoint], true)
+                    cube.updateRotation([...cache.rotation], true)
+                    cube.updateOffset([...cache.offset], true)
+                })
+                tbl.modelCache.updateMatrixWorld(true)
+                // totalCubesToApplyTo.forEach(d => d.cube.cubeGroup.updateMatrixWorld(true))
+            }
+         }
+    }
+
 }
 
 
