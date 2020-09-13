@@ -1,6 +1,5 @@
 import { readFile } from "../displays.js"
 import { ByteBuffer } from "../animations.js"
-import { TBLModel } from "../tbl_loader.js"
 import { doubleClickToEdit } from "../util.js"
 import { GifExporter } from "./gif_export.js"
 import { DCMModel } from "../model_format/dcm_loader.js"

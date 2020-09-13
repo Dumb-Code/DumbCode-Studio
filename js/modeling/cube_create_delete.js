@@ -1,5 +1,5 @@
-import { TblCube } from "../tbl_loader.js"
 import { CubeLocker } from "../util.js"
+import { DCMCube } from "../model_format/dcm_loader.js"
 
 export function applyCubeAddingDeleting(dom, studio) {
     dom.find('.create-cube').click(() => {
@@ -59,5 +59,5 @@ function createCube(studio) {
         }
         name = newName
     }
-    return new TblCube(name, [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 1], [0, 0], [0, 0, 0], [], false, studio.display.tbl)
+    return new DCMCube(name, [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], studio.display.tbl)
 }
