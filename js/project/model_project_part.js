@@ -33,7 +33,7 @@ export class ModelProjectPart {
 
         this.projectSelectList.addElement(cloned)
 
-        doubleClickToEdit(cloned.find('.model-name-container'), name => model.fileName = name, model.fileName ? model.fileName : "New Model.dca")
+        doubleClickToEdit(cloned.find('.model-name-container'), name => model.fileName = name, model.fileName ? model.fileName : "New Model")
 
     }
 }

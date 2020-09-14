@@ -391,7 +391,7 @@ DCMModel.loadModel = async(arrayBuffer, name = "") => {
         model.children = readCubes()    
     }
     if(name) {
-        model.fileName = name
+        model.fileName = name.substring(0, name.lastIndexOf('.'))
     }
     return model
 }
