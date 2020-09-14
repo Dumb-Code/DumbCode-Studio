@@ -48,7 +48,7 @@ export class TexturemapCanvas {
         ctx.fillStyle = "rgba(255, 255, 255, 255)"
         ctx.fillRect(0, 0, drawWidth, drawHeight)
 
-        let canvas = this.pth.material?.map?.image
+        let canvas = this.pth.materials.normal?.map?.image
         if(canvas !== undefined) {
             ctx.drawImage(canvas, 0, 0, drawWidth, drawHeight)
         }
