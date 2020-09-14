@@ -80,11 +80,13 @@ class CommandLine {
         $(document).on('keypress', e => {
             if(e.which == 13) {
                 let val = input.val()
-                input.val('')
-                if(this.currentCommandBuilder === null) {
-                    this.startCommand(val)
-                } else {
-                    this.readNextLine(val)
+                if(val !== "") {
+                    input.val('')
+                    if(this.currentCommandBuilder === null) {
+                        this.startCommand(val)
+                    } else {
+                        this.readNextLine(val)
+                    }
                 }
             }
         });
