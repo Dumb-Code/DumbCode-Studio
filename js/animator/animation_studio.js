@@ -176,6 +176,7 @@ export class AnimationStudio {
     runFrame() {
         this.pth.model.resetAnimations()
         this.raytracer.update()
+        this.panelButtons.onFrame()
 
         let delta = this.clock.getDelta()
         if(this.pth.animationTabs.isAny()) {
