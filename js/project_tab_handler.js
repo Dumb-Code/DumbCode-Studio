@@ -54,6 +54,10 @@ export class ProjectTabHandler {
         return this.getSelected().materials
     }
 
+    get textureManager() {
+        return this.getSelected().textureManager
+    }
+
     updateTexture(callback) {
         callback(this.materials.normal)
         callback(this.materials.selected)
@@ -72,8 +76,7 @@ export class ProjectTabHandler {
     }
 
     createNewProject(model = new DCMModel()) {
-        console.trace(model)
-        let project = new DcProject(model, this.allTabs.length, this._files, this._modeling, this._texture, this._animation)
+        let project = new DcProject(model, this.allTabs.length, this)
         this.allTabs.push(project)
         this.dispatchEvent( { type: "newproject", project } )
         this.selectIndex(project.id)

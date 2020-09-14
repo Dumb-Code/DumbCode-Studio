@@ -22,9 +22,6 @@ export class AnimationTabHandler {
 
             studio.panelButtons.onTabChange()
         }
-        
-        // this.tabContainer = dom.find('.tab-container')
-        // dom.find('.tab-add').click(() => this.initiateNewTab())
     }
 
     initiateNewTab() {
@@ -92,5 +89,10 @@ export class AnimationTabHandler {
         }
         let tab = this.allTabs[index]
         return tab === undefined ? null : tab
+    }
+
+    refreshTabs() {
+        this.tabContainer.children().detach()
+        this.allTabs.forEach(tab => this.tabContainer.append(tab.element))
     }
 }

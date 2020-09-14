@@ -5,7 +5,6 @@ export class TextureTools {
     constructor(dom, studio) {
         this.pth = studio.pth
         this.raytracer = studio.raytracer
-        this.textureManager = studio.textureManager
         this.orbitControls  = studio.orbitControls 
         
         this.tabInUse = false
@@ -16,7 +15,7 @@ export class TextureTools {
         this.previousPixel = null
 
         dom.find('.button-generate-texturemap').click(() => {
-            let layer = this.textureManager.getSelectedLayer()
+            let layer = this.pth.textureManager.getSelectedLayer()
             if(layer === undefined) {
                 return
             }
@@ -83,18 +82,18 @@ export class TextureTools {
     }
 
     canDraw() {
-        return this.textureManager.getSelectedLayer() !== undefined && this.paintMode.value !== undefined
+        return this.pth.textureManager.getSelectedLayer() !== undefined && this.paintMode.value !== undefined
     }
 
     mouseOverPixel(u, v, context) {
         this.mouseOverContext = context
         if(this.paintMode.value !== undefined) {
-            this.textureManager.hightlightPixelBounds(u, v, this.gatherPixelBounds(u, v))
+            this.pth.textureManager.hightlightPixelBounds(u, v, this.gatherPixelBounds(u, v))
         }
     }
     
     gatherPixelBounds(u, v) {
-        let layer = this.textureManager.getSelectedLayer()
+        let layer = this.pth.textureManager.getSelectedLayer()
         if(layer === undefined) {
             return []
         }
@@ -149,7 +148,7 @@ export class TextureTools {
     }
     
     mouseDown(u, v, allowPrevious) {
-        let selected = this.textureManager.getSelectedLayer()
+        let selected = this.pth.textureManager.getSelectedLayer()
         u = Math.floor(u*selected.width)
         v = Math.floor(v*selected.height)
         let mode = this.paintMode.value

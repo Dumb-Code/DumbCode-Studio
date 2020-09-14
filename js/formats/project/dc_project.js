@@ -1,4 +1,5 @@
 import { AnimationTabHandler } from "../../animator/animation_tabs.js"
+import { TextureManager } from "../../texture/texture_manager.js"
 import { DoubleSide, MeshLambertMaterial } from "../../three.js"
 
 const material = new MeshLambertMaterial( {
@@ -8,23 +9,23 @@ const material = new MeshLambertMaterial( {
     alphaTest: 0.0001,
 } )
 
-export class DcProject {
-    constructor(model, id, files, modeling, texture, animation) {
+export class DcProject {//._files, this._modeling, this._texture, this._animation
+    constructor(model, id, pth) {
         this.model = model
         this.id = id
-        this.textures = []
-        this.animationTabHandler = new AnimationTabHandler(animation, files, model)
+        this.textureManager = new TextureManager(model, pth)
+        this.animationTabHandler = new AnimationTabHandler(pth._animation, pth._files, model)
         this.metadata = model.fileName ? { modelName: model.fileName } : {}
 
         this.materials = this._createMaterialsObject()
         this.selectedSet = new Set()
 
-        this.initiate(files, modeling, texture, animation)
+        this.initiate(pth)
     }
 
-    initiate(files, modeling, texture, animation) {
+    initiate(pth) {
         this.model.createModel(this.materials.normal)
-        this.model.addEventListener("hierarchyChanged", () => modeling.cubeHierarchyChanged())
+        this.model.addEventListener("hierarchyChanged", () => pth._modeling.cubeHierarchyChanged())
     }
 
     _createMaterialsObject() {

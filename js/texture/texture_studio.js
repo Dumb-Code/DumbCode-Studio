@@ -15,10 +15,13 @@ export class TextureStudio {
         this.orbitControls = orbitControls
 
         this.studioPanels = new TexturePanels(dom, 300, 300)
-        this.textureManager = new TextureManager(dom, this, filesPage)
         this.cubeValues = new TextureCubeValues(dom, raytracer)
         this.textureTools = new TextureTools(dom, this)
         this.texturemapCanvas = new TexturemapCanvas(dom.find('#texture-canvas'), raytracer, this.textureTools, this.cubeValues, pth)
+
+        this._textureUpload = dom.find('.texture-file-input-entry')
+        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(e.target.files))
+        dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
     }
 
     runFrame() {

@@ -6,8 +6,8 @@ export class FilesPage {
 
     constructor(dom, modellingGetter, textureGetter, animatorGetter, pth) {
         this.modelProjectPart = new ModelProjectPart(dom, pth)
-        this.animationProjectPart = new AnimationProjectPart(dom, animatorGetter)
-        this.textureProjectPart = new TextureProjectPart(dom, textureGetter)
+        this.animationProjectPart = new AnimationProjectPart(dom, animatorGetter, pth)
+        this.textureProjectPart = new TextureProjectPart(dom, pth)
     }
 
 

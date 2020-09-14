@@ -6,6 +6,7 @@ const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
 
 const hierarchyChangedEvent = { type: "hierarchyChanged" }
+const textureSizeChangedEvent = { type: "textureSizeChanged", width:64, hieght:64 }
 
 export class DCMModel {
 
@@ -17,6 +18,12 @@ export class DCMModel {
         
         this.cubeMap = new Map()
         this.children = []
+    }
+
+    setTextureSize(width, height) {
+        this.texWidth = textureSizeChangedEvent.width = width
+        this.texHeight = textureSizeChangedEvent.height = height
+        this.dispatchEvent( textureSizeChangedEvent )
     }
 
     onCubeHierarchyChanged() {

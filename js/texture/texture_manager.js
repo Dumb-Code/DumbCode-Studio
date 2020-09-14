@@ -4,17 +4,25 @@ import { DraggableElementList, LinkedSelectableList } from "../util.js"
 
 export class TextureManager {
 
-    constructor(dom, studio, filesPage) {
-        this.pth = studio.pth
-        this.filesPage = filesPage
+    constructor(model, pth) {
+        this.pth = pth
+        this.filesPage = pth._files
         this.textures = []
+        this.textureUpload = pth._texture._textureUpload
 
         this.highlightCanvas = document.createElement('canvas')
-        this.highlightCanvas.width = 1//this.pth.model.texWidth
-        this.highlightCanvas.height = 1//this.pth.model.texHeight
+        this.highlightCanvas.width = model.texWidth
+        this.highlightCanvas.height = model.texHeight
         this.highlightContext = this.highlightCanvas.getContext('2d')
         this.highlightContext.imageSmoothingEnabled = false
         this.highlighPixel = null
+
+        model.addEventListener('textureSizeChanged', e => {
+            this.highlightCanvas.width = e.width
+            this.highlightCanvas.height = e.height
+            this.highlightContext = this.highlightCanvas.getContext('2d')
+            this.highlightContext.imageSmoothingEnabled = false
+        })
 
         this.canvas = document.createElement('canvas')
         this.context = this.canvas.getContext('2d')
@@ -28,10 +36,6 @@ export class TextureManager {
                 this.highlightCanvas.height = layer.height
             }
         })
-
-        this.textureUpload = dom.find('.texture-file-input-entry')
-        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(e.target.files))
-        dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
     }
 
     getSelectedLayer() {
