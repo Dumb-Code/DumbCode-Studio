@@ -34,6 +34,11 @@
     .base-drop-area.is-dragging {
         background-color: green;
     }
+
+    .model-list-entry.is-activated {
+        color: khaki;
+    }
+
 </style>
 <section class="section is-mobile has-background-black-ter" style="height: 100vh">
     <div class="columns">
@@ -41,10 +46,6 @@
         <div class="column">
             <div class="notification is-dark">
                 <h1 class="title is-5">PROJECT</h1>
-                <div class="tags has-addons mb-2">
-                    <div class="tag is-warning">Note</div>
-                    <div class="tag is-link">Projects are a not yet implemented feature.</div>
-                </div>
                 <div class="columns">
                     <div class="column is-narrow">
                       <i class="fas fa-cubes"></i>
@@ -54,58 +55,41 @@
                     </div>
                 </div>
             </div>
-            <div class="notification is-dark">
-                <h1 class="title is-5">MODEL</h1>
-                <div class="tags has-addons mb-2">
-                    <div class="tag is-warning">Note</div>
-                    <div class="tag is-link">Model functionality not final.</div>
-                </div>
-                <div class="columns">
-                    <div class="column is-narrow">
-                      <i class="fas fa-cube"></i>
-                    </div>
+            <div class="notification is-dark base-drop-area model-drop-area">
+                <div class="columns model-layer-topbar">
                     <div class="column">
-                        <p>parasaur_adult.dcm</p>
+                        <h1 class="title is-5">MODEL</h1>
+                    </div>
+                    <div class="column is-narrow">
+                        <span class="new-model-button icon is-small clickable tooltip" data-tooltip="Create New Model">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                    </div>
+                    <div class="column is-narrow">
+                        <div class="clickable tooltip" data-tooltip="Upload New Model">
+                            <label for="model-file-input">
+                                <div class="icon is-small">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                            </label>
+                            <input id="model-file-input" class="file-input-hidden" type="file" accept=".tbl,.dcm" multiple/>
+                        </div>
                     </div>
                 </div>
-                <div class="notification is-warning">
-                    <div class="content is-small">
-                        <p>TEMPORARY MODEL CONTROLS</p>
+                <div class="model-list-entry columns empty-column">
+                    <div class="column is-narrow model-preview">
                     </div>
-                    <div class="columns">
-                        <div class="column is-narrow">
-                            <label class="file-label">
-                                <input class="file-input" type="file" name="tabula-main-model" accept=".tbl,.dcm" onchange="setupMainModel(this.files[0], this.parentElement.parentElement)">
-                                <span class="file-cta">
-                                    <span class="file-icon"><i class="fas fa-upload"></i></span>
-                                    <span class="file-label">Main Model</span>
-                                </span>
-                            </label>
-                        </div>
-                        <div class="column is-narrow">
-                            <label class="file-label">
-                                <input class="file-input" type="submit" onclick="createNewModel()">
-                                <span class="file-cta">
-                                    <span class="file-icon"><i class="fas fa-plus"></i></span>
-                                    <span class="file-label">New Model</span>
-                                </span>
-                            </label>
-                        </div>
-                        <div class="column is-narrow">
-                            <label class="file-label">
-                                <input class="file-input" type="submit" onclick="downloadModel()">
-                                <span class="file-cta">
-                                    <span class="file-icon"><i class="fas fa-plus"></i></span>
-                                    <span class="file-label">Download Model</span>
-                                </span>
-                            </label>
-                        </div>
+                    <div class="column dbl-click-container model-name-container">
+                        <p class="dbl-text"></p>
+                        <input class="dbl-text-edit" type="text">
                     </div>
-                    <div class="content is-small">
-                        <p>This will be moved to a more user friendly format in the future.</p>
+                    <div class="column is-narrow">
+                        <span class="download-model-file icon is-small clickable tooltip " data-tooltip="Download Model">
+                            <i class="fas fa-file-download"></i>
+                        </span>
                     </div>
                 </div>
-              </div>
+            </div>
         </div>
         <div class="column">
             <div class="notification is-dark base-drop-area texture-drop-area">

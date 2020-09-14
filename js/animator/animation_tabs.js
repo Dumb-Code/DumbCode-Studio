@@ -3,10 +3,11 @@ import { MementoTraverser } from "../memento_traverser.js"
 import { AnimationMemento } from "./animation_memento.js"
 
 export class AnimationTabHandler {
-    constructor(dom, studio, filesPage) {
+    constructor(studio, filesPage, model) {
         this.studio = studio
-        this.tbl = studio.display.tbl
+        this.model = model
         this.filesPage = filesPage
+        this.tabContainer = studio._tabContainer
         this._internalTab = -1
         this.allTabs = []
     
@@ -22,8 +23,8 @@ export class AnimationTabHandler {
             studio.panelButtons.onTabChange()
         }
         
-        this.tabContainer = dom.find('.tab-container')
-        dom.find('.tab-add').click(() => this.initiateNewTab())
+        // this.tabContainer = dom.find('.tab-container')
+        // dom.find('.tab-add').click(() => this.initiateNewTab())
     }
 
     initiateNewTab() {
@@ -42,7 +43,7 @@ export class AnimationTabHandler {
         element.onclick = () => this.activeTab = id
 
         let data = {
-            handler: new AnimationHandler(this.tbl),
+            handler: new AnimationHandler(this.model),
             element,
             name: "Tab " + id
         }

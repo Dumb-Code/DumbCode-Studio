@@ -4,11 +4,11 @@ const radius = 7.5
 
 export class ProgressionCanvas {
     constructor(dom, studio) {
-        this.animationTabHandler = studio.animationTabHandler
+        this.pth = studio.pth
         this.selectedPoint = null
         this.waitAndSetCanvas()
         dom.find('.popup-animator-progression').click(() =>         {
-            let handler = this.animationTabHandler.active
+            let handler = this.pth.animationTabs.active
             if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 this.easingFunction.value = "sine"
                 this.easingFunctionType.value = "in"
@@ -34,7 +34,7 @@ export class ProgressionCanvas {
     }
 
     mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback) {
-        let handler = this.animationTabHandler.active
+        let handler = this.pth.animationTabs.active
         if(handler === null || handler.selectedKeyFrame === undefined) {
             return
         }
@@ -86,7 +86,7 @@ export class ProgressionCanvas {
 
     redrawProgressionCanvas() {
         //TODO: scrolling and moving like the texture tab
-        let handler = this.animationTabHandler.active
+        let handler = this.pth.animationTabs.active
 
         if(handler !== null && handler.selectedKeyFrame !== undefined) {
             let width = this.progressionCanvas.width
@@ -122,7 +122,7 @@ export class ProgressionCanvas {
     }
 
     generateEasingFunction() {
-        let handler = this.animationTabHandler.active
+        let handler = this.pth.animationTabs.active
         let points = this.easingFunctionAmount.val()
 
         if(handler === null || handler.selectedKeyFrame === undefined || points <= 5) {

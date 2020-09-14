@@ -1,9 +1,9 @@
 export class CommandRoot {
 
-    constructor(dom, raytracer, display) {
+    constructor(dom, raytracer, pth) {
         this.commands = []
         this.raytracer = raytracer
-        this.display = display
+        this.pth = pth
         this.commandLine = new CommandLine(dom, this)
     }
 
@@ -44,7 +44,7 @@ export class CommandRoot {
             }
             return [...this.raytracer.selectedSet].map(c => c.tabulaCube)
         }
-        ctx.getTblModel = () => this.display.tbl
+        ctx.getTblModel = () => this.pth.model
         let cmdName = split.shift()
         let found = this.commands.filter(c => c.name === cmdName)
         if(found.length === 0) {

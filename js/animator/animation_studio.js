@@ -12,10 +12,11 @@ const mainArea = document.getElementById("main-area")
 
 export class AnimationStudio {
 
-    constructor(domElement, raytracer, display, filesPage) {
+    constructor(domElement, raytracer, display, pth) {
         this.domElement = domElement
         let dom  = $(domElement)
         this.raytracer = raytracer
+        this.pth = pth
         this.group = new Group()
 
         this.selectedRequired = dom.find('.editor-require-selected')
@@ -27,6 +28,9 @@ export class AnimationStudio {
         this.positionCache = null
         this.rotationCache = null
 
+        this._tabContainer = dom.find('.tab-container')
+        dom.find('.tab-add').click(() => pth.getSelected().animationTab.initiateNewTab())
+
         this.transformControls = display.createTransformControls()
         this.group.add(this.transformControls)
 
@@ -37,25 +41,24 @@ export class AnimationStudio {
         this.panelButtons = new PanelButtons(dom, this)
         this.display = display
         this.methodExporter = new JavaMethodExporter()
-        this.animationTabHandler = new AnimationTabHandler(dom, this, filesPage)
         this.progressionCanvas = new ProgressionCanvas(dom, this)
         this.clock = new Clock()
 
         dom.find('.button-undo').click(() => {
-            if(this.animationTabHandler.isAny()) {
-                this.animationTabHandler.activeData.mementoTraverser.undo()
+            if(pth.animationTabs.isAny()) {
+                pth.animationTabs.activeData.mementoTraverser.undo()
             }
         })
 
         dom.find('.button-redo').click(() => {
-            if(this.animationTabHandler.isAny()) {
-                this.animationTabHandler.activeData.mementoTraverser.redo()
+            if(pth.animationTabs.isAny()) {
+                pth.animationTabs.activeData.mementoTraverser.redo()
             }
         })
 
         this.onKeyDown = (e) => {
-            if(this.animationTabHandler.isAny()) {
-                let traverser = this.animationTabHandler.activeData.mementoTraverser
+            if(pth.animationTabs.isAny()) {
+                let traverser = pth.animationTabs.activeData.mementoTraverser
                 if(e.ctrlKey && e.keyCode === 90) { //z
                     if(e.shiftKey) {
                         traverser.redo()
@@ -87,11 +90,11 @@ export class AnimationStudio {
             }
             this.rotationCache = values
 
-            let handler = this.animationTabHandler.active
+            let handler = this.pth.animationTabs.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
                 handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layer).some(l => !l.locked)) {
                     handler.selectedKeyFrame.skip = true
-                    this.display.tbl.resetAnimations()
+                    this.pth.model.resetAnimations()
                     handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
                     handler.animate(0)
                     let arr = selected.parent.rotation.toArray()
@@ -114,11 +117,11 @@ export class AnimationStudio {
             }
             this.positionCache = values
 
-            let handler = this.animationTabHandler.active
+            let handler = this.pth.animationTabs.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
                 handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layer).some(l => !l.locked)) {
                     handler.selectedKeyFrame.skip = true
-                    this.display.tbl.resetAnimations()
+                    this.pth.model.resetAnimations()
                     handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
                     handler.animate(0)
                     let arr = selected.parent.position.toArray()
@@ -130,7 +133,7 @@ export class AnimationStudio {
     }
 
     selectKeyframe(keyframe) {
-        let handler = this.animationTabHandler.active
+        let handler = this.pth.animationTabs.active
         let old = handler.selectedKeyFrame
         handler.selectedKeyFrame = keyframe
         if(old !== undefined) {
@@ -171,12 +174,12 @@ export class AnimationStudio {
     }
 
     runFrame() {
-        this.display.tbl.resetAnimations()
+        this.pth.model.resetAnimations()
         this.raytracer.update()
 
         let delta = this.clock.getDelta()
-        if(this.animationTabHandler.isAny()) {
-            let data = this.animationTabHandler.activeData
+        if(this.pth.animationTabs.isAny()) {
+            let data = this.pth.animationTabs.activeData
             if(data !== null) {
                 this.keyframeManager.ensureFramePosition()
                 this.keyframeManager.setupSelectedPose()

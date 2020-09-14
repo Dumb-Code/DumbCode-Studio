@@ -1,11 +1,11 @@
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D, Quaternion } from "../three.js";
-import { downloadBlob } from "../util.js";
-import { readFile } from "../displays.js";
-import { ByteBuffer } from "../animations.js";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D, Quaternion, EventDispatcher } from "../../three.js";
+import { ByteBuffer } from "../../animations.js";
 import { readTblFile } from "./tbl_converter.js";
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
+
+const hierarchyChangedEvent = { type: "hierarchyChanged" }
 
 export class DCMModel {
 
@@ -17,11 +17,12 @@ export class DCMModel {
         
         this.cubeMap = new Map()
         this.children = []
+    }
 
-        this.onCubeHierarchyChanged = () => {
-            this.maxCubeLevel = 0
-            this.children.forEach(child => child.recalculateHierarchy())
-        }
+    onCubeHierarchyChanged() {
+        this.maxCubeLevel = 0
+        this.children.forEach(child => child.recalculateHierarchy())
+        this.dispatchEvent( hierarchyChangedEvent )
     }
 
     createModel( material ) {
@@ -418,3 +419,5 @@ DCMModel.writeModel = model => {
 
     return buffer
 }
+
+Object.assign( DCMModel.prototype, EventDispatcher.prototype )

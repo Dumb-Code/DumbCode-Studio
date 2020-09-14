@@ -56,12 +56,13 @@ const raycaster = new Raycaster()
 
 export class Raytracer {
 
-    constructor(display, material, highlightMaterial, selectedMaterial) {
-        this.material = material
-        this.highlightMaterial = highlightMaterial
-        this.selectedMaterial = selectedMaterial
+    constructor(display, pth) {
+        // this.material = material
+        // this.highlightMaterial = highlightMaterial
+        // this.selectedMaterial = selectedMaterial
+        this.pth = pth
         this.display = display
-        this.selectedSet = new Set()
+        // this.selectedSet = new Set()
         this.intersected
         this.intersectedDistance
         this.disableRaycast = false
@@ -81,12 +82,16 @@ export class Raytracer {
             
         }, false );
 
-        this.addEventListener('select', e => e.cubes.forEach(mesh => mesh.material = this.selectedMaterial))
-        this.addEventListener('deselect', e => e.cubes.forEach(mesh => mesh.material = this.material))
+        this.addEventListener('select', e => e.cubes.forEach(mesh => mesh.material = this.pth.materials.selected))
+        this.addEventListener('deselect', e => e.cubes.forEach(mesh => mesh.material = this.pth.materials.normal))
+    }
+
+    get selectedSet() {
+        return this.pth.getSelected().selectedSet
     }
 
     anySelected() {
-        return this.selectedSet.size > 0
+        return this.pth.anySelected() ? this.selectedSet.size > 0 : false
     }
 
     isSelected(group) {
@@ -160,7 +165,7 @@ export class Raytracer {
         if(mesh !== undefined) {
             if(this.intersected != mesh) {
                 if(this.intersected && !this.selectedSet.has(this.intersected)) {
-                    this.intersected.material = this.material
+                    this.intersected.material = this.pth.materials.normal
                 }
                 intersectionChangeEvent.old = this.intersected
                 intersectionChangeEvent.cube = mesh
@@ -169,12 +174,12 @@ export class Raytracer {
                 this.dispatchEvent(intersectionChangeEvent)
                 
                 if(!this.selectedSet.has(this.intersected)) {
-                    this.intersected.material = this.highlightMaterial
+                    this.intersected.material = this.pth.materials.highlight
                 } 
             } 
         } else if(this.intersected) {
             if(!this.selectedSet.has(this.intersected)) {
-                this.intersected.material = this.material
+                this.intersected.material = this.pth.materials.normal
             }
             intersectionChangeEvent.old = this.intersected
             intersectionChangeEvent.cube = undefined
@@ -198,7 +203,7 @@ export class Raytracer {
             style.top = rawMouse.y - 35 + "px"
         }
 
-        if(this.display.tbl) {
+        if(this.pth.anySelected()) {
             let intersects = this.gatherIntersections(false);
             if(!mouseDown) {
                 if(intersects.length > 0) {
@@ -217,7 +222,7 @@ export class Raytracer {
             let arr = []
             lineIntersection(previousRawMouse.x, previousRawMouse.y, rawMouse.x, rawMouse.y, (x, y) => {
                 raycaster.setFromCamera(setMouseFromPoint(x, y, false), this.display.camera)
-                let inters = raycaster.intersectObjects(this.display.tbl.modelCache.children, true)
+                let inters = raycaster.intersectObjects(this.pth.model.modelCache.children, true)
                 if(inters.length > 0) {
                     arr.push(inters[0])
                 }
@@ -225,7 +230,7 @@ export class Raytracer {
             return arr
         } else {
             raycaster.setFromCamera(mouse, this.display.camera);
-            return raycaster.intersectObjects(this.display.tbl.modelCache.children , true)
+            return raycaster.intersectObjects(this.pth.model.modelCache.children , true)
         }
     }
 

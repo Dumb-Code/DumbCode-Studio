@@ -22,7 +22,7 @@ export class CubeValueDisplay {
 
     constructor(dom, studio, renameCube) {
         this.raytracer = studio.raytracer
-        this.display = studio.display
+        this.pth = studio.pth
         this.root = studio.commandRoot
         this.commandResultChangeCache = null
 
@@ -242,12 +242,12 @@ export class CubeValueDisplay {
 
     cubeArgumentHandler() {
         return new ArgumentHandler(p => {
-            let cube = this.display.tbl.cubeMap.get(p)
+            let cube = this.pth.model.cubeMap.get(p)
             if(cube === undefined) {
                 throw Error(`Cube ${p} does not exist`)
             }
             return cube
-        }, p => [...this.display.tbl.cubeMap.keys()])
+        }, p => [...this.pth.model.cubeMap.keys()])
     }
 
 }

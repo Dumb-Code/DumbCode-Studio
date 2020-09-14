@@ -1,7 +1,7 @@
 export class PanelButtons {
     constructor(dom, studio) {
         dom.find('.button-delete-keyframe').click(() => {
-            let handler = studio.animationTabHandler.active
+            let handler = studio.pth.animationTabs.active
             if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 let index = handler.keyframes.indexOf(handler.selectedKeyFrame)
                 if(index >= 0) {
@@ -48,7 +48,7 @@ export class PanelButtons {
 
         startTimeField.on('input', e => {
             let value = Math.max(Number(e.target.value), 0)
-            let handler = studio.animationTabHandler.active
+            let handler = studio.pth.animationTabs.active
 
             if(handler !== null && !isNaN(value) && handler.selectedKeyFrame !== undefined) {
                 handler.selectedKeyFrame.startTime = value
@@ -59,7 +59,7 @@ export class PanelButtons {
 
         dom.find('.input-keyframe-duration').on('input', e => {
             let value = Math.max(Number(e.target.value), 0)
-            let handler = studio.animationTabHandler.active
+            let handler = studio.pth.animationTabs.active
             
             if(handler !== null && !isNaN(value) && handler.selectedKeyFrame !== undefined) {
                 let diff = value - handler.selectedKeyFrame.duration

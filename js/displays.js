@@ -82,11 +82,11 @@ export class DinosaurDisplay {
      * @param {Material} material 
      */
     setMainModel(material, model) {
-        if(this.tbl) {
-            this.scene.remove(this.tbl.modelCache)
-        }
-        this.allCubes.length = 0
-        this.tbl = model
+        // if(this.tbl) {
+        //     this.scene.remove(this.tbl.modelCache)
+        // }
+        // this.allCubes.length = 0
+        // this.tbl = model
         this.material = material
         this.scene.add(model.createModel(material))
     }

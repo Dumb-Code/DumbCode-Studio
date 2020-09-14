@@ -3,26 +3,26 @@ import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture } from ".
 
 export class ModelerOptions {
 
-    constructor(dom, studio, setCamera, updateTexture) {
+    constructor(dom, studio, setCamera) {
         this.raytracer = studio.raytracer
         this.textureMode = new LinkedSelectableList(dom.find('.select-texture-mode')).onchange(e => {
             switch(e.value) {
                 case "textured":
-                    updateTexture(m => {
+                    studio.pth.updateTexture(m => {
                         m.map = m._mapCache
                         m.wireframe = false
                     })
                     break
                 
                 case "untextured":
-                    updateTexture(m => {
+                    studio.pth.updateTexture(m => {
                         m.map = null
                         m.wireframe = false
                     })
                     break
                 
                 case "outline":
-                    updateTexture(m => {
+                    studio.pth.updateTexture(m => {
                         m.map = null
                         m.wireframe = true
                     })

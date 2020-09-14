@@ -21,6 +21,7 @@ $(document)
 export class DragSelection {
     constructor(studio, selectionElement, orbitControls) {
         this.display = studio.display
+        this.pth = studio.pth
         this.raytracer = studio.raytracer
         this.selectionElement = selectionElement
         this.previousIntersected = new Set()
@@ -60,7 +61,7 @@ export class DragSelection {
         //todo: maybe make the cubes intersected rather than selected before the mouse is released
         let intersectedObjects = new Set()
         let step = 5
-        let calcsLeft = Math.max(500 / this.display.tbl.cubeMap.size, 75)
+        let calcsLeft = Math.max(500 / this.pth.model.cubeMap.size, 75)
         for(let x = left; x <= left+width; x+=step) {
             for(let y = top; y <= top+height; y+=step) {
                 let key = x+','+y
@@ -74,7 +75,7 @@ export class DragSelection {
                     mouse.y = -((y - rect.top) / rect.height) * 2 + 1;
                     raycaster.setFromCamera(mouse, this.display.camera)
                     raycaster
-                        .intersectObjects(this.display.tbl.modelCache.children, true)
+                        .intersectObjects(this.pth.model.modelCache.children, true)
                         .forEach(object => cache.add(object.object.parent))
                     this.raytraceCache.set(key, cache)
                 }

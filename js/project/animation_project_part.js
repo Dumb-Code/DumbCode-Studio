@@ -2,7 +2,7 @@ import { readFile } from "../displays.js"
 import { ByteBuffer } from "../animations.js"
 import { doubleClickToEdit } from "../util.js"
 import { GifExporter } from "./gif_export.js"
-import { DCMModel } from "../model_format/dcm_loader.js"
+import { DCMModel } from "../formats/model/dcm_loader.js"
 
 export class AnimationProjectPart {
 
@@ -74,7 +74,7 @@ export class AnimationProjectPart {
     createNewAnimationTab(name) {
         let animator = this.animatorGetter()
         if(animator) {
-            let tab = animator.animationTabHandler.createNewTab()
+            let tab = animator.pth.animationTabs.createNewTab()
             let element = tab.element
 
             let cloned = this.emptyAnimationList.clone()

@@ -15,18 +15,20 @@ import { ModelerOptions } from "./modeler_options.js"
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, orbitControls, renameCube, setCamera, updateTexture) {
+    constructor(domElement, display, raytracer, orbitControls, renameCube, setCamera, pth) {
         this.domElement = domElement
         let dom = $(domElement)
         this.canvasContainer = dom.find("#display-div").get(0)
         this.display = display
+        this.pth = pth
         this.raytracer = raytracer
 
         this.group = new Group()
 
-        this.commandRoot = new CommandRoot(dom, this.raytracer, this.display)
+        this.commandRoot = new CommandRoot(dom, pth)
 
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
+        this.pth.addEventListener('selectchange', () => this.cubeList.refreshCompleatly())
         this.selectedRequired = dom.find('.editor-require-selected')
 
         this.transformControls = display.createTransformControls()
@@ -37,7 +39,7 @@ export class ModelingStudio {
 
         this.rotationPointMarkers = new RotationPointMarkers(this)
         this.lockedCubes = new LockedCubes(this)    
-        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, display.tbl, this.lockedCubes, renameCube)
+        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, pth, this.lockedCubes, renameCube)
         this.dragSelection = new DragSelection(this, dom.find('#drag-selection-overlay'), orbitControls)
         this.pointTracker = new CubePointTracker(raytracer, display, this.group)
         this.gumball = new Gumball(dom, this)
@@ -45,7 +47,7 @@ export class ModelingStudio {
         this.studioPanels = new StudioPanels(dom, 300, 300)
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
 
-        this.modelerOptions = new ModelerOptions(dom, this, setCamera, updateTexture)
+        this.modelerOptions = new ModelerOptions(dom, this, setCamera)
 
         this.cubeCommands = new CubeCommands(this.commandRoot, this)
     }
@@ -56,7 +58,7 @@ export class ModelingStudio {
     }
 
     runFrame() {
-        this.display.tbl.resetAnimations()
+        this.pth.model.resetAnimations()
         this.pointTracker.update()
         this.raytracer.update()
         this.cubeValues.onRender()

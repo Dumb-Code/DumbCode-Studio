@@ -4,15 +4,14 @@ import { DraggableElementList, LinkedSelectableList } from "../util.js"
 
 export class TextureManager {
 
-    constructor(dom, studio, setTexture, filesPage) {
-        this.display = studio.display
-        this.setTexture = setTexture
+    constructor(dom, studio, filesPage) {
+        this.pth = studio.pth
         this.filesPage = filesPage
         this.textures = []
 
         this.highlightCanvas = document.createElement('canvas')
-        this.highlightCanvas.width = this.display.tbl.texWidth
-        this.highlightCanvas.height = this.display.tbl.texHeight
+        this.highlightCanvas.width = 1//this.pth.model.texWidth
+        this.highlightCanvas.height = 1//this.pth.model.texHeight
         this.highlightContext = this.highlightCanvas.getContext('2d')
         this.highlightContext.imageSmoothingEnabled = false
         this.highlighPixel = null
@@ -69,8 +68,8 @@ export class TextureManager {
     }
     
     addImage(name, img) {
-        let width = this.display.tbl.texWidth
-        let height = this.display.tbl.texHeight
+        let width = this.pth.model.texWidth
+        let height = this.pth.model.texHeight
 
         let empty = false
 
@@ -143,8 +142,8 @@ export class TextureManager {
         let height = this.textures.filter(t => !t.isHidden).map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
 
         if(this.textures.length === 0) {
-            width = this.display.tbl.texWidth
-            height = this.display.tbl.texHeight
+            width = this.pth.model.texWidth
+            height = this.pth.model.texHeight
         }
 
         this.canvas.width = width
@@ -167,7 +166,7 @@ export class TextureManager {
         tex.flipY = false
         tex.magFilter = NearestFilter;
         tex.minFilter = NearestFilter;
-        this.setTexture(tex)
+        this.pth.setTexture(tex)
         
     }
 
