@@ -12,6 +12,7 @@ export class DCMModel {
 
     constructor() {
         this.author = "???"
+        this.fileName = "New Model"
         this.texWidth = 64
         this.texHeight = 64
         this.maxCubeLevel = 0

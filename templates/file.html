@@ -44,17 +44,6 @@
     <div class="columns">
         <div class="column is-1"></div>
         <div class="column">
-            <div class="notification is-dark">
-                <h1 class="title is-5">PROJECT</h1>
-                <div class="columns">
-                    <div class="column is-narrow">
-                      <i class="fas fa-cubes"></i>
-                    </div>
-                    <div class="column">
-                        <p>parasaur.dcproj</p>
-                    </div>
-                </div>
-            </div>
             <div class="notification is-dark base-drop-area model-drop-area">
                 <div class="columns model-layer-topbar">
                     <div class="column">
@@ -75,6 +64,16 @@
                             <input id="model-file-input" class="file-input-hidden" type="file" accept=".tbl,.dcm" multiple/>
                         </div>
                     </div>
+                    <div class="column is-narrow">
+                        <div class="clickable tooltip" data-tooltip="Import as Project">
+                            <label for="project-file-input">
+                                <div class="icon is-small">
+                                    <i class="fas fa-file-import"></i>
+                                </div>
+                            </label>
+                            <input id="project-file-input" class="file-input-hidden" type="file" accept=".dcproj" multiple/>
+                        </div>
+                    </div>
                 </div>
                 <div class="model-list-entry columns empty-column">
                     <div class="column is-narrow model-preview">
@@ -84,15 +83,31 @@
                         <input class="dbl-text-edit" type="text">
                     </div>
                     <div class="column is-narrow">
+                        <span class="download-project-file icon is-small clickable tooltip" data-tooltip="Download As Project">
+                            <i class="fas fa-file-export"></i>
+                        </span>
+                    </div>
+                    <div class="column is-narrow">
                         <span class="download-model-file icon is-small clickable tooltip " data-tooltip="Download Model">
                             <i class="fas fa-file-download"></i>
                         </span>
                     </div>
                 </div>
             </div>
+            <!-- <div class="notification is-dark required-project">
+                <h1 class="title is-5">PROJECT</h1>
+                <div class="columns">
+                    <div class="column is-narrow">
+                      <i class="fas fa-cubes"></i>
+                    </div>
+                    <div class="column">
+                        <p>parasaur.dcproj</p>
+                    </div>
+                </div>
+            </div> -->
         </div>
         <div class="column">
-            <div class="notification is-dark base-drop-area texture-drop-area">
+            <div class="notification is-dark base-drop-area texture-drop-area required-project">
                 <div class="columns texture-layer-topbar">
                     <div class="column">
                         <h1 class="title is-5">TEXTURE LAYERS</h1>
@@ -127,7 +142,7 @@
                     </div>
                 </div>
             </div>
-            <div class="notification is-dark">
+            <div class="notification is-dark required-project">
                 <div class="columns animation-layer-topbar">
                     <div class="column">
                         <h1 class="title is-5">ANIMATIONS</h1>

@@ -12,7 +12,7 @@ export class TextureProjectPart {
 
         fileUploadBox(dom.find('.texture-drop-area'), files => this.uploadTextureFile(files))
      
-        pth.addEventListener('selectchange', e => this.refreshTextureLayers())
+        pth.addEventListener('selectchange', () => this.refreshTextureLayers())
     }
 
     createEmptyTexture() {
@@ -47,7 +47,10 @@ export class TextureProjectPart {
             let img = document.createElement("img")
             return new Promise(async(resolve) => {
                 img.src = await readFile(file, (reader, f) => reader.readAsDataURL(f))
-                img.onload = () => { resolve({ name: file.name, img} ) }
+                img.onload = () => { 
+                    resolve({ name: file.name, img })
+                    img.onload = null
+                 }
             })
         }))
         .then(files => files.forEach(file => this.createTextureElement(file.name, file.img)))

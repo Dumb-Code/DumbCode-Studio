@@ -123,12 +123,14 @@ export class TextureManager {
         if(empty) {
             ctx.fillStyle = "rgba(255, 255, 255, 1)"
             ctx.fillRect(0, 0, width, height)
-            data.onCanvasChange()
         } else {
             ctx.drawImage(img, 0, 0, width, height)
         }
 
+        data.onCanvasChange()
+
         this.textures.unshift(data)
+
         return data
     }
 

@@ -24,11 +24,18 @@ export class ProjectTabHandler {
         if(index !== this.currentIndex) {
             if(this.currentIndex !== -1) {
                 this.display.scene.remove(this.allTabs[this.currentIndex].model.modelCache)
+            } else {
+                this.dispatchEvent( { type: "initiateselection" } )
+
             }
             this.display.scene.add(this.allTabs[index].model.modelCache)
         }
         this.currentIndex = index
         this.dispatchEvent( { type: "selectchange", from: this.currentIndex, to: index } )
+    }
+
+    refresh() {
+        this.selectIndex(this.currentIndex)
     }
 
     anySelected() {

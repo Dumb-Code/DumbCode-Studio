@@ -3,6 +3,8 @@ import { ByteBuffer } from "../animations.js"
 import { doubleClickToEdit } from "../util.js"
 import { GifExporter } from "./gif_export.js"
 import { DCMModel } from "../formats/model/dcm_loader.js"
+import { TBLFilesLoader } from "../formats/animation/tbl_files.js"
+import { DCALoader } from "../formats/animation/dca_loader.js"
 
 export class AnimationProjectPart {
 
@@ -12,18 +14,11 @@ export class AnimationProjectPart {
         this.gifExporter = new GifExporter(animatorGetter)
         this.emptyAnimationList = dom.find('.animation-list-entry.empty-column')
         dom.find('.new-animation-button').click(() => this.createNewAnimationTab())
-        dom.find('#animation-file-input').on('input', e => {
-            [...e.target.files].forEach(async(file) => {
-                let tab = this.createNewAnimationTab(file.name.substring(0, file.name.length - 4))
-                let animator = this.animatorGetter()
-                if(tab) {
-                    let buffer = new ByteBuffer(await readFile(file))
-                    tab.handler.readDCAFile(buffer)
-                    tab.handler.keyframes.forEach(kf => tab.handler.createLayerInfo(kf.layer))
-                    animator.keyframeManager.reframeKeyframes()
-                }
-            })
-        })
+        dom.find('#animation-file-input').on('input', e => 
+            [...e.target.files].forEach(async(file) => 
+                this.createAndInitiateNewAnimationTab(file.name.substring(0, file.name.length - 4), await readFile(file))
+            )
+        )
 
         dom.find('#animation-tbl-files').on('input', async(e) => {
             let files = [...e.target.files]
@@ -65,14 +60,24 @@ export class AnimationProjectPart {
         
                 let info = infoFile ? JSON.parse(result.pop()) : { base_time: 5 }
 
-                tab.handler.readFromTblFiles(result, info)
+                TBLFilesLoader.readFromTblFiles(tab.handler, result. info)
                 tab.handler.keyframes.forEach(kf => tab.handler.createLayerInfo(kf.layer))
                 animator.keyframeManager.reframeKeyframes()
             }
         })
 
         pth.addEventListener('selectchange', e => this.refreshAnimationList())
+    }
 
+    createAndInitiateNewAnimationTab(name, arraybuffer) {
+        let tab = this.createNewAnimationTab(name)
+        let animator = this.animatorGetter()
+        if(tab) {
+            let buffer = new ByteBuffer(arraybuffer)
+            DCALoader.importAnimation(tab.handler, buffer)
+            tab.handler.keyframes.forEach(kf => tab.handler.createLayerInfo(kf.layer))
+            animator.keyframeManager.reframeKeyframes()
+        }
     }
 
     createNewAnimationTab(name) {
@@ -101,50 +106,7 @@ export class AnimationProjectPart {
 
         let handler = tab.handler
         dom.find('.download-animation-gif').click(() => this.gifExporter.onOpenModal(handler, tab.name))
-        dom.find('.download-animation-file').click(() => {
-            let buffer = new ByteBuffer()
-            buffer.writeNumber(4)
-            buffer.writeNumber(handler.keyframes.length)
-            
-            handler.keyframes.forEach(kf => {
-                buffer.writeNumber(kf.startTime)
-                buffer.writeNumber(kf.duration)
-                buffer.writeNumber(kf.layer)
-
-                buffer.writeNumber(kf.rotationMap.size)
-                kf.rotationMap.forEach((entry, name) => {
-                    buffer.writeString(name)
-                    buffer.writeNumber(entry[0])
-                    buffer.writeNumber(entry[1])
-                    buffer.writeNumber(entry[2])
-                })
-
-                buffer.writeNumber(kf.rotationPointMap.size)
-                kf.rotationPointMap.forEach((entry, name) => {
-                    buffer.writeString(name)
-                    buffer.writeNumber(entry[0])
-                    buffer.writeNumber(entry[1])
-                    buffer.writeNumber(entry[2])
-                })
-
-                buffer.writeNumber(kf.progressionPoints.length)
-                kf.progressionPoints.forEach(p => {
-                    buffer.writeNumber(p.x)
-                    buffer.writeNumber(p.y)
-                })
-            })
-
-            buffer.writeNumber(handler.events.length)
-            handler.events.forEach(event => {
-                buffer.writeNumber(event.time)
-                buffer.writeNumber(event.data.length)
-                event.data.forEach(datum => {
-                    buffer.writeString(datum.type)
-                    buffer.writeString(datum.data)
-                })
-            })
-            buffer.downloadAsFile(tab.name + ".dca")
-        })
+        dom.find('.download-animation-file').click(() => DCALoader.exportAnimation(handler).downloadAsFile(tab.name + ".dca"))
         return tab
     }
 
