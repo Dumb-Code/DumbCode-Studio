@@ -1,5 +1,5 @@
-import { TblCube } from "../tbl_loader.js"
 import { CubeLocker } from "../util.js"
+import { DCMCube } from "../formats/model/dcm_loader.js"
 
 export function applyCubeAddingDeleting(dom, studio) {
     dom.find('.create-cube').click(() => {
@@ -7,7 +7,7 @@ export function applyCubeAddingDeleting(dom, studio) {
         if(studio.raytracer.anySelected()) {
             studio.raytracer.firstSelected().tabulaCube.addChild(cube)
         } else {
-            studio.display.tbl.rootGroup.addChild(cube)
+            studio.pth.model.addChild(cube)
         }
     })
 
@@ -16,7 +16,7 @@ export function applyCubeAddingDeleting(dom, studio) {
         if(studio.raytracer.anySelected()) {
             studio.raytracer.firstSelected().tabulaCube.parent.addChild(cube)
         } else {
-            studio.display.tbl.rootGroup.addChild(cube)
+            studio.pth.model.addChild(cube)
         }
     })
 
@@ -49,7 +49,7 @@ export function applyCubeAddingDeleting(dom, studio) {
 }
 
 function createCube(studio) {
-    let map = studio.display.tbl.cubeMap
+    let map = studio.pth.model.cubeMap
     let name = "newcube"
     if(map.has(name)) {
         let num = 0
@@ -59,5 +59,5 @@ function createCube(studio) {
         }
         name = newName
     }
-    return new TblCube(name, [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 1], [0, 0], [0, 0, 0], [], false, studio.display.tbl)
+    return new DCMCube(name, [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], studio.pth.model)
 }

@@ -1,11 +1,11 @@
 import { isKeyDown, DraggableElementList, doubleClickToEdit } from "../util.js"
 
 export class CubeListBoard {
-    constructor(cubeList, raytracer, tbl, lockedCubes, renameCube) {
+    constructor(cubeList, raytracer, pth, lockedCubes, renameCube) {
         this.cubeList = cubeList
         this.raytracer = raytracer
         this.renameCube = renameCube
-        this.tbl = tbl
+        this.pth = pth
         this.lockedCubes = lockedCubes
         this.previousDragElement
         this.elementMap = new Map()
@@ -37,7 +37,7 @@ export class CubeListBoard {
             if(e.target == this.cubeList && cube !== undefined) {
                 this.lockedCubes.createLockedCubesCache()
                 cube.parent.deleteChild(cube, true)
-                tbl.rootGroup.addChild(cube)
+                pth.model.addChild(cube)
                 this.lockedCubes.reconstructLockedCubes()
             }
         }
@@ -47,17 +47,14 @@ export class CubeListBoard {
                 this.raytracer.deselectAll()
             }
         }
-
-        this.refreshCompleatly()
     }
 
     refreshCompleatly() {
         let oldMap = new Map(this.elementMap)
         this.elementMap.clear()
         this.cubeList.innerHTML = "" //Remove all the children
-        let root = this.tbl.rootGroup
 
-        root.cubeList.forEach(c => this.createCube(this.cubeList, c, oldMap))
+        this.pth.model.children.forEach(c => this.createCube(this.cubeList, c, oldMap))
     }
 
     createCube(parent, cube, oldMap) {

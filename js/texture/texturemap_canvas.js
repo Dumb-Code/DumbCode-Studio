@@ -1,11 +1,11 @@
 import { CanvasTransformControls } from "../util.js"
 
 export class TexturemapCanvas {
-    constructor(domElement, display, raytracer, textureTools, cubeValues) {
+    constructor(domElement, raytracer, textureTools, cubeValues, pth) {
+        this.pth = pth
         this.canvas = domElement.get(0)
         this.canvas.width = this.canvas.height = 1
         this.parnetNode = domElement.parent().parent()
-        this.display = display
         this.raytracer = raytracer
         this.textureTools = textureTools
         this.updateCubeValues = () => cubeValues.updateCubeValues()
@@ -32,7 +32,7 @@ export class TexturemapCanvas {
         // let size = Math.max(Math.min(this.parnetNode.width(), this.parnetNode.height()), 1)
         // this.canvas.width = this.canvas.height = size
 
-        let aspect = this.display.tbl.texWidth / this.display.tbl.texHeight
+        let aspect = this.pth.model.texWidth / this.pth.model.texHeight
 
         let drawWidth = Math.min(this.parnetNode.width(), this.parnetNode.height() * aspect)
         let drawHeight = drawWidth / aspect
@@ -48,7 +48,7 @@ export class TexturemapCanvas {
         ctx.fillStyle = "rgba(255, 255, 255, 255)"
         ctx.fillRect(0, 0, drawWidth, drawHeight)
 
-        let canvas = this.display.material?.map?.image
+        let canvas = this.pth.materials.normal?.map?.image
         if(canvas !== undefined) {
             ctx.drawImage(canvas, 0, 0, drawWidth, drawHeight)
         }
@@ -58,10 +58,10 @@ export class TexturemapCanvas {
 
     drawCubesToCanvas(canvas, drawWidth, drawHeight, opacity) {
         let ctx = canvas.getContext('2d')
-        let su = this.display.tbl.texWidth/drawWidth
-        let sv = this.display.tbl.texHeight/drawHeight
+        let su = this.pth.model.texWidth/drawWidth
+        let sv = this.pth.model.texHeight/drawHeight
 
-        this.display.tbl.cubeMap.forEach(cube => {
+        this.pth.model.cubeMap.forEach(cube => {
             let r = 1.0
             let g = 1.0
             let b = 1.0
@@ -114,12 +114,12 @@ export class TexturemapCanvas {
 
     mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback, onlyUpdateContext) {
         let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
-        let su = this.display.tbl.texWidth/size
-        let sv = this.display.tbl.texHeight/size
+        let su = this.pth.model.texWidth/size
+        let sv = this.pth.model.texHeight/size
 
         let overHandled = false
 
-        this.display.tbl.cubeMap.forEach(cube => {
+        this.pth.model.cubeMap.forEach(cube => {
             if(overHandled) {
                 return
             }

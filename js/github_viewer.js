@@ -217,7 +217,7 @@ window.setupDinosaur = dino => {
                     Promise.all(
                         d.animations.map(f => 
                             fetch(f.download_url)
-                            .then(f => TBLModel.loadModel(f.blob()))
+                            .then(f => TBLModel.loadModel(f.arrayBuffer()))
                             .then(o => { node.innerText = `Parsing tabula models ( ${++counter} / ${total} ) - ${d.name}`; return o})
                         )
                     ).then(animations => call({ name:d.name, animations }))

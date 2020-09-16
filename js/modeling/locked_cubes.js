@@ -2,7 +2,7 @@ import { CubeLocker } from "../util.js"
 
 export class LockedCubes {
     constructor(studio) {
-        this.display = studio.display
+        this.pth = studio.pth
         this.lockedCubes = new Set()
 
         let transformControls  = studio.transformControls 
@@ -64,7 +64,7 @@ export class LockedCubes {
     }
 
     reconstructLockedCubes() {
-        this.display.tbl.modelCache.updateMatrixWorld(true)
+        this.pth.model.modelCache.updateMatrixWorld(true)
 
         //Moving cubes are cubes that SHOULD move but at some point a parent is locked preventing them from moving
         let movingCubesCache = new Map()

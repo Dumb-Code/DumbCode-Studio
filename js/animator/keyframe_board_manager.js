@@ -9,7 +9,7 @@ const resolution = 10
 export class KeyframeBoardManager {
     
     constructor(studio, keyframeBoard) {
-        this.getHandler = () => studio.animationTabHandler.active
+        this.getHandler = () => studio.pth.animationTabs.active
         this.selectKeyframe = keyframe => studio.selectKeyframe(keyframe)
         this.playstate = new PlayState()
         this.elementDoms = new Map()

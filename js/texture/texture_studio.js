@@ -6,31 +6,34 @@ import { TextureTools } from "./texture_tools.js"
 
 export class TextureStudio {
 
-    constructor(domElement, filesPage, display, raytracer, orbitControls, setTexture, updateTexture) {
+    constructor(domElement, filesPage, display, raytracer, orbitControls, pth) {
         this.domElement = domElement
-        this.updateTexture = updateTexture
+        this.pth = pth
         let dom = $(domElement)
         this.display = display
         this.raytracer = raytracer
         this.orbitControls = orbitControls
 
         this.studioPanels = new TexturePanels(dom, 300, 300)
-        this.textureManager = new TextureManager(dom, this, setTexture, filesPage)
         this.cubeValues = new TextureCubeValues(dom, raytracer)
         this.textureTools = new TextureTools(dom, this)
-        this.texturemapCanvas = new TexturemapCanvas(dom.find('#texture-canvas'), display, raytracer, this.textureTools, this.cubeValues)
+        this.texturemapCanvas = new TexturemapCanvas(dom.find('#texture-canvas'), raytracer, this.textureTools, this.cubeValues, pth)
+
+        this._textureUpload = dom.find('.texture-file-input-entry')
+        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(e.target.files))
+        dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
     }
 
     runFrame() {
         this.raytracer.update()
-        this.display.tbl.resetAnimations()
+        this.pth.model.resetAnimations()
         this.texturemapCanvas.drawTextureCanvas(this.rightArea, this.topRArea)
         this.textureTools.runFrame()
         this.display.render()
     }
 
     setActive() {
-        this.updateTexture(m => {
+        this.pth.updateTexture(m => {
             this.isTextureSeleted = m.map !== null
             m._oldTextureStudioWireframe = m.wireframe
             m.map = m._mapCache
@@ -43,7 +46,7 @@ export class TextureStudio {
     }
 
     setUnactive() {
-        this.updateTexture(m => {
+        this.pth.updateTexture(m => {
             //Texture can be updated, so we can't just cache it
             if(this.isTextureSeleted === true) {
                 m.map = m._mapCache 

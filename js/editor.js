@@ -1,5 +1,4 @@
 import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, Quaternion } from "./three.js";
-import { TBLModel } from "./tbl_loader.js";
 import { DinosaurDisplay, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
@@ -9,10 +8,13 @@ import { ModelingStudio } from "./modeling/modeling_studio.js";
 import { FilesPage } from "./project/files_page.js";
 import { Raytracer } from "./raytracer.js";
 import { TextureStudio } from "./texture/texture_studio.js";
+import { DCMModel } from "./formats/model/dcm_loader.js";
+import { ProjectTabHandler } from "./project_tab_handler.js";
+import { fileUploadBox } from "./util.js";
 
 const major = 0
-const minor = 2
-const patch = 17
+const minor = 3
+const patch = 0
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -23,21 +25,24 @@ const display = new DinosaurDisplay()
 
 let controls
 
-let material = new MeshLambertMaterial( {
-    color: 0x777777,
-    transparent: true,
-    side: DoubleSide,
-    alphaTest: 0.0001,
-} )
+// let material = new MeshLambertMaterial( {
+//     color: 0x777777,
+//     transparent: true,
+//     side: DoubleSide,
+//     alphaTest: 0.0001,
+// } )
 
 
-let highlightMaterial = material.clone()
-highlightMaterial.emissive.setHex( 0xFF0000 )
+// let highlightMaterial = material.clone()
+// highlightMaterial.emissive.setHex( 0xFF0000 )
 
-let selectedMaterial = material.clone()
-selectedMaterial.emissive.setHex( 0x0000FF )
+// let selectedMaterial = material.clone()
+// selectedMaterial.emissive.setHex( 0x0000FF )
 
-const raytracer = new Raytracer(display, material, highlightMaterial, selectedMaterial)
+const pth = new ProjectTabHandler(display)
+
+
+const raytracer = new Raytracer(display, pth)
 
 const projectTabs = new ProjectTabs()
 
@@ -85,7 +90,13 @@ async function init() {
 }
 
 window.onModulesFinished = async() => {
-    filesPage = await createFilesPage()
+    filesPage = createFilesPage()
+    animationStudio = createAnimationStudio()
+    modelingStudio = createModelingStudio()
+    textureStudio = createTextureStudio()
+
+    pth.inititateTabs(filesPage, modelingStudio, textureStudio, animationStudio)
+
     frame()
 }
 
@@ -139,13 +150,13 @@ function runFrame() {
 }
 
 function renameCube(cube, newValue) {
-    if(display.tbl.cubeMap.has(newValue)) {
+    if(pth.model.cubeMap.has(newValue)) {
         return true
     }
     let oldValue = cube.name
     if(oldValue !== newValue) {
         cube.updateCubeName(newValue)
-        animationStudio.animationTabHandler.allTabs.forEach(tab => tab.handler.renameCube(oldValue, newValue))
+        pth.animationTabs.allTabs.forEach(tab => tab.handler.renameCube(oldValue, newValue))
         modelingStudio.modelerOptions.refreshOptionTexts()
     }   
     return false
@@ -156,23 +167,6 @@ function setCamera(camera) {
     animationStudio.setCamera(camera)
     controls.object = camera
     display.camera = camera
-}
-
-function updateTexture(callback) {
-    callback(material)
-    callback(selectedMaterial)
-    callback(highlightMaterial)
-
-    material.needsUpdate = true
-    selectedMaterial.needsUpdate = true
-    highlightMaterial.needsUpdate = true
-}
-
-function setTexture(tex) {
-    updateTexture(m => {
-        m.map = tex
-        m._mapCache = tex
-    })
 }
 
 export function updateCamera(camera, width, height) {
@@ -190,7 +184,7 @@ export function updateCamera(camera, width, height) {
 }
 
 window.createNewModel = () => {
-    initiateModel(new TBLModel())
+    initiateModel(new DCMModel())
 }
 
 window.setupMainModel = async(file, nameElement) => {
@@ -199,7 +193,7 @@ window.setupMainModel = async(file, nameElement) => {
     nameElement.dataset.tooltip = file.name
 
     try {
-        initiateModel(await TBLModel.loadModel(readFile(file), file.name))
+        initiateModel(await DCMModel.loadModel(readFile(file), file.name))
     } catch(err) {
         nameElement.dataset.tooltip = "ERROR!"
         console.error(`Error from file ${file.name}: ${err.message}`, err)
@@ -207,38 +201,37 @@ window.setupMainModel = async(file, nameElement) => {
 }
 
 window.downloadModel = () => {
-    TBLModel.writeModel(display.tbl)
+    DCMModel.writeModel(pth.model).downloadAsFile(pth.model.fileName ? (pth.model.fileName + ".dcm") : "model.dcm" )
 }
 
 function createFilesPage() {
-    return new FilesPage($('#files-area'), () => modelingStudio, () => textureStudio, () => animationStudio)
+    return new FilesPage($('#files-area'), () => modelingStudio, () => textureStudio, () => animationStudio, pth)
 }
 
 function createModelingStudio() {
-    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, setCamera, updateTexture)
+    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, setCamera, pth)
 }
 
 function createTextureStudio() {
-    return new TextureStudio($('#texture-area'), filesPage, display, raytracer, controls, setTexture, updateTexture)
+    return new TextureStudio($('#texture-area'), filesPage, display, raytracer, controls, pth)
 }
 
 function createAnimationStudio() {
-    return new AnimationStudio($('#animation-area') , raytracer, display, filesPage)
+    return new AnimationStudio($('#animation-area') , raytracer, display, pth)
 }
 
 function initiateModel(model) {
-    if(display.tbl !== undefined) { //TODO: tabs
-        return
-    }
-    display.setMainModel(material, model)
-    animationStudio = createAnimationStudio()
-    modelingStudio = createModelingStudio()
-    textureStudio = createTextureStudio()
-    let old = model.onCubeHierarchyChanged
-    model.onCubeHierarchyChanged = () => {
-        modelingStudio.cubeHierarchyChanged()
-        old()
-    }
+
+    // display.setMainModel(material, model)
+    
+
+    
+
+    // let old = model.onCubeHierarchyChanged
+    // model.onCubeHierarchyChanged = () => {
+    //     modelingStudio.cubeHierarchyChanged()
+    //     old()
+    // }
 }
 
 window.addEventListener( 'resize', e => window.studioWindowResized(), false );

@@ -1,7 +1,8 @@
 export class PanelButtons {
     constructor(dom, studio) {
+        this.pth = studio.pth
         dom.find('.button-delete-keyframe').click(() => {
-            let handler = studio.animationTabHandler.active
+            let handler = studio.pth.animationTabs.active
             if(handler !== null && handler.selectedKeyFrame !== undefined) {
                 let index = handler.keyframes.indexOf(handler.selectedKeyFrame)
                 if(index >= 0) {
@@ -37,18 +38,18 @@ export class PanelButtons {
             updatePlaystate()
         })
 
-        let inputSpeedSlider = dom.find('.input-playback-speed')
-        inputSpeedSlider.on('input', e => {
-            let value = Math.round(Math.pow(2, e.target.value) * 10) / 10
-            inputSpeedSlider.parent().attr('data-tooltip', 'Speed: ' + (value === 1 ? 'Normal' : 'x ' + value))
-            studio.keyframeManager.playstate.speed = value
+        this.inputPlaybackRange = dom.find('.input-playback-range')
+        this.inputPlaybackRange.on('input', e => {
+            let value = e.target.value
+            this.inputPlaybackRange.parent().attr('data-tooltip', `Ticks: ${value}`)
+            studio.keyframeManager.playstate.ticks = parseFloat(value)
         })
 
         let startTimeField = dom.find('.input-keyframe-starttime')
 
         startTimeField.on('input', e => {
             let value = Math.max(Number(e.target.value), 0)
-            let handler = studio.animationTabHandler.active
+            let handler = studio.pth.animationTabs.active
 
             if(handler !== null && !isNaN(value) && handler.selectedKeyFrame !== undefined) {
                 handler.selectedKeyFrame.startTime = value
@@ -59,7 +60,7 @@ export class PanelButtons {
 
         dom.find('.input-keyframe-duration').on('input', e => {
             let value = Math.max(Number(e.target.value), 0)
-            let handler = studio.animationTabHandler.active
+            let handler = studio.pth.animationTabs.active
             
             if(handler !== null && !isNaN(value) && handler.selectedKeyFrame !== undefined) {
                 let diff = value - handler.selectedKeyFrame.duration
@@ -69,11 +70,10 @@ export class PanelButtons {
                 studio.keyframeManager.updateKeyFrame(handler.selectedKeyFrame)
             }
         })
+    }
 
-        this.onTabChange = () => {
-            let value = studio.keyframeManager.playstate.speed
-            inputSpeedSlider.val(Math.round(Math.log2(value) * 10) / 10)
-            inputSpeedSlider.parent().attr('data-tooltip', 'Speed: ' + (value === 1 ? 'Normal' : 'x ' + value))
-        }
+    onFrame() {
+        let active = this.pth.animationTabs.active
+        this.inputPlaybackRange.attr('max', active.totalTime).val(active.playstate.ticks)
     }
 }

@@ -1,11 +1,7 @@
-const rotArr = new Array(3)
-const posArr = new Array(3)
-
 export class AnimationHandler {
     
     constructor(tbl) {
         this.tbl = tbl
-        this.inertia = false
         this.looping = false
 
         this.forcedAnimationTicks = null
@@ -24,144 +20,6 @@ export class AnimationHandler {
         this.keyframes.forEach(kf => kf.renameCube(oldName, newName))
         if(this.loopKeyframe) {
             this.loopKeyframe.renameCube(oldName, newName)
-        }
-    }
-
-    readFromTblFiles(files, meta = { base_time: 5 }) {
-        this.keyframes = []
-
-        let baseTime = meta.base_time
-
-        if(files.length > 0 && files[0].fileName !== undefined) {
-            files.sort((a, b) => a.fileName.localeCompare(b.fileName))
-        }
-        
-        let startTime = 0;
-        for(let pose of files) {
-            let keyframe = new KeyFrame(this)
-
-            keyframe.startTime = startTime
-            keyframe.duration = baseTime
-
-            pose.cubeMap.forEach(poseCube => {
-                keyframe.rotationPointMap.set(poseCube.name, poseCube.rotationPoint)
-                keyframe.rotationMap.set(poseCube.name, poseCube.rotation)
-            })
-
-            startTime += baseTime; //todo: time overrides ???
-
-            this.keyframes.push(keyframe)
-        }
-        this.repairKeyframes(2)
-        return this.keyframes
-    }
-
-    readDCAFile(buffer) {
-        let version = buffer.readNumber()
-
-        if(version < 1) {
-            buffer.useOldString = true
-        }
-
-        let length = buffer.readNumber()
-
-        this.keyframes = []
-
-        for(let i = 0; i < length; i++) {
-            let kf = this.createKeyframe()
-
-            kf.startTime = buffer.readNumber()
-            kf.duration  = buffer.readNumber()
-            if(version >= 4) {
-                kf.layer = Math.round(buffer.readNumber())
-            }
-              
-
-            let rotSize = buffer.readNumber()
-            for(let r = 0; r < rotSize; r++) {
-                kf.rotationMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
-            }
-
-            let posSize = buffer.readNumber()
-            for(let p = 0; p < posSize; p++) {
-                kf.rotationPointMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
-            }
-
-            if(version >= 2) {
-                let ppSize = buffer.readNumber()
-                for(let p = 0; p < ppSize; p++) {
-                    kf.progressionPoints.push({ x: buffer.readNumber(), y: buffer.readNumber() })
-                }
-                kf.resortPointsDirty()
-            }
-        }
-
-        if(version >= 4) {
-            let eventSize = buffer.readNumber()
-            for(let e = 0; e < eventSize; e++) {
-                let time = buffer.readNumber()
-                let data = []
-                let dataSize = buffer.readNumber()
-                for(let d = 0; d < dataSize; d++) {
-                    data.push({ type: buffer.readString(), data: buffer.readString() })
-                }
-                this.events.push({ time, data })
-            }
-        }
-
-        this.repairKeyframes(version)
-    }
-
-    repairKeyframes(version) {
-        if(version <= 3) {
-            let map = this.tbl.cubeMap
-            if(version === 3) {
-                this.keyframes.forEach(kf => {
-                    kf.rotationMap.forEach((arr, key) => this.transformArr(arr, map.get(key)?.rotation))
-                    kf.rotationPointMap.forEach((arr, key) => this.transformArr(arr, map.get(key)?.rotationPoint))
-                })
-    
-            }
-            let sorted = [...this.keyframes].sort((a, b) => a.startTime - b.startTime)
-
-            sorted.forEach((kf, index) => {
-                this.tbl.resetAnimations()
-                this.keyframes.forEach(_kf => _kf.animate(kf.startTime))
-
-                let next = sorted[index+1]
-
-                let mod = 1
-                if(next !== undefined) {
-                    let dist = next.startTime - kf.startTime
-                    //Keyframes intersect
-                    if(dist < kf.duration) {
-                        mod = dist / kf.duration
-                        kf.duration = dist
-                    }
-                }
-
-                kf.rotationMap.forEach((arr, key) => {
-                    map.get(key)?.cubeGroup.rotation.toArray(rotArr)
-                    for(let i = 0; i < 3; i++) {
-                        arr[i] = (arr[i] - rotArr[i]*180/Math.PI) * mod
-                    }
-                })
-                kf.rotationPointMap.forEach((arr, key) => {
-                    map.get(key)?.cubeGroup.position.toArray(posArr)
-                    for(let i = 0; i < 3; i++) {
-                        arr[i] = (arr[i] - posArr[i]) * mod
-                    }
-                })
-            })
-        }
-    }
-
-    transformArr(arr, subValue) {
-        if(subValue === null) {
-            return
-        }
-        for(let i = 0; i < 3; i++) {
-            arr[i] = arr[i] + subValue[i]
         }
     }
 
@@ -340,11 +198,22 @@ export class ByteBuffer {
         this._addBuffer(arr)
     }
 
+    writeBool(bool) {
+        let buffer = new ArrayBuffer(1)
+        let view = new DataView(buffer)
+        view.setInt8(0, bool ? 1 : 0)
+        this._addBuffer(buffer)
+    }
+
     readNumber() {
         let veiw = new DataView(this.buffer)
         let num = veiw.getFloat32(this.offset)
         this.offset += 4
         return num
+    }
+
+    readInteger() {
+        return Math.round(this.readNumber())
     }
 
     readString() {
@@ -360,6 +229,17 @@ export class ByteBuffer {
 
         this.offset += length
         return new TextDecoder().decode(this.buffer.slice(this.offset - length, this.offset))
+    }
+
+    readBool() {
+        let veiw = new DataView(this.buffer)
+        let bool = veiw.getInt8(this.offset) === 1 ? true : false
+        this.offset += 1
+        return bool
+    }
+
+    getAsBlob() {
+        return new Blob([this.buffer])
     }
 
     downloadAsFile(name) {

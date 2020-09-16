@@ -143,11 +143,14 @@ export class LinkedSelectableList {
         this.mustSelectOne = mustSelectOne
         this.className = className
         this.predicate = () => true
-        this.addElement(elements)        
-        if(this.mustSelectOne) {
-            this.elements.first().each((_i, elem) => this.value = elem.getAttribute('select-list-entry'))
+        if(elements !== null) {
+            this.addElement(elements)        
+            if(this.mustSelectOne) {
+                this.elements.first().each((_i, elem) => this.value = elem.getAttribute('select-list-entry'))
+            }
         }
     }
+        
 
     addElement(elements) {
         let getValue = () => this.value
@@ -166,17 +169,23 @@ export class LinkedSelectableList {
     }
 
     set value(value) {
+        this.setValue(value)
+    }
+
+    get value() {
+        return this.rawValue
+    }
+
+    setValue(value, silent = false) {
         if(this.predicate(value)) {
             let old = this.rawValue
             this.rawValue = value
             this.elements.removeClass(this.className)
             this.elements.filter(`[select-list-entry='${value}']`).addClass(this.className)
-            this.dispatchEvent({ type: "changed", old, value })
+            if(silent !== true) {
+                this.dispatchEvent({ type: "changed", old, value })
+            }
         }
-    }
-
-    get value() {
-        return this.rawValue
     }
 
     onchange(listener) {

@@ -1,54 +1,72 @@
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D, Quaternion } from "./three.js";
-import { downloadBlob } from "./util.js";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D, Quaternion, EventDispatcher } from "../../three.js";
+import { ByteBuffer } from "../../animations.js";
+import { readTblFile } from "./tbl_converter.js";
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
 
-export class TBLModel {
+const hierarchyChangedEvent = { type: "hierarchyChanged" }
+const textureSizeChangedEvent = { type: "textureSizeChanged", width:64, hieght:64 }
+
+export class DCMModel {
 
     constructor() {
-        this.modelName = "New Model"
         this.author = "???"
+        this.fileName = "New Model"
         this.texWidth = 64
         this.texHeight = 64
         this.maxCubeLevel = 0
         
         this.cubeMap = new Map()
-        this.rootGroup = new TblCubeGroup(this, [], [])
-
-        this.onCubeHierarchyChanged = () => {
-            this.maxCubeLevel = 0
-            this.rootGroup.recalculateHierarchy()
-        }
+        this.children = []
     }
 
-    parseJson(content) {
+    setTextureSize(width, height) {
+        this.texWidth = textureSizeChangedEvent.width = width
+        this.texHeight = textureSizeChangedEvent.height = height
+        this.dispatchEvent( textureSizeChangedEvent )
+    }
 
-        let jobj = JSON.parse(content)
-
-        this.modelName = jobj.modelName
-        this.author = jobj.authorName
-
-        this.texWidth = jobj.textureWidth
-        this.texHeight = jobj.textureHeight
-
-        this.cubeMap = new Map()
-        this.rootGroup = parseGroupJson(jobj, this)
+    onCubeHierarchyChanged() {
+        this.maxCubeLevel = 0
+        this.children.forEach(child => child.recalculateHierarchy())
+        this.dispatchEvent( hierarchyChangedEvent )
     }
 
     createModel( material ) {
         this.mat = material
-        let mainCubeGroup = this.rootGroup.createGroup()
 
-        this.modelCache = new Group(); 
+        this.modelCache = new Group() 
         this.modelCache.scale.set(1/16, 1/16, 1/16)
-        //Instead of scaling by [-1, -1, 1], we can just rotate by [0, 0, PI]
-        this.modelCache.rotation.set(0, 0, Math.PI)
-        this.modelCache.position.set(0, 1.5, 0)
-        this.modelCache.add(mainCubeGroup)
-
+        this.modelCache.position.set(0.5, 0, 0.5)
+        
+        this.children.forEach(child => this.modelCache.add(child.createGroup()))
 
         return this.modelCache
+    }
+
+    invalidateModelCache() {
+        this.children.forEach(child => child.traverse(cube => cube.cubeGroup = undefined))
+    }
+
+    addChild(child, silent = false) {
+        this.children.push(child)
+        this.onChildrenChange(silent)   
+    }
+
+    deleteChild(child, silent = false) {
+        child.parent = undefined
+        this.children = this.children.filter(c => c != child)
+        this.onChildrenChange(silent)
+    }
+
+    onChildrenChange(silent = false, childern = this.children) {
+        if(!silent) {
+            this.onCubeHierarchyChanged()
+        }
+        this.children.forEach(child => child.cubeGroup ? this.modelCache.remove(child.cubeGroup) : 0)
+        this.children = childern;
+        this.children.forEach(child => this.modelCache.add(child.createGroup()))
     }
 
     resetAnimations() {
@@ -57,128 +75,32 @@ export class TBLModel {
     }
 
     resetVisuals() {
-        this.rootGroup.resetVisuals()
+        this.children.forEach(child => child.resetVisuals())
     }
 }
 
-export class TblCubeGroup {
+export class DCMCube {
 
-    constructor(tbl, cubes, cubeGroups) {
-        this.tbl = tbl
-        this.cubeList = cubes
-        this.cubeGroups = cubeGroups
-
-        this.cubeList.forEach(child => {
-            child.parent = this
-            child.hierarchyLevel = 0
-        })
-    }
-
-    recalculateHierarchy() {
-        this.cubeList.forEach(child => {
-            child.hierarchyLevel = 0
-            child.parent = this
-            child.recalculateHierarchy()
-        })
-        this.cubeGroups.forEach(child => child.recalculateHierarchy())
-    }
-
-    addChild(child, silent = false) {
-        this.cubeList.push(child)
-        this.refreshGroup(silent)
-    }
-
-    deleteChild(child, silent = false) {
-        child.parent = undefined
-
-        this.cubeList = this.cubeList.filter(c => c != child)
-        this.refreshGroup(silent)
-    }
-
-    onChildrenChange(silent = false, children = this.cubeList) {
-        this.cubeList = children
-        this.cubeList.forEach(c => {
-            c.parent = this
-            c.hierarchyLevel = 0
-        })
-        this.refreshGroup(silent)
-    }
-
-    getChildren() {
-        return this.cubeList
-    }
-
-    createGroup() {
-        if(this.modelGroup !== undefined) {
-            return this.modelGroup
-        }
-        this.modelGroup = new Group()
-
-        this.cubeGroups.forEach(child => this.modelGroup.add(child.createGroup()))
-        this.cubeList.forEach(cube => this.modelGroup.add(cube.createGroup()))
-
-        return this.modelGroup
-    }
-    
-    refreshGroup(silent = false, cubes = this.cubeList, cubeGroups = this.cubeGroups) {
-        this.cubeList = cubes
-        this.cubeGroups = cubeGroups
-        this.modelGroup.children.forEach(child => this.modelGroup.remove(child))
-        this.cubeGroups.forEach(child => this.modelGroup.add(child.createGroup()))
-        this.cubeList.forEach(cube => {
-            this.modelGroup.add(cube.createGroup())
-            cube.parent = this
-        })
-        if(!silent) {
-            this.tbl.onCubeHierarchyChanged()
-        }
-
-    }
-
-    resetVisuals() {
-        this.cubeGroups.forEach(child => child.resetVisuals())
-        this.cubeList.forEach(child => child.resetVisuals())
-    }
-
-    getGroup() {
-        return this.modelGroup
-    }
-}
-
-function parseGroupJson(json, tbl) {
-
-     let cubeList = []
-     let childGroups = []
-
-     json.cubes.forEach(cube => { cubeList.push(parseCubeJson(cube, tbl)) })
-     json.cubeGroups.forEach(group => { childGroups.push(parseGroupJson(group, tbl)) })
-
-    return new TblCubeGroup(tbl, cubeList, childGroups)
-}
-
-export class TblCube {
-
-    constructor(name, dimension, rotationPoint, offset, rotation, scale, textureOffset, cubeGrow, children, textureMirrored, tbl) {
+    constructor(name, dimension, rotationPoint, offset, rotation, textureOffset, textureMirrored, cubeGrow, children, model) {
         this.name = name
         this.dimension = dimension
         this.rotationPoint = rotationPoint
         this.offset = offset
         this.rotation = rotation
-        this.scale = scale
         this.textureOffset = textureOffset
+        this.textureMirrored = textureMirrored
         this.cubeGrow = cubeGrow
         this.children = children
-        this.tbl = tbl
-        this.textureMirrored = textureMirrored
+        this.model = model
         this.hierarchyLevel = 0
 
         let counter = 0
-        while(tbl.cubeMap.has(this.name)) {
+        while(model.cubeMap.has(this.name)) {
             this.name = name + "~" + counter
             counter += 1
         }
 
-        tbl.cubeMap.set(this.name, this)
+        model.cubeMap.set(this.name, this)
     }
 
   
@@ -189,7 +111,7 @@ export class TblCube {
         this.cubeGroup = new Group();
         this.cubeGroup.tabulaCube = this
 
-        this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.tbl.mat)
+        this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.mat)
         this.cubeMesh.tabulaCube = this
 
         this.cubeMesh.position.set(0.5, 0.5, 0.5)
@@ -209,19 +131,10 @@ export class TblCube {
         return this.cubeGroup
     }
 
-    getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3()) {
+    getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3(), quat) {
         let w = this.dimension[0] + this.cubeGrow[0]*2 + 0.01
         let h = this.dimension[1] + this.cubeGrow[1]*2 + 0.01
         let d = this.dimension[2] + this.cubeGrow[2]*2 + 0.01
-        if(w === 0) {
-            w === 0.001
-        }
-        if(h === 0) {
-            h === 0.001
-        }
-        if(d === 0) {
-            d === 0.001
-        }
         tempVector.set(xDelta*w/16, yDelta*h/16, zDelta*d/16).applyQuaternion(this.cubeMesh.getWorldQuaternion(tempQuaterion))
         this.cubeMesh.getWorldPosition(vector).add(tempVector)
         return vector
@@ -234,7 +147,7 @@ export class TblCube {
             child.recalculateHierarchy()
         }) 
         if(this.children.length === 0) {
-            this.tbl.maxCubeLevel = Math.max(this.tbl.maxCubeLevel, this.hierarchyLevel)
+            this.model.maxCubeLevel = Math.max(this.model.maxCubeLevel, this.hierarchyLevel)
         }
     }
 
@@ -259,10 +172,10 @@ export class TblCube {
     }
 
     cloneCube() {
-         return new TblCube(this.name, this.dimension, this.rotationPoint, this.offset, 
-            this.rotation, this.scale, this.textureOffset, this.cubeGrow, 
+         return new DCMCube(this.name, this.dimension, this.rotationPoint, this.offset, 
+            this.rotation, this.textureOffset, this.cubeGrow, 
             this.children.map(c => c.cloneCube()),
-            this.textureMirrored, this.tbl)
+            this.textureMirrored, this.model)
     }
 
     traverse(callback) {
@@ -272,7 +185,7 @@ export class TblCube {
 
     onChildrenChange(silent = false, childern = this.children) {
         if(!silent) {
-            this.tbl.onCubeHierarchyChanged()
+            this.model.onCubeHierarchyChanged()
         }
         this.children.forEach(child => child.cubeGroup ? this.cubeGroup.add(child.cubeGroup) : 0)
         this.children = childern;
@@ -293,8 +206,8 @@ export class TblCube {
     resetVisuals() {
         this.children.forEach(child => child.resetVisuals())
 
-        this.updateGeometry()
-        this.updateCubePosition()
+        // this.updateGeometry()
+        // this.updateCubePosition()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
     }
@@ -308,8 +221,8 @@ export class TblCube {
         this.updateTexture()
     }
 
-    updateCubePosition( { offset = this.offset, cubeGrow = this.cubeGrow } = {} ) {
-        this.cubeMesh.position.set(offset[0] - cubeGrow[0], offset[1]- cubeGrow[1], offset[2] - cubeGrow[2] )
+    updateCubePosition( { offset = this.offset } = {} ) {
+        this.cubeMesh.position.set(offset[0], offset[1], offset[2] )
     }
 
     updatePositionVisuals(position = this.rotationPoint) {
@@ -320,7 +233,7 @@ export class TblCube {
         this.cubeGroup.rotation.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180)
     }
 
-    updateTexture({ textureOffset = this.textureOffset, dimension = this.dimension, texWidth = this.tbl.texWidth, texHeight = this.tbl.texHeight, textureMirrored = this.textureMirrored } = {}) {
+    updateTexture({ textureOffset = this.textureOffset, dimension = this.dimension, texWidth = this.model.texWidth, texHeight = this.model.texHeight, textureMirrored = this.textureMirrored } = {}) {
         let uvData = getUV(textureOffset[0], textureOffset[1], dimension[0], dimension[1], dimension[2], texWidth, texHeight, textureMirrored)
         this.cubeMesh.geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uvData), 2))
     }
@@ -343,7 +256,6 @@ export class TblCube {
             this.cubeGrow = value
         }
         this.updateGeometry( {cubeGrow:value} )
-        this.updateCubePosition( { cubeGrow:values } )
     }
 
     updateTextureOffset(values = this.textureOffset, visualOnly = false) {
@@ -380,43 +292,6 @@ export class TblCube {
         }
         this.updateRotationVisuals(values)
     }
-
-}
-
-function parseCubeJson(json, tbl) {
-    let children = []
-    json.children.forEach(child => { children.push( parseCubeJson( child, tbl ) ) })
-
-    let cubeGrow = json.cubeGrow
-    if(cubeGrow === undefined) {
-        cubeGrow = [json.mcScale, json.mcScale, json.mcScale]
-    }
-
-    return new TblCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.scale, json.txOffset, cubeGrow, children, json.txMirror, tbl)
-}
-
-function writeCubeJson(cube) {
-    let obj = {
-        name: cube.name,
-        dimensions: cube.dimension, 
-        position: cube.rotationPoint,
-        offset: cube.offset,
-        rotation: cube.rotation,
-        scale: cube.scale,
-        txOffset: cube.textureOffset,
-        txMirror: cube.textureMirrored,
-        cubeGrow: cube.cubeGrow,
-        mcScale: cube.cubeGrow.reduce((a,b) => a+b, 0) / 3, //For tabula support
-        opacity: 100,
-        hidden: false,
-        metadata: [],
-        children: cube.children.map(child => writeCubeJson(child)),
-        identifier: cube.name //lol
-    }
-    if(cube.parent) {
-        obj.parentIdentifier = cube.parent.name
-    }
-    return obj
 }
 
 function getUV(offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {
@@ -480,34 +355,77 @@ function putUVData(uvData, facingindex, minU, minV, uSize, vSize, texWidth, texH
 }
 
 
-TBLModel.loadModel = async(data, name = "") => {
-    let zip = await JSZip.loadAsync(data)
-    let model = new TBLModel();
-    model.parseJson(await zip.file("model.json").async("string"))
+DCMModel.loadModel = async(arrayBuffer, name = "") => {
+    let model
+    if(name.endsWith('.tbl')) {
+        model = await readTblFile(arrayBuffer)
+    } else {
+        let buffer = new ByteBuffer(await arrayBuffer)
+
+        model = new DCMModel()
+    
+        let _version = buffer.readNumber()
+        model.author = buffer.readString()
+        model.texWidth = buffer.readInteger()
+        model.texHeight = buffer.readInteger()
+    
+        let readCubes = () => {
+            let cubes = []
+            let amount = buffer.readNumber()
+            for(let i = 0; i < amount; i++) {
+                cubes.push(new DCMCube(
+                    buffer.readString(), //Name
+                    [buffer.readInteger(), buffer.readInteger(), buffer.readInteger()], //Dimension
+                    [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()], //Rotation Point
+                    [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()], //Offset
+                    [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()], //Rotation
+                    [buffer.readInteger(), buffer.readInteger()], //Texture Offset
+                    buffer.readBool(), //Texture Mirrored
+                    [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()], //Cube Grow
+                    readCubes(), //Children
+                    model
+                ))
+            }
+            return cubes
+        }
+    
+        model.children = readCubes()    
+    }
     if(name) {
-        model.fileName = name
+        model.fileName = name.substring(0, name.lastIndexOf('.'))
     }
     return model
 }
 
-TBLModel.writeModel = tbl => {
-    let zip = new JSZip()
+DCMModel.writeModel = model => {
+    let buffer = new ByteBuffer()
 
-    zip.file("model.json", JSON.stringify({ 
-        modelName: tbl.modelName, 
-        authorName: tbl.author, 
-        projVersion: 4,
-        metadata: [],
-        textureWidth: tbl.texWidth,
-        textureHeight: tbl.texHeight,
-        scale: [1,1,1],
-        cubeGroups:[],
-        anims: [],
-        cubes: tbl.rootGroup.cubeList.map(cube => writeCubeJson(cube)),
-        cubeCount: tbl.cubeMap.size 
-    }))
-    zip.generateAsync({type:"blob"})
-    .then(content => downloadBlob(tbl.fileName ? tbl.fileName : "model.tbl", content))
-        
+    buffer.writeNumber(1) //Version
+    
+    buffer.writeString(model.author)
+    buffer.writeNumber(model.texWidth)
+    buffer.writeNumber(model.texHeight)
 
+    let writeArr = (arr, amount) => [...Array(amount).keys()].forEach(num => buffer.writeNumber(arr[num]))
+
+    let writeCubes = cubes => {
+        buffer.writeNumber(cubes.length)
+        cubes.forEach(cube => {
+            buffer.writeString(cube.name)
+            writeArr(cube.dimension, 3)
+            writeArr(cube.rotationPoint, 3)
+            writeArr(cube.offset, 3)
+            writeArr(cube.rotation, 3)
+            writeArr(cube.textureOffset, 2)
+            buffer.writeBool(cube.textureMirrored)
+            writeArr(cube.cubeGrow, 3)
+            writeCubes(cube.children)
+        })
+    }
+
+    writeCubes(model.children)
+
+    return buffer
 }
+
+Object.assign( DCMModel.prototype, EventDispatcher.prototype )

@@ -4,18 +4,25 @@ import { DraggableElementList, LinkedSelectableList } from "../util.js"
 
 export class TextureManager {
 
-    constructor(dom, studio, setTexture, filesPage) {
-        this.display = studio.display
-        this.setTexture = setTexture
-        this.filesPage = filesPage
+    constructor(model, pth) {
+        this.pth = pth
+        this.filesPage = pth._files
         this.textures = []
+        this.textureUpload = pth._texture._textureUpload
 
         this.highlightCanvas = document.createElement('canvas')
-        this.highlightCanvas.width = this.display.tbl.texWidth
-        this.highlightCanvas.height = this.display.tbl.texHeight
+        this.highlightCanvas.width = model.texWidth
+        this.highlightCanvas.height = model.texHeight
         this.highlightContext = this.highlightCanvas.getContext('2d')
         this.highlightContext.imageSmoothingEnabled = false
         this.highlighPixel = null
+
+        model.addEventListener('textureSizeChanged', e => {
+            this.highlightCanvas.width = e.width
+            this.highlightCanvas.height = e.height
+            this.highlightContext = this.highlightCanvas.getContext('2d')
+            this.highlightContext.imageSmoothingEnabled = false
+        })
 
         this.canvas = document.createElement('canvas')
         this.context = this.canvas.getContext('2d')
@@ -29,10 +36,6 @@ export class TextureManager {
                 this.highlightCanvas.height = layer.height
             }
         })
-
-        this.textureUpload = dom.find('.texture-file-input-entry')
-        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(e.target.files))
-        dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
     }
 
     getSelectedLayer() {
@@ -69,8 +72,8 @@ export class TextureManager {
     }
     
     addImage(name, img) {
-        let width = this.display.tbl.texWidth
-        let height = this.display.tbl.texHeight
+        let width = this.pth.model.texWidth
+        let height = this.pth.model.texHeight
 
         let empty = false
 
@@ -120,12 +123,14 @@ export class TextureManager {
         if(empty) {
             ctx.fillStyle = "rgba(255, 255, 255, 1)"
             ctx.fillRect(0, 0, width, height)
-            data.onCanvasChange()
         } else {
             ctx.drawImage(img, 0, 0, width, height)
         }
 
+        data.onCanvasChange()
+
         this.textures.unshift(data)
+
         return data
     }
 
@@ -143,8 +148,8 @@ export class TextureManager {
         let height = this.textures.filter(t => !t.isHidden).map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
 
         if(this.textures.length === 0) {
-            width = this.display.tbl.texWidth
-            height = this.display.tbl.texHeight
+            width = this.pth.model.texWidth
+            height = this.pth.model.texHeight
         }
 
         this.canvas.width = width
@@ -167,7 +172,7 @@ export class TextureManager {
         tex.flipY = false
         tex.magFilter = NearestFilter;
         tex.minFilter = NearestFilter;
-        this.setTexture(tex)
+        this.pth.setTexture(tex)
         
     }
 
