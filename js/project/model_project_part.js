@@ -95,7 +95,7 @@ export class ModelProjectPart {
             })
 
             zip.generateAsync( { type:"blob" } )
-            .then(content => downloadBlob(model.fileName + ".zip", content))
+            .then(content => downloadBlob(model.fileName + ".dcproj", content))
 
         })
 
