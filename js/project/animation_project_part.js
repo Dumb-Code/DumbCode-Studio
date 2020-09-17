@@ -60,9 +60,8 @@ export class AnimationProjectPart {
         
                 let info = infoFile ? JSON.parse(result.pop()) : { base_time: 5 }
 
-                TBLFilesLoader.readFromTblFiles(tab.handler, result. info)
-                tab.handler.keyframes.forEach(kf => tab.handler.createLayerInfo(kf.layer))
-                animator.keyframeManager.reframeKeyframes()
+                TBLFilesLoader.readFromTblFiles(tab.handler, result, info)
+                this.onAnimationTabAdded(tab)
             }
         })
 
@@ -71,13 +70,17 @@ export class AnimationProjectPart {
 
     createAndInitiateNewAnimationTab(name, arraybuffer) {
         let tab = this.createNewAnimationTab(name)
-        let animator = this.animatorGetter()
         if(tab) {
             let buffer = new ByteBuffer(arraybuffer)
             DCALoader.importAnimation(tab.handler, buffer)
-            tab.handler.keyframes.forEach(kf => tab.handler.createLayerInfo(kf.layer))
-            animator.keyframeManager.reframeKeyframes()
+            this.onAnimationTabAdded(tab)
         }
+        return tab
+    }
+
+    onAnimationTabAdded(tab) {
+        tab.handler.keyframes.forEach(kf => tab.handler.ensureLayer(kf.layer))
+        this.animatorGetter().keyframeManager.reframeKeyframes()
     }
 
     createNewAnimationTab(name) {

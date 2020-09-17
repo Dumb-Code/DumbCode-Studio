@@ -36,32 +36,52 @@ export class ModelProjectPart {
                 this.pth.createNewProject(await DCMModel.loadModel(await zip.file('model.dcm').async('arraybuffer'), file.name))
 
                 let textureFolder = zip.folder('textures')
-                textureFolder.file('texture_order').async('string')
-                .then(res => {
-                    let layerNames = res.split("\n")
-                    Promise.all(layerNames.map((_, i) => textureFolder.file(i + ".png").async('blob')))
-                    .then(textures => Promise.all(textures.map((texture, index) => {
-                        let img = document.createElement("img")
-                        img.src = URL.createObjectURL(texture)
-                        
-                        return new Promise(resolve => img.onload = () => {
-                            img.onload = null
-                            this.texturePart.createTextureElement(layerNames[index], img)
-                            resolve()
-                        })
-                    })))
-                    .then(() => this.pth.textureManager.refresh())
-                })
+                let textureFile = textureFolder.file('texture_names')
+                if(textureFile !== null) {
+                    textureFile.async('string')
+                    .then(res => {
+                        //Shouldn't occur, but this is just to check
+                        if(res === "") {
+                            return
+                        }
+                        let layerNames = res.split("\n")
+                        Promise.all(layerNames.map((_, i) => textureFolder.file(i + ".png").async('blob')))
+                        .then(textures => Promise.all(textures.map((texture, index) => {
+                            let img = document.createElement("img")
+                            img.src = URL.createObjectURL(texture)
+                            
+                            return new Promise(resolve => img.onload = () => {
+                                img.onload = null
+                                this.texturePart.createTextureElement(layerNames[index], img)
+                                resolve()
+                            })
+                        })))
+                        .then(() => this.pth.textureManager.refresh())
+                    })
+                }
 
                 let animationFolder = zip.folder('animations')
-                animationFolder.file('animation_order').async('string')
-                .then(res => {
-                    let animationNames = res.split("\n")
-                    Promise.all(animationNames.map((_, i) => animationFolder.file(i + ".dca").async('arraybuffer')))
-                    .then(animations => animations.forEach((animation, index) => 
-                        this.animationPart.createAndInitiateNewAnimationTab(animationNames[index], animation)
-                    ))
-                })
+                let animationFile = animationFolder.file('animation_names')
+                if(animationFile !== null) {
+                    animationFile.async('string')
+                    .then(res => {
+                        //Shouldn't occur, but this is just to check
+                        if(res === "") {
+                            return
+                        }
+                        let animationNames = res.split("\n")
+                        Promise.all(animationNames.map((_, i) => Promise.all([
+                            animationFolder.file(i + ".dca").async('arraybuffer'), 
+                            animationFolder.file(i + ".json").async('string').then(data => JSON.parse(data))
+                        ])))
+                        .then(fileDatas => fileDatas.forEach((data, index) => {
+                            let tab = this.animationPart.createAndInitiateNewAnimationTab(animationNames[index], data[0])
+                            tab.handler.keyframeInfo = data[1].keyframeInfo
+                            this.animationPart.onAnimationTabAdded(tab)
+                            
+                    }))
+                    })
+                }
             })
         })
     }
@@ -82,17 +102,21 @@ export class ModelProjectPart {
             zip.file('model.dcm', DCMModel.writeModel(model).getAsBlob())
 
             let textures = [...project.textureManager.textures].reverse()
-            let texFolder = zip.folder('textures')
-            texFolder.file('texture_order', textures.map(data => data.name).join("\n"))
-            textures.forEach((data, index) => texFolder.file(index + ".png", data.img.src.substring(data.img.src.indexOf(',')), { base64: true }))
+            if(textures.length !== 0) {
+                let texFolder = zip.folder('textures')
+                texFolder.file('texture_names', textures.map(data => data.name).join("\n"))
+                textures.forEach((data, index) => texFolder.file(index + ".png", data.img.src.substring(data.img.src.indexOf(',')), { base64: true }))
+            }
 
             let animations = project.animationTabHandler.allTabs
-            let animFolder = zip.folder('animations')
-            animFolder.file('animation_order', animations.map(data => data.name).join("\n"))
-            animations.forEach((data, index) => {
-                animFolder.file(index + ".dca", DCALoader.exportAnimation(data.handler).getAsBlob())
-                animFolder.file(index + "-metadata.json", JSON.stringify( { keyframeInfo: this.cleanKeyframeInfo(data.handler.keyframeInfo) } ))
-            })
+            if(animations.length !== 0) {
+                let animFolder = zip.folder('animations')
+                animFolder.file('animation_names', animations.map(data => data.name).join("\n"))
+                animations.forEach((data, index) => {
+                    animFolder.file(index + ".dca", DCALoader.exportAnimation(data.handler).getAsBlob())
+                    animFolder.file(index + ".json", JSON.stringify( { keyframeInfo: this.cleanKeyframeInfo(data.handler.keyframeInfo) } ))
+                })
+            }
 
             zip.generateAsync( { type:"blob" } )
             .then(content => downloadBlob(model.fileName + ".dcproj", content))
