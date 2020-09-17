@@ -29,7 +29,7 @@ export class DCMModel {
 
     onCubeHierarchyChanged() {
         this.maxCubeLevel = 0
-        this.children.forEach(child => child.recalculateHierarchy())
+        this.children.forEach(child => child.recalculateHierarchy(0, this))
         this.dispatchEvent( hierarchyChangedEvent )
     }
 
@@ -140,12 +140,10 @@ export class DCMCube {
         return vector
     }
 
-    recalculateHierarchy() {
-        this.children.forEach(child => {
-            child.hierarchyLevel = this.hierarchyLevel+1
-            child.parent = this
-            child.recalculateHierarchy()
-        }) 
+    recalculateHierarchy(hierarchyLevel, parent) {
+        this.hierarchyLevel = hierarchyLevel
+        this.parent = parent
+        this.children.forEach(child => child.recalculateHierarchy(this.hierarchyLevel+1, this)) 
         if(this.children.length === 0) {
             this.model.maxCubeLevel = Math.max(this.model.maxCubeLevel, this.hierarchyLevel)
         }
