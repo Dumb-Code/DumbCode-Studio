@@ -3,6 +3,7 @@ import { readFile } from "../displays.js"
 import { DCALoader } from "../formats/animation/dca_loader.js"
 import { DCMModel } from "../formats/model/dcm_loader.js"
 import { DcProject } from "../formats/project/dc_project.js"
+import { RemoteProject } from "../formats/project/remote_project.js"
 import { doubleClickToEdit, downloadBlob, fileUploadBox, LinkedSelectableList } from "../util.js"
 
 export class ModelProjectPart {
@@ -23,6 +24,19 @@ export class ModelProjectPart {
         fileUploadBox(dom.find('.model-drop-area'), files => this.loadModelFiles(files))
 
         dom.find('#project-file-input').on('input', e => this.loadProjectFiles(e.target.files))
+
+        getModal('project/github').then(e => {
+            let dom = $(e)
+            let token = dom.find('.access-token')
+            let owner = dom.find('.repo-owner')
+            let name = dom.find('.repo-name')
+            let branch = dom.find('.repo-branch')
+            dom.submit(() => {
+                new RemoteProject(this.pth, this.texturePart, this.animationPart, token.val(), owner.val(), name.val(), branch.val())
+                return false
+            })
+        })
+
     }
     
     async loadModelFiles(files) {
@@ -90,6 +104,7 @@ export class ModelProjectPart {
         let model = project.model
 
         let cloned = this.emptyModelEntry.clone()
+        project._element = cloned
         cloned
             .attr('select-list-entry', project.id)
             .removeClass('empty-column')

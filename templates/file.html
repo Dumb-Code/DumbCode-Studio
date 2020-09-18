@@ -39,12 +39,24 @@
         color: khaki;
     }
 
+    /* .primary-box-area {
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 95%;
+    } */
+
+    .secondary-box-area {
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 45%;
+    }
+
 </style>
 <section class="section is-mobile has-background-black-ter" style="height: 100vh">
     <div class="columns">
         <div class="column is-1"></div>
         <div class="column">
-            <div class="notification is-dark base-drop-area model-drop-area">
+            <div class="primary-box-area notification is-dark base-drop-area model-drop-area">
                 <div class="columns model-layer-topbar">
                     <div class="column">
                         <h1 class="title is-5">MODEL</h1>
@@ -74,6 +86,11 @@
                             <input id="project-file-input" class="file-input-hidden" type="file" accept=".dcproj" multiple/>
                         </div>
                     </div>
+                    <div class="column is-narrow">
+                        <span class="remote-project-button icon is-small clickable tooltip popup-modal-button" modal-target="project/github" data-tooltip="Add Remote Project">
+                            <i class="fab fa-github"></i>
+                        </span>
+                    </div>
                 </div>
                 <div class="model-list-entry columns empty-column">
                     <div class="column is-narrow model-preview">
@@ -81,6 +98,11 @@
                     <div class="column dbl-click-container model-name-container">
                         <p class="dbl-text"></p>
                         <input class="dbl-text-edit" type="text">
+                    </div>
+                    <div class="column is-narrow github-sync" style="display: none;">
+                        <span class="sync-project-button icon is-small clickable tooltip" data-tooltip="Push To Github">
+                            <i class="fas fa-sync"></i>
+                        </span>
                     </div>
                     <div class="column is-narrow">
                         <span class="download-project-file icon is-small clickable tooltip" data-tooltip="Download As Project">
@@ -107,7 +129,7 @@
             </div> -->
         </div>
         <div class="column">
-            <div class="notification is-dark base-drop-area texture-drop-area required-project">
+            <div class="secondary-box-area notification is-dark base-drop-area texture-drop-area required-project">
                 <div class="columns texture-layer-topbar">
                     <div class="column">
                         <h1 class="title is-5">TEXTURE LAYERS</h1>
@@ -142,7 +164,7 @@
                     </div>
                 </div>
             </div>
-            <div class="notification is-dark required-project">
+            <div class="secondary-box-area notification is-dark required-project">
                 <div class="columns animation-layer-topbar">
                     <div class="column">
                         <h1 class="title is-5">ANIMATIONS</h1>

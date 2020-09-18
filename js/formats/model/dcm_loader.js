@@ -204,8 +204,8 @@ export class DCMCube {
     resetVisuals() {
         this.children.forEach(child => child.resetVisuals())
 
-        // this.updateGeometry()
-        // this.updateCubePosition()
+        this.updateGeometry()
+        this.updateCubePosition()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
     }
@@ -219,8 +219,8 @@ export class DCMCube {
         this.updateTexture()
     }
 
-    updateCubePosition( { offset = this.offset } = {} ) {
-        this.cubeMesh.position.set(offset[0], offset[1], offset[2] )
+    updateCubePosition( { offset = this.offset, cubeGrow = this.cubeGrow } = {} ) {
+        this.cubeMesh.position.set(offset[0] - cubeGrow[0], offset[1] - cubeGrow[1], offset[2] - cubeGrow[1] )
     }
 
     updatePositionVisuals(position = this.rotationPoint) {
@@ -244,7 +244,6 @@ export class DCMCube {
         if(visualOnly !== true) {
             this.dimension = values.map(e => Math.round(e))
         }
-        this.updateCubePosition()
         this.updateGeometry( { dimension:values } )
         this.updateTexture( { dimension:values } )
     }
@@ -254,6 +253,8 @@ export class DCMCube {
             this.cubeGrow = value
         }
         this.updateGeometry( {cubeGrow:value} )
+        this.updateCubePosition( {cubeGrow:value} )
+
     }
 
     updateTextureOffset(values = this.textureOffset, visualOnly = false) {

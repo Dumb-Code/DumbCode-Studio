@@ -1,3 +1,5 @@
+import { readFile } from "./displays.js"
+
 export class AnimationHandler {
     
     constructor(tbl) {
@@ -240,6 +242,10 @@ export class ByteBuffer {
 
     getAsBlob() {
         return new Blob([this.buffer])
+    }
+
+    getAsBase64() {
+        return btoa(String.fromCharCode(...new Uint8Array(this.buffer)))
     }
 
     downloadAsFile(name) {

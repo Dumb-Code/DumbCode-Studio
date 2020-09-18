@@ -1,0 +1,55 @@
+<style>
+    a:hover, a:active, a:focus {
+        color:#c33c33;
+    }
+
+</style>
+<div id="modal-gif-export" style="text-transform: none; width: 600px">
+    <div class="modal-background"></div>
+    <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+        <h3 class="title is-3" style="color: whitesmoke">Remote Settings</h3>
+        <div style="padding-bottom: 20px">
+            <button class="modal-close" aria-label="close" style="position: absolute"></button>
+        </div>
+        <div class="settings-entry entry-top">
+            <form id="github-access-form">
+                <div class="field">
+                    <h5 class="title is-5" style="color: whitesmoke">Remote Github Settings</h5>
+                    <div class="settings-entry-field">
+                        <div class="columns">
+                            <div class="column is-narrow">
+                                <a href="https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token">Personal Access Token:</a>
+                            </div>
+                            <div class="column">
+                                <input style="width: 100%;" autocomplete="on" class="access-token" type="text" name="dcs_github_access_token" placeholder="ff34885a8624460a855540c6592698d2f1812843" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-entry-field">
+                        <div class="columns">
+                            <div class="column is-narrow">
+                                <span>Repository:</span>
+                            </div>
+                            <div class="column">
+                                <input style="width: 30%;" autocomplete="on" class="repo-owner" type="text" name="dcs_owner" placeholder="Repository Owner" required>
+                                <span>/</span>
+                                <input style="width: 30%;" autocomplete="on" class="repo-name" type="text" name="dcs_repo" placeholder="Repository Name" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-entry-field">
+                        <div class="columns">
+                            <div class="column is-narrow">
+                                <span>Branch:</span>
+                            </div>
+                            <div class="column">
+                                <input style="width: 30%;" autocomplete="on" class="repo-branch" type="text" name="dcs_branch" placeholder="Leave blank for default branch">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+</div>

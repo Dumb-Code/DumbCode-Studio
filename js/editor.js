@@ -13,8 +13,8 @@ import { ProjectTabHandler } from "./project_tab_handler.js";
 import { fileUploadBox } from "./util.js";
 
 const major = 0
-const minor = 3
-const patch = 2
+const minor = 4
+const patch = 0
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -183,27 +183,6 @@ export function updateCamera(camera, width, height) {
     camera.updateProjectionMatrix();
 }
 
-window.createNewModel = () => {
-    initiateModel(new DCMModel())
-}
-
-window.setupMainModel = async(file, nameElement) => {
-    nameElement.classList.toggle("tooltip", true)
-
-    nameElement.dataset.tooltip = file.name
-
-    try {
-        initiateModel(await DCMModel.loadModel(readFile(file), file.name))
-    } catch(err) {
-        nameElement.dataset.tooltip = "ERROR!"
-        console.error(`Error from file ${file.name}: ${err.message}`, err)
-    }
-}
-
-window.downloadModel = () => {
-    DCMModel.writeModel(pth.model).downloadAsFile(pth.model.fileName ? (pth.model.fileName + ".dcm") : "model.dcm" )
-}
-
 function createFilesPage() {
     return new FilesPage($('#files-area'), () => modelingStudio, () => textureStudio, () => animationStudio, pth)
 }
@@ -220,21 +199,7 @@ function createAnimationStudio() {
     return new AnimationStudio($('#animation-area') , raytracer, display, pth)
 }
 
-function initiateModel(model) {
-
-    // display.setMainModel(material, model)
-    
-
-    
-
-    // let old = model.onCubeHierarchyChanged
-    // model.onCubeHierarchyChanged = () => {
-    //     modelingStudio.cubeHierarchyChanged()
-    //     old()
-    // }
-}
-
-window.addEventListener( 'resize', e => window.studioWindowResized(), false );
+window.addEventListener( 'resize', () => window.studioWindowResized(), false );
 
 window.studioWindowResized = () => {
     if(canvasContainer === undefined) {

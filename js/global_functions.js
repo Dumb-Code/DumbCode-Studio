@@ -29,21 +29,24 @@ openModal = async name => {
     return $(modal)
 }
 
-
 getModal = async(name) => {
     if(!_htmlCache.has(name)) {
         let h = await loadHtml(name)
         $(h).click(e => {
             if(e.target.classList.contains('modal-background')) {
-                document.getElementById('modal-area').innerHTML = ""
+                closeModal()
             }
         })
-        .find('.modal-close, .modal-close-button').click(() => document.getElementById('modal-area').innerHTML = "")
+        .find('.modal-close, .modal-close-button').click(closeModal)
         
         _htmlCache.set(name, h)
     }
 
     return _htmlCache.get(name)
+}
+
+closeModal = () => {
+    document.getElementById('modal-area').innerHTML = ""
 }
 
 removeItem = (array, item) => {

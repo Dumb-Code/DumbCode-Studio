@@ -87,6 +87,7 @@ export class ProjectTabHandler {
         this.allTabs.push(project)
         this.dispatchEvent( { type: "newproject", project } )
         this.selectIndex(project.id)
+        return project
     }
 }
 
