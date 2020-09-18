@@ -647,3 +647,21 @@ export function objectEquals(obj1, obj2, deep = false) {
         return obj1 == obj2
     }
   }
+
+  export class AsyncProgressCounter {
+    constructor(nodes, stages, state, callback) {
+        this.nodes = Array(nodes).fill(0)
+        this.stages = stages
+        this.state = state
+        this.callback = callback
+    }
+
+    updateProgress(node = 0, amount = 1) {
+        this.nodes[node] = Math.floor(this.nodes[node]) + amount
+        this.callback(this.state, this.nodes.map(n => n / this.stages / this.nodes.length).reduce((a, b) => a + b))
+    }
+
+    globalState(state) {
+        this.state = state
+    }
+  }

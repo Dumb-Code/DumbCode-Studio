@@ -11,6 +11,7 @@ loadHtml = async file => {
 }
 
 const _htmlCache = new Map()
+let locked = false
 
 applyModalPopups = async(html) => {
     $(html).find('.popup-modal-button').click(async function() {
@@ -19,6 +20,7 @@ applyModalPopups = async(html) => {
 }
 
 openModal = async name => {
+    locked = false
     let modal = await getModal(name)
 
     modal.classList.add('modal', 'is-active')
@@ -33,16 +35,24 @@ getModal = async(name) => {
     if(!_htmlCache.has(name)) {
         let h = await loadHtml(name)
         $(h).click(e => {
-            if(e.target.classList.contains('modal-background')) {
+            if(e.target.classList.contains('modal-background') && locked !== true) {
                 closeModal()
             }
         })
-        .find('.modal-close, .modal-close-button').click(closeModal)
+        .find('.modal-close, .modal-close-button').click(() => {
+            if(locked !== true) {
+                closeModal()
+            }
+        })
         
         _htmlCache.set(name, h)
     }
 
     return _htmlCache.get(name)
+}
+
+lockModalUserClose = () => {
+    locked = true
 }
 
 closeModal = () => {

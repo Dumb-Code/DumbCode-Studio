@@ -22,13 +22,25 @@ export class GithubCommiter {
         this.dirsToRemoveFiles.add(directory)
     }
 
-    async submit(message) {
+    async submit(message, progress = () => {}, state = () => {}) {
         await this.startingBranch
-
         let parentCommit = await this.request(`branches/${this.branch}`).then(r => r.commit.sha)
-        
         let rootObject = await this._generateObject(parentCommit, "")
+        progress()
 
+        let totalFolders = new Set(
+            this.files.map(file => {
+                let split = file.path.split('/')
+                return [...Array(split.length - 1).keys()].map(i => split.slice(0, i+1).join("/"))
+            }).flat()
+        ).size
+        let count = 0
+        let updateFolders = () => {
+            state(`Preparing Git Tree (${count}/${totalFolders} total)`)
+            progress(count / totalFolders)
+            count++
+        }
+        updateFolders()
         for(let f = 0; f < this.files.length; f++) {
             let file = this.files[f]
             let parent = rootObject
@@ -44,17 +56,37 @@ export class GithubCommiter {
                 } else {
                     if(parent.children[part] === undefined) {
                         parent.children[part] = await this._generateObject(parent?.tree?.find(o => o.path === part && o.type === "tree")?.sha, split.slice(0, i+1).join("/"))
+                        updateFolders()
                     }
                     parent = parent.children[part]
                 }
             }
         }
         
+        let countObjects = root => {
+            let count = 0
+            for(let _ in root.objects) {
+                count++
+            }
+            for(let child in root.children) {
+                count += countObjects(root.children[child])
+            }
+            return count + 1
+        }
+        let totalElements = countObjects(rootObject)
+        count = 0
+
         let getInsertIndex = (tree, path) => {
             let idx = tree.findIndex(o => o.path === path)
             return idx === -1 ? tree.length : idx
-          }
+        }
 
+        let updateSha = () => {
+            state(`Generating Git Tree (${count}/${totalElements} objects)`)
+            progress(count / totalElements)
+            count++
+        }
+        updateSha()
         let createObjectSha = async(root) => {
             let tree = root.tree
             for(let child in root.children) {
@@ -77,14 +109,17 @@ export class GithubCommiter {
                         encoding: data.base64 ? 'base64' : 'utf-8'
                     }).then(r => r.sha)
                 }
+                updateSha()
             }
-
-            return this.post(`git/trees`, { tree }).then(r => r.sha)
+            
+            return this.post(`git/trees`, { tree }).then(r => { updateSha(); return r.sha } )
         }
-        await createObjectSha(rootObject)
-        return await createObjectSha(rootObject)
-        .then(sha => this.post(`git/commits`, { message, tree: sha, parents: [parentCommit] } ))
-        .then(r => this.post(`git/refs/heads/${this.branch}`, { sha: r.sha, force: true }))
+        let sha = await createObjectSha(rootObject)
+        state(`Pushing to github`)
+        progress()
+        let commitSha = await this.post(`git/commits`, { message, tree: sha, parents: [parentCommit] } ).then(r => r.sha)
+        this.post(`git/refs/heads/${this.branch}`, { sha: commitSha, force: true })
+        progress()
     }
 
     async _generateObject(sha, path) {

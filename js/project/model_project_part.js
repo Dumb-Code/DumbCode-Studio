@@ -31,8 +31,9 @@ export class ModelProjectPart {
             let owner = dom.find('.repo-owner')
             let name = dom.find('.repo-name')
             let branch = dom.find('.repo-branch')
+            let logArea = dom.find('.log-area')
             dom.submit(() => {
-                new RemoteProject(this.pth, this.texturePart, this.animationPart, token.val(), owner.val(), name.val(), branch.val())
+                new RemoteProject(this.pth, this.texturePart, this.animationPart, token.val(), owner.val(), name.val(), branch.val(), logArea)
                 return false
             })
         })
