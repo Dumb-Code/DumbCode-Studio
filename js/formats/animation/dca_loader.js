@@ -62,7 +62,7 @@ DCALoader.importAnimation = (handler, buffer) => {
     repairKeyframes(handler, version)
 }
 
-function repairKeyframes(handler, version) {
+DCALoader.repairKeyframes = (handler, version) => {
     if(version <= 3) {
         let map = handler.tbl.cubeMap
         if(version === 3) {
@@ -70,10 +70,8 @@ function repairKeyframes(handler, version) {
                 kf.rotationMap.forEach((arr, key) => transformArr(arr, map.get(key)?.rotation))
                 kf.rotationPointMap.forEach((arr, key) => transformArr(arr, map.get(key)?.rotationPoint))
             })
-
         }
         let sorted = [...handler.keyframes].sort((a, b) => a.startTime - b.startTime)
-
         sorted.forEach((kf, index) => {
             handler.tbl.resetAnimations()
             handler.keyframes.forEach(_kf => _kf.animate(kf.startTime))

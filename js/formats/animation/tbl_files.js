@@ -1,3 +1,5 @@
+import { DCALoader } from "./dca_loader.js";
+
 export class TBLFilesLoader {}
 
 TBLFilesLoader.readFromTblFiles = (handler, files, meta = { base_time: 5 }) => {
@@ -8,7 +10,6 @@ TBLFilesLoader.readFromTblFiles = (handler, files, meta = { base_time: 5 }) => {
     if(files.length > 0 && files[0].fileName !== undefined) {
         files.sort((a, b) => a.fileName.localeCompare(b.fileName))
     }
-    
     let startTime = 0;
     for(let pose of files) {
         let keyframe = handler.createKeyframe()
@@ -21,10 +22,8 @@ TBLFilesLoader.readFromTblFiles = (handler, files, meta = { base_time: 5 }) => {
             keyframe.rotationMap.set(poseCube.name, poseCube.rotation)
         })
 
-        startTime += baseTime; //todo: time overrides ???
-
-        handler.keyframes.push(keyframe)
+        startTime += keyframe.duration
     }
-    handler.repairKeyframes(2)
+    DCALoader.repairKeyframes(handler, 2)
     return handler.keyframes
 }
