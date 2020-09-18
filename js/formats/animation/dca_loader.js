@@ -37,9 +37,11 @@ DCALoader.importAnimation = (handler, buffer) => {
 
         if(version >= 2) {
             let ppSize = buffer.readNumber()
+            kf.progressionPoints.length = 0
             for(let p = 0; p < ppSize; p++) {
-                kf.progressionPoints.push({ x: buffer.readNumber(), y: buffer.readNumber() })
+                kf.progressionPoints.push({ required: p<2, x: buffer.readNumber(), y: buffer.readNumber() })
             }
+            kf.progressionPoints = kf.progressionPoints.filter(p => p.required || p.x > 0 || p.x < 1)
             kf.resortPointsDirty()
         }
     }
@@ -123,24 +125,26 @@ DCALoader.exportAnimation = handler => {
         buffer.writeNumber(kf.duration)
         buffer.writeNumber(kf.layer)
 
-        buffer.writeNumber(kf.rotationMap.size)
-        kf.rotationMap.forEach((entry, name) => {
+        buffer.writeNumber(kf.rotationMap.size);
+        [...kf.rotationMap.keys()].sort().forEach(name => {
+            let entry = kf.rotationMap.get(name)
             buffer.writeString(name)
             buffer.writeNumber(entry[0])
             buffer.writeNumber(entry[1])
             buffer.writeNumber(entry[2])
         })
 
-        buffer.writeNumber(kf.rotationPointMap.size)
-        kf.rotationPointMap.forEach((entry, name) => {
+        buffer.writeNumber(kf.rotationPointMap.size);
+        [...kf.rotationPointMap.keys()].sort().forEach(name => {
+            let entry = kf.rotationPointMap.get(name)
             buffer.writeString(name)
             buffer.writeNumber(entry[0])
             buffer.writeNumber(entry[1])
             buffer.writeNumber(entry[2])
         })
 
-        buffer.writeNumber(kf.progressionPoints.length)
-        kf.progressionPoints.forEach(p => {
+        buffer.writeNumber(kf.progressionPoints.length);
+        [...kf.progressionPoints].sort(p => p.required ? -1 : 1).forEach(p => {
             buffer.writeNumber(p.x)
             buffer.writeNumber(p.y)
         })
