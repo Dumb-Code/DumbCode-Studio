@@ -42,5 +42,8 @@ function includeModules() {
     }
     if(window.onModulesFinished) {
       window.onModulesFinished()
+      window.onModulesFinished = null
+      //Sort of a hack at the moment, but needed to make sure bulma stuff is correct
+      document.dispatchEvent(new Event("DOMContentLoaded"))
     }
   }
