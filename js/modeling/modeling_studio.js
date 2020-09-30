@@ -7,7 +7,7 @@ import { CubeValueDisplay } from "./cube_value_display.js"
 import { StudioPanels } from "./studio_panels.js"
 import { applyCubeStateHighlighting } from "./cube_state_highlighting.js"
 import { RotationPointMarkers } from "./rotation_point.markers.js"
-import { applyCubeAddingDeleting } from "./cube_create_delete.js"
+import { CubeCreateDelete } from "./cube_create_delete.js"
 import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 import { Group } from "../three.js"
 import { CubeCommands } from "./cube_commands.js"
@@ -35,7 +35,8 @@ export class ModelingStudio {
         this.group.add(this.transformControls)
 
         applyCubeStateHighlighting(dom, this)
-        applyCubeAddingDeleting(dom, this)
+        
+        this.cubeCreateDelete = new CubeCreateDelete(dom, this)
 
         this.rotationPointMarkers = new RotationPointMarkers(this)
         this.lockedCubes = new LockedCubes(this)    
@@ -50,6 +51,12 @@ export class ModelingStudio {
         this.modelerOptions = new ModelerOptions(dom, this, setCamera)
 
         this.cubeCommands = new CubeCommands(this.commandRoot, this)
+
+        this.onKeyDown = (e) => {
+            if(e.keyCode === 46) {
+                this.cubeCreateDelete.deleteCubes()
+            }
+        }
     }
 
     setCamera(camera) {

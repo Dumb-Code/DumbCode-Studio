@@ -162,15 +162,11 @@ export class AnimationStudio {
         }
         this.display.scene.add(this.group)
         this.transformControls.enableReason('tab')
-
-        document.addEventListener('keydown', this.onKeyDown)
     }
     
     setUnactive() {
         this.display.scene.remove(this.group)
         this.transformControls.disableReason('tab')
-
-        document.removeEventListener('keydown', this.onKeyDown)
     }
 
     runFrame() {

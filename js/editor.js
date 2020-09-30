@@ -14,7 +14,7 @@ import { fileUploadBox } from "./util.js";
 
 const major = 0
 const minor = 4
-const patch = 0
+const patch = 1
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -122,6 +122,9 @@ function frame() {
             if(activeTab.setUnactive) {
                 activeTab.setUnactive()
             }
+            if(activeTab.onKeyDown) {
+                document.removeEventListener('keydown', activeTab.onKeyDown)
+            }
         }
         if(canvasContainer !== undefined) {
             $(display.renderer.domElement).detach()
@@ -139,7 +142,12 @@ function frame() {
         Array.from(document.getElementsByClassName("editor-part")).forEach(elem => {
             elem.classList.toggle("is-active", elem.getAttribute("editor-tab").split(",").includes(projectTabs.activeTab))
         })
-        activeTab.setActive()
+        if(activeTab.setActive) {
+            activeTab.setActive()
+        }
+        if(activeTab.onKeyDown) {
+            document.addEventListener('keydown', activeTab.onKeyDown)
+        }
     }
     requestAnimationFrame(frame)
     runFrame()
