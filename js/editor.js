@@ -14,7 +14,7 @@ import { fileUploadBox } from "./util.js";
 
 const major = 0
 const minor = 4
-const patch = 1
+const patch = 2
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -24,6 +24,8 @@ const mainArea = document.getElementById("main-area")
 const display = new DinosaurDisplay()
 
 let controls
+
+const tabEventTypes = ['keydown']
 
 // let material = new MeshLambertMaterial( {
 //     color: 0x777777,
@@ -97,6 +99,8 @@ window.onModulesFinished = async() => {
 
     pth.inititateTabs(filesPage, modelingStudio, textureStudio, animationStudio)
 
+    tabEventTypes.forEach(type => document.addEventListener(type, event => activeTab.dispatchEvent( { type, event } )))
+
     frame()
 }
 
@@ -122,9 +126,6 @@ function frame() {
             if(activeTab.setUnactive) {
                 activeTab.setUnactive()
             }
-            if(activeTab.onKeyDown) {
-                document.removeEventListener('keydown', activeTab.onKeyDown)
-            }
         }
         if(canvasContainer !== undefined) {
             $(display.renderer.domElement).detach()
@@ -144,9 +145,6 @@ function frame() {
         })
         if(activeTab.setActive) {
             activeTab.setActive()
-        }
-        if(activeTab.onKeyDown) {
-            document.addEventListener('keydown', activeTab.onKeyDown)
         }
     }
     requestAnimationFrame(frame)

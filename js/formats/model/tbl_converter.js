@@ -41,7 +41,7 @@ export async function readTblFile(data) {
     let dummyMaterial = new MeshLambertMaterial()
     model.createModel(dummyMaterial)
     model.modelCache.updateMatrix()
-    model.modelCache.updateMatrixWorld( true)
+    model.modelCache.updateMatrixWorld(true)
 
     model.children.forEach(root => {
         let allCubes = root.getAllChildrenCubes([], true)

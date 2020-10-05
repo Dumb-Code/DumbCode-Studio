@@ -9,9 +9,10 @@ import { applyCubeStateHighlighting } from "./cube_state_highlighting.js"
 import { RotationPointMarkers } from "./rotation_point.markers.js"
 import { CubeCreateDelete } from "./cube_create_delete.js"
 import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
-import { Group } from "../three.js"
+import { EventDispatcher, Group } from "../three.js"
 import { CubeCommands } from "./cube_commands.js"
 import { ModelerOptions } from "./modeler_options.js"
+import { CubeCopyPaste } from "./cube_copy_paste.js"
 
 export class ModelingStudio {
 
@@ -25,7 +26,7 @@ export class ModelingStudio {
 
         this.group = new Group()
 
-        this.commandRoot = new CommandRoot(dom, pth)
+        this.commandRoot = new CommandRoot(dom, raytracer, pth)
 
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
         this.pth.addEventListener('selectchange', () => this.cubeList.refreshCompleatly())
@@ -36,6 +37,7 @@ export class ModelingStudio {
 
         applyCubeStateHighlighting(dom, this)
         
+        this.cubeCopyPaste = new CubeCopyPaste(this, this.commandRoot)
         this.cubeCreateDelete = new CubeCreateDelete(dom, this)
 
         this.rotationPointMarkers = new RotationPointMarkers(this)
@@ -52,11 +54,11 @@ export class ModelingStudio {
 
         this.cubeCommands = new CubeCommands(this.commandRoot, this)
 
-        this.onKeyDown = (e) => {
-            if(e.keyCode === 46) {
+        this.addEventListener('keydown', e => {
+            if(e.event.keyCode === 46) {
                 this.cubeCreateDelete.deleteCubes()
             }
-        }
+        })
     }
 
     setCamera(camera) {
@@ -102,3 +104,5 @@ export class ModelingStudio {
         this.selectedRequired.prop("disabled", !isSelected).toggleClass("is-active", isSelected)
     }
 }
+
+Object.assign(ModelingStudio.prototype, EventDispatcher.prototype)

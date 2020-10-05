@@ -50,23 +50,28 @@ export class DCMModel {
     }
 
     addChild(child, silent = false) {
+        this.cubeMap.set(child.name, child)
         this.children.push(child)
         this.onChildrenChange(silent)   
     }
 
+    updateMatrixWorld(force = true) {
+        this.modelCache.updateMatrixWorld(force)
+    }
+
     deleteChild(child, silent = false) {
+        this.cubeMap.delete(child.name)
         child.parent = undefined
-        this.children = this.children.filter(c => c != child)
-        this.onChildrenChange(silent)
+        this.onChildrenChange(silent, this.children.filter(c => c != child))
     }
 
     onChildrenChange(silent = false, childern = this.children) {
-        if(!silent) {
-            this.onCubeHierarchyChanged()
-        }
         this.children.forEach(child => child.cubeGroup ? this.modelCache.remove(child.cubeGroup) : 0)
         this.children = childern;
         this.children.forEach(child => this.modelCache.add(child.createGroup()))
+        if(!silent) {
+            this.onCubeHierarchyChanged()
+        }
     }
 
     resetAnimations() {
@@ -99,13 +104,11 @@ export class DCMCube {
             this.name = name + "~" + counter
             counter += 1
         }
-
-        model.cubeMap.set(this.name, this)
     }
 
   
     createGroup( ) {
-        if(this.cubeGroup !== undefined) {
+        if(this.cubeGroup !== undefined && this.cubeMesh !== undefined) {
             return this.cubeGroup
         }
         this.cubeGroup = new Group();
@@ -126,8 +129,8 @@ export class DCMCube {
         this.updatePosition()
         this.updateRotation()
         
-        this.onChildrenChange()
-
+        this.onChildrenChange(true)
+        
         return this.cubeGroup
     }
 
@@ -150,19 +153,16 @@ export class DCMCube {
     }
 
     addChild(child, silent = false) {
+        this.model.cubeMap.set(child.name, child)
         this.children.push(child)
         this.onChildrenChange(silent)
         
     }
 
     deleteChild(child, silent = false) {
+        this.model.cubeMap.delete(child.name)
         child.parent = undefined
-        this.children = this.children.filter(c => c != child)
-        this.onChildrenChange(silent)
-    }
-
-    getGroup() {
-        return this.cubeGroup
+        this.onChildrenChange(silent, this.children.filter(c => c != child))
     }
 
     getChildren() {
@@ -170,10 +170,13 @@ export class DCMCube {
     }
 
     cloneCube() {
-         return new DCMCube(this.name, this.dimension, this.rotationPoint, this.offset, 
-            this.rotation, this.textureOffset, this.cubeGrow, 
-            this.children.map(c => c.cloneCube()),
-            this.textureMirrored, this.model)
+        return new DCMCube(this.name.replace(/~\d+$/, ""), this.dimension, this.rotationPoint, this.offset, 
+            this.rotation, this.textureOffset, this.textureMirrored, this.cubeGrow, 
+            this.children.map(c => c.cloneCube()), this.model)
+    }
+
+    updateMatrixWorld(force = true) {
+        this.cubeGroup.updateMatrixWorld(force)
     }
 
     traverse(callback) {
@@ -182,12 +185,12 @@ export class DCMCube {
     }
 
     onChildrenChange(silent = false, childern = this.children) {
+        this.children.forEach(child => child.cubeGroup ? this.cubeGroup.remove(child.cubeGroup) : 0)
+        this.children = childern;
+        this.children.forEach(child => this.cubeGroup.add(child.createGroup()))
         if(!silent) {
             this.model.onCubeHierarchyChanged()
         }
-        this.children.forEach(child => child.cubeGroup ? this.cubeGroup.add(child.cubeGroup) : 0)
-        this.children = childern;
-        this.children.forEach(child => this.cubeGroup.add(child.createGroup()))
     }
 
     getAllChildrenCubes(arr = [], includeSelf = false) {

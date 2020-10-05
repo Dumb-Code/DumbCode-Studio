@@ -15,14 +15,29 @@ export class CommandRoot {
 
     runCommand(str, ctx = {}) {
         let split = splitStr(str)
-        if(split.length === 0) {
+
+        let commands = []
+        let computedFlags = []
+
+        split.forEach(v => {
+            if(v.startsWith('-')) {
+                computedFlags.push(v.substring(1))
+            } else {
+                commands.push(v)
+            }
+        })
+
+        if(commands.length === 0) {
             throw new Error(`String is empty ?`)
         }
         if(ctx.dummy !== true) {
             this.commandLine.outputLines.push(str)
             this.commandLine.onLinesChanged()
         }
-        return this.runCommandSplit(split, ctx)
+
+        ctx.hasFlag = (...flags) => flags.find(flag => computedFlags.indexOf(flag) !== -1) !== undefined
+
+        return this.runCommandSplit(commands, ctx)
     }
 
     runCommandSplit(split, ctx = {}) {

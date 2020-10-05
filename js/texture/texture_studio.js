@@ -3,6 +3,7 @@ import { TextureManager } from "./texture_manager.js"
 import { TexturemapCanvas } from "./texturemap_canvas.js"
 import { TextureCubeValues } from "./texture_cube_values.js"
 import { TextureTools } from "./texture_tools.js"
+import { EventDispatcher } from "../three.js"
 
 export class TextureStudio {
 
@@ -62,3 +63,5 @@ export class TextureStudio {
     }
 
 }
+
+Object.assign(TextureStudio.prototype, EventDispatcher.prototype)

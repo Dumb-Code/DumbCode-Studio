@@ -1,5 +1,5 @@
 import { JavaMethodExporter } from '../java_method_exporter.js'
-import { Clock, Group } from '../three.js'
+import { Clock, EventDispatcher, Group } from '../three.js'
 import { Gumball } from './gumball.js'
 import { AnimationPanel } from './animation_panel.js'
 import { AnimationCubeValues } from './animation_cube_values.js'
@@ -56,22 +56,22 @@ export class AnimationStudio {
             }
         })
 
-        this.onKeyDown = (e) => {
+        this.addEventListener('keydown', e => {
             if(pth.animationTabs.isAny()) {
                 let traverser = pth.animationTabs.activeData.mementoTraverser
-                if(e.ctrlKey && e.keyCode === 90) { //z
-                    if(e.shiftKey) {
+                if(e.event.ctrlKey && e.event.keyCode === 90) { //z
+                    if(e.event.shiftKey) {
                         traverser.redo()
                     } else {
                         traverser.undo()
                     }
                 }
             
-                if(e.ctrlKey && e.keyCode === 89) { //y
+                if(e.event.ctrlKey && e.event.keyCode === 89) { //y
                     traverser.redo()
                 }
-            }        
-        }
+            } 
+        })
     }
 
     setCamera(camera) {
@@ -199,3 +199,5 @@ export class AnimationStudio {
     }
     
 }
+
+Object.assign(AnimationStudio.prototype, EventDispatcher.prototype)
