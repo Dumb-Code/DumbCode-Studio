@@ -35,6 +35,7 @@ export class DCMModel {
 
     createModel( material ) {
         this.mat = material
+        this.onCubeHierarchyChanged()
 
         this.modelCache = new Group() 
         this.modelCache.scale.set(1/16, 1/16, 1/16)
