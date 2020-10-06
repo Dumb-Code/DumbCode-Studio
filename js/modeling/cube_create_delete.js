@@ -22,25 +22,27 @@ export class CubeCreateDelete {
             }
         })
     
-        dom.find('.delete-cube').click(() => {
-            if(studio.raytracer.anySelected()) {
-                studio.raytracer.selectedSet.forEach(cube => {
-                    let tbl = cube.tabulaCube
-                    let lockers = tbl.children.map(cube => new CubeLocker(cube, 0))
-                    
-                    tbl.children.forEach(cube => {
-                        tbl.deleteChild(cube, true)
-                        tbl.parent.addChild(cube) 
-                    })
-    
-                    tbl.parent.deleteChild(tbl)
-                    lockers.forEach(locker => locker.reconstruct())
-                    studio.raytracer.clickOnMesh(cube, false)
-                })
-            }
-        })
+        dom.find('.delete-cube').click(() => this.deleteCubesNoChildren())
     
         dom.find('.delete-cube-and-children').click(() => this.deleteCubes())
+    }
+
+    deleteCubesNoChildren() {
+        if(this.raytracer.anySelected()) {
+            this.raytracer.selectedSet.forEach(cube => {
+                let tbl = cube.tabulaCube
+                let lockers = tbl.children.map(cube => new CubeLocker(cube, 0))
+                
+                tbl.children.forEach(cube => {
+                    tbl.deleteChild(cube, true)
+                    tbl.parent.addChild(cube) 
+                })
+
+                tbl.parent.deleteChild(tbl)
+                lockers.forEach(locker => locker.reconstruct())
+                this.raytracer.clickOnMesh(cube, false)
+            })
+        }
     }
 
     deleteCubes() {

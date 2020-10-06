@@ -56,7 +56,11 @@ export class ModelingStudio {
 
         this.addEventListener('keydown', e => {
             if(e.event.keyCode === 46) {
-                this.cubeCreateDelete.deleteCubes()
+                if(e.event.ctrlKey) {
+                    this.cubeCreateDelete.deleteCubes()
+                } else {
+                    this.cubeCreateDelete.deleteCubesNoChildren()
+                }
             }
         })
     }
