@@ -29,6 +29,7 @@ export class DCMModel {
 
     onCubeHierarchyChanged() {
         this.maxCubeLevel = 0
+        this.cubeMap.clear()
         this.children.forEach(child => child.recalculateHierarchy(0, this))
         this.dispatchEvent( hierarchyChangedEvent )
     }
@@ -47,27 +48,27 @@ export class DCMModel {
     }
 
     invalidateModelCache() {
-        this.children.forEach(child => child.traverse(cube => cube.cubeGroup = undefined))
+        this.traverseAll(cube => cube.cubeGroup = undefined)
     }
 
-    addChild(child, silent = false) {
-        this.cubeMap.set(child.name, child)
-        this.children.push(child)
-        this.onChildrenChange(silent)   
+    traverseAll(func) {
+        this.children.forEach(child => child.traverse(cube => func(cube)))
     }
 
     updateMatrixWorld(force = true) {
         this.modelCache.updateMatrixWorld(force)
     }
 
+    addChild(child, silent = false) {
+        this.onChildrenChange(silent, this.children.concat(child))   
+    }
+
     deleteChild(child, silent = false) {
-        this.cubeMap.delete(child.name)
-        child.parent = undefined
         this.onChildrenChange(silent, this.children.filter(c => c != child))
     }
 
     onChildrenChange(silent = false, childern = this.children) {
-        this.children.forEach(child => child.cubeGroup ? this.modelCache.remove(child.cubeGroup) : 0)
+        this.children.forEach(child => child.cubeGroup ? this.modelCache.remove(child.cubeGroup) : null)
         this.children = childern;
         this.children.forEach(child => this.modelCache.add(child.createGroup()))
         if(!silent) {
@@ -147,6 +148,7 @@ export class DCMCube {
     recalculateHierarchy(hierarchyLevel, parent) {
         this.hierarchyLevel = hierarchyLevel
         this.parent = parent
+        this.model.cubeMap.set(this.name, this)
         this.children.forEach(child => child.recalculateHierarchy(this.hierarchyLevel+1, this)) 
         if(this.children.length === 0) {
             this.model.maxCubeLevel = Math.max(this.model.maxCubeLevel, this.hierarchyLevel)
@@ -154,15 +156,10 @@ export class DCMCube {
     }
 
     addChild(child, silent = false) {
-        this.model.cubeMap.set(child.name, child)
-        this.children.push(child)
-        this.onChildrenChange(silent)
-        
+        this.onChildrenChange(silent, this.children.concat(child))   
     }
 
     deleteChild(child, silent = false) {
-        this.model.cubeMap.delete(child.name)
-        child.parent = undefined
         this.onChildrenChange(silent, this.children.filter(c => c != child))
     }
 
@@ -186,7 +183,7 @@ export class DCMCube {
     }
 
     onChildrenChange(silent = false, childern = this.children) {
-        this.children.forEach(child => child.cubeGroup ? this.cubeGroup.remove(child.cubeGroup) : 0)
+        this.children.forEach(child => child.cubeGroup ? this.cubeGroup.remove(child.cubeGroup) : null)
         this.children = childern;
         this.children.forEach(child => this.cubeGroup.add(child.createGroup()))
         if(!silent) {

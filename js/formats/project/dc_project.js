@@ -1,4 +1,6 @@
 import { AnimationTabHandler } from "../../animator/animation_tabs.js"
+import { MementoTraverser } from "../../memento_traverser.js"
+import { ModelingMemento } from "../../modeling/modeling_memento.js"
 import { TextureManager } from "../../texture/texture_manager.js"
 import { DoubleSide, MeshLambertMaterial } from "../../three.js"
 
@@ -15,6 +17,7 @@ export class DcProject {//._files, this._modeling, this._texture, this._animatio
         this.id = id
         this.textureManager = new TextureManager(model, pth)
         this.animationTabHandler = new AnimationTabHandler(pth._animation, pth._files, model)
+        this.modelMementoTraverser = new MementoTraverser(() => new ModelingMemento(model))
         this.metadata = model.fileName ? { modelName: model.fileName } : {}
 
         this.materials = this._createMaterialsObject()

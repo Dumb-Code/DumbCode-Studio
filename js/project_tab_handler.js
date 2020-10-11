@@ -65,6 +65,10 @@ export class ProjectTabHandler {
         return this.getSelected().textureManager
     }
 
+    get modelMementoTraverser() {
+        return this.getSelected().modelMementoTraverser
+    }
+
     updateTexture(callback) {
         callback(this.materials.normal)
         callback(this.materials.selected)

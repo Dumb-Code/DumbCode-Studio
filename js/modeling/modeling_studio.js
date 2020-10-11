@@ -62,6 +62,8 @@ export class ModelingStudio {
                     this.cubeCreateDelete.deleteCubesNoChildren()
                 }
             }
+
+            pth.modelMementoTraverser.onKeyDown(e.event)
         })
     }
 
@@ -78,6 +80,7 @@ export class ModelingStudio {
         this.cubeCommands.onFrame()
         this.display.render()
         this.dragSelection.onFrame()
+        this.pth.modelMementoTraverser.onFrame()
     }
 
     cubeHierarchyChanged() {

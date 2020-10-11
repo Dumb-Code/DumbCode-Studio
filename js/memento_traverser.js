@@ -3,10 +3,12 @@ import { objectEquals } from "./util.js"
 
 export class MementoTraverser {
 
-    constructor( mementoCreator, { maxLimit = 50, timeTillCheck = 5 } = {} ) {
+    constructor( mementoCreator, { maxLimit = 50, timeTillCheck = 5, skipFrames = 10 } = {} ) {
         this.mementoCreator = mementoCreator
         this.maxLimit = maxLimit
         this.timeTillCheck = timeTillCheck
+        this.skipFrames = skipFrames
+        this.frameCounter = 0
         this.mementoList = []
         this.index = -1
         
@@ -15,8 +17,23 @@ export class MementoTraverser {
 
     onFrame() {
         let time = this._internalClock.getElapsedTime()
-        if(time >= this.timeTillCheck || this.mementoList.length == 0) {
-            this.attemptPush()        
+        if((time >= this.timeTillCheck && (this.frameCounter++ % this.skipFrames) === 0) || this.mementoList.length == 0) {
+            this.attemptPush()
+            this.frameCounter = 0
+        }
+    }
+
+    onKeyDown(event) {
+        if(event.ctrlKey && event.keyCode === 90) { //z
+            if(event.shiftKey) {
+                this.redo()
+            } else {
+                this.undo()
+            }
+        }
+    
+        if(event.ctrlKey && event.keyCode === 89) { //y
+            this.redo()
         }
     }
 

@@ -58,18 +58,7 @@ export class AnimationStudio {
 
         this.addEventListener('keydown', e => {
             if(pth.animationTabs.isAny()) {
-                let traverser = pth.animationTabs.activeData.mementoTraverser
-                if(e.event.ctrlKey && e.event.keyCode === 90) { //z
-                    if(e.event.shiftKey) {
-                        traverser.redo()
-                    } else {
-                        traverser.undo()
-                    }
-                }
-            
-                if(e.event.ctrlKey && e.event.keyCode === 89) { //y
-                    traverser.redo()
-                }
+                pth.animationTabs.activeData.mementoTraverser.onKeyDown(e.event)
             } 
         })
     }
