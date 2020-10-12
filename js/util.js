@@ -619,6 +619,18 @@ export function objectEquals(obj1, obj2, deep = false) {
     if(typeof obj1 != typeof obj2) {
         return false
     }
+    if(Array.isArray(obj1)) {
+        if(Array.isArray(obj2)) {
+            if(obj1.length !== obj2.length) {
+                return false;
+            }
+            return obj1.find((a, i) => a !== obj2[i]) === undefined
+        } else {
+            return false;
+        }
+    } else if(Array.isArray(obj2)) {
+        return false;
+    }
     if(typeof obj1 == "object") {
         for (var i in obj1) {
             if (obj1.hasOwnProperty(i)) {
