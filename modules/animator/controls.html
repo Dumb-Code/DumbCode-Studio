@@ -43,49 +43,33 @@
   }
 </style>
 
+<div class="columns is-mobile has-background-black-ter pt-0 px-3 py-0 my-0" style="border-top: 1px solid black;">
 
-<div class="columns is-mobile" style="padding: 10px;">
-  <div class="column is-3 is-v-paddingless has-text-grey">
-    <div class="notification has-background-black-bis is-marginless no-border is-paddingless">
+  <div class="column is-narrow has-text-grey-light">
+    <div class="notification has-background-black-ter is-marginless no-border is-paddingless">
       <p class="heading is-size-8">Rotation</p>
-      <div class="field has-addons is-marginless">
-        <div class="control">
-          <a class="button is-small">X</a>
-        </div>
-        <div class="control is-small" style="width: 100%;">
-          <input axis="0" class="animation-input-rotation-slider editor-require-keyframe editor-require-selection input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0">
-        </div>
-        <div class="control is-small">
-          <input axis="0" class="animation-input-rotation editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
-        </div>
+      <div class="is-marginless" style="display: inline-flex;">
+        <a style="float: left;" class="button is-static is-small">X</a>
+        <input axis="0" class="animation-input-rotation editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem; float:left;">
+        <input axis="0" class="animation-input-rotation-slider editor-require-keyframe editor-require-selection input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0" style="width: 18rem; float:left border-left: none;">
       </div>
-      <div class="field has-addons is-marginless">
-        <div class="control">
-          <a class="button is-small is-static">Y</a>
-        </div>
-        <div class="control is-small" style="width: 100%;">
-          <input axis="1" class="animation-input-rotation-slider editor-require-keyframe editor-require-selection input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0">
-        </div>
-        <div class="control is-small">
-          <input axis="1" class="animation-input-rotation editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
-        </div>
+      <br>
+      <div class="is-marginless" style="display: inline-flex;">
+        <a style="float: left;" class="button is-static is-small">Y</a>
+        <input axis="1" class="animation-input-rotation editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem; float:left; border-top: none;">
+        <input axis="1" class="animation-input-rotation-slider editor-require-keyframe editor-require-selection input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0" style="width: 18rem; float:left; border-top: none; border-left: none;">
       </div>
-      <div class="field has-addons is-marginless">
-        <div class="control">
-          <a class="button is-small is-static">Z</a>
-        </div>
-        <div class="control is-small" style="width: 100%;">
-          <input axis="2" class="animation-input-rotation-slider editor-require-keyframe editor-require-selection input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0">
-        </div>
-        <div class="control is-small">
-          <input axis="2" class="animation-input-rotation editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
-        </div>
+      <br>
+      <div class="is-marginless" style="display: inline-flex;">
+        <a style="float: left;" class="button is-static is-small">Z</a>
+        <input axis="2" class="animation-input-rotation editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem; float:left; border-top: none;">
+        <input axis="2" class="animation-input-rotation-slider editor-require-keyframe editor-require-selection input is-small slider has-background-black-ter is-dark has-text-light" type="range" min="-180" max="180" value="0" style="width: 18rem; float:left; border-top: none; border-left: none;">
       </div>
     </div>
   </div>
 
-  <div class="column is-narrow is-v-paddingless has-text-grey">
-    <div class="notification has-background-dark is-marginless no-border is-paddingless">
+  <div class="column is-narrow has-text-grey-light">
+    <div class="notification has-background-black-ter is-marginless no-border is-paddingless">
       <p class="heading is-size-8">Position</p>
       <div class="field has-addons is-marginless">
         <div class="control">
@@ -100,7 +84,7 @@
           <a class="button is-small is-static">Y</a>
         </div>
         <div class="control is-small">
-          <input axis="1" class="animation-input-position editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
+          <input axis="1" class="animation-input-position editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem; border-top: none;">
         </div>
       </div>
       <div class="field has-addons is-marginless">
@@ -108,16 +92,45 @@
           <a class="button is-small is-static">Z</a>
         </div>
         <div class="control is-small">
-          <input axis="2" class="animation-input-position editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
+          <input axis="2" class="animation-input-position editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem; border-top: none;">
         </div>
       </div>
-
     </div>
   </div>
 
-  <div class="column is-v-paddingless has-text-grey">
-    <div class="notification has-background-dark is-marginless no-border is-paddingless">
-      <p class="heading is-size-8">Playback</p>
+  <div class="column is-narrow has-text-grey-light">
+    <div class="notification has-background-black-ter is-marginless no-border is-paddingless">
+      <p class="heading is-size-8 has-text-grey-light">Cube Grow</p>
+      <div class="field has-addons is-marginless">
+        <div class="control">
+          <a class="button is-small is-static">X</a>
+        </div>
+        <div class="control is-small">
+          <input axis="0" class="animation-input-scale editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem;">
+        </div>
+      </div>
+      <div class="field has-addons is-marginless">
+        <div class="control">
+          <a class="button is-small is-static">Y</a>
+        </div>
+        <div class="control is-small">
+          <input axis="1" class="animation-input-scale editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem; border-top: none;">
+        </div>
+      </div>
+      <div class="field has-addons is-marginless">
+        <div class="control">
+          <a class="button is-small is-static">Z</a>
+        </div>
+        <div class="control is-small">
+          <input axis="2" class="animation-input-scale editor-require-keyframe editor-require-selection input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 6rem; border-top: none;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="column has-text-grey" style="border-left: 1px solid black;">
+    <div class="notification has-background-black-ter is-marginless no-border is-paddingless">
+      <p class="heading is-size-8 has-text-grey-light">Playback</p>
       <div class="field has-addons is-marginless">
 
         <div class="control keep-size button-restart-time">
@@ -142,14 +155,14 @@
           </a>
         </div>
         <div class="tooltip" style="width: 100%;" data-tooltip="">
-          <input class="input is-small slider has-background-black-ter is-dark has-text-light input-playback-range" type="range" min="0" value="0" step="0.1">
+          <input class="input is-small slider has-background-black-ter is-dark has-text-light input-playback-range" type="range" min="0" value="0" step="0.1" style="border: none;">
         </div>
       </div>
       
       <div class="columns is-primary" style="padding-top: 10px;">
         <div class="column is-narrow">
-          <div class="notification has-background-dark is-marginless no-border is-paddingless">
-            <p class="heading is-size-8">Keyframe</p>
+          <div class="notification has-background-black-ter is-marginless no-border is-paddingless">
+            <p class="heading is-size-8 has-text-grey-light">Keyframe</p>
             <div class="columns is-gapless is-marginless has-text-light">
               <div class="column">
                 <span class="icon is-small">
@@ -173,8 +186,8 @@
         </div>
 
         <div class="column is-narrow">
-          <div class="notification has-background-dark is-marginless no-border is-paddingless">
-            <p class="heading is-size-8">Frame Start</p>
+          <div class="notification has-background-black-ter is-marginless no-border is-paddingless">
+            <p class="heading is-size-8 has-text-grey-light">Frame Start</p>
             <div class="field has-addons is-marginless">
               <div class="control is-small number-input">
                 <input class="input is-small has-background-black-ter is-dark has-text-light input-frame-start editor-require-keyframe" type="number" value="20" style="width: 7rem;" disabled>
@@ -184,8 +197,8 @@
         </div>
 
         <div class="column is-narrow">
-          <div class="notification has-background-dark is-marginless no-border is-paddingless">
-            <p class="heading is-size-8">Frame Length</p>
+          <div class="notification has-background-black-ter is-marginless no-border is-paddingless">
+            <p class="heading is-size-8 has-text-grey-light">Frame Length</p>
             <div class="field has-addons is-marginless">
               <div class="control is-small number-input">
                 <input class="input is-small has-background-black-ter is-dark has-text-light input-frame-length editor-require-keyframe" type="number" value="20" style="width: 7rem;" disabled>
@@ -195,8 +208,8 @@
         </div>
 
         <div class="column is-2">
-          <div class="notification has-background-dark is-marginless no-border is-paddingless">
-            <p class="heading is-size-8 is-marginless">Editor</p>
+          <div class="notification has-background-black-ter is-marginless no-border is-paddingless">
+            <p class="heading is-size-8 is-marginless has-text-grey-light">Editor</p>
             <div class="columns is-marginless is-gapless has-text-light">
               <div class="column button-activateable tooltip transform-control-tool" data-tooltip="Toggle Translate Mode" select-list-entry="translate">
                 <span class="icon is-small">
