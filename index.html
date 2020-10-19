@@ -39,6 +39,14 @@
     <link rel="manifest" href="./images/brand/site.webmanifest">
 </head>
 <body>
+
+<script>
+function toggleNav() {
+	document.getElementById("navbar-burger").classList.toggle("is-active");
+	document.getElementById("navbar-menu").classList.toggle("is-active");
+}
+</script>
+
     <section class="is-fullheight is-mobile">
         <nav class="navbar is-mobile is-marginless heading has-text-weight-bold is-dark has-background-black-bis" role="navigation" aria-label="main navigation">
             <div class="navbar-brand">
@@ -46,20 +54,20 @@
                 <img src="/images/brand/logo.svg" width="48" height="28">DUMBCODE
               </a>
               <div class="divider" style="width: 2rem"></div>
-              <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbar-main">
+              <a id="navbar-burger" role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="mainNavBar" onclick="toggleNav()">
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
               </a>
             </div>
-            <div id="navbar-main" class="navbar-menu is-fullhd">
-              <div class="navbar-start">
-                <a class="navbar-item is-active" onclick="setTab(this, 0)">Project</a>
-                <a class="navbar-item" onclick="setTab(this, 1)">Modeling</a>
-                <a class="navbar-item" onclick="setTab(this, 2)">Texture</a>
-                <a class="navbar-item" onclick="setTab(this, 3)">Animation</a>
+            <div id="navbar-menu" class="navbar-menu is-fullhd has-background-black-bis">
+              <div class="navbar-start has-background-black-bis">
+                <a class="navbar-item has-background-black-bis has-text-light is-active" onclick="setTab(this, 0)">Project</a>
+                <a class="navbar-item has-background-black-bis has-text-light" onclick="setTab(this, 1)">Modeling</a>
+                <a class="navbar-item has-background-black-bis has-text-light" onclick="setTab(this, 2)">Texture</a>
+                <a class="navbar-item has-background-black-bis has-text-light" onclick="setTab(this, 3)">Animation</a>
               </div>
-              <div class="navbar-end">
+              <div class="navbar-end has-background-black-bis">
                 <div class="navbar-item">
                   <div class="navbar-item has-text-light" id="dumbcode-studio-version"></div>
                 </div>
@@ -67,6 +75,7 @@
             </div>
         </nav>
     </section>
+	
     <div id="main-area">
         <div id="files-area" class="tab-area editor-part" editor-tab="files" module="templates/file.html"></div>
         <div id="modeling-area" class="tab-area editor-part" editor-tab="modeling" module="templates/modeling.html"></div>
