@@ -39,14 +39,6 @@
     <link rel="manifest" href="./images/brand/site.webmanifest">
 </head>
 <body>
-
-<script>
-function toggleNav() {
-	document.getElementById("navbar-burger").classList.toggle("is-active");
-	document.getElementById("navbar-menu").classList.toggle("is-active");
-}
-</script>
-
     <section class="is-fullheight is-mobile">
         <nav class="navbar is-mobile is-marginless heading has-text-weight-bold is-dark has-background-black-bis" role="navigation" aria-label="main navigation">
             <div class="navbar-brand">
@@ -101,5 +93,11 @@ function toggleNav() {
     </div>
     <div id="editor-mouseover"></div>
     <div id="modal-area"></div>
+<script>
+	function toggleNav() {
+		document.getElementById("navbar-burger").classList.toggle("is-active");
+		document.getElementById("navbar-menu").classList.toggle("is-active");
+	}
+</script>
 </body>
 </html>
