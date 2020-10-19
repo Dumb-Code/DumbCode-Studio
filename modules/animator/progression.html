@@ -1,0 +1,71 @@
+<div class="notification is-marginless has-background-black-ter has-text-grey-light is-paddingless pt-2 ml-3">
+
+    <p class="heading is-size-8 has-text-grey-light">Playback</p>
+
+    <div class="box is-dark" style="width: 96%; padding-bottom: 42%; margin-top: 10px; border: 1px solid black;"></div>
+
+    <div class="container">
+
+        <div class="button is-info is-small" onclick="toggleInCheckbox()">
+            <icon class="icon is-small">
+                <i class="far fa-check-square" id="in-checkbox"></i>
+            </icon>
+            <br>
+            In
+        </div>
+        
+        <div class="button is-info is-small" onclick="toggleOutCheckbox()">
+            <icon class="icon is-small">
+                <i class="far fa-check-square" id="out-checkbox"></i>
+            </icon>
+            <br>
+            Out
+        </div>
+        
+        
+        <div class="dropdown">
+            <div class="dropdown-trigger">
+                <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu3">
+                <span>Progression Points</span>
+                <span class="icon is-small">
+                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                </span>
+                </button>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu3" role="menu">
+                <div class="dropdown-content">
+                <a class="dropdown-item">
+                    Sine
+                </a>
+                <a class="dropdown-item">
+                    Quad
+                </a>
+                <a class="dropdown-item">
+                    Quartic
+                </a>
+                <a class="dropdown-item">
+                    Quintic
+                </a>
+                <a class="dropdown-item">
+                    Exponential
+                </a>
+                <a class="dropdown-item">
+                    Circular
+                </a>
+                <a class="dropdown-item">
+                    Back
+                </a>
+                <a class="dropdown-item">
+                    Elastic
+                </a>
+                <a class="dropdown-item">
+                    Bounce
+                </a>
+                <a class="dropdown-item has-background-grey-lighter">
+                    Custom
+                </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

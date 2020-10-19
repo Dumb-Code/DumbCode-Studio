@@ -59,7 +59,6 @@
     height: 100vh;
 }
 
-
 .modeling-input-3 {
     display: grid;
     grid-template-columns: 30% 5% 30% 5% 30%;
@@ -208,9 +207,9 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
      border-radius: 5px 5px 0px 0px;
  }
 
- .editor-tab.tab-selected {
-     background-color: #363636;
-     color: white;
+.editor-tab.tab-selected {
+    background-color: #363636;
+    color: white;
 }
 
 .pcr-app .pcr-selection .pcr-color-palette {

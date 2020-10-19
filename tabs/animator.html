@@ -1,16 +1,38 @@
-<div class="tab-div has-background-black-bis" id="tab-div" style="padding-left: 1rem;">
-    <span class="tab-container" style="padding: 0px;"></span>
-    <span class="tab-add icon is-small">
-        <i class="fas fa-plus"></i>
-    </span> 
+<div class="has-background-black-ter" style="padding-left: 15px; padding-top: 6px; border-bottom: 1px solid black;">
+    <div class="tab-div has-background-black-ter" id="tab-div">
+        <span class="tab-container" style="padding: 0px;"></span>
+        <span class="tab-add icon is-small">
+            <i class="fas fa-plus"></i>
+        </span> 
+    </div>
 </div>
-<div id="display-div"></div>
-<div class="editor" id="editor" style="padding: 0px; border-top: 1px solid black">
-    <section class="is-mobile has-background-black-ter is-paddingless"style="height: 13vh;">
+
+<div class="has-background-danger" style="display: flex;">
+    <div id="display-div" style="width: 100%;"></div>
+
+
+    <div class="has-background-black-ter" style="width: 17vw; height: auto; float: right; border-left: 1px solid black;">
+        <div style="border-bottom: 1px solid black;">
+            <div><div module="modules/animator/editor.html"></div></div>
+            <div><div module="modules/animator/keyframe.html"></div></div>
+            <div class="columns is-gapless mb-0">
+                <div><div module="modules/animator/position.html"></div></div>
+                <div><div module="modules/animator/cube_grow.html"></div></div>
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <span class="icon is-small has-text-light mt-4"><i class="fas fa-lock"></i></span>
+                </div>
+            </div>
+            <div module="modules/animator/rotation.html" style="padding-right: 10px; margin-top: 0px"></div>
+        </div>
+        <div>
+            <div module="modules/animator/progression.html"></div>
+        </div>
+    </div>
+</div>
+
+<div class="has-background-black-ter" style="position: absolute; width: 100vw; bottom: 0px;">
+    <div module="modules/animator/scrub_bar.html" style="border-top: 1px solid black; border-right: 1px solid black; width: calc(80% + 1px);"></div>
+    <section class="is-mobile has-background-black-ter is-paddingless" style="border-top: 1px solid black;">
         <div class="keyframe-board" module="modules/animator/timeline.html"></div>
-    </section>
-  
-    <section class="is-mobile has-background-dark is-paddingless" style="height: 14vh;">
-        <div module="modules/animator/controls.html"></div>
     </section>
 </div>
