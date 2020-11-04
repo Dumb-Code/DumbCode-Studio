@@ -40,38 +40,23 @@
     <link rel="manifest" href="./images/brand/site.webmanifest">
 </head>
 <body>
-
-<script>
-function toggleNav() {
-	document.getElementById("navbar-burger").classList.toggle("is-active");
-	document.getElementById("navbar-menu").classList.toggle("is-active");
-}
-</script>
-
-    <section class="is-fullheight is-mobile">
-        <nav class="navbar is-mobile is-marginless heading has-text-weight-bold is-dark has-background-black-bis" role="navigation" aria-label="main navigation">
+    <section class="is-fullheight is-flex-mobile is-flex-tablet has-background-black-bis">
+        <nav class="navbar is-desktop is-marginless heading has-text-weight-bold is-dark has-background-black-bis" role="navigation" aria-label="main navigation" style="min-height: 3.25rem; align-items: stretch; display: flex; width: 100%;">
             <div class="navbar-brand">
               <a class="navbar-item" href="https://www.dumbcode.net/studio">
                 <img src="/images/brand/logo.svg" width="48" height="28">DUMBCODE
               </a>
               <div class="divider" style="width: 2rem"></div>
-              <a id="navbar-burger" role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="mainNavBar" onclick="toggleNav()">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-              </a>
             </div>
-            <div id="navbar-menu" class="navbar-menu is-fullhd has-background-black-bis">
-              <div class="navbar-start has-background-black-bis">
-                <a class="navbar-item has-background-black-bis has-text-light is-active" onclick="setTab(this, 0)">Project</a>
-                <a class="navbar-item has-background-black-bis has-text-light" onclick="setTab(this, 1)">Modeling</a>
-                <a class="navbar-item has-background-black-bis has-text-light" onclick="setTab(this, 2)">Texture</a>
-                <a class="navbar-item has-background-black-bis has-text-light" onclick="setTab(this, 3)">Animation</a>
-              </div>
-              <div class="navbar-end has-background-black-bis">
-                <div class="navbar-item">
-                  <div class="navbar-item has-text-light" id="dumbcode-studio-version"></div>
-                </div>
+            <div id="navbar-menu" class="is-fullhd has-background-black-bis" style="flex-grow: 1; flex-shrink: 0; align-items: stretch; display: flex;">
+              <a class="navbar-item top-nav-item has-background-black-bis has-text-light is-active" onclick="setTab(this, 0)">Project</a>
+              <a class="navbar-item top-nav-item has-background-black-bis has-text-light" onclick="setTab(this, 1)">Modeling</a>
+              <a class="navbar-item top-nav-item has-background-black-bis has-text-light" onclick="setTab(this, 2)">Texture</a>
+              <a class="navbar-item top-nav-item has-background-black-bis has-text-light" onclick="setTab(this, 3)">Animation</a>
+            </div>
+            <div class="navbar-end top-nav-item has-background-black-bis" style="float: right">
+              <div class="navbar-item top-nav-item">
+                <div class="navbar-item top-nav-item has-text-light" id="dumbcode-studio-version"></div>
               </div>
             </div>
         </nav>
