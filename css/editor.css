@@ -59,6 +59,18 @@
     height: 100vh;
 }
 
+#main-area.is-animation > div#animation-area {
+    display: grid;
+    grid-template-areas: 
+    "tab tab"
+    "main side-bar"
+    "playback side-bar"
+    "bottom bottom";
+    grid-template-columns: calc(100% - 326px) 326px ;
+    grid-template-rows: 31px calc(100vh - 234px) 30px 121px;
+    width: 100%;
+    height: 100vh;
+}
 
 .modeling-input-3 {
     display: grid;
@@ -208,9 +220,9 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
      border-radius: 5px 5px 0px 0px;
  }
 
- .editor-tab.tab-selected {
-     background-color: #363636;
-     color: white;
+.editor-tab.tab-selected {
+    background-color: #363636;
+    color: white;
 }
 
 .pcr-app .pcr-selection .pcr-color-palette {
@@ -260,4 +272,14 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
 
 .modal-content {
     width: unset !important;
+}
+
+.top-nav {
+    font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+.top-nav-item {
+    align-items: center !important;
+    display: flex !important;
+
 }

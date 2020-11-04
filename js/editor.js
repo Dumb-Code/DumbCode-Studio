@@ -13,8 +13,8 @@ import { ProjectTabHandler } from "./project_tab_handler.js";
 import { fileUploadBox } from "./util.js";
 
 const major = 0
-const minor = 4
-const patch = 5
+const minor = 5
+const patch = 0
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`

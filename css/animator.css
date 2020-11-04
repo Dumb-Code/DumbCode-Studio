@@ -1,0 +1,126 @@
+.layer {
+    height: 22px;
+    padding-left: 10px;
+    padding-right: 100px;
+}
+.layer-name {
+    padding: 1px; 
+    margin:0px; 
+    margin-bottom: 3px;
+}
+
+.keyframe-container {
+   background: repeating-linear-gradient( 
+       90deg,
+       #363636  0px,
+       #363636  20px,
+       #4A4A4A  20px,
+       #4A4A4A  40px);
+   background-size: 40px;
+   margin-bottom: 3px;
+   height: 20px;
+   padding: 0px;
+   display: flex;
+}
+
+.clip-full-box {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)
+}
+
+.eventpoint {
+    z-index: 1;
+    position: absolute;
+    top: 0px;
+    left: -8px;
+    display: inline-flex;
+}
+.keyframe {
+    height: 12px;
+    border-radius: 6px;
+    z-index: 1;
+    position: absolute;
+    top: 4px;
+    display: inline-flex;
+}
+.keypoint {
+    height: 18px;
+    width: 18px;
+    border-radius: 9px;
+    z-index: 2;
+    position: relative;
+    top: -3px;
+}
+
+.empty-keyframe .kf-layer-visible, .empty-keyframe .kf-layer-lock, .empty-keyframe .keyframe-container, .empty-event-point {
+    display: none;
+}
+
+
+.empty-keyframe {
+    padding-top: 12px;
+}
+
+.keyframe-icon-box span {
+    cursor: pointer;
+}
+
+.event-points-board {
+    padding: 1.25rem 0 0 0;
+    height: 20px;
+}
+
+.dbl-text-edit {
+    /* height: 16px; */
+    width: 100px;
+}
+
+.keyframe-playback-marker {
+   position: absolute;
+   width: 5px;
+   height: 120px;
+   background-color: #25a5d8;
+   z-index: 1;
+}
+
+.no-border {
+    border-radius: 0px;
+}
+
+.is-v-paddingless {
+padding-top: 0px;
+padding-bottom: 0px;
+}
+
+.slider {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+}
+.slider::-webkit-slider-thumb {
+cursor: pointer;
+transition: background 0.05s ease-in-out;
+}
+.slider::-webkit-slider-thumb:hover {
+background: #35dbac;
+}
+.slider:active::-webkit-slider-thumb {
+background:#096fdb;
+}
+.slider::-moz-range-thumb {
+cursor: pointer;
+transition: background 0.05s ease-in-out;
+}
+.slider::-moz-range-thumb:hover {
+background: #35dbac;
+}
+.slider::-moz-range-thumb {
+background:#096fdb;
+border: 0;
+}
+.slider::-moz-range-track {
+background: #18191a;
+border: 0;
+}
+.slider::-moz-focus-inner, ::-moz-focus-outer {
+border: 0;
+}

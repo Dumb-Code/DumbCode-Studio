@@ -29,7 +29,7 @@ export class AnimationStudio {
         this.rotationCache = null
 
         this._tabContainer = dom.find('.tab-container')
-        dom.find('.tab-add').click(() => pth.getSelected().animationTab.initiateNewTab())
+        dom.find('.tab-add').click(() => pth.animationTabs.initiateNewTab())
 
         this.transformControls = display.createTransformControls()
         this.group.add(this.transformControls)
@@ -43,6 +43,20 @@ export class AnimationStudio {
         this.methodExporter = new JavaMethodExporter()
         this.progressionCanvas = new ProgressionCanvas(dom, this)
         this.clock = new Clock()
+
+        this.tabDragArea = dom.find('.tab-draggable-area')
+        this.tabDragArea.bind('mousewheel DOMMouseScroll', e => {
+            let direction = e.originalEvent.wheelDelta
+            if(direction === undefined) { //Firefox >:(
+                direction = -e.detail
+            }
+            if(direction !== 0) {
+                direction > 0
+            }
+            this.tabDragArea.scrollLeft(this.tabDragArea.scrollLeft() + (direction > 0 ? 20 : -20))
+            e.preventDefault()
+            e.stopPropagation()
+        })
 
         dom.find('.button-undo').click(() => {
             if(pth.animationTabs.isAny()) {

@@ -1,98 +1,12 @@
-<style>
-.layer {
-    height: 22px;
-    padding-left: 10px;
-    padding-right: 100px;
-}
-.layer-name {
-    padding: 1px; 
-    margin:0px; 
-    margin-bottom: 3px;
-}
-
-.keyframe-container {
-   background: repeating-linear-gradient( 
-       90deg,
-       #363636  0px,
-       #363636  20px,
-       #4A4A4A  20px,
-       #4A4A4A  40px);
-   background-size: 40px;
-   margin-bottom: 3px;
-   height: 20px;
-   padding: 0px;
-   display: flex;
-}
-
-.clip-full-box {
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)
-}
-
-.eventpoint {
-    z-index: 1;
-    position: absolute;
-    top: 0px;
-    left: -8px;
-    display: inline-flex;
-}
-.keyframe {
-    height: 12px;
-    border-radius: 6px;
-    z-index: 1;
-    position: absolute;
-    top: 4px;
-    display: inline-flex;
-}
-.keypoint {
-    height: 18px;
-    width: 18px;
-    border-radius: 9px;
-    z-index: 2;
-    position: relative;
-    top: -3px;
-}
-
-.empty-keyframe .kf-layer-visible, .empty-keyframe .kf-layer-lock, .empty-keyframe .keyframe-container, .empty-event-point {
-    display: none;
-}
-
-
-.empty-keyframe {
-    padding-top: 12px;
-}
-
-.keyframe-icon-box span {
-    cursor: pointer;
-}
-
-.event-points-board {
-    padding: 1.25rem 0 0 0;
-    height: 20px;
-}
-
-.dbl-text-edit {
-    /* height: 16px; */
-    width: 100px;
-}
-
-.keyframe-playback-marker {
-   position: absolute;
-   width: 5px;
-   height: 120px;
-   background-color: #25a5d8;
-   z-index: 1;
-}
-
-</style>
 <div class="keyframe-playback-marker tooltip"></div>
-<div class="columns is-mobile layer">
+<div class="columns is-mobile layer has-text-grey-light">
     <div class="column is-narrow">
         <div class="notification has-background-black-ter layer-name">
             <p class="heading is-size-8" style="margin-bottom: 3px; width: 100px;">Events</p>
         </div>
     </div>
 
-    <div class="column is-narrow has-text-grey" style="width: 90px;">
+    <div class="column is-narrow has-text-grey-light" style="width: 90px;">
     </div>
 
     <span class="eventpoint icon is-small tooltip empty-event-point"><i class="fas fa-map-marker"></i></span>
@@ -104,7 +18,7 @@
 </div>
 <div class="keyframe-board-columns">
 </div>
-<div class="columns is-mobile layer column-blue keyframe-layer empty-keyframe">
+<div class="columns is-mobile layer column-blue keyframe-layer empty-keyframe has-text-grey-light">
     <div class="column is-narrow">
         <div class="notification dbl-click-container has-background-black-ter layer-name layer-name-conatiner">
             <p class="heading is-size-8 dbl-text" style="margin-bottom: 3px; width: 100px;">New Layer</p>
@@ -112,7 +26,7 @@
         </div>
     </div>
 
-    <div class="column is-narrow has-text-grey keyframe-icon-box" style="width: 90px;">
+    <div class="column is-narrow has-text-grey-light keyframe-icon-box" style="width: 90px;">
         <span class="icon is-small kf-layer-add">
             <i class="fas fa-plus"></i>
         </span>
