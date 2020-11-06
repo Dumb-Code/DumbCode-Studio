@@ -205,19 +205,21 @@ export class DCMCube {
     resetVisuals() {
         this.children.forEach(child => child.resetVisuals())
 
-        this.updateGeometry()
+        this.updateGeometry({ shouldUpdateTexture: false })
         this.updateCubePosition()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
     }
 
-    updateGeometry( { dimension = this.dimension, cubeGrow = this.cubeGrow, updateTexture = true } = {}) {
+    updateGeometry( { dimension = this.dimension, cubeGrow = this.cubeGrow, shouldUpdateTexture = true } = {}) {
         let w = dimension[0] + cubeGrow[0]*2 + 0.01
         let h = dimension[1] + cubeGrow[1]*2 + 0.01
         let d = dimension[2] + cubeGrow[2]*2 + 0.01
 
         this.cubeMesh.scale.set(w, h, d)
-        this.updateTexture()
+        if(shouldUpdateTexture) {
+            this.updateTexture()
+        }
     }
 
     updateCubePosition( { offset = this.offset, cubeGrow = this.cubeGrow } = {} ) {
@@ -233,6 +235,7 @@ export class DCMCube {
     }
 
     updateTexture({ textureOffset = this.textureOffset, dimension = this.dimension, texWidth = this.model.texWidth, texHeight = this.model.texHeight, textureMirrored = this.textureMirrored } = {}) {
+        this.cubeMesh.geometry.removeAttribute("uv")
         let uvData = getUV(textureOffset[0], textureOffset[1], dimension[0], dimension[1], dimension[2], texWidth, texHeight, textureMirrored)
         this.cubeMesh.geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uvData), 2))
     }
