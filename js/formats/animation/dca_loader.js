@@ -59,7 +59,7 @@ DCALoader.importAnimation = (handler, buffer) => {
         }
     }
 
-    repairKeyframes(handler, version)
+    DCALoader.repairKeyframes(handler, version)
 }
 
 DCALoader.repairKeyframes = (handler, version) => {
