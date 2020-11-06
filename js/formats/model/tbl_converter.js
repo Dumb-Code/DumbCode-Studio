@@ -3,7 +3,7 @@ import { MeshLambertMaterial, Vector3 } from "../../three.js"
 import { runMirrorMath } from "../../modeling/cube_commands.js"
 
 
-let worldPos = new Vector3(0, 0, 0)
+let worldPos = new Vector3(8/16, 12/16, 0)
 let worldX = new Vector3(1, 0, 0)
 let worldY = new Vector3(0, 1, 0)
 
@@ -43,12 +43,8 @@ export async function readTblFile(data) {
     model.modelCache.updateMatrix()
     model.modelCache.updateMatrixWorld(true)
 
-    model.children.forEach(root => {
-        let allCubes = root.getAllChildrenCubes([], true)
-        runMirrorMath(worldPos, worldX, allCubes, model, false)
-        runMirrorMath(worldPos, worldY, allCubes, model, false)
-        root.updatePosition([root.rotationPoint[0] + 16, root.rotationPoint[1] + 24, root.rotationPoint[2]])
-    })
+    runMirrorMath(worldPos, worldX, null, model, false)
+    runMirrorMath(worldPos, worldY, null, model, false)
 
     model.invalidateModelCache()
 

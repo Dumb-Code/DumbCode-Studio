@@ -65,14 +65,14 @@ export class CubeCommands {
     }
     
     onCommandExit() {
-        if(this.commandResultChangeCache !== null) {
+        if(this.commandResultChangeCache) {
             this.commandResultChangeCache.onExit()
             this.commandResultChangeCache = null
         }
     }
 
     onFrame() {
-        if(this.commandResultChangeCache !== null) {
+        if(this.commandResultChangeCache) {
             this.commandResultChangeCache.applyOnFrame()
         }
     }
@@ -80,6 +80,11 @@ export class CubeCommands {
 
 export function runMirrorMath(worldPos, normal, cubesToApplyTo, tbl, dummy) {
     tbl.resetVisuals()
+
+    if(cubesToApplyTo == null) {
+        cubesToApplyTo = []
+        tbl.traverseAll(cube => cubesToApplyTo.push(cube))
+    }
     
     let totalCubesToApplyTo = []
     let cubes = cubesToApplyTo.sort((a, b) => a.hierarchyLevel - b.hierarchyLevel)

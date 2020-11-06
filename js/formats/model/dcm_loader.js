@@ -34,7 +34,7 @@ export class DCMModel {
         this.dispatchEvent( hierarchyChangedEvent )
     }
 
-    createModel( material ) {
+    createModel( material = this.mat ) {
         this.mat = material
         this.onCubeHierarchyChanged()
 
@@ -83,6 +83,21 @@ export class DCMModel {
 
     resetVisuals() {
         this.children.forEach(child => child.resetVisuals())
+    }
+
+    cloneModel() {
+        let model = new DCMModel()
+        
+        model.author = this.author
+        model.fileName = this.fileName
+        model.texWidth = this.texWidth
+        model.texHeight = this.texHeight
+
+        model.children = this.children.map(c => c.cloneCube(model))
+
+        model.onCubeHierarchyChanged()
+
+        return model
     }
 }
 
@@ -167,10 +182,10 @@ export class DCMCube {
         return this.children
     }
 
-    cloneCube() {
+    cloneCube(model = this.model) {
         return new DCMCube(this.name.replace(/~\d+$/, ""), this.dimension, this.rotationPoint, this.offset, 
             this.rotation, this.textureOffset, this.textureMirrored, this.cubeGrow, 
-            this.children.map(c => c.cloneCube()), this.model)
+            this.children.map(c => c.cloneCube(model)), model)
     }
 
     updateMatrixWorld(force = true) {
