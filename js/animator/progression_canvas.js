@@ -244,7 +244,7 @@ export class ProgressionCanvas {
         }
    
 
-        const resolution = 10000
+        const resolution = 1000
         const step = 1 / resolution
         let array = new Array(resolution + 1)
         for(let i = 0; i < array.length; i++) {
