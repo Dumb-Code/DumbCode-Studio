@@ -10,8 +10,8 @@ export class AnimationPanel {
     }
 
     updateAreas() {
-        this.editor.css("height", this.panelHeight + "px");
-        this.displayDiv.css("height", window.innerHeight + "px");
+        // this.editor.css("height", this.panelHeight + "px");
+        // this.displayDiv.css("height", window.innerHeight + "px");
         window.studioWindowResized()
     }
 
