@@ -24,6 +24,6 @@ TBLFilesLoader.readFromTblFiles = (handler, files, meta = { base_time: 5 }) => {
 
         startTime += keyframe.duration
     }
-    DCALoader.repairKeyframes(handler, 2, { shouldFlip: false })
+    DCALoader.repairKeyframes(handler, 2, true)
     return handler.keyframes
 }

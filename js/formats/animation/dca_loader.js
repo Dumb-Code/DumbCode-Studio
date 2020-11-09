@@ -1,15 +1,7 @@
 import { ByteBuffer } from "../../animations.js"
-import { runMirrorMath } from "../../modeling/cube_commands.js"
-import { MeshLambertMaterial, Vector3 } from "../../three.js"
 
 const rotArr = new Array(3)
 const posArr = new Array(3)
-
-let dummyMaterial = new MeshLambertMaterial()
-
-let worldPos = new Vector3(8/16, 12/16, 0)
-let worldX = new Vector3(1, 0, 0)
-let worldY = new Vector3(0, 1, 0)
 
 export class DCALoader {}
 
@@ -68,18 +60,8 @@ DCALoader.importAnimation = (handler, buffer) => {
     DCALoader.repairKeyframes(handler, version)
 }
 
-DCALoader.repairKeyframes = (handler, version, { shouldFlip = version <= 4, shouldClipIntersections = version <= 3 } = {}) => {
-    if(version <= 4) {
-        let calculationModel = null
-        let flippedActualInfo = []
-        let absoluteModel = handler.tbl
-
-        if(shouldFlip === true) {
-            calculationModel = handler.tbl.cloneModel()
-            calculationModel.createModel(dummyMaterial)
-            handler.tbl = createMirrorCopyModel(handler.tbl)
-        }
-        
+DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
+    if(version <= 3) {        
         let map = handler.tbl.cubeMap
 
         if(version === 3) {
@@ -94,145 +76,45 @@ DCALoader.repairKeyframes = (handler, version, { shouldFlip = version <= 4, shou
             handler.tbl.resetAnimations()
             handler.keyframes.forEach(_kf => _kf.animate(kf.startTime))
 
-            if(version <= 3) {
-                let next = sorted[index+1]
+            let next = sorted[index+1]
 
-                let mod = 1
-                if(shouldClipIntersections) {
-                    if(next !== undefined) {
-                        let dist = next.startTime - kf.startTime
-                        //Keyframes intersect
-                        if(dist < kf.duration) {
-                            mod = dist / kf.duration
-                            kf.duration = dist
-                        }
-                    }
+            let mod = 1
+            if(next !== undefined) {
+                let dist = next.startTime - kf.startTime
+                //Keyframes intersect
+                if(dist < kf.duration) {
+                    mod = dist / kf.duration
+                    kf.duration = dist
                 }
-                
-                kf.rotationMap.forEach((arr, key) => {
-                    map.get(key).cubeGroup.rotation.toArray(rotArr)
-                    for(let i = 0; i < 3; i++) {
-                        arr[i] = (arr[i] - rotArr[i]*180/Math.PI) * mod
-                    }
-                })
-                kf.rotationPointMap.forEach((arr, key) => {
-                    map.get(key).cubeGroup.position.toArray(posArr)
-                    for(let i = 0; i < 3; i++) {
-                        arr[i] = (arr[i] - posArr[i]) * mod
-                    }
-                })
             }
-            
-            if(shouldFlip == true) {
-                calculationModel.modelCache.updateMatrix()
-                calculationModel.modelCache.updateMatrixWorld(true)
-
-                calculationModel.traverseAll(dst => {
-                    let src = map.get(dst.name)
-                    let pos = src.cubeGroup.position
-                    let rot = src.cubeGroup.rotation
-                    dst.updatePosition([pos.x, pos.y, pos.z])
-                    dst.updateRotation([rot.x, rot.y, rot.z].map(i => i*180/Math.PI))
-                    dst.updateOffset([...src.offset])
-                })
-
-                calculationModel.modelCache.updateMatrixWorld(true)
-                runMirrorMath(worldPos, worldY, null, calculationModel, false)
-                runMirrorMath(worldPos, worldX, null, calculationModel, false)
-                calculationModel.modelCache.updateMatrixWorld(true)
                 
-                let data = {
-                    rotation: new Map(),
-                    position: new Map(),
-
-                    wholeRotationState: new Map()
-                }
-
-                calculationModel.cubeMap.forEach((cube, key) => {
-                    let rotation = cube.cubeGroup.rotation
-                    let rot = [rotation.x, rotation.y, rotation.z].map(i => i*180/Math.PI)
-
-                    if(kf.rotationMap.has(key)) {
-                        data.rotation.set(key, rot)
-                    }
-
-                    data.wholeRotationState.set(key, rot)
-                })
-
-                kf.rotationPointMap.forEach((_, key) => {
-                    let position = calculationModel.cubeMap.get(key).cubeGroup.position
-                    data.position.set(key, [position.x, position.y, position.z])
-                })
-
-                data.layer = kf.layer
-                data.startTime = kf.startTime
-                data.duration = kf.duration
-                data.progressionPoints = kf.progressionPoints
-
-                flippedActualInfo.push(data)                
-            }
-        })
-        handler.tbl = absoluteModel
-        if(shouldFlip === true) {
-            recreateAndRerunMirrorKeyframes(handler, flippedActualInfo)
-        }
-    }
-}
-
-function recreateAndRerunMirrorKeyframes(handler, flippedActualInfo) {
-    handler.keyframes = []
-    
-    let previousArray = new Map()
-    flippedActualInfo.forEach(data => {
-        let kf = handler.createKeyframe()
-
-        kf.layer = data.layer
-        kf.startTime = data.startTime
-        kf.duration = data.duration
-        kf.progressionPoints = data.progressionPoints
-        kf.rotationMap = data.rotation
-        kf.rotationPointMap = data.position
-
-        //Because of the mirror math, sometimes the rotation can change by 360 degrees.
-        //The code below is to detect that and fix it.
-        data.wholeRotationState.forEach((arr, key) => {
-            if(previousArray.has(key)) {
-                let prev = previousArray.get(key)
+            kf.rotationMap.forEach((arr, key) => {
+                map.get(key).cubeGroup.rotation.toArray(rotArr)
                 for(let i = 0; i < 3; i++) {
-                    let delta = prev[i] - arr[i]
-                    if(Math.abs(delta) > 180) {
-                        let newP = arr[i] + Math.sign(delta)*360
-                        arr[i] = newP
-                        if(kf.rotationMap.has(key)) {
-                            kf.rotationMap.get(key)[i] = newP
-                        }
-                    }
+                    arr[i] = (arr[i] - rotArr[i]*180/Math.PI) * mod
                 }
-            }
-            previousArray.set(key, arr)
+            })
+            kf.rotationPointMap.forEach((arr, key) => {
+                map.get(key).cubeGroup.position.toArray(posArr)
+                for(let i = 0; i < 3; i++) {
+                    arr[i] = (arr[i] - posArr[i]) * mod
+                }
+            })
         })
-    })
+    }
 
-    DCALoader.repairKeyframes(handler, 2, { shouldFlip: false, shouldClipIntersections: false})
-}
-
-function createMirrorCopyModel(modelIn) {
-    let model = modelIn.cloneModel()
-    model.createModel(dummyMaterial)
-    model.modelCache.updateMatrix()
-    model.modelCache.updateMatrixWorld(true)
-
-
-    let allCubes = []
-    model.traverseAll(cube => allCubes.push(cube))
-
-    runMirrorMath(worldPos, worldY, allCubes, model, false)
-    runMirrorMath(worldPos, worldX, allCubes, model, false)
-
-    model.modelCache.updateMatrix()
-    model.modelCache.updateMatrixWorld(true)
-
-    return model
+    //Root cubes will have the move direction flipped.
+    if(version <= 4 && alreadyFlipped !== true) {
+        handler.tbl.children.forEach(root => {
+            handler.keyframes.forEach(keyframe => {
+                if(keyframe.rotationPointMap.has(root.name)) {
+                    let arr = keyframe.rotationPointMap.get(root.name)
+                    arr[0] = -arr[0]
+                    arr[1] = -arr[1]
+                }
+            })
+        })
+    }
 }
 
 function transformArr(arr, subValue) {
