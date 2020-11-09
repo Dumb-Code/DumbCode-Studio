@@ -261,7 +261,6 @@ export class ProgressionCanvas {
         })
 
         let xValues = []
-
         let length = distances.reduce((a, b) => a + b)
         let xStep = length / (points - 1)
         for(let i = 0; i < points; i++) {
@@ -270,13 +269,17 @@ export class ProgressionCanvas {
             for(let d = 0; d < distances.length; d++) {
                 let dist = distances[d]
                 if(distToMove < dist) {
-                    xValues.push((d + dist/distToMove)*step)
+                    let val = (d + dist/distToMove)*step
+                    if(val < 1) {
+                        xValues.push(val)
+                    }
                     break
                 } else {
                     distToMove -= dist
                 }
             }
         }
+        
 
         let progressionPoints = handler.selectedKeyFrame.progressionPoints.filter(p => p.required)
         
@@ -284,6 +287,7 @@ export class ProgressionCanvas {
             let y = 1 - func(x)
             progressionPoints.push({ x, y })
         })
+
         
         handler.selectedKeyFrame.progressionPoints = progressionPoints.sort((p1, p2) => p1.x - p2.x)
         this.redrawProgressionCanvas()
