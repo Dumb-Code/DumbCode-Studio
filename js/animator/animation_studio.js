@@ -146,6 +146,7 @@ export class AnimationStudio {
             this.keyframeManager.updateKeyFrame(keyframe)
         }
         this.cubeDisplayValues.updateKeyframeSelected()
+        this.progressionCanvas.keyframeSelectChange()
     }
 
 
@@ -165,6 +166,7 @@ export class AnimationStudio {
         }
         this.display.scene.add(this.group)
         this.transformControls.enableReason('tab')
+        this.progressionCanvas.onSwitchedTo()
     }
     
     setUnactive() {
@@ -188,7 +190,6 @@ export class AnimationStudio {
                 data.mementoTraverser.onFrame()
             }
         }
-        
 
         this.display.render()
         

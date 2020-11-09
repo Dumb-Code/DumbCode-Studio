@@ -181,9 +181,9 @@ export class LinkedSelectableList {
             let old = this.rawValue
             this.rawValue = value
             this.elements.removeClass(this.className)
-            this.elements.filter(`[select-list-entry='${value}']`).addClass(this.className)
+            let elements = this.elements.filter(`[select-list-entry='${value}']`).addClass(this.className)
             if(silent !== true) {
-                this.dispatchEvent({ type: "changed", old, value })
+                this.dispatchEvent({ type: "changed", old, value, elements })
             }
         }
     }

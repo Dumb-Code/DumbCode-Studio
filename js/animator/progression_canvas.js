@@ -1,4 +1,4 @@
-import { LinkedSelectableList, CanvasTransformControls } from "../util.js"
+import { LinkedSelectableList, CanvasTransformControls, LinkedElement } from "../util.js"
 
 const radius = 7.5
 
@@ -6,31 +6,61 @@ export class ProgressionCanvas {
     constructor(dom, studio) {
         this.pth = studio.pth
         this.selectedPoint = null
-        this.waitAndSetCanvas()
-        dom.find('.popup-animator-progression').click(() =>         {
-            let handler = this.pth.animationTabs.active
-            if(handler !== null && handler.selectedKeyFrame !== undefined) {
-                this.easingFunction.value = "sine"
-                this.easingFunctionType.value = "in"
-                this.redrawProgressionCanvas()
-            }
-        })
-    }
+        this.dropdownText = dom.find('.dropdown-text')
 
-    async waitAndSetCanvas() {
-        let dom = $(await getModal('animator/progression'))
+        this.easingRequiresChoice = true
+
         let pc = dom.find('#progression_canvas')
         this.progressionCanvas = pc.get(0)
         this.canvasCtx = this.progressionCanvas.getContext("2d")
-
         this.canvasTransformControls = new CanvasTransformControls(this.progressionCanvas, (a, b, c, d, e) => this.mouseOverCanvas(a, b, c, d, e), () => this.redrawProgressionCanvas())
 
-        this.easingFunction = new LinkedSelectableList(dom.find('.easing-function-entry'), false)
-        this.easingFunctionType = new LinkedSelectableList(dom.find('.easing-function-type-entry'))
-        this.easingFunctionAmount = dom.find('.easing-function-number')
+        this.easingFunction = new LinkedSelectableList(dom.find('.easing-function-entry')).onchange(e => {
+            this.dropdownText.text(e.elements.text())
+            this.easingRequiresChoice = false
+            this.generateEasingFunction()
+        })
+        this.easingFunctionQuality = dom.find('.easing-function-quality').on('input', () => {
+            let val = this.easingFunctionQuality.val()
+            let qual
+            if (val <= 10) {
+                qual = "Normal"
+            } else if(val <= 20) {
+                qual = "High"
+            } else if(val <= 30) {
+                qual = "Very High (can cause performance issues)"
+            }  else if(val <= 40) {
+                qual = "Extreemly High (can cause performance issues)"
+            }
+            this.easingFunctionQuality.attr('data-tooltip', `Quality: ${qual}`)
+            this.generateEasingFunction()
+        })
 
-        dom.find('.generate-points-button').click(() => this.generateEasingFunction())
+        this.easingIn = true
+        this.easingOut = true
 
+        this.createEasingType(dom.find('.easing-function-in'), () => this.easingIn = !this.easingIn)
+        this.createEasingType(dom.find('.easing-function-out'), () => this.easingOut = !this.easingOut)
+    }
+
+    onSwitchedTo() {
+        this.redrawProgressionCanvas()
+    }
+
+    createEasingType(dom, toggle) {
+        let iconParent = dom.find('.easing-icon')
+
+        dom.click(() => {
+            toggle()
+            this.generateEasingFunction()
+            iconParent.children().toggleClass("fa-check-square").toggleClass("fa-square")
+        })
+    }
+
+    keyframeSelectChange() {
+        this.dropdownText.text("None")
+        this.easingRequiresChoice = true
+        this.redrawProgressionCanvas()
     }
 
     mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback) {
@@ -87,14 +117,16 @@ export class ProgressionCanvas {
     redrawProgressionCanvas() {
         //TODO: scrolling and moving like the texture tab
         let handler = this.pth.animationTabs.active
+        if(handler === null) {
+            return
+        }
 
-        if(handler !== null && handler.selectedKeyFrame !== undefined) {
-            let width = this.progressionCanvas.width
-            let height = this.progressionCanvas.height
+        let width = this.progressionCanvas.width
+        let height = this.progressionCanvas.height
         
-            this.canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
-            this.canvasCtx.clearRect(0, 0, width, height);
+        this.canvasCtx.clearRect(0, 0, width, height);
 
+        if(handler.selectedKeyFrame !== undefined) {
             this.canvasTransformControls.applyTransforms()
 
             this.canvasCtx.beginPath();
@@ -118,14 +150,17 @@ export class ProgressionCanvas {
         
                 this.canvasCtx.stroke();
             }
+            
+            this.canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
         }
     }
 
     generateEasingFunction() {
         let handler = this.pth.animationTabs.active
-        let points = this.easingFunctionAmount.val()
+        let points = Math.min(50, 10 + parseInt(this.easingFunctionQuality.val()))
 
-        if(handler === null || handler.selectedKeyFrame === undefined || points <= 5) {
+
+        if(handler === null || handler.selectedKeyFrame === undefined || points <= 5 || this.easingRequiresChoice) {
             return
         }
 
@@ -190,19 +225,24 @@ export class ProgressionCanvas {
         }
 
         let func
-        switch(this.easingFunctionType.value) {
-            case "in":
-                func = x => funcRaw(x)
-                break
-
-            case "out":
-                func = x => 1 - funcRaw(1 - x)
-                break
-            
-            case "inout":
+        if(this.easingIn === true) {
+            if(this.easingOut === true) {
+                //inout
                 func = x => x < 0.5 ? funcRaw(2*x)/2 : 1 - funcRaw(2-2*x)/2
-                break
+            } else {
+                //in
+                func = x => funcRaw(x)
+            }
+        } else {
+            if(this.easingOut === true) {
+                //out
+                func = x => 1 - funcRaw(1 - x)
+            } else {
+                //none (linear)
+                func = x => x
+            }
         }
+   
 
         const resolution = 10000
         const step = 1 / resolution
