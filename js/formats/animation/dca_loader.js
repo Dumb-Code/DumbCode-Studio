@@ -31,8 +31,7 @@ DCALoader.importAnimation = (handler, buffer) => {
         if(version >= 4) {
             kf.layer = Math.round(buffer.readNumber())
         }
-          
-
+        
         let rotSize = buffer.readNumber()
         for(let r = 0; r < rotSize; r++) {
             kf.rotationMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
@@ -66,11 +65,10 @@ DCALoader.importAnimation = (handler, buffer) => {
             handler.events.push({ time, data })
         }
     }
-
-    DCALoader.repairKeyframes(handler, version, version <= 4)
+    DCALoader.repairKeyframes(handler, version)
 }
 
-DCALoader.repairKeyframes = (handler, version, shouldFlip = false) => {
+DCALoader.repairKeyframes = (handler, version, { shouldFlip = version <= 4, shouldClipIntersections = version <= 3 } = {}) => {
     if(version <= 4) {
         let calculationModel = null
         let flippedActualInfo = []
@@ -91,7 +89,6 @@ DCALoader.repairKeyframes = (handler, version, shouldFlip = false) => {
             })
         }
 
-        let previousRotation = new Map()
         let sorted = [...handler.keyframes].sort((a, b) => a.startTime - b.startTime)
         sorted.forEach((kf, index) => {
             handler.tbl.resetAnimations()
@@ -101,14 +98,17 @@ DCALoader.repairKeyframes = (handler, version, shouldFlip = false) => {
                 let next = sorted[index+1]
 
                 let mod = 1
-                if(next !== undefined) {
-                    let dist = next.startTime - kf.startTime
-                    //Keyframes intersect
-                    if(dist < kf.duration) {
-                        mod = dist / kf.duration
-                        kf.duration = dist
+                if(shouldClipIntersections) {
+                    if(next !== undefined) {
+                        let dist = next.startTime - kf.startTime
+                        //Keyframes intersect
+                        if(dist < kf.duration) {
+                            mod = dist / kf.duration
+                            kf.duration = dist
+                        }
                     }
                 }
+                
                 kf.rotationMap.forEach((arr, key) => {
                     map.get(key).cubeGroup.rotation.toArray(rotArr)
                     for(let i = 0; i < 3; i++) {
@@ -147,8 +147,6 @@ DCALoader.repairKeyframes = (handler, version, shouldFlip = false) => {
 
                     wholeRotationState: new Map()
                 }
-
-
 
                 calculationModel.cubeMap.forEach((cube, key) => {
                     let rotation = cube.cubeGroup.rotation
@@ -215,7 +213,7 @@ function recreateAndRerunMirrorKeyframes(handler, flippedActualInfo) {
         })
     })
 
-    DCALoader.repairKeyframes(handler, 2)
+    DCALoader.repairKeyframes(handler, 2, { shouldFlip: false, shouldClipIntersections: false})
 }
 
 function createMirrorCopyModel(modelIn) {
