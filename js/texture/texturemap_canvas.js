@@ -34,7 +34,7 @@ export class TexturemapCanvas {
 
         let aspect = this.pth.model.texWidth / this.pth.model.texHeight
 
-        let drawWidth = Math.min(this.parnetNode.width(), this.parnetNode.height() * aspect)
+        let drawWidth = Math.min(this.parnetNode.width(), this.parnetNode.height() / aspect)
         let drawHeight = drawWidth / aspect
 
         this.canvas.width = this.parnetNode.width()

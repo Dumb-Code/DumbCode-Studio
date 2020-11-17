@@ -37,7 +37,7 @@ export class TextureTools {
                 hue: true,
                 interaction: {
                     hex: true,
-                    rgba: true,
+                    rgba: false,
                     input: true,
                 }
             }

@@ -1,93 +1,62 @@
-<div id="panel-texturemap" style="grid-area: texture_map; background-color: black; position: relative;">
-    <span class="switch-canvas-button icon is-small">
-        <i class="fas fa-random"></i>
-    </span>
-    <span class="popout-button icon is-small">
-        <i class="fas fa-sign-out-alt"></i>
-    </span>
-    <div class="texture-container-class">
-        <canvas id="texture-canvas"></canvas>
-    </div>
-</div>
-<div id="panel-offset-editing" style="grid-area: offset_editing; background-color: black; position: relative;">
-    <span class="popout-button icon is-small">
-        <i class="fas fa-sign-out-alt"></i>
-    </span>
-    <div class="modeling-ui-entry">
-        <label>Offset</label>
-        <div class="modeling-input-3" style="padding: 5px;">
-            <input axis="0" class="input-texure-offset modeling-ui-changeable editor-require-selected" style="grid-area: l" type="number" name="X Tex Offet">
-            <input axis="1" class="input-texure-offset modeling-ui-changeable editor-require-selected" style="grid-area: m" type="number" name="Y Tex Offet">
-            <div style="grid-area: r" class="b-checkbox is-inline">
-                <input class="input-texture-mirrored editor-require-selected" id="checkbox-tex-mirrored" class="styled" type="checkbox">
-                <label for="checkbox-tex-mirrored">Mirror</label>
+<div class="columns is-gapless" style="height: 100vh; width: 100vw;">
+    <div class="column has-background-grey-darker" style="height: 100vh; width: 40vw"></div>
+    <div class="column is-paddingless is-one-third">
+        <div class="has-background-black-ter" style="height: calc(100vh - 290px - 68px); border-left: 1px solid black;">
+            <canvas id="texture-canvas" style="overflow: hidden;"></canvas>
+        </div>
+        <div class="columns has-background-black-ter is-paddingless is-marginless" style="height: 56px; border-top: 1px solid black; border-left: 1px solid black; overflow: hidden;">
+            <div class="column is-narrow">
+                <div class="field has-addons">
+                    <div class="control"><a class="button is-small is-static">OFFSET X</a></div>
+                    <div class="control is-small"><input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 8rem;"></div>
+                </div>
+            </div>
+            <div class="column is-narrow">
+                <div class="field has-addons">
+                    <div class="control"><a class="button is-small is-static">OFFSET Y</a></div>
+                    <div class="control is-small"><input class="input is-small has-background-black-ter is-dark has-text-light" type="number" value="0" style="width: 8rem;"></div>
+                </div>
+            </div>
+            <div class="column is-narrow">
+                <div class="field has-addons">
+                    <div class="control"><a class="button is-small is-static">MIRRORED</a></div>
+                    <div class="control is-small">
+                        <span class="button icon is-medium is-dark has-background-black-ter">
+                            <i class="far fa-check-square"></i> <!--"far fa-square" for unchekced-->
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="columns is-gapless" style="margin-left: 0px; border-left: 1px solid black; border-top: 1px solid black;">
+            <div class="column is-narrow has-background-black-ter">
+                <div class="element-picker"></div>
+            </div>
+            <div class="column has-background-black-ter is-narrow" style="border-left: 1px solid black;">
+                <span class="icon is-medium">
+                    <i class="fas fa-paint-brush has-text-info"></i>
+                </span>
+                <br>
+                <span class="icon is-medium">
+                    <i class="fas fa-square"></i>
+                </span>
+                <br>
+                <span class="icon is-medium">
+                    <i class="fas fa-cube"></i>
+                </span>
+            </div>
+            <div class="column container has-background-black-ter" style="border-left: 1px solid black; height: 250px; overflow-y: scroll;">
+                <div class="heading ml-2 mt-2">layers</div>
+                <button class="layer-selected">texture_layer_name_selected.png</button>
+                <button class="layer-unselected">texture_layer_name_1.png</button>
+                <button class="layer-unselected">texture_layer_name_2.png</button>
+                <button class="layer-unselected">texture_layer_name_3.png</button>
+                <button class="layer-unselected">texture_layer_name_4.png</button>
+                <button class="layer-unselected">texture_layer_name_5.png</button>
+                <button class="layer-unselected">texture_layer_name_6.png</button>
+                <button class="layer-unselected">texture_layer_name_7.png</button>
+                <button class="layer-unselected">texture_layer_name_8.png</button>
             </div>
         </div>
     </div>
 </div>
-<div id="panel-colour-picker" style="grid-area: colour_picker; position: relative;">
-    <span class="popout-button icon is-small">
-        <i class="fas fa-sign-out-alt"></i>
-    </span>
-    <div>
-        <button class="button button-activateable is-dark button-paint-mode tooltip" select-list-entry="pixel" data-tooltip="Paint Pixel">
-            <span class="icon is-small">
-                <i class="fas fa-paint-brush"></i>
-            </span>
-        </button>
-        <button class="button button-activateable is-dark button-paint-mode tooltip" select-list-entry="face" data-tooltip="Paint Face">
-            <span class="icon is-small">
-                <i class="fas fa-brush"></i>
-            </span>
-        </button>
-        <button class="button button-activateable is-dark button-paint-mode tooltip" select-list-entry="cube" data-tooltip="Fill Cube">
-            <span class="icon is-small">
-                <i class="fas fa-fill"></i>
-            </span>
-        </button>
-    </div>
-    <div>
-        <button class="button button-activateable is-dark button-generate-texturemap tooltip" data-tooltip="Fill Texturemap">
-            <span class="icon is-small">
-                <i class="far fa-square"></i>
-            </span>
-        </button>
-    </div>
-</div>
-<div id="panel-colour-palette" style="grid-area: colour_palette; position: relative;">
-    <span class="popout-button icon is-small">
-        <i class="fas fa-sign-out-alt"></i>
-    </span>
-    <div class="element-picker"></div>
-</div>
-<div id="panel-texture-layers" style="grid-area: texture_layers; background-color: black; position: relative;">
-    <span class="popout-button icon is-small">
-        <i class="fas fa-sign-out-alt"></i>
-    </span>
-    <div class="texture-upload-container">
-        <ul class="texture-upload">
-            <li class="texture-file-input-entry">
-                <label class="file-label" style="display: block">
-                    <input class="file-input texture-file-input" type="file">
-                    <span class="file-cta" style="border-color: #dbdbdb">
-                        <span class="file-icon">
-                            <i class="fas fa-upload"></i>
-                        </span>
-                        <span class="file-label">
-                            Add Texture
-                        </span>
-                    </span>
-                </label>  
-                <span class="new-texture-button icon is-small clickable tooltip" data-tooltip="Create New Texture">
-                    <i class="fas fa-plus"></i>
-                </span>  
-            </li>
-        </ul>
-    </div>
-</div>
-<div id="display-div" style="grid-area: main_area;"></div>
-<div id="main-divider" class="vertical-divider"></div>
-<div id="top-main-divider" class="horizontal-divider"></div>
-<div id="bottom-main-divider" class="horizontal-divider"></div>
-<div id="texture-layers-divider" class="vertical-divider"></div>
-<div id="picker-palette-divider" class="horizontal-divider"></div>
