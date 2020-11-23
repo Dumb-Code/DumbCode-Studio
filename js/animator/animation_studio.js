@@ -37,7 +37,7 @@ export class AnimationStudio {
         this.gumball = new Gumball(dom, this)
         this.animationPanel = new AnimationPanel(dom)
         this.cubeDisplayValues = new AnimationCubeValues(dom, this)
-        this.keyframeManager = new KeyframeBoardManager(this, dom.find('.keyframe-board'))
+        this.keyframeManager = new KeyframeBoardManager(this, dom.find('.keyframe-board'), dom.find('.input-playback-range'))
         this.panelButtons = new PanelButtons(dom, this)
         this.display = display
         this.methodExporter = new JavaMethodExporter()
@@ -49,9 +49,6 @@ export class AnimationStudio {
             let direction = e.originalEvent.wheelDelta
             if(direction === undefined) { //Firefox >:(
                 direction = -e.detail
-            }
-            if(direction !== 0) {
-                direction > 0
             }
             this.tabDragArea.scrollLeft(this.tabDragArea.scrollLeft() + (direction > 0 ? 20 : -20))
             e.preventDefault()
@@ -75,6 +72,36 @@ export class AnimationStudio {
                 pth.animationTabs.activeData.mementoTraverser.onKeyDown(e.event)
             } 
         })
+        
+
+        dom.bind('mousewheel DOMMouseScroll', e => {
+            if(e.target.classList.contains("animator-scrollchange") && e.target.disabled !== true) {
+                let direction = e.originalEvent.wheelDelta
+                if(direction === undefined) { //Firefox >:(
+                    direction = -e.detail
+                }
+
+                let change = Math.sign(direction) * (e.target.hasAttribute("step-mod") ? parseFloat(e.target.getAttribute('step-mod')) : 1)
+                let ctrl = e.ctrlKey
+                let shift = e.shiftKey
+
+                if(ctrl && shift) {
+                    change *= 10 
+                } else if(ctrl) {
+                    change *= 0.01
+                } else if(!shift) {
+                    change *= 0.1
+                }
+
+                e.target.value = `${parseFloat(e.target.value) + change}`
+                e.target.dispatchEvent(new Event("input"))
+
+                e.preventDefault()
+                e.stopPropagation()
+            }
+            
+        })
+        
     }
 
     setCamera(camera) {

@@ -8,7 +8,7 @@ const resolution = 10
 
 export class KeyframeBoardManager {
     
-    constructor(studio, keyframeBoard) {
+    constructor(studio, keyframeBoard, sliders) {
         this.getHandler = () => studio.pth.animationTabs.active
         this.selectKeyframe = keyframe => studio.selectKeyframe(keyframe)
         this.playstate = new PlayState()
@@ -35,6 +35,10 @@ export class KeyframeBoardManager {
             
             this.playstate.ticks = (marker + this.scroll) / pixelsPerTick
         }, () => this.scrubbingPlaybackMarker = false)
+
+        sliders
+        .mousedown(() => this.scrubbingPlaybackMarker = true)
+        .mouseup(() => this.scrubbingPlaybackMarker = false)
         
         this.editingPoint = null
         //todo: link up all the of controls to the animator. Most of them will be changing the class name
