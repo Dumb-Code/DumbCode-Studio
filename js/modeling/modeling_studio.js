@@ -13,6 +13,7 @@ import { EventDispatcher, Group } from "../three.js"
 import { CubeCommands } from "./cube_commands.js"
 import { ModelerOptions } from "./modeler_options.js"
 import { CubeCopyPaste } from "./cube_copy_paste.js"
+import { applyAdjustScrollable } from "../util.js"
 
 export class ModelingStudio {
 
@@ -65,6 +66,8 @@ export class ModelingStudio {
 
             pth.modelMementoTraverser.onKeyDown(e.event)
         })
+
+        applyAdjustScrollable(dom)
     }
 
     setCamera(camera) {

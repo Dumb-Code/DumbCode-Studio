@@ -7,6 +7,7 @@ import { AnimationTabHandler } from './animation_tabs.js'
 import { PanelButtons } from './panel_buttons.js'
 import { ProgressionCanvas } from './progression_canvas.js'
 import { KeyframeBoardManager } from './keyframe_board_manager.js'
+import { applyAdjustScrollable } from '../util.js'
 
 const mainArea = document.getElementById("main-area")
 
@@ -73,35 +74,7 @@ export class AnimationStudio {
             } 
         })
         
-
-        dom.bind('mousewheel DOMMouseScroll', e => {
-            if(e.target.classList.contains("animator-scrollchange") && e.target.disabled !== true) {
-                let direction = e.originalEvent.wheelDelta
-                if(direction === undefined) { //Firefox >:(
-                    direction = -e.detail
-                }
-
-                let change = Math.sign(direction) * (e.target.hasAttribute("step-mod") ? parseFloat(e.target.getAttribute('step-mod')) : 1)
-                let ctrl = e.ctrlKey
-                let shift = e.shiftKey
-
-                if(ctrl && shift) {
-                    change *= 10 
-                } else if(ctrl) {
-                    change *= 0.01
-                } else if(!shift) {
-                    change *= 0.1
-                }
-
-                e.target.value = `${parseFloat(e.target.value) + change}`
-                e.target.dispatchEvent(new Event("input"))
-
-                e.preventDefault()
-                e.stopPropagation()
-            }
-            
-        })
-        
+        applyAdjustScrollable(dom)
     }
 
     setCamera(camera) {

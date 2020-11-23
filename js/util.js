@@ -677,3 +677,33 @@ export function objectEquals(obj1, obj2, deep = false) {
         this.state = state
     }
   }
+
+  export function applyAdjustScrollable(dom) {
+    dom.bind('mousewheel DOMMouseScroll', e => {
+        if(e.target.classList.contains("studio-scrollchange") && e.target.disabled !== true) {
+            let direction = e.originalEvent.wheelDelta
+            if(direction === undefined) { //Firefox >:(
+                direction = -e.detail
+            }
+
+            let change = Math.sign(direction) * (e.target.hasAttribute("step-mod") ? parseFloat(e.target.getAttribute('step-mod')) : 1)
+            let ctrl = e.ctrlKey
+            let shift = e.shiftKey
+
+            if(ctrl && shift) {
+                change *= 10 
+            } else if(ctrl) {
+                change *= 0.01
+            } else if(!shift) {
+                change *= 0.1
+            }
+
+            e.target.value = `${Math.round((parseFloat(e.target.value) + change) * 10000) / 10000}`
+            e.target.dispatchEvent(new Event("input"))
+
+            e.preventDefault()
+            e.stopPropagation()
+        }
+        
+    })
+  }
