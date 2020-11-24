@@ -30,7 +30,7 @@ export class Gumball {
 
     setMode(mode) {
         let selected = this.raytracer.oneSelected()
-        if(selected === null || mode === null) {
+        if(selected === null || mode === null || mode === undefined) {
             this.transformControls.detach()
         } else {
             this.transformControls.attach(selected.parent);
