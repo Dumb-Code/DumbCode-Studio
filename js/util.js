@@ -687,15 +687,18 @@ export function objectEquals(obj1, obj2, deep = false) {
             }
 
             let change = Math.sign(direction) * (e.target.hasAttribute("step-mod") ? parseFloat(e.target.getAttribute('step-mod')) : 1)
-            let ctrl = e.ctrlKey
-            let shift = e.shiftKey
-
-            if(ctrl && shift) {
-                change *= 10 
-            } else if(ctrl) {
-                change *= 0.01
-            } else if(!shift) {
-                change *= 0.1
+           
+            if(e.target.getAttribute("step-constant") != "true") {
+                let ctrl = e.ctrlKey
+                let shift = e.shiftKey
+    
+                if(ctrl && shift) {
+                    change *= 10 
+                } else if(ctrl) {
+                    change *= 0.01
+                } else if(!shift) {
+                    change *= 0.1
+                }
             }
 
             e.target.value = `${Math.round((parseFloat(e.target.value) + change) * 10000) / 10000}`
