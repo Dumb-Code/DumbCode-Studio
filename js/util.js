@@ -624,7 +624,7 @@ export function objectEquals(obj1, obj2, deep = false) {
             if(obj1.length !== obj2.length) {
                 return false;
             }
-            return obj1.find((a, i) => a !== obj2[i]) === undefined
+            return obj1.find((a, i) => deep ? !objectEquals(a, obj2[i], true) : a !== obj2[i]) === undefined
         } else {
             return false;
         }
