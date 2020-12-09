@@ -63,8 +63,8 @@ export class MementoTraverser {
 
     undo() {
         if(this.canUndo()) {
-            if(this.mementoList.length === this.index + 1 && this.attemptPush() === true) {
-                this.index--
+            if(this.mementoList.length === this.index + 1) {
+                this.attemptPush()
             }
             this.mementoList[--this.index].reconstruct()
         }
