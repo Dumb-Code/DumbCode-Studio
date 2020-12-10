@@ -41,7 +41,7 @@ export class MementoTraverser {
         memento._JSON = JSON.stringify(memento)
         let current = this.mementoList[this.index]
 
-        if(current === undefined || current._JSON == memento._JSON) {
+        if(current === undefined || current._JSON != memento._JSON) {
             this._internalClock.elapsedTime = 0
             this.mementoList.length = ++this.index
             this.mementoList.push(memento)
