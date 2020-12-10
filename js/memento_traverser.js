@@ -1,5 +1,4 @@
 import { Clock } from "./three.js"
-import { objectEquals } from "./util.js"
 
 export class MementoTraverser {
 
@@ -39,9 +38,10 @@ export class MementoTraverser {
 
     attemptPush() {
         let memento = this.mementoCreator()
+        memento._JSON = JSON.stringify(memento)
         let current = this.mementoList[this.index]
 
-        if(!objectEquals(current, memento, true)) {
+        if(current === undefined || current._JSON == memento._JSON) {
             this._internalClock.elapsedTime = 0
             this.mementoList.length = ++this.index
             this.mementoList.push(memento)

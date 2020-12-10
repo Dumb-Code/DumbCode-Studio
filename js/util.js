@@ -615,52 +615,7 @@ export function lineIntersection(x0, y0, x1, y1, callback, skip = 1) {
     }
 }
 
-export function objectEquals(obj1, obj2, deep = false) {
-    if(typeof obj1 != typeof obj2) {
-        return false
-    }
-    if(Array.isArray(obj1)) {
-        if(Array.isArray(obj2)) {
-            if(obj1.length !== obj2.length) {
-                return false;
-            }
-            return obj1.find((a, i) => deep ? !objectEquals(a, obj2[i], true) : a !== obj2[i]) === undefined
-        } else {
-            return false;
-        }
-    } else if(Array.isArray(obj2)) {
-        return false;
-    }
-    if(typeof obj1 == "object") {
-        for (var i in obj1) {
-            if (obj1.hasOwnProperty(i)) {
-                if (!obj2.hasOwnProperty(i)) {
-                    return false
-                }
-                if(deep === true ? !objectEquals(obj1[i], obj2[i], true) : obj1[i] != obj2[i]) {
-                    return false
-                }
-            }
-        }
-        for (var i in obj2) {
-            if (obj2.hasOwnProperty(i)) {
-                if (!obj1.hasOwnProperty(i)) {
-                    return false
-                }
-                if(deep === true ? !objectEquals(obj1[i], obj2[i], true) : obj1[i] != obj2[i]) {
-                    return false
-                }
-            }
-        }
-        return true;
-    } else if(typeof obj1 == "function") {
-        return true //don't compare functions
-    } else {
-        return obj1 == obj2
-    }
-  }
-
-  export class AsyncProgressCounter {
+export class AsyncProgressCounter {
     constructor(nodes, stages, state, callback) {
         this.nodes = Array(nodes).fill(0)
         this.stages = stages
