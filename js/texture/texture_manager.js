@@ -1,6 +1,6 @@
 import { readFile } from "../displays.js"
 import { Texture, NearestFilter, Vector2, DataTexture, RGBAFormat, CanvasTexture } from "../three.js"
-import { DraggableElementList, LinkedSelectableList } from "../util.js"
+import { doubleClickToEdit, DraggableElementList, LinkedSelectableList, ToggleableElement } from "../util.js"
 
 export class TextureManager {
 
@@ -8,7 +8,7 @@ export class TextureManager {
         this.pth = pth
         this.filesPage = pth._files
         this.textures = []
-        this.textureUpload = pth._texture._textureUpload
+        this.textureEmptyLayer = pth._texture._textureEmptyLayer
 
         this.highlightCanvas = document.createElement('canvas')
         this.highlightCanvas.width = model.texWidth
@@ -29,7 +29,7 @@ export class TextureManager {
         this.context.imageSmoothingEnabled = false
 
         this.dragElementList = new DraggableElementList(false, (a, b, c) => this.textureDragged(a, b, c))
-        this.selectedLayer = new LinkedSelectableList($(),false).onchange(e => {
+        this.selectedLayer = new LinkedSelectableList($(), false, "texture-layer-selected").onchange(e => {
             let layer = this.textures[e.value]
             if(layer) {
                 this.highlightCanvas.width = layer.width
@@ -86,31 +86,47 @@ export class TextureManager {
             height = img.naturalHeight
         }
 
+        let dom = this.textureEmptyLayer.clone()
+        dom.removeClass("empty-layer")
         let data = {}
 
-        let li = document.createElement('li')
-        data.li = li
-        this.selectedLayer.addElement($(li))
+        data.dom = dom
+
+        let container = dom.find('.texture-layer-name-container')
+        data.text = container.find('.dbl-text')
+        data._onRename = () => {}
+        doubleClickToEdit(container, newName => {
+            data.name = newName
+            data.text.text(newName)
+            data._onRename()
+        }, name)
+
+        this.selectedLayer.addElement(dom)
         data.name = name
         data.isHidden = false
-        this.dragElementList.addElement(li, () => data.idx)
-        li.oncontextmenu = () => {
-            data.isHidden = !data.isHidden
-            li.classList.toggle('entry-hidden', data.isHidden)
+        this.dragElementList.addElement(dom.get(0), () => data.idx)
+        
+        new ToggleableElement(dom.find('.texture-layer-visible')).onchange(e => {
+            data.isHidden = !e.value
             this.refresh()
-            return false
-        }
-        li.classList.add('texture-file-entry')
-        li.draggable = true
+        })
 
         data.width = width
         data.height = height
         data.img = img
+        data.img2 = img.cloneNode()
+
+        dom.find('.texture-layer-preview').append(data.img2)
+
 
         data.onCanvasChange = () => {
             data.img.src = data.canvas.toDataURL()
             data.img.width = data.canvas.width
             data.img.height = data.canvas.height
+
+            data.img2.src = data.canvas.toDataURL()
+            data.img2.width = data.canvas.width
+            data.img2.height = data.canvas.height
             this.refresh()
         }
         
@@ -137,11 +153,12 @@ export class TextureManager {
     refresh() {
         this.filesPage.textureProjectPart.refreshTextureLayers()
 
-        this.textureUpload.siblings().detach()
+        this.textureEmptyLayer.siblings().not('.layer-persistant').detach()
         this.textures.forEach((t, id) => {
             t.idx = id
-            t.li.setAttribute('select-list-entry', t.idx)
-            $(t.li).text(t.name).detach().insertBefore(this.textureUpload)
+            t.dom.attr('select-list-entry', t.idx)
+            t.text.text(t.name)
+            t.dom.detach().insertBefore(this.textureEmptyLayer)
         })
 
         let width = this.textures.filter(t => !t.isHidden).map(t => t.width).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)

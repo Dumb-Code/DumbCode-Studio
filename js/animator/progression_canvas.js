@@ -13,7 +13,7 @@ export class ProgressionCanvas {
         let pc = dom.find('#progression_canvas')
         this.progressionCanvas = pc.get(0)
         this.canvasCtx = this.progressionCanvas.getContext("2d")
-        this.canvasTransformControls = new CanvasTransformControls(this.progressionCanvas, (a, b, c, d, e) => this.mouseOverCanvas(a, b, c, d, e), () => this.redrawProgressionCanvas())
+        this.canvasTransformControls = new CanvasTransformControls(this.progressionCanvas, (a, b, c, d, e) => this.mouseOverCanvas(a, b, c, d, e), 1, () => this.redrawProgressionCanvas())
 
         this.easingFunction = new LinkedSelectableList(dom.find('.easing-function-entry')).onchange(e => {
             this.dropdownText.text(e.elements.text())

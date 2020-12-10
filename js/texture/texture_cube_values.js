@@ -1,4 +1,4 @@
-import { LinkedElement } from "../util.js"
+import { LinkedElement, ToggleableElement } from "../util.js"
 
 export class TextureCubeValues {
 
@@ -6,7 +6,7 @@ export class TextureCubeValues {
         this.raytracer = raytracer
         let getCube = () => this.raytracer.selectedSet.size === 1 ? this.raytracer.firstSelected().tabulaCube : undefined
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => getCube()?.updateTextureOffset(e.value))
-        this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => getCube()?.updateTextureMirrored(e.value))
+        this.textureMirrored = new ToggleableElement(dom.find('.input-texture-mirrored')).onchange(e => getCube()?.updateTextureMirrored(e.value))
         this.raytracer.addEventListener('selectchange', () => this.updateCubeValues())
 
     }
@@ -19,7 +19,7 @@ export class TextureCubeValues {
             this.textureMirrored.setInternalValue(cube.textureMirrored)
         } else {
             this.textureOffset.setInternalValue(undefined)
-            this.textureMirrored.setInternalValue(undefined)
+            this.textureMirrored.setInternalValue(false)
         }   
     }
 }

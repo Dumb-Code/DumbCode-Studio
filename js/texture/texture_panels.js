@@ -12,8 +12,7 @@ export class TexturePanels {
         let mainDisplay = dom.find('#display-div')
         this.texturemapPanel = new LayoutPart(tex, () => this.panelChange())
         this.offsetPanel = new LayoutPart(dom.find('#panel-offset-editing'), () => this.panelChange())
-        this.colourPickerPanel = new LayoutPart(dom.find('#panel-colour-picker'), () => this.panelChange())
-        this.colourPalettePanel = new LayoutPart(dom.find('#panel-colour-palette'), () => this.panelChange())
+        this.colourPanel = new LayoutPart(dom.find('#panel-colour'), () => this.panelChange())
         this.textureLayersPanel = new LayoutPart(dom.find('#panel-texture-layers'), () => this.panelChange())
         
         tex.find('.switch-canvas-button').click(() => {
@@ -33,15 +32,13 @@ export class TexturePanels {
         //Setup the dividers to allow for changing the panel size
         this.mainDivider = dom.find("#main-divider")
         this.topDivider = dom.find("#top-main-divider")
-        this.bottomDivider = dom.find("#bottom-main-divider")
         this.textureLayersDivider = dom.find("#texture-layers-divider")
-        this.pickerPaletteDivider = dom.find("#picker-palette-divider")
 
         this.rightArea = 500
-        this.topArea = 300
         this.offsetArea = 70
-        this.pickerArea = 100
         this.layersArea = 250
+        this.topArea = window.innerHeight - 52 - 70 - 240
+
 
         let clickedDivider = 0
         $(document)
@@ -55,12 +52,8 @@ export class TexturePanels {
                         this.rightArea = newDist
                     } else if(clickedDivider === 2) {
                         this.topArea = e.clientY - mainArea.offsetTop
-                    }  else if(clickedDivider === 3) {
-                        this.offsetArea = e.clientY - mainArea.offsetTop - this.topArea
-                    } else if(clickedDivider === 4) {
+                    } else if(clickedDivider === 3) {
                         this.layersArea = mainArea.clientWidth - e.clientX
-                    } else if(clickedDivider === 5) {
-                        this.pickerArea = e.clientY - mainArea.offsetTop - this.topArea - this.offsetArea
                     }
                     this.updateAreas()
                 }
@@ -68,9 +61,7 @@ export class TexturePanels {
 
         this.mainDivider.mousedown(() => clickedDivider = 1)
         this.topDivider.mousedown(() => clickedDivider = 2)
-        this.bottomDivider.mousedown(() => clickedDivider = 3)
-        this.textureLayersDivider.mousedown(() => clickedDivider = 4)
-        this.pickerPaletteDivider.mousedown(() => clickedDivider = 5)
+        this.textureLayersDivider.mousedown(() => clickedDivider = 3)
         this.updateAreas()
     }
 
@@ -84,20 +75,6 @@ export class TexturePanels {
             this.topDivider.css('top', (mainArea.offsetTop+this.topArea-4) + "px").css('right', '0px').css('width', this.rightArea + "px").css('left', 'unset')
         }
 
-        if(this.offsetArea === 0) {
-            this.bottomDivider.css('display', 'none')
-        } else {
-            this.bottomDivider.css('display', 'unset')
-            this.bottomDivider.css('top', (mainArea.offsetTop+this.topArea+this.offsetArea-4) + "px").css('right', '0px').css('width', this.rightArea + "px").css('left', 'unset')
-        }
-
-        if(this.pickerArea === 0) {
-            this.pickerPaletteDivider.css('display', 'none')
-        } else {
-            this.pickerPaletteDivider.css('display', 'unset')
-            this.pickerPaletteDivider.css('top', (mainArea.offsetTop+this.topArea+this.offsetArea+this.pickerArea-4) + "px").css('right', `${this.layersArea}px`).css('width', `${this.rightArea - this.layersArea}px`).css('left', 'unset')
-        }
-
         if(this.layersArea === 0) {
             this.textureLayersDivider.css('display', 'none')
         } else {
@@ -107,7 +84,7 @@ export class TexturePanels {
 
         this.dom
             .css('grid-template-columns', `calc(100% - ${this.rightArea}px) ${this.rightArea-this.layersArea}px ${this.layersArea}px`) 
-            .css('grid-template-rows', `${this.topArea}px ${this.offsetArea}px ${this.pickerArea}px calc(100vh - ${this.topArea + this.offsetArea + this.pickerArea + 52}px)`) 
+            .css('grid-template-rows', `${this.topArea}px ${this.offsetArea}px calc(100vh - ${this.topArea + this.offsetArea + 52}px)`) 
 
         window.studioWindowResized()
     }
@@ -115,34 +92,23 @@ export class TexturePanels {
     panelChange() {
         let texture = !this.texturemapPanel.popped
         let offset = !this.offsetPanel.popped
-        let picker = !this.colourPickerPanel.popped
-        let palette = !this.colourPalettePanel.popped
+        let palette = !this.colourPanel.popped
         let layers = !this.textureLayersPanel.popped
         
-        if(!texture && !offset && !picker && !palette && !layers) {
+        if(!texture && !offset && !palette && !layers) {
             this.rightArea = 0
         } else {
             let top = texture
             let middle = offset
-            let bottom = picker || palette || layers
+            let bottom = palette || layers
 
             if(this.rightArea === 0) {
                 this.rightArea = 300
             }
 
             if(bottom) {
-                if(picker) {
-                    if(palette) {
-                        this.pickerArea = 100
-                    } else {
-                        this.pickerArea = mainArea.clientHeight - this.topArea - this.offsetArea
-                    }
-                } else {
-                    this.pickerArea = 0
-                }
-
                 if(layers) {
-                    if(picker || palette) {
+                    if(palette) {
                         this.layersArea = 100
                     } else {
                         this.layersArea = this.rightArea
@@ -178,7 +144,6 @@ export class TexturePanels {
 
             } else {
                 this.layersArea = 0
-                this.pickerArea = 0
 
                 if(middle) {
                     if(top) {

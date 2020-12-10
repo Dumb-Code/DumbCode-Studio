@@ -207,18 +207,28 @@ export class ToggleableElement {
         this.elements = elements
         this.predicate = () => true
         let setValue = v => this.value = v
-        this.elements.click(function() { setValue(!this.classList.contains("is-activated")) })
+        this.elements.click(function(e) { 
+            setValue(!this.classList.contains("is-activated"))
+            e.stopPropagation()
+        })
     }
 
     set value(value) {
-        if(this.predicate(value)) {
-            this.elements.toggleClass("is-activated", value)
+        if(this.setInternalValue(value)) {
             this.dispatchEvent({ type: "changed", value })
         }
     }
 
     get value() {
         return this.elements.is('.is-activated')
+    }
+
+    setInternalValue(value) {
+        if(this.predicate(value)) {
+            this.elements.toggleClass("is-activated", value)
+            return true
+        }
+        return false
     }
 
     addPredicate(predicate) {
@@ -337,9 +347,10 @@ export function onElementDrag(element, infoClickGetter = () => {}, callback = (d
 }
 
 export class CanvasTransformControls {
-    constructor(canvas, mouseCallback, redrawCallback = () => {}) {
+    constructor(canvas, mouseCallback, widthReboundModifier = 1, redrawCallback = () => {}) {
         this.mouseCallback = mouseCallback
         this.redrawCallback = redrawCallback
+        this.widthReboundModifier = widthReboundModifier
         this.canvasMatrix = new DOMMatrix([1, 0, 0, 1, 0, 0])
         this.canvas = canvas
         this.hasMoved = false
@@ -421,7 +432,7 @@ export class CanvasTransformControls {
         let width = this.canvas.clientWidth
         let height = this.canvas.clientHeight
 
-        this.finalCanvasMatrix = new DOMMatrix().translate(width/2, height/2).multiply(this.canvasMatrix).multiply(new DOMMatrix().translate(-width/2, -height/2))
+        this.finalCanvasMatrix = new DOMMatrix().translate(width/2, height/2).multiply(this.canvasMatrix).multiply(new DOMMatrix().translate(-width/(2*this.widthReboundModifier), -height/2))
     }
 }
 
@@ -483,7 +494,9 @@ export class DraggableElementList {
         this.getDraggedData = () => draggedData
 
         this.addElement = (element, dataGetter) => {
-            element.ondragstart = () => draggedData = dataGetter() 
+            element.ondragstart = () => {
+                draggedData = dataGetter() 
+            }
             element.ondragover = function(e) {
                 let rect = this.getBoundingClientRect()
                 let yPerc = (e.clientY - rect.top) / rect.height

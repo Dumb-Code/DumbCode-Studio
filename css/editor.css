@@ -53,8 +53,7 @@
     grid-template-areas: 
     "main_area texture_map texture_map"
     "main_area offset_editing offset_editing"
-    "main_area colour_picker texture_layers"
-    "main_area colour_palette texture_layers";
+    "main_area palette texture_layers";
     width: 100%;
     height: 100vh;
 }
@@ -260,12 +259,12 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
     text-decoration: line-through;
 }
 
-.texture-file-entry[drag-state="top"] {
+.texture-layer[drag-state="top"] {
     border-top-style: solid;
     border-top-color: #000000;
 }
 
-.texture-file-entry[drag-state="bottom"] {
+.texture-layer[drag-state="bottom"] {
     border-bottom-style: solid;
     border-bottom-color: #000000;
 }

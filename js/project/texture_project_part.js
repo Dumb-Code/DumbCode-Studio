@@ -34,10 +34,14 @@ export class TextureProjectPart {
         data._projectElement = cloned
         this.dragableElementList.addElement(element, () => data.idx)
 
-        doubleClickToEdit(cloned.find('.texture-name-container'), name => {
+        let container = cloned.find('.texture-name-container')
+        doubleClickToEdit(container, name => {
             data.name = name
-            data.li.innerText = name
+            data.text.text(name)
         }, data.name)
+
+        let nameContainer = container.find('.dbl-text')
+        data._onRename = () => nameContainer.text(data.name)
 
         cloned.find('.download-texture-file').click(() => downloadCanvas(data.name + ".png", data.canvas))
     }

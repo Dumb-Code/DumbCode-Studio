@@ -24,7 +24,7 @@ export class TextureTools {
             layer.onCanvasChange()
         })
 
-        this.paintMode = new LinkedSelectableList(dom.find('.button-paint-mode'), false)
+        this.paintMode = new LinkedSelectableList(dom.find('.button-paint-mode'), false, "has-text-info")
 
         this.colorPicker = Pickr.create({ 
             el: dom.find('.element-picker').get(0),
@@ -37,7 +37,6 @@ export class TextureTools {
                 hue: true,
                 interaction: {
                     hex: true,
-                    rgba: true,
                     input: true,
                 }
             }

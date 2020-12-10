@@ -24,7 +24,10 @@ export class TexturemapCanvas {
                 textureTools.mouseDown(mouseX/size, mouseY/size, true)
             }
             this.mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback, mouseDown)
-        })
+        }, 2)
+
+        this.canvasTransformControls.mulMatrix(new DOMMatrix().scaleSelf(1/1.1))
+        this.canvasTransformControls.redrawCallback()
     }
 
     drawTextureCanvas() {

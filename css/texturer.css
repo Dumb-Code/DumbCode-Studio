@@ -1,0 +1,84 @@
+.texture-layer {
+    background-color: hsl(0, 0%, 20%);
+    border: none;
+    border-radius: 5px;;
+    color: white;
+    padding: 3px;
+    margin: 2px;
+    margin-left: 6px;
+    font-size: 16px;
+    width: 90%;
+    text-align: left;
+    overflow: hidden;
+}
+.texture-layer:hover {
+    background-color: hsl(0, 0%, 22%);
+}
+
+.texture-layer-selected {
+    background-color: hsl(204, 86%, 53%);
+}
+.texture-layer-selected:hover {
+    background-color: hsl(204, 86%, 45%);
+}
+
+
+.input-texture-mirrored.is-activated .checkbox-unchecked {
+    display: none;
+}
+.input-texture-mirrored:not(.is-activated) .checkbox-checked {
+    display: none;
+}
+
+.texture-layer.empty-layer {
+    display: none;
+}
+
+.texture-layer-preview {
+    padding-bottom: 0.5rem;
+}
+.texture-layer-preview img {
+    width: auto;
+    height: 32px;
+}
+
+.texture-layer-visible.is-activated .icon-closed {
+    display: none;
+}
+.texture-layer-visible:not(.is-activated) .icon-open {
+    display: none;
+}
+
+
+/* ------------------------ PICKR OVERRIDES ------------------------  */
+.pcr-app {
+    background: hsl(0, 0%, 14%) !important;
+    box-shadow: none !important;
+    width: unset !important;
+}
+
+.pcr-app .pcr-interaction .pcr-result::-moz-selection {
+	background: hsl(204, 86%, 53%) !important;
+}
+
+.pcr-app .pcr-interaction .pcr-result::selection {
+	background: hsl(204, 86%, 53%) !important;
+}
+
+.pcr-app .pcr-interaction .pcr-type.active {
+	background: hsl(204, 86%, 53%) !important;
+}
+
+.pcr-app .pcr-interaction .pcr-save {
+	background: hsl(204, 86%, 53%) !important;
+}
+
+.pcr-app[data-theme=monolith] .pcr-selection .pcr-color-preview {
+    height: 100% !important;
+    margin-bottom: 0;
+}
+
+.pcr-app[data-theme=monolith] .pcr-selection .pcr-color-palette .pcr-palette:before {
+    background-size: auto !important;
+}
+/* -----------------------------------------------------------------  */

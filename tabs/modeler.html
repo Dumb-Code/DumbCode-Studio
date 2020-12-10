@@ -1,14 +1,14 @@
 <style>
-    ul, #layer-pannel {
+    #modeling-area ul, #modeling-area #layer-pannel {
       list-style-type: none;
     }
     
-    #layer-pannel {
+    #modeling-area #layer-pannel {
       margin: 0;
       padding: 0;
     }
     
-    .caret {
+    #modeling-area .caret {
       cursor: pointer;
       -webkit-user-select: none; /* Safari 3.1+ */
       -moz-user-select: none; /* Firefox 2+ */
@@ -16,38 +16,38 @@
       user-select: none;
     }
     
-    .caret::before {
+    #modeling-area .caret::before {
       content: "\25B6";
       color: gray;
       display: inline-block;
       margin-right: 6px;
     }
     
-    .cube-line-controller:not(.children-hidden) .caret::before {
+    #modeling-area .cube-line-controller:not(.children-hidden) .caret::before {
       -ms-transform: rotate(90deg); /* IE 9 */
       -webkit-transform: rotate(90deg); /* Safari */
       transform: rotate(90deg);  
     }
     
-    .nested {
+    #modeling-area .nested {
       display: none;
     }
     
-    :not(.children-hidden)+.nested {
+    #modeling-area :not(.children-hidden)+.nested {
       display: block;
     }
 
-    .nested li {
+    #modeling-area .nested li {
       margin-left: 10px;
     }
 
 
-    .control:not(.keep-size) {
+    #modeling-area .control:not(.keep-size) {
         width: 100%
     }
 
 
-    .input-title {
+    #modeling-area .input-title {
       clear: both;
       padding: 22px 0px 0px 0px;
       font-size: 16px;
@@ -59,7 +59,7 @@
 
 
 /* Styling Checkbox Starts */
-.checkbox-label {
+#modeling-area .checkbox-label {
   display: block;
   position: relative;
   margin: auto;
@@ -71,13 +71,13 @@
   clear: both;
 }
 
-.checkbox-label input {
+#modeling-area .checkbox-label input {
   position: absolute;
   opacity: 0;
   cursor: pointer;
 }
 
-.checkbox-label .checkbox-custom {
+#modeling-area .checkbox-label .checkbox-custom {
   position: absolute;
   top: 0px;
   left: 0px;
@@ -94,7 +94,7 @@
 }
 
 
-.checkbox-label input:checked ~ .checkbox-custom {
+#modeling-area .checkbox-label input:checked ~ .checkbox-custom {
   background-color: #209cee;
   border-radius: 5px;
   -webkit-transform: rotate(0deg) scale(1);
@@ -105,7 +105,7 @@
 }
 
 
-.checkbox-label .checkbox-custom::after {
+#modeling-area .checkbox-label .checkbox-custom::after {
   position: absolute;
   content: "";
   left: 12px;
@@ -126,7 +126,7 @@
 }
 
 
-.checkbox-label input:checked ~ .checkbox-custom::after {
+#modeling-area .checkbox-label input:checked ~ .checkbox-custom::after {
     -webkit-transform: rotate(45deg) scale(1);
     -ms-transform: rotate(45deg) scale(1);
     transform: rotate(45deg) scale(1);
@@ -144,14 +144,14 @@
 
 
 
-.lock-icon {
+#modeling-area .lock-icon {
 height: 12px; 
 position: absolute; 
 right: 10px; 
 margin-top: 5px;
 }
 
-.hide-icon {
+#modeling-area .hide-icon {
 height: 12px; 
 position: absolute; 
 right: 30px; 
@@ -170,7 +170,7 @@ margin-top: 6px;
     left: 0px;
     bottom: 0px; */
 
-.option-select.is-activated {
+    #modeling-area .option-select.is-activated {
   color: #3298dc;
 }
 

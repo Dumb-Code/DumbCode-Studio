@@ -20,7 +20,7 @@ export class TextureStudio {
         this.textureTools = new TextureTools(dom, this)
         this.texturemapCanvas = new TexturemapCanvas(dom.find('#texture-canvas'), raytracer, this.textureTools, this.cubeValues, pth)
 
-        this._textureUpload = dom.find('.texture-file-input-entry')
+        this._textureEmptyLayer = dom.find('.texture-layer.empty-layer')
         dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(e.target.files))
         dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
     }
