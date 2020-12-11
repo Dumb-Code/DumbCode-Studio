@@ -37,7 +37,7 @@ export class TexturePanels {
         this.rightArea = 500
         this.offsetArea = 70
         this.layersArea = 250
-        this.bottomArea = 240
+        this.bottomArea = 290
 
 
         let clickedDivider = 0
@@ -51,7 +51,7 @@ export class TexturePanels {
                         this.layersArea += diff * (this.layersArea / this.rightArea)
                         this.rightArea = newDist
                     } else if(clickedDivider === 2) {
-                        this.bottomArea = mainArea.clientHeight - e.clientY
+                        this.bottomArea = mainArea.clientHeight - e.clientY - 16
                     } else if(clickedDivider === 3) {
                         this.layersArea = mainArea.clientWidth - e.clientX
                     }
