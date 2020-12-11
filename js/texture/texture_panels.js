@@ -14,7 +14,7 @@ export class TexturePanels {
         let mainDisplay = dom.find('#display-div')
         this.texturemapPanel = new LayoutPart(tex, () => this.panelChange())
         this.offsetPanel = new LayoutPart(dom.find('#panel-offset-editing'), () => this.panelChange())
-        this.colourPanel = new LayoutPart(dom.find('#panel-colour'), () => this.panelChange(), popped => { 
+        this.colourPanel = new LayoutPart(dom.find('#panel-colour'), () => this.panelChange(), "popped_out_colour_picker", popped => { 
             if(popped) {
                 let dom = $(this.colourPanel.win.document.body) 
                 let container = dom.find('.element-picker-container')               
