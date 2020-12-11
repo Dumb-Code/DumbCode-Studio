@@ -4,15 +4,34 @@ const mainArea = document.getElementById("main-area")
 
 export class TexturePanels {
 
-    constructor(dom) {
+    constructor(studio, dom) {
         this.dom = dom
+
+        this.poppedOutChildren = null
 
         let tex = dom.find('#panel-texturemap')
         let texPopout = tex.find('.popout-button')
         let mainDisplay = dom.find('#display-div')
         this.texturemapPanel = new LayoutPart(tex, () => this.panelChange())
         this.offsetPanel = new LayoutPart(dom.find('#panel-offset-editing'), () => this.panelChange())
-        this.colourPanel = new LayoutPart(dom.find('#panel-colour'), () => this.panelChange())
+        this.colourPanel = new LayoutPart(dom.find('#panel-colour'), () => this.panelChange(), popped => { 
+            if(popped) {
+                let dom = $(this.colourPanel.win.document.body) 
+                let container = dom.find('.element-picker-container')               
+                this.poppedOutChildren = container.children().detach()
+                dom.find('.colour-picker-container').children().detach().appendTo(container)
+
+                this.colourPanel.win.document._picker.setColor(studio.textureTools.colorPicker.getColor().toRGBA().toString())
+                studio.textureTools.colorPicker = this.colourPanel.win.document._picker
+            } else {
+                let container = dom.find('.element-picker-container')
+                container.children().detach()
+
+                container.append(this.poppedOutChildren)
+                studio.textureTools.colorPicker = studio.textureTools.originalPicker 
+                studio.textureTools.colorPicker.setColor(this.colourPanel.win.document._picker.getColor().toRGBA().toString())
+            }
+        })
         this.textureLayersPanel = new LayoutPart(dom.find('#panel-texture-layers'), () => this.panelChange())
         
         tex.find('.switch-canvas-button').click(() => {
@@ -110,7 +129,7 @@ export class TexturePanels {
             if(bottom) {
                 if(layers) {
                     if(palette) {
-                        this.layersArea = 100
+                        this.layersArea = 250
                     } else {
                         this.layersArea = this.rightArea
                     }
@@ -121,7 +140,7 @@ export class TexturePanels {
                 if(middle) {
                     this.offsetArea = 70
                     if(top) {
-                        this.bottomArea = 240
+                        this.bottomArea = 290
                     } else {
                         this.bottomArea = height - this.offsetArea
                     }

@@ -282,3 +282,11 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
     display: flex !important;
 
 }
+
+.dc-c-sw.column {
+    flex: none;
+}
+
+.dc-c-sw.columns {
+    display: flex;
+}

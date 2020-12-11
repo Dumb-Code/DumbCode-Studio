@@ -6,10 +6,13 @@
         <i class="fas fa-sign-out-alt"></i>
     </span>
     <div class="has-background-black-ter" style="border-left: 1px solid black;">
-        <canvas id="texture-canvas" style="overflow: hidden;"></canvas>
+        <canvas id="texture-canvas" style="overflow: hidden; display: block;"></canvas>
     </div>
 </div>
-<div id="panel-offset-editing" class="columns has-background-black-ter is-paddingless is-marginless" style="grid-area: offset_editing; border-top: 1px solid black; border-left: 1px solid black; overflow: hidden; position: relative;">
+<div id="panel-offset-editing" class="dc-c-sw columns has-background-black-ter is-paddingless is-marginless" style="grid-area: offset_editing; border-top: 1px solid black; border-left: 1px solid black; overflow: hidden; position: relative;">
+    <span class="icon is-medium popout-button" style="z-index: 500;">
+        <i class="fas fa-sign-out-alt"></i>
+    </span>
     <div class="column">
         <div class="field has-addons">
             <div class="control"><a class="button is-small is-static">OFFSET X</a></div>
@@ -42,11 +45,11 @@
         </div>
     </div>
 </div>
-<div id="panel-colour" class="columns is-gapless" style="grid-area: palette; position: relative; margin-left: 0px; border-left: 1px solid black; border-top: 1px solid black; height: 100%;">
-    <div class="column has-background-black-ter">
+<div id="panel-colour" class="dc-c-sw columns is-gapless has-background-black-ter" style="grid-area: palette; position: relative; margin-left: 0px; border-left: 1px solid black; border-top: 1px solid black; height: 100%;">
+    <div class="column has-background-black-ter element-picker-container">
         <div class="element-picker"></div>
     </div>
-    <div class="column has-background-black-ter is-narrow" style="border-left: 1px solid black; height: 100%;">
+    <div class="dc-c-sw column has-background-black-ter is-narrow" style="border-left: 1px solid black; height: 100%;">
         <span class="icon is-medium popout-button">
             <i class="fas fa-sign-out-alt"></i>
         </span>
@@ -64,16 +67,19 @@
         </span>
     </div>
 </div>
-<div class="column has-background-black-ter" id="panel-texture-layers" style="grid-area: texture_layers; border-left: 1px solid black; overflow-y: scroll; overflow-x: hidden; padding: 0;">
+<div class="column has-background-black-ter" id="panel-texture-layers" style="grid-area: texture_layers; position: relative; border-left: 1px solid black; border-top: 1px solid black; overflow-y: scroll; overflow-x: hidden; padding: 0;">
+    <span class="icon is-medium popout-button layer-persistant">
+        <i class="fas fa-sign-out-alt"></i>
+    </span>
     <div class="heading ml-2 mt-2 layer-persistant">layers</div>
-    <div class="texture-layer columns empty-layer layer-persistant" draggable="true">
-        <div class="column is-narrow texture-layer-preview">
+    <div class="texture-layer dc-c-sw columns empty-layer layer-persistant" draggable="true">
+        <div class="dc-c-sw column is-narrow texture-layer-preview">
         </div>
         <div class="column dbl-click-container texture-layer-name-container" style="padding: 0; padding-top: 16px">
             <p class="dbl-text"></p>
             <input class="dbl-text-edit" type="text">
         </div>
-        <div class="column is-narrow texture-layer-visible is-activated" style="padding-top: 17px">
+        <div class="dc-c-sw column is-narrow texture-layer-visible is-activated" style="padding-top: 17px">
             <span class="icon is-small icon-open">
                 <i class="fas fa-eye"></i>
             </span>
@@ -95,39 +101,3 @@
 <div id="main-divider" class="vertical-divider"></div>
 <div id="top-main-divider" class="horizontal-divider"></div>
 <div id="texture-layers-divider" class="vertical-divider"></div>
-
-<!-- <div class="columns is-gapless" style="height: 100vh; width: 100vw;">
-    <div class="column has-background-grey-darker" style="height: 100vh; width: 40vw"></div>
-    <div class="column is-paddingless is-one-third">
-        <div class="columns is-gapless" style="margin-left: 0px; border-left: 1px solid black; border-top: 1px solid black;">
-            <div class="column is-narrow has-background-black-ter">
-                <div class="element-picker"></div>
-            </div>
-            <div class="column has-background-black-ter is-narrow" style="border-left: 1px solid black;">
-                <span class="icon is-medium">
-                    <i class="fas fa-paint-brush has-text-info"></i>
-                </span>
-                <br>
-                <span class="icon is-medium">
-                    <i class="fas fa-square"></i>
-                </span>
-                <br>
-                <span class="icon is-medium">
-                    <i class="fas fa-cube"></i>
-                </span>
-            </div>
-            <div class="column container has-background-black-ter" style="border-left: 1px solid black; height: 250px; overflow-y: scroll;">
-                <div class="heading ml-2 mt-2">layers</div>
-                <button class="layer-selected">texture_layer_name_selected.png</button>
-                <button class="layer-unselected">texture_layer_name_1.png</button>
-                <button class="layer-unselected">texture_layer_name_2.png</button>
-                <button class="layer-unselected">texture_layer_name_3.png</button>
-                <button class="layer-unselected">texture_layer_name_4.png</button>
-                <button class="layer-unselected">texture_layer_name_5.png</button>
-                <button class="layer-unselected">texture_layer_name_6.png</button>
-                <button class="layer-unselected">texture_layer_name_7.png</button>
-                <button class="layer-unselected">texture_layer_name_8.png</button>
-            </div>
-        </div>
-    </div>
-</div> -->

@@ -15,7 +15,7 @@ export class TextureStudio {
         this.raytracer = raytracer
         this.orbitControls = orbitControls
 
-        this.studioPanels = new TexturePanels(dom, 300, 300)
+        this.studioPanels = new TexturePanels(this, dom)
         this.cubeValues = new TextureCubeValues(dom, raytracer)
         this.textureTools = new TextureTools(dom, this)
         this.texturemapCanvas = new TexturemapCanvas(dom.find('#texture-canvas'), raytracer, this.textureTools, this.cubeValues, pth)

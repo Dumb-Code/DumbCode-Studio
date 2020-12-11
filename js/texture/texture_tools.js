@@ -26,7 +26,7 @@ export class TextureTools {
 
         this.paintMode = new LinkedSelectableList(dom.find('.button-paint-mode'), false, "has-text-info")
 
-        this.colorPicker = Pickr.create({ 
+        this.originalPicker = this.colorPicker = Pickr.create({ 
             el: dom.find('.element-picker').get(0),
             theme: 'monolith',
             showAlways: true,
