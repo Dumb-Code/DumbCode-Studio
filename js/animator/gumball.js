@@ -1,24 +1,49 @@
+import { Vector3 } from "../three.js";
 import { LinkedSelectableList, LinkedElement, ToggleableElement } from "../util.js";
 
 export class Gumball {
     constructor(dom, studio) {
         this.raytracer = studio.raytracer
         this.transformControls = studio.transformControls
-        this.transformControls.addEventListener('objectChange', () => {
+
+        let startingRot = new Vector3()
+        let startingPos = new Vector3()
+        this.transformControls.addEventListener('mouseDown', () => {
             let selected = this.raytracer.oneSelected()
             if(selected === null) {
                 return
             }
-            let pos = selected.parent.position
+            startingRot.x = selected.rotation.x
+            startingRot.y = selected.rotation.y
+            startingRot.z = selected.rotation.z
+
+            startingPos.copy(selected.position)
+        })
+        this.transformControls.addEventListener('studioRotate', e => {
+            let selected = this.raytracer.oneSelected()
+            if(selected === null) {
+                return
+            }
+
             let rot = selected.parent.rotation
+            rot.x = startingRot.x + e.rotationAngle * e.rotationAxis.x
+            rot.y = startingRot.y + e.rotationAngle * e.rotationAxis.y
+            rot.z = startingRot.z + e.rotationAngle * e.rotationAxis.z
 
             let rotations = rot.toArray().map(a => a * 180 / Math.PI)
-            let positions = [pos.x, pos.y, pos.z]
-
             studio.setRotation(rotations)
-            studio.setPosition(positions)
             studio.runFrame()
-        } );
+        })
+        this.transformControls.addEventListener('studioTranslate', e => {
+            let selected = this.raytracer.oneSelected()
+            if(selected === null) {
+                return
+            }
+
+            selected.parent.position.copy(e.axis).multiplyScalar(e.length).add(startingPos)
+            studio.setPosition(selected.parent.position.toArray())
+            studio.runFrame()
+        })
 
         this.transformType = new LinkedSelectableList(dom.find('.transform-control-tool'), false).onchange(() => this.selectChanged())
         this.globalMode = new ToggleableElement(dom.find('.transform-control-global')).onchange(e => this.transformControls.space = e.value ? 'world' : 'local')

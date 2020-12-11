@@ -69,6 +69,15 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
                 kf.rotationMap.forEach((arr, key) => transformArr(arr, map.get(key)?.rotation))
                 kf.rotationPointMap.forEach((arr, key) => transformArr(arr, map.get(key)?.rotationPoint))
             })
+        } else {
+            handler.tbl.children.forEach(root => {
+                handler.keyframes.forEach(keyframe => {
+                    if(keyframe.rotationMap.has(root.name)) {
+                        let arr = keyframe.rotationMap.get(root.name)
+                        arr[2] += 180
+                    }
+                })
+            })
         }
 
         let sorted = [...handler.keyframes].sort((a, b) => a.startTime - b.startTime)
@@ -115,6 +124,19 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
             })
         })
     }
+
+    //Cubes need to be changed to do the shortest rotation path
+    if(version <= 5) {
+        handler.keyframes.forEach(keyframe => {
+            keyframe.rotationMap.forEach(arr => {
+                for(let i = 0; i < 3; i++) {
+                    while(Math.abs(arr[i]) >= 180) {
+                        arr[i] -= 360*Math.sign(arr[i])
+                    }
+                }
+            })
+        })
+    }
 }
 
 function transformArr(arr, subValue) {
@@ -128,7 +150,7 @@ function transformArr(arr, subValue) {
 
 DCALoader.exportAnimation = handler => {
     let buffer = new ByteBuffer()
-    buffer.writeNumber(5)
+    buffer.writeNumber(6)
     buffer.writeNumber(handler.keyframes.length)
     
     handler.keyframes.forEach(kf => {
