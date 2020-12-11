@@ -8,6 +8,7 @@ import { PanelButtons } from './panel_buttons.js'
 import { ProgressionCanvas } from './progression_canvas.js'
 import { KeyframeBoardManager } from './keyframe_board_manager.js'
 import { applyAdjustScrollable } from '../util.js'
+import { KeyframeSettings } from './keyframe_settings.js'
 
 const mainArea = document.getElementById("main-area")
 
@@ -39,6 +40,7 @@ export class AnimationStudio {
         this.animationPanel = new AnimationPanel(dom)
         this.cubeDisplayValues = new AnimationCubeValues(dom, this)
         this.keyframeManager = new KeyframeBoardManager(this, dom.find('.keyframe-board'), dom.find('.input-playback-range'))
+        this.keyframeSettings = new KeyframeSettings()
         this.panelButtons = new PanelButtons(dom, this)
         this.display = display
         this.methodExporter = new JavaMethodExporter()
@@ -96,6 +98,7 @@ export class AnimationStudio {
             let handler = this.pth.animationTabs.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
                 handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layer).some(l => !l.locked)) {
+                    handler.ensureDefinedLayers()
                     handler.selectedKeyFrame.skip = true
                     this.pth.model.resetAnimations()
                     handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
@@ -104,6 +107,9 @@ export class AnimationStudio {
                     handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]*180/Math.PI))
                     handler.selectedKeyFrame.skip = false
                     handler.forcedAnimationTicks = null
+
+                    handler.updateDefinedKeyframe(handler.selectedKeyFrame)
+                    handler.fixDefinedLayers(handler.selectedKeyFrame)
             }
         }
     }
@@ -123,6 +129,7 @@ export class AnimationStudio {
             let handler = this.pth.animationTabs.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
                 handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layer).some(l => !l.locked)) {
+                    handler.ensureDefinedLayers()
                     handler.selectedKeyFrame.skip = true
                     this.pth.model.resetAnimations()
                     handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
@@ -131,6 +138,9 @@ export class AnimationStudio {
                     handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]))
                     handler.selectedKeyFrame.skip = false
                     handler.forcedAnimationTicks = null
+
+                    handler.updateDefinedKeyframe(handler.selectedKeyFrame)
+                    handler.fixDefinedLayers(handler.selectedKeyFrame)
             }
         }
     }

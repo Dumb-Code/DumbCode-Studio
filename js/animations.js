@@ -11,6 +11,7 @@ export class AnimationHandler {
         this.loopKeyframe = false
         this.events = []
         this.keyframeInfo = []
+        this.definedKeyframeInfo = new Map()
         this.playstate = new PlayState()
     }
 
@@ -49,7 +50,8 @@ export class AnimationHandler {
             id, 
             visible: true,
             locked: false,
-            name: `Layer ${id}` 
+            name: `Layer ${id}`,
+            definedMode: false,
         }
         this.keyframeInfo.push(data)
         return data
@@ -60,6 +62,100 @@ export class AnimationHandler {
             return this.createLayerInfo(id)
         }
         return this.keyframeInfo.find(layer => layer.id === id)
+    }
+
+    removeDefinedLayers(id) {
+        this.keyframes.filter(kf => kf.layer == id).forEach(kf => this.definedKeyframeInfo.delete(kf))
+    }
+
+    ensureDefinedLayers() {
+        this.keyframes
+        .filter(kf => this.ensureLayer(kf.layer).definedMode === true)
+        .filter(kf => !this.definedKeyframeInfo.has(kf))
+        .forEach(kf => this.updateDefinedKeyframe(kf))
+    }
+
+    updateDefinedKeyframe(keyframe) {
+        if(this.ensureLayer(keyframe.layer).definedMode !== true) {
+            return
+        }
+        this.tbl.resetAnimations()
+        this.forcedAnimationTicks = keyframe.startTime + keyframe.duration
+        this.animate(0)
+        this.forcedAnimationTicks = null
+        let data = { rot:{}, pos:{} }
+        this.tbl.cubeMap.forEach((cube, name) => {
+            data.rot[name] = cube.cubeGroup.rotation.toArray()
+            data.pos[name] = cube.cubeGroup.position.toArray()
+        })
+        this.definedKeyframeInfo.set(keyframe, data)
+    }
+
+    fixDefinedLayers(keyframe) {
+        if(this.ensureLayer(keyframe.layer).definedMode !== true) {
+            return
+        }
+        let layerKfs = this.keyframes.filter(kf => kf.layer === keyframe.layer && kf !== keyframe)
+        
+        let toEditKeyframes = []
+        //Get the keyframe whose end position is either during the keyframe,
+        //Or is the first after the keyframe is finished
+        let minimumLayerEndValue = Infinity
+        let minimumKeyframe = null
+        layerKfs.forEach(kf => {
+            let endTime = kf.startTime + kf.duration
+
+            if(endTime > keyframe.startTime && endTime < keyframe.startTime + keyframe.duration) {
+                toEditKeyframes.push(kf)
+            } else {
+                let deltaEndTime = endTime - keyframe.startTime-keyframe.duration
+                if(deltaEndTime > 0 && deltaEndTime < minimumLayerEndValue) {
+                    minimumLayerEndValue = deltaEndTime
+                    minimumKeyframe = kf
+                }
+            }
+        })
+
+        if(minimumKeyframe != null) {
+            toEditKeyframes.push(minimumKeyframe)
+        }
+
+        toEditKeyframes.sort(kf => kf.startTime + kf.duration).forEach(kf => {
+            let targetMap = this.definedKeyframeInfo.get(kf)
+            this.tbl.resetAnimations()
+            this.forcedAnimationTicks = kf.startTime + kf.duration
+            this.animate(0)
+            this.forcedAnimationTicks = null
+
+            this.tbl.cubeMap.forEach((cube, name) => {
+                let tRot = targetMap.rot[name]
+                let rot = cube.cubeGroup.rotation.toArray()
+                if(tRot[0] !== rot[0] || tRot[1] !== rot[1] || tRot[2] !== rot[2]) {
+                    let delta = [tRot[0]-rot[0], tRot[1]-rot[1], tRot[2]-rot[2]].map(v => v*180/Math.PI)
+                    //map plus : target - current
+                    if(kf.rotationMap.has(name)) {
+                        kf.rotationMap.set(name, kf.rotationMap.get(name).map((v, i) => v + delta[i]))
+                    } else {
+                        kf.rotationMap.set(name, delta)
+                    }
+                    
+                }
+
+                let tPos = targetMap.pos[name]
+                let pos = cube.cubeGroup.position.toArray()
+                if(tPos[0] !== pos[0] || tPos[1] !== pos[1] || tPos[2] !== pos[2]) {
+                    let delta = [tPos[0]-pos[0], tPos[1]-pos[1], tPos[2]-pos[2]]
+                    //map plus : target - current
+                    if(kf.rotationPointMap.has(name)) {
+                        kf.rotationPointMap.set(name, kf.rotationPointMap.get(name).map((v, i) => v + delta[i]))
+                    } else {
+                        kf.rotationPointMap.set(name, delta)
+                    }
+                    
+                }
+            })
+
+        })
     }
 }
 

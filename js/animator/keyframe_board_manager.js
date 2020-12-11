@@ -11,6 +11,11 @@ export class KeyframeBoardManager {
     constructor(studio, keyframeBoard, sliders) {
         this.getHandler = () => studio.pth.animationTabs.active
         this.selectKeyframe = keyframe => studio.selectKeyframe(keyframe)
+        this.openKeyframeSetings = data => studio.keyframeSettings.open(data, () => {
+            if(data.definedMode !== true) {
+                this.getHandler().removeDefinedLayers(data.id)
+            }
+        })
         this.playstate = new PlayState()
         this.elementDoms = new Map()
 
@@ -299,6 +304,8 @@ export class KeyframeBoardManager {
             data.locked = !data.locked
             layerLocked.find('.icon-symbol').toggleClass('fa-lock', data.locked).toggleClass('fa-lock-open', !data.locked)
         })
+
+        dom.find('.kf-layer-settings').click(() => this.openKeyframeSetings(dataGetter()))
     }
 
     ensureFramePosition() {

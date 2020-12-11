@@ -51,7 +51,7 @@
     top: -3px;
 }
 
-.empty-keyframe .kf-layer-visible, .empty-keyframe .kf-layer-lock, .empty-keyframe .keyframe-container, .empty-event-point {
+.empty-keyframe .kf-layer-visible, .empty-keyframe .kf-layer-lock, .empty-keyframe .kf-layer-settings, .empty-keyframe .keyframe-container, .empty-event-point {
     display: none;
 }
 
