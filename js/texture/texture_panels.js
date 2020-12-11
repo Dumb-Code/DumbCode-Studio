@@ -37,7 +37,7 @@ export class TexturePanels {
         this.rightArea = 500
         this.offsetArea = 70
         this.layersArea = 250
-        this.topArea = window.innerHeight - 52 - 70 - 240
+        this.bottomArea = 240
 
 
         let clickedDivider = 0
@@ -51,7 +51,7 @@ export class TexturePanels {
                         this.layersArea += diff * (this.layersArea / this.rightArea)
                         this.rightArea = newDist
                     } else if(clickedDivider === 2) {
-                        this.topArea = e.clientY - mainArea.offsetTop
+                        this.bottomArea = mainArea.clientHeight - e.clientY
                     } else if(clickedDivider === 3) {
                         this.layersArea = mainArea.clientWidth - e.clientX
                     }
@@ -68,23 +68,23 @@ export class TexturePanels {
     updateAreas() {
         this.mainDivider.css('right', (this.rightArea-4) + "px")
 
-        if(this.topArea === 0) {
+        if(this.bottomArea === 0) {
             this.topDivider.css('display', 'none')
         } else {
             this.topDivider.css('display', 'unset')
-            this.topDivider.css('top', (mainArea.offsetTop+this.topArea-4) + "px").css('right', '0px').css('width', this.rightArea + "px").css('left', 'unset')
+            this.topDivider.css('bottom', (this.bottomArea+this.offsetArea-52-4) + "px").css('right', '0px').css('width', this.rightArea + "px").css('left', 'unset')
         }
 
         if(this.layersArea === 0) {
             this.textureLayersDivider.css('display', 'none')
         } else {
             this.textureLayersDivider.css('display', 'unset')
-            this.textureLayersDivider.css('right', `${this.layersArea}px`).css('top', `${mainArea.offsetTop+this.topArea+this.offsetArea-4}px`).css('height', `${mainArea.clientHeight-this.topArea-this.offsetArea}px`).css('left', 'unset')
+            this.textureLayersDivider.css('right', `${this.layersArea}px`).css('bottom', `0px`).css('height', `${this.bottomArea}px`).css('left', 'unset').css('top', 'unset')
         }
 
         this.dom
             .css('grid-template-columns', `calc(100% - ${this.rightArea}px) ${this.rightArea-this.layersArea}px ${this.layersArea}px`) 
-            .css('grid-template-rows', `${this.topArea}px ${this.offsetArea}px calc(100vh - ${this.topArea + this.offsetArea + 52}px)`) 
+            .css('grid-template-rows', `calc(100vh - ${this.bottomArea + this.offsetArea + mainArea.clientTop}px) ${this.offsetArea}px ${this.bottomArea}px`) 
 
         window.studioWindowResized()
     }
@@ -106,6 +106,7 @@ export class TexturePanels {
                 this.rightArea = 300
             }
 
+            let height =  mainArea.clientHeight - mainArea.clientTop
             if(bottom) {
                 if(layers) {
                     if(palette) {
@@ -118,44 +119,32 @@ export class TexturePanels {
                 }
 
                 if(middle) {
+                    this.offsetArea = 70
                     if(top) {
-                        this.topArea = 300
-                        this.offsetArea = 70
+                        this.bottomArea = 240
                     } else {
-                        if(this.topArea === 0) {
-                            this.offsetArea = 70
-                        } else {
-                            this.offsetArea += this.topArea
-                        }
-                        this.topArea = 0
-                    }
-                } else {
-                    this.offsetArea =0
-                    if(top) {
-                        if(this.offsetArea === 0) {
-                            this.topArea = 300
-                        } else {
-                            this.topArea += this.offsetArea
-                        }
-                    } else {
-                        this.topArea = 0
-                    }
-                }
-
-            } else {
-                this.layersArea = 0
-
-                if(middle) {
-                    if(top) {
-                        this.offsetArea = mainArea.clientHeight/2
-                        this.topArea = mainArea.clientHeight/2
-                    } else {
-                        this.offsetArea = mainArea.clientHeight
-                        this.topArea = 0
+                        this.bottomArea = height - this.offsetArea
                     }
                 } else {
                     this.offsetArea = 0
-                    this.topArea = mainArea.clientHeight
+                    if(top) {
+                        this.bottomArea += 35
+                    } else {
+                        this.bottomArea = height
+                    }
+                }
+            } else {
+                this.layersArea = 0
+                this.bottomArea = 0
+
+                if(middle) {
+                    this.offsetArea = 70
+                    if(!top) {
+                        this.offsetArea = mainArea.clientHeight
+                    }
+                } else {
+                    this.offsetArea = 0
+                    this.bottomArea = 0
                 }
             }
         }
