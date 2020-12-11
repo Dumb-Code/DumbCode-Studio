@@ -565,10 +565,12 @@ export class LayoutPart {
                 let left = window.screenX + offset.left
                 this.rootDom.detach()
                 this.win = window.open('templates/popped_out.html', 'Test Window ' + Math.random(), `top=${top},screenY=${top},left=${left},screenX=${left},height=${height},width=${width}`)
-                this.win.onload = () => this.rootDom.appendTo(this.win.document.body)
-                this.win.onbeforeunload  = () => {
-                    if(this.popped) {
-                        this.popped = false
+                this.win.onload = () => {
+                    this.rootDom.appendTo(this.win.document.body)
+                    this.win.onbeforeunload  = () => {
+                        if(this.popped) {
+                            this.popped = false
+                        }
                     }
                 }
             }
