@@ -150,6 +150,26 @@ function transformArr(arr, subValue) {
 
 DCALoader.exportAnimation = handler => {
     let buffer = new ByteBuffer()
+    //0 - initial version
+    //    (14 JUL 2019) [80ac6a28eef5e8c89ad9b44e787df1881d968b7f]
+    //
+    //1 - changed string handling to work with java's DataInputStream
+    //    (26 JUL 2019) [7bfe16e78df47b07670097969565f272cc58c68a]
+    //
+    //2 - added progression points
+    //    (15 NOV 2019) [a79a5701ecbc0049a0fea5628cddd44b47813230]
+    //
+    //3 - changed keyframe data to be "relative" (basically minus what the cube default value is on importing and plus it on exporting)
+    //    (11 MAY 2020) [23f1414541c54b14a73645dde18d3b8a8dd03608]
+    //
+    //4 - added keyframe layers
+    //    (12 AUG 2020) [00d31e0d2d3241610e7f6b13d8fe41ca2f62dee1]
+    //
+    //5 - flips the animation to comply with the new world space. Having 5 marks the animation as flipped.
+    //    (6 NOV 2020) [3c3ed3c82e90ccf649d6b981736136e175e441b0] -> [072d0d795c6ba79ba8b61a5cd79483fe1a69f76b]
+    //
+    //6 - removes -180,180 limit. Having 6 marks the animation as "minimized", where the shorted rotation path is taken
+    //    (11 DEC 2020) [308f68e34066ee87a72b19af6dd9ad0ace6a3509]
     buffer.writeNumber(6)
     buffer.writeNumber(handler.keyframes.length)
     
