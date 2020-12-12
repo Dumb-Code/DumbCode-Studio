@@ -74,6 +74,9 @@ export class PanelButtons {
 
     onFrame() {
         let active = this.pth.animationTabs.active
+        if(active == null) {
+            return  
+        }
         this.inputPlaybackRange.attr('max', active.totalTime).val(active.playstate.ticks)
     }
 }

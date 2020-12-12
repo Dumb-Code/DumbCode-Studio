@@ -46,17 +46,16 @@ export class KeyframeBoardManager {
         .mouseup(() => this.scrubbingPlaybackMarker = false)
         
         this.editingPoint = null
-        //todo: link up all the of controls to the animator. Most of them will be changing the class name
         this.emptyPoint = keyframeBoard.find('.empty-event-point')
         this.eventPointBoard = keyframeBoard.find('.event-points-board')
         this.eventPointBoard.click(e => {
-            if(e.target !== this.eventPointBoard.get(0)) {
+            let handler = this.getHandler()
+            if(e.target !== this.eventPointBoard.get(0) || handler === null) {
                 return
             }
             let left = this.eventPointBoard.offset().left
             let time = (e.clientX - left + this.scroll) / pixelsPerTick
 
-            let handler = this.getHandler()
             let newPoint = { time, data: [] }
 
             this.editEventPoint(newPoint)
@@ -148,7 +147,7 @@ export class KeyframeBoardManager {
 
     updateEventPoints() {
         this.eventPointBoard.html('')
-        this.getHandler().events.forEach(evt => {
+        this.getHandler()?.events?.forEach(evt => {
             if(evt.element === undefined) {
                 evt.element = this.emptyPoint.clone()[0]
                 evt.element.classList.remove('empty-event-point')

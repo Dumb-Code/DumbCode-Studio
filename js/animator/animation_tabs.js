@@ -1,4 +1,4 @@
-import { AnimationHandler } from "../animations.js"
+import { AnimationHandler, PlayState } from "../animations.js"
 import { MementoTraverser } from "../memento_traverser.js"
 import { AnimationMemento } from "./animation_memento.js"
 
@@ -13,7 +13,7 @@ export class AnimationTabHandler {
     
         this.onchange = newElement => {
             let manager = studio.keyframeManager
-            manager.playstate = newElement.handler.playstate
+            manager.playstate = newElement == undefined ? new PlayState() : newElement.handler.playstate
             manager.reframeKeyframes()
 
             let values = studio.cubeDisplayValues
@@ -33,14 +33,57 @@ export class AnimationTabHandler {
         element.classList.add('editor-tab')
         element.classList.add('heading')
         element.style.float = "left";
-        element.innerText = "Tab " + id
+
+        let textElement = document.createElement('span')
+        textElement.innerText = "New Animation"
+
+        let closeElement = document.createElement('span')
+        closeElement.classList.add("icon", "is-small")
+        closeElement.style.paddingLeft = "15px"
+        closeElement.style.paddingTop = "1px"
+        closeElement.style.float = "right"
+        let i = document.createElement('i')
+        i.classList.add("fas", "fa-times")
+
+        closeElement.appendChild(i)
+        element.appendChild(textElement)    
+        element.appendChild(closeElement)
+
         this.tabContainer.append(element)
         element.onclick = () => this.activeTab = id
+        closeElement.onclick = e => {
+            data.toggleOpened() 
+            e.stopPropagation()
+        }
 
         let data = {
             handler: new AnimationHandler(this.model),
             element,
-            name: "Tab " + id
+            textElement,
+            name: "New Animation",
+            opened: true,
+            toggleOpened: () => {
+                if(data.opened) { //Removing
+                    let openedArr = this.allTabs.filter(tab => tab.opened)
+                    let idx = openedArr.indexOf(data)
+                    let right = openedArr[idx+1]
+                    let left = openedArr[idx-1]
+
+                    if(right !== undefined) {
+                        this.activeTab = idx+1
+                    } else if(left !== undefined) {
+                        this.activeTab = idx-1
+                    } else {
+                        this.activeTab = -1
+                    }
+                } else { //Adding
+                    this.activeTab = this.allTabs.indexOf(data)
+                }
+                this.filesPage.animationProjectPart.toggleTabOpened(data)
+                data.opened = !data.opened
+                this.refreshTabs()
+                this.onchange()
+            }
         }
         data.mementoTraverser = new MementoTraverser(() => new AnimationMemento(this.studio, data))
         this.allTabs.push(data)
@@ -67,12 +110,17 @@ export class AnimationTabHandler {
     }
 
     get active() {
-        return this.activeData?.handler
+        let data = this.activeData
+        if(data) {
+            return data.handler
+        }
+        return null
     }
 
     get activeData() {
         if(this._internalTab === -1) {
-            this.initiateNewTab()
+            return null
+            // this.initiateNewTab()
         }
         return this.getIndex(this._internalTab) || null
     }
@@ -91,6 +139,6 @@ export class AnimationTabHandler {
 
     refreshTabs() {
         this.tabContainer.children().detach()
-        this.allTabs.forEach(tab => this.tabContainer.append(tab.element))
+        this.allTabs.filter(tab => tab.opened).forEach(tab => this.tabContainer.append(tab.element))
     }
 }

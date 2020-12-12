@@ -1,6 +1,6 @@
 import { readFile } from "../displays.js"
 import { ByteBuffer } from "../animations.js"
-import { doubleClickToEdit } from "../util.js"
+import { doubleClickToEdit, ToggleableElement } from "../util.js"
 import { GifExporter } from "./gif_export.js"
 import { DCMModel } from "../formats/model/dcm_loader.js"
 import { TBLFilesLoader } from "../formats/animation/tbl_files.js"
@@ -83,9 +83,13 @@ export class AnimationProjectPart {
         this.animatorGetter().keyframeManager.reframeKeyframes()
     }
 
+    toggleTabOpened(tab) {
+        tab._toggleDom.toggleClass('is-activated')
+    }
+
     createNewAnimationTab(name) {
         let tab = this.pth.animationTabs.createNewTab()
-        let element = tab.element
+        let textElement = tab.textElement
 
         let cloned = this.emptyAnimationList.clone()
         cloned.removeClass('empty-column')
@@ -100,16 +104,19 @@ export class AnimationProjectPart {
             tab.name = name
         }
 
-        element.innerText = tab.name
+        textElement.innerText = tab.name
 
         doubleClickToEdit(dom.find('.animation-name'), name => {
             tab.name = name
-            element.innerText = name
+            textElement.innerText = name
         }, name)
 
         let handler = tab.handler
         dom.find('.download-animation-gif').click(() => this.gifExporter.onOpenModal(handler, tab.name))
         dom.find('.download-animation-file').click(() => DCALoader.exportAnimation(handler).downloadAsFile(tab.name + ".dca"))
+        
+        tab._toggleDom = dom.find('.toggle-animation')
+        tab._toggleDom.click(() => tab.toggleOpened())
         return tab
     }
 

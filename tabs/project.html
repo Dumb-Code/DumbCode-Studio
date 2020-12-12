@@ -50,6 +50,13 @@
         overflow-x: hidden;
     }
 
+    .toggle-animation.is-activated .toggle-on {
+        display: none
+    }
+    .toggle-animation:not(.is-activated) .toggle-off {
+        display: none
+    }
+
 </style>
 <section class="section is-mobile has-background-black-ter" style="height: 100vh">
     <div class="columns">
@@ -201,6 +208,16 @@
                     <div class="column dbl-click-container animation-name">
                         <p class="dbl-text"></p>
                         <input class="dbl-text-edit" type="text">
+                    </div>
+                    <div class="column is-narrow">
+                        <span class="toggle-animation icon is-small clickable">
+                            <span class="toggle-on tooltip" data-tooltip="Remove Animation From Tab">
+                                <i class="fas fa-toggle-on"></i>
+                            </span>
+                            <span class="toggle-off tooltip" data-tooltip="Add Animation From Tab">
+                                <i class="fas fa-toggle-off"></i>
+                            </span>
+                        </span>
                     </div>
                     <div class="column is-narrow">
                         <span class="download-animation-gif icon is-small clickable tooltip " data-tooltip="Record As Gif">
