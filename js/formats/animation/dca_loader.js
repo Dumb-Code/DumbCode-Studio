@@ -63,20 +63,10 @@ DCALoader.importAnimation = (handler, buffer) => {
 DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
     if(version <= 3) {        
         let map = handler.tbl.cubeMap
-
         if(version === 3) {
             handler.keyframes.forEach(kf => {
                 kf.rotationMap.forEach((arr, key) => transformArr(arr, map.get(key)?.rotation))
                 kf.rotationPointMap.forEach((arr, key) => transformArr(arr, map.get(key)?.rotationPoint))
-            })
-        } else {
-            handler.tbl.children.forEach(root => {
-                handler.keyframes.forEach(keyframe => {
-                    if(keyframe.rotationMap.has(root.name)) {
-                        let arr = keyframe.rotationMap.get(root.name)
-                        arr[2] += 180
-                    }
-                })
             })
         }
 
@@ -130,7 +120,7 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
         handler.keyframes.forEach(keyframe => {
             keyframe.rotationMap.forEach(arr => {
                 for(let i = 0; i < 3; i++) {
-                    while(Math.abs(arr[i]) >= 180) {
+                    while(Math.abs(arr[i]) > 180) {
                         arr[i] -= 360*Math.sign(arr[i])
                     }
                 }
