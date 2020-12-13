@@ -73,7 +73,10 @@ export class AnimationStudio {
         this.addEventListener('keydown', e => {
             if(pth.animationTabs.isAny()) {
                 pth.animationTabs.activeData.mementoTraverser.onKeyDown(e.event)
-            } 
+            }
+            if(e.event.keyCode == 46) {
+                this.panelButtons.deleteKeyframe(this)
+            }
         })
         
         applyAdjustScrollable(dom)

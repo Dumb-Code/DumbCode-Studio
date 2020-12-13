@@ -1,18 +1,7 @@
 export class PanelButtons {
     constructor(dom, studio) {
         this.pth = studio.pth
-        dom.find('.button-delete-keyframe').click(() => {
-            let handler = studio.pth.animationTabs.active
-            if(handler !== null && handler.selectedKeyFrame !== undefined) {
-                let index = handler.keyframes.indexOf(handler.selectedKeyFrame)
-                if(index >= 0) {
-                    handler.keyframes.splice(index, 1)
-            
-                    studio.selectKeyframe(undefined)
-                    studio.keyframeManager.reframeKeyframes()
-                }
-            }
-        })
+        dom.find('.button-delete-keyframe').click(() => this.deleteKeyframe(studio))
 
         let playstateRoot = dom.find('.toggle-timeline-playstate')
         let updatePlaystate = () => {
@@ -78,5 +67,17 @@ export class PanelButtons {
             return  
         }
         this.inputPlaybackRange.attr('max', active.totalTime).val(active.playstate.ticks)
+    }
+
+    deleteKeyframe(studio) {
+        let handler = studio.pth.animationTabs.active
+        if(handler !== null && handler.selectedKeyFrame !== undefined) {
+            let index = handler.keyframes.indexOf(handler.selectedKeyFrame)
+            if(index >= 0) {
+                handler.keyframes.splice(index, 1) 
+                studio.selectKeyframe(undefined)
+                studio.keyframeManager.reframeKeyframes()
+            }
+        }
     }
 }

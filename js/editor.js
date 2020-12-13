@@ -14,7 +14,7 @@ import { fileUploadBox } from "./util.js";
 
 const major = 0
 const minor = 6
-const patch = 6
+const patch = 7
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
