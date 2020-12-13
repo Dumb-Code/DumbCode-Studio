@@ -1,11 +1,60 @@
-<div class="notification is-dark">
-  <h1 class="title is-5">MODEL</h1>
-  <div class="columns">
-      <div class="column is-narrow">
-        <i class="fas fa-cube"></i>
-      </div>
+<div class="primary-box-area notification is-dark base-drop-area model-drop-area">
+  <div class="columns is-mobile model-layer-topbar">
       <div class="column">
-          <p>model_base.tbl</p>
+          <h1 class="title is-5">MODEL</h1>
+      </div>
+      <div class="column is-narrow">
+          <span class="new-model-button icon is-small clickable tooltip" data-tooltip="Create New Model">
+              <i class="fas fa-plus"></i>
+          </span>
+      </div>
+      <div class="column is-narrow">
+          <div class="clickable tooltip" data-tooltip="Upload New Model">
+              <label for="model-file-input">
+                  <div class="icon is-small">
+                      <i class="fas fa-upload"></i>
+                  </div>
+              </label>
+              <input id="model-file-input" class="file-input-hidden" type="file" accept=".tbl,.dcm" multiple/>
+          </div>
+      </div>
+      <div class="column is-narrow">
+          <div class="clickable tooltip" data-tooltip="Import as Project">
+              <label for="project-file-input">
+                  <div class="icon is-small">
+                      <i class="fas fa-file-import"></i>
+                  </div>
+              </label>
+              <input id="project-file-input" class="file-input-hidden" type="file" accept=".dcproj" multiple/>
+          </div>
+      </div>
+      <div class="column is-narrow">
+          <span class="remote-project-button icon is-small clickable tooltip popup-modal-button" modal-target="project/github" data-tooltip="Add Remote Project">
+              <i class="fab fa-github"></i>
+          </span>
+      </div>
+  </div>
+  <div class="model-list-entry columns is-mobile empty-column">
+      <div class="column is-narrow model-preview">
+      </div>
+      <div class="column dbl-click-container model-name-container">
+          <p class="dbl-text"></p>
+          <input class="dbl-text-edit" type="text">
+      </div>
+      <div class="column is-narrow github-sync" style="display: none;">
+          <span class="sync-project-button icon is-small clickable tooltip" data-tooltip="Push To Github">
+              <i class="fas fa-sync"></i>
+          </span>
+      </div>
+      <div class="column is-narrow">
+          <span class="download-project-file icon is-small clickable tooltip" data-tooltip="Download As Project">
+              <i class="fas fa-file-export"></i>
+          </span>
+      </div>
+      <div class="column is-narrow">
+          <span class="download-model-file icon is-small clickable tooltip " data-tooltip="Download Model">
+              <i class="fas fa-file-download"></i>
+          </span>
       </div>
   </div>
 </div>

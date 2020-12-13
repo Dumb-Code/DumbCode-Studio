@@ -1,0 +1,33 @@
+<div class="columns is-mobile texture-layer-topbar">
+    <div class="column">
+        <h1 class="title is-5">TEXTURE LAYERS</h1>
+    </div>
+    <div class="column is-narrow">
+        <span class="new-texture-button icon is-small clickable tooltip" data-tooltip="Create New Texture">
+            <i class="fas fa-plus"></i>
+        </span>
+    </div>
+    <div class="column is-narrow">
+        <div class="clickable tooltip" data-tooltip="Upload New Texture">
+            <label for="texture-file-input">
+                <div class="icon is-small">
+                    <i class="fas fa-upload"></i>
+                </div>
+            </label>
+            <input id="texture-file-input" class="file-input-hidden" type="file" accept=".png" multiple/>
+        </div>
+    </div>
+</div>
+<div class="texture-list-entry columns is-mobile empty-column">
+    <div class="column is-narrow texture-preview">
+    </div>
+    <div class="column dbl-click-container texture-name-container">
+        <p class="dbl-text"></p>
+        <input class="dbl-text-edit" type="text">
+    </div>
+    <div class="column is-narrow">
+        <span class="download-texture-file icon is-small clickable tooltip " data-tooltip="Download Texture">
+            <i class="fas fa-file-download"></i>
+        </span>
+    </div>
+</div>
