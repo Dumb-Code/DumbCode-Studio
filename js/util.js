@@ -662,7 +662,7 @@ export class AsyncProgressCounter {
 
             let change = Math.sign(direction) * (e.target.hasAttribute("step-mod") ? parseFloat(e.target.getAttribute('step-mod')) : 1)
            
-            if(e.target.getAttribute("step-constant") != "true") {
+            if(hasParentClass(e.target, "step-constant-marker", "input-top-level")) {
                 let ctrl = e.ctrlKey
                 let shift = e.shiftKey
     
@@ -683,4 +683,15 @@ export class AsyncProgressCounter {
         }
         
     })
+  }
+
+  function hasParentClass(element, className, clazzBeforeCheck) {
+      if(element.classList.contains("disable-upwards-looking")) {
+          return true
+      }
+      let node = element
+      while(!node.classList.contains(clazzBeforeCheck)) {
+          node = node.parentNode
+      }
+      return !node.parentNode.classList.contains(className)
   }

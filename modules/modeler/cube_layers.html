@@ -1,0 +1,31 @@
+<p class="heading is-size-8 px-1 has-text-grey-light mt-1">Layers</p>
+
+<div class="section is-marginless is-paddingless">
+  <div class="buttons has-addons mx-1 mb-0" style="float:left">
+    <!--Create cube in same level heirarchy-->
+    <button class="button is-info create-cube-sibling tooltip" style="height: 24px; border-right: 4px solid #363636" data-tooltip="Create a sibling cube">
+      <i class="fas fa-plus has-text-light mr-1"></i><i class="fas fa-cube has-text-light"></i>
+    </button>
+    <!--Create new child cube of current selected-->
+    <button class="button is-info create-cube tooltip" style="height: 24px;"  data-tooltip="Create a child cube">
+      <i class="fas fa-plus has-text-light mr-1"></i><i class="fas fa-cube has-text-light"></i><i class="fas fa-cube has-text-light" style="height: 10px;" ></i>
+    </button>
+  </div>
+
+  <div class="buttons has-addons" >
+    <!-- Delete the cube, moving it's children to the parent cube -->
+    <button class="button is-info delete-cube tooltip" style="height: 24px; border-right: 4px solid #363636" data-tooltip="Delete selected cube only">
+      <i class="fas fa-trash has-text-light mr-1" style="height: 14px;"></i>
+    </button>
+    <!-- Delete the cube and it's children -->
+    <button class="button is-info delete-cube-and-children tooltip" style="height: 24px;"  data-tooltip="Delete selected cube and children">
+      <i class="fas fa-trash has-text-light mr-1" style="height: 14px;"></i><i class="fas fa-cubes has-text-light"></i>
+    </button>
+  </div>
+</div>
+
+<!--Layers Tree-->
+<div class="section is-paddingless pt-3 pl-1" style="overflow-y: scroll; height: calc(100% - 48px); position: absolute; width: 100%;">
+  <ul id="cube-list" class="has-text-grey-lighter ">
+  </ul>
+</div>

@@ -1,0 +1,65 @@
+<div class="section has-background-black-ter py-0 my-0 pl-1 has-text-light" style="height: 4vh; border: 1px solid #121212; font-size: 14px; border-right: none;">
+    <div class="columns is-mobile is-gapless">
+      <div class="column is-narrow">
+        <div class="dropdown is-up">
+          <div class="dropdown-trigger">
+            <button class="button is-dark" aria-haspopup="true" aria-controls="dropdown-display" style="height: 20px; font-size: 14px;">
+              <span>Textured</span>
+              <span class="icon is-small">
+                <i class="fas fa-angle-up" aria-hidden="true"></i>
+              </span>
+            </button>
+          </div>
+          <div class="dropdown-menu" id="dropdown-display" role="menu">
+            <div class="dropdown-content has-background-black-bis">
+              <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Display Mode</p></div>
+              <hr class="dropdown-divider">
+              <a class="dropdown-item option-select select-texture-mode" select-list-entry="textured">Textured</a>
+              <!-- <a class="dropdown-item option-select select-texture-mode">UV</a> -->
+              <a class="dropdown-item option-select select-texture-mode" select-list-entry="untextured">White</a>
+              <a class="dropdown-item option-select select-texture-mode" select-list-entry="outline">Outline</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="column is-narrow">
+        <div class="dropdown is-up">
+          <div class="dropdown-trigger">
+            <button class="button is-dark ml-1" aria-haspopup="true" aria-controls="dropdown-camera" style="height: 20px; font-size: 14px;">
+              <span>Perspective</span>
+              <span class="icon is-small">
+                <i class="fas fa-angle-up" aria-hidden="true"></i>
+              </span>
+            </button>
+          </div>
+          <div class="dropdown-menu" id="dropdown-camera" role="menu">
+            <div class="dropdown-content has-background-black-bis">
+              <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Render Mode</p></div>
+              <hr class="dropdown-divider">
+              <a class="dropdown-item option-select select-camera-mode" select-list-entry="perspective">
+                <span>Perspective</span>
+                <span>
+                  <span class="has-text-grey-lighter">Fov:</span>
+                  <input class="perspective-camera-fov" style="width: 50px;" type="number" value="65">
+                </span>
+              </a>
+              <a class="dropdown-item option-select select-camera-mode" select-list-entry="orthographic">Orthographic</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="column is-narrow">
+        <button class="button is-dark ml-1" style="height: 20px; font-size: 14px;">
+          <span><i class="far fa-lightbulb"></i></span>
+        </button>
+      </div>
+      <div class="column is-narrow">
+        <div class="button is-paddingless is-dark px-3 ml-1 cube-name-display" style="height: 20px; font-size: 14px; display: none;"></div>
+      </div>
+      <div class="column is-narrow">
+        <div class="button is-paddingless is-dark px-3 mx-1 cube-children-display" style="height: 20px; font-size: 14px; display: none;"></div>
+      </div>
+    </div>
+    </div>
+
+  </div>

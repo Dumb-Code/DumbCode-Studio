@@ -24,7 +24,7 @@ function includeModules() {
         xhttp.onreadystatechange = function() {
           if (this.readyState == 4) {
             if (this.status == 200) {
-              element.innerHTML = this.responseText;
+              element.innerHTML = this.responseText + element.innerHTML;
               if(applyModalPopups) {
                 applyModalPopups(element)
               }

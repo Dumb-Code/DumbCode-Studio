@@ -35,15 +35,15 @@ export class CubeValueDisplay {
         this.cubeName = new LinkedElement(dom.find('.input-cube-name'), false, false).onchange(e => {
             dom.find('.input-cube-name').toggleClass('input-invalid', renameCube(e.old, e.value))
         })
-        this.dimensions = new LinkedElement(dom.find('.input-dimension')).onchange(e => getCube()?.updateDimension(e.value))
-        this.positions = new LinkedElement(dom.find('.input-position')).onchange(e => {
+        this.dimensions = new LinkedElement(dom.find('.input-dimensions .input-part')).onchange(e => getCube()?.updateDimension(e.value))
+        this.positions = new LinkedElement(dom.find('.input-position .input-part')).onchange(e => {
             this.lockedCubes.createLockedCubesCache()
             getCube()?.updatePosition(e.value)
             this.lockedCubes.reconstructLockedCubes()
             studio.rotationPointMarkers.updateSpheres()
         })
-        this.offsets = new LinkedElement(dom.find('.input-offset')).onchange(e => getCube()?.updateOffset(e.value))
-        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow')).onchange(e => getCube()?.updateCubeGrow(e.value))
+        this.offsets = new LinkedElement(dom.find('.input-offset .input-part')).onchange(e => getCube()?.updateOffset(e.value))
+        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow .input-part')).onchange(e => getCube()?.updateCubeGrow(e.value))
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => getCube()?.updateTextureOffset(e.value))
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => getCube()?.updateTextureMirrored(e.value))
         this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => {
