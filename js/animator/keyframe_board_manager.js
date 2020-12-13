@@ -323,8 +323,7 @@ export class KeyframeBoardManager {
             xpos = (ticks - left) / ticksInContainer
         }
         
-        this.playbackMarker.css('display', xpos < 0 || xpos > 1 ? 'none' : 'unset').css('left', (235 + (xpos * conatainerWidth)) + "px")
-
+        this.playbackMarker.css('display', xpos < 0 || xpos > 1 ? 'none' : 'unset').css('left', (255 + (xpos * conatainerWidth)) + "px")
 
         let rounded = Math.round(ticks * 10) / 10;
         this.playbackMarker.attr('data-tooltip', `${rounded} ticks`)
