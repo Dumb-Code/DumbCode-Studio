@@ -30,6 +30,6 @@ export class ProjectTabs {
 let activeProjectTab
 
 window.setTab = (element, tab) => {
-    Array.from(element.parentElement.children).forEach(elem => elem.classList.toggle("is-active", elem == element))
+    Array.from(element.parentElement.children).forEach(elem => elem.classList.toggle("navbar-is-active", elem == element))
     activeProjectTab.activeTab = activeProjectTab.tabs[tab]
 }

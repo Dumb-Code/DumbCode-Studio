@@ -280,7 +280,10 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
 .top-nav-item {
     align-items: center !important;
     display: flex !important;
+}
 
+.navbar-is-active {
+    background-color: hsl(204, 86%, 53%) !important;
 }
 
 .dc-c-sw.column {
