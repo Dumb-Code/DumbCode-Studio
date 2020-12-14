@@ -16,7 +16,7 @@ export class StudioPanels {
         this.commandDivider = dom.find("#command-divider")
 
         this.commandsArea = 90
-        this.rightArea = 300
+        this.rightArea = 320
         this.topArea = 400
 
         let clickedDivider = 0
@@ -48,7 +48,7 @@ export class StudioPanels {
             this.rightArea = 0
         } else {
             if(this.rightArea === 0) {
-                this.rightArea = 400
+                this.rightArea = 320
             }
 
             if(this.topPanel.popped !== this.bottomPanel.popped) {
