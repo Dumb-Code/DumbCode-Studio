@@ -1,3 +1,4 @@
+import { OrbitControls } from "../orbit_controls.js"
 import { isKeyDown, DraggableElementList, doubleClickToEdit } from "../util.js"
 
 export class CubeListBoard {
@@ -26,15 +27,15 @@ export class CubeListBoard {
             lockedCubes.reconstructLockedCubes()
         })
 
-        this.cubeList.ondragover = e => {
-            if(e.target == this.cubeList) {
+        this.cubeList.parentNode.ondragover = e => {
+            if(e.target == this.cubeList.parentNode) {
                 this.dragElementList.removePreviousState()
                 e.preventDefault()
             }
         }
-        this.cubeList.ondrop = e => {
+        this.cubeList.parentNode.ondrop = e => {
             let cube = this.dragElementList.getDraggedData()
-            if(e.target == this.cubeList && cube !== undefined) {
+            if(e.target == this.cubeList.parentNode && cube !== undefined) {
                 this.lockedCubes.createLockedCubesCache()
                 cube.parent.deleteChild(cube, true)
                 pth.model.addChild(cube)

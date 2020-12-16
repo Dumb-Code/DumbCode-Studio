@@ -67,6 +67,10 @@ export class DCMModel {
         this.onChildrenChange(silent, this.children.filter(c => c != child))
     }
 
+    getChildren() {
+        return this.children
+    }
+
     onChildrenChange(silent = false, childern = this.children) {
         this.children.forEach(child => child.cubeGroup ? this.modelCache.remove(child.cubeGroup) : null)
         this.children = childern;
