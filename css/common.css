@@ -12,6 +12,10 @@
     display: unset;
 }
 
+.is-file  {
+    height: 100%;
+}
+
 .dbl-click-container.is-editing .dbl-text {
     display: none;
 }
