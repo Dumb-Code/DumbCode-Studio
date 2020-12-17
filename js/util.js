@@ -315,8 +315,8 @@ let mouseMoveKey = (key, pressed) => {
 }
 let directKeys = ["Alt", "Control", "Shift"]
 $(document)
-    .keydown(e => directKeys.includes(e.key) ? 0 : keydown(e.key))
-    .keyup(e => directKeys.includes(e.key) ? 0 : keyup(e.key))
+    .keydown(e => directKeys.includes(e.key) ? mouseMoveKey(e.key, true) : keydown(e.key))
+    .keyup(e => directKeys.includes(e.key) ? mouseMoveKey(e.key, false) : keyup(e.key))
     .mousemove(e => {
         mouseMoveKey(directKeys[0], e.altKey)
         mouseMoveKey(directKeys[1], e.ctrlKey)
