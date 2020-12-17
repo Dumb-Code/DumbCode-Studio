@@ -1,6 +1,7 @@
 export class AnimationMemento {
     constructor(studio, tabData) {
-        this.keyframes = tabData.handler.keyframes.map(kf => { return {
+        this.data = {}
+        this.data.keyframes = tabData.handler.keyframes.map(kf => { return {
             layer: kf.layer, startTime: kf.startTime, duration: kf.duration,
             rotationMap: this.mapToObj(kf.rotationMap),
             rotationPointMap: this.mapToObj(kf.rotationPointMap),
@@ -11,7 +12,7 @@ export class AnimationMemento {
         this.reconstruct = () => {
             tabData.handler.keyframes = []
             let selectedKeyframe = undefined
-            this.keyframes.forEach(kfData => {
+            this.data.keyframes.forEach(kfData => {
                 let kf = tabData.handler.createKeyframe()
                 kf.layer = kfData.layer
                 kf.startTime = kfData.startTime

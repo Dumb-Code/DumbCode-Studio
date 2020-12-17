@@ -38,7 +38,7 @@ export class MementoTraverser {
 
     attemptPush() {
         let memento = this.mementoCreator()
-        memento._JSON = JSON.stringify(memento)
+        memento._JSON = JSON.stringify(memento.data)
         let current = this.mementoList[this.index]
 
         if(current === undefined || current._JSON != memento._JSON) {

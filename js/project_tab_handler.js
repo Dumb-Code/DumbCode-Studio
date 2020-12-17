@@ -69,6 +69,10 @@ export class ProjectTabHandler {
         return this.getSelected().modelMementoTraverser
     }
 
+    get lockedCubes() {
+        return this.getSelected().lockedCubes
+    }
+
     updateTexture(callback) {
         callback(this.materials.normal)
         callback(this.materials.selected)

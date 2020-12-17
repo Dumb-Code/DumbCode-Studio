@@ -3,7 +3,6 @@ import { CubeLocker } from "../util.js"
 export class LockedCubes {
     constructor(studio) {
         this.pth = studio.pth
-        this.lockedCubes = new Set()
 
         let transformControls  = studio.transformControls 
 
@@ -32,24 +31,32 @@ export class LockedCubes {
 
     }
 
+    get lockedCubes() {
+        return this.pth.lockedCubes
+    }
+
     lock(cube) {
-        this.lockedCubes.add(cube)
+        this.lockedCubes.add(cube.name)
     }
 
     unlock(cube) {
-        this.lockedCubes.delete(cube)
+        this.lockedCubes.delete(cube.name)
     }
 
     isLocked(cube) {
-        return this.lockedCubes.has(cube)
+        return this.lockedCubes.has(cube.name)
     }
 
     createLockedCubesCache() {
         this.lockedChildrenCache.clear()
         this.movingChildrenCache.clear()
-        this.lockedCubes.forEach(cube => {
+        this.lockedCubes.forEach(cubeName => {
+            let cube = this.pth.model.cubeMap.get(cubeName)
+            if(!cube) {
+                return
+            } 
             this.traverseUnlockedCubes(cube)
-            if(!this.lockedCubes.has(cube.parent)) {
+            if(!this.isLocked(cube.parent)) {
                 this.addToHierarchyMap(this.lockedChildrenCache, cube.hierarchyLevel, new CubeLocker(cube))
             }
         })
@@ -58,7 +65,7 @@ export class LockedCubes {
     traverseUnlockedCubes(cube) {
         if(this.isLocked(cube)) {
             cube.children.forEach(child => this.traverseUnlockedCubes(child))
-        } else if(this.lockedCubes.has(cube.parent)) {
+        } else if(this.isLocked(cube.parent)) {
             this.movingChildrenCache.add(cube)
         }
     }

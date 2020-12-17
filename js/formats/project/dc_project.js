@@ -17,11 +17,12 @@ export class DcProject {//._files, this._modeling, this._texture, this._animatio
         this.id = id
         this.textureManager = new TextureManager(model, pth)
         this.animationTabHandler = new AnimationTabHandler(pth._animation, pth._files, model)
-        this.modelMementoTraverser = new MementoTraverser(() => new ModelingMemento(model))
+        this.modelMementoTraverser = new MementoTraverser(() => new ModelingMemento(model, this.lockedCubes))
         this.metadata = model.fileName ? { modelName: model.fileName } : {}
 
         this.materials = this._createMaterialsObject()
         this.selectedSet = new Set()
+        this.lockedCubes = new Set()
 
         this.initiate(pth)
     }

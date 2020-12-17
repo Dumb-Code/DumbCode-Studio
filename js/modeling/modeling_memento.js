@@ -1,7 +1,8 @@
 import { DCMCube } from "../formats/model/dcm_loader.js"
 
 export class ModelingMemento {
-    constructor(model) {
+    constructor(model, lockedSet) {
+        this.data = {}
         let writeCube = cube => {
             return {
                 name: cube.name,
@@ -15,7 +16,9 @@ export class ModelingMemento {
                 children: cube.children.map(child => writeCube(child))
             }
         }
-        this.children = model.children.map(child => writeCube(child))
+        this.data.children = model.children.map(child => writeCube(child))
+
+        this.lockedCubes = [...lockedSet]
 
         let readCube = obj => new DCMCube(
             obj.name,
@@ -32,7 +35,10 @@ export class ModelingMemento {
 
         this.reconstruct = () => {
             model.cubeMap.clear()
-            model.onChildrenChange(false, this.children.map(child => readCube(child)))
+            model.onChildrenChange(false, this.data.children.map(child => readCube(child)))
+            
+            lockedSet.clear()
+            this.lockedCubes.forEach(c => lockedSet.add(c))
         }
     }
 }
