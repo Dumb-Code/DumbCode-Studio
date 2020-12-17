@@ -22,6 +22,7 @@ export class TexturemapCanvas {
             let mouseDown = ((buttons & 1) === 1) && textureTools.canDraw()
             if(mouseDown) {
                 textureTools.mouseDown(mouseX/size, mouseY/size, true)
+                return
             }
             this.mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback, mouseDown)
         }, 2)
