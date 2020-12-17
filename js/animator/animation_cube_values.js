@@ -6,7 +6,7 @@ export class AnimationCubeValues {
         this.raytracer = studio.raytracer
         this.keyframeSelectionRequired = dom.find('.editor-require-keyframe')
         this.cubeSelectionRequired = dom.find('.editor-require-selection')
-        this.getActiveKeyframe = () => studio.pth.animationTabs.isAny() ? studio.pth.animationTabs.active.selectedKeyFrame : null
+        this.getActiveKeyframe = () => studio.pth.animationTabs.isAny() ? studio.pth.animationTabs.active.selectedKeyFrame : undefined
         this.activeKeyframeFunc = cons => {
             let keyframe = this.getActiveKeyframe()
             if((keyframe || null) !== null) {
@@ -31,12 +31,14 @@ export class AnimationCubeValues {
 
         let isSelected = keyframe !== undefined
         this.keyframeSelectionRequired.prop("disabled", !isSelected).toggleClass("is-active", isSelected)
+    
+        this.updateSelected()
     }
 
     updateSelected() {
         let selected = this.raytracer.oneSelected()
 
-        if(selected === null && this.getActiveKeyframe() === null) {
+        if(selected === null || this.getActiveKeyframe() === undefined) {
             this.position.setInternalValue(undefined)
             this.rotation.setInternalValue(undefined)
         }
