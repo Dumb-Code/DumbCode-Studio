@@ -296,14 +296,31 @@ function getElementFromCube(cube, type) {
 
 let pressedKeys = new Set();
 let keyListeners = new Map()
+let keydown = key => {
+    pressedKeys.add(key)
+    keyListeners.get(key)?.forEach(func => func(true))
+}
+let keyup = key => {
+    pressedKeys.delete(key)
+    keyListeners.get(key)?.forEach(func => func(false))
+}
+let mouseMoveKey = (key, pressed) => {
+    if(pressed !== pressedKeys.has(key)) {
+        if(pressed) {
+            keydown(key)
+        } else {
+            keyup(key)
+        }
+    }
+}
+let directKeys = ["Alt", "Control", "Shift"]
 $(document)
-    .keydown(e => {
-        pressedKeys.add(e.key)
-        keyListeners.get(e.key)?.forEach(func => func(true))
-    })
-    .keyup(e => {
-        pressedKeys.delete(e.key)
-        keyListeners.get(e.key)?.forEach(func => func(false))
+    .keydown(e => directKeys.includes(e.key) ? 0 : keydown(e.key))
+    .keyup(e => directKeys.includes(e.key) ? 0 : keyup(e.key))
+    .mousemove(e => {
+        mouseMoveKey(directKeys[0], e.altKey)
+        mouseMoveKey(directKeys[1], e.ctrlKey)
+        mouseMoveKey(directKeys[2], e.shiftKey)
     })
 export function isKeyDown(key) {
     return pressedKeys.has(key)
