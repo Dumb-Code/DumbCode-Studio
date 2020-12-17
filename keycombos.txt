@@ -1,3 +1,11 @@
 -- Delete
 Delete: Deletes only the selected cube.
 Ctrl + Delete: Deletes the selected cube + children
+Ctrl + C: Copies cubes/field values
+Ctrl + V: pastes cubes/field values
+Ctrl + Z: Undo
+Ctrl + Y: Redo
+Shift + Click + Drag: Drag Select
+Ctrl + Click:
+  - In Viewer, drags camera around
+  - In Cube List: Toggles Visibility or Lock for parent and child cubes
