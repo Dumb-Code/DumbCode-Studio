@@ -118,6 +118,9 @@ export class LinkedElement {
         if(this.array) {
             elem.focusin(e => this.indexSelected = parseInt(e.target.getAttribute('axis')))
             elem.on('input', e => {
+                if(this.rawValue == undefined) {
+                    return
+                }
                 let arr = this.rawValue.splice(0)
                 let idx = parseInt(e.target.getAttribute('axis'))
                 arr[idx] = this.parseNum ? parseFloat(e.target.value) : e.target.value
