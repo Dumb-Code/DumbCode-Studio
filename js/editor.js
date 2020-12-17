@@ -1,4 +1,4 @@
-import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, Quaternion } from "./three.js";
+import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, Quaternion, Group } from "./three.js";
 import { DinosaurDisplay, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
@@ -53,9 +53,8 @@ let filesPage, modelingStudio, textureStudio, animationStudio
 
 async function init() {
     //Set up the renderer
-    let renderer = new WebGLRenderer({
-        alpha: true
-    });
+    var renderer = new WebGLRenderer( { alpha: true } );
+    renderer.autoClear = false;
     renderer.setClearColor(0x000000, 0);
     renderer.setSize(1, 1);
 
@@ -64,7 +63,9 @@ async function init() {
     camera.position.set(-3.745472848477101, 2.4616311452213426, -4.53288230701089)
     camera.lookAt(0, 0, 0)
 
-    display.setup(renderer, camera, createScene())
+    let onTop = new Scene()
+    onTop.background = null;
+    display.setup(renderer, camera, createScene(), onTop)
 
     //Set up the controls
     controls = new OrbitControls(camera, renderer.domElement);
@@ -89,6 +90,11 @@ async function init() {
         transformControls.space = "local"
         return transformControls
     }
+
+    display.renderTopGroup = new Group()
+    display.renderTopGroup.renderOrder = 999
+    display.renderTopGroup.onBeforeRender = function( renderer ) { renderer.clearDepth(); };
+    display.onTopScene.add(display.renderTopGroup)
 }
 
 window.onModulesFinished = async() => {

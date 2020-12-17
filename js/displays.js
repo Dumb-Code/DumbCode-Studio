@@ -6,12 +6,12 @@ export class DinosaurDisplay {
         this.allCubes = []
     }
 
-    setup(renderer, camera, scene) {
+    setup(renderer, camera, scene, onTopScene) {
         this.renderer = renderer
         this.camera = camera
         this.scene = scene
+        this.onTopScene = onTopScene
                
-
         let gridSquares = 7
         //Set up the grid
         this.gridGroup = new Group()
@@ -92,7 +92,10 @@ export class DinosaurDisplay {
     }
 
     render() {
+        this.renderer.clear()
         this.renderer.render(this.scene, this.camera);
+        this.renderer.clearDepth()
+        this.renderer.render(this.onTopScene, this.camera);
     }
 }
 

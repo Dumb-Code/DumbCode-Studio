@@ -19,6 +19,7 @@ export class AnimationStudio {
         let dom  = $(domElement)
         this.raytracer = raytracer
         this.pth = pth
+    
         this.group = new Group()
 
         this.selectedRequired = dom.find('.editor-require-selected')
@@ -177,13 +178,13 @@ export class AnimationStudio {
                 this.positionCache = null
             }
         }
-        this.display.scene.add(this.group)
+        this.display.renderTopGroup.add(this.group)
         this.transformControls.enableReason('tab')
         this.progressionCanvas.onSwitchedTo()
     }
     
     setUnactive() {
-        this.display.scene.remove(this.group)
+        this.display.renderTopGroup.remove(this.group)
         this.transformControls.disableReason('tab')
     }
 

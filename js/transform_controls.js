@@ -769,16 +769,16 @@ var TransformControlsGizmo = function () {
 	// shared materials
 
 	var gizmoMaterial = new MeshBasicMaterial( {
-		depthTest: false,
-		depthWrite: false,
+		// depthTest: false,
+		// depthWrite: false,
 		transparent: true,
 		side: DoubleSide,
 		fog: false
 	} );
 
 	var gizmoLineMaterial = new LineBasicMaterial( {
-		depthTest: false,
-		depthWrite: false,
+		// depthTest: false,
+		// depthWrite: false,
 		transparent: true,
 		linewidth: 1,
 		fog: false

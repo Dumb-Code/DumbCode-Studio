@@ -94,13 +94,13 @@ export class ModelingStudio {
     setActive() {
         window.studioWindowResized()
         this.cubeValues.updateCubeValues()
-        this.display.scene.add(this.group)
+        this.display.renderTopGroup.add(this.group)
         this.transformControls.enableReason('tab')
         this.dragSelection.onActive()
     }
     
     setUnactive() {
-        this.display.scene.remove(this.group)
+        this.display.renderTopGroup.remove(this.group)
         this.transformControls.disableReason('tab')
         this.dragSelection.onInactive()
     }
