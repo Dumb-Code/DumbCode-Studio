@@ -15,6 +15,8 @@ export class StudioPanels {
         this.controlsDivider = dom.find("#controls-divider")
         this.commandDivider = dom.find("#command-divider")
 
+        this.middleSplit = false
+
         this.commandsArea = 90
         this.rightArea = 320
         this.topArea = 400
@@ -53,16 +55,15 @@ export class StudioPanels {
 
             if(this.topPanel.popped !== this.bottomPanel.popped) {
                 if(this.topPanel.popped) {
-                    this.bottomPanelDom.css('grid-area', 'right_top / right_top / right_top / right_top')
-                    this.topArea = 0
+                    this.bottomPanelDom.css('grid-area', 'right_top / right_top / right_bottom / right_bottom')
                 } else {
-                    this.topPanelDom.css('grid-area', 'right_top / right_top / right_top / right_top')
-                    this.topArea = 0
+                    this.topPanelDom.css('grid-area', 'right_top / right_top / right_bottom / right_bottom')
                 }
+                this.middleSplit = true
             } else {
                 this.topPanelDom.css('grid-area', 'right_top / right_top / right_top / right_top')
                 this.bottomPanelDom.css('grid-area', 'right_bottom / right_bottom / right_bottom / right_bottom')
-                this.topArea = mainArea.clientHeight / 2
+                this.middleSplit = false
             }
 
         }
@@ -75,7 +76,7 @@ export class StudioPanels {
         this.commandDivider.css('top', `${mainArea.offsetTop + this.commandsArea - 4}px`).css('width', `${mainArea.clientWidth-this.rightArea}px`)
         
         this.rightDivider.css('display', this.rightArea === 0 ? 'none' : 'unset')
-        this.controlsDivider.css('display', this.topArea === 0 ? 'none' : 'unset')
+        this.controlsDivider.css('display', this.middleSplit ? 'none' : 'unset')
         this.commandDivider.css('display', this.commandsArea === 0 ? 'none' : 'unset')
 
         this.dom
