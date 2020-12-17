@@ -163,7 +163,7 @@ export class Gumball {
                 cube.updateRotation(decomposeEuler.toArray().map(v => v * 180 / Math.PI))
 
                 if(this.selectedRotation.value === 'point')  {
-                    let diff = decomposePosition.copy(data.threePos).sub(this.transformAnchor.position).multiply(decomposePosition2.set(-16, -16, 16))
+                    let diff = decomposePosition.copy(data.threePos).sub(this.transformAnchor.position).multiply(decomposePosition2.set(16, 16, 16))
                     let rotatedPos = decomposePosition2.copy(diff).applyAxisAngle(axis, e.rotationAngle)
                     let rotatedDiff = rotatedPos.sub(diff)
                     cube.updatePosition(rotatedDiff.toArray().map((v, i) => v + data.position[i]))
