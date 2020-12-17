@@ -105,7 +105,10 @@ export class Gumball {
         this.spaceMode = new LinkedSelectableList(dom.find('.object-space-tool'), true, "is-info").onchange(e =>  this.transformControls.space = e.value)
         this.spaceMode.value = "local"
 
-        this.selectedTranslate = new LinkedSelectableList(dom.find('.object-translate-type-entry'), true, "is-info").onchange(() => this.toolTransformType.value = translateKey)
+        this.selectedTranslate = new LinkedSelectableList(dom.find('.object-translate-type-entry'), true, "is-info").onchange(() => {
+            this.toolTransformType.value = translateKey
+            this.moveGumballToSelected()
+        })
         this.selectedRotation = new LinkedSelectableList(dom.find('.object-rotate-type-entry'), true, "is-info").onchange(() => this.toolTransformType.value = rotateKey)
 
         this.gumballAutomaticallyMove = dom.find('.gumball-automove-checkbox')
