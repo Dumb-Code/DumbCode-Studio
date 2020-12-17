@@ -5,6 +5,7 @@ export class LockedCubes {
         this.pth = studio.pth
 
         let transformControls  = studio.transformControls 
+        this.raytracer = studio.raytracer
 
         this.lockedChildrenCache = new Map()
         this.movingChildrenCache = new Set()
@@ -52,7 +53,7 @@ export class LockedCubes {
         this.movingChildrenCache.clear()
         this.lockedCubes.forEach(cubeName => {
             let cube = this.pth.model.cubeMap.get(cubeName)
-            if(!cube) {
+            if(!cube || this.raytracer.isCubeSelected(cube)) {
                 return
             } 
             this.traverseUnlockedCubes(cube)
