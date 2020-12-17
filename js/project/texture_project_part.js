@@ -51,8 +51,9 @@ export class TextureProjectPart {
             let img = document.createElement("img")
             return new Promise(async(resolve) => {
                 img.src = await readFile(file, (reader, f) => reader.readAsDataURL(f))
-                img.onload = () => { 
-                    resolve({ name: file.name, img })
+                img.onload = () => {
+                    let name = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name.length
+                    resolve({ name, img })
                     img.onload = null
                  }
             })
