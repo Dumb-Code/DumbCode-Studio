@@ -1,0 +1,3 @@
+-- Delete
+Delete: Deletes only the selected cube.
+Ctrl + Delete: Deletes the selected cube + children
