@@ -117,9 +117,16 @@ export function createScene() {
 
     //Set up lighting
     scene.add(new HemisphereLight());
+
     let dirLight = new DirectionalLight()
-    dirLight.position.set(-1.25, 1.5, 1)
-    dirLight.target.position.set(1, -1, -1)
+    dirLight.position.set(-1.25, 1.5, 0)
+    dirLight.target.position.set(0, 0, 0)
+    scene.add(dirLight);
+
+    dirLight = new DirectionalLight()
+    dirLight.intensity = 0.75;
+    dirLight.position.set(1.25, -1.5, 0)
+    dirLight.target.position.set(0, 0, 0)
     scene.add(dirLight);
 
     return scene
