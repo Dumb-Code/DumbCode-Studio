@@ -13,11 +13,12 @@ export class Gumball {
             if(selected === null) {
                 return
             }
-            startingRot.x = selected.rotation.x
-            startingRot.y = selected.rotation.y
-            startingRot.z = selected.rotation.z
 
-            startingPos.copy(selected.position)
+            startingRot.x = selected.parent.rotation.x
+            startingRot.y = selected.parent.rotation.y
+            startingRot.z = selected.parent.rotation.z
+
+            startingPos.copy(selected.parent.position)
         })
         this.transformControls.addEventListener('studioRotate', e => {
             let selected = this.raytracer.oneSelected()
