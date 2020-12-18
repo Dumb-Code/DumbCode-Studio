@@ -63,8 +63,8 @@ async function init() {
 
     //Set up the camera
     let camera = new PerspectiveCamera( 65, 1, 0.1, 700 )
-    camera.position.set(-3.745472848477101, 2.4616311452213426, -4.53288230701089)
-    camera.lookAt(0.5, 0, 0)
+    camera.position.set(0.45, 1.5, -4.5)
+    camera.lookAt(0.5, 1.5, 0.5)
 
     let onTop = new Scene()
     onTop.background = null;
@@ -82,6 +82,28 @@ async function init() {
     $(document)
     .focusin(e => e.target.nodeName == "INPUT" ? controls.enableKeys = false : 0)
     .focusout(e => e.target.nodeName == "INPUT" ? controls.enableKeys = true : 0)
+    .keydown(e => {
+        if(!e.ctrlKey) {
+            const angle = 0.0872665 //5 degrees
+            switch (e.keyCode) {
+                case 98: //num2
+                    controls.rotateUp(-angle)
+                    break;
+                case 100: //num4
+                    controls.rotateLeft(angle)
+                    break;
+                case 102: //num6
+                    controls.rotateLeft(-angle)
+                    break;
+                case 104: //num8
+                    controls.rotateUp(angle)
+                    break;
+                default:
+                    return
+            }
+            controls.update()
+        }
+    })
 
     directionalIndecators = new DirectionalIndecators(display, controls)
 
@@ -93,7 +115,7 @@ async function init() {
             controls.enabled = !e.value;
         });
         transformControls.addEventListener('axis-changed', e => {
-            let textDiv = document.getElementById("editor-mouseover")
+            let textDiv = document.getElemenById("editor-mouseover")
             if(e.value === null) {
                 textDiv.style.display = "block"
                 raytracer.disableRaycast = false

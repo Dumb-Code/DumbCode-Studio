@@ -50,6 +50,35 @@ export class DirectionalIndecators {
         this.createCicleMesh(0, 0,  1, 0x00007F)
         this.createLine(Math.PI/2, 0, 0x000057)
 
+        $(document).keydown(e => {
+            let key = e.keyCode
+            if(key >= 96 && key <= 105) {
+                let num = key - 96
+                if(e.ctrlKey) {
+                    switch (num) {
+                        case 2:
+                            this.startTransition(0, -1, 0)
+                            break;
+                        case 4:
+                            this.startTransition(-1, 0, 0)
+                            break;
+                        case 5:
+                            this.startTransition(0, 0, 1)
+                            break;
+                        case 6:
+                            this.startTransition(1, 0, 0)
+                            break;
+                        case 8:
+                            this.startTransition(0, 1, 0)
+                            break;
+                    }
+                } else if(num == 5) {
+                    this.startTransition(0, 0, -1)
+                }
+            }
+            e.preventDefault()
+        })
+
     }
 
     domFinished() {
@@ -64,19 +93,23 @@ export class DirectionalIndecators {
                 if(_raycastArray.length != 0) {
                     let pos = _raycastArray[_raycastArray.length-1].object.position
                     
-                    startPosition.copy(this.displays.camera.position)
-                    startTarget.copy(this.controls.target)
-
-                    let y = pos.y > 0 ? 0 : 1.5
-
-                    transitionPosition.copy(pos).multiplyScalar(-10).add(_vec3.set(0.5, y, 0.5)).sub(startPosition)
-                    transitionTarget.set(0.5, y, 0.5).sub(startTarget)
-
-                    transitionClock.start()
+                    this.startTransition(-pos.x*2, -pos.y*2, -pos.z*2)
 
                 }
             }
         }).find('canvas')
+    }
+
+    startTransition(x, y, z) {
+        startPosition.copy(this.displays.camera.position)
+        startTarget.copy(this.controls.target)
+
+        let yTarget = y < 0 ? 0 : 1.5
+
+        transitionPosition.set(x, y, z).multiplyScalar(5).add(_vec3.set(0.5, yTarget, 0.5)).sub(startPosition)
+        transitionTarget.set(0.5, yTarget, 0.5).sub(startTarget)
+
+        transitionClock.start()
     }
 
     createCicleMesh(x, y, z, color) {

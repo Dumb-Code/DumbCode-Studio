@@ -313,6 +313,10 @@ var OrbitControls = function ( object, domElement ) {
 
 	}
 
+	//DUMBCODE: expose the rotate methods
+	this.rotateLeft = rotateLeft
+	this.rotateUp = rotateUp
+
 	var panLeft = function () {
 
 		var v = new Vector3();

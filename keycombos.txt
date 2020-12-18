@@ -9,3 +9,14 @@ Ctrl + Click:
   - In Viewer, drags camera around
   - In Cube List: Toggles Visibility or Lock for parent and child cubes
 Ctrl + Drag Cube: Doesn't keep the cube in the same place. Instead only keeps locked cubes in the same place
+
+Numpad 5: Front view
+Ctrl + Numpad 5: Back view
+Ctrl + Numpad 4: Left view
+Ctrl + Numpad 6: Right view
+Ctrl + Numpad 8: Top view
+Ctrl + Numpad 2: Bottom view
+Numpad 4: Rotate view left
+Numpad 6: Rotate view right
+Numpad 8: Rotate view up
+Numpad 2: Rotate view down
