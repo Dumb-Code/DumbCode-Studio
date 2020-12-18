@@ -48,10 +48,11 @@ export class LockedCubes {
         return this.lockedCubes.has(cube.name)
     }
 
-    createLockedCubesCache() {
+    createLockedCubesCache(lockedCubes = this.lockedCubes) {
+        console.log(lockedCubes)
         this.lockedChildrenCache.clear()
         this.movingChildrenCache.clear()
-        this.lockedCubes.forEach(cubeName => {
+        lockedCubes.forEach(cubeName => {
             let cube = this.pth.model.cubeMap.get(cubeName)
             if(!cube || this.raytracer.isCubeSelected(cube)) {
                 return
@@ -71,12 +72,14 @@ export class LockedCubes {
         }
     }
 
-    reconstructLockedCubes() {
+    reconstructLockedCubes(movingCubes = true) {
         this.pth.model.modelCache.updateMatrixWorld(true)
 
         //Moving cubes are cubes that SHOULD move but at some point a parent is locked preventing them from moving
         let movingCubesCache = new Map()
-        this.movingChildrenCache.forEach(cube => this.addToHierarchyMap(movingCubesCache, cube.hierarchyLevel, new CubeLocker(cube)))
+        if(movingCubes === true) {
+            this.movingChildrenCache.forEach(cube => this.addToHierarchyMap(movingCubesCache, cube.hierarchyLevel, new CubeLocker(cube)))
+        }
 
         let size = Math.max(Math.max(...this.lockedChildrenCache.keys()), Math.max(...movingCubesCache.keys()))
         

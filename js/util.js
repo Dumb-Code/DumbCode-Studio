@@ -545,10 +545,10 @@ export class DraggableElementList {
                 e.preventDefault()
                 e.stopPropagation()
             }
-            element.ondrop = function() {
+            element.ondrop = function(e) {
                 let drop = this.getAttribute("drag-state")
                 if(draggedData !== null && drop !== undefined) {
-                    callback(drop, draggedData, dataGetter())
+                    callback(drop, draggedData, dataGetter(), e)
                 }
                 this.removeAttribute("drag-state")
                 draggedData = null

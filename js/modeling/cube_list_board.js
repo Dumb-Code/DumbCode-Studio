@@ -11,8 +11,8 @@ export class CubeListBoard {
         this.previousDragElement
         this.elementMap = new Map()
 
-        this.dragElementList = new DraggableElementList(true, (drop, draggedCube, droppedOnto) => {
-            lockedCubes.createLockedCubesCache()
+        this.dragElementList = new DraggableElementList(true, (drop, draggedCube, droppedOnto, e) => {
+            lockedCubes.createLockedCubesCache(e.ctrlKey ? undefined : [draggedCube.name])
             draggedCube.parent.deleteChild(draggedCube, true)
             if(drop === "on") {
                 droppedOnto.addChild(draggedCube)
@@ -24,7 +24,7 @@ export class CubeListBoard {
                 droppedOnto.parent.getChildren().splice(index, 0, draggedCube)
                 droppedOnto.parent.onChildrenChange(false)
             }
-            lockedCubes.reconstructLockedCubes()
+            lockedCubes.reconstructLockedCubes(e.ctrlKey)
         })
 
         document.body.addEventListener('dragover', e => {
@@ -37,10 +37,10 @@ export class CubeListBoard {
         document.body.addEventListener('drop', e => {
             let cube = this.dragElementList.getDraggedData()
             if(cube !== null) {
-                this.lockedCubes.createLockedCubesCache()
+                this.lockedCubes.createLockedCubesCache(e.ctrlKey ? undefined : [cube.name])
                 cube.parent.deleteChild(cube, true)
                 pth.model.addChild(cube)
-                this.lockedCubes.reconstructLockedCubes()
+                this.lockedCubes.reconstructLockedCubes(e.ctrlKey)
                 e.preventDefault()
             }
         })
