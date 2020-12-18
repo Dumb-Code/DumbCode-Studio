@@ -1,4 +1,3 @@
-import { CubePointTracker } from "./modeling/cube_point_tracker.js"
 import { BackSide, BoxBufferGeometry, BufferGeometry, CircleGeometry, Clock, Color, DirectionalLight, DoubleSide, Euler, Float32BufferAttribute, Group, HemisphereLight, Line, LineBasicMaterial, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, OrthographicCamera, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3 } from "./three.js"
 
 const width = 75
@@ -71,12 +70,17 @@ export class DirectionalIndecators {
                         case 8:
                             this.startTransition(0, 1, 0)
                             break;
+                        default:
+                            return
                     }
                 } else if(num == 5) {
                     this.startTransition(0, 0, -1)
+                } else {
+                    return
                 }
+                e.preventDefault()
+                e.stopPropergation()
             }
-            e.preventDefault()
         })
 
     }

@@ -102,6 +102,7 @@ async function init() {
                     return
             }
             controls.update()
+            e.stopPropagation()
         }
     })
 
