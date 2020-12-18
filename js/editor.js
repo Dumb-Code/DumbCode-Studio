@@ -54,8 +54,6 @@ let directionalIndecators
 let activeTab
 let filesPage, modelingStudio, textureStudio, animationStudio
 
-
-
 async function init() {
     //Set up the renderer
     var renderer = new WebGLRenderer( { alpha: true } );
@@ -118,6 +116,13 @@ window.onModulesFinished = async() => {
     tabEventTypes.forEach(type => document.addEventListener(type, event => activeTab.dispatchEvent( { type, event } )))
 
     directionalIndecators.domFinished()
+
+    $('.dropdown:not(.is-hoverable) .dropdown-menu').get().forEach(t => $(t).click(e => {
+        if(t.parentNode.classList.contains('is-active')) {
+            e.stopPropagation()
+        }
+    }))
+    
 
     frame()
 }

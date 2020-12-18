@@ -128,6 +128,14 @@
    pointer-events: none;
 }
 
+#directional-indicators {
+   display: none;
+}
+
+.is-modeling ~ #directional-indicators, .is-animation ~ #directional-indicators, .is-texture ~ #directional-indicators {
+   display: unset;
+}
+
 #directional-indicators .dark {
    color: #424242;
 }
