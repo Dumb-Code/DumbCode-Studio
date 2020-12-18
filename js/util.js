@@ -515,9 +515,12 @@ export class DraggableElementList {
 
         this.addElement = (element, dataGetter) => {
             element.ondragstart = () => {
-                draggedData = dataGetter() 
+                draggedData = dataGetter() || false
             }
             element.ondragover = function(e) {
+                if(draggedData == null) {
+                    return
+                }
                 let rect = this.getBoundingClientRect()
                 let yPerc = (e.clientY - rect.top) / rect.height
         
@@ -540,6 +543,7 @@ export class DraggableElementList {
                 }
 
                 e.preventDefault()
+                e.stopPropagation()
             }
             element.ondrop = function() {
                 let drop = this.getAttribute("drag-state")

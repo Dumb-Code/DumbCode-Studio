@@ -27,22 +27,24 @@ export class CubeListBoard {
             lockedCubes.reconstructLockedCubes()
         })
 
-        this.cubeList.parentNode.ondragover = e => {
-            if(e.target == this.cubeList.parentNode) {
+        document.body.addEventListener('dragover', e => {
+            if(this.dragElementList.getDraggedData() != null) {
                 this.dragElementList.removePreviousState()
                 e.preventDefault()
             }
-        }
-        this.cubeList.parentNode.ondrop = e => {
+        })
+
+        document.body.addEventListener('drop', e => {
             let cube = this.dragElementList.getDraggedData()
-            if(e.target == this.cubeList.parentNode && cube !== undefined) {
+            if(cube !== null) {
                 this.lockedCubes.createLockedCubesCache()
                 cube.parent.deleteChild(cube, true)
                 pth.model.addChild(cube)
                 this.lockedCubes.reconstructLockedCubes()
+                e.preventDefault()
             }
-        }
-
+        })
+        
         this.cubeList.onclick = e => {
             if(e.target.nodeName == 'UL') {
                 this.raytracer.deselectAll()
