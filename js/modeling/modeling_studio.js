@@ -87,6 +87,7 @@ export class ModelingStudio {
         this.display.render()
         this.dragSelection.onFrame()
         this.pth.modelMementoTraverser.onFrame()
+        this.rotationPointMarkers.onFrame()
     }
 
     cubeHierarchyChanged() {

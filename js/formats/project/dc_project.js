@@ -39,7 +39,7 @@ export class DcProject {//._files, this._modeling, this._texture, this._animatio
         highlight.emissive.setHex( 0xFF0000 )
         
         let selected = material.clone()
-        selected.emissive.setHex( 0x0000FF )
+        selected.emissive.setHex( 0x000066 )
     
         return { normal, highlight, selected }
     }

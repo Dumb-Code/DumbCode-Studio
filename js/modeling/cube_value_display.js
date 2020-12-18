@@ -40,7 +40,6 @@ export class CubeValueDisplay {
             this.lockedCubes.createLockedCubesCache()
             getCube()?.updatePosition(e.value)
             this.lockedCubes.reconstructLockedCubes()
-            studio.rotationPointMarkers.updateSpheres()
         })
         this.offsets = new LinkedElement(dom.find('.input-offset .input-part')).onchange(e => getCube()?.updateOffset(e.value))
         this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow .input-part')).onchange(e => getCube()?.updateCubeGrow(e.value))
@@ -50,7 +49,6 @@ export class CubeValueDisplay {
             this.lockedCubes.createLockedCubesCache()
             getCube()?.updateRotation(e.value)
             this.lockedCubes.reconstructLockedCubes()
-            studio.rotationPointMarkers.updateSpheres()
         })
 
         studio.transformControls.addEventListener('objectChange', () => this.updateCubeValues())
@@ -72,7 +70,6 @@ export class CubeValueDisplay {
             this.lockedCubes.createLockedCubesCache()
             cube.updatePosition(values, visualOnly)
             this.lockedCubes.reconstructLockedCubes()
-            this.rotationPointMarkers.updateSpheres()
         }
         this.createArrayCommand(root, cube => cube.rotationPoint, posChanged, xyzAxis, 'pos')
         this.createArrayCommand(root, cube => cube.rotationPoint, posChanged, xyzAxis, 'posworld', false, (mode, axisValues, cube) => {
@@ -99,7 +96,6 @@ export class CubeValueDisplay {
             this.lockedCubes.createLockedCubesCache()
             cube.updateRotation(values, visualOnly)
             this.lockedCubes.reconstructLockedCubes()
-            this.rotationPointMarkers.updateSpheres()
         }
         this.createArrayCommand(root, cube => cube.rotation, rotChanged, xyzAxis, 'rot')
         this.createArrayCommand(root, cube => cube.rotation, rotChanged, xyzAxis, 'rotworld', false, (mode, axisValues, cube) => {
@@ -205,7 +201,6 @@ export class CubeValueDisplay {
             this.commandResultChangeCache.cube.resetVisuals()
             this.commandResultChangeCache.cube.cubeGroup.updateMatrixWorld(true)
             this.commandResultChangeCache = null
-            this.rotationPointMarkers.updateSpheres()
         }
     }
 

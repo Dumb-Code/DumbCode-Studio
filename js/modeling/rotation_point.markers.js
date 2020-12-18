@@ -1,35 +1,75 @@
-import { Group, SphereGeometry, MeshBasicMaterial, Mesh } from "../three.js"
+import { Group, SphereGeometry, MeshBasicMaterial, Mesh, Vector3, EdgesGeometry, BoxBufferGeometry, LineBasicMaterial, Line, LineSegments, Matrix4 } from "../three.js"
+
+const tempPos = new Vector3()
+
+const bufferBoxGeometry = new BoxBufferGeometry()
+bufferBoxGeometry.applyMatrix(new Matrix4().makeTranslation(0.5, 0.5, 0.5))
 
 export class RotationPointMarkers {
 
     constructor(studio) {
+        this.display = studio.display
         this.raytracer = studio.raytracer
-        studio.group.add(this.rotationPointSpheres = new Group())
-        studio.transformControls.addEventListener('objectChange', () => this.updateSpheres())
+        this.spheres = []
+        this.outlines = []
+        studio.group.add(this.group = new Group())
+        studio.transformControls.addEventListener('objectChange', () => this.onFrame())
     }
 
-    updateSpheres() {
-        this.rotationPointSpheres.children.forEach(child => {
-            if(child.linkedUpObject !== undefined) {
-                child.position.setFromMatrixPosition(child.linkedUpObject.matrixWorld)
+    onFrame() {
+        this.spheres.forEach(sphere => {
+            if(sphere.linkedUpObject !== undefined) {
+                sphere.position.setFromMatrixPosition(sphere.linkedUpObject.matrixWorld)
+            }
+            let eyeDistance = sphere.position.distanceTo(tempPos.setFromMatrixPosition(this.display.camera.matrixWorld))
+            sphere.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance / 4 )
+        })
+        
+        this.outlines.forEach(outline => {
+            if(outline.linkedUpObject !== undefined) {
+                outline.linkedUpObject.matrixWorld.decompose(outline.position, outline.quaternion, tempPos)
+                outline.rotation.setFromQuaternion(outline.quaternion)
+                outline.scale.copy(outline.linkedUpObject.scale).divideScalar(16)
             }
         })
     }
-
+ 
     selectChanged() {
-        this.rotationPointSpheres.remove(...this.rotationPointSpheres.children)
+        this.group.remove(...this.spheres)
+        this.group.remove(...this.outlines)
+
+        this.spheres.length = 0
+        this.outlines.length = 0
         this.raytracer.selectedSet.forEach(cube => {
             let sph = this.createRotationPointObject()
-            this.rotationPointSpheres.add(sph)
+            let out = this.createOutlineObject()
+
+            this.group.add(sph)
+            this.spheres.push(sph)
+
+            this.group.add(out)
+            this.outlines.push(out)
+
             sph.linkedUpObject = cube.tabulaCube.cubeGroup
+            out.linkedUpObject = cube.tabulaCube.cubeMesh
+
             sph.position.setFromMatrixPosition(cube.tabulaCube.cubeGroup.matrixWorld)
+            out.position.setFromMatrixPosition(cube.tabulaCube.cubeGroup.matrixWorld)
         })
+
+        this.onFrame()
     }
 
     createRotationPointObject() {
         let geometry = new SphereGeometry(1/32, 32, 32);
         let material = new MeshBasicMaterial({ color: 0x0624cf});
         return new Mesh(geometry, material);
+    }
+
+    createOutlineObject() {
+        let gometry = new EdgesGeometry(bufferBoxGeometry)
+        let material = new LineBasicMaterial({ color: 0x0624cf })
+        return new LineSegments(gometry, material)
     }
 
 }
