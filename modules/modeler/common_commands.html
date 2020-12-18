@@ -1,6 +1,55 @@
-<div class="has-background-black-ter has-text-gray-light is-narrow">
-    <div class="icon is-medium saved-command tooltip" command="snap" data-tooltip="Vertex Snapping">
-        <i class="fas fa-vector-square"></i>
+<style>
+    .command-button {
+        border-left: none;
+        border-top: none;
+        border-bottom: none;
+        color: rgb(122, 122, 122);
+        border-right: 1px solid black;
+    }
+    .command-button:hover {
+        background-color: rgb(29, 25, 25);
+    }
+    .dropdown-command {
+        margin-left: 34px;
+        margin-top: -32px;
+    }
+    .tooltip-border {
+        border: 1px solid black;
+    }
+    .tooltip-text {
+        font-size: 12px;
+        margin: 0px;
+    }
+</style>
+
+<div class="dropdown is-hoverable">
+    <div class="dropdown-trigger">
+        <button class="icon is-medium saved-command has-background-black-ter command-button" command="snap" aria-haspopup="true" aria-controls="mirror-dropdown">
+            <i class="fas fa-vector-square"></i>
+        </button>
     </div>
-    
+    <div class="dropdown-menu dropdown-command" id="mirror-dropdown" role="menu">
+        <div class="dropdown-content has-background-black-ter tooltip-border py-1">
+            <div class="dropdown-item has-background-black-ter has-text-light tooltip-text">
+                <p><strong class="has-text-info">SNAP</strong></p>
+                <p>Allows you to move cubes relative to source and target vertices.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="dropdown is-hoverable">
+    <div class="dropdown-trigger">
+        <button class="icon is-medium saved-command has-background-black-ter command-button" command="copypaste" aria-haspopup="true" aria-controls="mirror-dropdown">
+            <i class="far fa-clone"></i>
+        </button>
+    </div>
+    <div class="dropdown-menu dropdown-command" id="mirror-dropdown" role="menu">
+        <div class="dropdown-content has-background-black-ter tooltip-border py-1">
+            <div class="dropdown-item has-background-black-ter has-text-light tooltip-text">
+                <p><strong class="has-text-info">COPYPASTE</strong></p>
+                <p>Copies and pastes the selected cubes and selects the newly created cubes.</p>
+            </div>
+        </div>
+    </div>
 </div>
