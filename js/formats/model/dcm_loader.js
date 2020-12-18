@@ -242,7 +242,7 @@ export class DCMCube {
     }
 
     updateCubePosition( { offset = this.offset, cubeGrow = this.cubeGrow } = {} ) {
-        this.cubeMesh.position.set(offset[0] - cubeGrow[0], offset[1] - cubeGrow[1], offset[2] - cubeGrow[1] )
+        this.cubeMesh.position.set(offset[0] - cubeGrow[0], offset[1] - cubeGrow[1], offset[2] - cubeGrow[2] )
     }
 
     updatePositionVisuals(position = this.rotationPoint) {
