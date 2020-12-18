@@ -7,7 +7,7 @@ import { PlayState, ByteBuffer } from "./animations.js";
 const display = new DinosaurDisplay()
 
 const ext = "Dumb-Code/ProjectNublar"
-const canvasContainer = document.getElementById("display-div");
+const canvasContainer = document.querySelector(".display-div");
 const animationSelectionNode = document.getElementById("animation-select-controller");
 
 const name2Animation = new Map()

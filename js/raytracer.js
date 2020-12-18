@@ -20,7 +20,7 @@ function onMouseMove( event ) {
 }
 
 function setMouseFromPoint(x, y, updateOnDiv) {
-    let div = $('.tab-area.is-active #display-div').get(0)
+    let div = $('.tab-area.is-active .display-div').get(0)
     mouse.set(-5, -5)
     if(div !== undefined) {
         let rect = div.getBoundingClientRect()

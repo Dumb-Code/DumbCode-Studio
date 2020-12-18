@@ -185,7 +185,7 @@ html {
 }
 
 
-#display-div canvas {
+.display-div canvas {
    display: block;
 }
 

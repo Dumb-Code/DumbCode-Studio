@@ -148,7 +148,7 @@ function frame() {
         mainArea.classList.toggle("is-"+projectTabs.activeTab, true)
         activeTab = newTab
 
-        canvasContainer = $(activeTab.domElement).find("#display-div").get(0)
+        canvasContainer = $(activeTab.domElement).find(".display-div").get(0)
         if(canvasContainer !== undefined) {
             $(display.renderer.domElement).appendTo(canvasContainer)
         }

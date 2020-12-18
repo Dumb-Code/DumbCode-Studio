@@ -20,7 +20,7 @@ export class ModelingStudio {
     constructor(domElement, display, raytracer, orbitControls, renameCube, setCamera, pth) {
         this.domElement = domElement
         let dom = $(domElement)
-        this.canvasContainer = dom.find("#display-div").get(0)
+        this.canvasContainer = dom.find(".display-div").get(0)
         this.display = display
         this.pth = pth
         this.raytracer = raytracer

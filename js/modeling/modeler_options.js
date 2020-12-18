@@ -30,7 +30,7 @@ export class ModelerOptions {
             }
         })
 
-        let canvasContainer = dom.find('#display-div').get(0)
+        let canvasContainer = dom.find('.display-div').get(0)
         this.perspectiveFov = dom.find('.perspective-camera-fov')
         this.cameraMode = new LinkedSelectableList(dom.find('.select-camera-mode')).onchange(e => {
             let cam
