@@ -1,4 +1,4 @@
-import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material, BoxBufferGeometry, MeshBasicMaterial, Mesh, CylinderBufferGeometry, Matrix4 } from "./three.js";
+import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material, BoxBufferGeometry, MeshBasicMaterial, Mesh, CylinderBufferGeometry, Matrix4, MeshLambertMaterial } from "./three.js";
 
 const vector = new Vector3()
 
@@ -76,7 +76,7 @@ export class DinosaurDisplay {
         }
 
         let blockGeometry = new BoxBufferGeometry()
-        let blockMaterial = new MeshBasicMaterial({ color: 0x2251A9 })
+        let blockMaterial = new MeshLambertMaterial({ color: 0x2251A9 })
         this.blockElement = new Mesh(blockGeometry, blockMaterial)
         this.blockElement.position.set(0.5, -0.5001, 0.5)
         this.scene.add(this.blockElement)
