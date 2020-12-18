@@ -3,14 +3,16 @@ import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material, BoxBufferG
 export class DinosaurDisplay {
 
     constructor() {
-        this.allCubes = []
+        this.drawWidth = 1
+        this.drawHeight = 1
     }
 
-    setup(renderer, camera, scene, onTopScene) {
+    setup(renderer, camera, scene, onTopScene, directionalIndecators) {
         this.renderer = renderer
         this.camera = camera
         this.scene = scene
         this.onTopScene = onTopScene
+        this.directionalIndecators = directionalIndecators
                
         let gridSquares = 7
         //Set up the grid
@@ -78,6 +80,12 @@ export class DinosaurDisplay {
         this.scene.add(this.blockElement)
     }
 
+    setSize(width, height) {
+        this.drawWidth = width
+        this.drawHeight = height
+        this.renderer.setSize(width, height)
+    }
+
     /**
      * @param {Material} material 
      */
@@ -92,10 +100,15 @@ export class DinosaurDisplay {
     }
 
     render() {
-        this.renderer.clear()
         this.renderer.render(this.scene, this.camera);
-        this.renderer.clearDepth()
-        this.renderer.render(this.onTopScene, this.camera);
+        if(this.onTopScene) {
+            this.renderer.clearDepth()
+            this.renderer.render(this.onTopScene, this.camera);
+        }
+        
+        if(this.directionalIndecators) {
+            this.directionalIndecators.draw()
+        }
     }
 }
 

@@ -11,6 +11,7 @@ import { TextureStudio } from "./texture/texture_studio.js";
 import { DCMModel } from "./formats/model/dcm_loader.js";
 import { ProjectTabHandler } from "./project_tab_handler.js";
 import { fileUploadBox } from "./util.js";
+import { DirectionalIndecators } from "./directional_indicators.js";
 
 const major = 0
 const minor = 6
@@ -48,29 +49,40 @@ const raytracer = new Raytracer(display, pth)
 
 const projectTabs = new ProjectTabs()
 
+let directionalIndecators
+
 let activeTab
 let filesPage, modelingStudio, textureStudio, animationStudio
+
+
 
 async function init() {
     //Set up the renderer
     var renderer = new WebGLRenderer( { alpha: true } );
     renderer.autoClear = false;
     renderer.setClearColor(0x000000, 0);
-    renderer.setSize(1, 1);
+
 
     //Set up the camera
     let camera = new PerspectiveCamera( 65, 1, 0.1, 700 )
     camera.position.set(-3.745472848477101, 2.4616311452213426, -4.53288230701089)
-    camera.lookAt(0, 0, 0)
+    camera.lookAt(0.5, 0, 0)
 
     let onTop = new Scene()
     onTop.background = null;
-    display.setup(renderer, camera, createScene(), onTop)
 
     //Set up the controls
     controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0.5, 0, 0.5)
     controls.screenSpacePanning = true
-    controls.addEventListener('change', () => runFrame())
+    display.dontReRender = true
+    controls.addEventListener('change', () => display.dontReRender ? 0 : runFrame())
+    controls.update()
+    display.false = true
+
+    directionalIndecators = new DirectionalIndecators(display, controls)
+
+    display.setup(renderer, camera, createScene(), onTop, directionalIndecators)
 
     display.createTransformControls = () => {
         let transformControls = new TransformControls(camera, renderer.domElement)
@@ -92,8 +104,6 @@ async function init() {
     }
 
     display.renderTopGroup = new Group()
-    display.renderTopGroup.renderOrder = 999
-    display.renderTopGroup.onBeforeRender = function( renderer ) { renderer.clearDepth(); };
     display.onTopScene.add(display.renderTopGroup)
 }
 
@@ -106,6 +116,8 @@ window.onModulesFinished = async() => {
     pth.inititateTabs(filesPage, modelingStudio, textureStudio, animationStudio)
 
     tabEventTypes.forEach(type => document.addEventListener(type, event => activeTab.dispatchEvent( { type, event } )))
+
+    directionalIndecators.domFinished()
 
     frame()
 }
@@ -228,7 +240,7 @@ window.studioWindowResized = () => {
     let height = canvasContainer.clientHeight
     updateCamera(display.camera, width, height)
 
-    display.renderer.setSize( width, height );
+    display.setSize(width, height)
 }
 
 init()
