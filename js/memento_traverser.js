@@ -2,7 +2,7 @@ import { Clock } from "./three.js"
 
 export class MementoTraverser {
 
-    constructor( mementoCreator, { maxLimit = 50, timeTillCheck = 5, skipFrames = 10 } = {} ) {
+    constructor( mementoCreator, { maxLimit = 50, timeTillCheck = 2, skipFrames = 10 } = {} ) {
         this.mementoCreator = mementoCreator
         this.maxLimit = maxLimit
         this.timeTillCheck = timeTillCheck
