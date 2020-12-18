@@ -71,7 +71,8 @@ export class CubePointTracker {
             
             this.points.forEach(p => {
                 p.mesh.visible = true
-                tempPos.set(p.x*cube.dimension[0]/16, p.y*cube.dimension[1]/16, p.z*cube.dimension[2]/16).applyQuaternion(group.getWorldQuaternion(tempQuaterion))
+                let cg = cube.cubeGrow
+                tempPos.set(p.x*(cube.dimension[0]+2*cg[0])/16, p.y*(cube.dimension[1]+2*cg[1])/16, p.z*(cube.dimension[2]+2*cg[2])/16).applyQuaternion(group.getWorldQuaternion(tempQuaterion))
                 group.getWorldPosition(p.mesh.position).add(tempPos)
                 
                 let eyeDistance = p.mesh.position.distanceTo(tempPos.setFromMatrixPosition(this.display.camera.matrixWorld));
