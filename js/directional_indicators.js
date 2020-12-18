@@ -67,8 +67,10 @@ export class DirectionalIndecators {
                     startPosition.copy(this.displays.camera.position)
                     startTarget.copy(this.controls.target)
 
-                    transitionPosition.copy(pos).multiplyScalar(-10).add(_vec3.set(0.5, 0, 0.5)).sub(startPosition)
-                    transitionTarget.set(0.5, 0, 0.5).sub(startTarget)
+                    let y = pos.y > 0 ? 0 : 1.5
+
+                    transitionPosition.copy(pos).multiplyScalar(-10).add(_vec3.set(0.5, y, 0.5)).sub(startPosition)
+                    transitionTarget.set(0.5, y, 0.5).sub(startTarget)
 
                     transitionClock.start()
 
