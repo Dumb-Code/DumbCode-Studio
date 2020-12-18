@@ -23,6 +23,9 @@ export class MementoTraverser {
     }
 
     onKeyDown(event) {
+        if(document.activeElement.nodeName == "INPUT") {
+            return
+        }
         if(event.ctrlKey && event.keyCode === 90) { //z
             if(event.shiftKey) {
                 this.redo()

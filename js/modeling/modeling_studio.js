@@ -56,6 +56,9 @@ export class ModelingStudio {
         this.cubeCommands = new CubeCommands(this.commandRoot, this)
 
         this.addEventListener('keydown', e => {
+            if(document.activeElement.nodeName == "INPUT") {
+                return
+            }
             if(e.event.keyCode === 46) {
                 if(e.event.ctrlKey) {
                     this.cubeCreateDelete.deleteCubes()

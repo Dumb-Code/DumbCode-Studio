@@ -78,6 +78,11 @@ async function init() {
     controls.update()
     display.false = true
 
+    //When an input is focused on don't allow for keyboard controls.
+    $(document)
+    .focusin(e => e.target.nodeName == "INPUT" ? controls.enableKeys = false : 0)
+    .focusout(e => e.target.nodeName == "INPUT" ? controls.enableKeys = true : 0)
+
     directionalIndecators = new DirectionalIndecators(display, controls)
 
     display.setup(renderer, camera, createScene(), onTop, directionalIndecators)
@@ -117,6 +122,7 @@ window.onModulesFinished = async() => {
 
     directionalIndecators.domFinished()
 
+    //Fix bulma dropdown boxes
     $('.dropdown:not(.is-hoverable) .dropdown-menu').get().forEach(t => $(t).click(e => {
         if(t.parentNode.classList.contains('is-active')) {
             e.stopPropagation()

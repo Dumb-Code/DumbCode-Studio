@@ -7,6 +7,9 @@ export class CubeCopyPaste {
         this._cache = []
 
         studio.addEventListener('keydown', evt => {
+            if(document.activeElement.nodeName == "INPUT") {
+                return
+            }
             let e = evt.event
             if(e.ctrlKey) {
                 switch(e.keyCode) {
