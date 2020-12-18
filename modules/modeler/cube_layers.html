@@ -1,15 +1,24 @@
 <p class="heading is-size-8 px-1 has-text-grey-light mt-1">Layers</p>
 
 <div class="section is-marginless is-paddingless">
-  <div class="buttons has-addons mx-1 mb-0" style="float:left">
-    <!--Create cube in same level heirarchy-->
-    <button class="button is-info create-cube-sibling tooltip" style="height: 24px; border-right: 4px solid #363636" data-tooltip="Create a sibling cube">
-      <i class="fas fa-plus has-text-light mr-1"></i><i class="fas fa-cube has-text-light"></i>
-    </button>
-    <!--Create new child cube of current selected-->
-    <button class="button is-info create-cube tooltip" style="height: 24px;"  data-tooltip="Create a child cube">
-      <i class="fas fa-plus has-text-light mr-1"></i><i class="fas fa-cube has-text-light"></i><i class="fas fa-cube has-text-light" style="height: 10px;" ></i>
-    </button>
+  <div class="editor-cube-button editor-require-selected" style="float:left">
+    <span class="buttons has-addons mx-1 mb-0 when-has-cubes">
+        <!--Create cube in same level heirarchy-->
+      <button class="button when-has-cubes is-info create-cube-sibling tooltip" style="height: 24px; border-right: 4px solid #363636" data-tooltip="Create a sibling cube">
+        <i class="fas fa-plus has-text-light mr-1"></i><i class="fas fa-cube has-text-light"></i>
+      </button>
+      <!--Create new child cube of current selected-->
+      <button class="button when-has-cubes is-info create-cube tooltip" style="height: 24px;"  data-tooltip="Create a child cube">
+        <i class="fas fa-plus has-text-light mr-1"></i><i class="fas fa-cube has-text-light"></i><i class="fas fa-cube has-text-light" style="height: 10px;" ></i>
+      </button>
+    </span>
+    <span class="buttons has-addons mx-1 mb-0" style="width: 154px;">
+      <!--Create new cube -->
+      <button class="button is-info create-cube tooltip" style="height: 24px;" data-tooltip="Create a cube">
+        <i class="fas fa-plus has-text-light mr-1"></i><i class="fas fa-cube has-text-light"></i>
+      </button>
+    </span>
+    
   </div>
 
   <div class="buttons has-addons" >

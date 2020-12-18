@@ -32,6 +32,7 @@ export class ModelingStudio {
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
         this.pth.addEventListener('selectchange', () => this.cubeList.refreshCompleatly())
         this.selectedRequired = dom.find('.editor-require-selected')
+        this.cubesRequired = dom.find('.editor-require-cubes')
 
         this.transformControls = display.createTransformControls()
         this.group.add(this.transformControls)
@@ -93,6 +94,8 @@ export class ModelingStudio {
     cubeHierarchyChanged() {
         this.cubeList.refreshCompleatly()
         this.modelerOptions.refreshOptionTexts()
+        
+        let hasCubes = this.pth.model.cubeMap.size !== 0
     }
 
     setActive() {

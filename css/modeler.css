@@ -172,3 +172,11 @@ margin-top: 6px;
   #modeling-area .option-select.is-activated {
 color: #3298dc;
 }
+
+.editor-cube-button:not(.is-active) > *.when-has-cubes {
+  display: none
+}
+
+.editor-cube-button.is-active > *:not(.when-has-cubes) {
+  display: none
+}
