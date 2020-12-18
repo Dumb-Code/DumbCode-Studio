@@ -20,10 +20,12 @@ export class CubePointTracker {
         this.definedCube = null
         this.group = group
        
-        let geometry = new SphereGeometry(1/15, 32, 32);
-        let helperGeometry = new SphereGeometry(1/10, 32, 32);
+        let geometry = new SphereGeometry(1/10, 32, 32);
+        let helperGeometry = new SphereGeometry(1/5, 32, 32);
+        let visibleGeometry = new SphereGeometry(1, 32, 32);
 
         this.points = []
+        this.visiblePoints = []
         this.helperPoints = []
         for(let x = 0; x <= 1; x += 0.5) {
             for(let y = 0; y <= 1; y += 0.5) {
@@ -43,8 +45,15 @@ export class CubePointTracker {
                     mesh.add(helperMesh)
                     this.helperPoints.push(helperMesh)
 
+                    let visibleMesh = new Mesh(visibleGeometry, material)
+                    visibleMesh.visible = false
+                    mesh.add(visibleMesh)
+                    this.visiblePoints.push(visibleMesh)
+
                     let point = { x, y, z, mesh }
                     helperMesh._point = point
+                    visibleMesh._mesh = mesh
+                    visibleMesh._helper = helperMesh
                     this.points.push( point )
                 }
             }
@@ -65,12 +74,12 @@ export class CubePointTracker {
     }
 
     update() {
+        this.points.forEach(p => p.mesh.visible = false)
         if(this.enabled && (this.definedCube !== null || this.raytracer.intersected !== undefined)) {
             let cube = this.definedCube !== null ? this.definedCube : this.raytracer.intersected.tabulaCube
             let group = cube.cubeMesh
             
             this.points.forEach(p => {
-                p.mesh.visible = true
                 tempPos.set(p.x*cube.dimension[0]/16, p.y*cube.dimension[1]/16, p.z*cube.dimension[2]/16).applyQuaternion(group.getWorldQuaternion(tempQuaterion))
                 group.getWorldPosition(p.mesh.position).add(tempPos)
                 
@@ -78,9 +87,15 @@ export class CubePointTracker {
                 p.mesh.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance / 7 );
             })
 
-            this.helperPoints.forEach(p => p.visible = true)
+            this.visiblePoints.forEach(p => p.visible = true)
+            raytraceUnderMouse(this.display.camera, this.visiblePoints).forEach(i => {
+                i.object._mesh.visible = true
+                i.object._helper.visible = true
+            })
+            this.visiblePoints.forEach(p => p.visible = false)
             let intersected = raytraceUnderMouse(this.display.camera, this.helperPoints)
             this.helperPoints.forEach(p => p.visible = false)
+
             if(intersected.length > 0) {
                 let closest = intersected[0].object
                 if(true) {//intersected[0].distance < this.raytracer.intersectedDistance || this.raytracer.intersectedDistance === -1
@@ -98,8 +113,6 @@ export class CubePointTracker {
                 this.intersected = null
             } 
 
-        } else {
-            this.points.forEach(p => p.mesh.visible = false)
         }
     }
 
