@@ -118,6 +118,20 @@
    display: none;
 }
 
+#directional-indicators div {
+   position: absolute; 
+   font-size: x-small;
+   color: white;
+   padding-left: 1px;
+   padding-right: 1px;
+   border-radius: 7px;
+   pointer-events: none;
+}
+
+#directional-indicators .dark {
+   color: #424242;
+}
+
 .keyframe-entry-wrapper {
    position: absolute;
    height: 125px;

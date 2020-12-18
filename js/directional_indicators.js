@@ -30,21 +30,23 @@ export class DirectionalIndecators {
         this.circles = new Group()
         this.scene = new Scene()
 
+        this.indicators = $('#directional-indicators')
+
         this.scene.add(this.circles)
   
         this.camera = new OrthographicCamera(-width/2, width/2, -height/2, height/2)
         this.camera.zoom = 40
         this.camera.updateProjectionMatrix()
 
-        this.createCicleMesh(-1, 0, 0, 0xFF0000)
+        this.indX = this.createCicleMesh(-1, 0, 0, 0xFF0000)
         this.createCicleMesh( 1, 0, 0, 0x7F0000)
         this.createLine(0, 0, 0x570000)
 
-        this.createCicleMesh(0,  -1, 0, 0x00FF00)
+        this.indY = this.createCicleMesh(0,  -1, 0, 0x00FF00)
         this.createCicleMesh(0,   1, 0, 0x007F00)
         this.createLine(0, Math.PI/2, 0x005700)
 
-        this.createCicleMesh(0, 0, -1, 0x0000FF)
+        this.indZ = this.createCicleMesh(0, 0, -1, 0x0000FF)
         this.createCicleMesh(0, 0,  1, 0x00007F)
         this.createLine(Math.PI/2, 0, 0x000057)
 
@@ -72,7 +74,7 @@ export class DirectionalIndecators {
 
                 }
             }
-        })
+        }).find('canvas')
     }
 
     createCicleMesh(x, y, z, color) {
@@ -82,6 +84,7 @@ export class DirectionalIndecators {
         let mesh = new Mesh(geometry, mat)
         mesh.position.set(x/2, y/2, z/2)
         this.circles.add(mesh)
+        return mesh
     }
 
     createLine(x, y, color) {
@@ -95,6 +98,11 @@ export class DirectionalIndecators {
     }
 
     draw() {
+        this.offTop = this.displays.renderer.context.canvas.offsetTop
+        this.offLeft = this.displays.renderer.context.canvas.offsetLeft
+        this.updatePart(this.indX, 'x')
+        this.updatePart(this.indY, 'y')
+        this.updatePart(this.indZ, 'z')
         if(transitionClock.running) {
             let d = transitionClock.getElapsedTime() / transitionTime
             if(d < 1) {
@@ -115,6 +123,14 @@ export class DirectionalIndecators {
         this.displays.renderer.clearDepth()
         this.displays.renderer.render(this.scene, this.camera);
         this.displays.renderer.setViewport(0, 0, this.displays.drawWidth, this.displays.drawHeight)
+    }
 
+    updatePart(indicator, value) {
+        let ret = this.displays.toScreenPosition(indicator, this.camera)
+        ret.x = ret.x*width + this.displays.drawWidth - width
+        ret.y = ret.y*height + this.displays.drawHeight - height
+        let indc = this.indicators.find(`div[attribute=${value}]`)
+        indc.css('left', `${ret.x + this.offLeft - indc.innerWidth()/2}px`)
+            .css('top', `${ret.y + this.offTop -  indc.innerHeight()/2}px`)
     }
 }

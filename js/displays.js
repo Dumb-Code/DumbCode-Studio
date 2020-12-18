@@ -1,5 +1,7 @@
 import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material, BoxBufferGeometry, MeshBasicMaterial, Mesh, CylinderBufferGeometry, Matrix4 } from "./three.js";
 
+const vector = new Vector3()
+
 export class DinosaurDisplay {
 
     constructor() {
@@ -98,6 +100,22 @@ export class DinosaurDisplay {
         this.material = material
         this.scene.add(model.createModel(material))
     }
+
+    toScreenPosition(obj, camera = this.camera) {
+
+        obj.updateMatrixWorld()
+        vector.setFromMatrixPosition(obj.matrixWorld)
+        vector.project(camera)
+
+        vector.x = ( vector.x / 2 ) + 0.5
+        vector.y = - ( vector.y / 2 ) + 0.5
+
+        return { 
+            x: vector.x,
+            y: vector.y
+        }
+
+};
 
     render() {
         this.renderer.render(this.scene, this.camera);
