@@ -116,7 +116,7 @@ async function init() {
             controls.enabled = !e.value;
         });
         transformControls.addEventListener('axis-changed', e => {
-            let textDiv = document.getElemenById("editor-mouseover")
+            let textDiv = document.getElementById("editor-mouseover")
             if(e.value === null) {
                 textDiv.style.display = "block"
                 raytracer.disableRaycast = false
