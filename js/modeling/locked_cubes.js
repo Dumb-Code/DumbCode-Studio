@@ -49,7 +49,6 @@ export class LockedCubes {
     }
 
     createLockedCubesCache(lockedCubes = this.lockedCubes) {
-        console.log(lockedCubes)
         this.lockedChildrenCache.clear()
         this.movingChildrenCache.clear()
         lockedCubes.forEach(cubeName => {

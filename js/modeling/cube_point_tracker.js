@@ -17,16 +17,18 @@ export class CubePointTracker {
         this.enabled = false
         this.intersected = null
         this.selected = null
+        this.definedCube = null
+        this.group = group
        
         let geometry = new SphereGeometry(1/15, 32, 32);
         let helperGeometry = new SphereGeometry(1/10, 32, 32);
 
         this.points = []
         this.helperPoints = []
-        for(let x = -0.5; x <= 0.5; x += 0.5) {
-            for(let y = -0.5; y <= 0.5; y += 0.5) {
-                for(let z = -0.5; z <= 0.5; z += 0.5) {
-                    if(x === 0 && y === 0 && z === 0) {
+        for(let x = 0; x <= 1; x += 0.5) {
+            for(let y = 0; y <= 1; y += 0.5) {
+                for(let z = 0; z <= 1; z += 0.5) {
+                    if(x === .5 && y === .5 && z === .5) {
                         continue                        
                     }
 
@@ -41,23 +43,30 @@ export class CubePointTracker {
                     mesh.add(helperMesh)
                     this.helperPoints.push(helperMesh)
 
-                    this.points.push( { x, y, z, mesh } )
+                    let point = { x, y, z, mesh }
+                    helperMesh._point = point
+                    this.points.push( point )
                 }
             }
         }
-    }
 
-    enable(callback = () => {}) {
-        this.enabled = true
-        this.points.forEach(p => p.mesh.onClickCallback = () => {
-            this.enabled = false
-            callback(p.mesh.position)
+        $(document).mousedown(() => {
+            if(this.enabled && this.intersected !== null) {
+                this.disable()
+                this.callback({ point: this.intersected._point, position: this.intersected.parent.position })
+            }
         })
     }
 
+    enable(callback = () => {}, definedCube = null) {
+        this.enabled = true
+        this.definedCube = definedCube
+        this.callback = callback
+    }
+
     update() {
-        if(this.enabled && this.raytracer.intersected !== undefined) {
-            let cube = this.raytracer.intersected.tabulaCube
+        if(this.enabled && (this.definedCube !== null || this.raytracer.intersected !== undefined)) {
+            let cube = this.definedCube !== null ? this.definedCube : this.raytracer.intersected.tabulaCube
             let group = cube.cubeMesh
             
             this.points.forEach(p => {
@@ -96,6 +105,7 @@ export class CubePointTracker {
 
     disable() {
         this.enabled = false
+        this.definedCube = null
     }
 
 

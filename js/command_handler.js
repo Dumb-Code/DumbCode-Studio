@@ -13,6 +13,10 @@ export class CommandRoot {
         return cmd
     }
 
+    doCommand(text) {
+        this.commandLine.startCommand(text)
+    }
+
     runCommand(str, ctx = {}) {
         let split = splitStr(str)
 

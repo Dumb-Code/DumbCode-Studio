@@ -24,11 +24,16 @@ const tempCubeNewBase1 = new Vector3()
 
 
 export class CubeCommands {
-    constructor(root, studio) {
+    constructor(root, studio, dom) {
         this.commandResultChangeCache = null
         this.gumballObject = studio.gumball.transformAnchor
 
+        dom.find('.saved-command').click(e => {
+            root.doCommand(e.delegateTarget.getAttribute('command'))
+        })
+
         this.applycopypaste(root, studio.raytracer)
+        this.applyVertexSnapping(root, studio.pointTracker, studio.lockedCubes)
         this.applyMirrorCommand(root)
     }
 
@@ -43,6 +48,26 @@ export class CubeCommands {
                 raytracer.clickOnMesh(cloned.cubeMesh)
             })
     
+    }
+
+    applyVertexSnapping(root, pointTracker, lockedCubes) {
+        root.command('snap')
+            .onRun(args => {
+                let cube = args.context.getCube()
+                pointTracker.enable(p => {
+                    worldPosVector.copy(p.position)
+                    pointTracker.enable(p => {
+                        let worldDiff = worldPosVector.sub(p.position).multiplyScalar(-1)
+                        cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
+                        
+                        tempResultMatrix.compose(tempCubePos.add(worldDiff), tempCubeQuat, tempCubeScale)
+                        
+                        lockedCubes.createLockedCubesCache()
+                        CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
+                        lockedCubes.reconstructLockedCubes()
+                    })
+                }, cube)
+            })
     }
     
     applyMirrorCommand(root) {

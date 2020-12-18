@@ -53,7 +53,7 @@ export class ModelingStudio {
 
         this.modelerOptions = new ModelerOptions(dom, this, setCamera)
 
-        this.cubeCommands = new CubeCommands(this.commandRoot, this)
+        this.cubeCommands = new CubeCommands(this.commandRoot, this, dom)
 
         this.addEventListener('keydown', e => {
             if(document.activeElement.nodeName == "INPUT") {
@@ -106,6 +106,7 @@ export class ModelingStudio {
         this.display.renderTopGroup.remove(this.group)
         this.transformControls.disableReason('tab')
         this.dragSelection.onInactive()
+        this.pointTracker.disable()
     }
 
     selectedChanged() {
