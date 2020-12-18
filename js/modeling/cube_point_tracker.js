@@ -20,8 +20,8 @@ export class CubePointTracker {
         this.definedCube = null
         this.group = group
        
-        let geometry = new SphereGeometry(1/10, 32, 32);
-        let helperGeometry = new SphereGeometry(1/5, 32, 32);
+        let geometry = new SphereGeometry(1/15, 32, 32);
+        let helperGeometry = new SphereGeometry(1/6, 32, 32);
 
         this.points = []
         this.helperPoints = []
