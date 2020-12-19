@@ -4,6 +4,7 @@ import { raytraceUnderMouse } from "../raytracer.js";
 const raycaster = new Raycaster()
 
 const tempPos = new Vector3()
+const tempPos2 = new Vector3()
 const tempQuaterion = new Quaternion()
 
 const normalColor = 0x6378ad
@@ -75,7 +76,9 @@ export class CubePointTracker {
                 tempPos.set(p.x*(cube.dimension[0]+2*cg[0])/16, p.y*(cube.dimension[1]+2*cg[1])/16, p.z*(cube.dimension[2]+2*cg[2])/16).applyQuaternion(group.getWorldQuaternion(tempQuaterion))
                 group.getWorldPosition(p.mesh.position).add(tempPos)
                 
-                let eyeDistance = p.mesh.position.distanceTo(tempPos.setFromMatrixPosition(this.display.camera.matrixWorld));
+                tempPos2.subVectors(p.mesh.position, tempPos.setFromMatrixPosition(this.display.camera.matrixWorld)).normalize();
+                let angleBetween = tempPos2.angleTo(this.display.camera.getWorldDirection(tempPos));
+                let eyeDistance = p.mesh.position.distanceTo(tempPos.setFromMatrixPosition(this.display.camera.matrixWorld)) * Math.cos(angleBetween);
                 p.mesh.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance / 7 );
             })
 
