@@ -50,6 +50,9 @@ export class DirectionalIndecators {
         this.createLine(Math.PI/2, 0, 0x000057)
 
         $(document).keydown(e => {
+            if(document.activeElement.nodeName == "INPUT") {
+                return
+            }
             let key = e.keyCode
             if(key >= 96 && key <= 105) {
                 let num = key - 96
@@ -79,7 +82,7 @@ export class DirectionalIndecators {
                     return
                 }
                 e.preventDefault()
-                e.stopPropergation()
+                e.stopPropagation()
             }
         })
 

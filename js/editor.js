@@ -83,6 +83,9 @@ async function init() {
     .focusin(e => e.target.nodeName == "INPUT" ? controls.enableKeys = false : 0)
     .focusout(e => e.target.nodeName == "INPUT" ? controls.enableKeys = true : 0)
     .keydown(e => {
+        if(document.activeElement.nodeName == "INPUT") {
+            return
+        }
         if(e.ctrlKey) {
             const angle = 0.0872665 //5 degrees
             switch (e.keyCode) {
