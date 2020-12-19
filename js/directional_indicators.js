@@ -65,7 +65,7 @@ export class DirectionalIndecators {
                             this.startTransition(-1, 0, 0)
                             break;
                         case 5:
-                            this.startTransition(0, 0, -1)
+                            this.startTransition(0, 0, 1)
                             break;
                         case 6:
                             this.startTransition(1, 0, 0)
@@ -77,7 +77,7 @@ export class DirectionalIndecators {
                             return
                     }
                 } else if(num == 5) {
-                    this.startTransition(0, 0, 1)
+                    this.startTransition(0, 0, -1)
                 } else {
                     return
                 }

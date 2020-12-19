@@ -63,7 +63,7 @@ async function init() {
 
     //Set up the camera
     let camera = new PerspectiveCamera( 65, 1, 0.1, 700 )
-    camera.position.set(0.45, 1.5, -4.5)
+    camera.position.set(0.45, 1.5, 4.5)
     camera.lookAt(0.5, 1.5, 0.5)
 
     let onTop = new Scene()
