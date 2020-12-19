@@ -39,12 +39,14 @@ export class ModelingStudio {
 
         applyCubeStateHighlighting(dom, this)
         
+        this.modelerOptions = new ModelerOptions(dom, this, setCamera, renameCube)
+
         this.cubeCopyPaste = new CubeCopyPaste(this, this.commandRoot)
         this.cubeCreateDelete = new CubeCreateDelete(dom, this)
 
         this.rotationPointMarkers = new RotationPointMarkers(this)
         this.lockedCubes = new LockedCubes(this)    
-        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, pth, this.lockedCubes, renameCube)
+        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, pth, this.lockedCubes, this.modelerOptions, renameCube)
         this.dragSelection = new DragSelection(this, dom.find('#drag-selection-overlay'), orbitControls)
         this.pointTracker = new CubePointTracker(raytracer, display, this.group)
         this.gumball = new Gumball(dom, this)
@@ -52,7 +54,6 @@ export class ModelingStudio {
         this.studioPanels = new StudioPanels(dom, 300, 300)
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
 
-        this.modelerOptions = new ModelerOptions(dom, this, setCamera)
 
         this.cubeCommands = new CubeCommands(this.commandRoot, this, dom)
 

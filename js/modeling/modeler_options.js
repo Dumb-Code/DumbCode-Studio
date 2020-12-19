@@ -1,9 +1,9 @@
-import { LinkedSelectableList } from "../util.js";
+import { doubleClickToEdit, LinkedSelectableList } from "../util.js";
 import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture } from "../three.js";
 
 export class ModelerOptions {
 
-    constructor(dom, studio, setCamera) {
+    constructor(dom, studio, setCamera, renameCube) {
         this.raytracer = studio.raytracer
         this.textureMode = new LinkedSelectableList(dom.find('.select-texture-mode')).onchange(e => {
             switch(e.value) {
@@ -59,7 +59,18 @@ export class ModelerOptions {
             }
         })
 
+        dom.find('.toggle-cube-button').click(() => studio.display.toggleBlock())
+        dom.find('.toggle-grid-button').click(() => studio.display.toggleGrid())
+
         this.cubeName = dom.find('.cube-name-display')
+        doubleClickToEdit(this.cubeName, name => this.raytracer.oneSelected() ? renameCube(this.raytracer.firstSelected().tabulaCube, name) : 0)
+        this.cubeLockEyeContainer = dom.find('.cube-lock-eye')
+        this.cubeVisible = this.cubeLockEyeContainer.find('.selected-cube-visible').click(() => {
+            $(".cube-line-controller.cube-selected .cube-hide-icon-container").click()
+        })
+        this.cubeLocked = this.cubeLockEyeContainer.find('.selected-cube-locked').click(() => {
+            $(".cube-line-controller.cube-selected .cube-lock-icon-container").click()
+        })
         this.cubeChildrenCount = dom.find('.cube-children-display')
 
         this.cubeChildrenCount.click(() => {
@@ -74,12 +85,22 @@ export class ModelerOptions {
     refreshOptionTexts() {
         if(this.raytracer.oneSelected()) {
             let cube = this.raytracer.firstSelected().tabulaCube
-            this.cubeName.css('display', 'unset').text(cube.name)
-            this.cubeChildrenCount.css('display', 'unset').text(`${cube.getAllChildrenCubes().length} Child Objects`)
+            this.cubeName.css('display', '').find('.dbl-text').text(cube.name)
+            this.cubeLockEyeContainer.css('display', '')
+
+            this.cubeVisible.children().children().remove()
+            this.cubeVisible.children().append($(".cube-line-controller.cube-selected .cube-hide-icon-container").children().clone())
+
+            this.cubeLocked.children().children().remove()
+            this.cubeLocked.children().append($(".cube-line-controller.cube-selected .cube-lock-icon-container").children().clone())
+
+            this.cubeChildrenCount.css('display', '').text(`${cube.getAllChildrenCubes().length} Child Objects`)
         } else {
             this.cubeName.css('display', 'none')
+            this.cubeLockEyeContainer.css('display', 'none')
+
             if(this.raytracer.anySelected()) {
-                this.cubeChildrenCount.css('display', 'unset').text(`${this.raytracer.selectedSet.size} Total Selected`)
+                this.cubeChildrenCount.css('display', '').text(`${this.raytracer.selectedSet.size} Total Selected`)
             } else {
                 this.cubeChildrenCount.css('display', 'none')
             }

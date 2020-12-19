@@ -2,9 +2,10 @@ import { OrbitControls } from "../orbit_controls.js"
 import { isKeyDown, DraggableElementList, doubleClickToEdit } from "../util.js"
 
 export class CubeListBoard {
-    constructor(cubeList, raytracer, pth, lockedCubes, renameCube) {
+    constructor(cubeList, raytracer, pth, lockedCubes, modelerOptions, renameCube) {
         this.cubeList = cubeList
         this.raytracer = raytracer
+        this.modelerOptions = modelerOptions
         this.renameCube = renameCube
         this.pth = pth
         this.lockedCubes = lockedCubes
@@ -116,6 +117,7 @@ export class CubeListBoard {
         }, cube.name)
 
         let hideIconSpan = document.createElement("span")
+        hideIconSpan.classList.add("cube-hide-icon-container")
         let hideIconI = document.createElement("i")
         hideIconI.classList.add('fas', cube.cubeMesh?.visible ? 'fa-eye' : 'fa-eye-slash', 'hide-icon') //fa-eye-slash
         $(hideIconSpan).click(e => {
@@ -128,6 +130,7 @@ export class CubeListBoard {
         div.appendChild(hideIconSpan)
 
         let lockIconSpan = document.createElement("span")
+        lockIconSpan.classList.add("cube-lock-icon-container")
         let lockIconI = document.createElement("i")
         lockIconI.classList.add('fas', this.lockedCubes.isLocked(cube) ? 'fa-lock' : 'fa-lock-open', 'lock-icon')
         $(lockIconSpan).click(e => {
@@ -155,8 +158,21 @@ export class CubeListBoard {
         parent.appendChild(li)
         this.elementMap.set(cube, { 
             div, 
-            getLockIcon: () => $(lockIconSpan).children(),
-            getHideIcon: () => $(hideIconSpan).children()
+            getLockIcon: () => {
+                let elems = $(lockIconSpan).children()
+                if(this.raytracer.isCubeSelected(cube)) {
+                    return elems.add(this.modelerOptions.cubeLocked.children())
+                }
+                return elems
+            },
+            getHideIcon: () => {
+                let elems = $(hideIconSpan).children()
+                if(this.raytracer.isCubeSelected(cube)) {
+                    return elems.add(this.modelerOptions.cubeVisible.children())
+                }
+                return elems
+
+            }
         })
     }
 

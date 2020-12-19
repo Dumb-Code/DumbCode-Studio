@@ -49,12 +49,30 @@
         </div>
       </div>
       <div class="column is-narrow">
-        <button class="button is-dark ml-1" style="height: 20px; font-size: 14px;">
-          <span><i class="far fa-lightbulb"></i></span>
+        <button class="button is-paddingless is-dark ml-1 " style="height: 20px; font-size: 14px; padding-left: 1rem !important; padding-right: 1rem !important;">
+          <span class="icon is-small toggle-grid-button tooltip" data-tooltip="Toggle Grid">
+            <i class="fas fa-th"></i>
+          </span>
+          <span class="icon is-small toggle-cube-button tooltip" data-tooltip="Toggle Cube">
+            <i class="fas fa-stop-circle"></i>
+          </span>
         </button>
       </div>
       <div class="column is-narrow">
-        <div class="button is-paddingless is-dark px-3 ml-1 cube-name-display" style="height: 20px; font-size: 14px; display: none;"></div>
+        <button class="button is-paddingless is-dark ml-1 cube-lock-eye" style="height: 20px; font-size: 14px; padding-left: 1rem !important; padding-right: 1rem !important; display: none;">
+          <span class="icon is-small selected-cube-visible">
+            <i class="far fa-eye"></i>
+          </span>
+          <span class="icon is-small selected-cube-locked">
+            <i class="fa fa-lock-open"></i>
+          </span>
+        </button>
+      </div>
+      <div class="column is-narrow">
+        <div class="button is-paddingless is-dark px-3 ml-1 cube-name-display dbl-click-container" style="height: 20px; font-size: 14px; display: none;">
+          <p class="dbl-text"></p>
+          <input class="dbl-text-edit" type="text">
+        </div>
       </div>
       <div class="column is-narrow">
         <div class="button is-paddingless is-dark px-3 mx-1 cube-children-display" style="height: 20px; font-size: 14px; display: none;"></div>

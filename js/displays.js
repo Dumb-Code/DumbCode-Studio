@@ -82,6 +82,14 @@ export class DinosaurDisplay {
         this.scene.add(this.blockElement)
     }
 
+    toggleGrid() {
+        this.gridGroup.visible = !this.gridGroup.visible
+    }
+
+    toggleBlock() {
+        this.blockElement.visible = !this.blockElement.visible
+    }
+
     setSize(width, height) {
         this.drawWidth = width
         this.drawHeight = height

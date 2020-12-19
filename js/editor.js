@@ -223,6 +223,7 @@ function renameCube(cube, newValue) {
         cube.updateCubeName(newValue)
         pth.animationTabs.allTabs.forEach(tab => tab.handler.renameCube(oldValue, newValue))
         modelingStudio.modelerOptions.refreshOptionTexts()
+        modelingStudio.cubeList.refreshCompleatly()
     }   
     return false
 }
