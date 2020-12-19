@@ -48,8 +48,9 @@ export class MementoTraverser {
             this._internalClock.elapsedTime = 0
             this.mementoList.length = ++this.index
             this.mementoList.push(memento)
-            while(this.mementoList.length >= this.maxLimit) {
+            while(this.mementoList.length > this.maxLimit) {
                 this.mementoList.shift()
+                this.index--
             }
             return true
         }
