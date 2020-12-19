@@ -53,7 +53,7 @@ export class DirectionalIndecators {
             let key = e.keyCode
             if(key >= 96 && key <= 105) {
                 let num = key - 96
-                if(e.ctrlKey) {
+                if(!e.ctrlKey) {
                     switch (num) {
                         case 2:
                             this.startTransition(0, -1, 0)
@@ -62,7 +62,7 @@ export class DirectionalIndecators {
                             this.startTransition(-1, 0, 0)
                             break;
                         case 5:
-                            this.startTransition(0, 0, 1)
+                            this.startTransition(0, 0, -1)
                             break;
                         case 6:
                             this.startTransition(1, 0, 0)
@@ -74,7 +74,7 @@ export class DirectionalIndecators {
                             return
                     }
                 } else if(num == 5) {
-                    this.startTransition(0, 0, -1)
+                    this.startTransition(0, 0, 1)
                 } else {
                     return
                 }
