@@ -15,7 +15,7 @@ import { DirectionalIndecators } from "./directional_indicators.js";
 
 const major = 0
 const minor = 6
-const patch = 11
+const patch = 12
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -227,7 +227,6 @@ function renameCube(cube, newValue) {
         cube.updateCubeName(newValue)
         pth.animationTabs.allTabs.forEach(tab => tab.handler.renameCube(oldValue, newValue))
         modelingStudio.modelerOptions.refreshOptionTexts()
-        modelingStudio.cubeList.refreshCompleatly()
     }   
     return false
 }
