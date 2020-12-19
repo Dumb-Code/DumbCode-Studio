@@ -156,6 +156,10 @@ window.onModulesFinished = async() => {
     frame()
 }
 
+window.onbeforeunload = function() { 
+    return "Some changes may be unsaved, would you like to leave the page?";
+}; 
+
 export function createScene() {
     //Set up the Scene
     let scene = new Scene();
