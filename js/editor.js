@@ -15,7 +15,7 @@ import { DirectionalIndecators } from "./directional_indicators.js";
 
 const major = 0
 const minor = 6
-const patch = 12
+const patch = 12 
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
