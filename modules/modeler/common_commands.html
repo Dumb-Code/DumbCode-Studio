@@ -1,4 +1,7 @@
 <style>
+    .light-button {
+        color: rgb(122, 122, 122);
+    }
     .command-button {
         border-left: none;
         border-top: none;
@@ -26,15 +29,24 @@
 
 <div class="dropdown is-hoverable">
     <div class="dropdown-trigger">
-        <button class="icon is-medium saved-command has-background-black-ter command-button" command="snap" aria-haspopup="true" aria-controls="mirror-dropdown">
+        <button class="icon is-medium has-background-black-ter light-button saved-command command-button" command="snap" aria-haspopup="true" aria-controls="vertex-dropdown">
             <i class="fas fa-vector-square"></i>
         </button>
     </div>
-    <div class="dropdown-menu dropdown-command" id="mirror-dropdown" role="menu">
+    <div class="dropdown-menu dropdown-command" id="vertex-dropdown" role="menu">
         <div class="dropdown-content has-background-black-ter tooltip-border py-1">
             <div class="dropdown-item has-background-black-ter has-text-light tooltip-text">
+                <button class="icon is-medium saved-command has-background-black-ter light-button tooltip" data-tooltip="Snap" command="snap">
+                    <i class="fas fa-vector-square"></i>
+                </button>
+                <button class="icon is-medium saved-command has-background-black-ter light-button tooltip" data-tooltip="Snap Rotation Point" command="snap -rp">
+                    <i class="fas fa-vector-square" style="transform: translateX(6.75px)"></i>
+                    <i class="far fa-circle" style="transform: translateX(-6.75px) scale(0.5);"></i>
+                </button>
                 <p><strong class="has-text-info">SNAP</strong></p>
                 <p>Allows you to move cubes relative to source and target vertices.</p>
+                <p><strong class="has-text-info">SNAP ROTATION POINT</strong></p>
+                <p>Allows you to move the cubes rotation point to a target vertex.</p>
             </div>
         </div>
     </div>
