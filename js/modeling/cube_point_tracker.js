@@ -87,10 +87,15 @@ export class CubePointTracker {
                 tempPos2.subVectors(p.mesh.position, tempPos.setFromMatrixPosition(this.display.camera.matrixWorld)).normalize();
                 let angleBetween = tempPos2.angleTo(this.display.camera.getWorldDirection(tempPos));
                 let eyeDistance = p.mesh.position.distanceTo(tempPos.setFromMatrixPosition(this.display.camera.matrixWorld)) * Math.cos(angleBetween);
-                p.mesh.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance / 7 );
+                if(eyeDistance > 3) {
+                    p.mesh.visible = false
+                } else {
+                    p.mesh.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance / 7 )
+                }
+                
             })
 
-            this.helperPoints.forEach(p => p.visible = true)
+            this.helperPoints.forEach(p => p.visible = p.parent.visible)
             let intersected = raytraceUnderMouse(this.display.camera, this.helperPoints)
             this.helperPoints.forEach(p => p.visible = false)
 
