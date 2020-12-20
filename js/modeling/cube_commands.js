@@ -54,20 +54,43 @@ export class CubeCommands {
         root.command('snap')
             .onRun(args => {
                 let cube = args.context.getCube()
-                pointTracker.enable(p => {
-                    raytracer.clickOnMesh(cube.cubeMesh, false)
-                    worldPosVector.copy(p.position)
+                let rp = args.context.hasFlag('rp')
+                let cubeLockers = []
+                if(rp) {
+                    cubeLockers.push(new CubeLocker(cube, 1))
+                    cube.children.forEach(child => cubeLockers.push(new CubeLocker(child, 0)))
+                }
+
+                let phase2 = () => {
                     pointTracker.enable(p => {
                         let worldDiff = worldPosVector.sub(p.position).multiplyScalar(-1)
                         cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
                         
                         tempResultMatrix.compose(tempCubePos.add(worldDiff), tempCubeQuat, tempCubeScale)
                         
-                        lockedCubes.createLockedCubesCache()
-                        CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
-                        lockedCubes.reconstructLockedCubes()
+                        if(rp) {
+                            CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
+                            cube.cubeGroup.updateMatrixWorld()
+                            cubeLockers.forEach(l => l.reconstruct())
+                        } else {
+                            lockedCubes.createLockedCubesCache()
+                            CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
+                            lockedCubes.reconstructLockedCubes()
+                        }
+                        
                     }, 0xFF0000)
-                }, undefined, undefined, cube)
+                }
+
+                if(rp) {
+                    cube.cubeGroup.getWorldPosition(worldPosVector)
+                    phase2()
+                } else {
+                    pointTracker.enable(p => {
+                        raytracer.clickOnMesh(cube.cubeMesh, false)
+                        worldPosVector.copy(p.position)
+                        phase2()
+                    }, undefined, undefined, cube)
+                } 
             })
     }
     
