@@ -94,9 +94,7 @@ export class ModelingStudio {
 
     cubeHierarchyChanged() {
         this.cubeList.refreshCompleatly()
-        this.modelerOptions.refreshOptionTexts()
-        
-        let hasCubes = this.pth.model.cubeMap.size !== 0
+        this.modelerOptions.refreshOptionTexts()        
     }
 
     setActive() {

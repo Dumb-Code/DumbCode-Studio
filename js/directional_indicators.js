@@ -89,8 +89,7 @@ export class DirectionalIndecators {
     }
 
     domFinished() {
-        $('.display-div')
-        .mousedown(e => {
+        this.displays.mousedown.addListener(0, e => {
             _vec3.x = 2 * (e.offsetX - this.displays.drawWidth) / width + 1
             _vec3.y = -2 * (e.offsetY - this.displays.drawHeight) / height - 1
             if(Math.abs(_vec3.x) < 1 && Math.abs(_vec3.y) < 1) {
@@ -103,8 +102,9 @@ export class DirectionalIndecators {
                     this.startTransition(-pos.x*2, -pos.y*2, -pos.z*2)
 
                 }
+                e.consume()
             }
-        }).find('canvas')
+        })
     }
 
     startTransition(x, y, z) {

@@ -719,3 +719,24 @@ export class AsyncProgressCounter {
       }
       return !node.parentNode.classList.contains(className)
   }
+
+  export class WeightedEventHandler {
+      constructor() {
+          this.listners = []
+      }
+
+      addListener(index, listener) {
+          this.listners.push( { index, listener })
+          this.listners = this.listners.sort((a, b) => a.index - b.index)
+      }
+
+      fireEvent(data) {
+          let consumed = false
+          data.consume = () => consumed = true
+          this.listners.forEach(l => {
+              if(!consumed) {
+                l.listener(data)
+              }
+          })
+      }
+  }

@@ -9,7 +9,6 @@ const tempQuaterion = new Quaternion()
 
 const normalColor = 0x6378ad
 const highlightColor = 0x15c1d4
-const selectColor = 0xd11573
 
 export class CubePointTracker {
     constructor(raytracer, display, group) {
@@ -20,6 +19,9 @@ export class CubePointTracker {
         this.selected = null
         this.definedCube = null
         this.group = group
+
+        this.normalColor = normalColor
+        this.highlightColor = highlightColor
        
         let geometry = new SphereGeometry(1/15, 32, 32);
         let helperGeometry = new SphereGeometry(1/6, 32, 32);
@@ -33,7 +35,7 @@ export class CubePointTracker {
                         continue                        
                     }
 
-                    let material = new MeshBasicMaterial({ color: normalColor})
+                    let material = new MeshBasicMaterial({ color: this.normalColor})
 
                     let mesh = new Mesh(geometry, material)
                     mesh.visible = false
@@ -51,23 +53,29 @@ export class CubePointTracker {
             }
         }
 
-        $(document).mousedown(() => {
+        this.display.mousedown.addListener(0, e => {
             if(this.enabled && this.intersected !== null) {
+                let intersected = this.intersected
                 this.disable()
-                this.callback({ point: this.intersected._point, position: this.intersected.parent.position })
+                this.callback({ point: intersected._point, position: intersected.parent.position })
+                e.consume()
             }
         })
     }
 
-    enable(callback = () => {}, definedCube = null) {
+    enable(callback = () => {}, normal = normalColor, highlight = highlightColor, definedCube = null) {
         this.enabled = true
         this.definedCube = definedCube
         this.callback = callback
+        this.normalColor = normal
+        this.highlightColor = highlight
+        this.points.forEach(p => p.mesh.material.color.setHex(this.normalColor))
     }
 
     update() {
-        if(this.enabled && (this.definedCube !== null || this.raytracer.intersected !== undefined)) {
-            let cube = this.definedCube !== null ? this.definedCube : this.raytracer.intersected.tabulaCube
+        if(this.enabled && (this.definedCube !== null || this.raytracer.oneSelected() !== null)) {
+            let cube = this.definedCube !== null ? this.definedCube : this.raytracer.oneSelected().tabulaCube
+  
             let group = cube.cubeMesh
             
             this.points.forEach(p => {
@@ -91,15 +99,14 @@ export class CubePointTracker {
                 if(true) {//intersected[0].distance < this.raytracer.intersectedDistance || this.raytracer.intersectedDistance === -1
                     if(this.intersected !== closest) {
                         if(this.intersected !== null) {
-                            this.intersected.material.color.setHex(normalColor)
+                            this.intersected.material.color.setHex(this.normalColor)
                         }
-                        closest.material.color.setHex(highlightColor)
-
+                        closest.material.color.setHex(this.highlightColor)
                         this.intersected = closest
                     }
                 }
             } else if(this.intersected !== null) {
-                this.intersected.material.color.setHex(normalColor)
+                this.intersected.material.color.setHex(this.normalColor)
                 this.intersected = null
             } 
 
@@ -111,6 +118,7 @@ export class CubePointTracker {
     disable() {
         this.enabled = false
         this.definedCube = null
+        this.intersected = null
     }
 
 

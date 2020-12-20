@@ -33,7 +33,7 @@ export class CubeCommands {
         })
 
         this.applycopypaste(root, studio.raytracer)
-        this.applyVertexSnapping(root, studio.pointTracker, studio.lockedCubes)
+        this.applyVertexSnapping(root, studio.pointTracker, studio.lockedCubes, studio.raytracer)
         this.applyMirrorCommand(root)
     }
 
@@ -50,11 +50,12 @@ export class CubeCommands {
     
     }
 
-    applyVertexSnapping(root, pointTracker, lockedCubes) {
+    applyVertexSnapping(root, pointTracker, lockedCubes, raytracer) {
         root.command('snap')
             .onRun(args => {
                 let cube = args.context.getCube()
                 pointTracker.enable(p => {
+                    raytracer.clickOnMesh(cube.cubeMesh, false)
                     worldPosVector.copy(p.position)
                     pointTracker.enable(p => {
                         let worldDiff = worldPosVector.sub(p.position).multiplyScalar(-1)
@@ -65,8 +66,8 @@ export class CubeCommands {
                         lockedCubes.createLockedCubesCache()
                         CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
                         lockedCubes.reconstructLockedCubes()
-                    })
-                }, cube)
+                    }, 0xFF0000)
+                }, undefined, undefined, cube)
             })
     }
     

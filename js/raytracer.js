@@ -3,7 +3,7 @@ import { isKeyDown, lineIntersection } from "./util.js";
 
 
 document.addEventListener( 'mousemove', onMouseMove, false );
-document.addEventListener( 'mousedown', onMouseDown, false );
+// document.addEventListener( 'mousedown', onMouseDown, false );
 
 let mouse = new Vector2(-5, -5);
 let mouseClickDown = new Vector2(-5, -5)
@@ -35,12 +35,6 @@ function setMouseFromPoint(x, y, updateOnDiv) {
     return mouse
 }
 
-function onMouseDown( event ) {
-   mouseDown = true
-   mouseClickDown.x = event.clientX
-   mouseClickDown.y = event.clientY
-}
-
 export function raytraceUnderMouse(camera, elements, recursive = false) {
     raycaster.setFromCamera(mouse, camera)
     return raycaster.intersectObjects(elements, recursive)
@@ -57,6 +51,11 @@ const raycaster = new Raycaster()
 export class Raytracer {
 
     constructor(display, pth) {
+        display.mousedown.addListener(999, event =>  { 
+            mouseClickDown.x = event.originalEvent.clientX
+            mouseClickDown.y = event.originalEvent.clientY
+            mouseDown = true
+        })
         // this.material = material
         // this.highlightMaterial = highlightMaterial
         // this.selectedMaterial = selectedMaterial
@@ -68,6 +67,9 @@ export class Raytracer {
         this.disableRaycast = false
 
         document.addEventListener( 'mouseup', e => {
+            if(mouseDown === false) {
+                return
+            }
             mouseDown = false
             let xMove = Math.abs(mouseClickDown.x - event.clientX)
             let yMove = Math.abs(mouseClickDown.y - event.clientY)
@@ -232,10 +234,6 @@ export class Raytracer {
             raycaster.setFromCamera(mouse, this.display.camera);
             return raycaster.intersectObjects(this.pth.model.modelCache.children , true)
         }
-    }
-
-    isMouseDown() {
-        return mouseDown
     }
 }
 Object.assign( Raytracer.prototype, EventDispatcher.prototype );

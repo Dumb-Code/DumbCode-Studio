@@ -1,4 +1,5 @@
 import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material, BoxBufferGeometry, MeshBasicMaterial, Mesh, CylinderBufferGeometry, Matrix4, MeshLambertMaterial } from "./three.js";
+import { WeightedEventHandler } from "./util.js";
 
 const vector = new Vector3()
 
@@ -7,6 +8,9 @@ export class DinosaurDisplay {
     constructor() {
         this.drawWidth = 1
         this.drawHeight = 1
+
+        this.mousedown = new WeightedEventHandler()
+        $(document).mousedown(e => this.mousedown.fireEvent(e))
     }
 
     setup(renderer, camera, scene, onTopScene, directionalIndecators) {
