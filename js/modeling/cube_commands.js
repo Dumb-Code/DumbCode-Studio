@@ -53,11 +53,11 @@ export class CubeCommands {
     applyVertexSnapping(root, display, pointTracker, lockedCubes, raytracer) {
         let active = false
 
-        display.mousedown.addListener(900, e => {
-            if(active == true) {
+        raytracer.addEventListener('clicked', e => {
+            if(active && raytracer.intersected === undefined) {
                 active = false
                 pointTracker.disable()
-                e.consume()
+                e.ignore = true
             }
         })
         raytracer.addEventListener('selectchange', () => {

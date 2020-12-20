@@ -46,6 +46,8 @@ const deselectElementEvent = { type:"deselect", cubes:[] }
 const selectChangeEvent = { type:"selectchange", }
 const intersectionChangeEvent = { type:"intersection", old:undefined, cube:undefined }
 
+const elementClickedEvent = {type:"clicked", ignore:false }
+
 const raycaster = new Raycaster()
 
 export class Raytracer {
@@ -75,10 +77,14 @@ export class Raytracer {
             let yMove = Math.abs(mouseClickDown.y - event.clientY)
         
             if(e.target === display.renderer.domElement && xMove < 5 && yMove < 5 && mouse.x >= -1 && mouse.x <= 1 && mouse.y >= -1 && mouse.y <= 1) {
-                if(this.intersected !== undefined) {
-                    this.clickOnMesh(this.intersected)
-                } else {
-                    this.deselectAll()
+                elementClickedEvent.ignore = false
+                this.dispatchEvent(elementClickedEvent)
+                if(elementClickedEvent.ignore !== true) {
+                    if(this.intersected !== undefined) {
+                        this.clickOnMesh(this.intersected)
+                    } else {
+                        this.deselectAll()
+                    }
                 }
             }
             
