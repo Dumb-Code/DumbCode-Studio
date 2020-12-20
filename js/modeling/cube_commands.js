@@ -33,7 +33,7 @@ export class CubeCommands {
         })
 
         this.applycopypaste(root, studio.raytracer)
-        this.applyVertexSnapping(root, studio.pointTracker, studio.lockedCubes, studio.raytracer)
+        this.applyVertexSnapping(root, studio.display, studio.pointTracker, studio.lockedCubes, studio.raytracer)
         this.applyMirrorCommand(root)
     }
 
@@ -50,9 +50,25 @@ export class CubeCommands {
     
     }
 
-    applyVertexSnapping(root, pointTracker, lockedCubes, raytracer) {
+    applyVertexSnapping(root, display, pointTracker, lockedCubes, raytracer) {
+        let active = false
+
+        display.mousedown.addListener(900, e => {
+            if(active == true) {
+                active = false
+                pointTracker.disable()
+                e.consume()
+            }
+        })
+        raytracer.addEventListener('selectchange', () => {
+            if(active && raytracer.anySelected() !== true) {
+                active = false
+                pointTracker.disable()
+            }
+        })
         root.command('snap')
             .onRun(args => {
+                active = true
                 let cube = args.context.getCube()
                 let rp = args.context.hasFlag('rp')
                 let cubeLockers = []
@@ -63,6 +79,7 @@ export class CubeCommands {
 
                 let phase2 = () => {
                     pointTracker.enable(p => {
+                        active = false
                         let worldDiff = worldPosVector.sub(p.position).multiplyScalar(-1)
                         cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
                         
@@ -77,6 +94,9 @@ export class CubeCommands {
                             CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
                             lockedCubes.reconstructLockedCubes()
                         }
+
+                        raytracer.deselectAll()
+                        raytracer.clickOnMesh(cube.cubeMesh)
                         
                     }, 0xFF0000)
                 }
@@ -86,7 +106,7 @@ export class CubeCommands {
                     phase2()
                 } else {
                     pointTracker.enable(p => {
-                        raytracer.clickOnMesh(cube.cubeMesh, false)
+                        raytracer.deselectAll()
                         worldPosVector.copy(p.position)
                         phase2()
                     }, undefined, undefined, cube)
