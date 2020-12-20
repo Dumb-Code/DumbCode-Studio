@@ -1,5 +1,5 @@
 import { LinkedSelectableList, ToggleableElement } from "../util.js"
-import { Vector3, Quaternion, Euler, Matrix4, Object3D } from "../three.js"
+import { Vector3, Quaternion, Euler, Matrix4, Object3D, ReverseSubtractEquation } from "../three.js"
 
 const translateKey = "translate"
 const rotateKey = "rotate"
@@ -172,13 +172,20 @@ export class Gumball {
         })
 
         this.transformControls.addEventListener('studioDimension', e => {
-            let length = Math.floor(Math.abs(e.length*16))
+            let length = Math.floor(e.length*16)
             this.forEachCube(e.axis, (axis, cube, data) => {
+                let len = [length, length, length]
                 this.alignAxis(axis)
-
-                cube.updateDimension(axis.toArray().map((e, i) => Math.abs(e)*length + data.dimension[i]))
+                cube.updateDimension(axis.toArray().map((e, i) => {
+                    let ret = Math.abs(e)*length + data.dimension[i]
+                    if(ret < 0) {
+                        len[i] = -data.dimension[i]/Math.abs(e)
+                        ret = 0
+                    }
+                    return ret
+                }))
                 if(e.axis.x+e.axis.y+e.axis.z < 0) {
-                    cube.updateOffset(e.axis.toArray().map((e, i) => e*length + data.offset[i]))
+                    cube.updateOffset(e.axis.toArray().map((e, i) => e*len[i] + data.offset[i]))
                 }
             })
         })

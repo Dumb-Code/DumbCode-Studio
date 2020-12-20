@@ -397,20 +397,19 @@ var TransformControls = function ( camera, domElement ) {
 			if ( axis.indexOf( 'Y' ) === - 1 ) offset.y = 0;
 			if ( axis.indexOf( 'Z' ) === - 1 ) offset.z = 0;
 
-			offset.applyQuaternion( quaternionStart ).divide( parentScale );
+			// offset.applyQuaternion( quaternionStart ).divide( parentScale );
 
 			if(axis.endsWith('N')) {
 				offset.multiplyScalar(-1)
 			}
 
-			
 			let v = axis.endsWith('N') ? -1 : 1
 			if(axis.startsWith('X')) {
 				_tempVector.set(v, 0, 0)
 			} else if(axis.startsWith('Y')) {
 				_tempVector.set(0, v, 0)
 			} else if(axis.startsWith('Z')) {
-				_tempVector.set(0, 0, -v)
+				_tempVector.set(0, 0, v)
 			}
 
 			studioDimensionEvent.length = offset.x+offset.y+offset.z
@@ -884,35 +883,35 @@ var TransformControlsGizmo = function () {
 			[ new Mesh( translationLineGeometry, matGreen), [ 0, 0.6, 0 ], null]
 		],
 		Z: [
-			[ new Mesh( arrowGeometry, matBlue ), [ 0, 0, -1.2 ], [ Math.PI / 2, 0, 0 ], null],
-			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, -0.6 ], [ Math.PI / 2, 0, 0 ]]
+			[ new Mesh( arrowGeometry, matBlue ), [ 0, 0, 1.2 ], [ -Math.PI / 2, 0, 0 ], null],
+			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, 0.6 ], [ - Math.PI / 2, 0, 0 ]]
 		]
 	};
 
 	var gizmoDimensions = {
 		XN: [
-			[ new Mesh( scaleHandleGeometry, matRed ), [ -1.2, 0, 0 ], [ 0, 0, Math.PI / 2 ], null ],
-			[ new Mesh(translationLineGeometry , matLineRed ), [ -0.6, 0, 0 ], [ 0, 0, Math.PI / 2 ] ]
+			[ new Mesh( scaleHandleGeometry, matRedDark ), [ -1.2, 0, 0 ], [ 0, 0, Math.PI / 2 ], null ],
+			[ new Mesh(translationLineGeometry , matRedDark ), [ -0.6, 0, 0 ], [ 0, 0, Math.PI / 2 ] ]
 		],
 		XP: [
-			[ new Mesh( scaleHandleGeometry, matRedDark ), [ 1.2, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null ],
-			[ new Mesh(translationLineGeometry , matRedDark ), [ 0.6, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ]
+			[ new Mesh( scaleHandleGeometry, matRed ), [ 1.2, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null ],
+			[ new Mesh(translationLineGeometry , matRed ), [ 0.6, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ]
 		],
 		YN: [
-			[ new Mesh( scaleHandleGeometry, matGreen ), [ 0, -1.2, 0 ],  [ Math.PI, 0, 0 ], null ],
-			[ new Mesh( translationLineGeometry, matGreen), [ 0, -0.6, 0 ],  [ Math.PI, 0, 0 ]]
+			[ new Mesh( scaleHandleGeometry, matGreenDark ), [ 0, -1.2, 0 ],  [ Math.PI, 0, 0 ], null ],
+			[ new Mesh( translationLineGeometry, matGreenDark), [ 0, -0.6, 0 ],  [ Math.PI, 0, 0 ]]
 		],
 		YP: [
-			[ new Mesh( scaleHandleGeometry, matGreenDark ), [ 0, 1.2, 0 ], null, null ],
-			[ new Mesh( translationLineGeometry, matGreenDark), [ 0, 0.6, 0 ], null]
+			[ new Mesh( scaleHandleGeometry, matGreen ), [ 0, 1.2, 0 ], null, null ],
+			[ new Mesh( translationLineGeometry, matGreen), [ 0, 0.6, 0 ], null]
 		],
 		ZN: [
-			[ new Mesh( scaleHandleGeometry, matBlue ), [ 0, 0, 1.2 ], [ - Math.PI / 2, 0, 0 ], null],
-			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, 0.6 ], [ - Math.PI / 2, 0, 0 ]]
-		],
-		ZP: [
 			[ new Mesh( scaleHandleGeometry, matBlueDark ), [ 0, 0, -1.2 ], [ Math.PI / 2, 0, 0 ], null],
 			[ new Mesh( translationLineGeometry, matBlueDark ), [ 0, 0, -0.6 ], [ Math.PI / 2, 0, 0 ]]
+		],
+		ZP: [
+			[ new Mesh( scaleHandleGeometry, matBlue ), [ 0, 0, 1.2 ], [ - Math.PI / 2, 0, 0 ], null],
+			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, 0.6 ], [ -Math.PI / 2, 0, 0 ]]
 		]
 	};
 
@@ -1200,11 +1199,6 @@ var TransformControlsGizmo = function () {
 		handles = handles.concat( this.helper[ this.mode ].children );
 
 		let centerFace = this.mode === 'dimensions' && this.object !== undefined && this.object.tabulaCube !== undefined
-		
-		if(centerFace) {
-			// this.object.tabulaCube.cubeMesh.matrixWorld.decompose(tempVector2, tempQuaternion, tempVector3)
-			// tempVector3.fromArray(this.object.tabulaCube.dimension).divideScalar(32)
-		}
 
 		for ( var i = 0; i < handles.length; i ++ ) {
 
@@ -1221,7 +1215,7 @@ var TransformControlsGizmo = function () {
 				this.object.tabulaCube.getWorldPosition (
 					handle.name.startsWith('X') ? (handle.name == 'XP' ? 1 : 0) : 0.5, 
 					handle.name.startsWith('Y') ? (handle.name == 'YP' ? 1 : 0) : 0.5,
-					handle.name.startsWith('Z') ? (handle.name == 'ZP' ? 0 : 1) : 0.5,
+					handle.name.startsWith('Z') ? (handle.name == 'ZP' ? 1 : 0) : 0.5,
 					handle.position
 				)
 			}
