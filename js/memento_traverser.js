@@ -9,14 +9,23 @@ export class MementoTraverser {
         this.skipFrames = skipFrames
         this.frameCounter = 0
         this.mementoList = []
+        this.blockedReason = new Set()
         this.index = -1
         
         this._internalClock = new Clock()
     }
 
+    blockReason(reason) {
+        this.blockedReason.add(reason)
+    }
+
+    unblockReason(reason) {
+        this.blockedReason.delete(reason)
+    }
+
     onFrame() {
         let time = this._internalClock.getElapsedTime()
-        if((time >= this.timeTillCheck && (this.frameCounter++ % this.skipFrames) === 0) || this.mementoList.length == 0) {
+        if((this.blockedReason.size === 0 && time >= this.timeTillCheck && (this.frameCounter++ % this.skipFrames) === 0) || this.mementoList.length == 0) {
             this.attemptPush()
             this.frameCounter = 0
         }

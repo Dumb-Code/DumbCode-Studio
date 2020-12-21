@@ -122,6 +122,10 @@ export class Gumball {
             this.pointTracker.enable(p => this.transformAnchor.position.copy(p))
         })
 
+        const reason = 'gumball'
+        this.transformControls.addEventListener('mouseDown', () => studio.pth.modelMementoTraverser.blockReason(reason))
+        this.transformControls.addEventListener('mouseUp', () => studio.pth.modelMementoTraverser.unblockReason(reason))
+
         this.transformControls.addEventListener('mouseDown', () => {
             this.startingCache.clear()
             this.raytracer.selectedSet.forEach(cube => {
