@@ -65,7 +65,7 @@ export class AnimationProjectPart {
             }
         })
 
-        pth.addEventListener('selectchange', e => this.refreshAnimationList())
+        pth.addEventListener('selectchange', () => this.refreshAnimationList())
     }
 
     createAndInitiateNewAnimationTab(name, arraybuffer) {
@@ -140,8 +140,10 @@ export class AnimationProjectPart {
 
     refreshAnimationList() {
         this.emptyAnimationList.siblings().not('.animation-layer-topbar').detach()
-        this.pth.animationTabs.allTabs.forEach(tab => tab._clonedDom.insertBefore(this.emptyAnimationList))
-        this.pth.animationTabs.refreshTabs()
+        if(this.pth.anySelected()) {
+            this.pth.animationTabs.allTabs.forEach(tab => tab._clonedDom.insertBefore(this.emptyAnimationList))
+            this.pth.animationTabs.refreshTabs()
+        }
     }
 
 }

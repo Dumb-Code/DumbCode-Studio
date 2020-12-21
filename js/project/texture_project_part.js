@@ -72,14 +72,15 @@ export class TextureProjectPart {
 
     refreshTextureLayers() {
         this.emptyTextureList.siblings().not('.texture-layer-topbar').detach()
-        this.pth.textureManager.textures.forEach(t => {
-            let e = t._projectElement
-            if(e === undefined) {
-                console.error("Layer created without project element " + JSON.stringify(t))
-                return
-            }
-            e.insertBefore(this.emptyTextureList)
-        })
-
+        if(this.pth.anySelected()) {
+            this.pth.textureManager.textures.forEach(t => {
+                let e = t._projectElement
+                if(e === undefined) {
+                    console.error("Layer created without project element " + JSON.stringify(t))
+                    return
+                }
+                e.insertBefore(this.emptyTextureList)
+            })
+        }
     }
 }

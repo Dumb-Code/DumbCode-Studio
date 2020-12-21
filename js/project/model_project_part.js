@@ -112,9 +112,14 @@ export class ModelProjectPart {
             .insertBefore(this.emptyModelEntry)    
         cloned.find('.close-model-button').click(e => {
             this.pth.deleteProject(project)
+            if(this.pth.allTabs.length == 0) {
+                project.textureManager.removeAll()
+                project.animationTabHandler.removeAll()
+                this.animationPart.refreshAnimationList()
+            }
             cloned.remove()
             this.pth.allTabs.forEach(tab => tab._element.attr('select-list-entry', tab.id))
-            this.pth.textureManager.refresh()
+            
             e.stopPropagation()
         })
         cloned.find('.download-model-file').click(e => {

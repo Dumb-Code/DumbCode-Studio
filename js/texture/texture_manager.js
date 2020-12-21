@@ -150,10 +150,14 @@ export class TextureManager {
         return data
     }
 
-    refresh() {
+    removeAll() {
         this.filesPage.textureProjectPart.refreshTextureLayers()
-
         this.textureEmptyLayer.siblings().not('.layer-persistant').detach()
+    }
+
+    refresh() {
+        this.removeAll()
+        
         this.textures.forEach((t, id) => {
             t.idx = id
             t.dom.attr('select-list-entry', t.idx)

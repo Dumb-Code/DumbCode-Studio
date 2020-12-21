@@ -149,9 +149,13 @@ export class AnimationTabHandler {
         let tab = this.allTabs[index]
         return tab === undefined ? null : tab
     }
+    
+    removeAll() {
+        this.tabContainer.children().detach()
+    }
 
     refreshTabs() {
-        this.tabContainer.children().detach()
+        this.removeAll()
         this.allTabs.filter(tab => tab.opened).forEach(tab => this.tabContainer.append(tab.element))
     }
 }
