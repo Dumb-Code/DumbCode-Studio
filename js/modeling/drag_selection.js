@@ -76,7 +76,7 @@ export class DragSelection {
                     raycaster.setFromCamera(mouse, this.display.camera)
                     raycaster
                         .intersectObjects(this.pth.model.modelCache.children, true)
-                        .forEach(object => cache.add(object.object.parent))
+                        .forEach(object => cache.add(object.object))
                     this.raytraceCache.set(key, cache)
                 }
                 this.raytraceCache.get(key).forEach(c => intersectedObjects.add(c))  
