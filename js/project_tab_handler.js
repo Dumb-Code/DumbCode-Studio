@@ -121,6 +121,9 @@ export class ProjectTabHandler {
                 this.selectIndex(idx+1)
             }
         }
+
+        this.display.scene.remove(project.model.modelCache)
+
     }
 }
 
