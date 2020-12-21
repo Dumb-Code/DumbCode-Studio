@@ -126,7 +126,17 @@ export class Gumball {
             this.startingCache.clear()
             this.raytracer.selectedSet.forEach(cube => {
                 let elem = this.getObject(cube.tabulaCube)
+                let parent = cube.tabulaCube.parent
+                let root = true
+                while(parent) {
+                    if(this.raytracer.isCubeSelected(parent)) {
+                        root = false
+                        break
+                    }
+                    parent = parent.parent
+                }
                 this.startingCache.set(cube.tabulaCube, { 
+                    root: root,
                     position: [...cube.tabulaCube.rotationPoint], 
                     offset: [...cube.tabulaCube.offset],
                     dimension: [...cube.tabulaCube.dimension],
@@ -137,7 +147,7 @@ export class Gumball {
         })
 
         this.transformControls.addEventListener('studioTranslate', e => {
-            this.forEachCube(e.axis, (axis, cube, data) => {
+            this.forEachCube(e.axis, true, (axis, cube, data) => {
                 axis.multiplyScalar(e.length)
                 let pos = axis.toArray()
                 switch(this.selectedTranslate.value) {
@@ -155,7 +165,7 @@ export class Gumball {
         })
 
         this.transformControls.addEventListener('studioRotate', e => {
-            this.forEachCube(e.rotationAxis, (axis, cube, data) => {
+            this.forEachCube(e.rotationAxis, true, (axis, cube, data) => {
                 decomposeRotation2.setFromAxisAngle(axis, e.rotationAngle)
                 decomposeRotation2.multiply(data.quaternion).normalize()
 
@@ -173,7 +183,7 @@ export class Gumball {
 
         this.transformControls.addEventListener('studioDimension', e => {
             let length = Math.floor(e.length*16)
-            this.forEachCube(e.axis, (axis, cube, data) => {
+            this.forEachCube(e.axis, false, (axis, cube, data) => {
                 let len = [length, length, length]
                 this.alignAxis(axis)
                 cube.updateDimension(axis.toArray().map((e, i) => {
@@ -217,9 +227,12 @@ export class Gumball {
     }
 
 
-    forEachCube(axisIn, callback) {
+    forEachCube(axisIn, applyRoots, callback) {
         this.transformAnchor.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
         this.startingCache.forEach((data, cube) => {
+            if(applyRoots === true && data.root !== true) {
+                return
+            }
             let elem = this.getObject(cube)
 
             elem.parent.matrixWorld.decompose(decomposePosition2, decomposeRotation2, decomposeScale2)
