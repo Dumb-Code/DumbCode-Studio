@@ -180,3 +180,5 @@ color: #3298dc;
 .editor-cube-button.is-active > *:not(.when-has-cubes) {
   display: none
 }
+
+button:focus {outline:0;}
