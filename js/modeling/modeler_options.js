@@ -73,11 +73,16 @@ export class ModelerOptions {
             $(".cube-line-controller.cube-selected .cube-lock-icon-container").click()
         })
         this.cubeChildrenCount = dom.find('.cube-children-display')
+
         this.totalCubeCount = dom.find('.total-cubes-display')
         this.totalCubeCount.click(() => {
-            this.raytracer.clearEventData()
-            this.pth.model.cubeMap.forEach(cube => this.raytracer.clickOnMesh(cube.cubeMesh, true, false, true))
-            this.raytracer.dispatchEvents(true)
+            if(this.raytracer.selectedSet.size !== this.pth.model.cubeMap.size) {
+                this.raytracer.clearEventData()
+                this.pth.model.cubeMap.forEach(cube => this.raytracer.clickOnMesh(cube.cubeMesh, true, false, true))
+                this.raytracer.dispatchEvents(true)
+            } else {
+                this.raytracer.deselectAll()
+            }
         })
 
         this.cubeChildrenCount.click(() => {
