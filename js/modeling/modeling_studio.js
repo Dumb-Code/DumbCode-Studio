@@ -33,6 +33,7 @@ export class ModelingStudio {
         this.pth.addEventListener('selectchange', () => this.cubeList.refreshCompleatly())
         this.selectedRequired = dom.find('.editor-require-selected')
         this.cubesRequired = dom.find('.editor-require-cubes')
+        this.childrenRequired = dom.find('.editor-require-children')
 
         this.transformControls = display.createTransformControls()
         this.group.add(this.transformControls)
@@ -94,7 +95,8 @@ export class ModelingStudio {
 
     cubeHierarchyChanged() {
         this.cubeList.refreshCompleatly()
-        this.modelerOptions.refreshOptionTexts()        
+        this.modelerOptions.refreshOptionTexts()    
+        this.refreshChildrenSelected()    
     }
 
     setActive() {
@@ -119,6 +121,17 @@ export class ModelingStudio {
 
         let isSelected = this.raytracer.selectedSet.size === 1
         this.selectedRequired.prop("disabled", !isSelected).toggleClass("is-active", isSelected)
+
+        let hasCubes = this.raytracer.anySelected()
+        this.cubesRequired.prop("disabled", !hasCubes).toggleClass("is-active", hasCubes)
+
+        this.refreshChildrenSelected()
+    }
+
+    refreshChildrenSelected() {
+        let hasChildren = false
+        this.raytracer.selectedSet.forEach(cube => hasChildren |= cube.tabulaCube.children.length > 0)
+        this.childrenRequired.prop("disabled", !hasChildren).toggleClass("is-active", hasChildren)
     }
 }
 
