@@ -125,6 +125,7 @@ export class DCMCube {
             this.name = name + "~" + counter
             counter += 1
         }
+        model.cubeMap.set(this.name, this)
     }
 
   
