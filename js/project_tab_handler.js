@@ -97,6 +97,31 @@ export class ProjectTabHandler {
         this.selectIndex(project.id)
         return project
     }
+    
+    deleteProject(project) {
+        let idx = this.allTabs.indexOf(project)
+        if(idx == -1) {
+            console.warn("Tried to delete an invalid project")
+            return
+        }
+        this.allTabs.splice(idx, 1)
+
+        this.allTabs.forEach((p, i) => p.id = i)
+
+        if(this.currentIndex > idx) {
+            this.selectIndex(this.currentIndex-1)
+        } else if(this.currentIndex == idx) {
+            if(idx == this.allTabs.length) {
+                if(idx == 0) {
+                    this.currentIndex = -1
+                } else {
+                    this.selectIndex(idx-1)
+                }
+            } else {
+                this.selectIndex(idx+1)
+            }
+        }
+    }
 }
 
 Object.assign( ProjectTabHandler.prototype, EventDispatcher.prototype )

@@ -110,9 +110,19 @@ export class ModelProjectPart {
             .attr('select-list-entry', project.id)
             .removeClass('empty-column')
             .insertBefore(this.emptyModelEntry)    
-        
-        cloned.find('.download-model-file').click(() => DCMModel.writeModel(model).downloadAsFile(model.fileName + ".dcm"))
-        cloned.find('.download-project-file').click(() => {
+        cloned.find('.close-model-button').click(e => {
+            this.pth.deleteProject(project)
+            cloned.remove()
+            this.pth.allTabs.forEach(tab => tab._element.attr('select-list-entry', tab.id))
+            this.pth.textureManager.refresh()
+            e.stopPropagation()
+        })
+        cloned.find('.download-model-file').click(e => {
+            DCMModel.writeModel(model).downloadAsFile(model.fileName + ".dcm")
+            e.stopPropagation()
+        })
+        cloned.find('.download-project-file').click(e => {
+            e.stopPropagation()
             let zip = new JSZip()
 
             zip.file('model.dcm', DCMModel.writeModel(model).getAsBlob())

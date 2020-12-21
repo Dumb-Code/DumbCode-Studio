@@ -112,9 +112,19 @@ export class AnimationProjectPart {
         }, name)
 
         let handler = tab.handler
-        dom.find('.download-animation-gif').click(() => this.gifExporter.onOpenModal(handler, tab.name))
-        dom.find('.download-animation-file').click(() => DCALoader.exportAnimation(handler).downloadAsFile(tab.name + ".dca"))
-        
+        dom.find('.download-animation-gif').click(e => {
+            this.gifExporter.onOpenModal(handler, tab.name)
+            e.stopPropagation()
+        })
+        dom.find('.download-animation-file').click(() => {
+            DCALoader.exportAnimation(handler).downloadAsFile(tab.name + ".dca")
+            e.stopPropagation()
+        })
+        dom.find('.delete-animation-button').click(e => {
+            this.pth.animationTabs.deleteAnimation(tab)
+            cloned.remove()
+            e.stopPropagation()
+        })
         tab._toggleDom = dom.find('.toggle-animation')
         tab._toggleDom.click(() => tab.toggleOpened())
         return tab

@@ -62,7 +62,7 @@ export class AnimationTabHandler {
             textElement,
             name: "New Animation",
             opened: true,
-            toggleOpened: () => {
+            toggleOpened: (silent = false) => {
                 if(data.opened) { //Removing
                     let openedArr = this.allTabs.filter(tab => tab.opened)
                     let idx = openedArr.indexOf(data)
@@ -81,8 +81,12 @@ export class AnimationTabHandler {
                 }
                 this.filesPage.animationProjectPart.toggleTabOpened(data)
                 data.opened = !data.opened
-                this.refreshTabs()
-                this.onchange()
+
+                if(silent !== true) {
+                    this.refreshTabs()
+                    this.onchange()
+                }
+                
             }
         }
         data.mementoTraverser = new MementoTraverser(() => new AnimationMemento(this.studio, data))
@@ -90,6 +94,15 @@ export class AnimationTabHandler {
 
         this.activeTab = id
         return data
+    }
+
+    deleteAnimation(data) {
+        if(data.opened) {
+            data.toggleOpened(true)
+        }
+        this.allTabs.splice(this.allTabs.indexOf(data), 1)
+        this.refreshTabs()
+        this.onchange()
     }
 
     set activeTab(activeTab) {

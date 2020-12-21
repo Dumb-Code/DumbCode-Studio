@@ -190,7 +190,13 @@ export class TextureManager {
         tex.magFilter = NearestFilter;
         tex.minFilter = NearestFilter;
         this.pth.setTexture(tex)
-        
+    }
+
+    deleteTexture(data) {
+        this.selectedLayer.value = undefined
+        this.textures.splice(this.textures.indexOf(data), 1)
+        data.dom.remove()
+        this.refresh()
     }
 
     gcd(a, b) {

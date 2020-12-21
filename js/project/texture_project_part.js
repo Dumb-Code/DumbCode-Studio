@@ -43,7 +43,15 @@ export class TextureProjectPart {
         let nameContainer = container.find('.dbl-text')
         data._onRename = () => nameContainer.text(data.name)
 
-        cloned.find('.download-texture-file').click(() => downloadCanvas(data.name + ".png", data.canvas))
+        cloned.find('.download-texture-file').click(e => {
+            downloadCanvas(data.name + ".png", data.canvas)
+            e.stopPropagation()
+        })
+        cloned.find('.delete-texture-button').click(e => {
+            this.pth.textureManager.deleteTexture(data)
+            cloned.remove()
+            e.stopPropagation()
+        })
     }
 
     async uploadTextureFile(files) {
