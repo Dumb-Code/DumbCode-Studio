@@ -1,4 +1,4 @@
-import { LinkedElement } from "../util.js"
+import { LinkedElement, ToggleableElement } from "../util.js"
 import { indexHandler, numberHandler, enumHandler, booleanHandler, ArgumentHandler, stringHandler, axisNumberHandler } from "../command_handler.js"
 import { Vector3, Quaternion, Matrix4, Euler } from "../three.js"
 
@@ -42,24 +42,23 @@ export class CubeValueDisplay {
             this.lockedCubes.reconstructLockedCubes()
         })
         this.offsets = new LinkedElement(dom.find('.input-offset .input-part')).onchange(e => getCube()?.updateOffset(e.value))
-        this.cubeGrowLocked = dom.find('.cube-grow-lock').click(() => {
+        this.cubeGrowLocked = new ToggleableElement(dom.find('.cube-grow-lock'), 'is-locked')
+        .addPredicate(() => this.cubeGrow.value !== undefined)
+        .onchange(() => {
             let values = this.cubeGrow.value
             if(values === undefined) {
                 return
             }
-            if(this.cubeGrowLocked.hasClass('is-locked')) {
-                this.cubeGrowLocked.removeClass('is-locked')
-            } else {
+            if(this.cubeGrowLocked.value === true) {
                 let val = (values[0]+values[1]+values[2]) / 3
                 values[0] = val
                 values[1] = val
                 values[2] = val
                 this.cubeGrow.value = values
-                this.cubeGrowLocked.addClass('is-locked')
             }
         })
         this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow .input-part')).onchange(e => {
-            if(e.idx !== -1 && this.cubeGrowLocked.hasClass('is-locked')) {
+            if(e.idx !== -1 && this.cubeGrowLocked.value) {
                 let val = e.value[e.idx]
                 e.value[0] = val
                 e.value[1] = val
@@ -241,11 +240,7 @@ export class CubeValueDisplay {
             let cube = this.raytracer.firstSelected().tabulaCube
 
             let vals = cube.cubeGrow
-            if(vals[0] == vals[1] && vals[1] == vals[2]) {
-                this.cubeGrowLocked.addClass('is-locked')
-            } else {
-                this.cubeGrowLocked.removeClass('is-locked')
-            }
+            this.cubeGrowLocked.setInternalValue(vals[1] && vals[1] == vals[2])
 
             this.cubeName.setInternalValue(cube.name)
             this.positions.setInternalValue(cube.rotationPoint)
