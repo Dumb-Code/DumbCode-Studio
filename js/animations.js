@@ -83,10 +83,11 @@ export class AnimationHandler {
         this.forcedAnimationTicks = keyframe.startTime + keyframe.duration
         this.animate(0)
         this.forcedAnimationTicks = null
-        let data = { rot:{}, pos:{} }
+        let data = { rot:{}, pos:{}, cg: {} }
         this.tbl.cubeMap.forEach((cube, name) => {
             data.rot[name] = cube.cubeGroup.rotation.toArray()
             data.pos[name] = cube.cubeGroup.position.toArray()
+            data.cg[name] =  cube.cubeMesh.scale.toArray().map((e, i) => (e-cube.dimension[i]) / 2)
         })
         this.definedKeyframeInfo.set(keyframe, data)
     }
@@ -150,8 +151,19 @@ export class AnimationHandler {
                         kf.rotationPointMap.set(name, kf.rotationPointMap.get(name).map((v, i) => v + delta[i]))
                     } else {
                         kf.rotationPointMap.set(name, delta)
-                    }
-                    
+                    } 
+                }
+
+                let tCg = targetMap.cg[name]
+                let cg = cube.cubeMesh.scale.toArray().map((e, i) => (e-cube.dimension[i]) / 2)
+                if(tCg[0] !== cg[0] || tCg[1] !== cg[1] || tCg[2] !== cg[2]) {
+                    let delta = [tCg[0]-cg[0], tCg[1]-cg[1], tCg[2]-cg[2]]
+                    //map plus : target - current
+                    if(kf.cubeGrowMap.has(name)) {
+                        kf.cubeGrowMap.set(name, kf.cubeGrowMap.get(name).map((v, i) => v + delta[i]))
+                    } else {
+                        kf.cubeGrowMap.set(name, delta)
+                    } 
                 }
             })
 
@@ -171,6 +183,7 @@ class KeyFrame {
 
         this.rotationMap = new Map();
         this.rotationPointMap = new Map();
+        this.cubeGrowMap = new Map();
 
         this.progressionPoints = [{required: true, x: 0, y: 1}, {required: true, x: 1, y: 0}]
     }
@@ -228,6 +241,24 @@ class KeyFrame {
             let cube = this.handler.tbl.cubeMap.get(key)?.cubeGroup
             if(cube) {
                 cube.position.set(cube.position.x + values[0]*percentageDone, cube.position.y + values[1]*percentageDone, cube.position.z + values[2]*percentageDone)
+            }
+        })
+
+        this.cubeGrowMap.forEach((values, key) => {
+            let cube = this.handler.tbl.cubeMap.get(key)?.cubeMesh
+            if(cube) {
+                cube.position.set(cube.position.x - values[0]*percentageDone, cube.position.y - values[1]*percentageDone, cube.position.z - values[2]*percentageDone)
+                cube.scale.set(cube.scale.x + 2*values[0]*percentageDone, cube.scale.y + 2*values[1]*percentageDone, cube.scale.z + 2*values[2]*percentageDone)
+
+                if(cube.scale.x === 0) {
+                    cube.scale.x = 0.00001
+                }
+                if(cube.scale.y === 0) {
+                    cube.scale.y = 0.00001
+                }
+                if(cube.scale.z === 0) {
+                    cube.scale.z = 0.00001
+                }
             }
         })
     }

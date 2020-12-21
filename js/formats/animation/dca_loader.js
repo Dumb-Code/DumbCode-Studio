@@ -1,4 +1,5 @@
 import { ByteBuffer } from "../../animations.js"
+import { LinkedElement } from "../../util.js"
 
 const rotArr = new Array(3)
 const posArr = new Array(3)
@@ -32,6 +33,13 @@ DCALoader.importAnimation = (handler, buffer) => {
         let posSize = buffer.readNumber()
         for(let p = 0; p < posSize; p++) {
             kf.rotationPointMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
+        }
+
+        if(version >= 7) {
+            let cgSize = buffer.readNumber()
+            for(let c = 0; c < cgSize; c++) {
+                kf.cubeGrowMap.set(buffer.readString(), [buffer.readNumber(), buffer.readNumber(), buffer.readNumber()])
+            }
         }
 
         if(version >= 2) {
@@ -180,6 +188,15 @@ DCALoader.exportAnimation = handler => {
         buffer.writeNumber(kf.rotationPointMap.size);
         [...kf.rotationPointMap.keys()].sort().forEach(name => {
             let entry = kf.rotationPointMap.get(name)
+            buffer.writeString(name)
+            buffer.writeNumber(entry[0])
+            buffer.writeNumber(entry[1])
+            buffer.writeNumber(entry[2])
+        })
+
+        buffer.writeNumber(kf.cubeGrowMap.size);
+        [...kf.cubeGrowMap.keys()].sort().forEach(name => {
+            let entry = kf.cubeGrowMap.get(name)
             buffer.writeString(name)
             buffer.writeNumber(entry[0])
             buffer.writeNumber(entry[1])

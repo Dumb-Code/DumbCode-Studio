@@ -23,6 +23,7 @@ export class DcProject {//._files, this._modeling, this._texture, this._animatio
         this.materials = this._createMaterialsObject()
         this.selectedSet = new Set()
         this.lockedCubes = new Set()
+        this.unlockedAnimationCubes = new Set()
 
         this.initiate(pth)
     }

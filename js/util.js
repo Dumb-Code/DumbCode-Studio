@@ -206,12 +206,12 @@ Object.assign( LinkedSelectableList.prototype, EventDispatcher.prototype );
 
 
 export class ToggleableElement {
-    constructor(elements) {
+    constructor(elements, clazz = "is-activated") {
         this.elements = elements
+        this.clazz = clazz
         this.predicate = () => true
-        let setValue = v => this.value = v
-        this.elements.click(function(e) { 
-            setValue(!this.classList.contains("is-activated"))
+        this.elements.click(e => { 
+            this.value = !this.value
             e.stopPropagation()
         })
     }
@@ -223,12 +223,12 @@ export class ToggleableElement {
     }
 
     get value() {
-        return this.elements.is('.is-activated')
+        return this.elements.hasClass(this.clazz)
     }
 
     setInternalValue(value) {
         if(this.predicate(value)) {
-            this.elements.toggleClass("is-activated", value)
+            this.elements.toggleClass(this.clazz, value)
             return true
         }
         return false

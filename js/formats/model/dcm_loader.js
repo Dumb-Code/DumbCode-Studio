@@ -157,9 +157,9 @@ export class DCMCube {
     }
 
     getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3(), quat) {
-        let w = this.dimension[0] + this.cubeGrow[0]*2 + 0.01
-        let h = this.dimension[1] + this.cubeGrow[1]*2 + 0.01
-        let d = this.dimension[2] + this.cubeGrow[2]*2 + 0.01
+        let w = this.dimension[0] + this.cubeGrow[0]*2 + 0.0001
+        let h = this.dimension[1] + this.cubeGrow[1]*2 + 0.0001
+        let d = this.dimension[2] + this.cubeGrow[2]*2 + 0.0001
         tempVector.set(xDelta*w/16, yDelta*h/16, zDelta*d/16).applyQuaternion(this.cubeMesh.getWorldQuaternion(tempQuaterion))
         this.cubeMesh.getWorldPosition(vector).add(tempVector)
         return vector
@@ -232,9 +232,9 @@ export class DCMCube {
     }
 
     updateGeometry( { dimension = this.dimension, cubeGrow = this.cubeGrow, shouldUpdateTexture = true } = {}) {
-        let w = dimension[0] + cubeGrow[0]*2 + 0.01
-        let h = dimension[1] + cubeGrow[1]*2 + 0.01
-        let d = dimension[2] + cubeGrow[2]*2 + 0.01
+        let w = dimension[0] + cubeGrow[0]*2 + 0.0001
+        let h = dimension[1] + cubeGrow[1]*2 + 0.0001
+        let d = dimension[2] + cubeGrow[2]*2 + 0.0001
 
         this.cubeMesh.scale.set(w, h, d)
         if(shouldUpdateTexture) {

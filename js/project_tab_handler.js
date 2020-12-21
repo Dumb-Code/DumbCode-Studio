@@ -73,6 +73,10 @@ export class ProjectTabHandler {
         return this.getSelected().lockedCubes
     }
 
+    get unlockedAnimationCubes() {
+        return this.getSelected().unlockedAnimationCubes
+    }
+
     updateTexture(callback) {
         callback(this.materials.normal)
         callback(this.materials.selected)

@@ -28,9 +28,6 @@ export class AnimationStudio {
             this.selectedRequired.prop("disabled", !isSelected).toggleClass("is-active", isSelected)
         })
 
-        this.positionCache = null
-        this.rotationCache = null
-
         this._tabContainer = dom.find('.tab-container')
         dom.find('.tab-add').click(() => pth.animationTabs.initiateNewTab())
 
@@ -97,7 +94,6 @@ export class AnimationStudio {
                     this.cubeDisplayValues.rotation.value = values
                 }
             }
-            this.rotationCache = values
 
             let handler = this.pth.animationTabs.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
@@ -128,7 +124,6 @@ export class AnimationStudio {
                     this.cubeDisplayValues.position.value = values
                 }
             }
-            this.positionCache = values
 
             let handler = this.pth.animationTabs.active
             if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
@@ -140,6 +135,61 @@ export class AnimationStudio {
                     handler.animate(0)
                     let arr = selected.parent.position.toArray()
                     handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]))
+                    handler.selectedKeyFrame.skip = false
+                    handler.forcedAnimationTicks = null
+
+                    handler.updateDefinedKeyframe(handler.selectedKeyFrame)
+                    handler.fixDefinedLayers(handler.selectedKeyFrame)
+            }
+        }
+    }
+
+    setCubeGrow(values, updateDisplay = true, updateSilent = false, idx = -1) {
+        let selected = this.raytracer.oneSelected()
+        if(selected !== null) {
+            if(updateDisplay) {
+                let silent = updateSilent
+                if(this.cubeDisplayValues.cubeGrowLocked.value) {
+                    let val
+                    //Get the odd one out
+                    if(values[0] == values[1]) {
+                        val = values[2]
+                    } else if(values[0] == values[2]) {
+                        val = values[1]
+                    } else if(values[1] == values[2]) {
+                        val = values[0]
+                    }
+
+                    values[0] = val
+                    values[1] = val
+                    values[2] = val
+
+                    if(this.cubeDisplayValues.cubeGrow.value !== undefined) {
+                        for(let i = 0; i < 3; i++) {
+                            if(this.cubeDisplayValues.cubeGrow.value[i] !== val) {
+                                silent = false
+                            }
+                        }
+                    }
+                }
+                if(silent) {
+                    this.cubeDisplayValues.cubeGrow.setInternalValue(values, this.cubeDisplayValues.cubeGrow.indexSelected)
+                } else {
+                    this.cubeDisplayValues.cubeGrow.value = values
+                }
+            }
+            this.positionCache = values
+
+            let handler = this.pth.animationTabs.active
+            if(handler !== null && handler.selectedKeyFrame !== undefined && !updateSilent &&
+                handler.keyframeInfo.filter(l => l.id == handler.selectedKeyFrame.layer).some(l => !l.locked)) {
+                    handler.ensureDefinedLayers()
+                    handler.selectedKeyFrame.skip = true
+                    this.pth.model.resetAnimations()
+                    handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
+                    handler.animate(0)
+                    let arr = selected.scale.toArray().map((e, i) => (e-selected.tabulaCube.dimension[i]) / 2)
+                    handler.selectedKeyFrame.cubeGrowMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]))
                     handler.selectedKeyFrame.skip = false
                     handler.forcedAnimationTicks = null
 
@@ -169,14 +219,14 @@ export class AnimationStudio {
         this.cubeDisplayValues.updateSelected()
         let selected = this.raytracer.oneSelected()
         if(selected !== null) {
-            if(this.rotationCache !== null) {
-                selected.parent.rotation.set(this.rotationCache[0] * Math.PI / 180, this.rotationCache[1] * Math.PI / 180, this.rotationCache[2] * Math.PI / 180)
-                this.rotationCache = null
-            }
-            if(this.positionCache !== null) {
-                selected.parent.position.set(this.positionCache[0], this.positionCache[1], this.positionCache[2])
-                this.positionCache = null
-            }
+            // if(this.rotationCache !== null) {
+            //     selected.parent.rotation.set(this.rotationCache[0] * Math.PI / 180, this.rotationCache[1] * Math.PI / 180, this.rotationCache[2] * Math.PI / 180)
+            //     this.rotationCache = null
+            // }
+            // if(this.positionCache !== null) {
+            //     selected.parent.position.set(this.positionCache[0], this.positionCache[1], this.positionCache[2])
+            //     this.positionCache = null
+            // }
         }
         this.display.renderTopGroup.add(this.group)
         this.transformControls.enableReason('tab')
@@ -211,8 +261,10 @@ export class AnimationStudio {
         if(selected !== null) {
              let pos = selected.parent.position
              let rot = selected.parent.rotation
+             let cubeGrow = selected.scale.toArray().map((e, i) => (e-selected.tabulaCube.dimension[i]) / 2)
              this.setPosition([pos.x, pos.y, pos.z], true, true)
              this.setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), true, true)
+             this.setCubeGrow(cubeGrow, true, true)
         }
     }
     
