@@ -126,8 +126,12 @@ export class Raytracer {
         console.trace("deprecated set")
     }
     
+    clearEventData() {
+        selectElementEvent.cubes.length = 0
+        deselectElementEvent.cubes.length = 0
+    }
     
-    clickOnMesh(mesh, toSet, testPrevious = true) {
+    clickOnMesh(mesh, toSet, testPrevious = true, silent = false) {
         if(mesh === undefined) {
             console.trace("deprecated click undefined")
             return
@@ -136,8 +140,10 @@ export class Raytracer {
         if(toSet !== undefined) {
             shouldRemove = !toSet
         }
-        selectElementEvent.cubes.length = 0
-        deselectElementEvent.cubes.length = 0
+
+        if(silent !== true) {
+            this.clearEventData()
+        }
 
         if(testPrevious === true && !isKeyDown("Control")) {
             this.selectedSet.forEach(c => deselectElementEvent.cubes.push(c))
@@ -149,14 +155,26 @@ export class Raytracer {
         } else {
             this.selectedSet.add(mesh)
             selectElementEvent.cubes.push(mesh)
-            this.dispatchEvent(selectElementEvent)
+            if(silent !== true) {
+                this.dispatchEvent(selectElementEvent)
+            }
         }
 
-        
-        if(deselectElementEvent.cubes.length !== 0) {
+        if(silent !== true) {
+            if(deselectElementEvent.cubes.length !== 0) {
+                this.dispatchEvent(deselectElementEvent)
+            }
+    
+            this.dispatchEvent(selectChangeEvent)
+        }
+    }
+
+    dispatchEvents(selected) {
+        if(selected === true) {
+            this.dispatchEvent(selectElementEvent)
+        } else {
             this.dispatchEvent(deselectElementEvent)
         }
-
         this.dispatchEvent(selectChangeEvent)
     }
 
@@ -165,8 +183,7 @@ export class Raytracer {
         deselectElementEvent.cubes.length = 0
         this.selectedSet.forEach(c => deselectElementEvent.cubes.push(c))
         this.selectedSet.clear()
-        this.dispatchEvent(deselectElementEvent)
-        this.dispatchEvent(selectChangeEvent)
+        this.dispatchEvents(false)
     }
 
     mouseOverMesh(mesh, distance = -1) {

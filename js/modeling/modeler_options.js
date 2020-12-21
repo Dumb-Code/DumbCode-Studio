@@ -1,10 +1,11 @@
 import { doubleClickToEdit, LinkedSelectableList } from "../util.js";
-import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture } from "../three.js";
+import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture, TubeBufferGeometry } from "../three.js";
 
 export class ModelerOptions {
 
     constructor(dom, studio, setCamera, renameCube) {
         this.raytracer = studio.raytracer
+        this.pth = studio.pth
         this.textureMode = new LinkedSelectableList(dom.find('.select-texture-mode')).onchange(e => {
             switch(e.value) {
                 case "textured":
@@ -72,10 +73,18 @@ export class ModelerOptions {
             $(".cube-line-controller.cube-selected .cube-lock-icon-container").click()
         })
         this.cubeChildrenCount = dom.find('.cube-children-display')
+        this.totalCubeCount = dom.find('.total-cubes-display')
+        this.totalCubeCount.click(() => {
+            this.raytracer.clearEventData()
+            this.pth.model.cubeMap.forEach(cube => this.raytracer.clickOnMesh(cube.cubeMesh, true, false, true))
+            this.raytracer.dispatchEvents(true)
+        })
 
         this.cubeChildrenCount.click(() => {
             if(this.raytracer.oneSelected()) {
-                this.raytracer.firstSelected().tabulaCube.getAllChildrenCubes().forEach(cube => this.raytracer.clickOnMesh(cube.cubeMesh, true, false))
+                this.raytracer.clearEventData()
+                this.raytracer.firstSelected().tabulaCube.getAllChildrenCubes().forEach(cube => this.raytracer.clickOnMesh(cube.cubeMesh, true, false, true))
+                this.raytracer.dispatchEvents(true)
             }
         })
 
@@ -94,7 +103,8 @@ export class ModelerOptions {
             this.cubeLocked.children().children().remove()
             this.cubeLocked.children().append($(".cube-line-controller.cube-selected .cube-lock-icon-container").children().clone())
 
-            this.cubeChildrenCount.css('display', '').text(`${cube.getAllChildrenCubes().length} Child Objects`)
+            let size = cube.getAllChildrenCubes().length
+            this.cubeChildrenCount.css('display', '').text(`${size} Child Object${size===1?"":"s"}`)
         } else {
             this.cubeName.css('display', 'none')
             this.cubeLockEyeContainer.css('display', 'none')
@@ -105,6 +115,9 @@ export class ModelerOptions {
                 this.cubeChildrenCount.css('display', 'none')
             }
         }
+
+        let size = this.pth.model.cubeMap.size
+        this.totalCubeCount.text(`${size} Total Object${size===1?"":"s"}`)
     }
 
 }
