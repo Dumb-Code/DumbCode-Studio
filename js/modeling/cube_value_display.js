@@ -42,7 +42,32 @@ export class CubeValueDisplay {
             this.lockedCubes.reconstructLockedCubes()
         })
         this.offsets = new LinkedElement(dom.find('.input-offset .input-part')).onchange(e => getCube()?.updateOffset(e.value))
-        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow .input-part')).onchange(e => getCube()?.updateCubeGrow(e.value))
+        this.cubeGrowLocked = dom.find('.cube-grow-lock').click(() => {
+            let values = this.cubeGrow.value
+            if(values === undefined) {
+                return
+            }
+            if(this.cubeGrowLocked.hasClass('is-locked')) {
+                this.cubeGrowLocked.removeClass('is-locked')
+            } else {
+                let val = (values[0]+values[1]+values[2]) / 3
+                values[0] = val
+                values[1] = val
+                values[2] = val
+                this.cubeGrow.value = values
+                this.cubeGrowLocked.addClass('is-locked')
+            }
+        })
+        this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow .input-part')).onchange(e => {
+            if(e.idx !== -1 && this.cubeGrowLocked.hasClass('is-locked')) {
+                let val = e.value[e.idx]
+                e.value[0] = val
+                e.value[1] = val
+                e.value[2] = val
+                this.cubeGrow.setInternalValue(e.value)
+            }
+            getCube()?.updateCubeGrow(e.value)
+        })
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => getCube()?.updateTextureOffset(e.value))
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => getCube()?.updateTextureMirrored(e.value))
         this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => {
@@ -214,12 +239,20 @@ export class CubeValueDisplay {
         let isSelected = this.raytracer.selectedSet.size === 1
         if(isSelected) {
             let cube = this.raytracer.firstSelected().tabulaCube
+
+            let vals = cube.cubeGrow
+            if(vals[0] == vals[1] && vals[1] == vals[2]) {
+                this.cubeGrowLocked.addClass('is-locked')
+            } else {
+                this.cubeGrowLocked.removeClass('is-locked')
+            }
+
             this.cubeName.setInternalValue(cube.name)
             this.positions.setInternalValue(cube.rotationPoint)
             this.dimensions.setInternalValue(cube.dimension)
             this.rotation.setInternalValue(cube.rotation)
             this.offsets.setInternalValue(cube.offset)
-            this.cubeGrow.setInternalValue(cube.cubeGrow)
+            this.cubeGrow.setInternalValue(vals)
             this.textureOffset.setInternalValue(cube.textureOffset)
             this.textureMirrored.setInternalValue(cube.textureMirrored)
         } else {

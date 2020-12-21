@@ -181,6 +181,14 @@ color: #3298dc;
   display: none
 }
 
+.cube-grow-lock:not(.is-locked) > .lock-element {
+  display: none
+}
+
+.cube-grow-lock.is-locked > *:not(.lock-element) {
+  display: none
+}
+
 button:focus {
   outline:0
 }
