@@ -181,4 +181,6 @@ color: #3298dc;
   display: none
 }
 
-button:focus {outline:0;}
+button:focus {
+  outline:0
+}
