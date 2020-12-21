@@ -12,6 +12,10 @@ export class RotationPointMarkers {
         this.raytracer = studio.raytracer
         this.spheres = []
         this.outlines = []
+
+        this.createdObjects = []
+        this.inUseObjects = []
+
         studio.group.add(this.group = new Group())
         studio.transformControls.addEventListener('objectChange', () => this.onFrame())
     }
@@ -38,11 +42,25 @@ export class RotationPointMarkers {
         this.group.remove(...this.spheres)
         this.group.remove(...this.outlines)
 
+        this.createdObjects.push(...this.inUseObjects)
+
+        this.inUseObjects.length = 0
         this.spheres.length = 0
         this.outlines.length = 0
+
         this.raytracer.selectedSet.forEach(cube => {
-            let sph = this.createRotationPointObject()
-            let out = this.createOutlineObject()
+
+            let obj
+            if(this.createdObjects.length == 0) {
+                obj = { sphere: this.createRotationPointObject(), outline: this.createOutlineObject() }
+            } else {
+                obj = this.createdObjects.splice(0, 1)[0]
+            }
+
+            this.inUseObjects.push(obj)
+
+            let sph = obj.sphere
+            let out = obj.outline
 
             this.group.add(sph)
             this.spheres.push(sph)
