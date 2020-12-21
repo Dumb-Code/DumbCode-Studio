@@ -80,6 +80,11 @@ async function init() {
 
     //When an input is focused on don't allow for keyboard controls.
     $(document)
+    .click(e => {
+        if(e.target !== document.activeElement && document.activeElement !== document.body) {
+            document.activeElement.blur()
+        }
+    })
     .focusin(e => e.target.nodeName == "INPUT" ? controls.enableKeys = false : 0)
     .focusout(e => e.target.nodeName == "INPUT" ? controls.enableKeys = true : 0)
     .keydown(e => {
