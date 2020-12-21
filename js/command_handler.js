@@ -89,6 +89,7 @@ class CommandLine {
         this.currentResolver = null
         this.currentCommandBuilder = null
         this.parsedBuilderArguments = 0
+        this.previousCommand = null
 
         this.outputLinesDom = dom.find('.command-output-lines')
         this.outputLines = []
@@ -179,6 +180,7 @@ class CommandLine {
     }
 
     startCommand(val) {
+        this.previousCommand = val
         this.constructedCommand = ""
         this.currentResolver = null
         let cmds = []
@@ -197,6 +199,12 @@ class CommandLine {
             setTimeout(() => this.activateNextLine())
         }
         this.onLinesChanged()
+    }
+
+    runPreviousCommand() {
+        if(this.previousCommand !== null) {
+            this.startCommand(this.previousCommand)
+        }
     }
 
     async nextInput(text, parser, onkey) {

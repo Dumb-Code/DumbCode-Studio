@@ -32,6 +32,12 @@ export class CubeCommands {
             root.doCommand(e.delegateTarget.getAttribute('command'))
         })
 
+        studio.addEventListener('keydown', e => {
+            if(document.activeElement.nodeName != "INPUT" && e.event.key === " ") {
+                root.commandLine.runPreviousCommand()
+            }
+        })
+
         this.applycopypaste(root, studio.raytracer)
         this.applyVertexSnapping(root, studio.display, studio.pointTracker, studio.lockedCubes, studio.raytracer)
         this.applyMirrorCommand(root)
