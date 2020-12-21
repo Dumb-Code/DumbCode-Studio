@@ -28,6 +28,8 @@ export class DragSelection {
         this.raytraceCache = new Map()
         this.active = false
         this.enabled = false
+        this.previousMoveState = {}
+        this.cubesToGoThrough = []
 
         this.setEnabled = (value = this.enabled) => {
             orbitControls.enabled = !value
@@ -45,8 +47,14 @@ export class DragSelection {
     onFrame() { 
         if(!this.enabled || !mousedown) {
             this.raytraceCache.clear()
+            this.cubesToGoThrough.length = 0
             this.selectionElement.hide()
             this.previousIntersected.clear()
+            return
+        }
+
+        let elements = this.pth.model.cubeMap.size
+        if(elements === 0) {
             return
         }
 
@@ -54,6 +62,20 @@ export class DragSelection {
         let top = Math.min(mousePoint.y, mouseDownPoint.y)
         let width = Math.abs(mousePoint.x - mouseDownPoint.x)
         let height = Math.abs(mousePoint.y - mouseDownPoint.y)
+
+        if(
+            this.previousMoveState.left != left ||
+            this.previousMoveState.top != top ||
+            this.previousMoveState.width != width ||
+            this.previousMoveState.height != height
+        ) {
+            this.previousMoveState = { left, top, width, height }
+            this.cubesToGoThrough.length = 0
+        }
+
+        if(this.cubesToGoThrough.length === 0) {
+            this.pth.model.cubeMap.forEach(cube => this.cubesToGoThrough.push(cube.cubeMesh))
+        }
 
 
         this.selectionElement.show().css('left', left).css('top', top).css('width', width).css('height', height)
@@ -75,8 +97,14 @@ export class DragSelection {
                     mouse.y = -((y - rect.top) / rect.height) * 2 + 1;
                     raycaster.setFromCamera(mouse, this.display.camera)
                     raycaster
-                        .intersectObjects(this.pth.model.modelCache.children, true)
-                        .forEach(object => cache.add(object.object))
+                        .intersectObjects(this.cubesToGoThrough)
+                        .forEach(object => {
+                            cache.add(object.object)
+                            let ix = this.cubesToGoThrough.indexOf(object.object)
+                            if(ix !== -1) { //Should always be true
+                                this.cubesToGoThrough.splice(ix, 1)
+                            }
+                        })
                     this.raytraceCache.set(key, cache)
                 }
                 this.raytraceCache.get(key).forEach(c => intersectedObjects.add(c))  
