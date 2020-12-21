@@ -168,7 +168,10 @@ DCALoader.exportAnimation = handler => {
     //
     //6 - removes -180,180 limit. Having 6 marks the animation as "minimized", where the shorted rotation path is taken
     //    (11 DEC 2020) [308f68e34066ee87a72b19af6dd9ad0ace6a3509]
-    buffer.writeNumber(6)
+    //
+    //7 - added cube grow as a changeable element the keyframe.
+    //    (21 DEC 2020) [785d7c5b60b36a9cbe3b68d1d80b12ebdd3c1153]
+    buffer.writeNumber(7)
     buffer.writeNumber(handler.keyframes.length)
     
     handler.keyframes.forEach(kf => {
