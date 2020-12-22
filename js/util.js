@@ -485,22 +485,30 @@ export function doubleClickToEdit(container, callback, current) {
 
 export function fileUploadBox(dom, callback) {
     dom.on('dragenter', e => {
-        dom.addClass('is-dragging')
-        e.originalEvent.preventDefault()
-        e.originalEvent.stopPropagation()
+        if(e.originalEvent.dataTransfer.types.includes('Files')) {
+            dom.addClass('is-dragging')
+            e.originalEvent.preventDefault()
+            e.originalEvent.stopPropagation()
+        }
     }).on('dragover', e => {
-        dom.addClass('is-dragging')
-        e.originalEvent.preventDefault()
-        e.originalEvent.stopPropagation()
+        if(e.originalEvent.dataTransfer.types.includes('Files')) {
+            dom.addClass('is-dragging')
+            e.originalEvent.preventDefault()
+            e.originalEvent.stopPropagation()
+        }
     }).on('dragleave', e => {
-        dom.removeClass('is-dragging')
-        e.originalEvent.preventDefault()
-        e.originalEvent.stopPropagation()
+        if(e.originalEvent.dataTransfer.types.includes('Files')) {
+            dom.removeClass('is-dragging')
+            e.originalEvent.preventDefault()
+            e.originalEvent.stopPropagation()
+        }
     }).on('drop', e => {
-        callback(e.originalEvent.dataTransfer.files)
-        dom.removeClass('is-dragging')
-        e.originalEvent.preventDefault()
-        e.originalEvent.stopPropagation()
+        if(e.originalEvent.dataTransfer.files.length !== 0) {
+            callback(e.originalEvent.dataTransfer.files)
+            dom.removeClass('is-dragging')
+            e.originalEvent.preventDefault()
+            e.originalEvent.stopPropagation()
+        }
     })
 }
 
