@@ -42,7 +42,7 @@ export class ReferenceImageHandler {
         }
         let results = raytraceUnderMouse(this.display.camera, this.images.map(i => i.mesh), false)
 
-        if(results.length !== 0) {
+        if(results.length !== 0 && results[0].object._ref.canSelect) {
             this.transformControls.attach(results[0].object)
             this.needObj.toggleClass('imgref-selected', true)
             this.refOnly.css('display', '')
@@ -82,6 +82,7 @@ export class ReferenceImageHandler {
             dom,
             mesh,
             opacity: 100,
+            canSelect: true,
             setOpacity: (op = data.opacity) => {
                 data.opacity = op
                 transSlider.val(op)
@@ -94,6 +95,7 @@ export class ReferenceImageHandler {
         }
         dom.find('.preview-window').append(img)
         dom.find('.name-conatiner').text(name)
+        dom.find('.refimg-is-selectable').on('input', e => data.canSelect = e.target.checked)
         let transSlider = dom.find('.translucentcy-input')
         transSlider.on('input', e => data.setOpacity(e.target.value))
         dom.find('.delete-image').click(() => {

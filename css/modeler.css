@@ -58,7 +58,7 @@
 
 
 /* Styling Checkbox Starts */
-#modeling-area .checkbox-label {
+.checkbox-label {
 display: block;
 position: relative;
 margin: auto;
@@ -70,13 +70,13 @@ width: 24px;
 clear: both;
 }
 
-#modeling-area .checkbox-label input {
+.checkbox-label input {
 position: absolute;
 opacity: 0;
 cursor: pointer;
 }
 
-#modeling-area .checkbox-label .checkbox-custom {
+.checkbox-label .checkbox-custom {
 position: absolute;
 top: 0px;
 left: 0px;
@@ -93,7 +93,7 @@ border: 2px solid #363636;
 }
 
 
-#modeling-area .checkbox-label input:checked ~ .checkbox-custom {
+.checkbox-label input:checked ~ .checkbox-custom {
 background-color: #209cee;
 border-radius: 5px;
 -webkit-transform: rotate(0deg) scale(1);
@@ -104,7 +104,7 @@ border: 1px solid #209cee;
 }
 
 
-#modeling-area .checkbox-label .checkbox-custom::after {
+.checkbox-label .checkbox-custom::after {
 position: absolute;
 content: "";
 left: 12px;
@@ -125,7 +125,7 @@ transition: all 0.1s ease-out;
 }
 
 
-#modeling-area .checkbox-label input:checked ~ .checkbox-custom::after {
+.checkbox-label input:checked ~ .checkbox-custom::after {
   -webkit-transform: rotate(45deg) scale(1);
   -ms-transform: rotate(45deg) scale(1);
   transform: rotate(45deg) scale(1);

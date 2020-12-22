@@ -9,7 +9,7 @@
     }
 
     .modal-content {
-        background-color: #363636; 
+        background-color: #303030; 
     }
 
     .modal-content.is-dragging {
@@ -18,7 +18,7 @@
 </style>
 <div id="modal-ref-img" style="text-transform: none">
     <div class="modal-background"></div>
-    <div class="modal-content box" style="color: whitesmoke !important; text-align: left; width: 500px !important;">
+    <div class="modal-content box" style="color: whitesmoke !important; text-align: left; width: 650px !important;">
         <h3 class="title is-3" style="color: whitesmoke">Reference Images</h3>
         <div style="padding-bottom: 20px">
             <button class="modal-close" aria-label="close" style="position: absolute"></button>
@@ -34,11 +34,22 @@
         <div class="columns is-mobile empty-entry">
             <div class="column is-narrow preview-window">
             </div>
-            <div class="column name-conatiner">
+            <div class="column is-narrow name-conatiner">
                 some_image.png
             </div>
             <div class="column">
                 <input class="translucentcy-input input is-small slider has-background-black-ter is-dark has-text-light" type="range" max="100" value="100">
+            </div>
+            <div class="column is-narrow">
+                <div class="buttons has-addons mt-1 is-narrow" style="float: left;">
+                    <div class="checkbox-container">
+                      <label class="checkbox-label">
+                        <input class="refimg-is-selectable" type="checkbox" checked>
+                        <span class="checkbox-custom rectangular"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <p class="has-text-light mt-1 px-2" style="float:left; font-size: 14px; padding-top: 1px;">Selectable</p>
             </div>
             <div class="column is-narrow" style="margin-right: 20px;">
                 <span class="icon is-small delete-image tooltip" data-tooltip="Delete Entry">
