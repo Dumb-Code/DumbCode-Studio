@@ -41,8 +41,11 @@ export class CubeCommands {
         this.applycopypaste(root, studio.raytracer)
         this.applyVertexSnapping(root, studio.display, studio.pointTracker, studio.lockedCubes, studio.raytracer)
         this.applyMirrorCommand(root)
+
+        root.command('refimg').onRun(() => studio.referenceImageHandler.openRefImgModal())
     }
 
+ 
     applycopypaste(root, raytracer) {
         root.command('copypaste')
             .onRun(args => {

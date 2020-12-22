@@ -10,7 +10,6 @@ export class DinosaurDisplay {
         this.drawHeight = 1
 
         this.mousedown = new WeightedEventHandler()
-        $(document).mousedown(e => this.mousedown.fireEvent(e))
     }
 
     setup(renderer, camera, scene, onTopScene, directionalIndecators) {

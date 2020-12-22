@@ -14,6 +14,7 @@ import { CubeCommands } from "./cube_commands.js"
 import { ModelerOptions } from "./modeler_options.js"
 import { CubeCopyPaste } from "./cube_copy_paste.js"
 import { applyAdjustScrollable } from "../util.js"
+import { ReferenceImageHandler } from "./reference_image_handler.js"
 
 export class ModelingStudio {
 
@@ -54,6 +55,7 @@ export class ModelingStudio {
         this.cubeValues = new CubeValueDisplay(dom, this, renameCube)
         this.studioPanels = new StudioPanels(dom, 300, 300)
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
+        this.referenceImageHandler = new ReferenceImageHandler(this, dom)
 
 
         this.cubeCommands = new CubeCommands(this.commandRoot, this, dom)

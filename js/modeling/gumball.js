@@ -63,11 +63,11 @@ export class Gumball {
 
         this.gumballTransformMode = new LinkedSelectableList(dom.find('.gumball-control-tool'), true, 'is-info').onchange(e => this.gumballTransformControls.mode = e.value)
 
-        let objectNoCubeSelected = dom.find('.object-no-cube-selected')
+        let objectNoCubeSelected = dom.find('.object-no-object-selected')
         let objectNeedSelection = dom.find('.object-need-selection')
         objectNeedSelection.css('display', 'none')
         this.raytracer.addEventListener('selectchange', () => {
-            objectNoCubeSelected.css('display', this.raytracer.anySelected() ? 'none' : '')
+            objectNoCubeSelected.toggleClass('cube-selected', this.raytracer.anySelected())
             objectNeedSelection.css('display', this.raytracer.anySelected() ? '' : 'none')
             this.updateObjectModeVisibleElemenets()
         })

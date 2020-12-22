@@ -2,7 +2,7 @@ import { AnimationTabHandler } from "../../animator/animation_tabs.js"
 import { MementoTraverser } from "../../memento_traverser.js"
 import { ModelingMemento } from "../../modeling/modeling_memento.js"
 import { TextureManager } from "../../texture/texture_manager.js"
-import { DoubleSide, MeshLambertMaterial } from "../../three.js"
+import { DoubleSide, Group, MeshLambertMaterial } from "../../three.js"
 
 const material = new MeshLambertMaterial( {
     color: 0x777777,
@@ -15,6 +15,7 @@ export class DcProject {//._files, this._modeling, this._texture, this._animatio
     constructor(model, id, pth) {
         this.model = model
         this.id = id
+        this.group = new Group()
         this.textureManager = new TextureManager(model, pth)
         this.animationTabHandler = new AnimationTabHandler(pth._animation, pth._files, model)
         this.modelMementoTraverser = new MementoTraverser(() => new ModelingMemento(model, this.lockedCubes))
@@ -24,6 +25,7 @@ export class DcProject {//._files, this._modeling, this._texture, this._animatio
         this.selectedSet = new Set()
         this.lockedCubes = new Set()
         this.unlockedAnimationCubes = new Set()
+        this.referenceImages = []
 
         this.initiate(pth)
     }

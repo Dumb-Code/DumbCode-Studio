@@ -23,12 +23,15 @@ export class ProjectTabHandler {
         }
         if(index !== this.currentIndex) {
             if(this.currentIndex !== -1) {
-                this.display.scene.remove(this.allTabs[this.currentIndex].model.modelCache)
+                let tab = this.allTabs[this.currentIndex]
+                this.display.scene.remove(tab.model.modelCache)
+                this.display.scene.remove(tab.group)
             } else {
                 this.dispatchEvent( { type: "initiateselection" } )
-
             }
-            this.display.scene.add(this.allTabs[index].model.modelCache)
+            let tab = this.allTabs[index]
+            this.display.scene.add(tab.model.modelCache)
+            this.display.scene.add(tab.group)
         }
         this.currentIndex = index
         this.dispatchEvent( { type: "selectchange", from: this.currentIndex, to: index } )
@@ -75,6 +78,14 @@ export class ProjectTabHandler {
 
     get unlockedAnimationCubes() {
         return this.getSelected().unlockedAnimationCubes
+    }
+
+    get displayGroup() {
+        return this.getSelected().group
+    }
+
+    get referenceImages() {
+        return this.getSelected().referenceImages
     }
 
     updateTexture(callback) {

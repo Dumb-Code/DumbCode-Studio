@@ -113,7 +113,7 @@ async function init() {
             e.stopPropagation()
         }
     })
-
+    
     directionalIndecators = new DirectionalIndecators(display, controls)
 
     display.setup(renderer, camera, createScene(), onTop, directionalIndecators)
@@ -152,6 +152,7 @@ window.onModulesFinished = async() => {
     tabEventTypes.forEach(type => document.addEventListener(type, event => activeTab.dispatchEvent( { type, event } )))
 
     directionalIndecators.domFinished()
+    $('.display-div').mousedown(e => display.mousedown.fireEvent(e))
 
     //Fix bulma dropdown boxes
     $('.dropdown:not(.is-hoverable) .dropdown-menu').get().forEach(t => $(t).click(e => {

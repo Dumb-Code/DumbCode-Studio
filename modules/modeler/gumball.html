@@ -4,27 +4,39 @@
   </div>
 
   <div class="section has-background-black-ter is-paddingless is-marginless is-gapless" style="height: 3.5vh; border-top: 1px solid #121212;" id="gb-object">
-      <div class="has-addons mt-1 is-narrow ml-4 object-no-cube-selected" style="float: left;">
-        No Cube Selected
+      <div class="has-addons mt-1 is-narrow ml-4 object-no-object-selected" style="float: left;">
+        No Object Selected
       </div>
-      <div class="buttons has-addons mt-1 is-narrow ml-4 object-need-selection" style="float: left">
+      
+      <div class="buttons has-addons mt-1 is-narrow ml-4 object-imgref-only" style="float: left; display: none">
+        <button class="button is-dark ref-image-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="translate">Move</button>
+        <button class="button is-dark ref-image-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="rotate">Rotate</button>
+        <button class="button is-dark ref-image-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="scale">Scale</button>
+      </div>
+
+      <div class="button is-paddingless is-dark px-3 mx-1 object-imgref-only" style="float: left; height: 24px; margin-top: 4px; display: none">
+        <span style="padding-right: 10px;">Opacity:</span>
+        <input class="button is-dark refimg-translucentcy-input input is-small slider has-background-black-ter is-dark has-text-light" style="height: 0px; padding: 0;" type="range" max="100" value="100">
+      </div>
+
+      <div class="buttons has-addons mt-1 is-narrow ml-4 object-need-selection object-no-imgref" style="float: left">
         <button class="button is-dark transform-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="translate">Move</button>
         <button class="button is-dark transform-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="rotate">Rotate</button>
         <button class="button is-dark transform-control-tool" style="height: 24px; font-size: 14px;" select-list-entry="dimensions">Dimension</button>
       </div>
 
-      <div class="buttons has-addons mt-1 is-narrow ml-4 object-space-mode object-need-selection" style="float: left">
+      <div class="buttons has-addons mt-1 is-narrow ml-4 object-space-mode object-need-selection object-no-imgref" style="float: left">
         <button class="button is-dark object-space-tool" select-list-entry="world" style="height: 24px; font-size: 14px;">World</button>
         <button class="button is-dark object-space-tool" select-list-entry="local" style="height: 24px; font-size: 14px;">Local</button>
       </div>
 
-      <div class="buttons has-addons mt-1 is-narrow ml-4 object-translation-type object-need-selection" style="float: left">
+      <div class="buttons has-addons mt-1 is-narrow ml-4 object-translation-type object-need-selection  object-no-imgref" style="float: left">
         <button class="button is-dark object-translate-type-entry" select-list-entry="position" style="height: 24px; font-size: 14px;">Position</button>
         <button class="button is-dark object-translate-type-entry" select-list-entry="offset" style="height: 24px; font-size: 14px;">Offset</button>
         <button class="button is-dark object-translate-type-entry" select-list-entry="rotation_point" style="height: 24px; font-size: 14px;">Rotation Point</button>
       </div>
 
-      <div class="buttons has-addons mt-1 is-narrow ml-4 object-rotation-type object-need-selection" style="float: left">
+      <div class="buttons has-addons mt-1 is-narrow ml-4 object-rotation-type object-need-selection object-no-imgref" style="float: left">
         <button class="button is-dark object-rotate-type-entry" select-list-entry="rotate" style="height: 24px; font-size: 14px;">Rotate</button>
         <button class="button is-dark object-rotate-type-entry" select-list-entry="point" style="height: 24px; font-size: 14px;">Rotate Around Point</button>
       </div>

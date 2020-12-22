@@ -192,3 +192,9 @@ color: #3298dc;
 button:focus {
   outline:0
 }
+
+.object-no-object-selected.cube-selected, .object-no-object-selected.imgref-selected, .object-no-imgref.imgref-selected {
+  display: none
+}
+
+

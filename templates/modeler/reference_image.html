@@ -1,0 +1,52 @@
+<style>
+    .preview-window img {
+        max-width: 50px;
+        max-height: 50px;
+    }
+
+    .empty-entry {
+        display: none !important;
+    }
+
+    .modal-content {
+        background-color: #363636; 
+    }
+
+    .modal-content.is-dragging {
+        background-color: green;
+    }
+</style>
+<div id="modal-ref-img" style="text-transform: none">
+    <div class="modal-background"></div>
+    <div class="modal-content box" style="color: whitesmoke !important; text-align: left; width: 500px !important;">
+        <h3 class="title is-3" style="color: whitesmoke">Reference Images</h3>
+        <div style="padding-bottom: 20px">
+            <button class="modal-close" aria-label="close" style="position: absolute"></button>
+        </div>
+        <div class="clickable tooltip" data-tooltip="Upload New Image">
+            <label for="ref-img-file-input">
+                <div class="icon is-small">
+                    <i class="fas fa-upload"></i>
+                </div>
+            </label>
+            <input id="ref-img-file-input" class="file-input-hidden" type="file" accept="image/*" multiple/>
+        </div>
+        <div class="columns is-mobile empty-entry">
+            <div class="column is-narrow preview-window">
+            </div>
+            <div class="column name-conatiner">
+                some_image.png
+            </div>
+            <div class="column">
+                <input class="translucentcy-input input is-small slider has-background-black-ter is-dark has-text-light" type="range" max="100" value="100">
+            </div>
+            <div class="column is-narrow" style="margin-right: 20px;">
+                <span class="icon is-small delete-image tooltip" data-tooltip="Delete Entry">
+                    <i class="fas fa-trash-alt"></i>
+                </span>
+            </div>
+        </div>
+        <div class="reference-image-list"></div>
+    
+    </div>
+</div>
