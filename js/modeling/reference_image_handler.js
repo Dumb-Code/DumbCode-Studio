@@ -54,6 +54,7 @@ export class ReferenceImageHandler {
             this.needObj.toggleClass('imgref-selected', false)
             e.ignore = true
         }
+        this.refOnly.css('display', 'none')
     }
 
     addImage(img, name) {
