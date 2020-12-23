@@ -6,7 +6,7 @@ import { DoubleSide, Group, MeshLambertMaterial } from "../../three.js"
 
 const material = new MeshLambertMaterial( {
     color: 0x777777,
-    transparent: true,
+    // transparent: true,
     side: DoubleSide,
     alphaTest: 0.0001,
 } )
