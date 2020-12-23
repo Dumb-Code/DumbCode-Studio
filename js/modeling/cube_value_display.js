@@ -69,7 +69,7 @@ export class CubeValueDisplay {
         })
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => getCube()?.updateTextureOffset(e.value))
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => getCube()?.updateTextureMirrored(e.value))
-        this.rotation = new LinkedElement(dom.find('.input-rotation')).withsliders(dom.find('.input-rotation-slider')).onchange(e => {
+        this.rotation = new LinkedElement(dom.find('.input-rotation .input-part')).withsliders(dom.find('.input-rotation .input-part-slider')).onchange(e => {
             this.lockedCubes.createLockedCubesCache()
             getCube()?.updateRotation(e.value)
             this.lockedCubes.reconstructLockedCubes()

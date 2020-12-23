@@ -194,7 +194,7 @@ button:focus {
 }
 
 .object-no-object-selected.cube-selected, .object-no-object-selected.imgref-selected, .object-no-imgref.imgref-selected {
-  display: none
+  display: none !important
 }
 
 

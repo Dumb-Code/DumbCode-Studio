@@ -1,21 +1,32 @@
 import { readFile } from "../displays.js"
 import { raytraceUnderMouse } from "../raytracer.js"
 import { DoubleSide, Mesh, MeshBasicMaterial, NearestFilter, PlaneGeometry, Texture } from "../three.js"
-import { fileUploadBox, LinkedSelectableList } from "../util.js"
+import { fileUploadBox, LinkedElement, LinkedSelectableList } from "../util.js"
 
 const startSize = 2
 
 export class ReferenceImageHandler {
     constructor(studio, dom) {
         this.pth = studio.pth
+        this.studioPanels = studio.studioPanels
         this.display = studio.display
 
         this.addedHooks = false
 
         this.transformControls = studio.display.createTransformControls()
+        this.transformControls.addEventListener('objectChange', () => this.updatePanelValues())
+        this.transformControls.space = "world"
         studio.group.add(this.transformControls)
 
         new LinkedSelectableList(dom.find('.ref-image-control-tool'), true, 'is-info').onchange(e => this.transformControls.mode = e.value)
+        new LinkedSelectableList(dom.find('.refimg-object-space-tool'), true, 'is-info').onchange(e => this.transformControls.space = e.value)
+
+        this.positionElemenet = new LinkedElement(dom.find('.input-refimg-position .input-part')).onchange(e => this.transformControls.object.position.set(e.value[0], e.value[1], e.value[2]))
+        this.scaleElemenet = new LinkedElement(dom.find('.input-refimg-scale'), false).onchange(() => this.updateScale())
+        this.rotationElement = new LinkedElement(dom.find('.input-refimg-rotation .input-part')).withsliders(dom.find('.input-refimg-rotation .input-part-slider')).onchange(e => this.transformControls.object.rotation.set(e.value[0]*Math.PI/180, e.value[1]*Math.PI/180, e.value[2]*Math.PI/180))
+
+        this.flipX = new LinkedElement(dom.find('.refimg-flip-x'), false, false, true).onchange(() => this.updateScale())
+        this.flipY = new LinkedElement(dom.find('.refimg-flip-y'), false, false, true).onchange(() => this.updateScale())
 
         this.selectedTranslucency = dom.find('.refimg-translucentcy-input').on('input', e => this.transformControls.object._ref.setOpacity(e.target.value))
 
@@ -32,6 +43,11 @@ export class ReferenceImageHandler {
         return this.pth.referenceImages
     }
 
+    updateScale() {
+        let value = this.scaleElemenet.value
+        this.transformControls.object.scale.set(this.flipX.value?-value:value, this.flipY.value?-value:value, value)
+    }
+
     mouseDown(e) {
         if(this.transformsInAction === true) {
             return
@@ -43,15 +59,17 @@ export class ReferenceImageHandler {
         let results = raytraceUnderMouse(this.display.camera, this.images.map(i => i.mesh), false)
 
         if(results.length !== 0 && results[0].object._ref.canSelect) {
-            this.transformControls.attach(results[0].object)
+            let mesh = results[0].object
+            this.transformControls.attach(mesh)
             this.needObj.toggleClass('imgref-selected', true)
             this.refOnly.css('display', '')
-            this.selectedTranslucency.val(results[0].object._ref.opacity)
+            this.studioPanels.useUpPanel()
+            this.selectedTranslucency.val(mesh._ref.opacity)
+            this.updatePanelValues()
             e.ignore = true
             return
         } else if(this.transformControls.object) {
-            this.transformControls.detach()
-            this.needObj.toggleClass('imgref-selected', false)
+            this.unselectPanel()
             e.ignore = true
         }
         this.refOnly.css('display', 'none')
@@ -94,7 +112,7 @@ export class ReferenceImageHandler {
             }
         }
         dom.find('.preview-window').append(img)
-        dom.find('.name-conatiner').text(name)
+        dom.find('.name-container').text(name)
         dom.find('.refimg-is-selectable').on('input', e => data.canSelect = e.target.checked)
         let transSlider = dom.find('.translucentcy-input')
         transSlider.on('input', e => data.setOpacity(e.target.value))
@@ -104,15 +122,31 @@ export class ReferenceImageHandler {
             texture.dispose()
             this.pth.displayGroup.remove(mesh)
             if(this.transformControls.object === mesh) {
-                this.transformControls.detach()
-                this.needObj.toggleClass('imgref-selected', false)
-                this.refOnly.css('display', 'none')
-
+                this.unselectPanel()
             }
         })
  
         mesh._ref = data
         this.images.push(data)
+    }
+
+    updatePanelValues() {
+        let mesh = this.transformControls.object
+        if(mesh !== undefined) {
+            this.positionElemenet.setInternalValue(mesh.position.toArray())
+            this.rotationElement.setInternalValue(mesh.rotation.toArray().map(e => e * 180/Math.PI))
+
+            this.scaleElemenet.setInternalValue(mesh.scale.z)
+            this.flipX.value = mesh.scale.x !== mesh.scale.z
+            this.flipY.value = mesh.scale.y !== mesh.scale.z
+
+        }
+    }
+
+    unselectPanel() {
+        this.transformControls.detach()
+        this.studioPanels.discardRightPanel()
+        this.needObj.toggleClass('imgref-selected', false)
     }
 
     uploadFile(file) {

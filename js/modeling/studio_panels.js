@@ -70,6 +70,21 @@ export class StudioPanels {
         this.updateAreas()
     }
 
+    useUpPanel() {
+        if(this.rightArea === 0) {
+            this.rightArea = 320
+        }
+        
+        this.updateAreas()
+    }
+
+    discardRightPanel() {
+        if(this.topPanel.popped && this.bottomPanel.popped) {
+            this.rightArea = 0
+        }
+        this.updateAreas()
+    }
+
     updateAreas() { 
         this.rightDivider.css('right', (this.rightArea-4) + "px")
         this.controlsDivider.css('left', `${mainArea.clientWidth - this.rightArea}px`).css('width', `${this.rightArea}px`).css('top', `${mainArea.offsetTop + this.topArea}px`)

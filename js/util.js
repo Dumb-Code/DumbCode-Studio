@@ -70,6 +70,11 @@ export class LinkedElement {
         }
         
         this.rawValue = value
+
+        this.elems.prop('disabled', value === undefined)
+        if(this.sliderElems !== undefined) {
+            this.sliderElems.prop('disabled', value === undefined)
+        }
         
         if(this.array && value !== undefined) {
             if(typeof value[0] == 'number') {
