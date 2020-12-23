@@ -263,7 +263,7 @@ export class KeyframeBoardManager {
             this.reframeKeyframes()
         })
 
-        doubleClickToEdit(dom.find('.layer-name-conatiner'), v => {
+        doubleClickToEdit(dom.find('.layer-name-container'), v => {
             let data = dataGetter()
             if(data !== null) {
                 data.name = v
