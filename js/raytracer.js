@@ -65,7 +65,7 @@ export class Raytracer {
         this.display = display
         // this.selectedSet = new Set()
         this.intersected
-        this.intersectedDistance
+        this.intersectedDistance = Infinity
         this.disableRaycast = false
 
         document.addEventListener( 'mouseup', e => {
@@ -186,7 +186,7 @@ export class Raytracer {
         this.dispatchEvents(false)
     }
 
-    mouseOverMesh(mesh, distance = -1) {
+    mouseOverMesh(mesh, distance = Infinity) {
         if(mesh !== undefined) {
             if(this.intersected != mesh) {
                 if(this.intersected && !this.selectedSet.has(this.intersected)) {

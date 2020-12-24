@@ -9,6 +9,7 @@ export class ReferenceImageHandler {
     constructor(studio, dom) {
         this.pth = studio.pth
         this.studioPanels = studio.studioPanels
+        this.raytracer = studio.raytracer
         this.display = studio.display
 
         this.addedHooks = false
@@ -36,7 +37,7 @@ export class ReferenceImageHandler {
         this.transformsInAction = false
         this.transformControls.addEventListener('mouseDown', () => this.transformsInAction = true)
         this.transformControls.addEventListener('mouseUp', () => this.transformsInAction = false)
-        studio.raytracer.addEventListener('clicked', e => this.mouseDown(e))
+        this.raytracer.addEventListener('clicked', e => this.mouseDown(e))
     }
 
     get images() {
@@ -57,8 +58,8 @@ export class ReferenceImageHandler {
             return
         }
         let results = raytraceUnderMouse(this.display.camera, this.images.map(i => i.mesh), false)
-
-        if(results.length !== 0 && results[0].object._ref.canSelect) {
+        
+        if(results.length !== 0 && results[0].distance < this.raytracer.intersectedDistance && results[0].object._ref.canSelect) {
             let mesh = results[0].object
             this.transformControls.attach(mesh)
             this.needObj.toggleClass('imgref-selected', true)
