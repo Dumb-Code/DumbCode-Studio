@@ -71,7 +71,7 @@ export class AnimationCubeValues {
         }
 
         let isSelected = this.raytracer.selectedSet.size === 1
-        this.keyframeSelectionRequired.prop("disabled", !isSelected).toggleClass("is-active", isSelected)
+        this.cubeSelectionRequired.prop("disabled", !isSelected).toggleClass("is-active", isSelected)
     }
 
 }
