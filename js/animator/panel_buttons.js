@@ -30,7 +30,8 @@ export class PanelButtons {
         this.inputPlaybackRange = dom.find('.input-playback-range')
         this.inputPlaybackRange.on('input', e => {
             let value = e.target.value
-            this.inputPlaybackRange.parent().attr('data-tooltip', `${value}s`)
+            let rounded = Math.round(value * 100) / 100
+            this.inputPlaybackRange.parent().attr('data-tooltip', `${rounded}s`)
             studio.keyframeManager.playstate.ticks = parseFloat(value)
         })
 

@@ -397,10 +397,10 @@ export class CanvasTransformControls {
                 if(direction === undefined) { //Firefox >:(
                     direction = -e.detail
                 }
-                if(direction !== 0) {
-                    this.mulMatrix(new DOMMatrix().scaleSelf(direction > 0 ? amount : 1/amount))
-                    this.redrawCallback()
-                }
+                this.mulMatrix(new DOMMatrix().scaleSelf(direction > 0 ? amount : 1/amount))
+                this.redrawCallback()
+                e.preventDefault()
+                e.stopPropagation()
             })
     }
     

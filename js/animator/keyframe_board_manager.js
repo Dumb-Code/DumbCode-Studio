@@ -100,11 +100,14 @@ export class KeyframeBoardManager {
                 width = handler._sectionWidth * multiplier
             }
 
-            let hw = this.eventPointBoard.width() / 2
             let newPixelsPerSecond = width / secondsPerSection
+            
+            let pixelPoint = this.scroll+mouseX
+            let secondsPoint = pixelPoint/this.pixelsPerSecond
+            let newPixelPoint = secondsPoint*newPixelsPerSecond
+            let changeInPixles = newPixelPoint - pixelPoint
 
-
-            this.scroll = (hw+mouseX)*newPixelsPerSecond/this.pixelsPerSecond - hw
+            this.scroll += changeInPixles
             if(this.scroll < 0) {
                 this.scroll = 0
             }
@@ -356,9 +359,9 @@ export class KeyframeBoardManager {
             if(direction === undefined) { //Firefox >:(
                 direction = -e.detail
             }
-
-
-            this.addSectionWidth(direction < 0 ? 1/amount : amount, e.clientX - 255)
+            this.addSectionWidth(direction < 0 ? 1/amount : amount, e.clientX - keyContainer.offset().left)
+            e.preventDefault()
+            e.stopPropagation()
         })
 
         dom.find('.kf-layer-settings').click(() => this.openKeyframeSetings(dataGetter()))
@@ -384,7 +387,7 @@ export class KeyframeBoardManager {
         
         this.playbackMarker.css('display', xpos < 0 || xpos > 1 ? 'none' : 'unset').css('left', (255 + (xpos * conatainerWidth)) + "px")
 
-        let rounded = Math.round(ticks * 10) / 10;
+        let rounded = Math.round(ticks * 100) / 100;
         this.playbackMarker.attr('data-tooltip', `${rounded} seconds`)
     }
 
