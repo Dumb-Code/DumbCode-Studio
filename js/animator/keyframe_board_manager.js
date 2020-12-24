@@ -27,7 +27,7 @@ export class KeyframeBoardManager {
         this.scrubbingPlaybackMarker = false
         this.playbackMarker = keyframeBoard.find('.keyframe-playback-marker')
         onElementDrag(this.playbackMarker.get(0), () => this.scrubbingPlaybackMarker = true, (_dx, _dy, _info, x) => {
-            let marker = x - 235;
+            let marker = x - 257;
 
             let conatainerWidth = this.eventPointBoard.width()
 
