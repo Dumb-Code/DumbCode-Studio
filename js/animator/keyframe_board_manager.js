@@ -1,9 +1,8 @@
 import { PlayState } from "../animations.js"
 import { onElementDrag, doubleClickToEdit } from "../util.js"
 
-const sectionWidth = 20
-const ticksPerSection = 1 
-const pixelsPerTick = sectionWidth / ticksPerSection
+const secondsPerSection = 0.05
+const defaultSectionWidth = 20
 const resolution = 10
 
 export class KeyframeBoardManager {
@@ -38,7 +37,7 @@ export class KeyframeBoardManager {
                 marker = conatainerWidth
             }
             
-            this.playstate.ticks = (marker + this.scroll) / pixelsPerTick
+            this.playstate.ticks = (marker + this.scroll) / this.pixelsPerSecond
         }, () => this.scrubbingPlaybackMarker = false)
 
         sliders
@@ -54,7 +53,7 @@ export class KeyframeBoardManager {
                 return
             }
             let left = this.eventPointBoard.offset().left
-            let time = (e.clientX - left + this.scroll) / pixelsPerTick
+            let time = (e.clientX - left + this.scroll) / this.pixelsPerSecond
 
             let newPoint = { time, data: [] }
 
@@ -81,6 +80,50 @@ export class KeyframeBoardManager {
         this.updateLables()
 
         this.waitAndSetEventModal()
+    }
+
+    get pixelsPerSecond() {
+        let handler = this.getHandler()
+        if(handler._pixelsPerSecond === undefined) {
+            handler._pixelsPerSecond = defaultSectionWidth / secondsPerSection
+        }
+        return handler._pixelsPerSecond
+    }
+
+    addSectionWidth(multiplier = 1, mouseX = 0) {
+        let handler = this.getHandler()
+        if(handler !== null) {
+            let width
+            if(handler._sectionWidth === undefined) {
+                width = defaultSectionWidth * multiplier
+            } else {
+                width = handler._sectionWidth * multiplier
+            }
+
+            let hw = this.eventPointBoard.width() / 2
+            let newPixelsPerSecond = width / secondsPerSection
+
+
+            this.scroll = (hw+mouseX)*newPixelsPerSecond/this.pixelsPerSecond - hw
+            if(this.scroll < 0) {
+                this.scroll = 0
+            }
+
+            handler._sectionWidth = width
+            handler._pixelsPerSecond = newPixelsPerSecond
+
+            this.getLayerInfo().forEach(layer => {
+                this.getLayerDom(layer.id).find('.keyframe-container')
+                    .css('background', 
+                    `repeating-linear-gradient(90deg, 
+                        #363636  0px,
+                        #363636  ${width}px,
+                        #4A4A4A  ${width}px,
+                        #4A4A4A  ${2*width}px)`)
+                    .css('background-size', `${2*width}px`)
+            })
+            this.reframeKeyframes()
+        }
     }
 
     editEventPoint(point) {
@@ -122,8 +165,10 @@ export class KeyframeBoardManager {
         })
     }
 
-    reframeKeyframes() {
-        this.ensureFramePosition()
+    reframeKeyframes(reframeFramePosition = true) {
+        if(reframeFramePosition === true) {
+            this.ensureFramePosition()
+        }
         let handler = this.getHandler();
         [...this.elementDoms.values()].forEach(d => d.detach())
 
@@ -152,7 +197,7 @@ export class KeyframeBoardManager {
                 evt.element = this.emptyPoint.clone()[0]
                 evt.element.classList.remove('empty-event-point')
                 onElementDrag(evt.element, () => evt.time, (dx, _, time) => {
-                    evt.time = time + (dx / pixelsPerTick )
+                    evt.time = time + (dx / this.pixelsPerSecond )
                     this.updateEventPoints()
                 }, max => {
                     if(max < 2) {
@@ -160,7 +205,7 @@ export class KeyframeBoardManager {
                     }
                 })
             }
-            evt.element.style.left = (evt.time * pixelsPerTick) - this.scroll - 8 + "px"
+            evt.element.style.left = (evt.time * this.pixelsPerSecond) - this.scroll - 8 + "px"
             this.eventPointBoard.append(evt.element)
         })
     }
@@ -178,8 +223,8 @@ export class KeyframeBoardManager {
         kf.element.style.backgroundColor = `hsl(${color}, 100%, ${lightnessMain}%)`
         kf.element._keyframePointer.style.backgroundColor = `hsl(${color}, 100%, ${lightnessPointer}%)`
 
-        let left = kf.startTime * pixelsPerTick
-        kf.element.style.width = kf.duration * pixelsPerTick + "px"
+        let left = kf.startTime * this.pixelsPerSecond
+        kf.element.style.width = kf.duration * this.pixelsPerSecond + "px"
         kf.element.style.left = left - this.scroll + "px"
     }
 
@@ -188,7 +233,7 @@ export class KeyframeBoardManager {
         element.classList.add('keyframe')
 
         onElementDrag(element, () => kf.startTime, (dx, _dy, startTime, _x, y) => {
-            kf.startTime = startTime + ( dx / pixelsPerTick )
+            kf.startTime = startTime + ( dx / this.pixelsPerSecond )
             this.updateKeyframeSelected()
             this.updateKeyFrame(kf)
 
@@ -277,7 +322,7 @@ export class KeyframeBoardManager {
                 return
             }
             let kf = handler.createKeyframe()
-            kf.duration = 5
+            kf.duration = 0.25
             kf.layer = layer
             kf.startTime = this.playstate.ticks
             this.reframeKeyframes()
@@ -304,20 +349,34 @@ export class KeyframeBoardManager {
             layerLocked.find('.icon-symbol').toggleClass('fa-lock', data.locked).toggleClass('fa-lock-open', !data.locked)
         })
 
+        let keyContainer = dom.find('.keyframe-container')
+        keyContainer.bind('mousewheel DOMMouseScroll', e => {
+            let direction = e.originalEvent.wheelDelta
+            let amount = 1.1
+            if(direction === undefined) { //Firefox >:(
+                direction = -e.detail
+            }
+
+
+            this.addSectionWidth(direction < 0 ? 1/amount : amount, e.clientX - 255)
+        })
+
         dom.find('.kf-layer-settings').click(() => this.openKeyframeSetings(dataGetter()))
+
+        this.addSectionWidth()
     }
 
     ensureFramePosition() {
         let ticks = this.playstate.ticks
-        let left = this.scroll / pixelsPerTick
+        let left = this.scroll / this.pixelsPerSecond
 
         let conatainerWidth = this.eventPointBoard.width()
-        let ticksInContainer = conatainerWidth / pixelsPerTick
+        let ticksInContainer = conatainerWidth / this.pixelsPerSecond
 
         let xpos = 0
         //Not on screen, we need to move screen to fit
         if(this.playstate.playing && (ticks < left || ticks > left + ticksInContainer)) {
-            this.scroll = ticks * pixelsPerTick
+            this.scroll = ticks * this.pixelsPerSecond
             this.updateScroll()
         } else {
             xpos = (ticks - left) / ticksInContainer
@@ -326,12 +385,12 @@ export class KeyframeBoardManager {
         this.playbackMarker.css('display', xpos < 0 || xpos > 1 ? 'none' : 'unset').css('left', (255 + (xpos * conatainerWidth)) + "px")
 
         let rounded = Math.round(ticks * 10) / 10;
-        this.playbackMarker.attr('data-tooltip', `${rounded} ticks`)
+        this.playbackMarker.attr('data-tooltip', `${rounded} seconds`)
     }
 
     updateScroll() {
         this.updateLables()
-        this.reframeKeyframes()
+        this.reframeKeyframes(false)
     }
 
     updateLables() {

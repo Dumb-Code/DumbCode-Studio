@@ -19,6 +19,10 @@ export class AnimationHandler {
         return this.keyframes.map(kf => kf.startTime + kf.duration).reduce((a,b) => Math.max(a,b), 0)
     }
 
+    get minTime() {
+        return this.keyframes.map(kf => kf.startTime).reduce((a,b) => Math.min(a,b), Infinity)
+    }
+
     renameCube(oldName, newName) {
         this.keyframes.forEach(kf => kf.renameCube(oldName, newName))
         if(this.loopKeyframe) {
@@ -289,7 +293,7 @@ export class PlayState {
     }
     onFrame(deltaTime) {
         if(this.playing) {
-            this.ticks += deltaTime * this.speed * 20 //t-p-s
+            this.ticks += deltaTime * this.speed
         }
     }
 }

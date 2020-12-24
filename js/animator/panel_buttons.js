@@ -30,7 +30,7 @@ export class PanelButtons {
         this.inputPlaybackRange = dom.find('.input-playback-range')
         this.inputPlaybackRange.on('input', e => {
             let value = e.target.value
-            this.inputPlaybackRange.parent().attr('data-tooltip', `Ticks: ${value}`)
+            this.inputPlaybackRange.parent().attr('data-tooltip', `${value}s`)
             studio.keyframeManager.playstate.ticks = parseFloat(value)
         })
 
@@ -66,7 +66,7 @@ export class PanelButtons {
         if(active == null) {
             return  
         }
-        this.inputPlaybackRange.attr('max', active.totalTime).val(active.playstate.ticks)
+        this.inputPlaybackRange.attr('min', active.minTime).attr('max', active.totalTime).val(active.playstate.ticks)
     }
 
     deleteKeyframe(studio) {

@@ -135,6 +135,16 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
             })
         })
     }
+
+    //Time needs to be changed from 20tps to 1tps
+    if(version <= 7) {
+        handler.keyframes.forEach(keyframe => {
+            keyframe.startTime /= 20
+            keyframe.duration /= 20
+        })
+
+        handler.events.forEach(event => event.time /= 20)
+    }
 }
 
 function transformArr(arr, subValue) {
@@ -164,14 +174,18 @@ DCALoader.exportAnimation = handler => {
     //    (12 AUG 2020) [00d31e0d2d3241610e7f6b13d8fe41ca2f62dee1]
     //
     //5 - flips the animation to comply with the new world space. Having 5 marks the animation as flipped.
-    //    (6 NOV 2020) [3c3ed3c82e90ccf649d6b981736136e175e441b0] -> [072d0d795c6ba79ba8b61a5cd79483fe1a69f76b]
+    //    (06 NOV 2020) [3c3ed3c82e90ccf649d6b981736136e175e441b0] -> [072d0d795c6ba79ba8b61a5cd79483fe1a69f76b]
     //
     //6 - removes -180,180 limit. Having 6 marks the animation as "minimized", where the shorted rotation path is taken
     //    (11 DEC 2020) [308f68e34066ee87a72b19af6dd9ad0ace6a3509]
     //
     //7 - added cube grow as a changeable element the keyframe.
     //    (21 DEC 2020) [785d7c5b60b36a9cbe3b68d1d80b12ebdd3c1153]
-    buffer.writeNumber(7)
+    //
+    //8 - tweaked time to be from 20 tps to 1 tps. Having 8 marks the animation as being in seconds instead of minecraft ticks.
+    //    (24 DEC 2020) [?]
+    //
+    buffer.writeNumber(8)
     buffer.writeNumber(handler.keyframes.length)
     
     handler.keyframes.forEach(kf => {
