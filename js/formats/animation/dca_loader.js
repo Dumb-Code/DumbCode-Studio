@@ -183,7 +183,7 @@ DCALoader.exportAnimation = handler => {
     //    (21 DEC 2020) [785d7c5b60b36a9cbe3b68d1d80b12ebdd3c1153]
     //
     //8 - tweaked time to be from 20 tps to 1 tps. Having 8 marks the animation as being in seconds instead of minecraft ticks.
-    //    (24 DEC 2020) [?]
+    //    (24 DEC 2020) [d39636d0440d7b330af7cf218f0d69472a8e44fe]
     //
     buffer.writeNumber(8)
     buffer.writeNumber(handler.keyframes.length)
