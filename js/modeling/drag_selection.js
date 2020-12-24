@@ -74,7 +74,13 @@ export class DragSelection {
         }
 
         if(this.cubesToGoThrough.length === 0) {
-            this.pth.model.cubeMap.forEach(cube => this.cubesToGoThrough.push(cube.cubeMesh))
+            this.pth.model.cubeMap.forEach(cube => {
+                if(cube.cubeMesh !== undefined) {
+                    this.cubesToGoThrough.push(cube.cubeMesh)
+                } else {
+                    console.warn("Cube hasn't got a mesh", cube.name)
+                }
+            })
         }
 
 
