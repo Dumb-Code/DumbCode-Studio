@@ -144,35 +144,11 @@ export class AnimationStudio {
         }
     }
 
-    setCubeGrow(values, updateDisplay = true, updateSilent = false, idx = -1) {
+    setCubeGrow(values, updateDisplay = true, updateSilent = false) {
         let selected = this.raytracer.oneSelected()
         if(selected !== null) {
             if(updateDisplay) {
-                let silent = updateSilent
-                if(this.cubeDisplayValues.cubeGrowLocked.value) {
-                    let val
-                    //Get the odd one out
-                    if(values[0] == values[1]) {
-                        val = values[2]
-                    } else if(values[0] == values[2]) {
-                        val = values[1]
-                    } else if(values[1] == values[2]) {
-                        val = values[0]
-                    }
-
-                    values[0] = val
-                    values[1] = val
-                    values[2] = val
-
-                    if(this.cubeDisplayValues.cubeGrow.value !== undefined) {
-                        for(let i = 0; i < 3; i++) {
-                            if(this.cubeDisplayValues.cubeGrow.value[i] !== val) {
-                                silent = false
-                            }
-                        }
-                    }
-                }
-                if(silent) {
+                if(updateSilent) {
                     this.cubeDisplayValues.cubeGrow.setInternalValue(values, this.cubeDisplayValues.cubeGrow.indexSelected)
                 } else {
                     this.cubeDisplayValues.cubeGrow.value = values

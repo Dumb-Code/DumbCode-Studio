@@ -117,11 +117,3 @@ border: 0;
 .slider::-moz-focus-inner, ::-moz-focus-outer {
 border: 0;
 }
-
-.animation-cube-grow-lock:not(.is-locked) > .lock-element {
-    display: none
-}
-  
-.animation-cube-grow-lock.is-locked > *:not(.lock-element) {
-    display: none
-}
