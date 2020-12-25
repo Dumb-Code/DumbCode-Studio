@@ -76,7 +76,8 @@ export class ReferenceImageHandler {
         this.refOnly.css('display', 'none')
     }
 
-    addImage(img, name) {
+    async addImage(img, name) {
+        await this.ensureModalCreated()
         let texture = new Texture(img)
         texture.needsUpdate = true
         texture.flipY = true
@@ -100,6 +101,8 @@ export class ReferenceImageHandler {
         let data = { 
             dom,
             mesh,
+            name,
+            img,
             opacity: 100,
             canSelect: true,
             setOpacity: (op = data.opacity) => {
@@ -129,6 +132,8 @@ export class ReferenceImageHandler {
  
         mesh._ref = data
         this.images.push(data)
+
+        return data
     }
 
     updatePanelValues() {
@@ -152,38 +157,40 @@ export class ReferenceImageHandler {
 
     uploadFile(file) {
         let img = document.createElement("img")
-        new Promise(async(resolve) => {
-            img.src = await readFile(file, (reader, f) => reader.readAsDataURL(f))
+        readFile(file, (reader, f) => reader.readAsDataURL(f))
+        .then(url => {
+            img.src = url
             img.onload = () => {
                 let name = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name.length
-                resolve({ name, img })
+                this.addImage(img, name)
                 img.onload = null
             }
         })
-        .then(data => this.addImage(data.img, data.name))
     }
 
     openRefImgModal() {
         this.ensureModalCreated().then(() => {
+            openModal("modeler/reference_image")
             this.listEntry.children().detach()
             this.images.forEach(data => this. listEntry.append(data.dom))
         })
     }
 
     ensureModalCreated() {
-        return openModal("modeler/reference_image").then(m => {
+        return getModal("modeler/reference_image").then(m => {
             if(this.addedHooks === true) {
                 return m
             }
+            let dom = $(m)
             this.addedHooks = true
     
-            this.emptyEntry = m.find('.empty-entry')
-            this.listEntry = m.find('.reference-image-list')
+            this.emptyEntry = dom.find('.empty-entry')
+            this.listEntry = dom.find('.reference-image-list')
             
             let callback = files => [...files].forEach(file => this.uploadFile(file))
     
-            m.find('#ref-img-file-input').on('input', e => callback(e.target.files))
-            fileUploadBox(m.find('.modal-content'), callback)
+            dom.find('#ref-img-file-input').on('input', e => callback(e.target.files))
+            fileUploadBox(dom.find('.modal-content'), callback)
         })
     }
 }

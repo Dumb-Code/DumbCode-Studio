@@ -8,7 +8,7 @@ export class FilesPage {
     constructor(dom, modellingGetter, textureGetter, animatorGetter, pth) {
         this.animationProjectPart = new AnimationProjectPart(dom, animatorGetter, pth)
         this.textureProjectPart = new TextureProjectPart(dom, pth)
-        this.modelProjectPart = new ModelProjectPart(dom, pth, this.textureProjectPart, this.animationProjectPart)
+        this.modelProjectPart = new ModelProjectPart(dom, pth, modellingGetter, this.textureProjectPart, this.animationProjectPart)
 
         let rp = dom.find('.required-project').css('display', 'none')
         pth.addEventListener("initiateselection", () => rp.css('display', ''))
