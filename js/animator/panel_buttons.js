@@ -1,7 +1,16 @@
+import { ToggleableElement } from "../util.js"
+
 export class PanelButtons {
     constructor(dom, studio) {
         this.pth = studio.pth
         dom.find('.button-delete-keyframe').click(() => this.deleteKeyframe(studio))
+
+        let looped = new ToggleableElement(dom.find('.toggle-timeline-looping')).onchange(e => {
+            let tab = this.pth.animationTabs.active
+            if(tab !== null) {
+                tab.finishLooping = !e.value
+            }
+        }).addPredicate(v => !v || studio.keyframeManager.playstate.playing)
 
         let playstateRoot = dom.find('.toggle-timeline-playstate')
         let updatePlaystate = () => {
@@ -13,17 +22,30 @@ export class PanelButtons {
         dom.find('.button-restart-time').click(() => {
             studio.keyframeManager.playstate.ticks = 0
             studio.keyframeManager.playstate.playing = true
+            let tab = this.pth.animationTabs.active
+            if(tab !== null && tab.loopData !== null) {
+                looped.value = true
+            }
             updatePlaystate()
         })
         dom.find('.button-reset-time').click(() => {
             studio.keyframeManager.playstate.ticks = 0
             studio.keyframeManager.playstate.playing = false
+            looped.value = false
             updatePlaystate()
         })
 
         playstateRoot.click(() => {
             let playing = studio.keyframeManager.playstate.playing === true
             studio.keyframeManager.playstate.playing = !playing
+            if(!playing) {
+                let tab = this.pth.animationTabs.active
+                if(tab !== null && tab.loopData !== null) {
+                    looped.value = true
+                }
+            } else {
+                looped.value = false
+            }
             updatePlaystate()
         })
 

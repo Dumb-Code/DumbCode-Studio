@@ -40,6 +40,7 @@ export class AnimationMemento {
             studio.keyframeManager.reframeKeyframes()
             studio.cubeDisplayValues.updateLoopedElements()
             studio.progressionCanvas.redrawProgressionCanvas()
+            tabData.handler.updateLoopKeyframe()
         }
     }
 

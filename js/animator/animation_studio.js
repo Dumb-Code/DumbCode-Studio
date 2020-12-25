@@ -189,7 +189,6 @@ export class AnimationStudio {
         this.progressionCanvas.keyframeSelectChange()
     }
 
-
     setActive() {
         window.studioWindowResized()
         this.cubeDisplayValues.updateSelected()

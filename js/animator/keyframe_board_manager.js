@@ -54,6 +54,7 @@ export class KeyframeBoardManager {
                 return
             }
             this.getHandler().loopData.start = start + (dx / this.pixelsPerSecond )
+            this.getHandler().updateLoopKeyframe()
             studio.cubeDisplayValues.updateLoopedElements()
             this.updateLoopedElements()
         })
@@ -62,6 +63,7 @@ export class KeyframeBoardManager {
                 return
             }
             this.getHandler().loopData.end = start + (dx / this.pixelsPerSecond )
+            this.getHandler().updateLoopKeyframe()
             studio.cubeDisplayValues.updateLoopedElements()
             this.updateLoopedElements()
         })
@@ -219,7 +221,7 @@ export class KeyframeBoardManager {
         let handler = this.getHandler()
         if(handler !== null && handler.loopData !== null) {
             this.loopContainer.css('display', '').css('left', handler.loopData.start*this.pixelsPerSecond - this.scroll)
-            this.loopMiddleLine.css('width', (handler.loopData.end-handler.loopData.start)*this.pixelsPerSecond - this.scroll)
+            this.loopMiddleLine.css('width', (handler.loopData.end-handler.loopData.start)*this.pixelsPerSecond)
         } else {
             this.loopContainer.css('display', 'none')
         }
@@ -406,7 +408,7 @@ export class KeyframeBoardManager {
             this.playbackMarker.css('display', 'none')
             return
         }
-        let ticks = this.playstate.ticks
+        let ticks = this.playstate.visibleTicks !== null ? this.playstate.visibleTicks : this.playstate.ticks
         let left = this.scroll / this.pixelsPerSecond
 
         let conatainerWidth = this.eventPointBoard.width()

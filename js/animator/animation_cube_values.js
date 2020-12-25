@@ -44,6 +44,7 @@ export class AnimationCubeValues {
                     this.animationLoopTime.setInternalValue(undefined)
                 }
                 studio.keyframeManager.updateLoopedElements()
+                handler.updateLoopKeyframe()
             }
         })
         this.animationLoop.setInternalValue(false)
@@ -51,6 +52,7 @@ export class AnimationCubeValues {
             let handler = studio.pth.animationTabs.active
             if(handler !== null) {
                 handler.loopData.start = e.value
+                handler.updateLoopKeyframe()
                 studio.keyframeManager.updateLoopedElements()
             }
         }).absNumber()
@@ -58,6 +60,7 @@ export class AnimationCubeValues {
             let handler = studio.pth.animationTabs.active
             if(handler !== null) {
                 handler.loopData.end = e.value
+                handler.updateLoopKeyframe()
                 studio.keyframeManager.updateLoopedElements()
             }
         }).absNumber()
@@ -65,6 +68,7 @@ export class AnimationCubeValues {
             let handler = studio.pth.animationTabs.active
             if(handler !== null) {
                 handler.loopData.duration = e.value
+                handler.updateLoopKeyframe()
             }
         }).absNumber()
         this.raytracer.addEventListener('selectchange', () => this.updateSelected())

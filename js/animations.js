@@ -1,14 +1,19 @@
 import { readFile } from "./displays.js"
+import { MeshStandardMaterial } from "./three.js"
 
 export class AnimationHandler {
     
     constructor(tbl) {
         this.tbl = tbl
-        this.looping = false
+        this.tbl.addEventListener("hierarchyChanged", () => this.updateLoopKeyframe())
+
+        this.finishLooping = false
+        this.finishLoopingMarker = false
+        this.looping = true
 
         this.forcedAnimationTicks = null
         this.keyframes = []
-        this.loopKeyframe = false
+        this.loopKeyframe = new KeyFrame(this)
 
         this.loopData = null
         
@@ -32,22 +37,94 @@ export class AnimationHandler {
 
     renameCube(oldName, newName) {
         this.keyframes.forEach(kf => kf.renameCube(oldName, newName))
-        if(this.loopKeyframe) {
-            this.loopKeyframe.renameCube(oldName, newName)
-        }
+        this.loopKeyframe.renameCube(oldName, newName)
     }
 
     animate(deltaTime) {
+        let previousTicks = this.playstate.ticks
         this.playstate.onFrame(deltaTime)
 
         let visibleFrames = this.keyframeInfo.filter(i => i.visible).map(i => i.id)
 
         let ticks = this.forcedAnimationTicks === null ? this.playstate.ticks : this.forcedAnimationTicks
-        if(this.looping) {
-            //todo: looping
-        } else {
-            this.keyframes.filter(kf => visibleFrames.includes(kf.layer)).forEach(kf => kf.animate(ticks))
+        
+        if(this.playstate.playing && this.forcedAnimationTicks === null) {
+            if(!this.finishLoopingMarker && this.looping && this.loopData !== null && ticks > this.loopData.start) {
+                if(ticks >= this.loopData.end+this.loopData.duration) {
+                    ticks = this.loopData.start + ticks - (this.loopData.end+this.loopData.duration)
+                    this.playstate.ticks = ticks
+                }
+
+                //TODO: if a layer is invisible, then the looping animation will look wrong. 
+                // To fix this, have a looped keyframe for every layer (eh)
+                // OR, call updateLoopKeyframe every time the visiblity is changed
+    
+                if(ticks >= this.loopData.end) {
+                    if(previousTicks < this.loopData.end && this.finishLooping) {
+                        this.finishLoopingMarker = true
+                        this.playstate.visibleTicks = null
+                    } else {
+                        let p = (ticks-this.loopData.end) / this.loopData.duration
+                        this.playstate.visibleTicks = this.loopData.end + (this.loopData.start-this.loopData.end)*p
+                        this.loopKeyframe.animate(ticks - this.loopData.end)
+                        ticks = this.loopData.end
+                    }
+                    
+                } else {
+                    this.playstate.visibleTicks = null
+                }
+            }
+
+            if(!this.finishLooping && this.finishLoopingMarker) {
+                this.finishLoopingMarker = false
+            }
         }
+
+        this.keyframes.filter(kf => visibleFrames.includes(kf.layer)).forEach(kf => kf.animate(ticks))
+
+    }
+
+    updateLoopKeyframe() {
+        if(this.loopData === null) {
+            return
+        }
+        this.loopKeyframe.rotationMap.clear()
+        this.loopKeyframe.rotationPointMap.clear()
+        this.loopKeyframe.cubeGrowMap.clear()
+
+        let forceTicks = this.forcedAnimationTicks
+
+        let loops = this.looping
+        this.looping = false
+
+        this.forcedAnimationTicks = this.loopData.start
+        this.tbl.resetAnimations()
+        this.animate(0)
+        let dataStart = this.captureData()
+
+        this.forcedAnimationTicks = this.loopData.end
+        this.tbl.resetAnimations()
+        this.animate(0)
+        let dataEnd = this.captureData()
+
+        let subArrays = (arr1, arr2) => {
+            let arr = []
+            for(let i = 0; i < 3; i++) {
+                arr.push(arr1[i] - arr2[i])
+            }
+            return arr
+        }
+
+        this.tbl.cubeMap.forEach((_, name) => {
+            this.loopKeyframe.rotationMap.set(name, subArrays(dataStart.rot[name], dataEnd.rot[name]))
+            this.loopKeyframe.rotationPointMap.set(name, subArrays(dataStart.pos[name], dataEnd.pos[name]))
+            this.loopKeyframe.cubeGrowMap.set(name, subArrays(dataStart.cg[name], dataEnd.cg[name]))
+        })
+
+        this.loopKeyframe.duration = this.loopData.duration
+
+        this.forcedAnimationTicks = forceTicks
+        this.looping = loops
     }
 
     createKeyframe() {
@@ -94,13 +171,18 @@ export class AnimationHandler {
         this.forcedAnimationTicks = keyframe.startTime + keyframe.duration
         this.animate(0)
         this.forcedAnimationTicks = null
+        
+        this.definedKeyframeInfo.set(keyframe, this.captureData())
+    }
+
+    captureData() {
         let data = { rot:{}, pos:{}, cg: {} }
         this.tbl.cubeMap.forEach((cube, name) => {
             data.rot[name] = cube.cubeGroup.rotation.toArray()
             data.pos[name] = cube.cubeGroup.position.toArray()
             data.cg[name] =  cube.cubeMesh.scale.toArray().map((e, i) => (e-cube.dimension[i]) / 2)
         })
-        this.definedKeyframeInfo.set(keyframe, data)
+        return data
     }
 
     fixDefinedLayers(keyframe) {
@@ -239,7 +321,6 @@ class KeyFrame {
             percentageDone = 1
         }
 
-
         this.rotationMap.forEach((values, key) => {
             let cube = this.handler.tbl.cubeMap.get(key)?.cubeGroup
             if(cube) {
@@ -295,6 +376,7 @@ class KeyFrame {
 export class PlayState {
     constructor() {
         this.ticks = 0
+        this.visibleTicks = null
         this.speed = 1
         this.playing = false
     }

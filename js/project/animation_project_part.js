@@ -83,7 +83,10 @@ export class AnimationProjectPart {
     }
 
     onAnimationTabAdded(tab) {
-        tab.handler.keyframes.forEach(kf => tab.handler.ensureLayer(kf.layer))
+        tab.handler.keyframes.forEach(kf =>  {
+            tab.handler.ensureLayer(kf.layer)
+            tab.handler.updateLoopKeyframe()
+        })
         this.animatorGetter().keyframeManager.reframeKeyframes()
         this.animatorGetter().cubeDisplayValues.updateLoopedElements()
     }

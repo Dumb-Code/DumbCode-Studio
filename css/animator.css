@@ -117,3 +117,7 @@ border: 0;
 .slider::-moz-focus-inner, ::-moz-focus-outer {
 border: 0;
 }
+
+.toggle-timeline-looping.is-activated .icon {
+    color: #096fdb;
+}
