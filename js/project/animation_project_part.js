@@ -1,6 +1,6 @@
 import { readFile } from "../displays.js"
 import { ByteBuffer } from "../animations.js"
-import { doubleClickToEdit, ToggleableElement } from "../util.js"
+import { doubleClickToEdit, fileUploadBox, ToggleableElement } from "../util.js"
 import { GifExporter } from "./gif_export.js"
 import { DCMModel } from "../formats/model/dcm_loader.js"
 import { TBLFilesLoader } from "../formats/animation/tbl_files.js"
@@ -14,11 +14,15 @@ export class AnimationProjectPart {
         this.gifExporter = new GifExporter(animatorGetter)
         this.emptyAnimationList = dom.find('.animation-list-entry.empty-column')
         dom.find('.new-animation-button').click(() => this.createNewAnimationTab())
-        dom.find('#animation-file-input').on('input', e => 
-            [...e.target.files].forEach(async(file) => 
+
+        let uploadTextureFile = files => {
+            [...files].forEach(async(file) => 
                 this.createAndInitiateNewAnimationTab(file.name.substring(0, file.name.length - 4), await readFile(file))
             )
-        )
+        }
+
+        dom.find('#animation-file-input').on('input', e => uploadTextureFile(e.target.files))
+        fileUploadBox(dom.find('.animation-drop-area'), files => uploadTextureFile(files))
 
         dom.find('#animation-tbl-files').on('input', async(e) => {
             let files = [...e.target.files]
@@ -81,6 +85,7 @@ export class AnimationProjectPart {
     onAnimationTabAdded(tab) {
         tab.handler.keyframes.forEach(kf => tab.handler.ensureLayer(kf.layer))
         this.animatorGetter().keyframeManager.reframeKeyframes()
+        this.animatorGetter().cubeDisplayValues.updateLoopedElements()
     }
 
     toggleTabOpened(tab) {
@@ -116,7 +121,7 @@ export class AnimationProjectPart {
             this.gifExporter.onOpenModal(handler, tab.name)
             e.stopPropagation()
         })
-        dom.find('.download-animation-file').click(() => {
+        dom.find('.download-animation-file').click(e => {
             DCALoader.exportAnimation(handler).downloadAsFile(tab.name + ".dca")
             e.stopPropagation()
         })

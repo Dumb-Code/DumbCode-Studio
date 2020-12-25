@@ -38,7 +38,7 @@ export class LinkedElement {
 
     constructor(elems, array = true, parseNum = true, checkbox = false) {
         this.array = array
-        this.parseNum = parseNum
+        this.parseValue = parseNum ? e => parseFloat(e) : e => e 
         this.checkbox = checkbox
         this.addElement(this.elems = elems)
         this.sliderElems = undefined
@@ -48,6 +48,11 @@ export class LinkedElement {
         } else {
             this.rawValue = 0
         }
+    }
+
+    absNumber() {
+        this.parseValue = e => Math.max(e, 0)
+        return this
     }
 
     //todo: remove
@@ -128,12 +133,12 @@ export class LinkedElement {
                 }
                 let arr = this.rawValue.splice(0)
                 let idx = parseInt(e.target.getAttribute('axis'))
-                arr[idx] = this.parseNum ? parseFloat(e.target.value) : e.target.value
+                arr[idx] = this.parseValue(e.target.value)
                 this.setValue(arr, ensure ? idx : -1)
             })
         } else {
             elem.focusin(() => this.indexSelected = 0)
-            elem.on('input', e => this.setValue(this.parseNum ? parseFloat(e.target.value) : (this.checkbox ? e.target.checked : e.target.value), 0))
+            elem.on('input', e => this.setValue(this.checkbox ? e.target.checked : this.parseValue(e.target.value), 0))
         }
 
         //Ensure when the boxes are deselected, the text inside them should be updated and formatted

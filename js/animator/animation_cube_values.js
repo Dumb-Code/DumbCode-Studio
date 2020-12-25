@@ -37,10 +37,75 @@ export class AnimationCubeValues {
                 this.cubeGrow.value = values
             }
         })
-        this.frameTime = new LinkedElement(dom.find('.input-frame-start'), false).onchange(e => this.activeKeyframeFunc(kf => kf.startTime = e.value))
-        this.frameLength = new LinkedElement(dom.find('.input-frame-length'), false).onchange(e => this.activeKeyframeFunc(kf => kf.duration = e.value))
+        this.frameTime = new LinkedElement(dom.find('.input-frame-start'), false).onchange(e => this.activeKeyframeFunc(kf => kf.startTime = e.value)).absNumber()
+        this.frameLength = new LinkedElement(dom.find('.input-frame-length'), false).onchange(e => this.activeKeyframeFunc(kf => kf.duration = e.value)).absNumber()
+        
+        this.animationLoop = new LinkedElement(dom.find('.keyframe-loop'), false, false, true).onchange(e => {
+            let handler = studio.pth.animationTabs.active
+            if(handler !== null) {
+                handler.hasLoopData = e.value
+                if(e.value) {
+                    handler.loopData = { 
+                        start: handler.minTime,
+                        end: handler.totalTime,
+                        duration: 0.5
+                     }
 
+                    this.animationLoopStart.setInternalValue(handler.loopData.start)
+                    this.animationLoopEnd.setInternalValue(handler.loopData.end)
+                    this.animationLoopTime.setInternalValue(handler.loopData.duration)
+                } else {
+                    handler.loopData = null
+
+                    this.animationLoopStart.setInternalValue(undefined)
+                    this.animationLoopEnd.setInternalValue(undefined)
+                    this.animationLoopTime.setInternalValue(undefined)
+                }
+                studio.keyframeManager.updateLoopedElements()
+            }
+        })
+        this.animationLoop.setInternalValue(false)
+        this.animationLoopStart = new LinkedElement(dom.find('.keyframe-loop-start'), false).onchange(e => {
+            let handler = studio.pth.animationTabs.active
+            if(handler !== null) {
+                handler.loopData.start = e.value
+                studio.keyframeManager.updateLoopedElements()
+            }
+        }).absNumber()
+        this.animationLoopEnd = new LinkedElement(dom.find('.keyframe-loop-end'), false).onchange(e => {
+            let handler = studio.pth.animationTabs.active
+            if(handler !== null) {
+                handler.loopData.end = e.value
+                studio.keyframeManager.updateLoopedElements()
+            }
+        }).absNumber()
+        this.animationLoopTime = new LinkedElement(dom.find('.keyframe-loop-time'), false).onchange(e => {
+            let handler = studio.pth.animationTabs.active
+            if(handler !== null) {
+                handler.loopData.duration = e.value
+            }
+        }).absNumber()
         this.raytracer.addEventListener('selectchange', () => this.updateSelected())
+    }
+
+    updateLoopedElements() {
+        let handler = this.pth.animationTabs.active
+
+        let isLooping = false
+        if(handler !== null) {
+            isLooping = handler.loopData !== null
+        }
+        this.animationLoop.setInternalValue(isLooping)
+
+        if(isLooping) {
+            this.animationLoopStart.setInternalValue(handler.loopData.start)
+            this.animationLoopEnd.setInternalValue(handler.loopData.end)
+            this.animationLoopTime.setInternalValue(handler.loopData.duration)
+        } else {
+            this.animationLoopStart.setInternalValue(undefined)
+            this.animationLoopEnd.setInternalValue(undefined)
+            this.animationLoopTime.setInternalValue(undefined)
+        }
     }
 
     updateKeyframeSelected() {

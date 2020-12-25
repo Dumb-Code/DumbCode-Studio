@@ -9,6 +9,15 @@ export class AnimationMemento {
             selected: kf === tabData.handler.selectedKeyFrame
         }})
 
+        let cloneData = d => {
+            if(d === null) {
+                return null
+            }
+            return { ...d }
+        }
+
+        this.data.loopData = cloneData(tabData.handler.loopData)
+
         this.reconstruct = () => {
             tabData.handler.keyframes = []
             let selectedKeyframe = undefined
@@ -24,8 +33,12 @@ export class AnimationMemento {
                     selectedKeyframe = kf
                 }
             })
+
+            tabData.handler.loopData = cloneData(this.data.loopData)
+
             studio.selectKeyframe(selectedKeyframe)
             studio.keyframeManager.reframeKeyframes()
+            studio.cubeDisplayValues.updateLoopedElements()
             studio.progressionCanvas.redrawProgressionCanvas()
         }
     }

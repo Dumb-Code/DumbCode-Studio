@@ -9,6 +9,9 @@ export class AnimationHandler {
         this.forcedAnimationTicks = null
         this.keyframes = []
         this.loopKeyframe = false
+
+        this.loopData = null
+        
         this.events = []
         this.keyframeInfo = []
         this.definedKeyframeInfo = new Map()
@@ -20,7 +23,11 @@ export class AnimationHandler {
     }
 
     get minTime() {
-        return this.keyframes.map(kf => kf.startTime).reduce((a,b) => Math.min(a,b), Infinity)
+        let ret = this.keyframes.map(kf => kf.startTime).reduce((a,b) => Math.min(a,b), Infinity)
+        if(ret == Infinity) {
+            return 0
+        }
+        return ret
     }
 
     renameCube(oldName, newName) {

@@ -10,12 +10,11 @@ import { Raytracer } from "./raytracer.js";
 import { TextureStudio } from "./texture/texture_studio.js";
 import { DCMModel } from "./formats/model/dcm_loader.js";
 import { ProjectTabHandler } from "./project_tab_handler.js";
-import { fileUploadBox } from "./util.js";
 import { DirectionalIndecators } from "./directional_indicators.js";
 
 const major = 0
 const minor = 7
-const patch = 0
+const patch = 1
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`

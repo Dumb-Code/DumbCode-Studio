@@ -45,6 +45,27 @@ export class KeyframeBoardManager {
         .mouseup(() => this.scrubbingPlaybackMarker = false)
         
         this.editingPoint = null
+
+        this.loopContainer = keyframeBoard.find('.keyframe-loop-conatiner')
+        this.loopMiddleLine = keyframeBoard.find('.keyframe-middle')
+
+        onElementDrag(keyframeBoard.find('.keyframe-loop-start').get(0), () => this.getHandler()?.loopData?.start, (dx, _, start) => {
+            if(start === undefined) {
+                return
+            }
+            this.getHandler().loopData.start = start + (dx / this.pixelsPerSecond )
+            studio.cubeDisplayValues.updateLoopedElements()
+            this.updateLoopedElements()
+        })
+        onElementDrag(keyframeBoard.find('.keyframe-loop-end').get(0), () => this.getHandler()?.loopData?.end, (dx, _, start) => {
+            if(start === undefined) {
+                return
+            }
+            this.getHandler().loopData.end = start + (dx / this.pixelsPerSecond )
+            studio.cubeDisplayValues.updateLoopedElements()
+            this.updateLoopedElements()
+        })
+
         this.emptyPoint = keyframeBoard.find('.empty-event-point')
         this.eventPointBoard = keyframeBoard.find('.event-points-board')
         this.eventPointBoard.click(e => {
@@ -172,6 +193,7 @@ export class KeyframeBoardManager {
         if(reframeFramePosition === true) {
             this.ensureFramePosition()
         }
+        this.updateLoopedElements()
         let handler = this.getHandler();
         [...this.elementDoms.values()].forEach(d => d.detach())
 
@@ -193,8 +215,18 @@ export class KeyframeBoardManager {
         this.updateEventPoints()
     }
 
+    updateLoopedElements() {
+        let handler = this.getHandler()
+        if(handler !== null && handler.loopData !== null) {
+            this.loopContainer.css('display', '').css('left', handler.loopData.start*this.pixelsPerSecond - this.scroll)
+            this.loopMiddleLine.css('width', (handler.loopData.end-handler.loopData.start)*this.pixelsPerSecond - this.scroll)
+        } else {
+            this.loopContainer.css('display', 'none')
+        }
+    }
+
     updateEventPoints() {
-        this.eventPointBoard.html('')
+        this.eventPointBoard.children().not('.board-persistent').detach()
         this.getHandler()?.events?.forEach(evt => {
             if(evt.element === undefined) {
                 evt.element = this.emptyPoint.clone()[0]
@@ -370,6 +402,10 @@ export class KeyframeBoardManager {
     }
 
     ensureFramePosition() {
+        if(this.getHandler() === null) {
+            this.playbackMarker.css('display', 'none')
+            return
+        }
         let ticks = this.playstate.ticks
         let left = this.scroll / this.pixelsPerSecond
 

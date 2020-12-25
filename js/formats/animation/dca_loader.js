@@ -12,6 +12,16 @@ DCALoader.importAnimation = (handler, buffer) => {
         buffer.useOldString = true
     }
 
+    if(version >= 9 && buffer.readBool()) {
+        handler.loopData = {
+            start: buffer.readNumber(),
+            end: buffer.readNumber(),
+            duration: buffer.readNumber()
+        }
+    } else {
+        handler.loopData = null
+    }
+
     let length = buffer.readNumber()
 
     handler.keyframes = []
@@ -185,7 +195,18 @@ DCALoader.exportAnimation = handler => {
     //8 - tweaked time to be from 20 tps to 1 tps. Having 8 marks the animation as being in seconds instead of minecraft ticks.
     //    (24 DEC 2020) [d39636d0440d7b330af7cf218f0d69472a8e44fe]
     //
-    buffer.writeNumber(8)
+    //9 - added looping data to the keyframe header. 
+    //    (25 DEC 2020) [?]
+    //
+    buffer.writeNumber(9)
+    if(handler.loopData !== null) {
+        buffer.writeBool(true)
+        buffer.writeNumber(handler.loopData.start)
+        buffer.writeNumber(handler.loopData.end)
+        buffer.writeNumber(handler.loopData.duration)
+    } else {
+        buffer.writeBool(false)
+    }
     buffer.writeNumber(handler.keyframes.length)
     
     handler.keyframes.forEach(kf => {
