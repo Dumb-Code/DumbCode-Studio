@@ -320,23 +320,29 @@ let keyup = key => {
 let mouseMoveKey = (key, pressed) => {
     if(pressed !== pressedKeys.has(key)) {
         if(pressed) {
-            console.log(key + " down")
             keydown(key)
         } else {
-            console.log(key + " up")
             keyup(key)
         }
     }
 }
+let runEventDirectKeys = e => {
+    mouseMoveKey(directKeys[0], e.altKey)
+    mouseMoveKey(directKeys[1], e.ctrlKey)
+    mouseMoveKey(directKeys[2], e.shiftKey)
+}
 let directKeys = ["Alt", "Control", "Shift"]
+
 $(document)
-    .keydown(e => directKeys.includes(e.key) ? mouseMoveKey(e.key, true) : keydown(e.key))
-    .keyup(e => directKeys.includes(e.key) ? mouseMoveKey(e.key, false) : keyup(e.key))
-    .mousemove(e => {
-        mouseMoveKey(directKeys[0], e.altKey)
-        mouseMoveKey(directKeys[1], e.ctrlKey)
-        mouseMoveKey(directKeys[2], e.shiftKey)
+    .keydown(e => {
+        keydown(e.key)
+        runEventDirectKeys(e)
     })
+    .keyup(e => {
+        keyup(e.key)
+        runEventDirectKeys(e)
+    })
+    .mousemove(e => runEventDirectKeys(e))
 export function isKeyDown(key) {
     return pressedKeys.has(key)
 } 
