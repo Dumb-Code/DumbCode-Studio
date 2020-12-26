@@ -13,6 +13,7 @@ export class CubeListBoard {
         this.elementMap = new Map()
 
         this.dragElementList = new DraggableElementList(true, (drop, draggedCube, droppedOnto, e) => {
+            console.log("Ctrl: " + e.ctrlKey)
             lockedCubes.createLockedCubesCache(e.ctrlKey ? undefined : [draggedCube.name])
             draggedCube.parent.deleteChild(draggedCube, true)
             if(drop === "on") {
