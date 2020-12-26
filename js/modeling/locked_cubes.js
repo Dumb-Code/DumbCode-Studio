@@ -48,12 +48,12 @@ export class LockedCubes {
         return this.lockedCubes.has(cube.name)
     }
 
-    createLockedCubesCache(lockedCubes = this.lockedCubes) {
+    createLockedCubesCache(lockedCubes = this.lockedCubes, directMove = false) {
         this.lockedChildrenCache.clear()
         this.movingChildrenCache.clear()
         lockedCubes.forEach(cubeName => {
             let cube = this.pth.model.cubeMap.get(cubeName)
-            if(!cube || this.raytracer.isCubeSelected(cube)) {
+            if(!cube || (directMove !== true && this.raytracer.isCubeSelected(cube))) {
                 return
             } 
             this.traverseUnlockedCubes(cube)
