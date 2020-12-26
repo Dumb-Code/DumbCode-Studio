@@ -320,8 +320,10 @@ let keyup = key => {
 let mouseMoveKey = (key, pressed) => {
     if(pressed !== pressedKeys.has(key)) {
         if(pressed) {
+            console.log(key + " down")
             keydown(key)
         } else {
+            console.log(key + " up")
             keyup(key)
         }
     }
