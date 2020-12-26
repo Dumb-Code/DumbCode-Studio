@@ -142,7 +142,7 @@ export class RemoteProject {
             Promise.all(textureData.suffixLocations.map(async(suffix) => {
                 let data = await this.request(`${textureData.location}/${suffix}.png`)
                 let img = document.createElement("img")
-                img.src = 'data:image/png;base64,' + data.content
+                img.src = 'data:image/png;base64,' + data.content.replaceAll('\n', '')
                 await new Promise(resolve => img.onload = resolve)
                 img.onload = null
                 updateCallback(++count / amount)
@@ -174,7 +174,7 @@ export class RemoteProject {
             data.referenceImages.forEach(async(image) => {
                 let imgData = await this.request(`${loc}/${image.name}.png`)
                 let img = document.createElement("img")
-                img.src = 'data:image/png;base64,' + imgData.content
+                img.src = 'data:image/png;base64,' + imgData.content.replaceAll('\n', '')
                 await new Promise(resolve => img.onload = resolve)
                 img.onload = null
                 updateCallback(++count / amount)
