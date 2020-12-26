@@ -156,6 +156,7 @@ export class ReferenceImageHandler {
     }
 
     uploadFile(file) {
+        console.log(file)
         let img = document.createElement("img")
         readFile(file, (reader, f) => reader.readAsDataURL(f))
         .then(url => {

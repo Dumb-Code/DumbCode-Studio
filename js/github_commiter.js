@@ -4,7 +4,7 @@ export class GithubCommiter {
         this.token = token
         this.repo = repo
         this.files = []
-        this.dirsToRemoveFiles = new Set()
+        this.dirsToRemoveFiles = []
 
         if(!branch) {
             this.startingBranch = this.request()
@@ -18,8 +18,8 @@ export class GithubCommiter {
         this.files.push( { path, content: { content, base64 } }) //content: base64 ? content : atob(content)
     }
 
-    removeRedundentFiles(directory) {
-        this.dirsToRemoveFiles.add(directory)
+    removeRedundentFiles(directory, fileNamePredicate = () => true) {
+        this.dirsToRemoveFiles.push( { directory, fileNamePredicate })
     }
 
     async submit(message, progress = () => {}, state = () => {}) {
@@ -123,11 +123,11 @@ export class GithubCommiter {
     }
 
     async _generateObject(sha, path) {
-        let rf = this.dirsToRemoveFiles.has(path)
+        let rf = this.dirsToRemoveFiles.find(d => d.directory == path)
         if(sha) {
             return this.request(`git/trees/${sha}`)
             .then(r => { 
-                let tree = r.tree.filter(f => !rf || (f.type === 'tree'))
+                let tree = r.tree.filter(f => rf === undefined || (f.type === 'tree') || !rf.fileNamePredicate(f.path))
                 return { 
                     children:{}, 
                     objects:{}, 

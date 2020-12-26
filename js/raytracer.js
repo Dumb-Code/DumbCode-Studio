@@ -208,6 +208,7 @@ export class Raytracer {
             }
             intersectionChangeEvent.old = this.intersected
             intersectionChangeEvent.cube = undefined
+            this.intersectedDistance = Infinity
             this.intersected = undefined
             this.dispatchEvent(intersectionChangeEvent)
         }

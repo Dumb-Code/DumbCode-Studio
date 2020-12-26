@@ -35,7 +35,7 @@ export class ModelProjectPart {
             let branch = dom.find('.repo-branch')
             let logArea = dom.find('.log-area')
             dom.submit(() => {
-                new RemoteProject(this.pth, this.texturePart, this.animationPart, token.val(), owner.val(), name.val(), branch.val(), logArea)
+                new RemoteProject(this.pth, this, this.texturePart, this.animationPart, token.val(), owner.val(), name.val(), branch.val(), logArea)
                 return false
             })
         })
@@ -102,7 +102,6 @@ export class ModelProjectPart {
                 let referenceImages = zip.folder('ref_images')
                 let refImgNames = referenceImages.file('data.json')
                 if(refImgNames !== null) {
-                    let modeler = this.modellingGetter()
                     refImgNames.async('string')
                     .then(res => {
                         let obj = JSON.parse(res)
@@ -110,7 +109,7 @@ export class ModelProjectPart {
                             referenceImages.file(`${elem.name}.png`).async('blob')
                             .then(blob => {
                                 let img = document.createElement('img')
-                                img.onload = () => modeler.referenceImageHandler.addImage(img, elem.name).then( data => {
+                                img.onload = () => this.addReferenceImage(img, elem.name).then(data => {
                                     data.mesh.position.set(elem.pos[0], elem.pos[1], elem.pos[2])
                                     data.mesh.rotation.set(elem.rot[0], elem.rot[1], elem.rot[2])
                                     data.mesh.scale.set(elem.scale[0], elem.scale[1], elem.scale[2])
@@ -126,6 +125,10 @@ export class ModelProjectPart {
                 }
             })
         })
+    }
+
+    addReferenceImage(img, name) {
+        return this.modellingGetter().referenceImageHandler.addImage(img, name)
     }
 
     initiateEntry(project) {
@@ -163,7 +166,7 @@ export class ModelProjectPart {
             if(textures.length !== 0) {
                 let texFolder = zip.folder('textures')
                 texFolder.file('texture_names', textures.map(data => data.name).join("\n"))
-                textures.forEach((data, index) => texFolder.file(index + ".png", data.img.src.substring(data.img.src.indexOf(',')), { base64: true }))
+                textures.forEach((data, index) => texFolder.file(index + ".png", data.img.src.substring(data.img.src.indexOf(',')+1), { base64: true }))
             }
 
             let animations = project.animationTabHandler.allTabs

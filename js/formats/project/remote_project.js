@@ -15,8 +15,9 @@ let textureArea
 let currentName = null
 
 export class RemoteProject {
-    constructor(pth, texturePart, animationPart, token, repoOwner, repoName, branch, logArea) {
+    constructor(pth, modelingPart, texturePart, animationPart, token, repoOwner, repoName, branch, logArea) {
         this.pth = pth
+        this.modelingPart = modelingPart
         this.texturePart = texturePart
         this.animationPart = animationPart
         this.token = token
@@ -45,7 +46,7 @@ export class RemoteProject {
     prepareRequestData() {
         this.request(`studio_remotes`).then(files => {
             let allFiles = files.filter(file => file.type == "file" && file.name.endsWith('.remote'))
-            let progress = new AsyncProgressCounter(allFiles.length, 8, 'Preparing...', (s, c) => this.logArea.text(s + ' ' + Math.round(c * 100) + '%'))
+            let progress = new AsyncProgressCounter(allFiles.length, 9, 'Preparing...', (s, c) => this.logArea.text(s + ' ' + Math.round(c * 100) + '%'))
             allFiles.forEach((file, n) => {
                 progress.updateProgress(n)
                 let name = file.name.substring(0, file.name.lastIndexOf('.'))
@@ -138,21 +139,56 @@ export class RemoteProject {
         if(textureData) {
             let amount = textureData.suffixLocations.length
             let count = 0
-            let allTextures = textureData.suffixLocations.map(suffix => this.request(`${textureData.location}/${suffix}.png`).then(r => {
+            Promise.all(textureData.suffixLocations.map(async(suffix) => {
+                let data = await this.request(`${textureData.location}/${suffix}.png`)
                 let img = document.createElement("img")
-                img.src = 'data:image/png;base64,' + r.content
-                return new Promise(resolve => img.onload = () => {
-                    img.onload = null
-                    resolve(() => {
-                        updateCallback(++count / amount)
-                        this.texturePart.createTextureElement(suffix, img)
-                    })
-                })
-            }))
-            Promise.all(allTextures).then(res => res.reverse().forEach(r => r())).then(() => this.pth.textureManager.refresh()).then(closeModal)
+                img.src = 'data:image/png;base64,' + data.content
+                await new Promise(resolve => img.onload = resolve)
+                img.onload = null
+                updateCallback(++count / amount)
+                return { suffix, img }
+            })).then(datas => {
+                datas.reverse().forEach(p => this.texturePart.createTextureElement(p.suffix, p.img))
+                this.pth.textureManager.refresh()
+                closeModal()
+            })
         } else {
             updateCallback()
         }
+
+        // let img = document.createElement('img')
+        // img.onload = () => modeler.referenceImageHandler.addImage(img, elem.name).then(data => {
+        //     data.mesh.position.set(elem.pos[0], elem.pos[1], elem.pos[2])
+        //     data.mesh.rotation.set(elem.rot[0], elem.rot[1], elem.rot[2])
+        //     data.mesh.scale.set(elem.scale[0], elem.scale[1], elem.scale[2])
+        //     data.setOpacity(elem.opacity)
+        //     data.canSelect = elem.canSelect
+        //     img.onload = null
+        // })
+        // readFile(blob, (reader, file) => reader.readAsDataURL(file))
+        // .then(data => img.src = data)
+        if(data.referenceImages.length !== 0) {
+            let amount = data.referenceImages.length
+            let count = 0
+            let loc = data.additionalData('reference_image')
+            data.referenceImages.forEach(async(image) => {
+                let imgData = await this.request(`${loc}/${image.name}.png`)
+                let img = document.createElement("img")
+                img.src = 'data:image/png;base64,' + imgData.content
+                await new Promise(resolve => img.onload = resolve)
+                img.onload = null
+                updateCallback(++count / amount)
+                let data = await this.modelingPart.addReferenceImage(img, image.name)
+                data.mesh.position.set(image.pos[0], image.pos[1], image.pos[2])
+                data.mesh.rotation.set(image.rot[0], image.rot[1], image.rot[2])
+                data.mesh.scale.set(image.scale[0], image.scale[1], image.scale[2])
+                data.setOpacity(image.opacity)
+                data.canSelect = image.canSelect
+            })
+        } else {
+            updateCallback()
+        }
+
     }
     
     toArrayBuffer(response) {
@@ -170,8 +206,10 @@ export class RemoteProject {
         let model = null
         let textureFolders = []
         let animationFolders = []
-        
+        let referenceImages = []
+
         let readingTexture = null
+        let readingRefImage = false
 
         lines.forEach(line => {
             if(line.startsWith('#') || line === "") {
@@ -186,8 +224,12 @@ export class RemoteProject {
                 readingTexture.suffixLocations = []
             } else if(line.startsWith('animation')) {
                 animationFolders.push(this.parseNamedLocation(line, 9))
+            } else if(line === "reference_image_files") {
+                readingRefImage = true
             } else if(line === "end") {
-                if(readingTexture !== null) {
+                if(readingRefImage === true) {
+                    readingRefImage = false
+                } else if(readingTexture !== null) {
                     textureFolders.push(readingTexture)
                     readingTexture = null
                 } else {
@@ -195,6 +237,24 @@ export class RemoteProject {
                 }
             } else if(readingTexture !== null) {
                 readingTexture.suffixLocations.push(line)
+            } else if(readingRefImage === true) {
+                let split = line.split(" ") //px py pz rx ry rz sx sy sz o sel <name>
+                if(split.length < 12) {
+                    console.warn(`Don't know how to process reference image line ${line}`)
+                } else {
+                    let pos, rot, scale, opacity, canSelect, name
+                    try {
+                        pos = [parseFloat(split.shift()), parseFloat(split.shift()), parseFloat(split.shift())]
+                        rot = [parseFloat(split.shift()), parseFloat(split.shift()), parseFloat(split.shift())]
+                        scale = [parseFloat(split.shift()), parseFloat(split.shift()), parseFloat(split.shift())]
+                        opacity = parseFloat(split.shift())
+                        canSelect = split.shift() == "t"
+                        name = split.join(' ')
+                    } catch(e) {
+                        console.warn("Unable to proess reference image line " + line, e)
+                    }
+                    referenceImages.push( { pos, rot, scale, opacity, canSelect, name } )
+                }
             } else {
                 console.warn(`Don't know how to process '${line}' for '${name}'`)
             }
@@ -209,7 +269,10 @@ export class RemoteProject {
             return
         }
 
-        return { model, textureFolders, animationFolders }
+        return { 
+            model, textureFolders, animationFolders, referenceImages,
+            additionalData: (...names) => `studio_remotes/data/${names}/${names.join('/')}`
+        }
     }
 
     parseNamedLocation(line, dataLength) {
@@ -238,16 +301,23 @@ export class RemoteProject {
         commiter.addFile(data.model, DCMModel.writeModel(project.model).getAsBase64(), true)
         progress.updateProgress()
         if(animationData) {
-            commiter.removeRedundentFiles(animationData.location)
+            commiter.removeRedundentFiles(animationData.location, f => f.endsWith('.dca'))
             project.animationTabHandler.allTabs.forEach(tab =>
                 commiter.addFile(`${animationData.location}/${tab.name}.dca`, DCALoader.exportAnimation(tab.handler).getAsBase64(), true)
             )
         }
         if(textureData) {
-            commiter.removeRedundentFiles(textureData.location)
-            project.textureManager.textures.forEach(data => 
-                commiter.addFile(`${textureData.location}/${data.name}.png`, data.img.src.substring(data.img.src.indexOf(',')), true)
-            )
+            commiter.removeRedundentFiles(textureData.location, f => f.endsWith('.png'))
+            project.textureManager.textures.forEach(data => {
+                commiter.addFile(`${textureData.location}/${data.name}.png`, data.img.src.substring(data.img.src.indexOf(',')+1), true)
+            })
+        }
+        if(project.referenceImages.length !== 0) {
+            let loc = data.additionalData('reference_image')
+            commiter.removeRedundentFiles(loc, f => f.endsWith('.png'))
+            project.referenceImages.forEach(data => {
+                commiter.addFile(`${loc}/${data.name}.png`, data.img.src.substring(data.img.src.indexOf(',')+1), true)
+            })
         }
         progress.updateProgress()
         return commiter.submit(
@@ -261,6 +331,7 @@ export class RemoteProject {
         let lines = [`version 1.0`, `model ${data.model}`]
 
         data.textureFolders.forEach(folder => {
+            lines.push('')
             let prefix = folder.name ? `texture:${folder.name}` : `texture`
             lines.push(`${prefix} ${folder.location}`)
             if(folder === textureData) {
@@ -271,9 +342,26 @@ export class RemoteProject {
             lines.push('end')
         })
         data.animationFolders.forEach(folder => {
+            lines.push('')
             let prefix = folder.name ? `animation:${folder.name}` : `animation`
             lines.push(`${prefix} ${folder.location}`)
         })
+        
+        if(project.referenceImages.length !== 0) {
+            lines.push('')
+            lines.push('reference_image_files')
+            project.referenceImages.forEach(e => {
+                lines.push([ 
+                    e.mesh.position.x, e.mesh.position.y, e.mesh.position.z, 
+                    e.mesh.rotation.x, e.mesh.rotation.y, e.mesh.rotation.z,
+                    e.mesh.scale.x, e.mesh.scale.y, e.mesh.scale.z,
+                    e.opacity,
+                    e.canSelect ? 't' : 'f',
+                    e.name
+                ].join(' '))
+            })
+            lines.push("end")
+        }
 
         return lines.join("\n")
     }
