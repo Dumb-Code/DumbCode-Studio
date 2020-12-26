@@ -12,6 +12,7 @@ export class LockedCubes {
 
         transformControls.addEventListener('objectChange', () => this.reconstructLockedCubes())
         transformControls.addEventListener('mouseUp', () => {
+            console.log("Illegal Transform Reset")
             this.lockedChildrenCache.clear()
             this.movingChildrenCache.clear()
         })
