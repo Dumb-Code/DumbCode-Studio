@@ -39,6 +39,7 @@ export class CubeListBoard {
         document.body.addEventListener('drop', e => {
             let cube = this.dragElementList.getDraggedData()
             if(cube !== null) {
+                console.log("Ctrl: " + e.ctrlKey)
                 this.lockedCubes.createLockedCubesCache(e.ctrlKey ? undefined : [cube.name])
                 cube.parent.deleteChild(cube, true)
                 pth.model.addChild(cube)
