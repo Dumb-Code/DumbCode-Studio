@@ -38,17 +38,20 @@ export class ModelerOptions {
             switch(e.value) {
                 case "perspective":
                     cam = new PerspectiveCamera(this.perspectiveFov.val(), canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 700)
+                    cam.zoom = studio.display.camera.zoom/100
+                    cam.updateProjectionMatrix()
                     break;
                 case "orthographic":
                     cam = new OrthographicCamera(canvasContainer.clientWidth / -2, canvasContainer.clientWidth / 2, canvasContainer.clientHeight / 2, canvasContainer.clientHeight / -2, 0.1, 700)
-                    cam.zoom = 100
+                    cam.zoom = studio.display.camera.zoom*100
                     cam.updateProjectionMatrix()
                     break
             }
 
             cam.position.copy(studio.display.camera.position)
-            cam.rotation.copy(studio.display.camera.rotation)   
-        
+            cam.rotation.copy(studio.display.camera.rotation)
+
+            cam.updateProjectionMatrix()
             setCamera(cam)
 
         })

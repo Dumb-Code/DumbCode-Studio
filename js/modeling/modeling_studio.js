@@ -78,11 +78,6 @@ export class ModelingStudio {
         applyAdjustScrollable(dom)
     }
 
-    setCamera(camera) {
-        this.transformControls.camera = camera
-        this.gumball.gumballTransformControls.camera = camera
-    }
-
     runFrame() {
         this.pth.model.resetAnimations()
         this.pointTracker.update()

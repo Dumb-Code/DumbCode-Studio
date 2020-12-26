@@ -53,6 +53,8 @@ let directionalIndecators
 let activeTab
 let filesPage, modelingStudio, textureStudio, animationStudio
 
+let allTransformControls = []
+
 async function init() {
     //Set up the renderer
     var renderer = new WebGLRenderer( { alpha: true } );
@@ -119,6 +121,7 @@ async function init() {
 
     display.createTransformControls = () => {
         let transformControls = new TransformControls(camera, renderer.domElement)
+        allTransformControls.push(transformControls)
         transformControls.addEventListener('dragging-changed', e => {
             controls.enabled = !e.value;
         });
@@ -240,10 +243,9 @@ function renameCube(cube, newValue) {
 }
 
 function setCamera(camera) {
-    modelingStudio.setCamera(camera)
-    animationStudio.setCamera(camera)
     controls.object = camera
     display.camera = camera
+    allTransformControls.forEach(tc => tc.camera = camera)
 }
 
 export function updateCamera(camera, width, height) {
