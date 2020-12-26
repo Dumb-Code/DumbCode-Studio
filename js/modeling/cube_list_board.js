@@ -13,7 +13,6 @@ export class CubeListBoard {
         this.elementMap = new Map()
 
         this.dragElementList = new DraggableElementList(true, (drop, draggedCube, droppedOnto, e) => {
-            console.log("Ctrl: " + e.ctrlKey)
             lockedCubes.createLockedCubesCache(e.ctrlKey ? undefined : [draggedCube.name])
             draggedCube.parent.deleteChild(draggedCube, true)
             if(drop === "on") {
@@ -39,7 +38,6 @@ export class CubeListBoard {
         document.body.addEventListener('drop', e => {
             let cube = this.dragElementList.getDraggedData()
             if(cube !== null) {
-                console.log("Ctrl: " + e.ctrlKey)
                 this.lockedCubes.createLockedCubesCache(e.ctrlKey ? undefined : [cube.name])
                 cube.parent.deleteChild(cube, true)
                 pth.model.addChild(cube)

@@ -12,7 +12,6 @@ export class LockedCubes {
 
         transformControls.addEventListener('objectChange', () => this.reconstructLockedCubes())
         transformControls.addEventListener('mouseUp', () => {
-            console.log("Illegal Transform Reset")
             this.lockedChildrenCache.clear()
             this.movingChildrenCache.clear()
         })
@@ -50,7 +49,6 @@ export class LockedCubes {
     }
 
     createLockedCubesCache(lockedCubes = this.lockedCubes) {
-        console.log("Locked: ", lockedCubes)
         this.lockedChildrenCache.clear()
         this.movingChildrenCache.clear()
         lockedCubes.forEach(cubeName => {
@@ -83,8 +81,6 @@ export class LockedCubes {
         }
 
         let size = Math.max(Math.max(...this.lockedChildrenCache.keys()), Math.max(...movingCubesCache.keys()))
-        
-        console.log("Recompute Cache. MC" + movingCubes + " (" + size + "): ",this.lockedChildrenCache)
         //We need to compute everything in order so the parents matrixWorld is correct
         for(let i = 0; i <= size; i++) {
             this.lockedChildrenCache.get(i)?.forEach(lock => {
