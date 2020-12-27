@@ -1,6 +1,7 @@
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D, Quaternion, EventDispatcher } from "../../three.js";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D, Quaternion, EventDispatcher, MeshLambertMaterial } from "../../three.js";
 import { ByteBuffer } from "../../animations.js";
 import { readTblFile } from "./tbl_converter.js";
+import { runInvertMath } from "../../modeling/cube_commands.js";
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
@@ -126,6 +127,8 @@ export class DCMCube {
             counter += 1
         }
         model.cubeMap.set(this.name, this)
+
+        this.uvBuffer = new BufferAttribute(new Float32Array(new Array(6*4*2)), 2)
     }
 
   
@@ -142,10 +145,12 @@ export class DCMCube {
         this.cubeMesh.position.set(0.5, 0.5, 0.5)
         this.cubeMesh.updateMatrix();
         this.cubeMesh.geometry.applyMatrix(this.cubeMesh.matrix);
+        this.cubeMesh.geometry.addAttribute("uv", this.uvBuffer)
         this.cubeMesh.position.set(0, 0, 0)
 
         this.cubeGroup.add(this.cubeMesh)
         this.updateDimension()
+    
 
         this.cubeGroup.rotation.order = "ZYX"
         this.updatePosition()
@@ -255,9 +260,24 @@ export class DCMCube {
     }
 
     updateTexture({ textureOffset = this.textureOffset, dimension = this.dimension, texWidth = this.model.texWidth, texHeight = this.model.texHeight, textureMirrored = this.textureMirrored } = {}) {
-        this.cubeMesh.geometry.removeAttribute("uv")
-        let uvData = getUV(textureOffset[0], textureOffset[1], dimension[0], dimension[1], dimension[2], texWidth, texHeight, textureMirrored)
-        this.cubeMesh.geometry.addAttribute("uv", new BufferAttribute(new Float32Array(uvData), 2))
+        
+        let tm = textureMirrored
+        let to = textureOffset
+        let tw = texWidth
+        let th = texHeight
+
+        let w = dimension[0]
+        let h = dimension[1]
+        let d = dimension[2]
+    
+        this._genereateFaceData(tm ? 1 : 0, tm, to, tw, th, d, d+h, -d, -h)
+        this._genereateFaceData(tm ? 0 : 1, tm, to, tw, th, d+w+d, d+h, -d, -h)
+        this._genereateFaceData(2, tm, to, tw, th, d, 0, w, d)
+        this._genereateFaceData(3, tm, to, tw, th, d+w, d, w, -d)
+        this._genereateFaceData(4, tm, to, tw, th, d+w+d+w, d+h, -w, -h)
+        this._genereateFaceData(5, tm, to, tw, th, d+w, d+h, -w, -h)
+
+        this.uvBuffer.needsUpdate = true
     }
 
     updateCubeName(value = this.name) {
@@ -315,79 +335,42 @@ export class DCMCube {
         }
         this.updateRotationVisuals(values)
     }
-}
 
-function getUV(offsetX, offsetY, w, h, d, texWidth, texHeight, texMirrored) {
+    _genereateFaceData(face, tm, toff, tw, th, offU, offV, heightU, heightV) {
 
-    //Uv data goes west, east, down, up, south, north (+x, -x, +y, -y, +z, -z)
-    //6 -> 6 faces
-    //4 -> 4 vertices per face
-    //2 -> 2 data per vertex (u, v)
-    let uvData = new Array(6 * 4 * 2)
-    let texBottomOrder = [ 1, 5, 0, 4 ]
-    let texUpperOrder = [3, 2]
+        let u = toff[0]
+        let v = toff[1]
 
-    let offX = 0
-    for(let texh = 0; texh < texBottomOrder.length; texh++) {
-        let minX = offsetX + offX
-        let minY = offsetY + d
-
-        let xDist = w;
-
-        let index = texBottomOrder[texh]
-
-        if (texh % 2 == 0) {
-            xDist = d
-            if(texMirrored) {
-                index = texBottomOrder[(texh + 2) % 4]
-            }
+        if(tm) {
+            offU += heightU
+            heightU *= -1
         }
-        offX += xDist
+        
+        let uMin = (u + offU) / tw
+        let vMin = (v + offV) / th
+        let uMax = (u + offU + heightU) / tw
+        let vMax = (v + offV + heightV) / th
 
-        putUVData(uvData, index, minX, minY, xDist, h, texWidth, texHeight, texMirrored)
-    }
-
-    for(let texb = 0; texb < texUpperOrder.length; texb++) {
-        let minXLower = offsetX + d + w * texb + w
-        if(texb == 0) { //Up
-            putUVData(uvData, texUpperOrder[texb], minXLower, offsetY+d, -w, -d, texWidth, texHeight, texMirrored)
-        } else { //Down
-            putUVData(uvData, texUpperOrder[texb], minXLower, offsetY, -w, d, texWidth, texHeight, texMirrored) 
-        }
-    }
-
-    // console.log(uvData.slice(2*8, 3*8))
-    return uvData
-}
-
-function putUVData(uvData, facingindex, minU, minV, uSize, vSize, texWidth, texHeight, texMirrored) {
-    if(texMirrored) {
-        minU += uSize
-        uSize = -uSize
-    }
-
-    //1 0 1 0
-    //1 1 0 0
-    let u = [minU + uSize, minU, minU + uSize, minU]
-    let v = [minV + vSize, minV + vSize, minV, minV]
-    for(let vertex = 0; vertex < 4; vertex++) {
-        let index = (facingindex * 4 + vertex) * 2
-        uvData[index] = u[vertex] / texWidth
-        uvData[index + 1] = v[vertex] / texHeight
+        this.uvBuffer.set([
+            uMax, vMax,
+            uMin, vMax,
+            uMax, vMin,
+            uMin, vMin,
+        ], face*8)
     }
 }
-
-
 DCMModel.loadModel = async(arrayBuffer, name = "") => {
     let model
+    let verion
     if(name.endsWith('.tbl')) {
         model = await readTblFile(arrayBuffer)
+        verion = 2
     } else {
         let buffer = new ByteBuffer(await arrayBuffer)
 
         model = new DCMModel()
     
-        let _version = buffer.readNumber()
+        verion = buffer.readNumber()
         model.author = buffer.readString()
         model.texWidth = buffer.readInteger()
         model.texHeight = buffer.readInteger()
@@ -417,13 +400,31 @@ DCMModel.loadModel = async(arrayBuffer, name = "") => {
     if(name) {
         model.fileName = name.substring(0, name.lastIndexOf('.'))
     }
+
+    if(verion < 2) {
+        model.createModel(new MeshLambertMaterial())
+        model.modelCache.updateMatrix()
+        model.modelCache.updateMatrixWorld(true)
+
+        runInvertMath(model)
+        
+        model.invalidateModelCache()
+    }
     return model
 }
 
 DCMModel.writeModel = model => {
     let buffer = new ByteBuffer()
 
-    buffer.writeNumber(1) //Version
+    //0 - internally used version
+    //    (???) [?]
+    //
+    //1 - Initial public version
+    //    (13 SEP 2020) [e8c947bcc79583e3cd26eccb391b5f1e21ca7f27]
+    //
+    //2 - Model is inverted. This is done to fix tbl imported models. Having a version of 2 marks it as inverted
+    //    (27 DEC 2020) [?]
+    buffer.writeNumber(2) //Version
     
     buffer.writeString(model.author)
     buffer.writeNumber(model.texWidth)

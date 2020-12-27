@@ -20,7 +20,7 @@ export class TextureTools {
                 return
             }
             layer.canvas.getContext('2d').clearRect(0, 0, layer.width, layer.height)
-            studio.texturemapCanvas.drawCubesToCanvas(layer.canvas, layer.width, layer.height, false)
+            studio.texturemapCanvas.drawCubesToCanvas(layer.canvas, layer.width, layer.height, true)
             layer.onCanvasChange()
         })
 

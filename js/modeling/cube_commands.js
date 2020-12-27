@@ -1,6 +1,6 @@
 import { indexHandler } from "../command_handler.js"
 import { CubeLocker } from "../util.js"
-import { Vector3, Quaternion, Matrix4 } from "../three.js"
+import { Vector3, Quaternion, Matrix4, Euler } from "../three.js"
 
 const worldPosVector = new Vector3()
 const worldRotQuat = new Quaternion()
@@ -21,7 +21,7 @@ const tempResultMatrix = new Matrix4()
 const tempCubeOldBase = new Vector3()
 const tempCubeNewBase0 = new Vector3()
 const tempCubeNewBase1 = new Vector3()
-
+const tempEuler = new Euler()
 
 export class CubeCommands {
     constructor(root, studio, dom) {
@@ -41,6 +41,7 @@ export class CubeCommands {
         this.applycopypaste(root, studio.raytracer)
         this.applyVertexSnapping(root, studio.display, studio.pointTracker, studio.lockedCubes, studio.raytracer)
         this.applyMirrorCommand(root)
+        this.applyInvertCommand(root)
 
         root.command('refimg').onRun(() => studio.referenceImageHandler.openRefImgModal())
     }
@@ -122,6 +123,18 @@ export class CubeCommands {
                 } 
             })
     }
+
+    applyInvertCommand(root) {
+        root.command("invert")
+        .onRun(args => {
+            let model = args.context.getTblModel()
+            let cubes
+            if(args.context.selected() !== 0) {
+                cubes = args.context.getAllCubes()
+            }
+            runInvertMath(model, cubes)
+        })
+    }
     
     applyMirrorCommand(root) {
         root.command('mirrorcube')
@@ -156,21 +169,63 @@ export class CubeCommands {
     }
 }
 
-export function runMirrorMath(worldPos, normal, cubesToApplyTo, tbl, dummy) {
+export function runInvertMath(model, cubes) {
+    if(cubes == null) {
+        cubes = []
+        model.traverseAll(cube => cubes.push(cube))
+    }
+    let allCubes = []
+
+    cubes.forEach(cube => allCubes.push({ cube, level: cube.hierarchyLevel, locker: new CubeLocker(cube) }))
+    
+    let wrongFullyMovedCubes = cubes.map(c => c.children).flat().filter(c => !cubes.includes(c))
+    wrongFullyMovedCubes.forEach(cube => allCubes.push({ isWrong: true, cube, level: cube.hierarchyLevel, locker: new CubeLocker(cube) }))
+
+    allCubes.sort((a, b) => a.level - b.level)
+
+    allCubes.forEach(data => {
+        data.locker.reconstruct()
+        if(data.isWrong === true) {
+            data.cube.cubeGroup.updateMatrixWorld(true)
+            return
+        }
+
+        let cube = data.cube
+
+        let rot = cube.rotation
+        let off = cube.offset
+        let dims = cube.dimension
+
+        cube.updateRotation([ -rot[0], -rot[1], rot[2]-180*defineSign(rot[2]) ])
+        cube.updateOffset( [ -off[0]-dims[0], -off[1]-dims[1], off[2] ])
+
+        cube.cubeGroup.updateMatrixWorld(true)
+    })
+}
+
+function defineSign(num) {
+    if(num === 0) {
+        return -1
+    }
+    return Math.sign(num)
+}
+
+export function runMirrorMath(worldPos, normal, cubes, tbl, dummy) {
     tbl.resetVisuals()
 
-    if(cubesToApplyTo == null) {
-        cubesToApplyTo = []
-        tbl.traverseAll(cube => cubesToApplyTo.push(cube))
+    if(cubes == null) {
+        cubes = []
+        tbl.traverseAll(cube => cubes.push(cube))
     }
     
     let totalCubesToApplyTo = []
-    let cubes = cubesToApplyTo.sort((a, b) => a.hierarchyLevel - b.hierarchyLevel)
     cubes.forEach(cube => totalCubesToApplyTo.push({type:0, cube}))
 
     let wrongFullyMovedCubes = cubes.map(c => c.children).flat().filter(c => !cubes.includes(c))
     wrongFullyMovedCubes.forEach(cube => totalCubesToApplyTo.push({type:1, cube}))
 
+    totalCubesToApplyTo.sort((a, b) => a.cube.hierarchyLevel - b.cube.hierarchyLevel)
+    
     let lockets = new Map()
     wrongFullyMovedCubes.forEach(cube => lockets.set(cube, new CubeLocker(cube)))
 

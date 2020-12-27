@@ -13,8 +13,8 @@ import { ProjectTabHandler } from "./project_tab_handler.js";
 import { DirectionalIndecators } from "./directional_indicators.js";
 
 const major = 0
-const minor = 7
-const patch = 3
+const minor = 8
+const patch = 0
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`

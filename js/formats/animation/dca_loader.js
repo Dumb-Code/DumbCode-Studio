@@ -155,6 +155,16 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
 
         handler.events.forEach(event => event.time /= 20)
     }
+
+    //Invert the animations. Positions have already been flipped in v4
+    if(version <= 9 && alreadyFlipped !== true) {
+        handler.keyframes.forEach(keyframe => {
+            keyframe.rotationMap.forEach(vals => {
+                vals[0] = -vals[0]
+                vals[1] = -vals[1]
+            })
+        })
+    }
 }
 
 function transformArr(arr, subValue) {
@@ -196,9 +206,12 @@ DCALoader.exportAnimation = handler => {
     //    (24 DEC 2020) [d39636d0440d7b330af7cf218f0d69472a8e44fe]
     //
     //9 - added looping data to the keyframe header. 
-    //    (25 DEC 2020) [?]
+    //    (25 DEC 2020) [2e91d338dd41ee035b2538d06cc2f4c571aac93c]
     //
-    buffer.writeNumber(9)
+    //10 - fixed issue with invertex xy axis. Having 10 marks the animation as inverted
+    //     (27 DEC 2020) [?]
+    //
+    buffer.writeNumber(10)
     if(handler.loopData !== null) {
         buffer.writeBool(true)
         buffer.writeNumber(handler.loopData.start)

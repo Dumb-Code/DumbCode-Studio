@@ -63,6 +63,7 @@ export class CommandRoot {
             }
             return [...this.raytracer.selectedSet].map(c => c.tabulaCube)
         }
+        ctx.selected = () => this.raytracer.selectedSet.size
         ctx.getTblModel = () => this.pth.model
         let cmdName = split.shift()
         let found = this.commands.filter(c => c.name === cmdName)
@@ -77,6 +78,7 @@ export class CommandRoot {
         } catch(err) {
             this.commandLine.editingLine = err.message
             this.commandLine.onLinesChanged() 
+            console.error(err)
         }
         return {code:-1}
     }

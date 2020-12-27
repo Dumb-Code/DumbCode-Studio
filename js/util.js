@@ -264,8 +264,10 @@ let decomposeScale = new Vector3()
 let decomposeEuler = new Euler()
 
 export class CubeLocker {
-    //type 0: position
+    //type 0: position + rotation
     //type 1: offset
+    //type 2: position
+    //type 3: rotation
     constructor(cube, type = 0) {
         this.cube = cube
         this.type = type
@@ -285,7 +287,13 @@ CubeLocker.reconstructLocker = (cube, type, matrix) => {
 
         switch(type) {
             case 0:
+            case 2:
                 cube.updatePosition(decomposePos.toArray())
+                if(type === 2) {
+                    break
+                }
+            case 0:
+            case 3:
                 decomposeEuler.setFromQuaternion(decomposeRot, "ZYX")
                 cube.updateRotation(decomposeEuler.toArray().map(e => e * 180 / Math.PI))
                 break
@@ -298,11 +306,11 @@ CubeLocker.reconstructLocker = (cube, type, matrix) => {
 function getElementFromCube(cube, type) {
     switch(type) {
         case 0:
+        case 2:
+        case 3:
             return cube.cubeGroup
-            break
         case 1:
             return cube.cubeMesh
-            break
     }
 }
 

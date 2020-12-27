@@ -57,10 +57,10 @@ export class TexturemapCanvas {
             ctx.drawImage(canvas, 0, 0, drawWidth, drawHeight)
         }
 
-        this.drawCubesToCanvas(this.canvas, drawWidth, drawHeight, true)
+        this.drawCubesToCanvas(this.canvas, drawWidth, drawHeight, false)
     }
 
-    drawCubesToCanvas(canvas, drawWidth, drawHeight, opacity) {
+    drawCubesToCanvas(canvas, drawWidth, drawHeight, renderDirect) {
         let ctx = canvas.getContext('2d')
         let su = this.pth.model.texWidth/drawWidth
         let sv = this.pth.model.texHeight/drawHeight
@@ -69,17 +69,20 @@ export class TexturemapCanvas {
             let r = 1.0
             let g = 1.0
             let b = 1.0
-            let a = opacity ? 0.2 : 1.0
+            let a = renderDirect ? 1.0 : 0.2
 
-            if(this.raytracer.intersected !== undefined && this.raytracer.intersected.tabulaCube === cube) {
-                g = 0.2
-                b = 0.2
-                a = opacity ? 0.5 : 1.0
-            } else if(this.raytracer.isCubeSelected(cube)) {
-                r = 0.2
-                g = 0.2
-                a = opacity ? 0.5 : 1.0
+            if(!renderDirect) {
+                if(this.raytracer.intersected !== undefined && this.raytracer.intersected.tabulaCube === cube) {
+                    g = 0.2
+                    b = 0.2
+                    a = 0.5
+                } else if(this.raytracer.isCubeSelected(cube)) {
+                    r = 0.2
+                    g = 0.2
+                    a =  0.5
+                }
             }
+            
 
             let u = cube.textureOffset[0]/su
             let v = cube.textureOffset[1]/sv
@@ -101,7 +104,7 @@ export class TexturemapCanvas {
             ctx.fillRect(u+ud, v, uw, vd)
 
             ctx.fillStyle = `rgba(0, 0, ${255*b}, ${a})`
-            ctx.fillRect(u+ud, v+vd, uw, vh)
+            ctx.fillRect(u+ud+uw+ud, v+vd, uw, vh)
 
 
             ctx.fillStyle = `rgba(${127*r}, 0, 0, ${a})`
@@ -111,7 +114,7 @@ export class TexturemapCanvas {
             ctx.fillRect(u+ud+uw, v, uw, vd)
 
             ctx.fillStyle = `rgba(0, 0, ${127*b}, ${a})`
-            ctx.fillRect(u+ud+uw+ud, v+vd, uw, vh)
+            ctx.fillRect(u+ud, v+vd, uw, vh)
         })
     }
 

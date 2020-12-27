@@ -1,6 +1,6 @@
 import { DCMModel, DCMCube } from "./dcm_loader.js"
 import { MeshLambertMaterial, Vector3 } from "../../three.js"
-import { runMirrorMath } from "../../modeling/cube_commands.js"
+import { runInvertMath, runMirrorMath } from "../../modeling/cube_commands.js"
 
 
 let worldPos = new Vector3(8/16, 12/16, 0)
@@ -38,13 +38,14 @@ export async function readTblFile(data) {
     
     navigateGroup(json)
 
-    let dummyMaterial = new MeshLambertMaterial()
-    model.createModel(dummyMaterial)
+    model.createModel(new MeshLambertMaterial())
     model.modelCache.updateMatrix()
     model.modelCache.updateMatrixWorld(true)
 
     runMirrorMath(worldPos, worldX, null, model, false)
     runMirrorMath(worldPos, worldY, null, model, false)
+
+    runInvertMath(model)
 
     model.invalidateModelCache()
 
