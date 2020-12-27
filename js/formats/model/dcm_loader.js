@@ -423,7 +423,7 @@ DCMModel.writeModel = model => {
     //    (13 SEP 2020) [e8c947bcc79583e3cd26eccb391b5f1e21ca7f27]
     //
     //2 - Model is inverted. This is done to fix tbl imported models. Having a version of 2 marks it as inverted
-    //    (27 DEC 2020) [?]
+    //    (27 DEC 2020) [ba91a6db089353646b976c1fabb251910640db62]
     buffer.writeNumber(2) //Version
     
     buffer.writeString(model.author)

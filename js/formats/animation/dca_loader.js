@@ -209,7 +209,7 @@ DCALoader.exportAnimation = handler => {
     //    (25 DEC 2020) [2e91d338dd41ee035b2538d06cc2f4c571aac93c]
     //
     //10 - fixed issue with invertex xy axis. Having 10 marks the animation as inverted
-    //     (27 DEC 2020) [?]
+    //     (27 DEC 2020) [ba91a6db089353646b976c1fabb251910640db62]
     //
     buffer.writeNumber(10)
     if(handler.loopData !== null) {
