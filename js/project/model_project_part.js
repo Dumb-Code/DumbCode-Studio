@@ -5,7 +5,7 @@ import { DCMModel } from "../formats/model/dcm_loader.js"
 import { DcProject } from "../formats/project/dc_project.js"
 import { RemoteProject } from "../formats/project/remote_project.js"
 import { FlatShading } from "../three.js"
-import { doubleClickToEdit, downloadBlob, fileUploadBox, LinkedSelectableList } from "../util.js"
+import { doubleClickToEdit, downloadBlob, fileUploadBox, getAndDeleteFiles, LinkedSelectableList } from "../util.js"
 
 export class ModelProjectPart {
     constructor(dom, pth, modellingGetter, texturePart, animationPart) {
@@ -15,17 +15,18 @@ export class ModelProjectPart {
         this.animationPart = animationPart
         this.emptyModelEntry = dom.find('.model-list-entry.empty-column')
 
-        this.projectSelectList = new LinkedSelectableList(null, true).onchange(v => pth.selectIndex(v.value))
+        this.projectSelectList = new LinkedSelectableList(null, true).onchange(v => pth.selectIndex(parseInt(v.value)))
 
         pth.addEventListener('newproject', e => this.initiateEntry(e.project))
+        pth.addEventListener('deleteproject', e => this.projectSelectList.remove(e.project._element))
         pth.addEventListener('selectchange', e => this.projectSelectList.setValue(e.to, true))
 
         dom.find('.new-model-button').click(() => pth.createNewProject())
 
-        dom.find('#model-file-input').on('input', e => this.loadModelFiles(e.target.files))
+        dom.find('#model-file-input').on('input', e => this.loadModelFiles(getAndDeleteFiles(e)))
         fileUploadBox(dom.find('.model-drop-area'), files => this.loadModelFiles(files))
 
-        dom.find('#project-file-input').on('input', e => this.loadProjectFiles(e.target.files))
+        dom.find('#project-file-input').on('input', e => this.loadProjectFiles(getAndDeleteFiles(e)))
 
         getModal('project/github').then(e => {
             let dom = $(e)

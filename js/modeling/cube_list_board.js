@@ -58,7 +58,9 @@ export class CubeListBoard {
         this.elementMap.clear()
         this.cubeList.innerHTML = "" //Remove all the children
 
-        this.pth.model.children.forEach(c => this.createCube(this.cubeList, c, oldMap))
+        if(this.pth.anySelected()) {
+            this.pth.model.children.forEach(c => this.createCube(this.cubeList, c, oldMap))
+        }
     }
 
     createCube(parent, cube, oldMap) {

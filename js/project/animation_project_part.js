@@ -1,6 +1,6 @@
 import { readFile } from "../displays.js"
 import { ByteBuffer } from "../animations.js"
-import { doubleClickToEdit, fileUploadBox, ToggleableElement } from "../util.js"
+import { doubleClickToEdit, fileUploadBox, getAndDeleteFiles, ToggleableElement } from "../util.js"
 import { GifExporter } from "./gif_export.js"
 import { DCMModel } from "../formats/model/dcm_loader.js"
 import { TBLFilesLoader } from "../formats/animation/tbl_files.js"
@@ -21,11 +21,11 @@ export class AnimationProjectPart {
             )
         }
 
-        dom.find('#animation-file-input').on('input', e => uploadTextureFile(e.target.files))
+        dom.find('#animation-file-input').on('input', e => uploadTextureFile(getAndDeleteFiles(e)))
         fileUploadBox(dom.find('.animation-drop-area'), files => uploadTextureFile(files))
 
         dom.find('#animation-tbl-files').on('input', async(e) => {
-            let files = [...e.target.files]
+            let files = [...getAndDeleteFiles(e)]
             let name = this.sharedStart(files.map(f => f.name))
 
             if(name.endsWith('_')) {

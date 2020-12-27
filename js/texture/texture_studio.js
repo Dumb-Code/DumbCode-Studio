@@ -4,6 +4,7 @@ import { TexturemapCanvas } from "./texturemap_canvas.js"
 import { TextureCubeValues } from "./texture_cube_values.js"
 import { TextureTools } from "./texture_tools.js"
 import { EventDispatcher } from "../three.js"
+import { getAndDeleteFiles } from "../util.js"
 
 export class TextureStudio {
 
@@ -21,7 +22,7 @@ export class TextureStudio {
         this.texturemapCanvas = new TexturemapCanvas(dom.find('#texture-canvas'), raytracer, this.textureTools, this.cubeValues, pth)
 
         this._textureEmptyLayer = dom.find('.texture-layer.empty-layer')
-        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(e.target.files))
+        dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(getAndDeleteFiles(e)))
         dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
     }
 

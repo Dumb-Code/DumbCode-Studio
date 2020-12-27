@@ -17,7 +17,7 @@ export class ProjectTabHandler {
     }
 
     selectIndex(index) {
-        if(index < 0 || index >= this.allTabs.length) {
+        if(index < -1 || index >= this.allTabs.length) {
             console.warn("Invalid Index ID, " + index)
             return
         }
@@ -29,12 +29,14 @@ export class ProjectTabHandler {
             } else {
                 this.dispatchEvent( { type: "initiateselection" } )
             }
-            let tab = this.allTabs[index]
-            this.display.scene.add(tab.model.modelCache)
-            this.display.scene.add(tab.group)
+            if(index !== -1) {
+                let tab = this.allTabs[index]
+                this.display.scene.add(tab.model.modelCache)
+                this.display.scene.add(tab.group)
+            }
+            this.currentIndex = index
+            this.dispatchEvent( { type: "selectchange", from: this.currentIndex, to: index } )
         }
-        this.currentIndex = index
-        this.dispatchEvent( { type: "selectchange", from: this.currentIndex, to: index } )
     }
 
     refresh() {
@@ -119,25 +121,28 @@ export class ProjectTabHandler {
             console.warn("Tried to delete an invalid project")
             return
         }
-        this.allTabs.splice(idx, 1)
 
-        this.allTabs.forEach((p, i) => p.id = i)
+        let selctedIndex = this.currentIndex
 
-        if(this.currentIndex > idx) {
-            this.selectIndex(this.currentIndex-1)
-        } else if(this.currentIndex == idx) {
-            if(idx == this.allTabs.length) {
+        if(this.currentIndex === idx) {
+            if(idx === this.allTabs.length - 1) {
                 if(idx == 0) {
-                    this.currentIndex = -1
+                    selctedIndex = -1
                 } else {
-                    this.selectIndex(idx-1)
+                    selctedIndex = idx-1
                 }
             } else {
-                this.selectIndex(idx+1)
+                console.log(idx)
+                selctedIndex = idx+1
             }
         }
 
-        this.display.scene.remove(project.model.modelCache)
+        this.selectIndex(selctedIndex)
+
+        this.allTabs.splice(idx, 1)
+        this.currentIndex = this.allTabs.findIndex(p => p.id === this.currentIndex)
+        this.allTabs.forEach((p, i) => p.id = i)
+
 
     }
 }

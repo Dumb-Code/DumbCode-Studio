@@ -1,5 +1,5 @@
 import { readFile } from "../displays.js"
-import { DraggableElementList, doubleClickToEdit, downloadCanvas, downloadHref, fileUploadBox } from "../util.js"
+import { DraggableElementList, doubleClickToEdit, downloadCanvas, downloadHref, fileUploadBox, getAndDeleteFiles } from "../util.js"
 
 export class TextureProjectPart {
 
@@ -7,7 +7,7 @@ export class TextureProjectPart {
         this.pth = pth
         this.emptyTextureList = dom.find('.texture-list-entry.empty-column')
         this.dragableElementList = new DraggableElementList(false, (a, b, c) => pth.textureManager.textureDragged(a, b, c))
-        dom.find('#texture-file-input').on('input', e => this.uploadTextureFile(e.target.files))
+        dom.find('#texture-file-input').on('input', e => this.uploadTextureFile(getAndDeleteFiles(e)))
         dom.find('.new-texture-button').click(() => this.createEmptyTexture())
 
         fileUploadBox(dom.find('.texture-drop-area'), files => this.uploadTextureFile(files))

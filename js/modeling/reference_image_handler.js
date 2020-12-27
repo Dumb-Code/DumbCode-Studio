@@ -1,7 +1,7 @@
 import { readFile } from "../displays.js"
 import { raytraceUnderMouse } from "../raytracer.js"
 import { DoubleSide, Mesh, MeshBasicMaterial, NearestFilter, PlaneGeometry, Texture } from "../three.js"
-import { fileUploadBox, LinkedElement, LinkedSelectableList } from "../util.js"
+import { fileUploadBox, getAndDeleteFiles, LinkedElement, LinkedSelectableList } from "../util.js"
 
 const startSize = 2
 
@@ -189,7 +189,7 @@ export class ReferenceImageHandler {
             
             let callback = files => [...files].forEach(file => this.uploadFile(file))
     
-            dom.find('#ref-img-file-input').on('input', e => callback(e.target.files))
+            dom.find('#ref-img-file-input').on('input', e => callback(getAndDeleteFiles(e)))
             fileUploadBox(dom.find('.modal-content'), callback)
         })
     }

@@ -181,6 +181,10 @@ export class LinkedSelectableList {
         this.elements = this.elements.add(elements)
     }
 
+    removeElement(elements) {
+        this.elements = this.elements.not(elements)
+    }
+
     set value(value) {
         this.setValue(value)
     }
@@ -773,4 +777,10 @@ export class AsyncProgressCounter {
               }
           })
       }
+  }
+
+  export function getAndDeleteFiles(event) {
+      let files = [...event.target.files]
+      event.target.value = ""
+      return files
   }
