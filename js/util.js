@@ -34,11 +34,19 @@ export class ButtonSpeed {
     }
 }
 
+function parseOrThrow(value) {
+    let num = parseFloat(value)
+    if(isNaN(num)) {
+        return 0
+    }
+    return num
+}
+
 export class LinkedElement {
 
     constructor(elems, array = true, parseNum = true, checkbox = false) {
         this.array = array
-        this.parseValue = parseNum ? e => parseFloat(e) : e => e 
+        this.parseValue = parseNum ? e => parseOrThrow(e) : e => e 
         this.checkbox = checkbox
         this.addElement(this.elems = elems)
         this.sliderElems = undefined
@@ -48,6 +56,7 @@ export class LinkedElement {
         } else {
             this.rawValue = 0
         }
+        this.idf = Math.random()
     }
 
     absNumber() {
@@ -90,9 +99,10 @@ export class LinkedElement {
         }
 
         if(this.array) {
-            this.elems.each((idx,e) => {
-                if(idx != ignore) {
-                    e.value = value===undefined?"":value[e.getAttribute('axis')]
+            this.elems.each((_,e) => {  
+                let axis = e.getAttribute('axis')
+                if(ignore != axis) {
+                    e.value = value===undefined?"":value[axis]
                 }
             })
             if(this.sliderElems !== undefined) {
@@ -133,12 +143,23 @@ export class LinkedElement {
                 }
                 let arr = this.rawValue.splice(0)
                 let idx = parseInt(e.target.getAttribute('axis'))
-                arr[idx] = this.parseValue(e.target.value)
-                this.setValue(arr, ensure ? idx : -1)
+                try {
+                    arr[idx] = this.parseValue(e.target.value)
+                    this.setValue(arr, ensure ? idx : -1)
+                } catch(e) {
+                    console.error(e)
+                    //Ignore
+                } 
             })
         } else {
             elem.focusin(() => this.indexSelected = 0)
-            elem.on('input', e => this.setValue(this.checkbox ? e.target.checked : this.parseValue(e.target.value), 0))
+            elem.on('input', e => {
+                try {
+                    this.setValue(this.checkbox ? e.target.checked : this.parseValue(e.target.value), 0)
+                } catch(err) {
+                    //Ignored
+                }
+            })
         }
 
         //Ensure when the boxes are deselected, the text inside them should be updated and formatted
@@ -716,7 +737,7 @@ export class AsyncProgressCounter {
 
   export function applyAdjustScrollable(dom) {
     dom.bind('mousewheel DOMMouseScroll', e => {
-        if(e.target.classList.contains("studio-scrollchange") && e.target.disabled !== true) {
+        if(e.target.classList.contains("studio-scrollchange") && e.target.disabled !== true && e.target.value !== "") {
             let direction = e.originalEvent.wheelDelta
             if(direction === undefined) { //Firefox >:(
                 direction = -e.detail
