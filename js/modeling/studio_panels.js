@@ -17,7 +17,7 @@ export class StudioPanels {
 
         this.middleSplit = false
 
-        this.commandsArea = 90
+        this.commandsArea = 32
         this.rightArea = 320
         this.topArea = 400
 
