@@ -37,13 +37,13 @@ export class ModelerOptions {
             let cam
             switch(e.value) {
                 case "perspective":
-                    cam = new PerspectiveCamera(this.perspectiveFov.val(), canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 700)
-                    cam.zoom = studio.display.camera.zoom/100
+                    cam = new PerspectiveCamera(this.perspectiveFov.val(), canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 700)           
+                    cam.zoom = studio.display.camera.zoom / (studio.display.camera.isOrthographicCamera ? 100 : 1)
                     cam.updateProjectionMatrix()
                     break;
                 case "orthographic":
                     cam = new OrthographicCamera(canvasContainer.clientWidth / -2, canvasContainer.clientWidth / 2, canvasContainer.clientHeight / 2, canvasContainer.clientHeight / -2, 0.1, 700)
-                    cam.zoom = studio.display.camera.zoom*100
+                    cam.zoom = studio.display.camera.zoom * (studio.display.camera.isPerspectiveCamera ? 100 : 1)
                     cam.updateProjectionMatrix()
                     break
             }

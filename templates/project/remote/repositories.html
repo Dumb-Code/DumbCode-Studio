@@ -1,0 +1,45 @@
+<style>
+    .repository-container {
+        border: solid black 2px; 
+        width: 500px; 
+        height: 200px; 
+        border-radius: 3px; 
+        overflow-y: scroll;
+    }
+
+    .repository-template {
+        display: none;
+    }
+
+    .repository-entry:hover {
+        background-color: #565656;
+    }
+</style>
+<div id="modal-remote-repos" style="text-transform: none">
+    <div class="modal-background"></div>
+    <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left;">
+        <h3 class="title is-3" style="color: whitesmoke">Remote Repositories</h3>
+        <div style="padding-bottom: 20px">
+            <button class="modal-close" aria-label="close" style="position: absolute"></button>
+        </div>
+        <span class="icon is-small add-repository ml-2 tooltip" data-tooltip="Add Entry">
+            <i class="fas fa-plus"></i>
+        </span>
+        <div class="pr-5 pl-3 repository-entry repository-template" style="height: 50px;">
+            <div class="pt-3">
+                <span class="repository-owner">
+                    O
+                </span>
+                /
+                <span class="repository-name">
+                    R
+                </span>
+                <span class="repository-edit pr-3 icon" style="float: right">
+                    <i class="fas fa-edit"></i>
+                </span>
+            </div>
+        </div>
+        <div class="mt-2 ml-2 mr-2 repository-container">
+        </div>
+    </div>
+</div>

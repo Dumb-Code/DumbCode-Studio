@@ -1,122 +1,53 @@
-import { GithubCommiter } from "../../github_commiter.js"
 import { DCALoader } from "../animation/dca_loader.js"
 import { DCMModel } from "../model/dcm_loader.js"
-import { readFile } from "../../displays.js"
 import { AsyncProgressCounter } from "../../util.js"
 
-let intilized = false
-
-let animationComboBox
-let animationArea
-
-let textureComboBox
-let textureArea
-
-let currentName = null
-
 export class RemoteProject {
-    constructor(pth, modelingPart, texturePart, animationPart, token, repoOwner, repoName, branch, logArea) {
+    constructor(pth, modelingPart, texturePart, animationPart, name, gitinter) {
         this.pth = pth
         this.modelingPart = modelingPart
         this.texturePart = texturePart
         this.animationPart = animationPart
-        this.token = token
-        this.repo = `${repoOwner}/${repoName}`
-        this.branch = branch
-        this.logArea = logArea
-
-        if(intilized !== true) {
-            intilized = true
-            getModal("project/decision").then(e => {
-                let dom = $(e)
-                animationComboBox = dom.find('.animation-choice-select')
-                animationArea = dom.find('.animation-selection')
-    
-                textureComboBox = dom.find('.texture-choice-select')
-                textureArea = dom.find('.texture-selection')
-                this.logArea = this.logArea.add(dom.find('.log-area'))
-                this.prepareRequestData()
-            })
-            getModal("project/upload").then(e => this.logArea = this.logArea.add($(e).find('.log-area')))      
-        } else {
-            this.prepareRequestData()
-        }
+        this.gitinter = gitinter
+        this.name = name
+        this.project = null
     }
 
-    prepareRequestData() {
-        this.request(`studio_remotes`).then(files => {
-            let allFiles = files.filter(file => file.type == "file" && file.name.endsWith('.remote'))
-            let progress = new AsyncProgressCounter(allFiles.length, 9, 'Preparing...', (s, c) => this.logArea.text(s + ' ' + Math.round(c * 100) + '%'))
-            allFiles.forEach((file, n) => {
-                progress.updateProgress(n)
-                let name = file.name.substring(0, file.name.lastIndexOf('.'))
-                this.request(file.path).then(f => {
-                    progress.updateProgress(n)
-                    let data = this.parseRemoteFile(atob(f.content), name)
-                    progress.updateProgress(n)
+    setupFromFile(file) {
+        this.remoteFile = this.parseRemoteFile(atob(file.content), file.name)
+        this.newCreated = false
+        return this.remoteFile
+    }
 
-                    let animationDecision = data.animationFolders.length > 1
-                    let textureDecision = data.textureFolders.length > 1
+    setupFromNew(model, animations, textures, syncCallback) {
+        this.newCreated = true
+        this._syncCallback = syncCallback
+        this.remoteFile = this._createRemoteFile(model, textures, animations)
+    }
 
-                    if(animationDecision || textureDecision) {
-                        animationArea.css('display', animationDecision ? '' : 'none')
-                        textureArea.css('display', textureDecision ? '' : 'none')
-        
-                        if(animationDecision) {
-                            animationComboBox.html('')
-                            data.animationFolders.forEach(f => {
-                                if(!f.name) {
-                                    console.warn(`Attempted choice of animations, but was given an unnamed entry '${f.location}'`)
-                                }
-                                let element = document.createElement("option")
-                                element.innerHTML = f.name
-                                animationComboBox.append(element)
-                            })
-                        }
-
-                        if(textureDecision) {
-                            textureComboBox.html('')
-                            data.textureFolders.forEach(f => {
-                                if(!f.name) {
-                                    console.warn(`Attempted choice of textures, but was given an unnamed entry '${f.location}'`)
-                                }
-                                let element = document.createElement("option")
-                                element.innerHTML = f.name
-                                textureComboBox.append(element)
-                            })
-                        }
-
-                        currentName = name
-                        openModal('project/decision').then(e => {
-                            progress.updateProgress(n)
-                            if(currentName !== name) {
-                                return
-                            }
-                            currentName = null
-                            e.find('.model-name-span').text(name)
-                            e.find('.choice-made-button').one('click', () => {
-                                let decidedAnimation = animationDecision ? data.animationFolders.find(f => f.name == animationComboBox.val()) : data.animationFolders[0]
-                                let decidedTexture = textureDecision ? data.textureFolders.find(f => f.name == textureComboBox.val()) : data.textureFolders[0]
-                                this.beginRunningRequests(file.path, data, decidedAnimation, decidedTexture, v => progress.updateProgress(n, v))
-                            })
-                        })
-                    } else {
-                        progress.updateProgress(n)
-                        this.beginRunningRequests(file.path, data, data.animationFolders[0], data.textureFolders[0], v => progress.updateProgress(n, v))
-                    }
-                })
-            })
+    initiateEmptyData(animationData, textureData) {
+        let model = new DCMModel()
+        model.fileName = this.name  
+        this.project = this.pth.createNewProject(model)
+        this.project._element.find('.github-sync').css('display','').children().click(() => {
+            this._syncCallback()
+            this._syncCallback = null
+            this.syncProject(animationData, textureData)
         })
     }
 
-    async beginRunningRequests(path, data, animationData, textureData, updateCallback) {
-        let modelLocation = data.model 
+
+    async beginRunningRequests(animationData, textureData, updateCallback) {
+        if(this.newCreated === true) {
+            this.initiateEmptyData(animationData, textureData)
+            return
+        }
+        let modelLocation = this.remoteFile.model 
         let name = modelLocation.substring(modelLocation.lastIndexOf('/') + 1)
         let model = await this.request(modelLocation).then(r => DCMModel.loadModel(this.toArrayBuffer(r), name))
         updateCallback()
-        let project = this.pth.createNewProject(model)
-
-        project._element.find('.github-sync').css('display','').children().click(() => this.syncProject(project, path, data, animationData, textureData))
+        this.project = this.pth.createNewProject(model)
+        this.project._element.find('.github-sync').css('display','').children().click(() => this.syncProject(animationData, textureData))
 
         if(animationData) {
             this.request(animationData.location)
@@ -132,6 +63,7 @@ export class RemoteProject {
                     })
                 )
             })
+            .catch(e => console.warn(e))
         } else {
             updateCallback(2)
         }
@@ -139,15 +71,17 @@ export class RemoteProject {
         if(textureData) {
             let amount = textureData.suffixLocations.length
             let count = 0
-            Promise.all(textureData.suffixLocations.map(async(suffix) => {
-                let data = await this.request(`${textureData.location}/${suffix}.png`)
-                let img = document.createElement("img")
-                img.src = 'data:image/png;base64,' + data.content.replaceAll('\n', '')
-                await new Promise(resolve => img.onload = resolve)
-                img.onload = null
-                updateCallback(++count / amount)
-                return { suffix, img }
-            })).then(datas => {
+            Promise.all(textureData.suffixLocations.map(suffix => 
+                this.request(`${textureData.location}/${suffix}.png`).then(async(data) => {
+                    let img = document.createElement("img")
+                    img.src = 'data:image/png;base64,' + data.content.replaceAll('\n', '')
+                    await new Promise(resolve => img.onload = resolve)
+                    img.onload = null
+                    updateCallback(++count / amount)
+                    return { suffix, img }
+                }).catch(e => console.warn(e))
+            ))
+            .then(datas => {
                 datas.reverse().forEach(p => this.texturePart.createTextureElement(p.suffix, p.img))
                 this.pth.textureManager.refresh()
                 closeModal()
@@ -156,35 +90,26 @@ export class RemoteProject {
             updateCallback()
         }
 
-        // let img = document.createElement('img')
-        // img.onload = () => modeler.referenceImageHandler.addImage(img, elem.name).then(data => {
-        //     data.mesh.position.set(elem.pos[0], elem.pos[1], elem.pos[2])
-        //     data.mesh.rotation.set(elem.rot[0], elem.rot[1], elem.rot[2])
-        //     data.mesh.scale.set(elem.scale[0], elem.scale[1], elem.scale[2])
-        //     data.setOpacity(elem.opacity)
-        //     data.canSelect = elem.canSelect
-        //     img.onload = null
-        // })
-        // readFile(blob, (reader, file) => reader.readAsDataURL(file))
-        // .then(data => img.src = data)
-        if(data.referenceImages.length !== 0) {
-            let amount = data.referenceImages.length
+        if(this.remoteFile.referenceImages.length !== 0) {
+            let amount = this.remoteFile.referenceImages.length
             let count = 0
-            let loc = data.additionalData('reference_image')
-            data.referenceImages.forEach(async(image) => {
-                let imgData = await this.request(`${loc}/${image.name}.png`)
-                let img = document.createElement("img")
-                img.src = 'data:image/png;base64,' + imgData.content.replaceAll('\n', '')
-                await new Promise(resolve => img.onload = resolve)
-                img.onload = null
-                updateCallback(++count / amount)
-                let data = await this.modelingPart.addReferenceImage(img, image.name)
-                data.mesh.position.set(image.pos[0], image.pos[1], image.pos[2])
-                data.mesh.rotation.set(image.rot[0], image.rot[1], image.rot[2])
-                data.mesh.scale.set(image.scale[0], image.scale[1], image.scale[2])
-                data.setOpacity(image.opacity)
-                data.canSelect = image.canSelect
-            })
+            let loc = this.remoteFile.additionalData('reference_image')
+            this.remoteFile.referenceImages.forEach(image => 
+                this.request(`${loc}/${image.name}.png`)
+                .then(async(imgData) => {
+                    let img = document.createElement("img")
+                    img.src = 'data:image/png;base64,' + imgData.content.replaceAll('\n', '')
+                    await new Promise(resolve => img.onload = resolve)
+                    img.onload = null
+                    updateCallback(++count / amount)
+                    let data = await this.modelingPart.addReferenceImage(img, image.name)
+                    data.mesh.position.set(image.pos[0], image.pos[1], image.pos[2])
+                    data.mesh.rotation.set(image.rot[0], image.rot[1], image.rot[2])
+                    data.mesh.scale.set(image.scale[0], image.scale[1], image.scale[2])
+                    data.setOpacity(image.opacity)
+                    data.canSelect = image.canSelect
+                })
+                .catch(e => console.warn(e)))
         } else {
             updateCallback()
         }
@@ -196,10 +121,10 @@ export class RemoteProject {
     }
 
     request(url) {
-        return fetch(`https://api.github.com/repos/${this.repo}/contents/${url}${this.branch?`?ref=${this.branch}`:''}`, { headers: { Authorization: `token ${this.token}` } }).then(response => response.json())
+        return this.gitinter.request(url)
     }
 
-    parseRemoteFile(content, name) {
+    parseRemoteFile(content) {
         let lines = content.split("\n")
         
         let version = null
@@ -233,7 +158,7 @@ export class RemoteProject {
                     textureFolders.push(readingTexture)
                     readingTexture = null
                 } else {
-                    console.warn(`Recieved end command when no texture was started for '${name}'`)
+                    console.warn(`Recieved end command when no texture was started for '${this.name}'`)
                 }
             } else if(readingTexture !== null) {
                 readingTexture.suffixLocations.push(line)
@@ -256,23 +181,36 @@ export class RemoteProject {
                     referenceImages.push( { pos, rot, scale, opacity, canSelect, name } )
                 }
             } else {
-                console.warn(`Don't know how to process '${line}' for '${name}'`)
+                console.warn(`Don't know how to process '${line}' for '${this.name}'`)
             }
         })
 
         if(version === null) {
-            console.error(`Version not specified for '${name}'`)
+            console.error(`Version not specified for '${this.name}'`)
             return
         }
         if(model === null) {
-            console.error(`Model not specified for '${name}'`)
+            console.error(`Model not specified for '${this.name}'`)
             return
         }
 
+        return this._createRemoteFile(model, textureFolders, animationFolders, referenceImages)
+    }
+
+    _createRemoteFile(model, textureFolders, animationFolders, referenceImages = []) {
+        this.ensureValidData(textureFolders)
         return { 
             model, textureFolders, animationFolders, referenceImages,
-            additionalData: (...names) => `studio_remotes/data/${names}/${names.join('/')}`
+            additionalData: (...names) => `studio_remotes/data/${this.name}/${names.join('/')}`
         }
+    }
+
+    ensureValidData(textureFolders = this.remoteFile.textureFolders) {
+        textureFolders.forEach(tf => {
+            if(!tf.suffixLocations) {
+                tf.suffixLocations = []
+            }
+        })
     }
 
     parseNamedLocation(line, dataLength) {
@@ -287,17 +225,30 @@ export class RemoteProject {
         }
     }
 
+    async syncRemoteFileOnly(message, logArea) {
+        let data = this.remoteFile
+        let commiter = this.gitinter.commiter()
+        let progress = new AsyncProgressCounter(1, 5, 'Writing Files', (s, c) => logArea.text(s + ' ' + Math.round(c * 100) + '%'))
+        commiter.addFile(`studio_remotes/${this.name}.remote`, this.writeRemoteFile())
+        return commiter.submit(
+            message,
+            v => progress.updateProgress(0, v),
+            state => progress.globalState(state)
+        )
+    }
 
-    syncProject(project, path, data, animationData, textureData) {
-        openModal("project/upload")
+
+    syncProject(animationData, textureData) {
+        let project = this.project
+        openModal("project/upload").then(d => this.logArea = d.find('.log-area'))
         lockModalUserClose()
-        let progress = new AsyncProgressCounter(1, 7, 'Writing Files', (s, c) => this.logArea.text(s + ' ' + Math.round(c * 100) + '%'))
-
+        let progress = new AsyncProgressCounter(1, 7, 'Writing Files', (s, c) => this.logArea?this.logArea.text(s + ' ' + Math.round(c * 100) + '%'):0)
+        let data = this.remoteFile
         if(!data.model.endsWith('.dcm')) {
             data.model = data.model.substring(0, data.model.lastIndexOf('.')) + '.dcm'
         }
-        let commiter = new GithubCommiter(this.token, this.repo, this.branch)
-        commiter.addFile(path, this.writeRemoteFile(project, data, textureData))
+        let commiter = this.gitinter.commiter()
+        commiter.addFile(`studio_remotes/${this.name}.remote`, this.writeRemoteFile(textureData))
         commiter.addFile(data.model, DCMModel.writeModel(project.model).getAsBase64(), true)
         progress.updateProgress()
         if(animationData) {
@@ -327,8 +278,13 @@ export class RemoteProject {
         ).then(closeModal)
     }
 
-    writeRemoteFile(project, data, textureData) {
+    writeRemoteFile(textureData) {
+        let data = this.remoteFile
+        let project = this.project
+
         let lines = [`version 1.0`, `model ${data.model}`]
+
+        console.log(data.textureFolders)
 
         data.textureFolders.forEach(folder => {
             lines.push('')
@@ -347,21 +303,37 @@ export class RemoteProject {
             lines.push(`${prefix} ${folder.location}`)
         })
         
-        if(project.referenceImages.length !== 0) {
+        if((project === null ? this.remoteFile.referenceImages : project.referenceImages).length !== 0) {
             lines.push('')
             lines.push('reference_image_files')
-            project.referenceImages.forEach(e => {
-                lines.push([ 
-                    e.mesh.position.x, e.mesh.position.y, e.mesh.position.z, 
-                    e.mesh.rotation.x, e.mesh.rotation.y, e.mesh.rotation.z,
-                    e.mesh.scale.x, e.mesh.scale.y, e.mesh.scale.z,
-                    e.opacity,
-                    e.canSelect ? 't' : 'f',
-                    e.name
-                ].join(' '))
-            })
+            if(project === null) {
+                this.remoteFile.referenceImages.forEach(ref => {
+                    let arr = []
+                    arr.push(...ref.pos)
+                    arr.push(...ref.rot)
+                    arr.push(...ref.scale)
+                    arr.push(ref.pos.opacity)
+                    arr.push(ref.pos.canSelect)
+                    arr.push(ref.pos.name)
+                    lines.push(arr.join(' '))
+                })
+            } else {
+                project.referenceImages.forEach(e => {
+                    lines.push([ 
+                        e.mesh.position.x, e.mesh.position.y, e.mesh.position.z, 
+                        e.mesh.rotation.x, e.mesh.rotation.y, e.mesh.rotation.z,
+                        e.mesh.scale.x, e.mesh.scale.y, e.mesh.scale.z,
+                        e.opacity,
+                        e.canSelect ? 't' : 'f',
+                        e.name
+                    ].join(' '))
+                })
+            }
+            
             lines.push("end")
         }
+
+        confirm(lines)
 
         return lines.join("\n")
     }

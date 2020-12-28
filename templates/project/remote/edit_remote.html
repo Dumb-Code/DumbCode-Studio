@@ -1,0 +1,102 @@
+<style>
+    a:hover, a:active, a:focus {
+        color:#c33c33;
+    }
+
+    .base-entry {
+        display: none !important
+    }
+
+</style>
+<div id="modal-repo-edit" style="text-transform: none; width: 600px">
+    <div class="modal-background"></div>
+    <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left">
+        <h3 class="title is-3" style="color: whitesmoke">Edit Remote</h3>
+        <div style="padding-bottom: 20px">
+            <button class="modal-close" aria-label="close" style="position: absolute"></button>
+        </div>
+        <div class="settings-entry entry-top">
+            <form id="create-new-entry-form">
+                <div class="field">
+                    <div class="settings-entry-field">
+                        <div class="columns is-mobile">
+                            <div class="column is-narrow">
+                                Name:
+                            </div>
+                            <div class="column">
+                                <input style="width: 100%;" autocomplete="on" name="dcs_project_name" class="project-name" type="text" placeholder="myremoteprojec" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-entry-field">
+                        <div class="columns is-mobile">
+                            <div class="column is-narrow">
+                                <span>Model Path:</span>
+                            </div>
+                            <div class="column">
+                                <input style="width: 100%;" autocomplete="on" name="dcs_model_path" class="model-path" type="text" placeholder="assets/path/to/the/model.dcm" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-entry-field texture-entry-field">
+                        <div class="persistant">
+                            <span>Texture Folders:</span>
+                            <span class="icon is-small add-entry ml-2 tooltip" data-tooltip="Add Entry">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                        </div>
+                        
+                        <div class="columns is-mobile base-entry persistant">
+                            <div class="column is-3 needs-multiple-entries">
+                                <input style="width: 100%" autocomplete="on" name="dcs_texture_name" class="entry-name" type="text" placeholder="name">
+                            </div>
+                            <div class="column">
+                                <input style="width: 100%" autocomplete="on" name="dcs_texture_location" class="entry-folder" type="text" placeholder="assets/path/to/the/folder">
+                            </div>
+                            <div class="column is-narrow needs-multiple-entries">
+                                <span class="icon is-small remove-folder ml-2">
+                                    <i class="fas fa-minus"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-entry-field animation-entry-field">
+                        <div class="persistant">
+                            <span>Animation Folders:</span>
+                            <span class="icon is-small add-entry ml-2 tooltip" data-tooltip="Add Entry">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                        </div>
+                        
+                        <div class="columns is-mobile base-entry persistant">
+                            <div class="column is-3 needs-multiple-entries">
+                                <input style="width: 100%" autocomplete="on" name="dcs_animation_name" class="entry-name" type="text" placeholder="name">
+                            </div>
+                            <div class="column">
+                                <input style="width: 100%"  autocomplete="on" name="dcs_animation_location" class="entry-folder" type="text" placeholder="assets/path/to/the/folder">
+                            </div>
+                            <div class="column is-narrow needs-multiple-entries">
+                                <span class="icon is-small remove-folder ml-2">
+                                    <i class="fas fa-minus"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-entry-field commit-container">
+                        <div class="columns is-mobile">
+                            <div class="column is-narrow">
+                                Commit Message 
+                            </div>
+                            <div class="column">
+                                <input class="commit-message" style="width: 100%;" autocomplete="off" type="text" >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-entry-field log-area">
+                    </div>
+                </div>
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+</div>

@@ -6,6 +6,7 @@ import { DcProject } from "../formats/project/dc_project.js"
 import { RemoteProject } from "../formats/project/remote_project.js"
 import { FlatShading } from "../three.js"
 import { doubleClickToEdit, downloadBlob, fileUploadBox, getAndDeleteFiles, LinkedSelectableList } from "../util.js"
+import { RemoteProjectHandler } from "./remote_project_handler.js"
 
 export class ModelProjectPart {
     constructor(dom, pth, modellingGetter, texturePart, animationPart) {
@@ -16,6 +17,7 @@ export class ModelProjectPart {
         this.emptyModelEntry = dom.find('.model-list-entry.empty-column')
 
         this.projectSelectList = new LinkedSelectableList(null, true).onchange(v => pth.selectIndex(parseInt(v.value)))
+        this.remoteProjects = new RemoteProjectHandler(pth, this, texturePart, animationPart)
 
         pth.addEventListener('newproject', e => this.initiateEntry(e.project))
         pth.addEventListener('deleteproject', e => this.projectSelectList.remove(e.project._element))
@@ -28,18 +30,18 @@ export class ModelProjectPart {
 
         dom.find('#project-file-input').on('input', e => this.loadProjectFiles(getAndDeleteFiles(e)))
 
-        getModal('project/github').then(e => {
-            let dom = $(e)
-            let token = dom.find('.access-token')
-            let owner = dom.find('.repo-owner')
-            let name = dom.find('.repo-name')
-            let branch = dom.find('.repo-branch')
-            let logArea = dom.find('.log-area')
-            dom.submit(() => {
-                new RemoteProject(this.pth, this, this.texturePart, this.animationPart, token.val(), owner.val(), name.val(), branch.val(), logArea)
-                return false
-            })
-        })
+        // getModal('project/github').then(e => {
+            // let dom = $(e)
+            // let token = dom.find('.access-token')
+            // let owner = dom.find('.repo-owner')
+            // let name = dom.find('.repo-name')
+            // let branch = dom.find('.repo-branch')
+            // let logArea = dom.find('.log-area')
+            // dom.submit(() => {
+            //     new RemoteProject(this.pth, this, this.texturePart, this.animationPart, token.val(), owner.val(), name.val(), branch.val(), logArea)
+            //     return false
+            // })
+        // })
 
     }
     
