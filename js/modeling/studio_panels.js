@@ -96,7 +96,7 @@ export class StudioPanels {
 
         this.dom
             .css('grid-template-columns', `32px ${mainArea.clientWidth - 32 - this.rightArea}px ${this.rightArea}px`)
-            .css('grid-template-rows', `${this.commandsArea}px ${this.topArea - this.commandsArea}px ${window.innerHeight - mainArea.offsetTop - this.topArea - 63}px 32px 28px`)
+            .css('grid-template-rows', `${this.commandsArea}px ${this.topArea - this.commandsArea}px ${window.innerHeight - mainArea.offsetTop - this.topArea - 60}px 32px 28px`)
             
 
         window.studioWindowResized()
