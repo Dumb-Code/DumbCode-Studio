@@ -93,7 +93,7 @@ export class RemoteProjectHandler {
                         }
                     })
                     this.editingProject.ensureValidData()
-                    this.editingProject.syncRemoteFileOnly(this.editEntryDoms.commitMsg.val(), this.editEntryDoms.log).then(() => this._openRepoEntries(active))
+                    this.editingProject.syncRemoteFileOnly(this.editingProject, this.editEntryDoms.commitMsg.val(), this.editEntryDoms.log).then(() => this._openRepoEntries(active))
                     this.editingProject = null
                 } else {
                     let project = new RemoteProject(this.pth, this.mp, this.tp, this.ap, this.editEntryDoms.name.val(), this.createGithubInterface())
