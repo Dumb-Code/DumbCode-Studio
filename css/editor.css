@@ -61,12 +61,13 @@
 #main-area.is-animation > div#animation-area {
     display: grid;
     grid-template-areas: 
-    "tab tab"
+    "tab side-bar"
     "main side-bar"
     "playback side-bar"
-    "bottom bottom";
+    "bottom side-bar"
+    "options side-bar";
     grid-template-columns: calc(100% - 326px) 326px ;
-    grid-template-rows: 31px calc(100vh - 234px) 30px 121px;
+    grid-template-rows: 31px calc(100vh - 261px) 31px 119px 30px;
     width: 100%;
     height: 100vh;
 }
