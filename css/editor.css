@@ -71,6 +71,10 @@
     height: 100vh;
 }
 
+.animator-scrub-buttons:hover{
+    background-color: rgb(18, 18, 19) !important;
+}
+
 .modeling-input-3 {
     display: grid;
     grid-template-columns: 30% 5% 30% 5% 30%;
