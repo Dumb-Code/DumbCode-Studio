@@ -255,7 +255,6 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
 
 .texture-upload {
     height: 100%;
-    overflow-y: scroll; 
     background-color: tomato;
     z-index: -2;
 }

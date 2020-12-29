@@ -1,6 +1,6 @@
-<div class="columns is-mobile animation-layer-topbar">
+<div class="columns is-mobile animation-layer-topbar has-background-black-bis mx-0 mb-0" style="border-top-left-radius: 5px; border-top-right-radius: 5px;">
   <div class="column">
-      <h1 class="title is-5">ANIMATIONS</h1>
+      <h1 class="title is-5 ml-3">ANIMATIONS</h1>
   </div>
   <div class="column is-narrow">
       <span class="new-animation-button icon is-small clickable tooltip" data-tooltip="Create New Animation">
@@ -28,37 +28,39 @@
       </div>
   </div>
 </div>
-<div class="animation-list-entry columns is-mobile empty-column">
-  <div class="column is-narrow">
-      <i class="fas fa-bars"></i>
-  </div>
-  <div class="column dbl-click-container animation-name">
-      <p class="dbl-text"></p>
-      <input class="dbl-text-edit" type="text">
-  </div>
-  <div class="column is-narrow">
-      <span class="toggle-animation icon is-small clickable">
-          <span class="toggle-on tooltip" data-tooltip="Remove Animation From Tab">
-              <i class="fas fa-toggle-on"></i>
+<div class="animation-list pr-4 mt-0 pt-5" style="overflow-y: scroll; overflow-x: hidden; height: 37vh;">
+    <div class="animation-list-entry columns is-mobile empty-column ml-3">
+        <div class="column is-narrow">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="column dbl-click-container animation-name">
+            <p class="dbl-text"></p>
+            <input class="dbl-text-edit" type="text">
+        </div>
+        <div class="column is-narrow">
+            <span class="toggle-animation icon is-small clickable">
+                <span class="toggle-on tooltip" data-tooltip="Remove Animation From Tab">
+                    <i class="fas fa-toggle-on"></i>
+                </span>
+                <span class="toggle-off tooltip" data-tooltip="Add Animation From Tab">
+                    <i class="fas fa-toggle-off"></i>
+                </span>
+            </span>
+        </div>
+        <div class="column is-narrow">
+            <span class="download-animation-gif icon is-small clickable tooltip " data-tooltip="Record As Gif">
+                <i class="fas fa-file-video"></i>
+            </span>
+        </div>
+        <div class="column is-narrow">
+            <span class="download-animation-file icon is-small clickable tooltip " data-tooltip="Download Animation">
+                <i class="fas fa-file-download"></i>
+            </span>
+        </div>
+        <div class="column is-narrow">
+          <span class="delete-animation-button icon is-small clickable tooltip " data-tooltip="Remove Animation">
+              <i class="fas fa-trash"></i>
           </span>
-          <span class="toggle-off tooltip" data-tooltip="Add Animation From Tab">
-              <i class="fas fa-toggle-off"></i>
-          </span>
-      </span>
-  </div>
-  <div class="column is-narrow">
-      <span class="download-animation-gif icon is-small clickable tooltip " data-tooltip="Record As Gif">
-          <i class="fas fa-file-video"></i>
-      </span>
-  </div>
-  <div class="column is-narrow">
-      <span class="download-animation-file icon is-small clickable tooltip " data-tooltip="Download Animation">
-          <i class="fas fa-file-download"></i>
-      </span>
-  </div>
-  <div class="column is-narrow">
-    <span class="delete-animation-button icon is-small clickable tooltip " data-tooltip="Remove Animation">
-        <i class="fas fa-trash"></i>
-    </span>
-</div>
+        </div>
+      </div>
 </div>
