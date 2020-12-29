@@ -39,7 +39,7 @@ export class AnimationTabHandler {
         textElement.innerText = "New Animation"
 
         let closeElement = document.createElement('span')
-        closeElement.classList.add("icon", "is-small")
+        closeElement.classList.add("icon", "is-small", "icon-close-button")
         closeElement.style.paddingLeft = "15px"
         closeElement.style.paddingTop = "1px"
         closeElement.style.float = "right"

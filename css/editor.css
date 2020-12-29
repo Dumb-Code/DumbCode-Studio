@@ -223,11 +223,30 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
      cursor: pointer;
      color: lightgray;
      border-radius: 5px 5px 0px 0px;
+     border: 1px solid rgb(27, 27, 27);
+     font-size: 10px;
+ }
+
+ .icon-close-button:hover {
+     color: rgb(194, 92, 92);
  }
 
 .editor-tab.tab-selected {
-    background-color: #363636;
     color: white;
+    background: #363636;
+    border: none;
+    position: relative;
+    z-index: 100;
+}
+
+.editor-tab.tab-selected:after {
+    position: absolute;
+    width: 100%;
+    right: 0px;
+    top: 24px;
+    border-bottom: 3px solid hsl(204, 86%, 53%);
+    z-index: 45478;
+    content:"";
 }
 
 .pcr-app .pcr-selection .pcr-color-palette {
