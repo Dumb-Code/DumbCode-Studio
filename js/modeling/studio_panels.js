@@ -19,7 +19,7 @@ export class StudioPanels {
 
         this.commandsArea = 32
         this.rightArea = 320
-        this.topArea = 400
+        this.topArea = 430
 
         let clickedDivider = 0
         $(document)
