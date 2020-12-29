@@ -36,8 +36,6 @@ export class TextureStudio {
 
     setActive() {
         this.pth.updateTexture(m => {
-            this.isTextureSeleted = m.map !== null
-            m._oldTextureStudioWireframe = m.wireframe
             m.map = m._mapCache
             m.wireframe = false
         })
@@ -49,16 +47,15 @@ export class TextureStudio {
 
     setUnactive() {
         this.pth.updateTexture(m => {
-            //Texture can be updated, so we can't just cache it
-            if(this.isTextureSeleted === true) {
+            if(m._mode === 0 || m._mode === undefined) { //textured is the default mode. So if _mode isn't set, default to it.
                 m.map = m._mapCache 
             } else {
                 m.map = null
             }
-            m.wireframe = m._oldTextureStudioWireframe
 
-            m._oldTextureStudioMap = undefined
-            m._oldTextureStudioWireframe = undefined
+            if(m._mode === 1) {
+                m.wireframe = true
+            }
         })
         this.textureTools.tabInUse = false
     }

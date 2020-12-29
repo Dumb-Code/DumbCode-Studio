@@ -10,6 +10,7 @@ export class StudioOptions {
             switch(e.value) {
                 case "textured":
                     pth.updateTexture(m => {
+                        m._mode = 0
                         m.map = m._mapCache
                         m.wireframe = false
                     })
@@ -17,6 +18,7 @@ export class StudioOptions {
                 
                 case "untextured":
                     pth.updateTexture(m => {
+                        m._mode = 1
                         m.map = null
                         m.wireframe = false
                     })
@@ -24,6 +26,7 @@ export class StudioOptions {
                 
                 case "outline":
                     pth.updateTexture(m => {
+                        m._mode = 2
                         m.map = null
                         m.wireframe = true
                     })
