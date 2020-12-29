@@ -243,7 +243,7 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
     position: absolute;
     width: 100%;
     right: 0px;
-    top: 24px;
+    top: 22px;
     border-bottom: 3px solid hsl(204, 86%, 53%);
     z-index: 45478;
     content:"";
