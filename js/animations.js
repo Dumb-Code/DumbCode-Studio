@@ -293,6 +293,7 @@ class KeyFrame {
 
 
     getProgressionValue(basePercentage) {
+        if(basePercentage)
         for(let i = 0; i < this.progressionPoints.length - 1; i++) {
             let point = this.progressionPoints[i]
             let next = this.progressionPoints[i + 1]
@@ -305,22 +306,18 @@ class KeyFrame {
         return basePercentage //Shouldn't happen. There should always be at least the first and last progression point
     }
 
-    animate(ticks) {
-        this.animatePercentage(this.getProgressionValue((ticks - this.startTime) / this.duration))
+    animate(animationTicks) {
+        let ticks = (animationTicks - this.startTime) / this.duration
+        if(ticks <= 0 || this.skip) {
+            return
+        }
+        if(ticks > 1) {
+            ticks = 1
+        }
+        this.animatePercentage(this.getProgressionValue(ticks))
     }
 
     animatePercentage(percentageDone) {
-        if(this.skip) {
-            return
-        }
-        if(percentageDone < 0) {
-            return
-        }
-
-        if(percentageDone > 1) {
-            percentageDone = 1
-        }
-
         this.rotationMap.forEach((values, key) => {
             let cube = this.handler.tbl.cubeMap.get(key)?.cubeGroup
             if(cube) {
