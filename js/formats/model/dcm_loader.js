@@ -139,6 +139,9 @@ export class DCMCube {
         this.cubeGroup = new Group();
         this.cubeGroup.tabulaCube = this
 
+        this.cubeGrowGroup = new Group()
+        this.cubeGrowGroup.tabulaCube = this
+
         this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.mat)
         this.cubeMesh.tabulaCube = this
 
@@ -148,7 +151,8 @@ export class DCMCube {
         this.cubeMesh.geometry.addAttribute("uv", this.uvBuffer)
         this.cubeMesh.position.set(0, 0, 0)
 
-        this.cubeGroup.add(this.cubeMesh)
+        this.cubeGrowGroup.add(this.cubeMesh)
+        this.cubeGroup.add(this.cubeGrowGroup)
         this.updateDimension()
     
 
@@ -231,7 +235,8 @@ export class DCMCube {
         this.children.forEach(child => child.resetVisuals())
 
         this.updateGeometry({ shouldUpdateTexture: false })
-        this.updateCubePosition()
+        this.updateCubeGrow()
+        this.updateOffset()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
     }
@@ -245,10 +250,6 @@ export class DCMCube {
         if(shouldUpdateTexture) {
             this.updateTexture()
         }
-    }
-
-    updateCubePosition( { offset = this.offset, cubeGrow = this.cubeGrow } = {} ) {
-        this.cubeMesh.position.set(offset[0] - cubeGrow[0], offset[1] - cubeGrow[1], offset[2] - cubeGrow[2] )
     }
 
     updatePositionVisuals(position = this.rotationPoint) {
@@ -296,9 +297,8 @@ export class DCMCube {
         if(visualOnly !== true) {
             this.cubeGrow = value
         }
+        this.cubeGrowGroup.position.set(-value[0], -value[1], -value[2])
         this.updateGeometry( {cubeGrow:value} )
-        this.updateCubePosition( {cubeGrow:value} )
-
     }
 
     updateTextureOffset(values = this.textureOffset, visualOnly = false) {
@@ -319,7 +319,7 @@ export class DCMCube {
         if(visualOnly !== true) {
             this.offset = values
         }
-        this.updateCubePosition( { offset:values } )
+        this.cubeMesh.position.set(values[0], values[1], values[2])
     }
 
     updatePosition(values = this.rotationPoint, visualOnly = false) {

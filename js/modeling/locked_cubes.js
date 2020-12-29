@@ -15,20 +15,7 @@ export class LockedCubes {
             this.lockedChildrenCache.clear()
             this.movingChildrenCache.clear()
         })
-        transformControls.addEventListener('mouseDown', () => {
-            this.createLockedCubesCache()
-
-            //When rotation point is selected. We need to lock the cubes offset in place. (level=1)
-            if(studio.gumball.isTranslateRotationPoint()) {
-                studio.raytracer.selectedSet.forEach(cube => {
-                    let tabula = cube.tabulaCube
-                    if(!this.isLocked(tabula)) {
-                        this.addToHierarchyMap(this.lockedChildrenCache, tabula.hierarchyLevel, new CubeLocker(tabula, 1))
-                        tabula.children.forEach(child => this.addToHierarchyMap(this.lockedChildrenCache, child.hierarchyLevel, new CubeLocker(child)))
-                    }
-                })
-            }
-        })
+        transformControls.addEventListener('mouseDown', () => this.createLockedCubesCache())
 
     }
 
@@ -46,6 +33,10 @@ export class LockedCubes {
 
     isLocked(cube) {
         return this.lockedCubes.has(cube.name)
+    }
+
+    addToLocker(cube, type) {
+        this.addToHierarchyMap(this.lockedChildrenCache, cube.hierarchyLevel, new CubeLocker(cube, type))
     }
 
     createLockedCubesCache(lockedCubes = this.lockedCubes, directMove = false) {
@@ -81,6 +72,7 @@ export class LockedCubes {
         }
 
         let size = Math.max(Math.max(...this.lockedChildrenCache.keys()), Math.max(...movingCubesCache.keys()))
+                
         //We need to compute everything in order so the parents matrixWorld is correct
         for(let i = 0; i <= size; i++) {
             this.lockedChildrenCache.get(i)?.forEach(lock => {

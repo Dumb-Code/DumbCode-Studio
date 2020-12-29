@@ -296,7 +296,7 @@ export class CubeLocker {
     constructor(cube, type = 0) {
         this.cube = cube
         this.type = type
-        this.worldMatrix = getElementFromCube(this.cube, this.type).matrixWorld.clone()
+        this.worldMatrix = getElementFromCube(this.cube, type).matrixWorld.clone()
     }
 
     reconstruct() {
