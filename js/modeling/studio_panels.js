@@ -27,11 +27,11 @@ export class StudioPanels {
             .mousemove(e => {
                 if(clickedDivider !== 0) {
                     if(clickedDivider === 1) {
-                        this.rightArea = mainArea.clientWidth - e.clientX
+                        this.rightArea = Math.max(mainArea.clientWidth - e.clientX, 50)
                     } else if(clickedDivider === 2) {
                         this.topArea = e.clientY - mainArea.offsetTop
                     } else if(clickedDivider === 3) {
-                        this.commandsArea = e.clientY - mainArea.offsetTop
+                        this.commandsArea = Math.max(e.clientY - mainArea.offsetTop, 32)
                     }
                     this.updateAreas()
                 }
