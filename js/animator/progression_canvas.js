@@ -115,14 +115,18 @@ export class ProgressionCanvas {
     }
 
     redrawProgressionCanvas() {
+
+        let width = this.progressionCanvas.width
+        let height = this.progressionCanvas.height
+
+        this.canvasCtx.fillStyle = "hsl(0, 0%, 10%)";
+        this.canvasCtx.fillRect(0, 0, width, height);
+
         //TODO: scrolling and moving like the texture tab
         let handler = this.pth.animationTabs.active
         if(handler === null) {
             return
         }
-
-        let width = this.progressionCanvas.width
-        let height = this.progressionCanvas.height
         
         this.canvasCtx.clearRect(0, 0, width, height);
 
@@ -133,7 +137,10 @@ export class ProgressionCanvas {
             this.canvasCtx.rect(0, 0, width, height)
             this.canvasCtx.stroke();
 
-            this.canvasCtx.strokeStyle = "#363636";
+            this.canvasCtx.fillStyle = "hsl(0, 0%, 10%)";
+            this.canvasCtx.strokeStyle = "hsl(204, 86%, 53%)";
+            this.canvasCtx.fillRect(0, 0, width, height);
+
             let points = handler.selectedKeyFrame.progressionPoints
         
             for(let i = 0; i < points.length; i++) {
