@@ -11,14 +11,13 @@ import { CubeCreateDelete } from "./cube_create_delete.js"
 import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 import { EventDispatcher, Group } from "../three.js"
 import { CubeCommands } from "./cube_commands.js"
-import { ModelerOptions } from "./modeler_options.js"
 import { CubeCopyPaste } from "./cube_copy_paste.js"
 import { applyAdjustScrollable } from "../util.js"
 import { ReferenceImageHandler } from "./reference_image_handler.js"
 
 export class ModelingStudio {
 
-    constructor(domElement, display, raytracer, orbitControls, renameCube, setCamera, pth) {
+    constructor(domElement, display, raytracer, orbitControls, renameCube, pth) {
         this.domElement = domElement
         let dom = $(domElement)
         this.canvasContainer = dom.find(".display-div").get(0)
@@ -41,14 +40,12 @@ export class ModelingStudio {
 
         applyCubeStateHighlighting(dom, this)
         
-        this.modelerOptions = new ModelerOptions(dom, this, setCamera, renameCube)
-
         this.cubeCopyPaste = new CubeCopyPaste(this, this.commandRoot)
         this.cubeCreateDelete = new CubeCreateDelete(dom, this)
 
         this.rotationPointMarkers = new RotationPointMarkers(this)
         this.lockedCubes = new LockedCubes(this)    
-        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, pth, this.lockedCubes, this.modelerOptions, renameCube)
+        this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, pth, this.lockedCubes, display.studioOptions, renameCube)
         this.dragSelection = new DragSelection(this, dom.find('#drag-selection-overlay'), orbitControls)
         this.pointTracker = new CubePointTracker(raytracer, display, this.group)
         this.gumball = new Gumball(dom, this)
@@ -92,7 +89,6 @@ export class ModelingStudio {
 
     cubeHierarchyChanged() {
         this.cubeList.refreshCompleatly()
-        this.modelerOptions.refreshOptionTexts()    
         this.refreshChildrenSelected()    
     }
 

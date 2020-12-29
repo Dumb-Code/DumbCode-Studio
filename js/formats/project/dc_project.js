@@ -32,7 +32,11 @@ export class DcProject {//._files, this._modeling, this._texture, this._animatio
 
     initiate(pth) {
         this.model.createModel(this.materials.normal)
-        this.model.addEventListener("hierarchyChanged", () => pth._modeling.cubeHierarchyChanged())
+        this.model.addEventListener("hierarchyChanged", () => {
+            pth._modeling.cubeHierarchyChanged()
+            pth.display.studioOptions.refreshOptionTexts()
+        })
+        
     }
 
     _createMaterialsObject() {

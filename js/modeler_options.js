@@ -1,29 +1,29 @@
-import { doubleClickToEdit, LinkedSelectableList } from "../util.js";
-import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture, TubeBufferGeometry } from "../three.js";
+import { doubleClickToEdit, LinkedSelectableList } from "./util.js";
+import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture, TubeBufferGeometry } from "./three.js";
 
-export class ModelerOptions {
+export class StudioOptions {
 
-    constructor(dom, studio, setCamera, renameCube) {
-        this.raytracer = studio.raytracer
-        this.pth = studio.pth
+    constructor(dom, raytracer, pth, display, setCamera, renameCube) {
+        this.raytracer = raytracer
+        this.pth = pth
         this.textureMode = new LinkedSelectableList(dom.find('.select-texture-mode')).onchange(e => {
             switch(e.value) {
                 case "textured":
-                    studio.pth.updateTexture(m => {
+                    pth.updateTexture(m => {
                         m.map = m._mapCache
                         m.wireframe = false
                     })
                     break
                 
                 case "untextured":
-                    studio.pth.updateTexture(m => {
+                    pth.updateTexture(m => {
                         m.map = null
                         m.wireframe = false
                     })
                     break
                 
                 case "outline":
-                    studio.pth.updateTexture(m => {
+                    pth.updateTexture(m => {
                         m.map = null
                         m.wireframe = true
                     })
@@ -31,40 +31,44 @@ export class ModelerOptions {
             }
         })
 
-        let canvasContainer = dom.find('.display-div').get(0)
+        let canvasContainer = dom.find('.display-div')
         this.perspectiveFov = dom.find('.perspective-camera-fov')
         this.cameraMode = new LinkedSelectableList(dom.find('.select-camera-mode')).onchange(e => {
+            let foundCanvas = canvasContainer.filter('.is-active').get(0)
+            let foundPerspective = this.perspectiveFov.filter('.is-active')
             let cam
             switch(e.value) {
                 case "perspective":
-                    cam = new PerspectiveCamera(this.perspectiveFov.val(), canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 700)           
-                    cam.zoom = studio.display.camera.zoom / (studio.display.camera.isOrthographicCamera ? 100 : 1)
+                    cam = new PerspectiveCamera(foundPerspective.val(), foundCanvas.clientWidth / foundCanvas.clientHeight, 0.1, 700)           
+                    cam.zoom = display.camera.zoom / (display.camera.isOrthographicCamera ? 100 : 1)
                     cam.updateProjectionMatrix()
                     break;
                 case "orthographic":
-                    cam = new OrthographicCamera(canvasContainer.clientWidth / -2, canvasContainer.clientWidth / 2, canvasContainer.clientHeight / 2, canvasContainer.clientHeight / -2, 0.1, 700)
-                    cam.zoom = studio.display.camera.zoom * (studio.display.camera.isPerspectiveCamera ? 100 : 1)
+                    cam = new OrthographicCamera(foundCanvas.clientWidth / -2, foundCanvas.clientWidth / 2, foundCanvas.clientHeight / 2, foundCanvas.clientHeight / -2, 0.1, 700)
+                    cam.zoom = display.camera.zoom * (display.camera.isPerspectiveCamera ? 100 : 1)
                     cam.updateProjectionMatrix()
                     break
             }
 
-            cam.position.copy(studio.display.camera.position)
-            cam.rotation.copy(studio.display.camera.rotation)
+            cam.position.copy(display.camera.position)
+            cam.rotation.copy(display.camera.rotation)
+
+            console.log(cam.position, cam.rotation)
 
             cam.updateProjectionMatrix()
             setCamera(cam)
 
         })
         this.perspectiveFov.on('input', () => {
-            let cam = studio.display.camera
+            let cam = display.camera
             if(cam.isPerspectiveCamera) {
                 cam.fov = this.perspectiveFov.val()
                 cam.updateProjectionMatrix()
             }
         })
 
-        dom.find('.toggle-cube-button').click(() => studio.display.toggleBlock())
-        dom.find('.toggle-grid-button').click(() => studio.display.toggleGrid())
+        dom.find('.toggle-cube-button').click(() => display.toggleBlock())
+        dom.find('.toggle-grid-button').click(() => display.toggleGrid())
 
         this.cubeName = dom.find('.cube-name-display')
         doubleClickToEdit(this.cubeName, name => this.raytracer.oneSelected() ? renameCube(this.raytracer.firstSelected().tabulaCube, name) : 0)

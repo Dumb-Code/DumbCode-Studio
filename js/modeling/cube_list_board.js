@@ -2,10 +2,10 @@ import { OrbitControls } from "../orbit_controls.js"
 import { isKeyDown, DraggableElementList, doubleClickToEdit } from "../util.js"
 
 export class CubeListBoard {
-    constructor(cubeList, raytracer, pth, lockedCubes, modelerOptions, renameCube) {
+    constructor(cubeList, raytracer, pth, lockedCubes, studioOptions, renameCube) {
         this.cubeList = cubeList
         this.raytracer = raytracer
-        this.modelerOptions = modelerOptions
+        this.studioOptions = studioOptions
         this.renameCube = renameCube
         this.pth = pth
         this.lockedCubes = lockedCubes
@@ -163,14 +163,14 @@ export class CubeListBoard {
             getLockIcon: () => {
                 let elems = $(lockIconSpan).children()
                 if(this.raytracer.isCubeSelected(cube)) {
-                    return elems.add(this.modelerOptions.cubeLocked.children())
+                    return elems.add(this.studioOptions.cubeLocked.children())
                 }
                 return elems
             },
             getHideIcon: () => {
                 let elems = $(hideIconSpan).children()
                 if(this.raytracer.isCubeSelected(cube)) {
-                    return elems.add(this.modelerOptions.cubeVisible.children())
+                    return elems.add(this.studioOptions.cubeVisible.children())
                 }
                 return elems
 

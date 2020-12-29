@@ -11,6 +11,7 @@ import { TextureStudio } from "./texture/texture_studio.js";
 import { DCMModel } from "./formats/model/dcm_loader.js";
 import { ProjectTabHandler } from "./project_tab_handler.js";
 import { DirectionalIndecators } from "./directional_indicators.js";
+import { StudioOptions } from "./modeler_options.js";
 
 const major = 0
 const minor = 8
@@ -51,6 +52,7 @@ const projectTabs = new ProjectTabs()
 let directionalIndecators
 
 let activeTab
+let studioOptions
 let filesPage, modelingStudio, textureStudio, animationStudio
 
 let allTransformControls = []
@@ -144,6 +146,10 @@ async function init() {
 }
 
 window.onModulesFinished = async() => {
+
+    studioOptions = new StudioOptions($(document), raytracer, pth, display, setCamera, renameCube)
+    display.studioOptions = studioOptions
+
     filesPage = createFilesPage()
     animationStudio = createAnimationStudio()
     modelingStudio = createModelingStudio()
@@ -237,7 +243,7 @@ function renameCube(cube, newValue) {
     if(oldValue !== newValue) {
         cube.updateCubeName(newValue)
         pth.animationTabs.allTabs.forEach(tab => tab.handler.renameCube(oldValue, newValue))
-        modelingStudio.modelerOptions.refreshOptionTexts()
+        this.studioOptions.refreshOptionTexts()
     }   
     return false
 }
@@ -267,7 +273,7 @@ function createFilesPage() {
 }
 
 function createModelingStudio() {
-    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, setCamera, pth)
+    return new ModelingStudio($('#modeling-area'), display, raytracer, controls, renameCube, pth)
 }
 
 function createTextureStudio() {
