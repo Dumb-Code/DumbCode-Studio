@@ -163,6 +163,7 @@ export class Gumball {
                     case 'rotation_point':
                     case 'position':
                         cube.updatePosition(pos.map((e, i) => e + data.position[i]))
+                        cube.cubeGroup.updateMatrixWorld(true)
                         break
                 }
             })
