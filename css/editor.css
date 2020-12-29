@@ -319,22 +319,22 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
     display: flex;
 }
 
-::-webkit-scrollbar {
-    background-color: #202324;
-    color: #aba499;
+*::-webkit-scrollbar {
+    background-color: transparent;
+    color: transparent;
 }
-::-webkit-scrollbar-thumb {
-    background-color: #454a4d;
+*::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 29%);
 }
-::-webkit-scrollbar-thumb:hover {
-    background-color: #575e62;
+*::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 32%);
 }
-::-webkit-scrollbar-thumb:active {
-    background-color: #484e51;
+*::-webkit-scrollbar-thumb:active {
+    background-color: hsl(0, 0%, 40%);
 }
-::-webkit-scrollbar-corner {
-    background-color: #181a1b;
+*::-webkit-scrollbar-corner {
+    background-color: hsl(0, 0%, 14%;
 }
 * {
-    scrollbar-color: #202324 #454a4d;
+    scrollbar-color: hsl(0, 0%, 29%) transparent;
 }
