@@ -103,7 +103,7 @@ export class TexturePanels {
 
         this.dom
             .css('grid-template-columns', `calc(100% - ${this.rightArea}px) ${this.rightArea-this.layersArea}px ${this.layersArea}px`) 
-            .css('grid-template-rows', `calc(100vh - ${this.bottomArea + this.offsetArea + mainArea.offsetTop}px) ${this.offsetArea}px ${this.bottomArea}px`) 
+            .css('grid-template-rows', `calc(100vh - ${this.bottomArea + this.offsetArea + mainArea.offsetTop}px - 28px) ${this.offsetArea}px ${this.bottomArea}px 28px`) 
 
         window.studioWindowResized()
     }

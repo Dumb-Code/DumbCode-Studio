@@ -1,9 +1,19 @@
-<div style="position:absolute; bottom: 0; width: 100%;">
-    <!--Command Log-->
-    <div class="section py-0 my-0 pt-2 command-output-lines" style="border: 1px solid #121212; font-size: 14px; border-top: none; border-right: none;"></div>
-    <!--Command Field-->
-    <div class="section py-0 my-0 has-text-light" style="padding-top: 5px !important; padding-bottom: 5px !important; margin-left: -14px; border: 1px solid #121212; font-size: 14px; border-top: none; border-right: none; padding-right: 0.5rem">
-      <span style="position: absolute;">&#x0003E;</span>
-      <input type="text" class="has-background-black-ter has-text-light command-line-field" style="border: 0px; font-size: 14px; outline: none; width: 100%; padding-left: 16px;">
+<div style="position: absolute; bottom: 0; width: 100%;">
+    <div class="columns is-gapless">
+      <div class="column is-one-third">
+          <!--Command Field-->
+          <div class="section py-0 my-0 has-text-light" 
+          style="font-size: 14px; border-bottom: 1px solid black; border-right: 1px solid black">
+            <div class="icon mt-1" style="position: absolute; left: 4px">
+              <i class="fas fa-arrow-right"></i>
+            </div>
+            <input type="text" class="has-background-black-ter has-text-light command-line-field" 
+            style="border: 0px; font-size: 14px; outline: none; width: 100%; padding-left: 16px;">
+          </div>
+      </div>
+      <div class="column is-two-thirds">
+          <div class="section py-0 my-0 command-output-lines has-text-grey-light" 
+          style="font-size: 14px; border-bottom: 1px solid black; position: absolute; bottom: 0; width: 100%;"></div>
+      </div>
     </div>
 </div>
