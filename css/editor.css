@@ -53,7 +53,8 @@
     grid-template-areas: 
     "main_area texture_map texture_map"
     "main_area offset_editing offset_editing"
-    "main_area palette texture_layers";
+    "main_area palette texture_layers"
+    "options palette texture_layers";
     width: 100%;
     height: 100vh;
 }
