@@ -30,22 +30,17 @@
 </div>
 <div class="animation-list pr-4 mt-0 pt-5" style="overflow-y: scroll; overflow-x: hidden; height: 37vh;">
     <div class="animation-list-entry columns is-mobile empty-column ml-3">
-        <div class="column is-narrow">
-            <i class="fas fa-bars"></i>
-        </div>
+        <span class="toggle-animation clickable">
+            <span class="toggle-on tooltip icon is-medium" data-tooltip="Hide Animation">
+                <i class="fas fa-check-square has-text-info is-medium" style="width: 22px; height: 20px; margin-top: 16px;"></i>
+            </span>
+            <span class="toggle-off tooltip icon is-medium" data-tooltip="Show Animation">
+                <i class="far fa-square is-medium has-text-black-bis" style="width: 22px; height: 20px; margin-top: 16px;"></i>
+            </span>
+        </span>
         <div class="column dbl-click-container animation-name">
             <p class="dbl-text"></p>
             <input class="dbl-text-edit" type="text">
-        </div>
-        <div class="column is-narrow">
-            <span class="toggle-animation icon is-small clickable">
-                <span class="toggle-on tooltip" data-tooltip="Remove Animation From Tab">
-                    <i class="fas fa-toggle-on"></i>
-                </span>
-                <span class="toggle-off tooltip" data-tooltip="Add Animation From Tab">
-                    <i class="fas fa-toggle-off"></i>
-                </span>
-            </span>
         </div>
         <div class="column is-narrow">
             <span class="download-animation-gif icon is-small clickable tooltip " data-tooltip="Record As Gif">
@@ -58,8 +53,8 @@
             </span>
         </div>
         <div class="column is-narrow">
-          <span class="delete-animation-button icon is-small clickable tooltip " data-tooltip="Remove Animation">
-              <i class="fas fa-trash"></i>
+          <span class="delete-animation-button icon is-small clickable tooltip icon-close-button" data-tooltip="Remove Animation">
+            <i class="fas fa-times-circle"></i>
           </span>
         </div>
       </div>
