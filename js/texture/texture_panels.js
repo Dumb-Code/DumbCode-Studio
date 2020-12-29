@@ -35,14 +35,18 @@ export class TexturePanels {
         this.textureLayersPanel = new LayoutPart(dom.find('#panel-texture-layers'), () => this.panelChange())
         
         tex.find('.switch-canvas-button').click(() => {
+
+            let switchElemet = document.getElementById("switch-button-texturer");
             let s = mainDisplay.get(0).style.gridArea
             mainDisplay.css('grid-area', tex.get(0).style.gridArea)
             tex.css('grid-area', s)
 
             if(s.startsWith('main_area')) {
                 texPopout.css('display', 'none')
+                switchElemet.style.left = "calc(100% + -20px)";
             } else {
                 texPopout.css('display', '')
+                switchElemet.style.left = "-20px";
             }
 
             window.studioWindowResized()
