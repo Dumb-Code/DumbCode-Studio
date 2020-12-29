@@ -8,68 +8,77 @@
 
     <div class="container">
 
-        <div class="button is-info is-small easing-function-in">
-            <icon class="easing-icon icon is-small">
-                <i class="far fa-check-square"></i>
-            </icon>
-            <span>
-                In
-            </span>
-        </div>
-        
-        <div class="button is-info is-small easing-function-out">
-            <icon class="easing-icon icon is-small">
-                <i class="far fa-check-square"></i>
-            </icon>
-            <span>
-                Out
-            </span>
-        </div>
-        
-        
-        <div class="dropdown is-up">
-            <div class="dropdown-trigger">
-                <button class="button is-small is-info" aria-haspopup="true" aria-controls="progression-dropdown-menu" style="width: 180px;">
-                <span class="dropdown-text">None</span>
-                <span class="icon is-small" style="position: absolute; right: 10px;">
-                    <i class="fas fa-angle-up" aria-hidden="true"></i>
-                </span>
-                </button>
-            </div>
-            <div class="dropdown-menu" id="progression-dropdown-menu" role="menu">
-                <div class="dropdown-content has-background-dark">
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="sine">
-                        Sine
-                    </a>
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="quad">
-                        Quad
-                    </a>
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="cubic">
-                        Cubic
-                    </a>
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="quart">
-                        Quartic
-                    </a>
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="quint">
-                        Quintic
-                    </a>
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="expo">
-                        Exponential
-                    </a>
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="circ">
-                        Circular
-                    </a>
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="back">
-                        Back
-                    </a>
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="elastic">
-                        Elastic
-                    </a>
-                    <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="bounce">
-                        Bounce
-                    </a>
+        <div class="columns is-gapless is-paddingless is-marginless">
+
+            <div class="column is-one-quarter" style="margin-right: 2px;">
+                <div class="button is-info is-small is-fullwidth easing-function-in">
+                    <icon class="easing-icon icon is-small">
+                        <i class="far fa-check-square"></i>
+                    </icon>
+                    <span>
+                        In
+                    </span>
                 </div>
             </div>
+
+            <div class="column is-one-quarter" style="margin-right: 2px;">
+                <div class="button is-info is-small is-fullwidth easing-function-out">
+                    <icon class="easing-icon icon is-small">
+                        <i class="far fa-check-square"></i>
+                    </icon>
+                    <span>
+                        Out
+                    </span>
+                </div>
+            </div>
+
+            <div class="column is-half" style="margin-right: 6px;">
+                <div class="dropdown is-up" style="width: 100%;">
+                    <div class="dropdown-trigger" style="width: 100%;">
+                        <button class="button is-small is-info is-fullwidth" aria-haspopup="true" aria-controls="progression-dropdown-menu" style="width: 100%;">
+                        <span class="dropdown-text">None</span>
+                        <span class="icon is-small" style="position: absolute; right: 10px;">
+                            <i class="fas fa-angle-up" aria-hidden="true"></i>
+                        </span>
+                        </button>
+                    </div>
+                    <div class="dropdown-menu" id="progression-dropdown-menu" role="menu">
+                        <div class="dropdown-content has-background-dark">
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="sine">
+                                Sine
+                            </a>
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="quad">
+                                Quad
+                            </a>
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="cubic">
+                                Cubic
+                            </a>
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="quart">
+                                Quartic
+                            </a>
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="quint">
+                                Quintic
+                            </a>
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="expo">
+                                Exponential
+                            </a>
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="circ">
+                                Circular
+                            </a>
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="back">
+                                Back
+                            </a>
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="elastic">
+                                Elastic
+                            </a>
+                            <a class="easing-function-entry dropdown-item button is-dark" select-list-entry="bounce">
+                                Bounce
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
         
         <input class="easing-function-quality editor-require-keyframe input slider has-background-black-ter is-dark has-text-light tooltip mt-3" axis="0" type="range" min="0" max="40" value="0" data-tooltip="Quality: Normal">
