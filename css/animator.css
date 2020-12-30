@@ -24,7 +24,7 @@
     z-index: 1;
     position: absolute;
     top: 0px;
-    left: -15px;
+    left: -8px;
     display: inline-flex;
 }
 .keyframe {
@@ -36,8 +36,8 @@
     display: inline-flex;
 }
 .keypoint {
-    height: 115px;
-    width: 115px;
+    height: 18px;
+    width: 18px;
     border-radius: 9px;
     z-index: 2;
     position: relative;
