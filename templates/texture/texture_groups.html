@@ -1,0 +1,77 @@
+<style>
+    .main-area-entry {
+        border: solid black 2px; 
+        width: 300px; 
+        height: 500px; 
+        border-radius: 3px; 
+    }
+
+    .texture-group-template, .texture-layer-template {
+        display: none;
+    }
+    
+
+    .texture-group-entry:hover {
+        background-color: #565656;
+    }
+
+    .texture-entry:hover {
+        background-color: #664646;
+    }
+
+    .is-dragged {
+        background-color: #8142F2
+    }
+
+    .texture-entry[drag-state="top"] {
+        border-top-style: solid;
+        border-top-color: #000000;
+    }
+
+    .texture-entry[drag-state="bottom"] {
+        border-bottom-style: solid;
+        border-bottom-color: #000000;
+    }
+
+</style>
+<div id="modal-texture-groups" style="text-transform: none">
+    <div class="modal-background"></div>
+    <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left;">
+        <h3 class="title is-3" style="color: whitesmoke">Texture Groups</h3>
+        <div style="padding-bottom: 20px">
+            <button class="modal-close" aria-label="close" style="position: absolute"></button>
+        </div>
+        <span class="icon is-small add-group ml-2 tooltip" data-tooltip="Add Group">
+            <i class="fas fa-plus"></i>
+        </span>
+        <div class="pr-5 pl-3 texture-group-entry texture-group-template">
+            <div class="pt-3 texture-group-toppart">
+                <div class="dbl-click-container texture-group-name">
+                    <p class="dbl-text"></p>
+                    <input class="dbl-text-edit" type="text">
+                </div>
+            </div>
+            <div class="texture-group-entry-container">
+            </div>
+        </div>
+        <div class="pr-5 pl-3 texture-entry texture-layer-template" draggable="true">
+            <div class="pt-3">
+                <span class="texture-name">
+                    texture.png
+                </span>
+                <span class="pr-3 icon tooltip remove-texture" style="float: right" data-tooltip="Remove Texture">
+                    <i class="fas fa-minus"></i>
+                </span>
+            </div>
+        </div>
+        <div class="columns is-mobile" style="overflow-y: scroll;">
+            <div class="column mt-2 ml-2 mr-2 main-area-entry texture-group-container">
+            
+            </div>
+            <div class="column mt-2 ml-2 mr-2 main-area-entry texture-layer-container">
+    
+            </div>
+        </div>
+        
+    </div>
+</div>

@@ -1,6 +1,7 @@
 import { readFile } from "../displays.js"
 import { Texture, NearestFilter, Vector2, DataTexture, RGBAFormat, CanvasTexture } from "../three.js"
 import { doubleClickToEdit, DraggableElementList, LinkedSelectableList, ToggleableElement } from "../util.js"
+import { TextureGroupManager } from "./texture_group_manager.js"
 
 export class TextureManager {
 
@@ -9,6 +10,7 @@ export class TextureManager {
         this.filesPage = pth._files
         this.textures = []
         this.textureEmptyLayer = pth._texture._textureEmptyLayer
+        this.groupManager = new TextureGroupManager(pth, this)
 
         this.highlightCanvas = document.createElement('canvas')
         this.highlightCanvas.width = model.texWidth
@@ -157,7 +159,7 @@ export class TextureManager {
 
     refresh() {
         this.removeAll()
-        
+        this.groupManager.updateIds(this.textures.map(t => t.idx))
         this.textures.forEach((t, id) => {
             t.idx = id
             t.dom.attr('select-list-entry', t.idx)

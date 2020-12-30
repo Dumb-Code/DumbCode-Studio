@@ -9,6 +9,7 @@ export class TextureProjectPart {
         this.dragableElementList = new DraggableElementList(false, (a, b, c) => pth.textureManager.textureDragged(a, b, c))
         dom.find('#texture-file-input').on('input', e => this.uploadTextureFile(getAndDeleteFiles(e)))
         dom.find('.new-texture-button').click(() => this.createEmptyTexture())
+        dom.find('.edit-texture-groups').click(() => pth.textureManager.groupManager.openGroupModal())
 
         fileUploadBox(dom.find('.texture-drop-area'), files => this.uploadTextureFile(files))
      
