@@ -11,7 +11,7 @@ import { TextureStudio } from "./texture/texture_studio.js";
 import { DCMModel } from "./formats/model/dcm_loader.js";
 import { ProjectTabHandler } from "./project_tab_handler.js";
 import { DirectionalIndecators } from "./directional_indicators.js";
-import { StudioOptions } from "./modeler_options.js";
+import { StudioOptions } from "./studio_options.js";
 
 const major = 0
 const minor = 8

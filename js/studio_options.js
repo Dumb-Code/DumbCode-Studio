@@ -6,6 +6,8 @@ export class StudioOptions {
     constructor(dom, raytracer, pth, display, setCamera, renameCube) {
         this.raytracer = raytracer
         this.pth = pth
+
+        let textureModeConatiner = dom.find('.texture-mode-label')
         this.textureMode = new LinkedSelectableList(dom.find('.select-texture-mode')).onchange(e => {
             switch(e.value) {
                 case "textured":
@@ -32,8 +34,11 @@ export class StudioOptions {
                     })
                     break
             }
+            textureModeConatiner.text(e.value.charAt(0).toUpperCase() + e.value.slice(1))
         })
 
+
+        let cameraModeConatiner = dom.find('.camera-mode-label')
         let canvasContainer = dom.find('.display-div')
         this.perspectiveFov = dom.find('.perspective-camera-fov')
         this.cameraMode = new LinkedSelectableList(dom.find('.select-camera-mode')).onchange(e => {
@@ -53,10 +58,10 @@ export class StudioOptions {
                     break
             }
 
+            cameraModeConatiner.text(e.value.charAt(0).toUpperCase() + e.value.slice(1))
+
             cam.position.copy(display.camera.position)
             cam.rotation.copy(display.camera.rotation)
-
-            console.log(cam.position, cam.rotation)
 
             cam.updateProjectionMatrix()
             setCamera(cam)

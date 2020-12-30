@@ -86,3 +86,7 @@
     background-size: auto !important;
 }
 /* -----------------------------------------------------------------  */
+
+#texture-area .texture-mode-option-area {
+    display: none
+}

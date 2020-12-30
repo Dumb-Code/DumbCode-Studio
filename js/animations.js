@@ -249,8 +249,6 @@ export class AnimationHandler {
 
                 let tCg = targetMap.cg[name]
                 let cg = cube.cubeGrowGroup.position.toArray()
-                // if(cube.name == "tail1")
-                // console.log(cg)
                 if(tCg[0] !== cg[0] || tCg[1] !== cg[1] || tCg[2] !== cg[2]) {
                     //The reason it's cg-tCg instead of tCg-cg, is that cubeGrowGroup.position is -1* the actual cube grow
                     let delta = [cg[0]-tCg[0], cg[1]-tCg[1], cg[2]-tCg[2]]
