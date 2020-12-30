@@ -1,4 +1,4 @@
-import { doubleClickToEdit, DraggableElementList } from "../util.js"
+import { doubleClickToEdit, downloadCanvas, DraggableElementList, LinkedSelectableList } from "../util.js"
 
 const modal = "texture/texture_groups"
 let groupTemplate, entryTemplate, entryGroupContainer, textureLayerContainer
@@ -18,6 +18,9 @@ export class TextureGroupManager {
         this.groups = []
 
         this.draggedTexture = null
+        this.textureLayerOptions = $('.texture-group-layers')
+
+        this.groupSelection = new LinkedSelectableList($(), true).onchange(e => manager.refresh())
     }
 
     updateIds(idMap) {
@@ -26,10 +29,21 @@ export class TextureGroupManager {
         )
     }
 
+    updateTextureLayerOption() {
+        this.textureLayerOptions.children().detach()
+        this.groups.forEach(g => this.textureLayerOptions.append(g.optionsDom))
+    }
+
     createNewGroup() {
         let dom = groupTemplate.clone()
         dom.removeClass('texture-group-template')
-        
+
+        let optionsDom = 
+        $(document.createElement("a"))
+        .addClass("dropdown-item option-select")
+        .attr('select-list-entry', this.groups.length)
+        this.groupSelection.addElement(optionsDom)
+        this.groupSelection.setValue(this.groups.length)
         let data
         this.groups.push(data = {
             name: "New Texture Group",
@@ -38,12 +52,15 @@ export class TextureGroupManager {
 
             dom,
             entryDom: dom.find('.texture-group-entry-container'),
+            optionsDom,
 
             dragList: new DraggableElementList(false, (drop, movedData, droppedOnData) => {
                 data.layerIDs.splice(droppedOnData + (drop == 'bottom' ? 1 : 0), 0, ...data.layerIDs.splice(movedData, 1))
                 this.refreshTextureGroups()
             })
         })
+
+        optionsDom.text(data.name)
         
         dom.find('.texture-group-toppart')
         .on('dragover', e => {
@@ -53,7 +70,7 @@ export class TextureGroupManager {
                 e.stopPropagation()
             }
         })
-        .on('dragleave', e => {
+        .on('dragleave', () => {
             dom.removeClass('is-dragged')
         })
         .on('drop', e => {
@@ -67,9 +84,13 @@ export class TextureGroupManager {
         })
 
 
-        doubleClickToEdit(dom.find('.dbl-click-container'), name => data.name = name, data.name)
+        doubleClickToEdit(dom.find('.dbl-click-container'), name => {
+            data.name = name
+            optionsDom.text(name)
+        }, data.name)
 
         this.refreshTextureGroups()
+        this.updateTextureLayerOption()
     }
 
     openGroupModal() {

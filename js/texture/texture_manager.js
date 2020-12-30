@@ -157,6 +157,7 @@ export class TextureManager {
         this.textureEmptyLayer.siblings().not('.layer-persistant').detach()
     }
 
+
     refresh() {
         this.removeAll()
         this.groupManager.updateIds(this.textures.map(t => t.idx))
@@ -167,8 +168,20 @@ export class TextureManager {
             t.dom.detach().insertBefore(this.textureEmptyLayer)
         })
 
-        let width = this.textures.filter(t => !t.isHidden).map(t => t.width).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
-        let height = this.textures.filter(t => !t.isHidden).map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
+        let textures = this.textures.filter(t => !t.isHidden)
+
+        let group = this.groupManager.groups[this.groupManager.groupSelection.value]
+        if(group === undefined && this.groupManager.groups.length !== 0) {
+            this.groupManager.groupSelection.value = '0'
+            group = this.groupManager.groups[0]   
+        }
+
+        if(group !== undefined) {
+            textures = group.layerIDs.map(id => this.textures[id]).filter(t => !t.isHidden)
+        }
+
+        let width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
+        let height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
 
         if(this.textures.length === 0) {
             width = this.pth.model.texWidth
@@ -179,12 +192,12 @@ export class TextureManager {
         this.canvas.height = height
         this.context.imageSmoothingEnabled = false
 
-        if(!this.textures.find(t => !t.isHidden)) {
+        if(textures.length === 0) {
             this.context.fillStyle = `rgba(255, 255, 255, 1)`
             this.context.fillRect(0, 0, width, height)
         }
 
-        this.textures.filter(t => !t.isHidden).reverse().forEach(t => this.context.drawImage(t.canvas, 0, 0, width, height))
+        textures.reverse().forEach(t => this.context.drawImage(t.canvas, 0, 0, width, height))
 
         if(this.selectedLayer.value !== undefined) {
             this.context.drawImage(this.highlightCanvas, 0, 0, width, height)

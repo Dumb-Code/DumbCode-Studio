@@ -576,6 +576,13 @@ export class DraggableElementList {
             element.ondragstart = () => {
                 draggedData = dataGetter() || false
             }
+            element.ondragleave = function(e) {
+                if(draggedData !== null) {
+                    this.removeAttribute("drag-state")
+                    e.preventDefault()
+                    e.stopPropagation()
+                }
+            }
             element.ondragover = function(e) {
                 if(draggedData == null) {
                     return

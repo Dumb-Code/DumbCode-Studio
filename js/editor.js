@@ -79,7 +79,7 @@ async function init() {
     display.dontReRender = true
     controls.addEventListener('change', () => display.dontReRender ? 0 : runFrame())
     controls.update()
-    display.false = true
+    display.dontReRender = false
 
     //When an input is focused on don't allow for keyboard controls.
     $(document)
