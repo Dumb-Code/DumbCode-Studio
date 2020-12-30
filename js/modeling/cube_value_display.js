@@ -240,7 +240,6 @@ export class CubeValueDisplay {
             let cube = this.raytracer.firstSelected().tabulaCube
 
             let vals = cube.cubeGrow
-            this.cubeGrowLocked.setInternalValue(vals[1] && vals[1] == vals[2])
 
             this.cubeName.setInternalValue(cube.name)
             this.positions.setInternalValue(cube.rotationPoint)
@@ -250,7 +249,9 @@ export class CubeValueDisplay {
             this.cubeGrow.setInternalValue(vals)
             this.textureOffset.setInternalValue(cube.textureOffset)
             this.textureMirrored.setInternalValue(cube.textureMirrored)
+            this.cubeGrowLocked.setInternalValue(vals[0] === vals[1] && vals[1] === vals[2])
         } else {
+            this.cubeGrowLocked.setInternalValue(true)
             this.dimensions.setInternalValue(undefined)
             this.positions.setInternalValue(undefined)
             this.offsets.setInternalValue(undefined)
