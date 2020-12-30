@@ -57,7 +57,7 @@ export class CubePointTracker {
             if(this.enabled && this.intersected !== null) {
                 let intersected = this.intersected
                 this.disable()
-                this.callback({ point: intersected._point, position: intersected.parent.position })
+                this.callback({ point: intersected._point, position: intersected.cubeGroup.position })
                 e.consume()
             }
         })

@@ -180,7 +180,7 @@ export class AnimationHandler {
         this.tbl.cubeMap.forEach((cube, name) => {
             data.rot[name] = cube.cubeGroup.rotation.toArray()
             data.pos[name] = cube.cubeGroup.position.toArray()
-            data.cg[name] =  cube.cubeMesh.scale.toArray().map((e, i) => (e-cube.dimension[i]) / 2)
+            data.cg[name] = cube.cubeGrowGroup.position.toArray()
         })
         return data
     }
@@ -248,9 +248,12 @@ export class AnimationHandler {
                 }
 
                 let tCg = targetMap.cg[name]
-                let cg = cube.cubeMesh.scale.toArray().map((e, i) => (e-cube.dimension[i]) / 2)
+                let cg = cube.cubeGrowGroup.position.toArray()
+                // if(cube.name == "tail1")
+                // console.log(cg)
                 if(tCg[0] !== cg[0] || tCg[1] !== cg[1] || tCg[2] !== cg[2]) {
-                    let delta = [tCg[0]-cg[0], tCg[1]-cg[1], tCg[2]-cg[2]]
+                    //The reason it's cg-tCg instead of tCg-cg, is that cubeGrowGroup.position is -1* the actual cube grow
+                    let delta = [cg[0]-tCg[0], cg[1]-tCg[1], cg[2]-tCg[2]]
                     //map plus : target - current
                     if(kf.cubeGrowMap.has(name)) {
                         kf.cubeGrowMap.set(name, kf.cubeGrowMap.get(name).map((v, i) => v + delta[i]))
@@ -334,19 +337,22 @@ class KeyFrame {
         })
 
         this.cubeGrowMap.forEach((values, key) => {
-            let cube = this.handler.tbl.cubeMap.get(key)?.cubeMesh
+            let cube = this.handler.tbl.cubeMap.get(key)
             if(cube) {
-                cube.position.set(cube.position.x - values[0]*percentageDone, cube.position.y - values[1]*percentageDone, cube.position.z - values[2]*percentageDone)
-                cube.scale.set(cube.scale.x + 2*values[0]*percentageDone, cube.scale.y + 2*values[1]*percentageDone, cube.scale.z + 2*values[2]*percentageDone)
+                let cm = cube.cubeMesh
+                let cgg = cube.cubeGrowGroup
 
-                if(cube.scale.x === 0) {
-                    cube.scale.x = 0.00001
+                cgg.position.set(cgg.position.x - values[0]*percentageDone, cgg.position.y - values[1]*percentageDone, cgg.position.z - values[2]*percentageDone)
+                cm.scale.set(cm.scale.x + 2*values[0]*percentageDone, cm.scale.y + 2*values[1]*percentageDone, cm.scale.z + 2*values[2]*percentageDone)
+
+                if(cm.scale.x === 0) {
+                    cm.scale.x = 0.00001
                 }
-                if(cube.scale.y === 0) {
-                    cube.scale.y = 0.00001
+                if(cm.scale.y === 0) {
+                    cm.scale.y = 0.00001
                 }
-                if(cube.scale.z === 0) {
-                    cube.scale.z = 0.00001
+                if(cm.scale.z === 0) {
+                    cm.scale.z = 0.00001
                 }
             }
         })

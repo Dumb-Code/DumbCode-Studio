@@ -14,11 +14,11 @@ export class Gumball {
                 return
             }
 
-            startingRot.x = selected.parent.rotation.x
-            startingRot.y = selected.parent.rotation.y
-            startingRot.z = selected.parent.rotation.z
+            startingRot.x = selected.cubeGroup.rotation.x
+            startingRot.y = selected.cubeGroup.rotation.y
+            startingRot.z = selected.cubeGroup.rotation.z
 
-            startingPos.copy(selected.parent.position)
+            startingPos.copy(selected.cubeGroup.position)
         })
         this.transformControls.addEventListener('studioRotate', e => {
             let selected = this.raytracer.oneSelected()
@@ -26,7 +26,7 @@ export class Gumball {
                 return
             }
 
-            let rot = selected.parent.rotation
+            let rot = selected.cubeGroup.rotation
             rot.x = startingRot.x + e.rotationAngle * e.rotationAxis.x
             rot.y = startingRot.y + e.rotationAngle * e.rotationAxis.y
             rot.z = startingRot.z + e.rotationAngle * e.rotationAxis.z
@@ -41,8 +41,8 @@ export class Gumball {
                 return
             }
 
-            selected.parent.position.copy(e.axis).multiplyScalar(e.length).add(startingPos)
-            studio.setPosition(selected.parent.position.toArray())
+            selected.cubeGroup.position.copy(e.axis).multiplyScalar(e.length).add(startingPos)
+            studio.setPosition(selected.cubeGroup.position.toArray())
             studio.runFrame()
         })
 

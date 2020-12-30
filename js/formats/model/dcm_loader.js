@@ -144,6 +144,7 @@ export class DCMCube {
 
         this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.mat)
         this.cubeMesh.tabulaCube = this
+        this.cubeMesh.cubeGroup = this.cubeGroup
 
         this.cubeMesh.position.set(0.5, 0.5, 0.5)
         this.cubeMesh.updateMatrix();
@@ -153,12 +154,12 @@ export class DCMCube {
 
         this.cubeGrowGroup.add(this.cubeMesh)
         this.cubeGroup.add(this.cubeGrowGroup)
-        this.updateDimension()
-    
 
         this.cubeGroup.rotation.order = "ZYX"
         this.updatePosition()
         this.updateRotation()
+        this.updateOffset()
+        this.updateCubeGrow()
         
         this.onChildrenChange(true)
         
@@ -236,7 +237,6 @@ export class DCMCube {
 
         this.updateGeometry({ shouldUpdateTexture: false })
         this.updateCubeGrow()
-        this.updateOffset()
         this.updatePositionVisuals()
         this.updateRotationVisuals()
     }
@@ -248,7 +248,7 @@ export class DCMCube {
 
         this.cubeMesh.scale.set(w, h, d)
         if(shouldUpdateTexture) {
-            this.updateTexture()
+            this.updateTexture({ dimension })
         }
     }
 
@@ -258,6 +258,11 @@ export class DCMCube {
 
     updateRotationVisuals(rotation = this.rotation) {
         this.cubeGroup.rotation.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180)
+    }
+
+    updateCubeGrowVisuals(value = this.cubeGrow) {
+        this.cubeGrowGroup.position.set(-value[0], -value[1], -value[2])
+        this.updateGeometry( {cubeGrow:value} )
     }
 
     updateTexture({ textureOffset = this.textureOffset, dimension = this.dimension, texWidth = this.model.texWidth, texHeight = this.model.texHeight, textureMirrored = this.textureMirrored } = {}) {
@@ -290,15 +295,13 @@ export class DCMCube {
             this.dimension = values.map(e => Math.round(e))
         }
         this.updateGeometry( { dimension:values } )
-        this.updateTexture( { dimension:values } )
     }
 
     updateCubeGrow(value = this.cubeGrow, visualOnly = false) {
         if(visualOnly !== true) {
             this.cubeGrow = value
         }
-        this.cubeGrowGroup.position.set(-value[0], -value[1], -value[2])
-        this.updateGeometry( {cubeGrow:value} )
+        this.updateCubeGrowVisuals(value)   
     }
 
     updateTextureOffset(values = this.textureOffset, visualOnly = false) {

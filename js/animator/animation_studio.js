@@ -99,7 +99,7 @@ export class AnimationStudio {
                     this.pth.model.resetAnimations()
                     handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
                     handler.animate(0)
-                    let arr = selected.parent.rotation.toArray()
+                    let arr = selected.cubeGroup.rotation.toArray()
                     handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]*180/Math.PI))
                     handler.selectedKeyFrame.skip = false
                     handler.forcedAnimationTicks = null
@@ -129,7 +129,7 @@ export class AnimationStudio {
                     this.pth.model.resetAnimations()
                     handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
                     handler.animate(0)
-                    let arr = selected.parent.position.toArray()
+                    let arr = selected.cubeGroup.position.toArray()
                     handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]))
                     handler.selectedKeyFrame.skip = false
                     handler.forcedAnimationTicks = null
@@ -160,7 +160,7 @@ export class AnimationStudio {
                     this.pth.model.resetAnimations()
                     handler.forcedAnimationTicks = handler.selectedKeyFrame.startTime + handler.selectedKeyFrame.duration
                     handler.animate(0)
-                    let arr = selected.scale.toArray().map((e, i) => (e-selected.tabulaCube.dimension[i]) / 2)
+                    let arr = selected.parent.position.toArray().map(e => -e)
                     handler.selectedKeyFrame.cubeGrowMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]))
                     handler.selectedKeyFrame.skip = false
                     handler.forcedAnimationTicks = null
@@ -191,11 +191,11 @@ export class AnimationStudio {
         let selected = this.raytracer.oneSelected()
         if(selected !== null) {
             // if(this.rotationCache !== null) {
-            //     selected.parent.rotation.set(this.rotationCache[0] * Math.PI / 180, this.rotationCache[1] * Math.PI / 180, this.rotationCache[2] * Math.PI / 180)
+            //     selected.cubeGroup.rotation.set(this.rotationCache[0] * Math.PI / 180, this.rotationCache[1] * Math.PI / 180, this.rotationCache[2] * Math.PI / 180)
             //     this.rotationCache = null
             // }
             // if(this.positionCache !== null) {
-            //     selected.parent.position.set(this.positionCache[0], this.positionCache[1], this.positionCache[2])
+            //     selected.cubeGroup.position.set(this.positionCache[0], this.positionCache[1], this.positionCache[2])
             //     this.positionCache = null
             // }
         }
@@ -230,12 +230,12 @@ export class AnimationStudio {
         
         let selected = this.raytracer.oneSelected()
         if(selected !== null) {
-             let pos = selected.parent.position
-             let rot = selected.parent.rotation
-             let cubeGrow = selected.scale.toArray().map((e, i) => (e-selected.tabulaCube.dimension[i]) / 2)
+             let pos = selected.cubeGroup.position
+             let rot = selected.cubeGroup.rotation
+             let cubeGrow = selected.parent.position
              this.setPosition([pos.x, pos.y, pos.z], true, true)
              this.setRotation([rot.x, rot.y, rot.z].map(a => a * 180 / Math.PI), true, true)
-             this.setCubeGrow(cubeGrow, true, true)
+             this.setCubeGrow([-cubeGrow.x, -cubeGrow.y, -cubeGrow.z], true, true)
         }
     }
     
