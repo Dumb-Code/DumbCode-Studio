@@ -129,8 +129,10 @@ export class Gumball {
         this.transformControls.addEventListener('mouseDown', () => {
             this.startingCache.clear()
             this.raytracer.selectedSet.forEach(cube => {
-                studio.lockedCubes.addToLocker(cube.tabulaCube, 1)
-                cube.tabulaCube.children.forEach(child => studio.lockedCubes.addToLocker(child))
+                if(this.toolTransformType.value === translateKey && this.selectedTranslate.value === 'rotation_point') {
+                    studio.lockedCubes.addToLocker(cube.tabulaCube, 1)
+                    cube.tabulaCube.children.forEach(child => studio.lockedCubes.addToLocker(child, 2))
+                }
 
                 let elem = this.getObject(cube.tabulaCube)
                 let parent = cube.tabulaCube.parent
@@ -319,10 +321,6 @@ export class Gumball {
 
     getObject(cube) {
         return this.transformSelectParents === true ? cube.cubeGroup : cube.cubeMesh
-    }
-
-    isTranslateRotationPoint() {
-        return this.toolTransformType.value === translateKey && this.selectedTranslate.value === 'rotation_point'
     }
 
     selectChange() {
