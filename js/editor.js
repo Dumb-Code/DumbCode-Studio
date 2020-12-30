@@ -1,4 +1,4 @@
-import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, Quaternion, Group } from "./three.js";
+import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, Quaternion, Group, AmbientLight } from "./three.js";
 import { DinosaurDisplay, readFile } from "./displays.js";
 import { OrbitControls } from './orbit_controls.js'
 import { TransformControls } from './transform_controls.js'
@@ -183,19 +183,21 @@ export function createScene() {
     scene.background = new Color(0x363636);
 
     //Set up lighting
-    scene.add(new HemisphereLight());
+    scene.add( new AmbientLight( 0xffffff ))
 
-    let dirLight = new DirectionalLight()
-    dirLight.position.set(-1.25, 1.5, 0)
-    dirLight.target.position.set(0, 0, 0)
-    scene.add(dirLight);
+    let createLight = (x, y, z, i) => {
+        let light = new DirectionalLight()
+        light.position.set(x, y, z)
+        light.intensity = i
+        scene.add(light)
+    } 
 
-    dirLight = new DirectionalLight()
-    dirLight.intensity = 0.75;
-    dirLight.position.set(1.25, -1.5, 0)
-    dirLight.target.position.set(0, 0, 0)
-    scene.add(dirLight);
-
+    createLight(1, 0, 0, 0.2)
+    createLight(-1, 0, 0, 0.2)
+    createLight(0, 1, 0, 0.8)
+    createLight(0, 0, 1, 0.6)
+    createLight(0, 0, -1, 0.6)
+    
     return scene
 }
 
