@@ -84,8 +84,6 @@ export class RemoteProject {
             datas.forEach(data =>
                 data._collctedImageDatas = data.imgDatas.map(d => this.texturePart.createTextureElement(d.file, d.img))
             )
-            //Needed so the texture idxs are correct
-            this.pth.textureManager.refresh()
             let groupManager = this.pth.textureManager.groupManager
             datas.forEach(data => {
                 if(data.name !== "") {
