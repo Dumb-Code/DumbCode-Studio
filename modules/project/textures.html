@@ -23,7 +23,25 @@
         </span>
     </div>
 </div>
-<div class="texture-list pr-4 mt-0 pt-5 ml-4" style="overflow-y: scroll; overflow-x: hidden; height: 37vh;">
+<div class="dropdown">
+    <div class="dropdown-trigger">
+        <button class="button is-dark" aria-haspopup="true" aria-controls="project-dropdown-texture-layer" style="height: 20px;">
+            <span class="texture-group-label">Group: </span>
+            <span class="icon is-small">
+                <i class="fas fa-angle-down" aria-hidden="true"></i>
+            </span>
+        </button>
+    </div>
+    <div class="dropdown-menu" id="project-dropdown-texture-layer" role="menu">
+        <div class="dropdown-content has-background-black-bis">
+            <!-- <div class="dropdown-item has-text-weight-bold has-text-grey-light"><p>Texture Layer</p></div>
+            <hr class="dropdown-divider"> -->
+            <div class="texture-group-layers">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="texture-list pr-4 mt-0 pt-5 ml-4" style="overflow-y: scroll; overflow-x: hidden; height: calc(100% - 56px);">
     <div class="texture-list-entry columns is-mobile empty-column">
         <div class="column is-narrow texture-preview">
         </div>

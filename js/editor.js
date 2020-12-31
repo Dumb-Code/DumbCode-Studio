@@ -164,7 +164,7 @@ window.onModulesFinished = async() => {
 
     //Fix bulma dropdown boxes
     $('.dropdown:not(.is-hoverable) .dropdown-menu').get().forEach(t => $(t).click(e => {
-        if(t.parentNode.classList.contains('is-active')) {
+        if(e.target.nodeName === "INPUT" && t.parentNode.classList.contains('is-active')) {
             e.stopPropagation()
         }
     }))

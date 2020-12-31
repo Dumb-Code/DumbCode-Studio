@@ -109,7 +109,6 @@ export class ProjectTabHandler {
         this.allTabs.push(project)
         this.dispatchEvent( { type: "newproject", project } )
         this.selectIndex(project.id)
-        project.onCreated(this)
         return project
     }
     

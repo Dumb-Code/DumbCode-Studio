@@ -6,7 +6,7 @@ export class TextureProjectPart {
     constructor(dom, pth) {
         this.pth = pth
         this.emptyTextureList = dom.find('.texture-list-entry.empty-column')
-        this.dragableElementList = new DraggableElementList(false, (a, b, c) => pth.textureManager.textureDragged(a, b, c))
+        this.dragableElementList = new DraggableElementList(false, (a, b, c) => pth.textureManager.groupManager.textureDragged(false, a, b, c))
         dom.find('#texture-file-input').on('input', e => this.uploadTextureFile(getAndDeleteFiles(e)))
         dom.find('.new-texture-button').click(() => this.createEmptyTexture())
         dom.find('.edit-texture-groups').click(() => pth.textureManager.groupManager.openGroupModal())
@@ -73,10 +73,12 @@ export class TextureProjectPart {
     refreshTextureLayers() {
         this.emptyTextureList.siblings().not('.texture-layer-topbar').detach()
         if(this.pth.anySelected()) {
-            this.pth.textureManager.textures.forEach(t => {
+            let groupManager = this.pth.textureManager.groupManager
+            groupManager.groups[groupManager.groupSelection.value].layerIDs.forEach(layer => {
+                let t = this.pth.textureManager.textures[layer]
                 let e = t._projectElement
                 if(e === undefined) {
-                    console.error("Layer created without project element " + JSON.stringify(t))
+                    console.error("Layer created without project element " + t.name)
                     return
                 }
                 e.insertBefore(this.emptyTextureList)

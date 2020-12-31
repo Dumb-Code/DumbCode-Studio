@@ -21,19 +21,14 @@ export class TextureGroupManager {
         this.draggedTexture = null
         this.textureLayerOptions = $('.texture-group-layers')
 
-        this.editGroupSelection = new LinkedSelectableList($()).onchange(() => this.refreshAllLayers())
-        this.groupSelection = new LinkedSelectableList($()).onchange(e => manager.refresh())
-
-        this.editGroupDrag = new DraggableElementList(false, (drop, movedData, droppedOnData) => {
-            let data = this.groups[this.editGroupSelection.value]
-            let droppedIndex = data.layerIDs.indexOf(droppedOnData) + (drop == 'bottom' ? 1 : 0)
-            if(data.layerIDs.includes(movedData)) {
-                data.layerIDs.splice(droppedIndex, 0, ...data.layerIDs.splice(data.layerIDs.indexOf(movedData), 1))
-            } else {
-                data.layerIDs.splice(droppedIndex, 0, movedData)
-            }
-            this.refreshAllLayers()
+        this.editGroupSelection = new LinkedSelectableList($()).onchange(() => this.refreshAllLayers(false))
+        this.groupSelection = new LinkedSelectableList($()).onchange(e => {
+            textureLayerLabel.text("Group: " + this.groups[e.value].name)
+            manager.refresh(this.groupSelection._refreshManager)
         })
+
+        let textureLayerLabel = $('.texture-group-label')
+        this.editGroupDrag = new DraggableElementList(false, (a, b, c) => this.textureDragged(true, a, b, c))
         
         this.editGroupDrag.addDropZone(activeLayerContainer, id => {
             let data = this.groups[this.editGroupSelection.value]
@@ -53,9 +48,22 @@ export class TextureGroupManager {
         }, () => this.editGroupSelection.value != 0)
     }
 
+    textureDragged(useEditGroup, drop, movedData, droppedOnData) {
+        let data = this.groups[(useEditGroup ? this.editGroupSelection : this.groupSelection).value]
+        let droppedIndex = data.layerIDs.indexOf(droppedOnData) + (drop == 'bottom' ? 1 : 0)
+        if(data.layerIDs.includes(movedData)) {
+            data.layerIDs.splice(droppedIndex, 0, ...data.layerIDs.splice(data.layerIDs.indexOf(movedData), 1))
+        } else {
+            data.layerIDs.splice(droppedIndex, 0, movedData)
+        }
+        this.refreshAllLayers()
+    }
+
     initiateDefaultEntry() {
-        this.createNewGroup("Default")
-        this.groups[0].isDefaultGroup = true
+        if(this.groups.length === 0) {
+            this.createNewGroup("Default")
+            this.groups[0].isDefaultGroup = true
+        }
     }
 
     updateIds(idMap) {
@@ -104,7 +112,9 @@ export class TextureGroupManager {
         this.refreshTextureGroups()
         this.updateTextureLayerOption()
         if(this.groups.length === 1) {
+            this.groupSelection._refreshManager = false
             this.groupSelection.value = '0'
+            this.groupSelection._refreshManager = undefined
         }
         this.editGroupSelection.setValue(this.groups.length-1)
         return data
@@ -122,7 +132,7 @@ export class TextureGroupManager {
         this.groups.forEach(g => entryGroupContainer.append(g.dom))
     }
 
-    refreshAllLayers() {
+    refreshAllLayers(refreshCanvas = true) {
         activeLayerContainer.children().detach()
         unactiveLayerContainer.children().detach()
         let selctedID = this.editGroupSelection.value
@@ -146,7 +156,9 @@ export class TextureGroupManager {
             t._checkbox.value = false
             t._canDragOn(false)
         })
-        this.manager.refresh()
+        if(refreshCanvas === true) {
+            this.manager.refresh()
+        }
     }
 
     createTextureDom(t) {

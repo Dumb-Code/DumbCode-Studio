@@ -82,15 +82,15 @@ export class RemoteProject {
         }))
         .then(datas => {
             datas.forEach(data =>
-                data._collctedImageDatas = data.imgDatas.map(d => this.texturePart.createTextureElement(d.file, d.img))
+                data._collectedImageDatas = data.imgDatas.map(d => this.texturePart.createTextureElement(d.file, d.img))
             )
             let groupManager = this.pth.textureManager.groupManager
             datas.forEach(data => {
                 if(data.name !== "") {
                     let groupData = groupManager.createNewGroup(data.name)
-                    groupData.layerIDs = data._collctedImageDatas.map(d => d.idx)
+                    groupData.layerIDs = data._collectedImageDatas.map(d => d.idx)
                 }
-                data._collctedImageDatas = undefined
+                data._collectedImageDatas = undefined
             })
             groupManager.refreshAllLayers()
         })
