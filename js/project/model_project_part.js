@@ -71,11 +71,11 @@ export class ModelProjectPart {
                             img.src = URL.createObjectURL(texture)
                             
                             return new Promise(resolve => img.onload = () => {
-                                img.onload = null
-                                this.texturePart.createTextureElement(layerNames[index], img)
-                                resolve()
+                                img.onload = null   
+                                resolve( { name: layerNames[index], img } )
                             })
                         })))
+                        .then(datas => datas.forEach(data => this.texturePart.createTextureElement(data.name, data.img)))
                         .then(() => this.pth.textureManager.refresh())
                     })
                 }
