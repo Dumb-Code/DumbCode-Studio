@@ -621,17 +621,17 @@ export class DraggableElementList {
          
             return e => canDragOn = e
         }
-        this.addDropZone = (element, callback) => {
+        this.addDropZone = (element, callback, predicate = () => true) => {
             element
             .on('dragover', e => {
-                if(draggedData !== null) {
+                if(draggedData !== null && predicate(draggedData)) {
                     previousElement?.removeAttribute("drag-state")
                     e.preventDefault()
                     e.stopPropagation()
                 }
             })
             .on('drop', e => {
-                if(draggedData !== null) {
+                if(draggedData !== null && predicate(draggedData)) {
                     callback(draggedData)
                     e.preventDefault()
                     e.stopPropagation()

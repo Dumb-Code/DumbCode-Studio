@@ -168,19 +168,10 @@ export class TextureManager {
             t.dom.detach().insertBefore(this.textureEmptyLayer)
         })
 
-        let textures = this.textures.filter(t => !t.isHidden)
-
         let group = this.groupManager.groups[this.groupManager.groupSelection.value]
-        if(group === undefined && this.groupManager.groups.length !== 0) {
-            this.groupManager.groupSelection.value = '0'
-            group = this.groupManager.groups[0]   
-        }
+        let textures = group.layerIDs.map(id => this.textures[id]).filter(t => !t.isHidden)
 
-        //Should never be false
-        if(group !== undefined) {
-            textures = group.layerIDs.map(id => this.textures[id]).filter(t => !t.isHidden)
-        }
-
+        
         let width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
         let height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
 

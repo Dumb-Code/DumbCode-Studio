@@ -22,44 +22,35 @@ export class TextureGroupManager {
         this.textureLayerOptions = $('.texture-group-layers')
 
         this.editGroupSelection = new LinkedSelectableList($()).onchange(() => this.refreshAllLayers())
-        this.groupSelection = new LinkedSelectableList($(), true).onchange(e => manager.refresh())
+        this.groupSelection = new LinkedSelectableList($()).onchange(e => manager.refresh())
 
         this.editGroupDrag = new DraggableElementList(false, (drop, movedData, droppedOnData) => {
-            let selctedID = this.editGroupSelection.value
-            if(selctedID !== undefined) {
-                let data = this.groups[selctedID]
-                let droppedIndex = data.layerIDs.indexOf(droppedOnData) + (drop == 'bottom' ? 1 : 0)
-                if(data.layerIDs.includes(movedData)) {
-                    data.layerIDs.splice(droppedIndex, 0, ...data.layerIDs.splice(data.layerIDs.indexOf(movedData), 1))
-                } else {
-                    data.layerIDs.splice(droppedIndex, 0, movedData)
-                }
-                this.refreshAllLayers()
+            let data = this.groups[selctedID]
+            let droppedIndex = data.layerIDs.indexOf(droppedOnData) + (drop == 'bottom' ? 1 : 0)
+            if(data.layerIDs.includes(movedData)) {
+                data.layerIDs.splice(droppedIndex, 0, ...data.layerIDs.splice(data.layerIDs.indexOf(movedData), 1))
+            } else {
+                data.layerIDs.splice(droppedIndex, 0, movedData)
             }
+            this.refreshAllLayers()
         })
         
         this.editGroupDrag.addDropZone(activeLayerContainer, id => {
-            let selctedID = this.editGroupSelection.value
-            if(selctedID !== undefined) {
-                let data = this.groups[selctedID]
-                if(data.layerIDs.includes(id)) {
-                    data.layerIDs.push(...data.layerIDs.splice(data.layerIDs.indexOf(id), 1))
-                } else {
-                    data.layerIDs.push(id)
-                }
-                this.refreshAllLayers()
+            let data = this.groups[this.editGroupSelection.value]
+            if(data.layerIDs.includes(id)) {
+                data.layerIDs.push(...data.layerIDs.splice(data.layerIDs.indexOf(id), 1))
+            } else {
+                data.layerIDs.push(id)
             }
-        })
+            this.refreshAllLayers()
+        }, () => this.editGroupSelection.value != 0)
         this.editGroupDrag.addDropZone(unactiveLayerContainer, id => {
-            let selctedID = this.editGroupSelection.value
-            if(selctedID !== undefined) {
-                let data = this.groups[selctedID]
-                if(data.layerIDs.includes(id)) {
-                    data.layerIDs.splice(data.layerIDs.indexOf(id), 1)
-                }
-                this.refreshAllLayers()
+            let data = this.groups[this.editGroupSelection.value]
+            if(data.layerIDs.includes(id)) {
+                data.layerIDs.splice(data.layerIDs.indexOf(id), 1)
             }
-        })
+            this.refreshAllLayers()
+        }, () => this.editGroupSelection.value != 0)
     }
 
     initiateDefaultEntry() {
@@ -112,6 +103,9 @@ export class TextureGroupManager {
 
         this.refreshTextureGroups()
         this.updateTextureLayerOption()
+        if(this.groups.length === 1) {
+            this.groupSelection.value = '0'
+        }
         this.editGroupSelection.setValue(this.groups.length-1)
     }
 
@@ -119,7 +113,7 @@ export class TextureGroupManager {
         activeGroupManager = this
         openModal(modal)
         this.refreshTextureGroups()
-        this.editGroupSelection.value = undefined
+        this.editGroupSelection.value = '0'
     }
 
     refreshTextureGroups() {
@@ -138,7 +132,7 @@ export class TextureGroupManager {
             t._nameDom.text(t.name)
         })
 
-        let textureIDs = selctedID === undefined ? this.manager.textures.map(t => t.idx) : this.groups[selctedID].layerIDs
+        let textureIDs = selctedID == 0 ? this.manager.textures.map(t => t.idx) : this.groups[selctedID].layerIDs
 
         textureIDs.forEach(tID => {
             let t = this.manager.textures[tID]
@@ -160,7 +154,7 @@ export class TextureGroupManager {
         t._nameDom = t._groupDom.find('.entry-texture-name')
         t._checkbox = new LinkedElement(t._groupDom.find('.entry-is-selectable'), false, false, true).onchange(e => {
             let selId = this.editGroupSelection.value
-            if(selId === undefined) {
+            if(selId == 0) {
                 if(!e.value) {
                     t._checkbox.setInternalValue(true)
                 }
