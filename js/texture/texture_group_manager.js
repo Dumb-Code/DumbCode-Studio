@@ -25,7 +25,7 @@ export class TextureGroupManager {
         this.groupSelection = new LinkedSelectableList($()).onchange(e => manager.refresh())
 
         this.editGroupDrag = new DraggableElementList(false, (drop, movedData, droppedOnData) => {
-            let data = this.groups[selctedID]
+            let data = this.groups[this.editGroupSelection.value]
             let droppedIndex = data.layerIDs.indexOf(droppedOnData) + (drop == 'bottom' ? 1 : 0)
             if(data.layerIDs.includes(movedData)) {
                 data.layerIDs.splice(droppedIndex, 0, ...data.layerIDs.splice(data.layerIDs.indexOf(movedData), 1))
