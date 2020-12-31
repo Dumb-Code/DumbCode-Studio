@@ -150,7 +150,11 @@ export class TextureManager {
         this.textures.unshift(data)
 
         data.idx = this.textures.length
+        
         this.groupManager.groups[0].layerIDs.unshift(data.idx)
+        if(this.groupManager.groupSelection.value != 0) {
+            this.groupManager.groups[this.groupManager.groupSelection.value].layerIDs.unshift(data.idx)
+        }
         this.updateIDs()
 
         return data
@@ -176,7 +180,7 @@ export class TextureManager {
 
         let group = this.groupManager.groups[this.groupManager.groupSelection.value]
         let textures = group.layerIDs.map(id => this.textures[id])
-        
+
         textures.forEach(t => t.dom.detach().insertBefore(this.textureEmptyLayer))
         textures = textures.filter(t => !t.isHidden)
 
