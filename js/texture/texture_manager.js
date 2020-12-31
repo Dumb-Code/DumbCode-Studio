@@ -6,6 +6,7 @@ import { TextureGroupManager } from "./texture_group_manager.js"
 export class TextureManager {
 
     constructor(model, pth) {
+        this.model = model
         this.pth = pth
         this.filesPage = pth._files
         this.textures = []
@@ -74,8 +75,8 @@ export class TextureManager {
     }
     
     addImage(name, img) {
-        let width = this.pth.model.texWidth
-        let height = this.pth.model.texHeight
+        let width = this.model.texWidth
+        let height = this.model.texHeight
 
         let empty = false
 
@@ -157,7 +158,6 @@ export class TextureManager {
         this.textureEmptyLayer.siblings().not('.layer-persistant').detach()
     }
 
-
     refresh() {
         this.removeAll()
         this.groupManager.updateIds(this.textures.map(t => t.idx))
@@ -176,6 +176,7 @@ export class TextureManager {
             group = this.groupManager.groups[0]   
         }
 
+        //Should never be false
         if(group !== undefined) {
             textures = group.layerIDs.map(id => this.textures[id]).filter(t => !t.isHidden)
         }
@@ -184,8 +185,8 @@ export class TextureManager {
         let height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
 
         if(this.textures.length === 0) {
-            width = this.pth.model.texWidth
-            height = this.pth.model.texHeight
+            width = this.model.texWidth
+            height = this.model.texHeight
         }
 
         this.canvas.width = width

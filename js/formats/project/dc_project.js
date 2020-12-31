@@ -39,6 +39,10 @@ export class DcProject {//._files, this._modeling, this._texture, this._animatio
         
     }
 
+    onCreated(pth) {
+        this.textureManager.groupManager.initiateDefaultEntry()
+    }
+
     onActive(pth) {
         pth.display.scene.add(this.model.modelCache)
         pth.display.scene.add(this.group)

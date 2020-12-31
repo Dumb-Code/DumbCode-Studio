@@ -62,6 +62,11 @@ export class TextureGroupManager {
         })
     }
 
+    initiateDefaultEntry() {
+        this.createNewGroup("Default")
+        this.groups[0].isDefaultGroup = true
+    }
+
     updateIds(idMap) {
         this.groups.forEach(group => 
             group.layerIDs = group.layerIDs.map(v => idMap.indexOf(v)).filter(id => id !== -1)
@@ -73,7 +78,7 @@ export class TextureGroupManager {
         this.groups.forEach(g => this.textureLayerOptions.each((i, e) => e.appendChild(g.optionsDom.get(i))))
     }
 
-    createNewGroup() {
+    createNewGroup(name) {
         let dom = groupTemplate.clone()
         dom.removeClass('texture-group-template')
         dom.attr('select-list-entry', this.groups.length)
@@ -90,7 +95,7 @@ export class TextureGroupManager {
         this.editGroupSelection.addElement(dom)
         let data
         this.groups.push(data = {
-            name: "New Texture Group",
+            name: name || "New Texture Group",
             layerIDs: [],
             elementDomCache: [],
 
