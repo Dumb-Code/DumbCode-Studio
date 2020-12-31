@@ -107,6 +107,7 @@ export class TextureGroupManager {
             this.groupSelection.value = '0'
         }
         this.editGroupSelection.setValue(this.groups.length-1)
+        return data
     }
 
     openGroupModal() {

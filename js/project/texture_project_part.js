@@ -51,6 +51,7 @@ export class TextureProjectPart {
             cloned.remove()
             e.stopPropagation()
         })
+        return data 
     }
 
     async uploadTextureFile(files) {

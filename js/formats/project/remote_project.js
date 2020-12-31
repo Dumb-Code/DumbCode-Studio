@@ -19,27 +19,27 @@ export class RemoteProject {
         return this.remoteFile
     }
 
-    setupFromNew(model, animations, textures, syncCallback) {
+    setupFromNew(model, animation, baseTextureLocation, syncCallback) {
         this.newCreated = true
         this._syncCallback = syncCallback
-        this.remoteFile = this._createRemoteFile(model, textures, animations)
+        this.remoteFile = this._createRemoteFile(model, baseTextureLocation, animation)
     }
 
-    initiateEmptyData(animationData, textureData) {
+    initiateEmptyData() {
         let model = new DCMModel()
         model.fileName = this.name  
         this.project = this.pth.createNewProject(model)
         this.project._element.find('.github-sync').css('display','').children().click(() => {
             this._syncCallback()
             this._syncCallback = null
-            this.syncProject(animationData, textureData)
+            this.syncProject()
         })
     }
 
 
-    async beginRunningRequests(animationData, textureData, updateCallback) {
+    async beginRunningRequests(updateCallback) {
         if(this.newCreated === true) {
-            this.initiateEmptyData(animationData, textureData)
+            this.initiateEmptyData()
             return
         }
         let modelLocation = this.remoteFile.model 
@@ -47,48 +47,55 @@ export class RemoteProject {
         let model = await this.request(modelLocation).then(r => DCMModel.loadModel(this.toArrayBuffer(r), name))
         updateCallback()
         this.project = this.pth.createNewProject(model)
-        this.project._element.find('.github-sync').css('display','').children().click(() => this.syncProject(animationData, textureData))
+        this.project._element.find('.github-sync').css('display','').children().click(() => this.syncProject())
 
-        if(animationData) {
-            this.request(animationData.location)
-            .then(files => {
-                updateCallback()
-                let amount = files.length
-                let count = 0
-                files.filter(file => file.type === "file" && file.name.endsWith('.dca')).forEach(file => 
-                    this.request(file.path)
-                    .then(r => {
-                        updateCallback(++count / amount)
-                        this.animationPart.createAndInitiateNewAnimationTab(file.name.substring(0, file.name.lastIndexOf('.')), this.toArrayBuffer(r))
-                    })
-                )
-            })
-            .catch(e => console.warn(e))
-        } else {
-            updateCallback(2)
-        }
-
-        if(textureData) {
-            let amount = textureData.suffixLocations.length
+        this.request(this.remoteFile.animationFolder)
+        .then(files => {
+            updateCallback()
+            let amount = files.length
             let count = 0
-            Promise.all(textureData.suffixLocations.map(suffix => 
-                this.request(`${textureData.location}/${suffix}.png`).then(async(data) => {
+            files.filter(file => file.type === "file" && file.name.endsWith('.dca')).forEach(file => 
+                this.request(file.path)
+                .then(r => {
+                    updateCallback(++count / amount)
+                    this.animationPart.createAndInitiateNewAnimationTab(file.name.substring(0, file.name.lastIndexOf('.')), this.toArrayBuffer(r))
+                })
+            )
+        })
+        .catch(e => console.warn(e))
+
+        let amount = this.remoteFile.textureGroups.flatMap(g => g.files).length
+        let count = 0
+        Promise.all(this.remoteFile.textureGroups.map(async(g) => {
+            let baseLocation = `${this.remoteFile.baseTextureFolder}/${g.name === '' ? '' : (g.name+'/')}`
+            let filesData = await Promise.all(g.files.map(file => 
+                this.request(baseLocation + file + ".png").then(async(data) => {
                     let img = document.createElement("img")
                     img.src = 'data:image/png;base64,' + data.content.replaceAll('\n', '')
                     await new Promise(resolve => img.onload = resolve)
                     img.onload = null
                     updateCallback(++count / amount)
-                    return { suffix, img }
+                    return { file, img }
                 }).catch(e => console.warn(e))
             ))
-            .then(datas => {
-                datas.reverse().forEach(p => this.texturePart.createTextureElement(p.suffix, p.img))
-                this.pth.textureManager.refresh()
-                closeModal()
+            return { name: g.name, imgDatas: filesData }
+        }))
+        .then(datas => {
+            datas.forEach(data =>
+                data._collctedImageDatas = data.imgDatas.map(d => this.texturePart.createTextureElement(d.file, d.img))
+            )
+            //Needed so the texture idxs are correct
+            this.pth.textureManager.refresh()
+            let groupManager = this.pth.textureManager.groupManager
+            datas.forEach(data => {
+                if(data.name !== "") {
+                    let groupData = groupManager.createNewGroup(data.name)
+                    groupData.layerIDs = data._collctedImageDatas.map(d => d.idx)
+                }
+                data._collctedImageDatas = undefined
             })
-        } else {
-            updateCallback()
-        }
+            groupManager.refreshAllLayers()
+        })
 
         if(this.remoteFile.referenceImages.length !== 0) {
             let amount = this.remoteFile.referenceImages.length
@@ -129,11 +136,12 @@ export class RemoteProject {
         
         let version = null
         let model = null
-        let textureFolders = []
-        let animationFolders = []
+        let baseTextureFolder = null
+        let animationFolder = null
+        let textureGroups = []
         let referenceImages = []
-
-        let readingTexture = null
+        
+        let readingGroup = null
         let readingRefImage = false
 
         lines.forEach(line => {
@@ -144,24 +152,28 @@ export class RemoteProject {
                 version = line.substring(8)
             } else if(line.startsWith('model ')) {
                 model = line.substring(6)
-            } else if(line.startsWith('texture')) {
-                readingTexture = this.parseNamedLocation(line, 7)
-                readingTexture.suffixLocations = []
-            } else if(line.startsWith('animation')) {
-                animationFolders.push(this.parseNamedLocation(line, 9))
+            } else if(line.startsWith('texure_group')) {
+                readingGroup = {
+                    name: line.substring(12).trim(),
+                    files: []
+                }
+            } else if(line.startsWith('texture ')) {
+                baseTextureFolder = line.substring(8)
+            } else if(line.startsWith('animation ')) {
+                animationFolder = line.substring(10)
             } else if(line === "reference_image_files") {
                 readingRefImage = true
             } else if(line === "end") {
                 if(readingRefImage === true) {
                     readingRefImage = false
-                } else if(readingTexture !== null) {
-                    textureFolders.push(readingTexture)
-                    readingTexture = null
+                } else if(readingGroup !== null) {
+                    textureGroups.push(readingGroup)
+                    readingGroup = null
                 } else {
                     console.warn(`Recieved end command when no texture was started for '${this.name}'`)
                 }
-            } else if(readingTexture !== null) {
-                readingTexture.suffixLocations.push(line)
+            } else if(readingGroup !== null) {
+                readingGroup.files.push(line)
             } else if(readingRefImage === true) {
                 let split = line.split(" ") //px py pz rx ry rz sx sy sz o sel <name>
                 if(split.length < 12) {
@@ -194,23 +206,14 @@ export class RemoteProject {
             return
         }
 
-        return this._createRemoteFile(model, textureFolders, animationFolders, referenceImages)
+        return this._createRemoteFile(model, baseTextureFolder, animationFolder, textureGroups, referenceImages)
     }
 
-    _createRemoteFile(model, textureFolders, animationFolders, referenceImages = []) {
-        this.ensureValidData(textureFolders)
-        return { 
-            model, textureFolders, animationFolders, referenceImages,
+    _createRemoteFile(model, baseTextureFolder, animationFolder, textureGroups = [], referenceImages = []) {
+        return {
+            model, baseTextureFolder, textureGroups, animationFolder, referenceImages,
             additionalData: (...names) => `studio_remotes/data/${this.name}/${names.join('/')}`
         }
-    }
-
-    ensureValidData(textureFolders = this.remoteFile.textureFolders) {
-        textureFolders.forEach(tf => {
-            if(!tf.suffixLocations) {
-                tf.suffixLocations = []
-            }
-        })
     }
 
     parseNamedLocation(line, dataLength) {
@@ -238,7 +241,7 @@ export class RemoteProject {
     }
 
 
-    syncProject(animationData, textureData) {
+    syncProject() {
         let project = this.project
         openModal("project/upload").then(d => this.logArea = d.find('.log-area'))
         lockModalUserClose()
@@ -248,21 +251,29 @@ export class RemoteProject {
             data.model = data.model.substring(0, data.model.lastIndexOf('.')) + '.dcm'
         }
         let commiter = this.gitinter.commiter()
-        commiter.addFile(`studio_remotes/${this.name}.remote`, this.writeRemoteFile(textureData))
+        commiter.addFile(`studio_remotes/${this.name}.remote`, this.writeRemoteFile())
         commiter.addFile(data.model, DCMModel.writeModel(project.model).getAsBase64(), true)
         progress.updateProgress()
-        if(animationData) {
-            commiter.removeRedundentFiles(animationData.location, f => f.endsWith('.dca'))
-            project.animationTabHandler.allTabs.forEach(tab =>
-                commiter.addFile(`${animationData.location}/${tab.name}.dca`, DCALoader.exportAnimation(tab.handler).getAsBase64(), true)
-            )
-        }
-        if(textureData) {
-            commiter.removeRedundentFiles(textureData.location, f => f.endsWith('.png'))
-            project.textureManager.textures.forEach(data => {
-                commiter.addFile(`${textureData.location}/${data.name}.png`, data.img.src.substring(data.img.src.indexOf(',')+1), true)
+        
+        commiter.removeRedundentFiles(data.animationFolder, f => f.endsWith('.dca'))
+        project.animationTabHandler.allTabs.forEach(tab =>
+            commiter.addFile(`${data.animationFolder}/${tab.name}.dca`, DCALoader.exportAnimation(tab.handler).getAsBase64(), true)
+        )
+
+        let groups = project.textureManager.groupManager.groups
+        commiter.removeRedundentFiles(data.baseTextureFolder, f => f.endsWith('.png'))
+        groups.forEach(g => {
+            if(groups.length > 1 && g.isDefaultGroup) {
+                return
+            }
+            let location = groups.length === 1 ? data.baseTextureFolder : `${data.baseTextureFolder}/${g.name}`
+            commiter.removeRedundentFiles(location, f => f.endsWith('.png'))
+            g.layerIDs.forEach(id => {
+                let data = project.textureManager.textures[id]
+                commiter.addFile(`${location}/${data.name}.png`, data.img.src.substring(data.img.src.indexOf(',')+1), true)
+
             })
-        }
+        })
         if(project.referenceImages.length !== 0) {
             let loc = data.additionalData('reference_image')
             commiter.removeRedundentFiles(loc, f => f.endsWith('.png'))
@@ -278,30 +289,33 @@ export class RemoteProject {
         ).then(closeModal)
     }
 
-    writeRemoteFile(textureData) {
+    writeRemoteFile() {
         let data = this.remoteFile
         let project = this.project
 
         let lines = [`version 1.0`, `model ${data.model}`]
 
-        console.log(data.textureFolders)
-
-        data.textureFolders.forEach(folder => {
-            lines.push('')
-            let prefix = folder.name ? `texture:${folder.name}` : `texture`
-            lines.push(`${prefix} ${folder.location}`)
-            if(folder === textureData) {
-                project.textureManager.textures.forEach(texture => lines.push(texture.name))
-            } else {
-                folder.suffixLocations.forEach(texture => lines.push(texture))
+        lines.push('')
+        lines.push(`texture ${data.baseTextureFolder}`)
+    
+        let textureManager = project.textureManager
+        let groups = textureManager.groupManager.groups
+        groups.forEach(g => {
+            if(groups.length > 1 && g.isDefaultGroup) {
+                return
             }
+            if(g.isDefaultGroup) {
+                lines.push('texure_group')
+            } else {
+                lines.push(`texure_group ${g.name}`)
+            }
+            lines.push(...g.layerIDs.map(i => textureManager.textures[i].name))
             lines.push('end')
         })
-        data.animationFolders.forEach(folder => {
-            lines.push('')
-            let prefix = folder.name ? `animation:${folder.name}` : `animation`
-            lines.push(`${prefix} ${folder.location}`)
-        })
+
+        lines.push('')
+        lines.push(`animation ${data.animationFolder}`)
+
         
         if((project === null ? this.remoteFile.referenceImages : project.referenceImages).length !== 0) {
             lines.push('')
@@ -332,9 +346,6 @@ export class RemoteProject {
             
             lines.push("end")
         }
-
-        confirm(lines)
-
         return lines.join("\n")
     }
 }

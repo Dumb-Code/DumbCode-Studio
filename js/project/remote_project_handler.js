@@ -58,11 +58,12 @@ export class RemoteProjectHandler {
             dom.find('.add-entry').click(e => {
                 this.editEntryDoms.name.val('').prop('disabled', false)
                 this.editEntryDoms.model.val('')
-                this.editEntryDoms.animation.reset()
-                this.editEntryDoms.texture.reset()
+                this.editEntryDoms.animation.val('')
+                this.editEntryDoms.texture.val('')
                 this.editEntryDoms.commitMsg.val('').prop('required', false)
                 this.editEntryDoms.commitContainer.css('display', 'none')
                 this.editEntryDoms.log.val('')
+                this.editingProject = null
                 openModal(newEntryLocation)
                 e.stopPropagation()
             })
@@ -74,8 +75,8 @@ export class RemoteProjectHandler {
             let dom = $(html)
             this.editEntryDoms.name = dom.find('.project-name')
             this.editEntryDoms.model = dom.find('.model-path')
-            this.editEntryDoms.texture = this._createNamedLocationField(dom.find('.texture-entry-field'))
-            this.editEntryDoms.animation = this._createNamedLocationField(dom.find('.animation-entry-field'))
+            this.editEntryDoms.texture = dom.find('.texture-path')
+            this.editEntryDoms.animation = dom.find('.animation-path')
             this.editEntryDoms.commitContainer = dom.find('.commit-container')
             this.editEntryDoms.commitMsg = dom.find('.commit-message')
             this.editEntryDoms.log = dom.find('.log-area')
@@ -83,24 +84,16 @@ export class RemoteProjectHandler {
                 let active = this.currentOpenRepo
                 if(this.editingProject !== null) {
                     this.editingProject.remoteFile.model = this.editEntryDoms.model.val()
-                    this.editingProject.remoteFile.animationFolders = this.editEntryDoms.animation.entries()
-                    let oldTextureData = this.editingProject.remoteFile.textureFolders
-                    this.editingProject.remoteFile.textureFolders = this.editEntryDoms.texture.entries()
-                    let newTextureData = this.editingProject.remoteFile.textureFolders
-                    oldTextureData.forEach((t, i) => {
-                        if(i < newTextureData.length) {
-                            newTextureData[i].suffixLocations = t.suffixLocations
-                        }
-                    })
-                    this.editingProject.ensureValidData()
+                    this.editingProject.remoteFile.animationFolder = this.editEntryDoms.animation.val()
+                    this.editingProject.remoteFile.baseTextureFolder = this.editEntryDoms.texture.val()
                     this.editingProject.syncRemoteFileOnly(this.editingProject, this.editEntryDoms.commitMsg.val(), this.editEntryDoms.log).then(() => this._openRepoEntries(active))
                     this.editingProject = null
                 } else {
                     let project = new RemoteProject(this.pth, this.mp, this.tp, this.ap, this.editEntryDoms.name.val(), this.createGithubInterface())
                     project.setupFromNew(
                         this.editEntryDoms.model.val(), 
-                        this.editEntryDoms.animation.entries(),
-                        this.editEntryDoms.texture.entries(), 
+                        this.editEntryDoms.animation.val(),
+                        this.editEntryDoms.texture.val(), 
                         () => active.newEntries.splice(active.newEntries.indexOf(project), 1)
                     )
                     active.newEntries.push(project)
@@ -109,57 +102,6 @@ export class RemoteProjectHandler {
                 return false
             })
         })
-    }
-
-    _createNamedLocationField(dom) {
-        let multipleEntries = $()
-        let baseEntry = dom.find('.base-entry')
-        let entries = []
-
-        let updateMultipleEntries = () => {
-            multipleEntries.css('display', entries.length > 1 ? '' : 'none')
-            multipleEntries.find('input').prop('required', entries.length > 1)
-        }
-
-        let newEntry = (location = '', name = '') => {
-            let entry = baseEntry.clone()
-            let localNeedsEntries = entry.find('.needs-multiple-entries')
-            multipleEntries = multipleEntries.add(localNeedsEntries)
-            entry.removeClass('base-entry persistant')
-            let data = { location, name }
-
-            entry.find('.entry-name').val(name).on('input', e => data.name = e.target.value)
-            entry.find('.entry-folder').val(location).prop('required', true).on('input', e => data.location = e.target.value)
-            entry.find('.remove-folder').click(() => {
-                entries.splice(entries.indexOf(data), 1)
-                entry.remove()
-                multipleEntries = multipleEntries.not(localNeedsEntries)
-                updateMultipleEntries()
-            })
-
-            entries.push(data)
-            updateMultipleEntries()
-
-            dom.append(entry)
-            return entry
-        }
-        dom.find('.add-entry').click(() => newEntry())
-        return {
-            reset: current => {
-                dom.children().not('.persistant').remove()
-                entries.length = 0
-                if(current === undefined || current.length === 0) {
-                    newEntry()
-                } else {
-                    if(current.length === 1) {
-                        newEntry(current[0].location)
-                    } else {
-                        current.forEach(c => newEntry(c.location, c.name))
-                    }
-                }
-            },
-            entries: () => entries
-        }
     }
 
     _editRepoData(data) {
@@ -215,60 +157,24 @@ export class RemoteProjectHandler {
         dom.find('.entry-name').text(remoteProject.name)
         this.entryContainer.append(dom)
 
-        
-        let texComboBox = dom.find('.texture-choice-select')
-        let texNeeded = data.textureFolders.length > 1
-
-        let animComboBox = dom.find('.animation-choice-select')
-        let animNeeded = data.animationFolders.length > 1
-
         dom.find('.remote-edit').click(e => {
             let data = remoteProject.remoteFile
             this.editingProject = remoteProject
             this.editEntryDoms.name.val(remoteProject.name).prop('disabled', true)
             this.editEntryDoms.model.val(data.model)
-            this.editEntryDoms.animation.reset(data.animationFolders)
-            this.editEntryDoms.texture.reset(data.textureFolders)
+            this.editEntryDoms.animation.val(data.animationFolder)
+            this.editEntryDoms.texture.val(data.baseTextureFolder)
             this.editEntryDoms.commitMsg.val('').prop('required', true)
             this.editEntryDoms.commitContainer.css('display', '')
             this.editEntryDoms.log.val('')
             openModal(newEntryLocation)
             e.stopPropagation()
         })
-
-        if(texNeeded) {
-            texComboBox.css('display', '').click(e => e.stopPropagation())
-            data.textureFolders.forEach(f => {
-                if(!f.name) {
-                    console.warn(`Attempted choice of texures, but was given an unnamed entry '${f.location}'`)
-                    return
-                }
-                let element = document.createElement("option")
-                element.innerHTML = f.name
-                texComboBox.append(element)
-            })
-        }
-        if(animNeeded) {
-            animComboBox.css('display', '').click(e => e.stopPropagation())
-            data.animationFolders.forEach(f => {
-                if(!f.name) {
-                    console.warn(`Attempted choice of animations, but was given an unnamed entry '${f.location}'`)
-                    return
-                }
-                let element = document.createElement("option")
-                element.innerHTML = f.name
-                animComboBox.append(element)
-            })
-        }
         
-
         dom.one('click', () => {
-            let tex = texNeeded ? data.textureFolders.find(f => f.name == texComboBox.val()) : data.textureFolders[0]
-            let anim = animNeeded ? data.animationFolders.find(f => f.name == animComboBox.val()) : data.animationFolders[0]
-
             dom.addClass('tooltip')
             let progress = new AsyncProgressCounter(1, 5, 'Downloading', (s, c) => dom.attr('data-tooltip', s + ' ' + Math.round(c * 100) + '%'))
-            remoteProject.beginRunningRequests(anim, tex, v => progress.updateProgress(0, v))
+            remoteProject.beginRunningRequests(v => progress.updateProgress(0, v))
         })
     }
 

@@ -122,7 +122,7 @@ export class TextureManager {
         dom.find('.texture-layer-preview').append(data.img2)
 
 
-        data.onCanvasChange = () => {
+        data.onCanvasChange = (full = true) => {
             data.img.src = data.canvas.toDataURL()
             data.img.width = data.canvas.width
             data.img.height = data.canvas.height
@@ -130,7 +130,10 @@ export class TextureManager {
             data.img2.src = data.canvas.toDataURL()
             data.img2.width = data.canvas.width
             data.img2.height = data.canvas.height
-            this.refresh()
+
+            if(full) {
+                this.refresh()
+            }
         }
         
         data.canvas = document.createElement("canvas")
@@ -146,9 +149,13 @@ export class TextureManager {
             ctx.drawImage(img, 0, 0, width, height)
         }
 
-        data.onCanvasChange()
+        data.onCanvasChange(false)
 
         this.textures.unshift(data)
+
+        data.idx = this.textures.length
+        this.groupManager.groups[0].layerIDs.unshift(data.idx)
+        this.updateIDs()
 
         return data
     }
@@ -158,11 +165,15 @@ export class TextureManager {
         this.textureEmptyLayer.siblings().not('.layer-persistant').detach()
     }
 
+    updateIDs() {
+        this.groupManager.updateIds(this.textures.map(t => t.idx))
+        this.textures.forEach((t, id) => t.idx = id)
+    }
+
     refresh() {
         this.removeAll()
-        this.groupManager.updateIds(this.textures.map(t => t.idx))
-        this.textures.forEach((t, id) => {
-            t.idx = id
+        this.updateIDs()
+        this.textures.forEach(t => {
             t.dom.attr('select-list-entry', t.idx)
             t.text.text(t.name)
             t.dom.detach().insertBefore(this.textureEmptyLayer)
@@ -170,12 +181,11 @@ export class TextureManager {
 
         let group = this.groupManager.groups[this.groupManager.groupSelection.value]
         let textures = group.layerIDs.map(id => this.textures[id]).filter(t => !t.isHidden)
-
         
         let width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
         let height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
 
-        if(this.textures.length === 0) {
+        if(textures.length === 0) {
             width = this.model.texWidth
             height = this.model.texHeight
         }
