@@ -24,16 +24,14 @@ export class TextureProjectPart {
     createTextureElement(name, img) {
         let data = this.pth.textureManager.addImage(name, img)
         let cloned = this.emptyTextureList.clone()
-        cloned.removeClass('empty-column')
-        cloned.insertBefore(this.emptyTextureList)    
+        .removeClass('empty-column')
+        .insertBefore(this.emptyTextureList)
+        .attr('draggable', true)
 
         cloned.find('.texture-preview').append(data.img)
 
-        let element = cloned.get(0)
-        element.draggable = true
-
         data._projectElement = cloned
-        this.dragableElementList.addElement(element, () => data.idx)
+        this.dragableElementList.addElement(cloned, () => data.idx)
 
         let container = cloned.find('.texture-name-container')
         doubleClickToEdit(container, name => {

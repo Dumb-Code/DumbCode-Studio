@@ -106,7 +106,7 @@ export class TextureManager {
         this.selectedLayer.addElement(dom)
         data.name = name
         data.isHidden = false
-        this.dragElementList.addElement(dom.get(0), () => data.idx)
+        this.dragElementList.addElement(dom, () => data.idx)
         
         new ToggleableElement(dom.find('.texture-layer-visible')).onchange(e => {
             data.isHidden = !e.value
