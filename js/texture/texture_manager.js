@@ -90,7 +90,7 @@ export class TextureManager {
         }
 
         let dom = this.textureEmptyLayer.clone()
-        dom.removeClass("empty-layer")
+        dom.removeClass("empty-layer layer-persistant")
         let data = {}
 
         data.dom = dom
