@@ -79,7 +79,7 @@ async function init() {
     display.dontReRender = true
     controls.addEventListener('change', () => display.dontReRender ? 0 : runFrame())
     controls.update()
-    display.false = true
+    display.dontReRender = false
 
     //When an input is focused on don't allow for keyboard controls.
     $(document)
@@ -164,7 +164,7 @@ window.onModulesFinished = async() => {
 
     //Fix bulma dropdown boxes
     $('.dropdown:not(.is-hoverable) .dropdown-menu').get().forEach(t => $(t).click(e => {
-        if(t.parentNode.classList.contains('is-active')) {
+        if(e.target.nodeName === "INPUT" && t.parentNode.classList.contains('is-active')) {
             e.stopPropagation()
         }
     }))

@@ -318,6 +318,10 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
     display: flex;
 }
 
+.texture-group-layers .is-activated {
+    color: #3298dc;
+}
+
 *::-webkit-scrollbar {
     background-color: transparent;
     color: transparent;
@@ -332,7 +336,7 @@ ul#cube-list .cube-line-controller[drag-state="bottom"] {
     background-color: hsl(0, 0%, 40%);
 }
 *::-webkit-scrollbar-corner {
-    background-color: hsl(0, 0%, 14%;
+    background-color: hsl(0, 0%, 14%);
 }
 * {
     scrollbar-color: hsl(0, 0%, 29%) transparent;

@@ -38,6 +38,18 @@ export class DcProject {//._files, this._modeling, this._texture, this._animatio
         })
         
     }
+    
+    onActive(pth) {
+        pth.display.scene.add(this.model.modelCache)
+        pth.display.scene.add(this.group)
+        
+        this.textureManager.groupManager.updateTextureLayerOption()
+    }
+     
+    onUnactive(pth) {
+        pth.display.scene.remove(this.model.modelCache)
+        pth.display.scene.remove(this.group)
+    }
 
     _createMaterialsObject() {
         let normal = material.clone()

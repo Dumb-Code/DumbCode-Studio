@@ -1,14 +1,17 @@
 import { readFile } from "../displays.js"
 import { Texture, NearestFilter, Vector2, DataTexture, RGBAFormat, CanvasTexture } from "../three.js"
 import { doubleClickToEdit, DraggableElementList, LinkedSelectableList, ToggleableElement } from "../util.js"
+import { TextureGroupManager } from "./texture_group_manager.js"
 
 export class TextureManager {
 
     constructor(model, pth) {
+        this.model = model
         this.pth = pth
         this.filesPage = pth._files
         this.textures = []
         this.textureEmptyLayer = pth._texture._textureEmptyLayer
+        this.groupManager = new TextureGroupManager(pth, this)
 
         this.highlightCanvas = document.createElement('canvas')
         this.highlightCanvas.width = model.texWidth
@@ -28,7 +31,7 @@ export class TextureManager {
         this.context = this.canvas.getContext('2d')
         this.context.imageSmoothingEnabled = false
 
-        this.dragElementList = new DraggableElementList(false, (a, b, c) => this.textureDragged(a, b, c))
+        this.dragElementList = new DraggableElementList(false, (a, b, c) => this.groupManager.textureDragged(false, a, b, c))
         this.selectedLayer = new LinkedSelectableList($(), false, "texture-layer-selected").onchange(e => {
             let layer = this.textures[e.value]
             if(layer) {
@@ -36,6 +39,8 @@ export class TextureManager {
                 this.highlightCanvas.height = layer.height
             }
         })
+
+        this.groupManager.initiateDefaultEntry()
     }
 
     getSelectedLayer() {
@@ -64,16 +69,10 @@ export class TextureManager {
         }
         this.refresh()
     }
-
-
-    textureDragged(drop, movedData, droppedOnData) {
-        this.textures.splice(droppedOnData + (drop == 'bottom' ? 1 : 0), 0, ...this.textures.splice(movedData, 1))
-        this.refresh()
-    }
     
     addImage(name, img) {
-        let width = this.pth.model.texWidth
-        let height = this.pth.model.texHeight
+        let width = this.model.texWidth
+        let height = this.model.texHeight
 
         let empty = false
 
@@ -87,7 +86,7 @@ export class TextureManager {
         }
 
         let dom = this.textureEmptyLayer.clone()
-        dom.removeClass("empty-layer")
+        dom.removeClass("empty-layer layer-persistant")
         let data = {}
 
         data.dom = dom
@@ -104,7 +103,7 @@ export class TextureManager {
         this.selectedLayer.addElement(dom)
         data.name = name
         data.isHidden = false
-        this.dragElementList.addElement(dom.get(0), () => data.idx)
+        this.dragElementList.addElement(dom, () => data.idx)
         
         new ToggleableElement(dom.find('.texture-layer-visible')).onchange(e => {
             data.isHidden = !e.value
@@ -119,7 +118,7 @@ export class TextureManager {
         dom.find('.texture-layer-preview').append(data.img2)
 
 
-        data.onCanvasChange = () => {
+        data.onCanvasChange = (refresh = true) => {
             data.img.src = data.canvas.toDataURL()
             data.img.width = data.canvas.width
             data.img.height = data.canvas.height
@@ -127,7 +126,10 @@ export class TextureManager {
             data.img2.src = data.canvas.toDataURL()
             data.img2.width = data.canvas.width
             data.img2.height = data.canvas.height
-            this.refresh()
+
+            if(refresh === true) {
+                this.refresh()
+            }
         }
         
         data.canvas = document.createElement("canvas")
@@ -143,9 +145,17 @@ export class TextureManager {
             ctx.drawImage(img, 0, 0, width, height)
         }
 
-        data.onCanvasChange()
+        data.onCanvasChange(false)
 
         this.textures.unshift(data)
+
+        data.idx = this.textures.length
+        
+        this.groupManager.groups[0].layerIDs.unshift(data.idx)
+        if(this.groupManager.groupSelection.value != 0) {
+            this.groupManager.groups[this.groupManager.groupSelection.value].layerIDs.unshift(data.idx)
+        }
+        this.updateIDs()
 
         return data
     }
@@ -155,34 +165,46 @@ export class TextureManager {
         this.textureEmptyLayer.siblings().not('.layer-persistant').detach()
     }
 
-    refresh() {
+    updateIDs() {
+        this.groupManager.updateIds(this.textures.map(t => t.idx))
+        this.textures.forEach((t, id) => t.idx = id)
+    }
+
+    refresh(refreshCanvas = true) {
         this.removeAll()
-        
-        this.textures.forEach((t, id) => {
-            t.idx = id
+        this.updateIDs()
+        this.textures.forEach(t => {
             t.dom.attr('select-list-entry', t.idx)
             t.text.text(t.name)
-            t.dom.detach().insertBefore(this.textureEmptyLayer)
         })
 
-        let width = this.textures.filter(t => !t.isHidden).map(t => t.width).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
-        let height = this.textures.filter(t => !t.isHidden).map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
+        let group = this.groupManager.groups[this.groupManager.groupSelection.value]
+        let textures = group.layerIDs.map(id => this.textures[id])
 
-        if(this.textures.length === 0) {
-            width = this.pth.model.texWidth
-            height = this.pth.model.texHeight
+        textures.forEach(t => t.dom.detach().insertBefore(this.textureEmptyLayer))
+        textures = textures.filter(t => !t.isHidden)
+
+        if(refreshCanvas !== true) {
+            return
+        }
+        let width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
+        let height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this.gcd(a, c), 1)
+
+        if(textures.length === 0) {
+            width = this.model.texWidth
+            height = this.model.texHeight
         }
 
         this.canvas.width = width
         this.canvas.height = height
         this.context.imageSmoothingEnabled = false
 
-        if(!this.textures.find(t => !t.isHidden)) {
+        if(textures.length === 0) {
             this.context.fillStyle = `rgba(255, 255, 255, 1)`
             this.context.fillRect(0, 0, width, height)
         }
 
-        this.textures.filter(t => !t.isHidden).reverse().forEach(t => this.context.drawImage(t.canvas, 0, 0, width, height))
+        textures.reverse().forEach(t => this.context.drawImage(t.canvas, 0, 0, width, height))
 
         if(this.selectedLayer.value !== undefined) {
             this.context.drawImage(this.highlightCanvas, 0, 0, width, height)

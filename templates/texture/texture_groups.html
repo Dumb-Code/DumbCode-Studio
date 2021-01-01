@@ -1,0 +1,97 @@
+<style>
+    /* .main-area-entry {
+        border: solid black 2px; 
+        height: 400px; 
+        border-radius: 3px; 
+    } */
+
+    .texture-group-container {
+        height: 400px;
+        border-right: black solid 1px;
+    }
+
+    .texture-layer-container-active {
+        height: 200px;
+        border-bottom: black solid 1px;
+    }
+
+    .texture-layer-container-unactive {
+        height: 200px;
+    }
+
+    .texture-group-template, .texture-entry-template {
+        display: none;
+    }
+    
+    .texture-group-entry:hover {
+        background-color: #565656;
+    }
+
+    .texture-entry:hover {
+        background-color: #664646;
+    }
+
+    .texture-group-entry.is-activated {
+        background-color: #812770;
+    }
+
+    .is-dragged {
+        background-color: #8142F2
+    }
+
+    .texture-entry {
+        overflow: hidden
+    }
+
+    .texture-entry[drag-state="top"] {
+        border-top-style: solid;
+        border-top-color: #000000;
+    }
+
+    .texture-entry[drag-state="bottom"] {
+        border-bottom-style: solid;
+        border-bottom-color: #000000;
+    }
+
+</style>
+<div id="modal-texture-groups" style="text-transform: none">
+    <div class="modal-background"></div>
+    <div class="modal-content box" style="background-color: #363636; color: whitesmoke !important; text-align: left;">
+        <h3 class="title is-3" style="color: whitesmoke">Texture Groups</h3>
+        <div style="padding-bottom: 20px">
+            <button class="modal-close" aria-label="close" style="position: absolute"></button>
+        </div>
+        <span class="icon is-small add-group ml-2 tooltip" data-tooltip="Add Group">
+            <i class="fas fa-plus"></i>
+        </span>
+        <div class="pr-5 pl-3 texture-group-entry texture-group-template">
+            <div class="pt-3 texture-group-toppart">
+                <div class="dbl-click-container texture-group-name">
+                    <p class="dbl-text"></p>
+                    <input class="dbl-text-edit" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="pr-5 pl-3 texture-entry texture-entry-template" draggable="true">
+            <div class="buttons has-addons mt-1" style="float: left;">
+                <div class="checkbox-container">
+                    <label class="checkbox-label">
+                        <input class="entry-is-selectable" type="checkbox" checked>
+                        <span class="checkbox-custom rectangular"></span>
+                    </label>
+                </div>
+            </div>
+            <p class="has-text-light mt-1 px-2 entry-texture-name" style="float:left; font-size: 14px; padding-top: 1px;">name.png</p>
+        </div>
+        <div class="columns is-mobile" style="overflow-y: auto; width: 600px;">
+            <div class="column is-5" style="padding-right: 0px;">
+                <div class="texture-group-container"></div>
+            </div>
+            <div class="column" style="padding-left: 0px;">
+                <div class="texture-layer-container-active" style="overflow-y: scroll;"></div>
+                <div class="texture-layer-container-unactive" style="overflow-y: scroll;"></div>
+            </div>
+        </div>
+        
+    </div>
+</div>

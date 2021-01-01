@@ -569,15 +569,21 @@ export class DraggableElementList {
         let previousElement = null
         let draggedData = null
 
-        this.removePreviousState = () => previousElement?.removeAttribute("drag-state")
-        this.getDraggedData = () => draggedData
-
         this.addElement = (element, dataGetter) => {
-            element.ondragstart = () => {
-                draggedData = dataGetter() || false
-            }
-            element.ondragover = function(e) {
-                if(draggedData == null) {
+            let canDragOn = true
+            element
+            .on('dragstart', () => {
+                draggedData = dataGetter()
+            })
+            .on('dragleave', function(e) {
+                if(draggedData !== null) {
+                    this.removeAttribute("drag-state")
+                    e.preventDefault()
+                    e.stopPropagation()
+                }
+            })
+            .on('dragover', function(e) {
+                if(!canDragOn || draggedData == null) {
                     return
                 }
                 let rect = this.getBoundingClientRect()
@@ -603,15 +609,34 @@ export class DraggableElementList {
 
                 e.preventDefault()
                 e.stopPropagation()
-            }
-            element.ondrop = function(e) {
+            })
+            .on('drop', function(e) {
                 let drop = this.getAttribute("drag-state")
-                if(draggedData !== null && drop !== undefined) {
+                if(draggedData !== null && drop !== undefined && canDragOn) {
                     callback(drop, draggedData, dataGetter(), e)
                 }
                 this.removeAttribute("drag-state")
                 draggedData = null
-            }
+            })
+         
+            return e => canDragOn = e
+        }
+        this.addDropZone = (element, callback, predicate = () => true) => {
+            element
+            .on('dragover', e => {
+                if(draggedData !== null && predicate(draggedData)) {
+                    previousElement?.removeAttribute("drag-state")
+                    e.preventDefault()
+                    e.stopPropagation()
+                }
+            })
+            .on('drop', e => {
+                if(draggedData !== null && predicate(draggedData)) {
+                    callback(draggedData)
+                    e.preventDefault()
+                    e.stopPropagation()
+                }
+            })
         }
     }
 }

@@ -22,19 +22,16 @@ export class ProjectTabHandler {
             return
         }
         if(index !== this.currentIndex) {
-            if(this.currentIndex !== -1) {
-                let tab = this.allTabs[this.currentIndex]
-                this.display.scene.remove(tab.model.modelCache)
-                this.display.scene.remove(tab.group)
+            let idx = this.currentIndex
+            this.currentIndex = index
+            if(idx !== -1) {
+                this.allTabs[idx].onUnactive(this)
             } else {
                 this.dispatchEvent( { type: "initiateselection" } )
             }
             if(index !== -1) {
-                let tab = this.allTabs[index]
-                this.display.scene.add(tab.model.modelCache)
-                this.display.scene.add(tab.group)
+                this.allTabs[index].onActive(this)
             }
-            this.currentIndex = index
             this.dispatchEvent( { type: "selectchange", from: this.currentIndex, to: index } )
         }
     }

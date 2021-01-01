@@ -28,23 +28,13 @@ export class CubeListBoard {
             lockedCubes.reconstructLockedCubes(e.ctrlKey)
         })
 
-        document.body.addEventListener('dragover', e => {
-            if(this.dragElementList.getDraggedData() != null) {
-                this.dragElementList.removePreviousState()
-                e.preventDefault()
-            }
+        this.dragElementList.addDropZone($(document.body), cube => {
+            this.lockedCubes.createLockedCubesCache(isKeyDown("Control") ? undefined : [cube.name], true)
+            cube.parent.deleteChild(cube, true)
+            pth.model.addChild(cube)
+            this.lockedCubes.reconstructLockedCubes(isKeyDown("Control"))
         })
 
-        document.body.addEventListener('drop', e => {
-            let cube = this.dragElementList.getDraggedData()
-            if(cube !== null) {
-                this.lockedCubes.createLockedCubesCache(e.ctrlKey ? undefined : [cube.name], true)
-                cube.parent.deleteChild(cube, true)
-                pth.model.addChild(cube)
-                this.lockedCubes.reconstructLockedCubes(e.ctrlKey)
-                e.preventDefault()
-            }
-        })
         
         this.cubeList.onclick = e => {
             if(e.target.nodeName == 'UL') {
@@ -75,7 +65,7 @@ export class CubeListBoard {
         }
 
         div.setAttribute('cubename', cube.name)
-        this.dragElementList.addElement(div, () => cube)
+        this.dragElementList.addElement($(div), () => cube)
         li.appendChild(div)
 
         if(cube.children.length !== 0) {
