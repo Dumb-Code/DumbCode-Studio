@@ -48,9 +48,31 @@ export class CubeListBoard {
         this.elementMap.clear()
         this.cubeList.innerHTML = "" //Remove all the children
 
-        if(this.pth.anySelected()) {
-            this.pth.model.children.forEach(c => this.createCube(this.cubeList, c, oldMap))
+        const maxRefreshFrame = 50
+        let refreshIndex = 0
+        let model = this.pth.model
+        let runOnFrame = () => {
+            if(this.pth.anySelected()) {
+                if(this.pth.model !== model) {
+                   return
+                }
+                let refreshTarget = refreshIndex + maxRefreshFrame
+                let cube
+                for(; refreshIndex < refreshTarget; refreshIndex++) {
+                    cube = this.pth.model.children[refreshIndex]
+                    if(cube) {
+                        this.createCube(this.cubeList, cube, oldMap)    
+                    } else {
+                        break
+                    }
+                }
+                if(cube) {
+                    requestAnimationFrame(runOnFrame)
+                }
+            }
         }
+        runOnFrame()
+        
     }
 
     createCube(parent, cube, oldMap) {
