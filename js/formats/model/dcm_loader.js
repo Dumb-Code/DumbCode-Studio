@@ -368,7 +368,7 @@ DCMModel.loadModel = async(arrayBuffer, name = "") => {
     let version = 2
     if(name.endsWith('.tbl')) {
         model = await readTblFile(arrayBuffer)
-    } if(name.endsWith('.bbmodel')) {
+    } else if(name.endsWith('.bbmodel')) {
         model = readBBModel(arrayBuffer)
     } else {
         let buffer = new ByteBuffer(await arrayBuffer)
