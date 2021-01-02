@@ -55,7 +55,7 @@ export class AnimationProjectPart {
             let tab = this.createNewAnimationTab(name)
             let animator = this.animatorGetter()
             if(tab) {
-                let promiseFiles = [...tblFiles.map(file => DCMModel.loadModel(readFile(file), file.name))]
+                let promiseFiles = [...tblFiles.map(async(file) => DCMModel.loadModel(await readFile(file), file.name))]
                 if(infoFile) {
                     promiseFiles.push(readFile(infoFile))
                 }

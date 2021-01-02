@@ -2,6 +2,7 @@ import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferG
 import { ByteBuffer } from "../../animations.js";
 import { readTblFile } from "./tbl_converter.js";
 import { runInvertMath } from "../../modeling/cube_commands.js";
+import { readBBModel } from "./bbmodel_loader.js";
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
@@ -364,16 +365,17 @@ export class DCMCube {
 }
 DCMModel.loadModel = async(arrayBuffer, name = "") => {
     let model
-    let verion
+    let version = 2
     if(name.endsWith('.tbl')) {
         model = await readTblFile(arrayBuffer)
-        verion = 2
+    } if(name.endsWith('.bbmodel')) {
+        model = readBBModel(arrayBuffer)
     } else {
         let buffer = new ByteBuffer(await arrayBuffer)
 
         model = new DCMModel()
     
-        verion = buffer.readNumber()
+        version = buffer.readNumber()
         model.author = buffer.readString()
         model.texWidth = buffer.readInteger()
         model.texHeight = buffer.readInteger()
@@ -404,7 +406,7 @@ DCMModel.loadModel = async(arrayBuffer, name = "") => {
         model.fileName = name.substring(0, name.lastIndexOf('.'))
     }
 
-    if(verion < 2) {
+    if(version < 2) {
         model.createModel(new MeshLambertMaterial())
         model.modelCache.updateMatrix()
         model.modelCache.updateMatrixWorld(true)

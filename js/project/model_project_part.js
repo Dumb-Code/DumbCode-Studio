@@ -37,7 +37,7 @@ export class ModelProjectPart {
     }
     
     async loadModelFiles(files) {
-        [...files].forEach(file => DCMModel.loadModel(readFile(file), file.name).then(model => this.pth.createNewProject(model)))
+        [...files].forEach(async(file) => DCMModel.loadModel(await readFile(file), file.name).then(model => this.pth.createNewProject(model)))
     }
 
     async loadProjectFiles(files) {
