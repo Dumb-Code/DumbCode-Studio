@@ -76,10 +76,7 @@ async function init() {
     controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(0.5, 0, 0.5)
     controls.screenSpacePanning = true
-    display.dontReRender = true
-    controls.addEventListener('change', () => display.dontReRender ? 0 : runFrame())
     controls.update()
-    display.dontReRender = false
 
     //When an input is focused on don't allow for keyboard controls.
     $(document)
