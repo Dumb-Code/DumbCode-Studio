@@ -51,6 +51,7 @@ export class TextureProjectPart {
             cloned.remove()
             e.stopPropagation()
         })
+        this.pth.textureManager.refresh()
         return data 
     }
 
