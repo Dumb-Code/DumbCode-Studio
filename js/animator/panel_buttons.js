@@ -1,10 +1,26 @@
 import { ToggleableElement } from "../util.js"
+import { AnimationStudio } from "./animation_studio.js"
 
+/**
+ * The panel buttons for the animation studio.
+ * This includes:
+ *  - Delete keyframe button
+ *  - Toggle timeline looping (infinity symbol)
+ *  - Pause/Play button
+ *  - Restart Time 
+ *  - Reset time
+ *  - Playback range slider
+ */
 export class PanelButtons {
     constructor(dom, studio) {
         this.pth = studio.pth
+        
+        //Setup the delete keyframe button
         dom.find('.button-delete-keyframe').click(() => this.deleteKeyframe(studio))
 
+        //Setup the timeline looping button. The behaviour for this is as follows:
+        //When an animation starts playing, if the an animation is loopable (has loop data),
+        //then turn this on. Then, when clicked (to turn off), set tab.finishLooping to be true
         let looped = new ToggleableElement(dom.find('.toggle-timeline-looping')).onchange(e => {
             let tab = this.pth.animationTabs.active
             if(tab !== null) {
@@ -12,13 +28,30 @@ export class PanelButtons {
             }
         }).addPredicate(v => !v || studio.keyframeManager.playstate.playing)
 
+        //The root for the pause/play button. Updates the pause-play symbol for when it's being played.
         let playstateRoot = dom.find('.toggle-timeline-playstate')
         let updatePlaystate = () => {
             let playing = studio.keyframeManager.playstate.playing === true
             playstateRoot.find('.play-pause-symbol').toggleClass('fa-pause', playing).toggleClass('fa-play', !playing)
         }
 
+        //When the pauseplay button is clicked, toggle it.
+        //If is now playing, make sure `looped.value` is set to true if there is loop data,
+        //Otherwise set it to be false
+        playstateRoot.click(() => {
+            let playing = studio.keyframeManager.playstate.playing === true
+            studio.keyframeManager.playstate.playing = !playing
+            let tab = this.pth.animationTabs.active
+            if(!playing && tab !== null && tab.loopData !== null) {
+                looped.value = true
+            } else {
+                looped.value = false
+            }
+            updatePlaystate()
+        })
 
+        //When the restart button is clicked, reset the ticks, 
+        //set playing to be true and set `looped` to be true if the handler has looped data
         dom.find('.button-restart-time').click(() => {
             studio.keyframeManager.playstate.ticks = 0
             studio.keyframeManager.playstate.playing = true
@@ -28,6 +61,9 @@ export class PanelButtons {
             }
             updatePlaystate()
         })
+
+        //When the reset button is clicked, reset the ticks, 
+        //set playing to be false, and set looped to be false.
         dom.find('.button-reset-time').click(() => {
             studio.keyframeManager.playstate.ticks = 0
             studio.keyframeManager.playstate.playing = false
@@ -35,20 +71,7 @@ export class PanelButtons {
             updatePlaystate()
         })
 
-        playstateRoot.click(() => {
-            let playing = studio.keyframeManager.playstate.playing === true
-            studio.keyframeManager.playstate.playing = !playing
-            if(!playing) {
-                let tab = this.pth.animationTabs.active
-                if(tab !== null && tab.loopData !== null) {
-                    looped.value = true
-                }
-            } else {
-                looped.value = false
-            }
-            updatePlaystate()
-        })
-
+        //The input range slider. Allows the user to slide the slider between the start and end of the animation.
         this.inputPlaybackRange = dom.find('.input-playback-range')
         this.inputPlaybackRange.on('input', e => {
             let value = e.target.value
@@ -57,46 +80,31 @@ export class PanelButtons {
             studio.keyframeManager.playstate.ticks = parseFloat(value)
         })
 
-        let startTimeField = dom.find('.input-keyframe-starttime')
-
-        startTimeField.on('input', e => {
-            let value = Math.max(Number(e.target.value), 0)
-            let handler = studio.pth.animationTabs.active
-
-            if(handler !== null && !isNaN(value) && handler.selectedKeyFrame !== undefined) {
-                handler.selectedKeyFrame.startTime = value
-                studio.keyframeManager.updateKeyFrame(handler.selectedKeyFrame)
-            }
-        })
-
-
-        dom.find('.input-keyframe-duration').on('input', e => {
-            let value = Math.max(Number(e.target.value), 0)
-            let handler = studio.pth.animationTabs.active
-            
-            if(handler !== null && !isNaN(value) && handler.selectedKeyFrame !== undefined) {
-                let diff = value - handler.selectedKeyFrame.duration
-                handler.selectedKeyFrame.duration = value
-                handler.selectedKeyFrame.startTime -= diff
-                startTimeField.val(handler.selectedKeyFrame.startTime)
-                studio.keyframeManager.updateKeyFrame(handler.selectedKeyFrame)
-            }
-        })
     }
 
+    /**
+     * Called per frame. Updates the playback range with the playstate ticks
+     */
     onFrame() {
         let active = this.pth.animationTabs.active
         if(active == null) {
             return  
         }
-        this.inputPlaybackRange.attr('min', active.minTime).attr('max', active.totalTime).val(active.playstate.ticks)
+        //Updat the slider with the ticks. If visibleTicks isn't null use that. Otherwise use normal ticks.
+        let ticks = this.playstate.visibleTicks !== null ? this.playstate.visibleTicks : this.playstate.ticks
+        this.inputPlaybackRange.attr('min', active.minTime).attr('max', active.totalTime).val(ticks)
     }
 
+    /**
+     * Deletes the keyframe from the studio
+     * @param {AnimationStudio} studio 
+     */
     deleteKeyframe(studio) {
         let handler = studio.pth.animationTabs.active
         if(handler !== null && handler.selectedKeyFrame !== undefined) {
             let index = handler.keyframes.indexOf(handler.selectedKeyFrame)
             if(index >= 0) {
+                //Remove the keyframe at that index, toggle the keyframe selection and reframe the keyframes.
                 handler.keyframes.splice(index, 1) 
                 studio.selectKeyframe(undefined)
                 studio.keyframeManager.reframeKeyframes()

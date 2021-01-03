@@ -1,4 +1,4 @@
-//deprecated
+//deprecated. Used to be for the animation panels. 
 export class AnimationPanel {
 
     constructor(dom) {

@@ -1,27 +1,37 @@
 import { LinkedSelectableList, CanvasTransformControls, LinkedElement } from "../util.js"
 
+//The radius of the circles
 const radius = 7.5
 
+/**
+ * Handles the cube progression canvas.
+ */
 export class ProgressionCanvas {
     constructor(dom, studio) {
         this.pth = studio.pth
+        //The selected progression point
         this.selectedPoint = null
         this.dropdownText = dom.find('.dropdown-text')
 
+        //Whether the easing mode has been set
         this.easingRequiresChoice = true
 
+        //Get the canvas and the context, and create the canvas transform controls.
         let pc = dom.find('#progression_canvas')
         this.progressionCanvas = pc.get(0)
         this.canvasCtx = this.progressionCanvas.getContext("2d")
         this.canvasTransformControls = new CanvasTransformControls(this.progressionCanvas, (a, b, c, d, e) => this.mouseOverCanvas(a, b, c, d, e), 1, () => this.redrawProgressionCanvas())
 
+        //The easing function entries
         this.easingFunction = new LinkedSelectableList(dom.find('.easing-function-entry')).onchange(e => {
             this.dropdownText.text(e.elements.text())
             this.easingRequiresChoice = false
             this.generateEasingFunction()
         })
+        //The easing function quality slider.
         this.easingFunctionQuality = dom.find('.easing-function-quality').on('input', () => {
             let val = this.easingFunctionQuality.val()
+            //Update the tooltip
             let qual
             if (val <= 10) {
                 qual = "Normal"
@@ -43,10 +53,18 @@ export class ProgressionCanvas {
         this.createEasingType(dom.find('.easing-function-out'), () => this.easingOut = !this.easingOut)
     }
 
+    /**
+     * Called when the animation tab is switched to
+     */
     onSwitchedTo() {
         this.redrawProgressionCanvas()
     }
 
+    /**
+     * Creates the easing type links
+     * @param {*} dom The easing dom
+     * @param {*} toggle the toggle callback
+     */
     createEasingType(dom, toggle) {
         let iconParent = dom.find('.easing-icon')
 
@@ -57,12 +75,23 @@ export class ProgressionCanvas {
         })
     }
 
+    /**
+     * Called when a keyframe select change happenes
+     */
     keyframeSelectChange() {
         this.dropdownText.text("None")
         this.easingRequiresChoice = true
         this.redrawProgressionCanvas()
     }
 
+    /**
+     * Call when a mouse event happens on the canvas.
+     * @param {string} type the type of event. 'mousedown', 'mouseup' 'mousemove'
+     * @param {number} mouseX the mouse x position
+     * @param {number} mouseY the mouse y position
+     * @param {number} buttons the buttons down
+     * @param {function} misscallback the callback for if nothing was under the mouse.
+     */
     mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback) {
         let handler = this.pth.animationTabs.active
         if(handler === null || handler.selectedKeyFrame === undefined) {
@@ -74,9 +103,12 @@ export class ProgressionCanvas {
         let height = this.progressionCanvas.height
 
         if(type === 'mousedown') {
+            //If the mouse is down, find the points by finding a point withing 3*radius of the point.
             if((buttons & 1) === 1) {
-                let clickedOn = points.find(p => Math.pow(width*p.x-mouseX, 2) + Math.pow(height*p.y-mouseY, 2) <= 3*radius*radius) //The 3 is just for comedic effect.
-            
+                let clickedOn = points.find(p => Math.pow(width*p.x-mouseX, 2) + Math.pow(height*p.y-mouseY, 2) <= 3*radius*radius) //The 3 is to make it easier to select
+
+                //If a point is clicked on, set the startX and startY varibles and set selectedPoint
+                //Otherwise, create a new point and select it.
                 if(clickedOn !== undefined) {
                     clickedOn.startX = clickedOn.x
                     clickedOn.startY = clickedOn.y
@@ -90,6 +122,7 @@ export class ProgressionCanvas {
                 this.redrawProgressionCanvas()
             }
         } else if(type === 'mousemove') {
+            //If the mouse is down, and a point is selected, move the point. Else call the miss callback
             if((buttons & 1) === 1 && this.selectedPoint !== null) {
                 if(!this.selectedPoint.required) {
                     this.selectedPoint.x = mouseX / width
@@ -101,6 +134,7 @@ export class ProgressionCanvas {
                 misscallback()
             }
         } else if(this.selectedPoint !== null) {
+            //When the mouse is released, if the point hasn't moved much from the startX/Y then remove the point
             if(this.selectedPoint.startX !== undefined && this.selectedPoint.startY !== undefined && !this.selectedPoint.required) {
                 let distX = width*(this.selectedPoint.startX - this.selectedPoint.x)
                 let distY = height*(this.selectedPoint.startY - this.selectedPoint.y)
@@ -114,15 +148,17 @@ export class ProgressionCanvas {
         }
     }
 
+    /**
+     * Redraw the canvas. Called whenever the canvas need re-rendering
+     */
     redrawProgressionCanvas() {
-
         let width = this.progressionCanvas.width
         let height = this.progressionCanvas.height
 
+        //Set the background style
         this.canvasCtx.fillStyle = "hsl(0, 0%, 10%)";
         this.canvasCtx.fillRect(0, 0, width, height);
 
-        //TODO: scrolling and moving like the texture tab
         let handler = this.pth.animationTabs.active
         if(handler === null) {
             return
@@ -133,16 +169,21 @@ export class ProgressionCanvas {
         if(handler.selectedKeyFrame !== undefined) {
             this.canvasTransformControls.applyTransforms()
 
+            //Draw the main box background stuff.
+            this.canvasCtx.fillStyle = "hsl(0, 0%, 10%)";
+            this.canvasCtx.fillRect(0, 0, width, height);
+            
+            //Set the line stroke color
+            this.canvasCtx.strokeStyle = "hsl(204, 86%, 53%)";
+
+            //Create the box
             this.canvasCtx.beginPath();
             this.canvasCtx.rect(0, 0, width, height)
             this.canvasCtx.stroke();
 
-            this.canvasCtx.fillStyle = "hsl(0, 0%, 10%)";
-            this.canvasCtx.strokeStyle = "hsl(204, 86%, 53%)";
-            this.canvasCtx.fillRect(0, 0, width, height);
-
             let points = handler.selectedKeyFrame.progressionPoints
         
+            //Go from every point drawing the circle and the lines between them
             for(let i = 0; i < points.length; i++) {
                 let point = points[i]
                 let next = points[i+1]
@@ -162,6 +203,9 @@ export class ProgressionCanvas {
         }
     }
 
+    /**
+     * Generate the easing points.
+     */
     generateEasingFunction() {
         let handler = this.pth.animationTabs.active
         let points = Math.min(50, 10 + parseInt(this.easingFunctionQuality.val()))
@@ -171,6 +215,7 @@ export class ProgressionCanvas {
             return
         }
 
+        //Gets the raw function
         let funcRaw
         switch(this.easingFunction.value) {
             case "sine":
@@ -231,6 +276,7 @@ export class ProgressionCanvas {
                 break
         }
 
+        //Gets the function with the in/out applied.
         let func
         if(this.easingIn === true) {
             if(this.easingOut === true) {
@@ -250,7 +296,10 @@ export class ProgressionCanvas {
             }
         }
    
-
+        //This code is very weird and should probally be rewritten.
+        //The idea for this was to be able to go up the function linerally.
+        //ie step along the function evenly spaced, rather than evenly spaced on the x axis.
+        //To do this, I create an array of `resolution` elements ranging from 0 to 1 of the function.
         const resolution = 1000
         const step = 1 / resolution
         let array = new Array(resolution + 1)
@@ -258,6 +307,7 @@ export class ProgressionCanvas {
             array[i] = func(i / resolution)
         }
 
+        //I then get the distance from the current to the next element
         let distances = array.map((y, i) => {
             let next = array[i + 1]
             if(next === undefined) {
@@ -267,6 +317,10 @@ export class ProgressionCanvas {
             return Math.sqrt(dy*dy + step*step)
         })
 
+        //To get the xValues, I first get the total length of the function, and divide that length
+        //by the amount of points i need to generate. This gives me the amount of "distance" to move
+        //per point. Then I iterate over all the points and iterate over the disatances till I find a 
+        //point that goes over that distance to move for that point.
         let xValues = []
         let length = distances.reduce((a, b) => a + b)
         let xStep = length / (points - 1)
@@ -287,15 +341,11 @@ export class ProgressionCanvas {
             }
         }
         
-
+        //Get a list of the required progression points 
+        //for every xvalue, push a new point to that list
+        //set the progression point list to that list sorted by x value
         let progressionPoints = handler.selectedKeyFrame.progressionPoints.filter(p => p.required)
-        
-        xValues.forEach(x => {
-            let y = 1 - func(x)
-            progressionPoints.push({ x, y })
-        })
-
-        
+        xValues.forEach(x => progressionPoints.push({ x, y: 1 - func(x) }))
         handler.selectedKeyFrame.progressionPoints = progressionPoints.sort((p1, p2) => p1.x - p2.x)
         this.redrawProgressionCanvas()
 
