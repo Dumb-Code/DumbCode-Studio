@@ -830,3 +830,58 @@ export class AsyncProgressCounter {
       event.target.value = ""
       return files
   }
+
+export function generateSortedTextureOffsets(cubes, width, height) {
+    let map = new Map()
+    let states = new Array(width).fill(0).map(() => new Array(height))
+    for(let i = 0; i < cubes.length; i++) {
+        let c = cubes[i]
+
+        let w = c.dimension[0]
+        let h = c.dimension[1]
+        let d = c.dimension[2]
+        
+        let cw = w+d+w+d
+        let ch = d+h
+
+        let isSet = false
+        outerLoop:
+        for(let y = 0; y < height-ch; y++) {
+            innerLoop:
+            for(let x = 0; x < width-cw; x++) {
+                for(let tx = 0; tx < d+w+d+w; tx++) {
+                    if(states[x+tx][y+d+h] === true) {
+                        continue innerLoop
+                    }
+                }
+                let hitStates = []
+
+                //Top part
+                for(let tx = d; tx < d+w+w; tx++) {
+                    for(let ty = 0; ty < d; ty++) {
+                        hitStates.push({ u:x+tx, v:y+ty })
+                    }
+                }
+
+                //Bottom Part
+                for(let tx = 0; tx < d+w+d+w; tx++) {
+                    for(let ty = d; ty < d+h; ty++) {
+                        hitStates.push({ u:x+tx, v:y+ty })
+                    }
+                }
+
+                let hit = hitStates.some(d => states[d.u][d.v] === true)
+                if(!hit) {
+                    map.set(c, {x, y})
+                    hitStates.forEach(d => states[d.u][d.v] = true)
+                    isSet = true
+                    break outerLoop
+                }
+            }
+        }
+        if(!isSet) {
+            return null
+        }
+    }
+    return map
+}

@@ -13,7 +13,7 @@ export class DcProjectZipConverter {
     readFile(file) {
         return JSZip.loadAsync(readFile(file, (reader, file) => reader.readAsBinaryString(file)))
         .then(async(zip) => {
-            this.pth.createNewProject(await DCMModel.loadModel(await zip.file('model.dcm').async('arraybuffer'), file.name))
+            this.pth.createNewProject(await DCMModel.loadModel(await zip.file('model.dcm').async('arraybuffer'), file.name, this.texturePart))
             
             let textureFolder = zip.folder('textures')
             let textureFile = textureFolder.file('texture_names')

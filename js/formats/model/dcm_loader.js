@@ -57,6 +57,11 @@ export class DCMModel {
         this.children.forEach(child => child.traverse(cube => func(cube)))
     }
 
+    gatherAllCubes(arr = []) {
+        this.traverseAll(c => arr.push(c))
+        return arr
+    }
+
     updateMatrixWorld(force = true) {
         this.modelCache.updateMatrixWorld(force)
     }
@@ -363,13 +368,13 @@ export class DCMCube {
         ], face*8)
     }
 }
-DCMModel.loadModel = async(arrayBuffer, name = "") => {
+DCMModel.loadModel = async(arrayBuffer, name = "", texturePart) => {
     let model
     let version = 2
     if(name.endsWith('.tbl')) {
         model = await readTblFile(arrayBuffer)
     } else if(name.endsWith('.bbmodel')) {
-        model = readBBModel(arrayBuffer)
+        model = await readBBModel(arrayBuffer, texturePart)
     } else {
         let buffer = new ByteBuffer(await arrayBuffer)
 
