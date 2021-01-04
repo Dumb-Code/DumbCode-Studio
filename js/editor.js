@@ -135,6 +135,7 @@ async function init() {
             }
         })
         transformControls.space = "local"
+        raytracer.addEventListener('clicked', e => e.ignore = e.ignore || (transformControls.dragging && transformControls.axis !== null))
         return transformControls
     }
 
