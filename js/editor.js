@@ -69,7 +69,7 @@ async function init() {
     camera.position.set(0.45, 1.5, 4.5)
     camera.lookAt(0.5, 1.5, 0.5)
 
-    let onTop = new Scene()
+    let onTop = createScene()
     onTop.background = null;
 
     //Set up the controls
