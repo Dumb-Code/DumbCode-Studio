@@ -40,6 +40,23 @@ export class AnimationCubeValues {
         this.frameTime = new LinkedElement(dom.find('.input-frame-start'), false).onchange(e => this.activeKeyframeFunc(kf => kf.startTime = e.value)).absNumber()
         this.frameLength = new LinkedElement(dom.find('.input-frame-length'), false).onchange(e => this.activeKeyframeFunc(kf => kf.duration = e.value)).absNumber()
         
+        //Create the animation inverse kinematic lock element
+        this.ikaCubes = new LinkedElement(dom.find('.keyframe-inverse-kinematics-anchor'), false, false, true).onchange(e => {
+            let handler = studio.pth.animationTabs.active
+            let selected = this.raytracer.oneSelected()
+
+            if(handler !== null && selected !== null) {
+                let name = selected.tabulaCube.name
+                if(e.value) {
+                    if(!handler.ikaCubes.includes(name)) {
+                        handler.ikaCubes.push(name)
+                    }
+                } else if(handler.ikaCubes.includes(name)) {
+                    handler.ikaCubes.splice(handler.ikaCubes.indexOf(name), 1)
+                }
+            }
+        })
+
         //Create the animation loop checkbox element
         this.animationLoop = new LinkedElement(dom.find('.keyframe-loop'), false, false, true).onchange(e => {
             let handler = studio.pth.animationTabs.active
@@ -146,6 +163,13 @@ export class AnimationCubeValues {
             this.position.setInternalValue(undefined)
             this.rotation.setInternalValue(undefined)
             this.cubeGrow.setInternalValue(undefined)
+        }
+
+        let handler = this.pth.animationTabs.active
+        if(selected !== null && handler !== null) {
+            this.ikaCubes.setInternalValue(handler.ikaCubes.includes(selected.tabulaCube.name))
+        } else {
+            this.ikaCubes.setInternalValue(false)
         }
 
         let isSelected = this.raytracer.selectedSet.size === 1
