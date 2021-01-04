@@ -1320,9 +1320,6 @@ var TransformControlsGizmo = function () {
 
 			var handle = handles[ i ];
 
-			// hide aligned to camera
-		
-
 			handle.visible = true;
 			handle.rotation.set( 0, 0, 0 );
 			handle.position.copy( this.worldPosition );
@@ -1429,14 +1426,16 @@ var TransformControlsGizmo = function () {
 
 					handle.quaternion.copy( quaternion );
 
-					if ( this.dragging ) {
+					if(!centerFace) {
+						if ( this.dragging ) {
 
-						handle.position.copy( this.worldPositionStart );
-
-					} else {
-
-						handle.position.copy( this.worldPosition );
-
+							handle.position.copy( this.worldPositionStart );
+	
+						} else {
+	
+							handle.position.copy( this.worldPosition );
+	
+						}
 					}
 
 					if ( this.axis ) {
