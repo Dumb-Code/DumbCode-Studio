@@ -861,6 +861,9 @@ var TransformControlsGizmo = function () {
 
 	var arrowGeometry = new CylinderBufferGeometry( 0, 0.1, 0.2, 12, 1, false );
 
+	let lw = 0.025
+	var translationLineGeometry = new BoxBufferGeometry( lw, 1, lw)
+
 	var scaleHandleGeometry = new BoxBufferGeometry( 0.125, 0.125, 0.125 );
 
 	var lineGeometry = new BufferGeometry( );
@@ -900,18 +903,21 @@ var TransformControlsGizmo = function () {
 	var gizmoTranslate = {
 		X: [
 			[ new Mesh( arrowGeometry, matRed ), [ 1, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null, 'fwd' ],
+			[ new Mesh(translationLineGeometry , matLineRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
 			// [ new Mesh( arrowGeometry, matRed ), [ 1, 0, 0 ], [ 0, 0, Math.PI / 2 ], null, 'bwd' ],
-			[ new Line( lineGeometry, matLineRed ) ]
+			// [ new Line( lineGeometry, matLineRed ) ]
 		],
 		Y: [
 			[ new Mesh( arrowGeometry, matGreen ), [ 0, 1, 0 ], null, null, 'fwd' ],
+			[ new Mesh( translationLineGeometry, matGreen), [ 0, 0.5, 0 ], null]
 			// [ new Mesh( arrowGeometry, matGreen ), [ 0, 1, 0 ], [ Math.PI, 0, 0 ], null, 'bwd' ],
-			[ new Line( lineGeometry, matLineGreen ), null, [ 0, 0, Math.PI / 2 ]]
+			// [ new Line( lineGeometry, matLineGreen ), null, [ 0, 0, Math.PI / 2 ]]
 		],
 		Z: [
-			// [ new Mesh( arrowGeometry, matBlue ), [ 0, 0, 1 ], [ Math.PI / 2, 0, 0 ], null, 'fwd' ],
-			[ new Mesh( arrowGeometry, matBlue ), [ 0, 0, 1 ], [ - Math.PI / 2, 0, 0 ], null, 'bwd' ],
-			[ new Line( lineGeometry, matLineBlue ), null, [ 0, - Math.PI / 2, 0 ]]
+			[ new Mesh( arrowGeometry, matBlue ), [ 0, 0, 1 ], [ - Math.PI / 2, 0, 0 ], null, 'fwd' ],
+			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, 0.5 ], [ - Math.PI / 2, 0, 0 ]]
+			// [ new Mesh( arrowGeometry, matBlue ), [ 0, 0, 1 ], [ Math.PI / 2, 0, 0 ], null, 'bwd' ],
+			// [ new Line( lineGeometry, matLineBlue ), null, [ 0, - Math.PI / 2, 0 ]]
 		],
 		XYZ: [
 			[ new Mesh( new OctahedronBufferGeometry( 0.1, 0 ), matWhiteTransparent.clone() ), [ 0, 0, 0 ], [ 0, 0, 0 ]]
@@ -981,27 +987,33 @@ var TransformControlsGizmo = function () {
 	var gizmoDimensions = {
 		XN: [
 			[ new Mesh( scaleHandleGeometry, matRedDark ), [ -1, 0, 0 ], [ 0, 0, Math.PI / 2 ], null ],
-			[ new Line( lineGeometry, matLineDarkRed ), null, [ 0, 0, Math.PI ]]
+			[ new Mesh( translationLineGeometry , matRedDark ), [ -0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ] ]
+			// [ new Line( lineGeometry, matLineDarkRed ), null, [ 0, 0, Math.PI ]]
 		],
 		XP: [
 			[ new Mesh( scaleHandleGeometry, matRed ), [ 1, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null ],
-			[ new Line( lineGeometry, matLineRed ), null, null ]
+			[ new Mesh( translationLineGeometry , matRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ]
+			// [ new Line( lineGeometry, matLineRed ), null, null ]
 		],
 		YN: [
 			[ new Mesh( scaleHandleGeometry, matGreenDark ), [ 0, -1, 0 ],  [ Math.PI, 0, 0 ], null ],
-			[ new Line( lineGeometry, matLineDarkGreen ), null, [ 0, 0, -Math.PI / 2 ]]
+			[ new Mesh( translationLineGeometry, matGreenDark), [ 0, -0.5, 0 ],  [ Math.PI, 0, 0 ]]
+			// [ new Line( lineGeometry, matLineDarkGreen ), null, [ 0, 0, -Math.PI / 2 ]]
 		],
 		YP: [
 			[ new Mesh( scaleHandleGeometry, matGreen ), [ 0, 1, 0 ], null, null ],
-			[ new Line( lineGeometry, matLineGreen ), null, [ 0, 0, Math.PI / 2 ]]
+			[ new Mesh( translationLineGeometry, matGreen), [ 0, 0.5, 0 ], null]
+			// [ new Line( lineGeometry, matLineGreen ), null, [ 0, 0, Math.PI / 2 ]]
 		],
 		ZN: [
 			[ new Mesh( scaleHandleGeometry, matBlueDark ), [ 0, 0, -1 ], [ Math.PI / 2, 0, 0 ], null],
-			[ new Line( lineGeometry, matLineDarkBlue ), null, [ 0, Math.PI / 2, 0  ]]
+			[ new Mesh( translationLineGeometry, matBlueDark ), [ 0, 0, -0.5 ], [ Math.PI / 2, 0, 0 ]]
+			// [ new Line( lineGeometry, matLineDarkBlue ), null, [ 0, Math.PI / 2, 0  ]]
 		],
 		ZP: [
 			[ new Mesh( scaleHandleGeometry, matBlue ), [ 0, 0, 1 ], [ - Math.PI / 2, 0, 0 ], null],
-			[ new Line( lineGeometry, matLineBlue ), null, [ 0, - Math.PI / 2, 0  ]]
+			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, 0.5 ], [ -Math.PI / 2, 0, 0 ]]
+			// [ new Line( lineGeometry, matLineBlue ), null, [ 0, - Math.PI / 2, 0  ]]
 		]
 	};
 
@@ -1058,16 +1070,19 @@ var TransformControlsGizmo = function () {
 
 	var gizmoRotate = {
 		X: [
-			[ new Line( CircleGeometry( 1, 0.5 ), matLineRed ) ],
-			[ new Mesh( new OctahedronBufferGeometry( 0.04, 0 ), matRed ), [ 0, 0, 0.99 ], null, [ 1, 3, 1 ]],
+			[ new Mesh( new TorusBufferGeometry( 1, lw, 24, 64 ), matRed ), [ 0, 0, 0 ], [ 0, - Math.PI / 2, - Math.PI / 2 ]],
+			// [ new Line( CircleGeometry( 1, 0.5 ), matLineRed ) ],
+			// [ new Mesh( new OctahedronBufferGeometry( 0.04, 0 ), matRed ), [ 0, 0, 0.99 ], null, [ 1, 3, 1 ]],
 		],
 		Y: [
-			[ new Line( CircleGeometry( 1, 0.5 ), matLineGreen ), null, [ 0, 0, - Math.PI / 2 ]],
-			[ new Mesh( new OctahedronBufferGeometry( 0.04, 0 ), matGreen ), [ 0, 0, 0.99 ], null, [ 3, 1, 1 ]],
+			[ new Mesh( new TorusBufferGeometry( 1, lw, 24, 64 ), matGreen ), [ 0, 0, 0 ], [ Math.PI / 2, 0, 0 ]],
+			// [ new Line( CircleGeometry( 1, 0.5 ), matLineGreen ), null, [ 0, 0, - Math.PI / 2 ]],
+			// [ new Mesh( new OctahedronBufferGeometry( 0.04, 0 ), matGreen ), [ 0, 0, 0.99 ], null, [ 3, 1, 1 ]],
 		],
 		Z: [
-			[ new Line( CircleGeometry( 1, 0.5 ), matLineBlue ), null, [ 0, Math.PI / 2, 0 ]],
-			[ new Mesh( new OctahedronBufferGeometry( 0.04, 0 ), matBlue ), [ 0.99, 0, 0 ], null, [ 1, 3, 1 ]],
+			[ new Mesh( new TorusBufferGeometry( 1, lw, 24, 64 ), matBlue ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]],
+			// [ new Line( CircleGeometry( 1, 0.5 ), matLineBlue ), null, [ 0, Math.PI / 2, 0 ]],
+			// [ new Mesh( new OctahedronBufferGeometry( 0.04, 0 ), matBlue ), [ 0.99, 0, 0 ], null, [ 1, 3, 1 ]],
 		],
 		// E: [
 		// 	[ new Line( CircleGeometry( 1.25, 1 ), matLineYellowTransparent ), null, [ 0, Math.PI / 2, 0 ]],
