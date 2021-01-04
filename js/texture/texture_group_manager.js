@@ -143,7 +143,7 @@ export class TextureGroupManager {
             t._nameDom.text(t.name)
         })
 
-        let textureIDs = selctedID == 0 ? this.manager.textures.map(t => t.idx) : this.groups[selctedID].layerIDs
+        let textureIDs = this.groups[selctedID].layerIDs
 
         textureIDs.forEach(tID => {
             let t = this.manager.textures[tID]
