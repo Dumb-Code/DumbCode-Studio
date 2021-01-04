@@ -49,12 +49,20 @@ export class TextureGroupManager {
     }
 
     textureDragged(useEditGroup, drop, movedData, droppedOnData) {
-        let data = this.groups[(useEditGroup ? this.editGroupSelection : this.groupSelection).value]
+        let selctedID = (useEditGroup ? this.editGroupSelection : this.groupSelection).value
+        let data = this.groups[selctedID]
         let droppedIndex = data.layerIDs.indexOf(droppedOnData) + (drop == 'bottom' ? 1 : 0)
         if(data.layerIDs.includes(movedData)) {
             data.layerIDs.splice(droppedIndex, 0, ...data.layerIDs.splice(data.layerIDs.indexOf(movedData), 1))
         } else {
             data.layerIDs.splice(droppedIndex, 0, movedData)
+        }
+        if(selctedID == 0) {
+            let oldList = [...this.manager.textures]
+            for (let i = 0; i < this.manager.textures.length; i++) {
+                this.manager.textures[i] = oldList[data.layerIDs[i]]
+                data.layerIDs[i] = i
+            }
         }
         this.refreshAllLayers()
     }
@@ -143,7 +151,7 @@ export class TextureGroupManager {
             t._nameDom.text(t.name)
         })
 
-        let textureIDs = this.groups[selctedID].layerIDs
+        let textureIDs = selctedID == 0 ? this.manager.textures.map(t => t.idx) : this.groups[selctedID].layerIDs
 
         textureIDs.forEach(tID => {
             let t = this.manager.textures[tID]
