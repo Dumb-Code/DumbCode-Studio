@@ -810,7 +810,7 @@ var TransformControlsGizmo = function () {
 	matBlueDark.color.set( 0x1b378c );
 
 	var matWhiteTransparent = gizmoMaterial.clone();
-	matWhiteTransparent.opacity = 0.25;
+	matWhiteTransparent.opacity = 0.5;
 
 	var matYellowTransparent = matWhiteTransparent.clone();
 	matYellowTransparent.color.set( 0xffff00 );
@@ -859,12 +859,13 @@ var TransformControlsGizmo = function () {
 
 	// reusable geometry
 
-	var arrowGeometry = new CylinderBufferGeometry( 0, 0.1, 0.2, 12, 1, false );
+	var arrowGeometry = new CylinderBufferGeometry( 0, 0.05, 0.2, 12, 1, false );
 
-	let lw = 0.025
+	let lw = 0.015
 	var translationLineGeometry = new BoxBufferGeometry( lw, 1, lw)
 
-	var scaleHandleGeometry = new BoxBufferGeometry( 0.125, 0.125, 0.125 );
+	let shw = 0.0625
+	var scaleHandleGeometry = new BoxBufferGeometry( shw, shw, shw );
 
 	var lineGeometry = new BufferGeometry( );
 	lineGeometry.addAttribute( 'position', new Float32BufferAttribute( [ 0, 0, 0,	1, 0, 0 ], 3 ) );
@@ -920,22 +921,23 @@ var TransformControlsGizmo = function () {
 			// [ new Line( lineGeometry, matLineBlue ), null, [ 0, - Math.PI / 2, 0 ]]
 		],
 		XYZ: [
-			[ new Mesh( new OctahedronBufferGeometry( 0.1, 0 ), matWhiteTransparent.clone() ), [ 0, 0, 0 ], [ 0, 0, 0 ]]
+			// [ new Mesh( new OctahedronBufferGeometry( 0.1, 0 ), matWhiteTransparent.clone() ), [ 0, 0, 0 ], [ 0, 0, 0 ]]
+			[ new Mesh( new SphereBufferGeometry( 0.1 ), matWhiteTransparent.clone() ), [ 0, 0, 0 ], [ 0, 0, 0 ]]
 		],
 		XY: [
 			[ new Mesh( new PlaneBufferGeometry( 0.295, 0.295 ), matYellowTransparent.clone() ), [ 0.15, 0.15, 0 ]],
-			[ new Line( lineGeometry, matLineYellow ), [ 0.18, 0.3, 0 ], null, [ 0.125, 1, 1 ]],
-			[ new Line( lineGeometry, matLineYellow ), [ 0.3, 0.18, 0 ], [ 0, 0, Math.PI / 2 ], [ 0.125, 1, 1 ]]
+			// [ new Line( lineGeometry, matLineYellow ), [ 0.18, 0.3, 0 ], null, [ 0.125, 1, 1 ]],
+			// [ new Line( lineGeometry, matLineYellow ), [ 0.3, 0.18, 0 ], [ 0, 0, Math.PI / 2 ], [ 0.125, 1, 1 ]]
 		],
 		YZ: [
 			[ new Mesh( new PlaneBufferGeometry( 0.295, 0.295 ), matCyanTransparent.clone() ), [ 0, 0.15, 0.15 ], [ 0, Math.PI / 2, 0 ]],
-			[ new Line( lineGeometry, matLineCyan ), [ 0, 0.18, 0.3 ], [ 0, 0, Math.PI / 2 ], [ 0.125, 1, 1 ]],
-			[ new Line( lineGeometry, matLineCyan ), [ 0, 0.3, 0.18 ], [ 0, - Math.PI / 2, 0 ], [ 0.125, 1, 1 ]]
+			// [ new Line( lineGeometry, matLineCyan ), [ 0, 0.18, 0.3 ], [ 0, 0, Math.PI / 2 ], [ 0.125, 1, 1 ]],
+			// [ new Line( lineGeometry, matLineCyan ), [ 0, 0.3, 0.18 ], [ 0, - Math.PI / 2, 0 ], [ 0.125, 1, 1 ]]
 		],
 		XZ: [
 			[ new Mesh( new PlaneBufferGeometry( 0.295, 0.295 ), matMagentaTransparent.clone() ), [ 0.15, 0, 0.15 ], [ - Math.PI / 2, 0, 0 ]],
-			[ new Line( lineGeometry, matLineMagenta ), [ 0.18, 0, 0.3 ], null, [ 0.125, 1, 1 ]],
-			[ new Line( lineGeometry, matLineMagenta ), [ 0.3, 0, 0.18 ], [ 0, - Math.PI / 2, 0 ], [ 0.125, 1, 1 ]]
+			// [ new Line( lineGeometry, matLineMagenta ), [ 0.18, 0, 0.3 ], null, [ 0.125, 1, 1 ]],
+			// [ new Line( lineGeometry, matLineMagenta ), [ 0.3, 0, 0.18 ], [ 0, - Math.PI / 2, 0 ], [ 0.125, 1, 1 ]]
 		]
 	};
 
@@ -986,32 +988,32 @@ var TransformControlsGizmo = function () {
 
 	var gizmoDimensions = {
 		XN: [
-			[ new Mesh( scaleHandleGeometry, matRedDark ), [ -0.0625, 0, 0 ], [ 0, 0, Math.PI / 2 ] ],
+			[ new Mesh( scaleHandleGeometry, matRedDark ), [ -shw/2, 0, 0 ], [ 0, 0, Math.PI / 2 ] ],
 			[ new Mesh( translationLineGeometry , matRedDark ), [ -0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ], null, 'doScale' ]
 			// [ new Line( lineGeometry, matLineDarkRed ), null, [ 0, 0, Math.PI ]]
 		],
 		XP: [
-			[ new Mesh( scaleHandleGeometry, matRed ), [ 0.0625, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
+			[ new Mesh( scaleHandleGeometry, matRed ), [ shw/2, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
 			[ new Mesh( translationLineGeometry , matRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null, 'doScale' ]
 			// [ new Line( lineGeometry, matLineRed ), null, null ]
 		],
 		YN: [
-			[ new Mesh( scaleHandleGeometry, matGreenDark ), [ 0, -0.0625, 0 ],  [ Math.PI, 0, 0 ] ],
+			[ new Mesh( scaleHandleGeometry, matGreenDark ), [ 0, -shw/2, 0 ],  [ Math.PI, 0, 0 ] ],
 			[ new Mesh( translationLineGeometry, matGreenDark), [ 0, -0.5, 0 ],  [ Math.PI, 0, 0 ], null, 'doScale']
 			// [ new Line( lineGeometry, matLineDarkGreen ), null, [ 0, 0, -Math.PI / 2 ]]
 		],
 		YP: [
-			[ new Mesh( scaleHandleGeometry, matGreen ), [ 0, 0.0625, 0 ], null ],
+			[ new Mesh( scaleHandleGeometry, matGreen ), [ 0, shw/2, 0 ], null ],
 			[ new Mesh( translationLineGeometry, matGreen), [ 0, 0.5, 0 ], null, null, 'doScale']
 			// [ new Line( lineGeometry, matLineGreen ), null, [ 0, 0, Math.PI / 2 ]]
 		],
 		ZN: [
-			[ new Mesh( scaleHandleGeometry, matBlueDark ), [ 0, 0, -0.0625 ], [ Math.PI / 2, 0, 0 ] ],
+			[ new Mesh( scaleHandleGeometry, matBlueDark ), [ 0, 0, -shw/2 ], [ Math.PI / 2, 0, 0 ] ],
 			[ new Mesh( translationLineGeometry, matBlueDark ), [ 0, 0, -0.5 ], [ Math.PI / 2, 0, 0 ], null, 'doScale']
 			// [ new Line( lineGeometry, matLineDarkBlue ), null, [ 0, Math.PI / 2, 0  ]]
 		],
 		ZP: [
-			[ new Mesh( scaleHandleGeometry, matBlue ), [ 0, 0, 0.0625 ], [ - Math.PI / 2, 0, 0 ] ],
+			[ new Mesh( scaleHandleGeometry, matBlue ), [ 0, 0, shw/2 ], [ - Math.PI / 2, 0, 0 ] ],
 			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, 0.5 ], [ -Math.PI / 2, 0, 0 ], null, 'doScale']
 			// [ new Line( lineGeometry, matLineBlue ), null, [ 0, - Math.PI / 2, 0  ]]
 		]
@@ -1019,27 +1021,27 @@ var TransformControlsGizmo = function () {
 
 	var pikcerDimensions = {
 		XN: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ -0.0625, 0, 0 ], [ 0, 0, Math.PI / 2 ] ],
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ -shw/2, 0, 0 ], [ 0, 0, Math.PI / 2 ] ],
 			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ -0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ], null, 'doScale' ]
 		],
 		XP: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0.0625, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ shw/2, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
 			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null, 'doScale' ]
 		],
 		YN: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, -0.0625, 0 ],  [ Math.PI, 0, 0 ] ],
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, -shw/2, 0 ],  [ Math.PI, 0, 0 ] ],
 			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, -0.5, 0 ], [ Math.PI, 0, 0 ], null, 'doScale' ]
 		],
 		YP: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0.0625, 0 ], null ],
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, shw/2, 0 ], null ],
 			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0.5, 0 ], null, null, 'doScale' ]
 		],
 		ZN: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, -0.0625 ], [ Math.PI / 2, 0, 0 ] ],
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, -shw/2 ], [ Math.PI / 2, 0, 0 ] ],
 			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, -0.5 ], [ -Math.PI / 2, 0, 0 ], null, 'doScale' ]
 		],
 		ZP: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, 0.0625 ], [ - Math.PI / 2, 0, 0 ] ],
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, shw/2 ], [ - Math.PI / 2, 0, 0 ] ],
 			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, 0.5 ], [ Math.PI / 2, 0, 0 ], null, 'doScale' ]
 		],
 	}
@@ -1345,7 +1347,9 @@ var TransformControlsGizmo = function () {
 			handle.rotation.set( 0, 0, 0 );
 			handle.position.copy( this.worldPosition );
 
-			var eyeDistance = this.worldPosition.distanceTo( this.cameraPosition );
+			tempVector.subVectors(this.worldPosition, this.cameraPosition ).normalize();
+			let angleBetween = tempVector.angleTo(this.camera.getWorldDirection(tempVector2));
+			let eyeDistance = this.worldPosition.distanceTo(this.cameraPosition) * Math.cos(angleBetween);
 			handle.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance * this.size / 7 );
 
 			if(centerFace && handle.name.length == 2) {

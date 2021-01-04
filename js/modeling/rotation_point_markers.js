@@ -1,6 +1,7 @@
 import { Group, SphereGeometry, MeshBasicMaterial, Mesh, Vector3, EdgesGeometry, BoxBufferGeometry, LineBasicMaterial, Line, LineSegments, Matrix4 } from "../three.js"
 
 const tempPos = new Vector3()
+const tempPos2 = new Vector3()
 
 const bufferBoxGeometry = new BoxBufferGeometry()
 bufferBoxGeometry.applyMatrix(new Matrix4().makeTranslation(0.5, 0.5, 0.5))
@@ -25,8 +26,10 @@ export class RotationPointMarkers {
             if(sphere.linkedUpObject !== undefined) {
                 sphere.position.setFromMatrixPosition(sphere.linkedUpObject.matrixWorld)
             }
-            let eyeDistance = sphere.position.distanceTo(tempPos.setFromMatrixPosition(this.display.camera.matrixWorld))
-            sphere.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance / 4 )
+            tempPos2.subVectors(sphere.position, tempPos.setFromMatrixPosition(this.display.camera.matrixWorld)).normalize();
+            let angleBetween = tempPos2.angleTo(this.display.camera.getWorldDirection(tempPos));
+            let eyeDistance = sphere.position.distanceTo(tempPos.setFromMatrixPosition(this.display.camera.matrixWorld)) * Math.cos(angleBetween);
+            sphere.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance / 3 )
         })
         
         this.outlines.forEach(outline => {
