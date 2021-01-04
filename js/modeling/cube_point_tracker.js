@@ -1,4 +1,4 @@
-import { Mesh, SphereGeometry, MeshBasicMaterial, Quaternion, Vector3, Raycaster } from "../three.js";
+import { Mesh, SphereGeometry, MeshBasicMaterial, Quaternion, Vector3, Raycaster, MeshLambertMaterial, BoxBufferGeometry } from "../three.js";
 import { raytraceUnderMouse } from "../raytracer.js";
 
 const raycaster = new Raycaster()
@@ -23,8 +23,8 @@ export class CubePointTracker {
         this.normalColor = normalColor
         this.highlightColor = highlightColor
        
-        let geometry = new SphereGeometry(1/15, 32, 32);
-        let helperGeometry = new SphereGeometry(1/6, 32, 32);
+        let geometry = new BoxBufferGeometry(1/7, 1/7, 1/7);
+        let helperGeometry = new BoxBufferGeometry(1/5, 1/5, 1/5);
 
         this.points = []
         this.helperPoints = []
@@ -35,7 +35,7 @@ export class CubePointTracker {
                         continue                        
                     }
 
-                    let material = new MeshBasicMaterial({ color: this.normalColor})
+                    let material = new MeshLambertMaterial({ color: this.normalColor})
 
                     let mesh = new Mesh(geometry, material)
                     mesh.visible = false

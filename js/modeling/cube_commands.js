@@ -108,7 +108,7 @@ export class CubeCommands {
                         raytracer.deselectAll()
                         raytracer.clickOnMesh(cube.cubeMesh)
                         
-                    }, 0xFF0000)
+                    }, 0x662141)
                 }
 
                 if(rp) {
