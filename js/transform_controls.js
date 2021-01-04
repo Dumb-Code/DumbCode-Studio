@@ -1076,9 +1076,9 @@ var TransformControlsGizmo = function () {
 		// 	[ new Mesh( new CylinderBufferGeometry( 0.03, 0, 0.15, 4, 1, false ), matLineYellowTransparent ), [ 0, - 1.17, 0 ], [ Math.PI, 0, 0 ], [ 1, 1, 0.001 ]],
 		// 	[ new Mesh( new CylinderBufferGeometry( 0.03, 0, 0.15, 4, 1, false ), matLineYellowTransparent ), [ 0, 1.17, 0 ], [ 0, 0, 0 ], [ 1, 1, 0.001 ]],
 		// ],
-		XYZE: [
-			[ new Line( CircleGeometry( 1, 1 ), matLineGray ), null, [ 0, Math.PI / 2, 0 ]]
-		]
+		// XYZE: [
+		// 	[ new Line( CircleGeometry( 1, 1 ), matLineGray ), null, [ 0, Math.PI / 2, 0 ]]
+		// ]
 	};
 
 	var helperRotate = {
@@ -1097,12 +1097,12 @@ var TransformControlsGizmo = function () {
 		Z: [
 			[ new Mesh( new TorusBufferGeometry( 1, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]],
 		],
-		E: [
-			[ new Mesh( new TorusBufferGeometry( 1.25, 0.1, 2, 24 ), matInvisible ) ]
-		],
-		XYZE: [
-			[ new Mesh( new SphereBufferGeometry( 0.7, 10, 8 ), matInvisible ) ]
-		]
+		// E: [
+		// 	[ new Mesh( new TorusBufferGeometry( 1.25, 0.1, 2, 24 ), matInvisible ) ]
+		// ],
+		// XYZE: [
+		// 	[ new Mesh( new SphereBufferGeometry( 0.7, 10, 8 ), matInvisible ) ]
+		// ]
 	};
 
 	var gizmoScale = {
