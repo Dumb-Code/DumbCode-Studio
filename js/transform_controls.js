@@ -986,55 +986,61 @@ var TransformControlsGizmo = function () {
 
 	var gizmoDimensions = {
 		XN: [
-			[ new Mesh( scaleHandleGeometry, matRedDark ), [ -1, 0, 0 ], [ 0, 0, Math.PI / 2 ], null ],
-			[ new Mesh( translationLineGeometry , matRedDark ), [ -0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ] ]
+			[ new Mesh( scaleHandleGeometry, matRedDark ), [ -0.0625, 0, 0 ], [ 0, 0, Math.PI / 2 ] ],
+			[ new Mesh( translationLineGeometry , matRedDark ), [ -0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ], null, 'doScale' ]
 			// [ new Line( lineGeometry, matLineDarkRed ), null, [ 0, 0, Math.PI ]]
 		],
 		XP: [
-			[ new Mesh( scaleHandleGeometry, matRed ), [ 1, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null ],
-			[ new Mesh( translationLineGeometry , matRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ]
+			[ new Mesh( scaleHandleGeometry, matRed ), [ 0.0625, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
+			[ new Mesh( translationLineGeometry , matRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null, 'doScale' ]
 			// [ new Line( lineGeometry, matLineRed ), null, null ]
 		],
 		YN: [
-			[ new Mesh( scaleHandleGeometry, matGreenDark ), [ 0, -1, 0 ],  [ Math.PI, 0, 0 ], null ],
-			[ new Mesh( translationLineGeometry, matGreenDark), [ 0, -0.5, 0 ],  [ Math.PI, 0, 0 ]]
+			[ new Mesh( scaleHandleGeometry, matGreenDark ), [ 0, -0.0625, 0 ],  [ Math.PI, 0, 0 ] ],
+			[ new Mesh( translationLineGeometry, matGreenDark), [ 0, -0.5, 0 ],  [ Math.PI, 0, 0 ], null, 'doScale']
 			// [ new Line( lineGeometry, matLineDarkGreen ), null, [ 0, 0, -Math.PI / 2 ]]
 		],
 		YP: [
-			[ new Mesh( scaleHandleGeometry, matGreen ), [ 0, 1, 0 ], null, null ],
-			[ new Mesh( translationLineGeometry, matGreen), [ 0, 0.5, 0 ], null]
+			[ new Mesh( scaleHandleGeometry, matGreen ), [ 0, 0.0625, 0 ], null ],
+			[ new Mesh( translationLineGeometry, matGreen), [ 0, 0.5, 0 ], null, null, 'doScale']
 			// [ new Line( lineGeometry, matLineGreen ), null, [ 0, 0, Math.PI / 2 ]]
 		],
 		ZN: [
-			[ new Mesh( scaleHandleGeometry, matBlueDark ), [ 0, 0, -1 ], [ Math.PI / 2, 0, 0 ], null],
-			[ new Mesh( translationLineGeometry, matBlueDark ), [ 0, 0, -0.5 ], [ Math.PI / 2, 0, 0 ]]
+			[ new Mesh( scaleHandleGeometry, matBlueDark ), [ 0, 0, -0.0625 ], [ Math.PI / 2, 0, 0 ] ],
+			[ new Mesh( translationLineGeometry, matBlueDark ), [ 0, 0, -0.5 ], [ Math.PI / 2, 0, 0 ], null, 'doScale']
 			// [ new Line( lineGeometry, matLineDarkBlue ), null, [ 0, Math.PI / 2, 0  ]]
 		],
 		ZP: [
-			[ new Mesh( scaleHandleGeometry, matBlue ), [ 0, 0, 1 ], [ - Math.PI / 2, 0, 0 ], null],
-			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, 0.5 ], [ -Math.PI / 2, 0, 0 ]]
+			[ new Mesh( scaleHandleGeometry, matBlue ), [ 0, 0, 0.0625 ], [ - Math.PI / 2, 0, 0 ] ],
+			[ new Mesh( translationLineGeometry, matBlue ), [ 0, 0, 0.5 ], [ -Math.PI / 2, 0, 0 ], null, 'doScale']
 			// [ new Line( lineGeometry, matLineBlue ), null, [ 0, - Math.PI / 2, 0  ]]
 		]
 	};
 
 	var pikcerDimensions = {
 		XN: [
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ -0.6, 0, 0 ], [ 0, 0, Math.PI / 2 ]]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ -0.0625, 0, 0 ], [ 0, 0, Math.PI / 2 ] ],
+			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ -0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ], null, 'doScale' ]
 		],
 		XP: [
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0.6, 0, 0 ], [ 0, 0, - Math.PI / 2 ]]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0.0625, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
+			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null, 'doScale' ]
 		],
 		YN: [
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, -0.6, 0 ], [ Math.PI, 0, 0 ]]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, -0.0625, 0 ],  [ Math.PI, 0, 0 ] ],
+			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, -0.5, 0 ], [ Math.PI, 0, 0 ], null, 'doScale' ]
 		],
 		YP: [
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0.6, 0 ]]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0.0625, 0 ], null ],
+			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0.5, 0 ], null, null, 'doScale' ]
 		],
 		ZN: [
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, -0.6 ], [ -Math.PI / 2, 0, 0 ]]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, -0.0625 ], [ Math.PI / 2, 0, 0 ] ],
+			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, -0.5 ], [ -Math.PI / 2, 0, 0 ], null, 'doScale' ]
 		],
 		ZP: [
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, 0.6 ], [ Math.PI / 2, 0, 0 ]]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, 0.0625 ], [ - Math.PI / 2, 0, 0 ] ],
+			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, 0.5 ], [ Math.PI / 2, 0, 0 ], null, 'doScale' ]
 		],
 	}
 
@@ -1339,17 +1345,29 @@ var TransformControlsGizmo = function () {
 			handle.rotation.set( 0, 0, 0 );
 			handle.position.copy( this.worldPosition );
 
-			if(centerFace && handle.name.length == 2) {
-				this.object.tabulaCube.getWorldPosition (
-					handle.name.startsWith('X') ? (handle.name == 'XP' ? 1 : 0) : 0.5, 
-					handle.name.startsWith('Y') ? (handle.name == 'YP' ? 1 : 0) : 0.5,
-					handle.name.startsWith('Z') ? (handle.name == 'ZP' ? 1 : 0) : 0.5,
-					handle.position
-				)
-			}
-
 			var eyeDistance = this.worldPosition.distanceTo( this.cameraPosition );
 			handle.scale.set( 1, 1, 1 ).multiplyScalar( eyeDistance * this.size / 7 );
+
+			if(centerFace && handle.name.length == 2) {
+				let cube = this.object.tabulaCube
+				if(handle.tag === "doScale") {
+					cube.getWorldPosition(0.5, 0.5, 0.5, handle.position)
+					if(handle.name.startsWith('X')) {
+						handle.scale.x = cube.dimension[0]/32
+					} else if(handle.name.startsWith('Y')) {
+						handle.scale.y = cube.dimension[1]/32
+					} else if(handle.name.startsWith('Z')) {
+						handle.scale.z = cube.dimension[2]/32
+					}
+				} else {
+					cube.getWorldPosition (
+						handle.name.startsWith('X') ? (handle.name == 'XP' ? 1 : 0) : 0.5, 
+						handle.name.startsWith('Y') ? (handle.name == 'YP' ? 1 : 0) : 0.5,
+						handle.name.startsWith('Z') ? (handle.name == 'ZP' ? 1 : 0) : 0.5,
+						handle.position
+					)
+				}
+			}
 
 			// TODO: simplify helpers and consider decoupling from gizmo
 
