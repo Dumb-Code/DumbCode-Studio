@@ -7,7 +7,7 @@ const tempPos = new Vector3()
 const tempPos2 = new Vector3()
 const tempQuaterion = new Quaternion()
 
-const normalColor = 0x6378ad
+const normalColor = 0x23284d
 const highlightColor = 0x15c1d4
 
 export class CubePointTracker {
