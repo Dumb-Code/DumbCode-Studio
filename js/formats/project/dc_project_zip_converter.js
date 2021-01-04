@@ -70,6 +70,7 @@ export class DcProjectZipConverter {
                     .then(fileDatas => fileDatas.forEach((data, index) => {
                         let tab = this.animationPart.createAndInitiateNewAnimationTab(animationNames[index], data[0])
                         tab.handler.keyframeInfo = data[1].keyframeInfo
+                        tab.handler.ikaCubes = data[1].ikaCubes ?? []
                         this.animationPart.onAnimationTabAdded(tab)
                     }))
                 })
@@ -130,7 +131,10 @@ export class DcProjectZipConverter {
             animFolder.file('animation_names', animations.map(data => data.name).join("\n"))
             animations.forEach((data, index) => {
                 animFolder.file(index + ".dca", DCALoader.exportAnimation(data.handler).getAsBlob())
-                animFolder.file(index + ".json", JSON.stringify( { keyframeInfo: this.cleanKeyframeInfo(data.handler.keyframeInfo) } ))
+                animFolder.file(index + ".json", JSON.stringify( { 
+                    keyframeInfo: this.cleanKeyframeInfo(data.handler.keyframeInfo),
+                    ikaCubes: data.handler.ikaCubes
+                 } ))
             })
         }
 

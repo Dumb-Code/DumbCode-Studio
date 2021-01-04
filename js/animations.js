@@ -19,6 +19,7 @@ export class AnimationHandler {
         
         this.events = []
         this.keyframeInfo = []
+        this.ikaCubes = [] //Inverse kinematic anchor cubes
         this.definedKeyframeInfo = new Map()
         this.playstate = new PlayState()
     }
@@ -38,6 +39,10 @@ export class AnimationHandler {
     renameCube(oldName, newName) {
         this.keyframes.forEach(kf => kf.renameCube(oldName, newName))
         this.loopKeyframe.renameCube(oldName, newName)
+
+        if(this.ikaCubes.includes(oldName)) {
+            this.ikaCubes.splice(this.ikaCubes.indexOf(oldName), 1, newName)
+        }
     }
 
     animate(deltaTime) {

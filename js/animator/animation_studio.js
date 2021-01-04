@@ -50,6 +50,8 @@ export class AnimationStudio {
         this.transformControls = display.createTransformControls()
         this.group.add(this.transformControls)
         
+        this.display = display
+
         //Instantiate all the texture studio stuff.
         //Note that some stuff relies on other stuff, so it being in this order is important.
         this.gumball = new Gumball(dom, this)
@@ -58,7 +60,6 @@ export class AnimationStudio {
         this.keyframeManager = new KeyframeBoardManager(this, dom.find('.keyframe-board'), dom.find('.input-playback-range'))
         this.keyframeSettings = new KeyframeSettings()
         this.panelButtons = new PanelButtons(dom, this)
-        this.display = display
         this.methodExporter = new JavaMethodExporter()
         this.progressionCanvas = new ProgressionCanvas(dom, this)
         this.clock = new Clock()
@@ -108,10 +109,10 @@ export class AnimationStudio {
      * @param {*} updateDisplay whether to update the dispaly (cube values)
      * @param {*} updateSilent whether to be silent. Should be true when the rotation is not being set by the player. 
      *                         If true, updates the keyframe
+     * @param {DCMCube} selected the selected cube to update to.
      */
-    setRotation(values, updateDisplay = true, updateSilent = false) {
-        let selected = this.raytracer.oneSelected()
-        if(selected !== null) {
+    setRotation(values, updateDisplay = true, updateSilent = false, selected = this.raytracer.oneSelected()?.tabulaCube) {
+        if(selected != null) {
             //Update the display if needed. Either silently or not silently.
             if(updateDisplay) {
                 if(updateSilent) {
@@ -140,7 +141,7 @@ export class AnimationStudio {
                     //Get the rotation of the cube, and calculate what it would take to get from values to that rottation.
                     //Set that in the keyframe data.
                     let arr = selected.cubeGroup.rotation.toArray()
-                    handler.selectedKeyFrame.rotationMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]*180/Math.PI))
+                    handler.selectedKeyFrame.rotationMap.set(selected.name, values.map((v, i) => v - arr[i]*180/Math.PI))
                     handler.selectedKeyFrame.skip = false
                     handler.forcedAnimationTicks = null
 
@@ -157,10 +158,10 @@ export class AnimationStudio {
      * @param {*} updateDisplay whether to update the dispaly (cube values)
      * @param {*} updateSilent whether to be silent. Should be true when the poisition is not being set by the player. 
      *                         If true, updates the keyframe
+     * @param {DCMCube} selected the selected cube to update to.
      */
-    setPosition(values, updateDisplay = true, updateSilent = false) {
-        let selected = this.raytracer.oneSelected()
-        if(selected !== null) {
+    setPosition(values, updateDisplay = true, updateSilent = false, selected = this.raytracer.oneSelected()?.tabulaCube) {
+        if(selected != null) {
             //Update the display if needed. Either silently or not silently.
             if(updateDisplay) {
                 if(updateSilent) {
@@ -188,7 +189,7 @@ export class AnimationStudio {
                     //Get the position of the cube, and calculate what it would take to get from values to that rottation.
                     //Set that in the keyframe data.
                     let arr = selected.cubeGroup.position.toArray()
-                    handler.selectedKeyFrame.rotationPointMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]))
+                    handler.selectedKeyFrame.rotationPointMap.set(selected.name, values.map((v, i) => v - arr[i]))
                     handler.selectedKeyFrame.skip = false
                     handler.forcedAnimationTicks = null
 
@@ -205,10 +206,10 @@ export class AnimationStudio {
      * @param {*} updateDisplay whether to update the dispaly (cube values)
      * @param {*} updateSilent whether to be silent. Should be true when the cube grow is not being set by the player. 
      *                         If true, updates the keyframe
+     * @param {DCMCube} selected the selected cube to update to.
      */
-    setCubeGrow(values, updateDisplay = true, updateSilent = false) {
-        let selected = this.raytracer.oneSelected()
-        if(selected !== null) {
+    setCubeGrow(values, updateDisplay = true, updateSilent = false, selected = this.raytracer.oneSelected()?.tabulaCube) {
+        if(selected != null) {
             //Update the display if needed. Either silently or not silently.
             if(updateDisplay) {
                 if(updateSilent) {
@@ -236,8 +237,8 @@ export class AnimationStudio {
 
                     //Get the cube grow of the cube, and calculate what it would take to get from values to that rottation.
                     //Set that in the keyframe data.
-                    let arr = selected.parent.position.toArray().map(e => -e)
-                    handler.selectedKeyFrame.cubeGrowMap.set(selected.tabulaCube.name, values.map((v, i) => v - arr[i]))
+                    let arr = selected.cubeGrowGroup.position.toArray().map(e => -e)
+                    handler.selectedKeyFrame.cubeGrowMap.set(selected.name, values.map((v, i) => v - arr[i]))
                     handler.selectedKeyFrame.skip = false
                     handler.forcedAnimationTicks = null
 

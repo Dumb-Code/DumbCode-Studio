@@ -15,7 +15,7 @@ import { StudioOptions } from "./studio_options.js";
 
 const major = 0
 const minor = 8
-const patch = 5
+const patch = 6
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`
@@ -69,7 +69,7 @@ async function init() {
     camera.position.set(0.45, 1.5, 4.5)
     camera.lookAt(0.5, 1.5, 0.5)
 
-    let onTop = new Scene()
+    let onTop = createScene()
     onTop.background = null;
 
     //Set up the controls
@@ -120,6 +120,7 @@ async function init() {
 
     display.createTransformControls = () => {
         let transformControls = new TransformControls(camera, renderer.domElement)
+        transformControls.setSize(1.25)
         allTransformControls.push(transformControls)
         transformControls.addEventListener('dragging-changed', e => {
             controls.enabled = !e.value;
@@ -135,6 +136,7 @@ async function init() {
             }
         })
         transformControls.space = "local"
+        raytracer.addEventListener('clicked', e => e.ignore = e.ignore || (transformControls.dragging && transformControls.axis !== null))
         return transformControls
     }
 

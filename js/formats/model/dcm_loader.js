@@ -172,7 +172,7 @@ export class DCMCube {
         return this.cubeGroup
     }
 
-    getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3(), quat) {
+    getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3()) {
         let w = this.dimension[0] + this.cubeGrow[0]*2 + 0.0001
         let h = this.dimension[1] + this.cubeGrow[1]*2 + 0.0001
         let d = this.dimension[2] + this.cubeGrow[2]*2 + 0.0001
