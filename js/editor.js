@@ -59,7 +59,7 @@ let allTransformControls = []
 
 async function init() {
     //Set up the renderer
-    var renderer = new WebGLRenderer( { alpha: true } );
+    var renderer = new WebGLRenderer( { antialias: true, alpha: true } );
     renderer.autoClear = false;
     renderer.setClearColor(0x000000, 0);
 
