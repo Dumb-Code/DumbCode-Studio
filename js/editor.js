@@ -120,6 +120,7 @@ async function init() {
 
     display.createTransformControls = () => {
         let transformControls = new TransformControls(camera, renderer.domElement)
+        transformControls.setSize(1.25)
         allTransformControls.push(transformControls)
         transformControls.addEventListener('dragging-changed', e => {
             controls.enabled = !e.value;
