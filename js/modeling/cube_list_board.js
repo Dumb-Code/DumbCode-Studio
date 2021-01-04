@@ -50,29 +50,30 @@ export class CubeListBoard {
 
         const maxRefreshFrame = 50
         let refreshIndex = 0
-        let model = this.pth.model
-        let runOnFrame = () => {
-            if(this.pth.anySelected()) {
-                if(this.pth.model !== model) {
-                   return
-                }
-                let refreshTarget = refreshIndex + maxRefreshFrame
-                let cube
-                for(; refreshIndex < refreshTarget; refreshIndex++) {
-                    cube = this.pth.model.children[refreshIndex]
+        if(this.pth.anySelected()) {
+            let model = this.pth.model
+            let runOnFrame = () => {
+                if(this.pth.anySelected()) {
+                    if(this.pth.model !== model) {
+                    return
+                    }
+                    let refreshTarget = refreshIndex + maxRefreshFrame
+                    let cube
+                    for(; refreshIndex < refreshTarget; refreshIndex++) {
+                        cube = this.pth.model.children[refreshIndex]
+                        if(cube) {
+                            this.createCube(this.cubeList, cube, oldMap)    
+                        } else {
+                            break
+                        }
+                    }
                     if(cube) {
-                        this.createCube(this.cubeList, cube, oldMap)    
-                    } else {
-                        break
+                        requestAnimationFrame(runOnFrame)
                     }
                 }
-                if(cube) {
-                    requestAnimationFrame(runOnFrame)
-                }
             }
-        }
-        runOnFrame()
-        
+            runOnFrame()
+        }        
     }
 
     createCube(parent, cube, oldMap) {
