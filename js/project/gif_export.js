@@ -3,6 +3,7 @@ import { createScene, updateCamera } from "../editor.js"
 import { downloadBlob } from "../util.js";
 
 const dummyRenderer = new WebGLRenderer({
+    antialias: true, 
     alpha:true
 });
 const gifFramesPerFrame = 3
