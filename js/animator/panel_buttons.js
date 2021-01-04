@@ -91,7 +91,7 @@ export class PanelButtons {
             return  
         }
         //Updat the slider with the ticks. If visibleTicks isn't null use that. Otherwise use normal ticks.
-        let ticks = this.playstate.visibleTicks !== null ? this.playstate.visibleTicks : this.playstate.ticks
+        let ticks = active.playstate.visibleTicks !== null ? active.playstate.visibleTicks : active.playstate.ticks
         this.inputPlaybackRange.attr('min', active.minTime).attr('max', active.totalTime).val(ticks)
     }
 
