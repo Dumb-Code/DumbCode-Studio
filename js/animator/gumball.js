@@ -1,4 +1,4 @@
-import { CubeGeometry, Euler, Group, Mesh, MeshLambertMaterial, Object3D, Quaternion, Vector3 } from "../three.js";
+import { BufferAttribute, BufferGeometry, CubeGeometry, Euler, Geometry, Group, Line, LineBasicMaterial, Mesh, MeshLambertMaterial, Object3D, Quaternion, Vector3 } from "../three.js";
 import { Bone3D, Chain3D, Structure3D, V3 } from "../fik.js"
 import { LinkedSelectableList, LinkedElement, ToggleableElement } from "../util.js";
 
@@ -11,6 +11,8 @@ const worldQuat = new Quaternion()
 const tempEuler = new Euler()
 tempEuler.order = "ZYX"
 
+
+const cubeHelperMesh = new Mesh(new CubeGeometry(1/32, 1/32, 1/32), new MeshLambertMaterial({ color: 0x528F15 }))
 /**
  * The animation gumball.
  */
@@ -37,18 +39,35 @@ export class Gumball {
         this.ikAnchor.rotation.order = "ZYX"
         studio.group.add(this.ikAnchor)
 
+        let ikHelpers = []
+        let ikLinePositionBuffer = new BufferAttribute(new Float32Array(32*3), 3)
+        let ikLineHelper = new Line(new BufferGeometry().addAttribute('position', ikLinePositionBuffer), new LineBasicMaterial( { color:0x528F15 } ))
+
         this.transformControls.addEventListener('mouseUp', () => {
             ikSolver.clear()
             ikData.length = 0
+            ikHelpers.forEach(data => studio.group.remove(data.mesh))
+            ikHelpers.length = 0
+            studio.group.remove(ikLineHelper)    
         })
+
+        let updateHelpers = () => {
+            ikHelpers.forEach((helper, index) => {
+                let cube = helper.cube
+                let mesh = helper.mesh
+                cube.cubeGroup.getWorldQuaternion(mesh.quaternion)
+                cube.getWorldPosition(0.5, 0.5, 0.5, mesh.position)
+
+                ikLinePositionBuffer.setXYZ(index, mesh.position.x, mesh.position.y, mesh.position.z)
+                ikLinePositionBuffer.needsUpdate = true
+            })
+        }
+
         this.transformControls.addEventListener('mouseDown', () => {
             let selected = this.raytracer.oneSelected()
             if(selected === null) {
                 return
             }
-
-            ikSolver.clear()
-            ikData.length = 0
 
             let handler = studio.pth.animationTabs.active
             if(handler !== null && this.transformType.value === translateIK) {
@@ -62,6 +81,10 @@ export class Gumball {
                         break
                     }
                 }
+
+                ikLineHelper.geometry.setDrawRange(0, allCubes.length)
+                studio.group.add(ikLineHelper)
+
                 allCubes.reverse()
                 let previousPosition = null
                 let previousCube = null
@@ -77,16 +100,24 @@ export class Gumball {
                         ikData.push( { 
                             cube: previousCube, 
                             startingWorldRot: previousCube.cubeGroup.getWorldQuaternion(new Quaternion()),
-                            offset: new Vector3(end.x-start.x, end.y-start.y, end.z-start.z).normalize() ,
+                            offset: new Vector3(end.x-start.x, end.y-start.y, end.z-start.z).normalize(),
                         } )
                         chain.addBone(bone)
                     }
+
+                    let mesh = cubeHelperMesh.clone()
+                    studio.group.add(mesh)
+                    ikHelpers.push( { cube, mesh } )
+
                     previousPosition = p.toArray()  
                     previousCube = cube
                 })
-                ikSolver.add(chain, this.ikAnchor.position)
-                ikSolver.update()
-                selected.cubeGroup.getWorldQuaternion(ikStartingRotation)
+                if(allCubes.length !== 0) {
+                    ikSolver.add(chain, this.ikAnchor.position)
+                    ikSolver.update()
+                    updateHelpers()
+                    selected.cubeGroup.getWorldQuaternion(ikStartingRotation)
+                }
             }
 
             startingRot.x = selected.cubeGroup.rotation.x
@@ -139,6 +170,7 @@ export class Gumball {
                     return
                 }
                 ikSolver.update()
+                updateHelpers()
                 let pushData = []
 
                 ikData.forEach((d, i) => {
