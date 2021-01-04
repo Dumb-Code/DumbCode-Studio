@@ -237,7 +237,7 @@ export class Gumball {
             this.transformControls.detach()
         } else {
             if(isIk) {
-                selected.matrixWorld.decompose(this.ikAnchor.position, this.ikAnchor.quaternion, tempVec)
+                selected.cubeGroup.matrixWorld.decompose(this.ikAnchor.position, this.ikAnchor.quaternion, tempVec)
             }
             this.transformControls.attach(isIk ? this.ikAnchor : selected.parent );
             this.transformControls.mode = mode
