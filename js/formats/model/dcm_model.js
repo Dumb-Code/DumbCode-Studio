@@ -6,6 +6,9 @@ const tempQuaterion = new Quaternion()
 const hierarchyChangedEvent = { type: "hierarchyChanged" }
 const textureSizeChangedEvent = { type: "textureSizeChanged", width:64, hieght:64 }
 
+/**
+ * Holds the 
+ */
 export class DCMModel {
 
     constructor() {
