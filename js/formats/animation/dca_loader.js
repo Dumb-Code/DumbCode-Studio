@@ -1,16 +1,27 @@
-import { ByteBuffer } from "../../animations.js"
+import { AnimationHandler, ByteBuffer } from "../../animations.js"
 
 const rotArr = new Array(3)
 const posArr = new Array(3)
 
 export class DCALoader {}
 
+/**
+ * Loads the aniamtions from a file.
+ * Note that there is no "dca class", instead we write to an animaion handler.
+ * 
+ * This requires the buffer to be in the correct format. 
+ * 
+ * @param {AnimationHandler} handler the handler to write to
+ * @param {ByteBuffer} buffer the file buffer to read from
+ */
 DCALoader.importAnimation = (handler, buffer) => {
     let version = buffer.readNumber()
+    //In version 1 we use a differnet type of string handling
     if(version < 1) {
         buffer.useOldString = true
     }
 
+    //Read the loop data
     if(version >= 9 && buffer.readBool()) {
         handler.loopData = {
             start: buffer.readNumber(),
@@ -21,10 +32,9 @@ DCALoader.importAnimation = (handler, buffer) => {
         handler.loopData = null
     }
 
-    let length = buffer.readNumber()
-
+    //Read the keyframes
     handler.keyframes = []
-
+    let length = buffer.readNumber()
     for(let i = 0; i < length; i++) {
         let kf = handler.createKeyframe()
 
@@ -62,6 +72,7 @@ DCALoader.importAnimation = (handler, buffer) => {
         }
     }
 
+    //Read the events
     if(version >= 4) {
         let eventSize = buffer.readNumber()
         for(let e = 0; e < eventSize; e++) {
@@ -74,27 +85,51 @@ DCALoader.importAnimation = (handler, buffer) => {
             handler.events.push({ time, data })
         }
     }
+
+    //Repair the keyframes. 
     DCALoader.repairKeyframes(handler, version)
 }
 
+/**
+ * 
+ * @param {AnimationHandler} handler the animation handler to write to
+ * @param {number} version the dca version 
+ * @param {*} alreadyFlipped whether the animation is already flipped. While usually tied to the version,
+ *                           if the animation is imported with model files then it will already be flipped
+ */
 DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
+    //If the keyframe version is <= 3, then the keyframe data is a list of points for the animation to follow.
+    //The following code is to convert that list of points into a list of changes.
     if(version <= 3) {        
         let map = handler.tbl.cubeMap
+        //At version 3, we have the keyframe data being subtracted from the default.
         if(version === 3) {
             handler.keyframes.forEach(kf => {
+                //Function to mutate array to array+subvalue
+                function transformArr(arr, subValue) {
+                    if(subValue === null) {
+                        return
+                    }
+                    for(let i = 0; i < 3; i++) {
+                        arr[i] = arr[i] + subValue[i]
+                    }
+                }
+                
                 kf.rotationMap.forEach((arr, key) => transformArr(arr, map.get(key)?.rotation))
                 kf.rotationPointMap.forEach((arr, key) => transformArr(arr, map.get(key)?.rotationPoint))
             })
         }
 
+        //Sort the keyframes, and animate at the start time
         let sorted = [...handler.keyframes].sort((a, b) => a.startTime - b.startTime)
         sorted.forEach((kf, index) => {
             handler.tbl.resetAnimations()
             handler.keyframes.forEach(_kf => _kf.animate(kf.startTime))
 
+            //If the next keyframe start time is before this end point, then it'll get cut off.
+            //The following code is to account to that and change `step` to be between 0-1 to where it gets cut off. 
+            let step = 1
             let next = sorted[index+1]
-
-            let mod = 1
             if(next !== undefined) {
                 let dist = next.startTime - kf.startTime
                 //Keyframes intersect
@@ -103,17 +138,20 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
                     kf.duration = dist
                 }
             }
-                
+
+            //The kf data maps currently hold where the cube should be.
+            //If we then where the cube is when it's animated, we can caluclate
+            //how much it should have to move.
             kf.rotationMap.forEach((arr, key) => {
                 map.get(key).cubeGroup.rotation.toArray(rotArr)
                 for(let i = 0; i < 3; i++) {
-                    arr[i] = (arr[i] - rotArr[i]*180/Math.PI) * mod
+                    arr[i] = (arr[i] - rotArr[i]*180/Math.PI) * step
                 }
             })
             kf.rotationPointMap.forEach((arr, key) => {
                 map.get(key).cubeGroup.position.toArray(posArr)
                 for(let i = 0; i < 3; i++) {
-                    arr[i] = (arr[i] - posArr[i]) * mod
+                    arr[i] = (arr[i] - posArr[i]) * step
                 }
             })
         })
@@ -166,15 +204,6 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
     }
 }
 
-function transformArr(arr, subValue) {
-    if(subValue === null) {
-        return
-    }
-    for(let i = 0; i < 3; i++) {
-        arr[i] = arr[i] + subValue[i]
-    }
-}
-
 DCALoader.exportAnimation = handler => {
     let buffer = new ByteBuffer()
     //0 - initial version
@@ -211,6 +240,8 @@ DCALoader.exportAnimation = handler => {
     //     (27 DEC 2020) [ba91a6db089353646b976c1fabb251910640db62]
     //
     buffer.writeNumber(10)
+
+    //Write the loop data
     if(handler.loopData !== null) {
         buffer.writeBool(true)
         buffer.writeNumber(handler.loopData.start)
@@ -219,13 +250,16 @@ DCALoader.exportAnimation = handler => {
     } else {
         buffer.writeBool(false)
     }
+
+
+    //Write the keyframes
     buffer.writeNumber(handler.keyframes.length)
-    
     handler.keyframes.forEach(kf => {
         buffer.writeNumber(kf.startTime)
         buffer.writeNumber(kf.duration)
         buffer.writeNumber(kf.layer)
 
+        //Write the rotation data
         buffer.writeNumber(kf.rotationMap.size);
         [...kf.rotationMap.keys()].sort().forEach(name => {
             let entry = kf.rotationMap.get(name)
@@ -235,6 +269,7 @@ DCALoader.exportAnimation = handler => {
             buffer.writeNumber(entry[2])
         })
 
+        //Write the position data
         buffer.writeNumber(kf.rotationPointMap.size);
         [...kf.rotationPointMap.keys()].sort().forEach(name => {
             let entry = kf.rotationPointMap.get(name)
@@ -244,6 +279,7 @@ DCALoader.exportAnimation = handler => {
             buffer.writeNumber(entry[2])
         })
 
+        //Write the cube grow data
         buffer.writeNumber(kf.cubeGrowMap.size);
         [...kf.cubeGrowMap.keys()].sort().forEach(name => {
             let entry = kf.cubeGrowMap.get(name)
@@ -260,6 +296,7 @@ DCALoader.exportAnimation = handler => {
         })
     })
 
+    //Write the events
     buffer.writeNumber(handler.events.length)
     handler.events.forEach(event => {
         buffer.writeNumber(event.time)

@@ -3,7 +3,7 @@ import { ByteBuffer } from "../animations.js"
 import { doubleClickToEdit, fileUploadBox, getAndDeleteFiles } from "../util/element_functions.js"
 import { GifExporter } from "./gif_export.js"
 import { DCMModel } from "../formats/model/dcm_loader.js"
-import { TBLFilesLoader } from "../formats/animation/tbl_files.js"
+import { ModelListAnimationLoader } from "../formats/animation/model_list_animation.js"
 import { DCALoader } from "../formats/animation/dca_loader.js"
 
 export class AnimationProjectPart {
@@ -64,7 +64,7 @@ export class AnimationProjectPart {
         
                 let info = infoFile ? JSON.parse(result.pop()) : { base_time: 5 }
 
-                TBLFilesLoader.readFromTblFiles(tab.handler, result, info)
+                ModelListAnimationLoader.readFromModelFiles(tab.handler, result, info)
                 this.onAnimationTabAdded(tab)
             }
         })
