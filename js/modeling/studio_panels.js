@@ -1,4 +1,4 @@
-import { LayoutPart } from "../util.js"
+import { LayoutPart } from "../util/layout_part.js"
 
 const mainArea = document.getElementById("main-area")
 

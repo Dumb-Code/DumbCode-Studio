@@ -1,4 +1,5 @@
-import { LinkedSelectableList, CanvasTransformControls, LinkedElement } from "../util.js"
+import { CanvasTransformControls } from "../util/canvas_transform_controls.js"
+import { LinkedSelectableList } from "../util/linked_selectable_list.js"
 
 //The radius of the circles
 const radius = 7.5

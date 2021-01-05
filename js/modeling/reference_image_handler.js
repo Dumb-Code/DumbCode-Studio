@@ -1,7 +1,9 @@
 import { readFile } from "../displays.js"
 import { raytraceUnderMouse } from "../raytracer.js"
 import { DoubleSide, Mesh, MeshBasicMaterial, NearestFilter, PlaneGeometry, Texture } from "../libs/three.js"
-import { fileUploadBox, getAndDeleteFiles, LinkedElement, LinkedSelectableList } from "../util.js"
+import { fileUploadBox, getAndDeleteFiles } from "../util/element_functions.js"
+import { LinkedElement } from "../util/linked_element.js"
+import { LinkedSelectableList } from "../util/linked_selectable_list.js"
 
 const startSize = 2
 

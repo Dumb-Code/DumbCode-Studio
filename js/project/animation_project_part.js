@@ -1,6 +1,6 @@
 import { readFile } from "../displays.js"
 import { ByteBuffer } from "../animations.js"
-import { doubleClickToEdit, fileUploadBox, getAndDeleteFiles, ToggleableElement } from "../util.js"
+import { doubleClickToEdit, fileUploadBox, getAndDeleteFiles } from "../util/element_functions.js"
 import { GifExporter } from "./gif_export.js"
 import { DCMModel } from "../formats/model/dcm_loader.js"
 import { TBLFilesLoader } from "../formats/animation/tbl_files.js"

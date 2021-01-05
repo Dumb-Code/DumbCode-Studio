@@ -1,6 +1,6 @@
 import { WebGLRenderer, Color, Clock } from "../libs/three.js";
 import { createScene, updateCamera } from "../editor.js"
-import { downloadBlob } from "../util.js";
+import { downloadBlob } from "../util/element_functions.js";
 
 const dummyRenderer = new WebGLRenderer({
     antialias: true, 
@@ -62,9 +62,9 @@ export class GifExporter {
                 let fps = modal.find('.gif-fps').val()
                 let color = parseInt(modal.find('.gif-transparent-texture').val().substring(1), 16)
                 this.createGif(animationStudio.display, handler, fps, color, widthDom.val(), heightDom.val(), recordingProcess, processProcess)
-                    .then(blob => {
-                stage.text('Done')
-                downloadBlob(name + ".gif", blob)
+                .then(blob => {
+                    stage.text('Done')
+                    downloadBlob(name + ".gif", blob)
                 })
                 
             })

@@ -1,5 +1,6 @@
 import { Vector2, Raycaster, EventDispatcher } from "./libs/three.js";
-import { isKeyDown, lineIntersection } from "./util.js";
+import { lineIntersection } from "./util.js";
+import { isKeyDown } from "./util/element_functions.js";
 
 
 document.addEventListener( 'mousemove', onMouseMove, false );

@@ -6,7 +6,8 @@ import { DcProject } from "../formats/project/dc_project.js"
 import { DcProjectZipConverter } from "../formats/project/dc_project_zip_converter.js"
 import { RemoteProject } from "../formats/project/remote_project.js"
 import { FlatShading } from "../libs/three.js"
-import { doubleClickToEdit, downloadBlob, fileUploadBox, getAndDeleteFiles, LinkedSelectableList } from "../util.js"
+import { doubleClickToEdit, downloadBlob, fileUploadBox, getAndDeleteFiles } from "../util/element_functions.js"
+import { LinkedSelectableList } from "../util/linked_selectable_list.js"
 import { RemoteProjectHandler } from "./remote_project_handler.js"
 
 export class ModelProjectPart {

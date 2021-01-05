@@ -1,4 +1,4 @@
-import { LinkedElement, ToggleableElement } from "../util.js"
+import { LinkedElement } from "../util/linked_element.js"
 
 /**
  * Holds all the information about the data displayed on the top right panel.

@@ -1,4 +1,5 @@
-import { LinkedSelectableList, lineIntersection } from "../util.js"
+import { lineIntersection } from "../util.js"
+import { LinkedSelectableList } from "../util/linked_selectable_list.js"
 
 export class TextureTools {
 

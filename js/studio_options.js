@@ -1,5 +1,6 @@
-import { doubleClickToEdit, LinkedSelectableList } from "./util.js";
+import { doubleClickToEdit } from "./util/element_functions.js";
 import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture, TubeBufferGeometry } from "./libs/three.js";
+import { LinkedSelectableList } from "./util/linked_selectable_list.js";
 
 export class StudioOptions {
 

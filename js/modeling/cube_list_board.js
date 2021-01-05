@@ -1,4 +1,5 @@
-import { isKeyDown, DraggableElementList, doubleClickToEdit } from "../util.js"
+import { DraggableElementList } from "../util/draggable_element_list.js"
+import { isKeyDown, doubleClickToEdit } from "../util/element_functions.js"
 
 export class CubeListBoard {
     constructor(cubeList, raytracer, pth, lockedCubes, studioOptions, renameCube) {

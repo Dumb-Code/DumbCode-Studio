@@ -1,4 +1,7 @@
-import { doubleClickToEdit, downloadCanvas, DraggableElementList, LinkedElement, LinkedSelectableList } from "../util.js"
+import { DraggableElementList } from "../util/draggable_element_list.js"
+import { doubleClickToEdit } from "../util/element_functions.js"
+import { LinkedElement } from "../util/linked_element.js"
+import { LinkedSelectableList } from "../util/linked_selectable_list.js"
 
 const modal = "texture/texture_groups"
 let groupTemplate, entryTemplate, entryGroupContainer, activeLayerContainer, unactiveLayerContainer

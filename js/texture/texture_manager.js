@@ -1,7 +1,10 @@
 import { readFile } from "../displays.js"
 import { Texture, NearestFilter, Vector2, DataTexture, RGBAFormat, CanvasTexture } from "../libs/three.js"
-import { doubleClickToEdit, DraggableElementList, LinkedSelectableList, ToggleableElement } from "../util.js"
+import { doubleClickToEdit } from "../util/element_functions.js"
+import { DraggableElementList } from "../util/draggable_element_list.js"
+import { ToggleableElement } from "../util/toggleable_element.js"
 import { TextureGroupManager } from "./texture_group_manager.js"
+import { LinkedSelectableList } from "../util/linked_selectable_list.js"
 
 export class TextureManager {
 

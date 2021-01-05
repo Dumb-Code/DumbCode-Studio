@@ -1,5 +1,5 @@
 import { Raycaster, Vector2 } from "../libs/three.js"
-import { listenForKeyChange } from "../util.js"
+import { listenForKeyChange } from "../util/element_functions.js"
 
 const raycaster = new Raycaster()
 

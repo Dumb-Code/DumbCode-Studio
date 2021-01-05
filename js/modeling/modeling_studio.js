@@ -12,8 +12,8 @@ import { CommandRoot, indexHandler, numberHandler } from "../command_handler.js"
 import { EventDispatcher, Group } from "../libs/three.js"
 import { CubeCommands } from "./cube_commands.js"
 import { CubeCopyPaste } from "./cube_copy_paste.js"
-import { applyAdjustScrollable } from "../util.js"
 import { ReferenceImageHandler } from "./reference_image_handler.js"
+import { applyAdjustScrollable } from "../util/element_functions.js"
 
 export class ModelingStudio {
 

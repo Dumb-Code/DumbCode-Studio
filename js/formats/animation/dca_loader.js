@@ -1,5 +1,4 @@
 import { ByteBuffer } from "../../animations.js"
-import { LinkedElement } from "../../util.js"
 
 const rotArr = new Array(3)
 const posArr = new Array(3)

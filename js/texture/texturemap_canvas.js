@@ -1,4 +1,4 @@
-import { CanvasTransformControls } from "../util.js"
+import { CanvasTransformControls } from "../util/canvas_transform_controls.js"
 
 export class TexturemapCanvas {
     constructor(domElement, raytracer, textureTools, cubeValues, pth) {

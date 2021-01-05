@@ -1,5 +1,6 @@
 import { readFile } from "../displays.js"
-import { DraggableElementList, doubleClickToEdit, downloadCanvas, downloadHref, fileUploadBox, getAndDeleteFiles } from "../util.js"
+import { doubleClickToEdit, downloadCanvas, downloadHref, fileUploadBox, getAndDeleteFiles } from "../util/element_functions.js"
+import { DraggableElementList } from "../util/draggable_element_list.js"
 
 export class TextureProjectPart {
 

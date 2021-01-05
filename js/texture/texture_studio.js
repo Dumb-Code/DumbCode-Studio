@@ -4,7 +4,7 @@ import { TexturemapCanvas } from "./texturemap_canvas.js"
 import { TextureCubeValues } from "./texture_cube_values.js"
 import { TextureTools } from "./texture_tools.js"
 import { EventDispatcher } from "../libs/three.js"
-import { getAndDeleteFiles } from "../util.js"
+import { getAndDeleteFiles } from "../util/element_functions.js"
 
 export class TextureStudio {
 

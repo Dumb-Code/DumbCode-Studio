@@ -1,4 +1,5 @@
-import { LinkedElement, ToggleableElement } from "../util.js"
+import { LinkedElement } from "../util/linked_element.js"
+import { ToggleableElement } from "../util/toggleable_element.js"
 
 export class TextureCubeValues {
 

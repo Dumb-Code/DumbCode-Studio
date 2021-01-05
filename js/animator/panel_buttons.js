@@ -1,4 +1,4 @@
-import { ToggleableElement } from "../util.js"
+import { ToggleableElement } from "../util/toggleable_element.js"
 import { AnimationStudio } from "./animation_studio.js"
 
 /**

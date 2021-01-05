@@ -1,5 +1,5 @@
 import { PlayState } from "../animations.js"
-import { onElementDrag, doubleClickToEdit } from "../util.js"
+import { onElementDrag, doubleClickToEdit } from "../util/element_functions.js"
 
 const secondsPerSection = 0.05
 const defaultSectionWidth = 20

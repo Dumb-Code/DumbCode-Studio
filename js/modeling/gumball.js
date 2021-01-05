@@ -1,5 +1,5 @@
-import { LinkedSelectableList, ToggleableElement } from "../util.js"
 import { Vector3, Quaternion, Euler, Matrix4, Object3D, ReverseSubtractEquation } from "../libs/three.js"
+import { LinkedSelectableList } from "../util/linked_selectable_list.js"
 
 const translateKey = "translate"
 const rotateKey = "rotate"

@@ -6,10 +6,10 @@ import { AnimationCubeValues } from './animation_cube_values.js'
 import { PanelButtons } from './panel_buttons.js'
 import { ProgressionCanvas } from './progression_canvas.js'
 import { KeyframeBoardManager } from './keyframe_board_manager.js'
-import { applyAdjustScrollable } from '../util.js'
 import { KeyframeSettings } from './keyframe_settings.js'
 import { DinosaurDisplay } from '../displays.js'
 import { Raytracer } from '../raytracer.js'
+import { applyAdjustScrollable } from '../util/element_functions.js'
 
 /**
  * Ties all the animation studio together.
