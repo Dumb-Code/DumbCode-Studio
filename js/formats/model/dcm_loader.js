@@ -248,9 +248,19 @@ export class DCMCube {
     }
 
     updateGeometry( { dimension = this.dimension, cubeGrow = this.cubeGrow, shouldUpdateTexture = true } = {}) {
-        let w = dimension[0] + cubeGrow[0]*2 + 0.0001
-        let h = dimension[1] + cubeGrow[1]*2 + 0.0001
-        let d = dimension[2] + cubeGrow[2]*2 + 0.0001
+        let w = dimension[0] + cubeGrow[0]*2
+        let h = dimension[1] + cubeGrow[1]*2
+        let d = dimension[2] + cubeGrow[2]*2
+
+        if(w === 0) {
+            w = 0.001
+        }
+        if(h === 0) {
+            h = 0.001
+        }
+        if(d === 0) {
+            d = 0.001
+        }
 
         this.cubeMesh.scale.set(w, h, d)
         if(shouldUpdateTexture) {

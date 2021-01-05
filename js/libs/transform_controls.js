@@ -1357,11 +1357,11 @@ var TransformControlsGizmo = function () {
 				if(handle.tag === "doScale") {
 					cube.getWorldPosition(0.5, 0.5, 0.5, handle.position)
 					if(handle.name.startsWith('X')) {
-						handle.scale.x = cube.dimension[0]/32
+						handle.scale.x = cube.dimension[0]/32 || 0.001
 					} else if(handle.name.startsWith('Y')) {
-						handle.scale.y = cube.dimension[1]/32
+						handle.scale.y = cube.dimension[1]/32 || 0.001
 					} else if(handle.name.startsWith('Z')) {
-						handle.scale.z = cube.dimension[2]/32
+						handle.scale.z = cube.dimension[2]/32 || 0.001
 					}
 				} else {
 					cube.getWorldPosition (
