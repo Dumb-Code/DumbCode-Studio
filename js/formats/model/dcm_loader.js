@@ -3,7 +3,7 @@ import { ByteBuffer } from "../../animations.js";
 import { readTblFile } from "./tbl_converter.js";
 import { runInvertMath } from "../../modeling/cube_commands.js";
 import { readBBModel } from "./bbmodel_loader.js";
-import { DCMModel } from "./dcm_model.js";
+import { DCMCube, DCMModel } from "./dcm_model.js";
 
 export class DCMLoader {}
 
