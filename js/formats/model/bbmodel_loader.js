@@ -1,5 +1,5 @@
 import { readFile } from "../../displays.js"
-import { CineonToneMapping } from "../../three.js"
+import { CineonToneMapping } from "../../libs/three.js"
 import { generateSortedTextureOffsets, getAndDeleteFiles } from "../../util.js"
 import { DCMCube, DCMModel } from "./dcm_loader.js"
 

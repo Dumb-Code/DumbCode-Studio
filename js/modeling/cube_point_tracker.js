@@ -1,4 +1,4 @@
-import { Mesh, SphereGeometry, MeshBasicMaterial, Quaternion, Vector3, Raycaster, MeshLambertMaterial, BoxBufferGeometry } from "../three.js";
+import { Mesh, SphereGeometry, MeshBasicMaterial, Quaternion, Vector3, Raycaster, MeshLambertMaterial, BoxBufferGeometry } from "../libs/three.js";
 import { raytraceUnderMouse } from "../raytracer.js";
 
 const raycaster = new Raycaster()

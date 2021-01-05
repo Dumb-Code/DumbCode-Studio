@@ -1,4 +1,4 @@
-import { Clock } from "./three.js"
+import { Clock } from "./libs/three.js"
 
 export class MementoTraverser {
 

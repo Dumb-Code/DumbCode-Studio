@@ -1,5 +1,5 @@
-import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./three.js";
-import { OrbitControls } from './orbit_controls.js'
+import { Raycaster, Vector2, PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture } from "./libs/three.js";
+import { OrbitControls } from './libs/orbit_controls.js'
 import { DinosaurDisplay, DinosaurTexture, readFile } from "./displays.js";
 import { TBLModel } from "./tbl_loader.js";
 import { PlayState, ByteBuffer } from "./animations.js";

@@ -1,6 +1,6 @@
 import { indexHandler } from "../command_handler.js"
 import { CubeLocker } from "../util.js"
-import { Vector3, Quaternion, Matrix4, Euler } from "../three.js"
+import { Vector3, Quaternion, Matrix4, Euler } from "../libs/three.js"
 
 const worldPosVector = new Vector3()
 const worldRotQuat = new Quaternion()

@@ -3,7 +3,7 @@ import { TextureManager } from "./texture_manager.js"
 import { TexturemapCanvas } from "./texturemap_canvas.js"
 import { TextureCubeValues } from "./texture_cube_values.js"
 import { TextureTools } from "./texture_tools.js"
-import { EventDispatcher } from "../three.js"
+import { EventDispatcher } from "../libs/three.js"
 import { getAndDeleteFiles } from "../util.js"
 
 export class TextureStudio {

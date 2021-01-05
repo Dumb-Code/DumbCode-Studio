@@ -1,4 +1,4 @@
-import { WebGLRenderer, Color, Clock } from "../three.js";
+import { WebGLRenderer, Color, Clock } from "../libs/three.js";
 import { createScene, updateCamera } from "../editor.js"
 import { downloadBlob } from "../util.js";
 

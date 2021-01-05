@@ -5,7 +5,7 @@ import { DCMModel } from "../formats/model/dcm_loader.js"
 import { DcProject } from "../formats/project/dc_project.js"
 import { DcProjectZipConverter } from "../formats/project/dc_project_zip_converter.js"
 import { RemoteProject } from "../formats/project/remote_project.js"
-import { FlatShading } from "../three.js"
+import { FlatShading } from "../libs/three.js"
 import { doubleClickToEdit, downloadBlob, fileUploadBox, getAndDeleteFiles, LinkedSelectableList } from "../util.js"
 import { RemoteProjectHandler } from "./remote_project_handler.js"
 

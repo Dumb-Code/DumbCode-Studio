@@ -1,4 +1,4 @@
-import { EventDispatcher, Matrix4, Vector3, Quaternion, Euler } from "./three.js";
+import { EventDispatcher, Matrix4, Vector3, Quaternion, Euler } from "./libs/three.js";
 
 export class ButtonSpeed {
 

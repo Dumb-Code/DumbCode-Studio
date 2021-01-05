@@ -2,7 +2,7 @@ import { AnimationTabHandler } from "../../animator/animation_tabs.js"
 import { MementoTraverser } from "../../memento_traverser.js"
 import { ModelingMemento } from "../../modeling/modeling_memento.js"
 import { TextureManager } from "../../texture/texture_manager.js"
-import { DoubleSide, Group, MeshLambertMaterial } from "../../three.js"
+import { DoubleSide, Group, MeshLambertMaterial } from "../../libs/three.js"
 
 const material = new MeshLambertMaterial( {
     color: 0x777777,

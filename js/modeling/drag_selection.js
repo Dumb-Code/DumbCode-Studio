@@ -1,4 +1,4 @@
-import { Raycaster, Vector2 } from "../three.js"
+import { Raycaster, Vector2 } from "../libs/three.js"
 import { listenForKeyChange } from "../util.js"
 
 const raycaster = new Raycaster()

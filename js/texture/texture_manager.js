@@ -1,5 +1,5 @@
 import { readFile } from "../displays.js"
-import { Texture, NearestFilter, Vector2, DataTexture, RGBAFormat, CanvasTexture } from "../three.js"
+import { Texture, NearestFilter, Vector2, DataTexture, RGBAFormat, CanvasTexture } from "../libs/three.js"
 import { doubleClickToEdit, DraggableElementList, LinkedSelectableList, ToggleableElement } from "../util.js"
 import { TextureGroupManager } from "./texture_group_manager.js"
 

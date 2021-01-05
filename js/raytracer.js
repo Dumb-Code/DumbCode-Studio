@@ -1,4 +1,4 @@
-import { Vector2, Raycaster, EventDispatcher } from "./three.js";
+import { Vector2, Raycaster, EventDispatcher } from "./libs/three.js";
 import { isKeyDown, lineIntersection } from "./util.js";
 
 

@@ -1,6 +1,6 @@
 import { readFile } from "../displays.js"
 import { raytraceUnderMouse } from "../raytracer.js"
-import { DoubleSide, Mesh, MeshBasicMaterial, NearestFilter, PlaneGeometry, Texture } from "../three.js"
+import { DoubleSide, Mesh, MeshBasicMaterial, NearestFilter, PlaneGeometry, Texture } from "../libs/three.js"
 import { fileUploadBox, getAndDeleteFiles, LinkedElement, LinkedSelectableList } from "../util.js"
 
 const startSize = 2

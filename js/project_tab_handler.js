@@ -1,6 +1,6 @@
 import { DCMModel } from "./formats/model/dcm_loader.js"
 import { DcProject } from "./formats/project/dc_project.js"
-import { EventDispatcher } from "./three.js"
+import { EventDispatcher } from "./libs/three.js"
 
 export class ProjectTabHandler {
     constructor(display) {

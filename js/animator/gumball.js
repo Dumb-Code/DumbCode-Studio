@@ -1,5 +1,5 @@
-import { BufferAttribute, BufferGeometry, CubeGeometry, Euler, Geometry, Group, Line, LineBasicMaterial, Mesh, MeshLambertMaterial, Object3D, Quaternion, Vector3 } from "../three.js";
-import { Bone3D, Chain3D, Structure3D, V3 } from "../fik.js"
+import { BufferAttribute, BufferGeometry, CubeGeometry, Euler, Geometry, Group, Line, LineBasicMaterial, Mesh, MeshLambertMaterial, Object3D, Quaternion, Vector3 } from "../libs/three.js";
+import { Bone3D, Chain3D, Structure3D, V3 } from "../libs/fik.js"
 import { LinkedSelectableList, LinkedElement, ToggleableElement } from "../util.js";
 
 const translateIK = "translate-ik"

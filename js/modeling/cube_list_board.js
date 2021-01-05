@@ -1,4 +1,3 @@
-import { OrbitControls } from "../orbit_controls.js"
 import { isKeyDown, DraggableElementList, doubleClickToEdit } from "../util.js"
 
 export class CubeListBoard {

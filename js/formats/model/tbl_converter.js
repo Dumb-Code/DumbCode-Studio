@@ -1,5 +1,5 @@
 import { DCMModel, DCMCube } from "./dcm_loader.js"
-import { MeshLambertMaterial, Vector3 } from "../../three.js"
+import { MeshLambertMaterial, Vector3 } from "../../libs/three.js"
 import { runInvertMath, runMirrorMath } from "../../modeling/cube_commands.js"
 
 

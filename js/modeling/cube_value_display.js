@@ -1,6 +1,6 @@
 import { LinkedElement, ToggleableElement } from "../util.js"
 import { indexHandler, numberHandler, enumHandler, booleanHandler, ArgumentHandler, stringHandler, axisNumberHandler } from "../command_handler.js"
-import { Vector3, Quaternion, Matrix4, Euler } from "../three.js"
+import { Vector3, Quaternion, Matrix4, Euler } from "../libs/three.js"
 
 const xyzAxis = "xyz"
 const uvAxis = "uv"

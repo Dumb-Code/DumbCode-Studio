@@ -1,5 +1,5 @@
 import { JavaMethodExporter } from '../java_method_exporter.js'
-import { Clock, EventDispatcher, Group } from '../three.js'
+import { Clock, EventDispatcher, Group } from '../libs/three.js'
 import { Gumball } from './gumball.js'
 import { AnimationPanel } from './animation_panel.js'
 import { AnimationCubeValues } from './animation_cube_values.js'

@@ -1,7 +1,7 @@
-import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, Quaternion, Group, AmbientLight } from "./three.js";
+import { PerspectiveCamera, WebGLRenderer, Scene, Color, HemisphereLight, DirectionalLight, NearestFilter, LinearMipMapLinearFilter, MeshLambertMaterial, DoubleSide, OrthographicCamera, Texture, Quaternion, Group, AmbientLight } from "./libs/three.js";
 import { DinosaurDisplay, readFile } from "./displays.js";
-import { OrbitControls } from './orbit_controls.js'
-import { TransformControls } from './transform_controls.js'
+import { OrbitControls } from './libs/orbit_controls.js'
+import { TransformControls } from './libs/transform_controls.js'
 import { ProjectTabs } from "./project_tabs.js";
 import { AnimationStudio } from "./animator/animation_studio.js";
 import { ModelingStudio } from "./modeling/modeling_studio.js";

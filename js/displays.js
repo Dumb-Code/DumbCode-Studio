@@ -1,4 +1,4 @@
-import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material, BoxBufferGeometry, MeshBasicMaterial, Mesh, CylinderBufferGeometry, Matrix4, MeshLambertMaterial } from "./three.js";
+import { Geometry, Vector3, LineBasicMaterial, Group, Line, Material, BoxBufferGeometry, MeshBasicMaterial, Mesh, CylinderBufferGeometry, Matrix4, MeshLambertMaterial } from "./libs/three.js";
 import { WeightedEventHandler } from "./util.js";
 
 const vector = new Vector3()

@@ -1,5 +1,5 @@
 import { readFile } from "./displays.js"
-import { MeshStandardMaterial } from "./three.js"
+import { MeshStandardMaterial } from "./libs/three.js"
 
 export class AnimationHandler {
     

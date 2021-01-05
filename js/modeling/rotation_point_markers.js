@@ -1,4 +1,4 @@
-import { Group, SphereGeometry, MeshBasicMaterial, Mesh, Vector3, EdgesGeometry, BoxBufferGeometry, LineBasicMaterial, Line, LineSegments, Matrix4 } from "../three.js"
+import { Group, SphereGeometry, MeshBasicMaterial, Mesh, Vector3, EdgesGeometry, BoxBufferGeometry, LineBasicMaterial, Line, LineSegments, Matrix4 } from "../libs/three.js"
 
 const tempPos = new Vector3()
 const tempPos2 = new Vector3()

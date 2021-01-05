@@ -1,4 +1,4 @@
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D, Quaternion, EventDispatcher, MeshLambertMaterial } from "../../three.js";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Material, PlaneBufferGeometry, Vector3, Object3D, Quaternion, EventDispatcher, MeshLambertMaterial } from "../../libs/three.js";
 import { ByteBuffer } from "../../animations.js";
 import { readTblFile } from "./tbl_converter.js";
 import { runInvertMath } from "../../modeling/cube_commands.js";
