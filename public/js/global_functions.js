@@ -107,7 +107,7 @@ function updateTooltip(time) {
                 lockedMousePoint = {...mousePoint}
             }
             tooltipDiv.classList.add('is-active')
-            tooltipDiv.innerText = tooltipElement.getAttribute('data-tooltip').replace('\\n', '\n')
+            tooltipDiv.innerText = tooltipElement.getAttribute('data-tooltip')?.replace('\\n', '\n')
             tooltipDiv.style.left = clamp(lockedMousePoint.x-tooltipDiv.clientWidth/2, tooltipDiv.clientWidth, window.innerWidth) + 'px'
             tooltipDiv.style.top = clamp(lockedMousePoint.y-tooltipDiv.clientHeight-15,tooltipDiv.clientHeight, window.innerHeight) + 'px'
         }

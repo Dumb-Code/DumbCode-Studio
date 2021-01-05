@@ -45,7 +45,7 @@ export class RemoteProject {
         }
         let modelLocation = this.remoteFile.model 
         let name = modelLocation.substring(modelLocation.lastIndexOf('/') + 1)
-        let model = await this.request(modelLocation).then(r => DCMModel.loadModel(this.toArrayBuffer(r), name, this.texturePart))
+        let model = await this.request(modelLocation).then(r => DCMLoader.loadModel(this.toArrayBuffer(r), name, this.texturePart))
         updateCallback()
         this.project = this.pth.createNewProject(model)
         this.project._element.find('.github-sync').css('display','').children().click(() => this.syncProject())
