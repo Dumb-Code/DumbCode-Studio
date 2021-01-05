@@ -75,10 +75,6 @@ export class ProjectTabHandler {
         return this.getSelected().lockedCubes
     }
 
-    get unlockedAnimationCubes() {
-        return this.getSelected().unlockedAnimationCubes
-    }
-
     get displayGroup() {
         return this.getSelected().group
     }
