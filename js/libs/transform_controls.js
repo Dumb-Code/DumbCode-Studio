@@ -904,7 +904,7 @@ var TransformControlsGizmo = function () {
 	var gizmoTranslate = {
 		X: [
 			[ new Mesh( arrowGeometry, matRed ), [ 1, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null, 'fwd' ],
-			[ new Mesh(translationLineGeometry , matLineRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
+			[ new Mesh( translationLineGeometry , matLineRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
 			// [ new Mesh( arrowGeometry, matRed ), [ 1, 0, 0 ], [ 0, 0, Math.PI / 2 ], null, 'bwd' ],
 			// [ new Line( lineGeometry, matLineRed ) ]
 		],
@@ -943,13 +943,13 @@ var TransformControlsGizmo = function () {
 
 	var pickerTranslate = {
 		X: [
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0.6, 0, 0 ], [ 0, 0, - Math.PI / 2 ]]
+			[ new Mesh( new CylinderBufferGeometry( 0.1, 0, 1, 4, 1, false ), matInvisible ), [ 0.6, 0, 0 ], [ 0, 0, - Math.PI / 2 ]]
 		],
 		Y: [
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0.6, 0 ]]
+			[ new Mesh( new CylinderBufferGeometry( 0.1, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0.6, 0 ]]
 		],
 		Z: [
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, 0.6 ], [ Math.PI / 2, 0, 0 ]]
+			[ new Mesh( new CylinderBufferGeometry( 0.1, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, 0.6 ], [ Math.PI / 2, 0, 0 ]]
 		],
 		// XYZ: [
 		// 	[ new Mesh( new OctahedronBufferGeometry( 0.2, 0 ), matInvisible ) ]
@@ -1021,28 +1021,28 @@ var TransformControlsGizmo = function () {
 
 	var pikcerDimensions = {
 		XN: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ -shw/2, 0, 0 ], [ 0, 0, Math.PI / 2 ] ],
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ -0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ], null, 'doScale' ]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ -shw/2, 0, 0 ], [ 0, 0, Math.PI / 2 ], [ 2, 2, 2 ] ],
+			[ new Mesh( new CylinderBufferGeometry( shw, 0, 1, 4, 1, false ), matInvisible ), [ -0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ], null, 'doScale' ]
 		],
 		XP: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ shw/2, 0, 0 ], [ 0, 0, - Math.PI / 2 ] ],
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null, 'doScale' ]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ shw/2, 0, 0 ], [ 0, 0, - Math.PI / 2 ], [ 2, 2, 2 ] ],
+			[ new Mesh( new CylinderBufferGeometry( shw, 0, 1, 4, 1, false ), matInvisible ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ], null, 'doScale' ]
 		],
 		YN: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, -shw/2, 0 ],  [ Math.PI, 0, 0 ] ],
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, -0.5, 0 ], [ Math.PI, 0, 0 ], null, 'doScale' ]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, -shw/2, 0 ],  [ Math.PI, 0, 0 ], [ 2, 2, 2 ] ],
+			[ new Mesh( new CylinderBufferGeometry( shw, 0, 1, 4, 1, false ), matInvisible ), [ 0, -0.5, 0 ], [ Math.PI, 0, 0 ], null, 'doScale' ]
 		],
 		YP: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, shw/2, 0 ], null ],
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0.5, 0 ], null, null, 'doScale' ]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, shw/2, 0 ], null, [ 2, 2, 2 ] ],
+			[ new Mesh( new CylinderBufferGeometry( shw, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0.5, 0 ], null, null, 'doScale' ]
 		],
 		ZN: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, -shw/2 ], [ Math.PI / 2, 0, 0 ] ],
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, -0.5 ], [ -Math.PI / 2, 0, 0 ], null, 'doScale' ]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, -shw/2 ], [ Math.PI / 2, 0, 0 ], [ 2, 2, 2 ] ],
+			[ new Mesh( new CylinderBufferGeometry( shw, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, -0.5 ], [ -Math.PI / 2, 0, 0 ], null, 'doScale' ]
 		],
 		ZP: [
-			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, shw/2 ], [ - Math.PI / 2, 0, 0 ] ],
-			[ new Mesh( new CylinderBufferGeometry( 0.2, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, 0.5 ], [ Math.PI / 2, 0, 0 ], null, 'doScale' ]
+			[ new Mesh( scaleHandleGeometry, matInvisible ), [ 0, 0, shw/2 ], [ - Math.PI / 2, 0, 0 ], [ 2, 2, 2 ] ],
+			[ new Mesh( new CylinderBufferGeometry( shw, 0, 1, 4, 1, false ), matInvisible ), [ 0, 0, 0.5 ], [ Math.PI / 2, 0, 0 ], null, 'doScale' ]
 		],
 	}
 
