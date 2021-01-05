@@ -1,33 +1,70 @@
-# DumbCode Studio
+# Getting Started with Create React App
 
-The Dumbcode studio is the answer to the lack of a cohesive entity mod creation workflow for Minecraft
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## What does it do?
+## Available Scripts
 
-The DumbCode Studio is a conjunction of tools for creating entity mods for minecraft. It includes:
-- A Project File Handler
-- A Modeler
-- An Animator
-- Texture mapping tools
-- A variety of export options, including to our Lib format DumbLibrary
+In the project directory, you can run:
 
-## The Modeler
+### `yarn start`
 
-The modler is heavily influenced by tabula in it's codebase. It uses almost the same model format, and can import files from tabula. 
-The goal of the modeler is to take what we've lerned from using and contributing to Tabula, and turn it into a more user friendly experience.
-Members of our team have used professional modeling solutions and many design decisions have been made based on the functionality of more powerful programs than previously avalible for minecraft modding use
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-Keep in mind this modeler is still in very early development and things like user interface and some functionality will be reorganized once we have the features implemented that we need to make it a useful piece of software.
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
 
-## The animator v2
+### `yarn test`
 
-The DumbCode animator as previously known will be getting a rework and new design. We have been using this animator internally at DumbCode for a long while now, and have been noting everything that needs improved, is missing, and is wrong with it. We have determined the things we want to make it useful and are goign to start implementing them in a more final user facing state.
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-The animator is very powerful in functionality, and there is much more to come on it's features in the future.
+### `yarn build`
 
-## Summary and Disclaimer
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-DumbCode has been working on this project for a long time, and are very excited to make it useful to the public in the near future. Public functionality will come soon, and is technically avalible at the time of writing this, however it is not entirely useful.
-Features are subject to change and using the software before it is released as Studio v1.0.0 is not reccomended unless you are using to test and provide feedback. Support will only be given in the form of future updates.
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-More news to come and make sure to keep up with us on Discord and on our Website for news to come.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `yarn eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `yarn build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
