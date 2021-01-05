@@ -8,7 +8,7 @@ import { ModelingStudio } from "./modeling/modeling_studio.js";
 import { FilesPage } from "./project/files_page.js";
 import { Raytracer } from "./raytracer.js";
 import { TextureStudio } from "./texture/texture_studio.js";
-import { DCMModel } from "./formats/model/dcm_loader.js";
+import { DCMModel } from "./formats/model/dcm_model.js";
 import { ProjectTabHandler } from "./project_tab_handler.js";
 import { DirectionalIndecators } from "./directional_indicators.js";
 import { StudioOptions } from "./studio_options.js";

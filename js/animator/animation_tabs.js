@@ -1,5 +1,5 @@
 import { AnimationHandler, PlayState } from "../animations.js"
-import { DCMModel } from "../formats/model/dcm_loader.js"
+import { DCMModel } from "../formats/model/dcm_model.js"
 import { MementoTraverser } from "../memento_traverser.js"
 import { FilesPage } from "../project/files_page.js"
 import { AnimationMemento } from "./animation_memento.js"

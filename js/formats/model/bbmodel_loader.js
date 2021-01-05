@@ -1,7 +1,7 @@
 import { readFile } from "../../displays.js"
 import { generateSortedTextureOffsets } from "../../util.js"
 import { getAndDeleteFiles } from "../../util/element_functions.js"
-import { DCMCube, DCMModel } from "./dcm_loader.js"
+import { DCMCube, DCMModel } from "./dcm_model.js"
 
 const DECODER = new TextDecoder('utf-8')
 

@@ -1,6 +1,7 @@
 import { readFile } from "../../displays.js"
 import { DCALoader } from "../animation/dca_loader.js"
-import { DCMModel } from "../model/dcm_loader.js"
+import { DCMLoader } from "../model/dcm_loader.js"
+import { DCMModel } from "../model/dcm_model.js"
 
 export class DcProjectZipConverter {
     constructor(pth, modelingPart, texturePart, animationPart) {
@@ -13,7 +14,7 @@ export class DcProjectZipConverter {
     readFile(file) {
         return JSZip.loadAsync(readFile(file, (reader, file) => reader.readAsBinaryString(file)))
         .then(async(zip) => {
-            this.pth.createNewProject(await DCMModel.loadModel(await zip.file('model.dcm').async('arraybuffer'), file.name, this.texturePart))
+            this.pth.createNewProject(await DCMLoader.loadModel(await zip.file('model.dcm').async('arraybuffer'), file.name, this.texturePart))
             
             let textureFolder = zip.folder('textures')
             let textureFile = textureFolder.file('texture_names')
@@ -106,7 +107,7 @@ export class DcProjectZipConverter {
     writeFile(project) {
         let zip = new JSZip()
 
-        zip.file('model.dcm', DCMModel.writeModel(project.model).getAsBlob())
+        zip.file('model.dcm', DCMLoader.writeModel(project.model).getAsBlob())
 
         let textures = [...project.textureManager.textures].reverse()
         if(textures.length !== 0) {

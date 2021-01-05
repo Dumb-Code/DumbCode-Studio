@@ -1,4 +1,4 @@
-import { DCMCube } from "../formats/model/dcm_loader.js"
+import { DCMCube } from "../formats/model/dcm_model.js"
 
 export class ModelingMemento {
     constructor(model, lockedSet) {

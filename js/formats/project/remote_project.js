@@ -1,6 +1,7 @@
 import { DCALoader } from "../animation/dca_loader.js"
-import { DCMModel } from "../model/dcm_loader.js"
+import { DCMModel } from "../model/dcm_model.js"
 import { AsyncProgressCounter } from "../../util.js"
+import { DCMLoader } from "../model/dcm_loader.js"
 
 export class RemoteProject {
     constructor(pth, modelingPart, texturePart, animationPart, name, gitinter) {
@@ -250,7 +251,7 @@ export class RemoteProject {
         }
         let commiter = this.gitinter.commiter()
         commiter.addFile(`studio_remotes/${this.name}.remote`, this.writeRemoteFile())
-        commiter.addFile(data.model, DCMModel.writeModel(project.model).getAsBase64(), true)
+        commiter.addFile(data.model, DCMLoader.writeModel(project.model).getAsBase64(), true)
         progress.updateProgress()
         
         commiter.removeRedundentFiles(data.animationFolder, f => f.endsWith('.dca'))

@@ -1,7 +1,8 @@
 import { ByteBuffer } from "../animations.js"
 import { readFile } from "../displays.js"
 import { DCALoader } from "../formats/animation/dca_loader.js"
-import { DCMModel } from "../formats/model/dcm_loader.js"
+import { DCMLoader } from "../formats/model/dcm_loader.js"
+import { DCMModel } from "../formats/model/dcm_model.js"
 import { DcProject } from "../formats/project/dc_project.js"
 import { DcProjectZipConverter } from "../formats/project/dc_project_zip_converter.js"
 import { RemoteProject } from "../formats/project/remote_project.js"
@@ -38,7 +39,7 @@ export class ModelProjectPart {
     }
     
     async loadModelFiles(files) {
-        [...files].forEach(file => DCMModel.loadModel(readFile(file), file.name, this.texturePart).then(model => this.pth.createNewProject(model)))
+        [...files].forEach(file => DCMLoader.loadModel(readFile(file), file.name, this.texturePart).then(model => this.pth.createNewProject(model)))
     }
 
     async loadProjectFiles(files) {
@@ -71,7 +72,7 @@ export class ModelProjectPart {
             e.stopPropagation()
         })
         cloned.find('.download-model-file').click(e => {
-            DCMModel.writeModel(model).downloadAsFile(model.fileName + ".dcm")
+            DCMLoader.writeModel(model).downloadAsFile(model.fileName + ".dcm")
             e.stopPropagation()
         })
         cloned.find('.download-project-file').click(e => {

@@ -1,4 +1,4 @@
-import { DCMModel } from "./formats/model/dcm_loader.js"
+import { DCMModel } from "./formats/model/dcm_model.js"
 import { DcProject } from "./formats/project/dc_project.js"
 import { EventDispatcher } from "./libs/three.js"
 

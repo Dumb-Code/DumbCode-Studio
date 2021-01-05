@@ -2,9 +2,10 @@ import { readFile } from "../displays.js"
 import { ByteBuffer } from "../animations.js"
 import { doubleClickToEdit, fileUploadBox, getAndDeleteFiles } from "../util/element_functions.js"
 import { GifExporter } from "./gif_export.js"
-import { DCMModel } from "../formats/model/dcm_loader.js"
+import { DCMModel } from "../formats/model/dcm_model.js"
 import { ModelListAnimationLoader } from "../formats/animation/model_list_animation.js"
 import { DCALoader } from "../formats/animation/dca_loader.js"
+import { DCMLoader } from "../formats/model/dcm_loader.js"
 
 export class AnimationProjectPart {
 
@@ -55,7 +56,7 @@ export class AnimationProjectPart {
             let tab = this.createNewAnimationTab(name)
             let animator = this.animatorGetter()
             if(tab) {
-                let promiseFiles = [...tblFiles.map(file => DCMModel.loadModel(readFile(file), file.name))]
+                let promiseFiles = [...tblFiles.map(file => DCMLoader.loadModel(readFile(file), file.name))]
                 if(infoFile) {
                     promiseFiles.push(readFile(infoFile))
                 }
