@@ -1,8 +1,8 @@
 import React from 'react';
 
-import Animations from './../modules/project/Animations';
-import Model from './../modules/project/Model';
-import Textures from './../modules/project/Textures';
+import Animations from './Animations';
+import Model from './Model';
+import Textures from './Textures';
 
 type Props = {
   isActive: boolean;
