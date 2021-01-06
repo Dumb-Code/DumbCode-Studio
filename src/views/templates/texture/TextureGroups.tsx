@@ -6,12 +6,128 @@ import React from "react";
 class TextureGroups extends React.Component {
   render() {
     return (
-      <style
-        dangerouslySetInnerHTML={{
-          __html:
-            '\n    /* .main-area-entry {\n        border: solid black 2px; \n        height: 400px; \n        border-radius: 3px; \n    } */\n\n    .texture-group-container {\n        height: 400px;\n        border-right: black solid 1px;\n    }\n\n    .texture-layer-container-active {\n        height: 200px;\n        border-bottom: black solid 1px;\n    }\n\n    .texture-layer-container-unactive {\n        height: 200px;\n    }\n\n    .texture-group-template, .texture-entry-template {\n        display: none;\n    }\n    \n    .texture-group-entry:hover {\n        background-color: #565656;\n    }\n\n    .texture-entry:hover {\n        background-color: #664646;\n    }\n\n    .texture-group-entry.is-activated {\n        background-color: #812770;\n    }\n\n    .is-dragged {\n        background-color: #8142F2\n    }\n\n    .texture-entry {\n        overflow: hidden\n    }\n\n    .texture-entry[drag-state="top"] {\n        border-top-style: solid;\n        border-top-color: #000000;\n    }\n\n    .texture-entry[drag-state="bottom"] {\n        border-bottom-style: solid;\n        border-bottom-color: #000000;\n    }\n\n'
+      <div
+        id="modal-texture-groups"
+        style={{
+          textTransform: "none"
         }}
-      />
+      >
+        <div className="modal-background">
+          <div
+            className="modal-content box"
+            style={{
+              backgroundColor: "#363636",
+              color: "whitesmoke !important",
+              textAlign: "left"
+            }}
+          >
+            <h3
+              className="title is-3"
+              style={{
+                color: "whitesmoke"
+              }}
+            >
+              Texture Groups
+            </h3>
+            <div
+              style={{
+                paddingBottom: "20px"
+              }}
+            >
+              <button
+                className="modal-close"
+                aria-label="close"
+                style={{
+                  position: "absolute"
+                }}
+              ></button>
+            </div>
+            <span
+              className="icon is-small add-group ml-2 tooltip"
+              data-tooltip="Add Group"
+            >
+              <i className="fas fa-plus"></i>
+            </span>
+            <div className="pr-5 pl-3 texture-group-entry texture-group-template">
+              <div className="pt-3 texture-group-toppart">
+                <div className="dbl-click-container texture-group-name">
+                  <p className="dbl-text">
+                    <input className="dbl-text-edit" type="text" />
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              className="pr-5 pl-3 texture-entry texture-entry-template"
+              draggable="true"
+            >
+              <div
+                className="buttons has-addons mt-1"
+                style={{
+                  float: "left"
+                }}
+              >
+                <div className="checkbox-container">
+                  <label className="checkbox-label">
+                    <input
+                      className="entry-is-selectable"
+                      type="checkbox"
+                      defaultChecked
+                    />
+                    <span className="checkbox-custom rectangular"></span>
+                  </label>
+                </div>
+              </div>
+              <p
+                className="has-text-light mt-1 px-2 entry-texture-name"
+                style={{
+                  float: "left",
+                  fontSize: "14px",
+                  paddingTop: "1px"
+                }}
+              >
+                name.png
+              </p>
+            </div>
+            <div
+              className="columns is-mobile"
+              style={{
+                overflowY: "auto",
+                width: "600px"
+              }}
+            >
+              <div
+                className="column is-5"
+                style={{
+                  paddingRight: "0px"
+                }}
+              >
+                <div className="texture-group-container"></div>
+                <div
+                  className="column"
+                  style={{
+                    paddingLeft: "0px"
+                  }}
+                >
+                  <div
+                    className="texture-layer-container-active"
+                    style={{
+                      overflowY: "scroll"
+                    }}
+                  >
+                    <div
+                      className="texture-layer-container-unactive"
+                      style={{
+                        overflowY: "scroll"
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 }

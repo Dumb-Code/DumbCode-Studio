@@ -7,12 +7,6 @@ class CommonCommands extends React.Component {
   render() {
     return (
       <>
-        <style
-          dangerouslySetInnerHTML={{
-            __html:
-              "\n    .light-button {\n        color: rgb(122, 122, 122);\n    }\n    .command-button {\n        border-left: none;\n        border-top: none;\n        border-bottom: none;\n        color: rgb(122, 122, 122);\n        border-right: 1px solid black;\n    }\n    .command-button:hover {\n        background-color: rgb(29, 25, 25);\n    }\n    .dropdown-command {\n        margin-left: 32px;\n        margin-top: -32px;\n        padding-left: 2px;\n    }\n\n    .tooltip-border {\n        border: 1px solid black;\n    }\n    .tooltip-text {\n        font-size: 12px;\n        margin: 0px;\n    }\n"
-          }}
-        />
         <div className="dropdown is-hoverable">
           <div className="dropdown-trigger">
             <button
