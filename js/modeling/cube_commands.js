@@ -1,6 +1,7 @@
 import { indexHandler } from "../command_handler.js"
 import { CubeLocker } from "../util.js"
 import { Vector3, Quaternion, Matrix4, Euler } from "../libs/three.js"
+import { DCMCube, DCMModel } from "../formats/model/dcm_model.js"
 
 const worldPosVector = new Vector3()
 const worldRotQuat = new Quaternion()
@@ -23,30 +24,40 @@ const tempCubeNewBase0 = new Vector3()
 const tempCubeNewBase1 = new Vector3()
 const tempEuler = new Euler()
 
+/**
+ * Cube commands hold (most) of the cube commands
+ */
 export class CubeCommands {
     constructor(root, studio, dom) {
         this.commandResultChangeCache = null
         this.gumballObject = studio.gumball.transformAnchor
 
+        //Load all the saved command elements
         dom.find('.saved-command').click(e => {
             root.doCommand(e.delegateTarget.getAttribute('command'))
         })
 
+        //When the space bar is pressed and the element selected isn't a input node 
         studio.addEventListener('keydown', e => {
             if(document.activeElement.nodeName != "INPUT" && e.event.key === " ") {
                 root.commandLine.runPreviousCommand()
             }
         })
 
+        //Apply the cube commands
         this.applycopypaste(root, studio.raytracer)
-        this.applyVertexSnapping(root, studio.display, studio.pointTracker, studio.lockedCubes, studio.raytracer)
+        this.applyVertexSnapping(root, studio.pointTracker, studio.lockedCubes, studio.raytracer)
         this.applyMirrorCommand(root)
         this.applyInvertCommand(root)
 
+        //Apply the reference image command 
         root.command('refimg').onRun(() => studio.referenceImageHandler.openRefImgModal())
     }
 
- 
+
+    /**
+     * Apply the copypaste command. Copies and pastes the selected cube
+     */
     applycopypaste(root, raytracer) {
         root.command('copypaste')
             .onRun(args => {
@@ -60,9 +71,14 @@ export class CubeCommands {
     
     }
 
-    applyVertexSnapping(root, display, pointTracker, lockedCubes, raytracer) {
+    /**
+     * Apply the vertex snapping command
+     */
+    applyVertexSnapping(root, pointTracker, lockedCubes, raytracer) {
         let active = false
 
+        //When the raytracer is clicked, if command is active and nothing is clicked, disable it and consume the event.
+        //This occurs when you click on nothing while the vertex snapping is enabled.
         raytracer.addEventListener('clicked', e => {
             if(active && raytracer.intersected === undefined) {
                 active = false
@@ -70,16 +86,22 @@ export class CubeCommands {
                 e.ignore = true
             }
         })
+        
+        //When the selction changes while the command is active, if there isn't any selcted disable the command.
         raytracer.addEventListener('selectchange', () => {
             if(active && raytracer.anySelected() !== true) {
                 active = false
                 pointTracker.disable()
             }
         })
+
         root.command('snap')
             .onRun(args => {
                 active = true
                 let cube = args.context.getCube()
+
+                //The rp flag means moving the roation point. That means the offset and children
+                //should stay the world same, so we need to create the cube lockers.
                 let rp = args.context.hasFlag('rp')
                 let cubeLockers = []
                 if(rp) {
@@ -87,34 +109,49 @@ export class CubeCommands {
                     cube.children.forEach(child => cubeLockers.push(new CubeLocker(child, 0)))
                 }
 
+                //Phase 2 is the second part of the command, where the user clicks on a point to use
+                //as the target point to move to. 
+                //The reason this is a seperate function, as if the flag 'rp' is active, then the first point
+                //will already be set (being the rotation point), and we only need to choice a target point.
+                //Thus phase2 is active immediatly.
                 let phase2 = () => {
+
+                    //Enable the point tracker with a redish color
                     pointTracker.enable(p => {
                         active = false
+                        //World difference of the two points. -1 as it should be (p.position - worldPosVector), but we don't want to mutate p.position
                         let worldDiff = worldPosVector.sub(p.position).multiplyScalar(-1)
+
+                        //Decompose the matrix and, add the position, then recompose the matrix.
                         cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
-                        
                         tempResultMatrix.compose(tempCubePos.add(worldDiff), tempCubeQuat, tempCubeScale)
                         
                         if(rp) {
+                            //If the rotation point, then reconstruct the matrix to the cube, and reconstruct the lockers.
                             CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
                             cube.cubeGroup.updateMatrixWorld()
                             cubeLockers.forEach(l => l.reconstruct())
                         } else {
+                            //Else, create the locked cubes cache, move the cube and reconstruct the cache.
                             lockedCubes.createLockedCubesCache()
                             CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
                             lockedCubes.reconstructLockedCubes()
                         }
 
+                        //Deselect everything and click on the original cube.
                         raytracer.deselectAll()
                         raytracer.clickOnMesh(cube.cubeMesh)
                         
                     }, 0x662141)
                 }
 
+                //Make sure worldPosVector has the target position before phase2 is called.
+                //If rp, we just need to find a target point
                 if(rp) {
                     cube.cubeGroup.getWorldPosition(worldPosVector)
                     phase2()
                 } else {
+                    //Enable the point tracker to get the source point to move.
                     pointTracker.enable(p => {
                         raytracer.deselectAll()
                         worldPosVector.copy(p.position)
@@ -124,6 +161,9 @@ export class CubeCommands {
             })
     }
 
+    /**
+     * Creates the invert math. Calls `runInvertMath`
+     */
     applyInvertCommand(root) {
         root.command("invert")
         .onRun(args => {
@@ -136,6 +176,9 @@ export class CubeCommands {
         })
     }
     
+    /**
+     * Creates the mirror command. Calls `runMirrorMath`
+     */
     applyMirrorCommand(root) {
         root.command('mirrorcube')
             .addCommandBuilder('mirror')
@@ -150,11 +193,14 @@ export class CubeCommands {
                 let worldPos = this.gumballObject.getWorldPosition(worldPosVector)
                 let worldQuat = this.gumballObject.getWorldQuaternion(worldRotQuat)
     
-                let normal = planeNormal.set(axis===0?1:0, axis===1?1:0, axis===2?1:0).normalize()//.applyQuaternion(worldQuat)
+                let normal = planeNormal.set(axis===0?1:0, axis===1?1:0, axis===2?1:0).normalize()//.applyQuaternion(worldQuat) //Uncomment if we want to do local axis or not.
                 this.commandResultChangeCache = runMirrorMath(worldPos, normal, cubes, args.context.getTblModel(), args.context.dummy)
             }).onExit(() => this.onCommandExit())
     }
     
+    /**
+     * Called when the command is exited. Used with `commandResultChangeCache` to display "previews" of command outputs.
+     */
     onCommandExit() {
         if(this.commandResultChangeCache) {
             this.commandResultChangeCache.onExit()
@@ -162,6 +208,9 @@ export class CubeCommands {
         }
     }
 
+    /**
+     * Called every frame. Used with `commandResultChangeCache` to display "previws" of a commands result
+     */
     onFrame() {
         if(this.commandResultChangeCache) {
             this.commandResultChangeCache.applyOnFrame()
@@ -169,26 +218,40 @@ export class CubeCommands {
     }
 }
 
+/**
+ * Runs the invert math on a cube. The math is as follows:
+ * -1 * rotation xy
+ * 180 + rotation z
+ * 
+ * offset xy = -1 * (offset xy + dimension xy)
+ * 
+ * @param {DCMModel} model the model to work on 
+ * @param {DCMCube[]} cubes the cubes to invert. If empty will be all cubes.
+ */
 export function runInvertMath(model, cubes) {
     if(cubes == null) {
         cubes = []
         model.traverseAll(cube => cubes.push(cube))
     }
     let allCubes = []
-
     cubes.forEach(cube => allCubes.push({ cube, level: cube.hierarchyLevel, locker: new CubeLocker(cube) }))
     
+    //Wrongfully moved cubes are cubes should shouldn't move but do because of locked cubes.
     let wrongFullyMovedCubes = cubes.map(c => c.children).flat().filter(c => !cubes.includes(c))
     wrongFullyMovedCubes.forEach(cube => allCubes.push({ isWrong: true, cube, level: cube.hierarchyLevel, locker: new CubeLocker(cube) }))
 
     allCubes.sort((a, b) => a.level - b.level)
 
+    //For each cube 
     allCubes.forEach(data => {
         data.locker.reconstruct()
+        //If is wrongfully moved cube
         if(data.isWrong === true) {
             data.cube.cubeGroup.updateMatrixWorld(true)
             return
         }
+
+        //Run the math on the cube
 
         let cube = data.cube
 
@@ -203,6 +266,10 @@ export function runInvertMath(model, cubes) {
     })
 }
 
+/**
+ * Math.sign(), except if the number is 0, returns -1
+ * @param {number} num input
+ */
 function defineSign(num) {
     if(num === 0) {
         return -1
@@ -210,22 +277,33 @@ function defineSign(num) {
     return Math.sign(num)
 }
 
+/**
+ * Runs the mirroring math
+ * @param {*} worldPos the world point the mirror on
+ * @param {*} normal the normal axis to mirror with 
+ * @param {*} cubes the cubes to mirror
+ * @param {*} tbl the model
+ * @param {*} dummy true if the math is a dummy run (if is a preview command)
+ */
 export function runMirrorMath(worldPos, normal, cubes, tbl, dummy) {
     tbl.resetVisuals()
-
     if(cubes == null) {
         cubes = []
         tbl.traverseAll(cube => cubes.push(cube))
     }
     
+    //Get the total cubes
     let totalCubesToApplyTo = []
     cubes.forEach(cube => totalCubesToApplyTo.push({type:0, cube}))
 
+    //Wrongfully moved cubes are cubes should shouldn't move but do because of locked cubes.
     let wrongFullyMovedCubes = cubes.map(c => c.children).flat().filter(c => !cubes.includes(c))
     wrongFullyMovedCubes.forEach(cube => totalCubesToApplyTo.push({type:1, cube}))
 
+    //Sort the total cubes to apply to.
     totalCubesToApplyTo.sort((a, b) => a.cube.hierarchyLevel - b.cube.hierarchyLevel)
     
+    //Get all the lockets
     let lockets = new Map()
     wrongFullyMovedCubes.forEach(cube => lockets.set(cube, new CubeLocker(cube)))
 
@@ -248,9 +326,12 @@ export function runMirrorMath(worldPos, normal, cubes, tbl, dummy) {
         vec.add(diff)
         return vec
     }
-    
+
+    //Start data cache is all the data from the cubes, before the math has been applied.
     let startDataCache = new Map()
     cubes.forEach(cube => {
+
+        //Get the mirrored position
         cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
         let newPosition = mirrorPoint(tempCubePos)
         
@@ -288,6 +369,7 @@ export function runMirrorMath(worldPos, normal, cubes, tbl, dummy) {
         })
     })
 
+    //End data cache is the result of the cube properties after the math has been applied.
     let endDataCache = new Map()
     totalCubesToApplyTo.forEach(data => {
         let cube = data.cube
@@ -326,6 +408,7 @@ export function runMirrorMath(worldPos, normal, cubes, tbl, dummy) {
         })
     })
 
+    //If it's a dummy, we need to reset the visuals and return the command result cache.
     if(dummy === true) {
         let resetVisuals = (visualOnly) => {
             startDataCache.forEach((cache, cube) => {
