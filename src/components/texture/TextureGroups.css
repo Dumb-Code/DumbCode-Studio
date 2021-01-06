@@ -1,0 +1,54 @@
+    /* .main-area-entry {
+        border: solid black 2px; 
+        height: 400px; 
+        border-radius: 3px; 
+    } */
+
+    .texture-group-container {
+      height: 400px;
+      border-right: black solid 1px;
+  }
+
+  .texture-layer-container-active {
+      height: 200px;
+      border-bottom: black solid 1px;
+  }
+
+  .texture-layer-container-unactive {
+      height: 200px;
+  }
+
+  .texture-group-template,
+  .texture-entry-template {
+      display: none;
+  }
+
+  .texture-group-entry:hover {
+      background-color: #565656;
+  }
+
+  .texture-entry:hover {
+      background-color: #664646;
+  }
+
+  .texture-group-entry.is-activated {
+      background-color: #812770;
+  }
+
+  .is-dragged {
+      background-color: #8142F2
+  }
+
+  .texture-entry {
+      overflow: hidden
+  }
+
+  .texture-entry[drag-state="top"] {
+      border-top-style: solid;
+      border-top-color: #000000;
+  }
+
+  .texture-entry[drag-state="bottom"] {
+      border-bottom-style: solid;
+      border-bottom-color: #000000;
+  }
