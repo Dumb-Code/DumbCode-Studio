@@ -1,0 +1,9 @@
+
+    a:hover, a:active, a:focus {
+        color:#c33c33;
+    }
+
+    .base-entry {
+        display: none !important
+    }
+

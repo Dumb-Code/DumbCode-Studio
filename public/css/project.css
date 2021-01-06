@@ -1,0 +1,55 @@
+.empty-column {
+    display: none !important;
+}
+
+.file-input-hidden {
+    display: none !important;
+}
+
+.clickable {
+    cursor: pointer !important;
+}
+
+.texture-list-entry {
+    border: solid 3px transparent
+}
+
+.texture-list-entry[drag-state="top"] {
+    border-top-style: solid;
+    border-top-color: #000000;
+}
+
+.texture-list-entry[drag-state="bottom"] {
+    border-bottom-style: solid;
+    border-bottom-color: #000000;
+}
+
+.texture-preview {
+    height: 50px;
+    max-width: 50px;
+    padding: 0;
+}
+
+.base-drop-area.is-dragging {
+    background-color: green;
+}
+
+.model-list-entry.is-activated {
+    background-color: hsl(204, 86%, 53%);
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+.secondary-box-area {
+    overflow-y: hidden;
+    overflow-x: hidden;
+    margin: 0px;
+    padding: 0px;
+    padding-top: 12px;
+}
+
+.toggle-animation.is-activated .toggle-on {
+    display: none
+}
+.toggle-animation:not(.is-activated) .toggle-off {
+    display: none
+}

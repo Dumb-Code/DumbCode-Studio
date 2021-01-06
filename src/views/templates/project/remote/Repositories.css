@@ -1,0 +1,16 @@
+
+    .repository-container {
+        border: solid black 2px; 
+        width: 500px; 
+        height: 200px; 
+        border-radius: 3px; 
+        overflow-y: scroll;
+    }
+
+    .repository-template {
+        display: none;
+    }
+
+    .repository-entry:hover {
+        background-color: #565656;
+    }

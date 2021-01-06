@@ -1,0 +1,117 @@
+package ${inputs.package};
+
+import ${mappings.modelCube.package};
+import net.minecraft.entity.Entity;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * The animated entry for a specified entity. This stores the information about the snapshot and the next transformations.
+ * @author Dumbcode Animation Editor
+ * @author Wyn Price
+ */
+public final class AnimatedEntityEntry {
+
+	/**
+	 * This entries Entity
+	 */
+	private final Entity entity;
+
+	/**
+	 * Contains the information about the current snapshot (where the cubes where at the start of this "pose". Used for interpolation)
+	 */
+	private final Map<${mappings.modelCube.name}, float[]> snapshotMap = new HashMap<>();
+
+	/**
+	 * Contains the current information for the cubes. This information will be what the cubes are set to.
+	 */
+	private final Map<${mappings.modelCube.name}, float[]> currentTransformsMap = new HashMap<>();
+
+	/**
+	 * The current name of the snapshot. Will be in the format `$group$id`
+	 */
+	private String snapshotName = "";
+
+	/**
+	 * The name of the current group of the snapshot. When this changes, the ticksOffset (and therefore ticksDone) is reset.
+	 */
+	private String snapshotGroup = "";
+	/**
+	 * The ticks since the current animation has started.
+	 */
+	private float tickOffset;
+
+	public AnimatedEntityEntry(Entity entity, Map<${mappings.modelCube.name}, float[]> defaultMap) {
+		this.entity = entity;
+		defaultMap.forEach((${mappings.modelCube.lowerName}, floats) -> this.currentTransformsMap.put(${mappings.modelCube.lowerName}, new float[]{floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]}));
+	}
+
+	/**
+	 * Makes sure that the current snapshot is active. If not, then a new snapshot is taken
+	 * (meaning that the model's cubes current rotations and positions are captured and stored for interpolating.
+	 * @param snapshotGroup the group name of the current snapshot
+	 * @param id id of the current snapshot
+	 */
+	public void ensureSnapshot(String snapshotGroup, int id) {
+		String snapshotName = snapshotGroup + id;
+		if (this.snapshotName.equals(snapshotName)) {
+			return;
+		}
+		if(!this.snapshotGroup.equals(snapshotGroup)) {
+			this.tickOffset = this.entity.age;
+			this.snapshotGroup = snapshotGroup;
+		}
+		this.snapshotName = snapshotName;
+
+		this.currentTransformsMap.forEach((${mappings.modelCube.lowerName}, floats) -> this.snapshotMap.put(${mappings.modelCube.lowerName}, new float[]{floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]}));
+	}
+
+	/**
+	 * Sets the transforms to the model renderer
+	 * @param ${mappings.modelCube.lowerName} the cube to set the transforms on
+	 * @param positionX the x position (rotation point) to set to
+	 * @param positionY the y position (rotation point) to set to
+	 * @param positionZ the z position (rotation point) to set to
+	 * @param rotateX the x angle (in radians) to set to
+	 * @param rotateY the y angle (in radians) to set to
+	 * @param rotateZ the z angle (in radians) to set to
+	 * @param alpha the interpolation amount. 0 would means the transforms are set to the current snapshot. 1 means the transforms are set exactly as the parameters
+	 */
+	public void setTransforms(${mappings.modelCube.name} ${mappings.modelCube.lowerName}, float positionX, float positionY, float positionZ, float rotateX, float rotateY, float rotateZ, float alpha) {
+		final float[] snapshot = this.snapshotMap.get(${mappings.modelCube.lowerName});
+		final float[] currentTransforms = this.currentTransformsMap.get(${mappings.modelCube.lowerName});
+
+		currentTransforms[0] = snapshot[0] + (positionX - snapshot[0]) * alpha;
+		currentTransforms[1] = snapshot[1] + (positionY - snapshot[1]) * alpha;
+		currentTransforms[2] = snapshot[2] + (positionZ - snapshot[2]) * alpha;
+
+		currentTransforms[3] = snapshot[3] + (rotateX - snapshot[3]) * alpha;
+		currentTransforms[4] = snapshot[4] + (rotateY - snapshot[4]) * alpha;
+		currentTransforms[5] = snapshot[5] + (rotateZ - snapshot[5]) * alpha;
+	}
+
+    /**
+    * Applys the current transforms in {@link AnimatedEntityEntry#currentTransformsMap} to the model
+    */
+	public void applyTransforms() {
+		this.currentTransformsMap.forEach((${mappings.modelCube.lowerName}, data) -> {
+			${mappings.modelCube.lowerName}.rotationPointX = data[0];
+			${mappings.modelCube.lowerName}.rotationPointY = data[1];
+			${mappings.modelCube.lowerName}.rotationPointZ = data[2];
+
+			${mappings.modelCube.lowerName}.${mappings.cubeRotX} = data[3];
+			${mappings.modelCube.lowerName}.${mappings.cubeRotY} = data[4];
+			${mappings.modelCube.lowerName}.${mappings.cubeRotZ} = data[5];
+		});
+	}
+
+	/**
+	 * Get the internal ticks done. This is optional
+	 * @param partialTicks the interpolation between ticks
+	 * @return the internal ticks done. See: https://github.com/Dumb-Code/Dumb-Code.github.io/wiki/Ticks-Done
+	 */
+	public float getTicksDone(float partialTicks) {
+		return this.entity.${mappings.entityAge} + partialTicks - this.tickOffset;
+	}
+}

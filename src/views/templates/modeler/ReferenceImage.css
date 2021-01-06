@@ -1,0 +1,17 @@
+
+    .preview-window img {
+        max-width: 50px;
+        max-height: 50px;
+    }
+
+    .empty-entry {
+        display: none !important;
+    }
+
+    .modal-content {
+        background-color: #303030; 
+    }
+
+    .modal-content.is-dragging {
+        background-color: green;
+    }

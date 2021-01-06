@@ -1,0 +1,213 @@
+.disable-select {
+    user-select: none; /* supported by Chrome and Opera */
+   -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+   -moz-user-select: none; /* Firefox */
+   -ms-user-select: none; /* Internet Explorer/Edge */
+}
+
+
+.settings-entry {
+   padding-bottom: 15px;
+   padding-top: 10px;
+   border-style: none;
+   border-bottom-style: solid;
+   border-width: 1px;
+   border-color: #181818
+}
+
+.settings-entry-field {
+   padding-top: 5px;
+   padding-bottom: 5px;
+}
+
+.editor-slider {
+   width: 100%
+}
+
+.input-slider {
+   -webkit-appearance: none;  
+   appearance: none;
+   min-width: 50%;
+   height: 15px;
+   background: #d3d3d3; 
+   outline: none; 
+   opacity: 0.7; 
+   -webkit-transition: .2s;
+   transition: .2s;
+}
+
+.input-slider:hover {
+   opacity: 1; 
+}
+
+.input-slider::-webkit-slider-thumb {
+   -webkit-appearance: none;
+   appearance: none;
+   width: 15px;
+   height: 15px;
+   background: #4CAF50; 
+   cursor: pointer; 
+}
+
+.input-slider::-moz-range-thumb {
+   width: 15px; 
+   height: 15px; 
+   background: #4CAF50;
+   cursor: pointer;
+}
+
+.input-slider:not(.is-active) {
+   background: #535353; 
+}
+
+.input-slider:not(.is-active)::-webkit-slider-thumb {
+   background: #707070;
+}
+
+.input-slider:not(.is-active)::-moz-range-thumb {
+   background: #707070;
+}
+
+.editor-text-value {
+   width: 50%;
+   height: 20px;
+}
+
+.editor-entry {
+   padding-top: 2px;
+   padding-bottom: 2px;
+   height: 32px;
+}
+
+.button-small {
+   width: 20px;
+   height: 20px;
+   font-size: 1rem;
+   padding-top: 0px;
+   padding-bottom: 0px;
+}
+
+.keyframe-board {
+   margin-left: 10px;
+   margin-right: 10px;
+   overflow-x: hidden;
+   overflow-y: scroll;
+   height: 120px;
+}
+
+.keyframe-board-entries {
+   height: 125px;
+   background: repeating-linear-gradient( 
+       90deg,
+       #7a7a7a 0px,
+       #7a7a7a 20px,
+       #525252 20px,
+       #525252 40px);
+   background-size: 40px
+}
+
+#editor-mouseover {
+   position: absolute; 
+   background-color: black; 
+   color: white; 
+   font-family: sans-serif; 
+   border-radius: 20px; 
+   padding: 2px 5px; 
+   text-transform: none; 
+   display: none;
+}
+
+#directional-indicators div {
+   position: absolute; 
+   font-size: x-small;
+   color: white;
+   padding-left: 1px;
+   padding-right: 1px;
+   border-radius: 7px;
+   pointer-events: none;
+}
+
+#directional-indicators {
+   display: none;
+}
+
+.is-modeling ~ #directional-indicators, .is-animation ~ #directional-indicators, .is-texture ~ #directional-indicators {
+   display: unset;
+}
+
+#directional-indicators .dark {
+   color: #424242;
+}
+
+.keyframe-entry-wrapper {
+   position: absolute;
+   height: 125px;
+   pointer-events: none;
+}
+
+
+.keyframe-entry-wrapper.is-hovered {
+   border-width: 1px;
+   border-left-style: solid;
+   border-color: #000000;
+}
+
+.keyframe-entry {
+   height: 125px;
+   pointer-events: none;
+
+   -webkit-transition: .5s;
+   transition: .5s;
+}
+
+.keyframe-entry.is-hovered {
+   background: #aaaaaa;
+}
+
+.keyframe-entry.is-selected {
+   background: #77AAAADD;
+}
+
+.keyframe-entry-marker {
+   pointer-events: all;
+   float: right;
+   width: 7px;
+   height: 125px;
+   background-color: #ffaa00;
+}
+
+.keyframe-entry-marker.is-selected {
+   background-color: #ffaaff;
+}
+
+.keyframe-board-labels {
+   height:25px;
+   background: #121212;
+}
+
+.keyframe-board-label {
+   position: absolute;
+   color: antiquewhite;
+   pointer-events: none;
+}
+
+.button-activateable.is-activated {
+   color: #4c7faf !important;
+}
+
+body {
+    margin: 0;
+    background-size: cover;
+    height: 100vh;
+}
+
+html {
+   overflow: hidden;
+}
+
+
+.display-div canvas {
+   display: block;
+}
+
