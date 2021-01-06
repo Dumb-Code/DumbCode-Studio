@@ -14,8 +14,15 @@ type Props = {
 
 class Modeler extends React.Component<Props> {
   render() {
+    const { isActive } = this.props
     return (
-      <>
+      <section
+        className="section is-mobile has-background-black-ter"
+        style={{
+          height: "calc(100vh - 52px)",
+          display: isActive ? 'block' : 'none',
+        }}
+      >
         <div
           className="has-background-black-ter"
           style={{
@@ -107,7 +114,7 @@ class Modeler extends React.Component<Props> {
             </div>
           </div>
         </div>
-      </>
+      </section>
     );
   }
 }
