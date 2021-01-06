@@ -213,7 +213,9 @@ function frame() {
         }
         projectTabs.tabs.forEach(t => mainArea.classList.remove("is-"+t))
 
-        mainArea.classList.toggle("is-"+projectTabs.activeTab, true)
+        let active = projectTabs.selectableList.value
+
+        mainArea.classList.toggle("is-"+active, true)
         activeTab = newTab
 
         canvasContainer = $(activeTab.domElement).find(".display-div").get(0)
@@ -222,7 +224,7 @@ function frame() {
         }
 
         Array.from(document.getElementsByClassName("editor-part")).forEach(elem => {
-            elem.classList.toggle("is-active", elem.getAttribute("editor-tab").split(",").includes(projectTabs.activeTab))
+            elem.classList.toggle("is-active", elem.getAttribute("editor-tab").split(",").includes(active))
         })
         if(activeTab.setActive) {
             activeTab.setActive()

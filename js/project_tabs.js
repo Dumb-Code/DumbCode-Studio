@@ -1,35 +1,34 @@
+import { LinkedSelectableList } from "./util/linked_selectable_list.js"
+
 export class ProjectTabs {
     constructor() {
         this.files = "file"
         this.modeling = "modeling"
         this.texture = "texture"
         this.animation = "animation"
-        this.activeTab = this.files
         this.tabs = [this.files, this.modeling, this.texture, this.animation]
-        this.setActive()
+
+        this.selectableList = new LinkedSelectableList($('.tab-controller'), true, "navbar-is-active")
     }
 
     getActive(files, modeling, texture, animation) {
-        if(this.activeTab == this.modeling) {
+        let active = this.selectableList.value
+        if(active == this.modeling) {
             return modeling
         }
-        if(this.activeTab == this.texture) {
+        if(active == this.texture) {
             return texture
         }
-        if(this.activeTab == this.animation) {
+        if(active == this.animation) {
             return animation
         }
         return files
     }
-
-    setActive() {
-        activeProjectTab = this
-    }
 }
 
-let activeProjectTab
+// let activeProjectTab
 
-window.setTab = (element, tab) => {
-    Array.from(element.parentElement.children).forEach(elem => elem.classList.toggle("navbar-is-active", elem == element))
-    activeProjectTab.activeTab = activeProjectTab.tabs[tab]
-}
+// window.setTab = (element, tab) => {
+//     Array.from(element.parentElement.children).forEach(elem => elem.classList.toggle("navbar-is-active", elem == element))
+//     activeProjectTab.activeTab = activeProjectTab.tabs[tab]
+// }
