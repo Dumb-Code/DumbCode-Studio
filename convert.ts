@@ -1,11 +1,12 @@
 import * as cheerio from 'cheerio';
 import * as fs from 'fs';
-import { camelCase } from 'lodash';
+import { camelCase, uniq } from 'lodash';
 import * as path from 'path';
 
-const DRY_RUN = false
 
 const extractReactComponents = require("html-to-react-components");
+
+const DRY_RUN = false
 
 const componentNames = {}
 
@@ -40,7 +41,7 @@ const convertFiles = (dir: string, targetDir: string) => {
       const relativePath = path.dirname(path.relative(destPath, path.resolve(__dirname, 'src/views', module)))
       if (/^modules/.test(module)) {
         const importedComponentName = getComponentName(module)
-        extraImports.push(`import ${importedComponentName} from '${relativePath}/${importedComponentName}';`)
+        extraImports.push(`import ${importedComponentName} from './${relativePath}/${importedComponentName}';`)
         const importedComponentTag = `<${importedComponentName} />`
         tagsToReplace.push(importedComponentTag)
         const component = $(importedComponentTag)
@@ -68,13 +69,14 @@ const convertFiles = (dir: string, targetDir: string) => {
     if (multipleRoots)
       componentContent = componentContent.replace(/faketag/g, '')
 
-    componentContent = extraImports.join('\n') + '\n' + componentContent
+    componentContent = uniq(extraImports).join('\n') + '\n' + componentContent
     // handle style tags
     const styleTags = $('style').toArray().map(tag => $(tag).html()).filter(e => !/^\s*$/.test(e))
     if (styleTags.length > 0) {
       const styleContent = styleTags.join('\n')
-      componentContent = `import '${componentName}.css'\n\n${componentContent}`
+      componentContent = `import './${componentName}.css'\n\n${componentContent}`
       const stylePath = path.resolve(destPath, `${componentName}.css`)
+      $('style').remove()
       console.log(`/// ${stylePath}`)
       console.log(styleContent)
       if (!DRY_RUN) fs.writeFileSync(stylePath, styleContent)
@@ -85,9 +87,10 @@ const convertFiles = (dir: string, targetDir: string) => {
     if (scriptTags.length > 0) {
       const scriptContent = scriptTags.join('\n')
       componentContent = componentContent.replace('render() {', `componentDidMount() {\n    ${scriptContent}\n  }\n\n  render() {`)
+      $('script').remove()
     }
 
-    const componentPath = path.resolve(destPath, `${componentName}.jsx`)
+    const componentPath = path.resolve(destPath, `${componentName}.tsx`)
     componentContent = componentContent.replace(/img src="{(.+)}"/g, "img src={$1}")
     tagsToReplace.forEach(tagString => {
       componentContent = componentContent.replace(new RegExp(tagString, 'gi'), tagString)
