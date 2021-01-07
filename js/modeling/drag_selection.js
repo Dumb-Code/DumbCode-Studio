@@ -9,15 +9,18 @@ let mousePoint = new Vector2()
 let mouse = new Vector2()
 
 $(document)
-    .mousedown(e => {
-        mouseDownPoint.set(e.clientX, e.clientY)
-        mousedown = true
-    })
-    .mousemove(e => mousePoint.set(e.clientX, e.clientY))
-    .mouseup(() => {
-        mousedown = false
-    })
+.mousedown(e => {
+    mouseDownPoint.set(e.clientX, e.clientY)
+    mousedown = true
+})
+.mousemove(e => mousePoint.set(e.clientX, e.clientY))
+.mouseup(() => {
+    mousedown = false
+})
 
+/**
+ * Used to handle the shift click dragging of 
+ */
 export class DragSelection {
     constructor(studio, selectionElement, orbitControls) {
         this.display = studio.display
@@ -28,7 +31,6 @@ export class DragSelection {
         this.raytraceCache = new Map()
         this.active = false
         this.enabled = false
-        this.previousMoveState = {}
         this.cubesToGoThrough = []
 
         this.setEnabled = (value = this.enabled) => {
@@ -58,20 +60,10 @@ export class DragSelection {
             return
         }
 
-        let left = Math.min(mousePoint.x, mouseDownPoint.x)
-        let top = Math.min(mousePoint.y, mouseDownPoint.y)
-        let width = Math.abs(mousePoint.x - mouseDownPoint.x)
-        let height = Math.abs(mousePoint.y - mouseDownPoint.y)
-
-        if(
-            this.previousMoveState.left != left ||
-            this.previousMoveState.top != top ||
-            this.previousMoveState.width != width ||
-            this.previousMoveState.height != height
-        ) {
-            this.previousMoveState = { left, top, width, height }
-            this.cubesToGoThrough.length = 0
-        }
+        let left = mouseDownPoint.x
+        let top = mouseDownPoint.y
+        let width = mousePoint.x - mouseDownPoint.x
+        let height = mousePoint.y - mouseDownPoint.y
 
         if(this.cubesToGoThrough.length === 0) {
             this.pth.model.cubeMap.forEach(cube => {
@@ -83,18 +75,24 @@ export class DragSelection {
             })
         }
 
-
-        this.selectionElement.show().css('left', left).css('top', top).css('width', width).css('height', height)
+        this.selectionElement.show()
+        .css('left', Math.min(left, mousePoint.x))
+        .css('top', Math.min(top, mousePoint.y))
+        .css('width', Math.abs(width))
+        .css('height', Math.abs(height))
         
         //todo: maybe make the cubes intersected rather than selected before the mouse is released
         let intersectedObjects = new Set()
         let step = 5
-        let calcsLeft = Math.max(500 / this.pth.model.cubeMap.size, 75)
-        for(let x = left; x <= left+width; x+=step) {
-            for(let y = top; y <= top+height; y+=step) {
+        let pixelsToScanPerFrame = 100
+
+        let xDir = Math.sign(width)
+        let yDir = Math.sign(height)
+        for(let x = left; xDir*x < xDir*(left+width); x+=(xDir*step)) {
+            for(let y = top; yDir*y < yDir*(top+height); y+=(yDir*step)) {
                 let key = x+','+y
                 if(!this.raytraceCache.has(key)) {
-                    if(calcsLeft-- < 0) {
+                    if(pixelsToScanPerFrame-- < 0) {
                         continue
                     }
                     let rect = this.display.renderer.domElement.getBoundingClientRect()
@@ -117,18 +115,27 @@ export class DragSelection {
             }
         }
 
-
+        let fireEvents = false
         this.previousIntersected.forEach(cube => {
             if(!intersectedObjects.has(cube)) {
-                this.raytracer.clickOnMesh(cube, false, false)
+                this.raytracer.clickOnMesh(cube, false, false, true)
             }
+            fireEvents = true
         })
+        if(fireEvents) {
+            this.raytracer.dispatchEvents(false)
+        }
 
+        fireEvents = false
         intersectedObjects.forEach(cube => {
             if(!this.previousIntersected.has(cube)) {
-                this.raytracer.clickOnMesh(cube, true, false)
+                this.raytracer.clickOnMesh(cube, true, false, true)
             }
-        })     
+            fireEvents = true
+        })
+        if(fireEvents) {
+            this.raytracer.dispatchEvents(true)
+        } 
 
         this.previousIntersected.clear()
         intersectedObjects.forEach(c => this.previousIntersected.add(c))
