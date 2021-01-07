@@ -19,6 +19,9 @@ const resultMat = new Matrix4()
 const resultMat2 = new Matrix4()
 
 
+/**
+ * Used for the right hand display of the cube values
+ */
 export class CubeValueDisplay {
 
     constructor(dom, studio, renameCube) {
@@ -30,19 +33,25 @@ export class CubeValueDisplay {
         this.lockedCubes = studio.lockedCubes
         this.rotationPointMarkers = studio.rotationPointMarkers
 
+        //Gets the selected cube, or null if no cube selected
+        let getCube = () => this.raytracer.selectedSet.size === 1 ? this.raytracer.firstSelected().tabulaCube : null
 
-        let getCube = () => this.raytracer.selectedSet.size === 1 ? this.raytracer.firstSelected().tabulaCube : undefined
-
+        //The cube name property
         this.cubeName = new LinkedElement(dom.find('.input-cube-name'), false, false).onchange(e => {
             dom.find('.input-cube-name').toggleClass('input-invalid', renameCube(e.old, e.value))
         })
+        //The cube dimensions property
         this.dimensions = new LinkedElement(dom.find('.input-dimensions .input-part')).onchange(e => getCube()?.updateDimension(e.value))
+        //The cube position property
         this.positions = new LinkedElement(dom.find('.input-position .input-part')).onchange(e => {
             this.lockedCubes.createLockedCubesCache()
             getCube()?.updatePosition(e.value)
             this.lockedCubes.reconstructLockedCubes()
         })
+        //The cube offset property
         this.offsets = new LinkedElement(dom.find('.input-offset .input-part')).onchange(e => getCube()?.updateOffset(e.value))
+        
+        //The cube grow locked property
         this.cubeGrowLocked = new ToggleableElement(dom.find('.cube-grow-lock'), 'is-locked')
         .addPredicate(() => this.cubeGrow.value !== undefined)
         .onchange(() => {
@@ -58,6 +67,7 @@ export class CubeValueDisplay {
                 this.cubeGrow.value = values
             }
         })
+        //The cube grow element
         this.cubeGrow = new LinkedElement(dom.find('.input-cube-grow .input-part')).onchange(e => {
             if(e.idx !== -1 && this.cubeGrowLocked.value) {
                 let val = e.value[e.idx]
@@ -68,20 +78,28 @@ export class CubeValueDisplay {
             }
             getCube()?.updateCubeGrow(e.value)
         })
+
+        //The texture offset element (not used: remove)
         this.textureOffset = new LinkedElement(dom.find('.input-texure-offset')).onchange(e => getCube()?.updateTextureOffset(e.value))
+        //The texture mirrored element (not used: remove)
         this.textureMirrored = new LinkedElement(dom.find('.input-texture-mirrored'), false, false).onchange(e => getCube()?.updateTextureMirrored(e.value))
+        
+        //The rotation property.
         this.rotation = new LinkedElement(dom.find('.input-rotation .input-part')).withsliders(dom.find('.input-rotation .input-part-slider')).onchange(e => {
             this.lockedCubes.createLockedCubesCache()
             getCube()?.updateRotation(e.value)
             this.lockedCubes.reconstructLockedCubes()
         })
 
+        //Shouldn't this be the raytracer select change?
         studio.transformControls.addEventListener('objectChange', () => this.updateCubeValues())
 
+        //Sets the commands
         this.setCommands(studio.commandRoot)
     }
 
     setCommands(root) {
+        //With command. Used to run commands with spefic cubes
         root.command('with', 'w')
             .argument('cube', this.cubeArgumentHandler())
             .argument('cmd', stringHandler(), true)
@@ -91,12 +109,16 @@ export class CubeValueDisplay {
                 root.runCommandSplit(args.get('cmd'), ctx)
             })
 
+        //Called when the position is changed.
         let posChanged = (cube, values, visualOnly) => {
             this.lockedCubes.createLockedCubesCache()
             cube.updatePosition(values, visualOnly)
             this.lockedCubes.reconstructLockedCubes()
         }
+
+        //Create the rotation point command (local)
         this.createArrayCommand(root, cube => cube.rotationPoint, posChanged, xyzAxis, 'pos')
+        //Create the rotation point command (world)
         this.createArrayCommand(root, cube => cube.rotationPoint, posChanged, xyzAxis, 'posworld', false, (mode, axisValues, cube) => {
             cube.resetVisuals()
             cube.parent.resetVisuals()
@@ -117,12 +139,15 @@ export class CubeValueDisplay {
             }
         })
 
+        //Called when rotation is changed
         let rotChanged = (cube, values, visualOnly) => {
             this.lockedCubes.createLockedCubesCache()
             cube.updateRotation(values, visualOnly)
             this.lockedCubes.reconstructLockedCubes()
         }
+        //Create the rotation command (local)
         this.createArrayCommand(root, cube => cube.rotation, rotChanged, xyzAxis, 'rot')
+        //Create the rotation command (world)
         this.createArrayCommand(root, cube => cube.rotation, rotChanged, xyzAxis, 'rotworld', false, (mode, axisValues, cube) => {
             cube.parent.resetVisuals()
             cube.resetVisuals()
@@ -165,11 +190,13 @@ export class CubeValueDisplay {
         })
 
 
+        //Create the dimension, offset, texOffset and cubegrow commands
         this.createArrayCommand(root, cube => cube.dimension, (cube, values, visualOnly) => cube.updateDimension(values, visualOnly), xyzAxis, 'dim', true)
         this.createArrayCommand(root, cube => cube.offset, (cube, values, visualOnly) => cube.updateOffset(values, visualOnly), xyzAxis, 'off')
         this.createArrayCommand(root, cube => cube.textureOffset, (cube, values, visualOnly) => cube.updateTextureOffset(values, visualOnly), 'uv', 'tex')
         this.createArrayCommand(root, cube => cube.cubeGrow, (cube, values, visualOnly) => cube.updateCubeGrow(values, visualOnly), xyzAxis, 'cg')
 
+        //Create the texture mirrored command
         root.command('texmirror')
             .addCommandBuilder(`texmirror`)
             .argument('value', booleanHandler())
@@ -187,6 +214,9 @@ export class CubeValueDisplay {
             .onExit(() => this.onCommandExit())
     }
 
+    /**
+     * Creates an array command to update cube values.
+     */
     createArrayCommand(root, cubeGetter, cubeSetter, axisNames, name, integer = false, axisEditor = (_mode, _axisValues, _cube) => {}) {
         root.command(name)
             .argument('mode', enumHandler('set', 'add'))
@@ -235,6 +265,7 @@ export class CubeValueDisplay {
         }
     }
 
+    //Update the cube values.
     updateCubeValues() {
         let isSelected = this.raytracer.selectedSet.size === 1
         if(isSelected) {

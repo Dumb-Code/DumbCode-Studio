@@ -119,6 +119,8 @@ export class CubeListBoard {
             div.classList.toggle('cube-selected', oldMap.get(cube).div.classList.contains('cube-selected'))
         }
 
+        //Element div is used in `cube_state_highlighting.js`
+        cube._elementDiv = $(div)
         div.setAttribute('cubename', cube.name)
         this.dragElementList.addElement($(div), () => cube)
         li.appendChild(div)

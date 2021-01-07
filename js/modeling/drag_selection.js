@@ -19,7 +19,7 @@ $(document)
 })
 
 /**
- * Used to handle the shift click dragging of 
+ * Used to handle the shift click dragging of selection cubes.
  */
 export class DragSelection {
     constructor(studio, selectionElement, orbitControls) {
@@ -33,11 +33,13 @@ export class DragSelection {
         this.enabled = false
         this.cubesToGoThrough = []
 
+        //Sets enabled
         this.setEnabled = (value = this.enabled) => {
             orbitControls.enabled = !value
             studio.transformControls.reason('drag', !value)
         }
 
+        //When the shift key is pressed/unpressed, set enabled.
         listenForKeyChange("Shift", value => {
             if(this.active) {
                 this.enabled = value
@@ -46,6 +48,9 @@ export class DragSelection {
         })
     }
 
+    /**
+     * Run onn every frame
+     */
     onFrame() { 
         if(!this.enabled || !mousedown) {
             this.raytraceCache.clear()
@@ -65,6 +70,8 @@ export class DragSelection {
         let width = mousePoint.x - mouseDownPoint.x
         let height = mousePoint.y - mouseDownPoint.y
 
+        //If there are no cubes to go through, re-add all the cubes.
+        //Note that this currently means the algorith will repeat ittself once all cubes are clicked on.
         if(this.cubesToGoThrough.length === 0) {
             this.pth.model.cubeMap.forEach(cube => {
                 if(cube.cubeMesh !== undefined) {
@@ -75,6 +82,7 @@ export class DragSelection {
             })
         }
 
+        //Set the properties of the shift click element
         this.selectionElement.show()
         .css('left', Math.min(left, mousePoint.x))
         .css('top', Math.min(top, mousePoint.y))
@@ -86,15 +94,19 @@ export class DragSelection {
         let step = 5
         let pixelsToScanPerFrame = 100
 
+        //Basically in a version of range(left, left+width, step), that accounts for both directions.
         let xDir = Math.sign(width)
         let yDir = Math.sign(height)
         for(let x = left; xDir*x < xDir*(left+width); x+=(xDir*step)) {
             for(let y = top; yDir*y < yDir*(top+height); y+=(yDir*step)) {
                 let key = x+','+y
+                //If the pixel has already been calculated, don't recalculate it
                 if(!this.raytraceCache.has(key)) {
+                    //If we're out of pixels per frame to scan
                     if(pixelsToScanPerFrame-- < 0) {
                         continue
                     }
+                    //Get the area size, and the mouse position for the raytracer.
                     let rect = this.display.renderer.domElement.getBoundingClientRect()
                     let cache = new Set()
                     mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
@@ -103,6 +115,7 @@ export class DragSelection {
                     raycaster
                         .intersectObjects(this.cubesToGoThrough)
                         .forEach(object => {
+                            //Remove the object from cubesToGoThrough, as if it's found, we shouldn't re-calculate it.
                             cache.add(object.object)
                             let ix = this.cubesToGoThrough.indexOf(object.object)
                             if(ix !== -1) { //Should always be true
@@ -115,6 +128,7 @@ export class DragSelection {
             }
         }
 
+        //Deselects the relevant cubes.
         let fireEvents = false
         this.previousIntersected.forEach(cube => {
             if(!intersectedObjects.has(cube)) {
@@ -126,6 +140,7 @@ export class DragSelection {
             this.raytracer.dispatchEvents(false)
         }
 
+        //Selects the relevant cubes.
         fireEvents = false
         intersectedObjects.forEach(cube => {
             if(!this.previousIntersected.has(cube)) {
@@ -137,15 +152,22 @@ export class DragSelection {
             this.raytracer.dispatchEvents(true)
         } 
 
+        //Set the previous intersected to the current intersected.
         this.previousIntersected.clear()
         intersectedObjects.forEach(c => this.previousIntersected.add(c))
     }
 
+    /**
+     * On the modeling tab active
+     */
     onActive() {
         this.setEnabled()
         this.active = true
     }
 
+    /**
+     * On the modeling tab unactive
+     */
     onInactive() {
         this.setEnabled(false)
         this.active = false
