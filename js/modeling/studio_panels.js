@@ -2,6 +2,9 @@ import { LayoutPart } from "../util/layout_part.js"
 
 const mainArea = document.getElementById("main-area")
 
+/**
+ * Used to control the studio panels. Used for resizing ect
+ */
 export class StudioPanels {
     constructor(dom) {
         this.dom = dom
@@ -21,6 +24,7 @@ export class StudioPanels {
         this.rightArea = 320
         this.topArea = 430
 
+        //The clicked divider elements
         let clickedDivider = 0
         $(document)
             .mouseup(() => clickedDivider = 0)
@@ -45,15 +49,21 @@ export class StudioPanels {
         this.updateAreas()
     }
 
+    /**
+     * Called when a right panel is popped
+     */
     rightPanelPopped() {
         if(this.topPanel.popped && this.bottomPanel.popped) {
+            //All panels popped, remove the right area
             this.rightArea = 0
         } else {
+            //Just popped back in
             if(this.rightArea === 0) {
                 this.rightArea = 320
             }
 
             if(this.topPanel.popped !== this.bottomPanel.popped) {
+                //If there is only one panel, it should take up both areas
                 if(this.topPanel.popped) {
                     this.bottomPanelDom.css('grid-area', 'right_top / right_top / right_bottom / right_bottom')
                 } else {
@@ -61,6 +71,7 @@ export class StudioPanels {
                 }
                 this.middleSplit = true
             } else {
+                //Top panel to top panel, bottom panel to bottom panel.
                 this.topPanelDom.css('grid-area', 'right_top / right_top / right_top / right_top')
                 this.bottomPanelDom.css('grid-area', 'right_bottom / right_bottom / right_bottom / right_bottom')
                 this.middleSplit = false
@@ -70,6 +81,9 @@ export class StudioPanels {
         this.updateAreas()
     }
 
+    /**
+     * Called when something else is using up the right panel
+     */
     useUpPanel() {
         if(this.rightArea === 0) {
             this.rightArea = 320
@@ -78,6 +92,9 @@ export class StudioPanels {
         this.updateAreas()
     }
 
+    /**
+     * Called when something else stops using the right panels
+     */
     discardRightPanel() {
         if(this.topPanel.popped && this.bottomPanel.popped) {
             this.rightArea = 0
@@ -85,6 +102,9 @@ export class StudioPanels {
         this.updateAreas()
     }
 
+    /**
+     * Updates all the dom elements.
+     */
     updateAreas() { 
         this.rightDivider.css('right', (this.rightArea-4) + "px")
         this.controlsDivider.css('left', `${mainArea.clientWidth - this.rightArea}px`).css('width', `${this.rightArea}px`).css('top', `${mainArea.offsetTop + this.topArea}px`)
@@ -94,6 +114,7 @@ export class StudioPanels {
         this.controlsDivider.css('display', this.middleSplit ? 'none' : 'unset')
         this.commandDivider.css('display', this.commandsArea === 0 ? 'none' : 'unset')
 
+        //Update the css grid
         this.dom
             .css('grid-template-columns', `32px ${mainArea.clientWidth - 32 - this.rightArea}px ${this.rightArea}px`)
             .css('grid-template-rows', `${this.commandsArea}px ${this.topArea - this.commandsArea}px ${window.innerHeight - mainArea.offsetTop - this.topArea - 60}px 32px 28px`)

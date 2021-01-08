@@ -7,6 +7,9 @@ import { LinkedSelectableList } from "../util/linked_selectable_list.js"
 
 const startSize = 2
 
+/**
+ * Used to handle the reference images 
+ */
 export class ReferenceImageHandler {
     constructor(studio, dom) {
         this.pth = studio.pth
@@ -16,11 +19,13 @@ export class ReferenceImageHandler {
 
         this.addedHooks = false
 
+        //Create the transform controls
         this.transformControls = studio.display.createTransformControls()
         this.transformControls.addEventListener('objectChange', () => this.updatePanelValues())
         this.transformControls.space = "world"
         studio.group.add(this.transformControls)
 
+        //Bind the righthand side elements
         new LinkedSelectableList(dom.find('.ref-image-control-tool'), true, 'is-info').onchange(e => this.transformControls.mode = e.value)
         new LinkedSelectableList(dom.find('.refimg-object-space-tool'), true, 'is-info').onchange(e => this.transformControls.space = e.value)
 
@@ -36,9 +41,12 @@ export class ReferenceImageHandler {
         this.needObj = dom.find('.object-no-object-selected, .object-no-imgref')
         this.refOnly = dom.find('.object-imgref-only')
 
+        //Bind transformInAction 
         this.transformsInAction = false
         this.transformControls.addEventListener('mouseDown', () => this.transformsInAction = true)
         this.transformControls.addEventListener('mouseUp', () => this.transformsInAction = false)
+        
+        //On the raytracer clicked.
         this.raytracer.addEventListener('clicked', e => this.mouseDown(e))
     }
 
@@ -52,33 +60,44 @@ export class ReferenceImageHandler {
     }
 
     mouseDown(e) {
+        //If the transform controls are in action then ignore
         if(this.transformsInAction === true) {
             return
         }
+        //If there isn't anything selected, disable.
         if(!this.pth.anySelected()) {
             this.refOnly.css('display', 'none')
             return
         }
+        //Get the raytrace results
         let results = raytraceUnderMouse(this.display.camera, this.images.map(i => i.mesh), false)
         
+        //If there is a intersected element, that's closer than the raytracerer cube distance
         if(results.length !== 0 && results[0].distance < this.raytracer.intersectedDistance && results[0].object._ref.canSelect) {
+            //Enable the transform tools, and enable the whole right handside panel
             let mesh = results[0].object
             this.transformControls.attach(mesh)
             this.needObj.toggleClass('imgref-selected', true)
             this.refOnly.css('display', '')
-            this.studioPanels.useUpPanel()
+            this.studioPanels.useUpPanel() //Make sure the righthand side has width.
             this.selectedTranslucency.val(mesh._ref.opacity)
             this.updatePanelValues()
             e.ignore = true
             return
-        } else if(this.transformControls.object) {
+        } else if(this.transformControls.object) { //Is active, we need to disable.
             this.unselectPanel()
             e.ignore = true
         }
         this.refOnly.css('display', 'none')
     }
 
+    /**
+     * Adds an image element to the reference images.
+     * @param {*} img the img tag 
+     * @param {string} name the name
+     */
     async addImage(img, name) {
+        //Ensure the modal is created.
         await this.ensureModalCreated()
         let texture = new Texture(img)
         texture.needsUpdate = true
@@ -86,16 +105,18 @@ export class ReferenceImageHandler {
         texture.magFilter = NearestFilter
         texture.minFilter = NearestFilter
 
+        //Get an element with maximum width/height of startSize
         let aspect = img.naturalWidth / img.naturalHeight
         let width = aspect > 1 ? startSize : startSize * aspect
         let height = aspect > 1 ? startSize / aspect : startSize
 
+        //Create the mesh
         let mat = new MeshBasicMaterial({ map:texture, side: DoubleSide, transparent : true })
         let geometry = new PlaneGeometry(width, height)
-
         let mesh = new Mesh(geometry, mat)
         this.pth.displayGroup.add(mesh)
         
+        //Attach the dom elements
         let dom = this.emptyEntry.clone()
         dom.removeClass('empty-entry')
         this.listEntry.append(dom)
@@ -138,6 +159,9 @@ export class ReferenceImageHandler {
         return data
     }
 
+    /**
+     * Updates the right hand side panel values
+     */
     updatePanelValues() {
         let mesh = this.transformControls.object
         if(mesh !== undefined) {
@@ -151,12 +175,19 @@ export class ReferenceImageHandler {
         }
     }
 
+    /**
+     * Deselects the reference image. 
+     */
     unselectPanel() {
         this.transformControls.detach()
         this.studioPanels.discardRightPanel()
         this.needObj.toggleClass('imgref-selected', false)
     }
 
+    /**
+     * Parses and adds the file as a reference image.
+     * @param {file} file the file to upload 
+     */
     uploadFile(file) {
         let img = document.createElement("img")
         readFile(file, (reader, f) => reader.readAsDataURL(f))
@@ -170,6 +201,9 @@ export class ReferenceImageHandler {
         })
     }
 
+    /**
+     * Opens the reference image modal.
+     */
     openRefImgModal() {
         this.ensureModalCreated().then(() => {
             openModal("modeler/reference_image")
@@ -178,8 +212,12 @@ export class ReferenceImageHandler {
         })
     }
 
+    /**
+     * Ensure the modal is created.
+     */
     ensureModalCreated() {
         return getModal("modeler/reference_image").then(m => {
+            //If the hooks aren't applied, apply them.
             if(this.addedHooks === true) {
                 return m
             }

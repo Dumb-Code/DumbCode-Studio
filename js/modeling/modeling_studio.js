@@ -15,12 +15,15 @@ import { CubeCopyPaste } from "./cube_copy_paste.js"
 import { ReferenceImageHandler } from "./reference_image_handler.js"
 import { applyAdjustScrollable } from "../util/element_functions.js"
 
+/**
+ * Ties all the modeling studio together.
+ * Most of the stuff on the modeling page will be handled in here.
+ */
 export class ModelingStudio {
 
     constructor(domElement, display, raytracer, orbitControls, renameCube, pth) {
         this.domElement = domElement
         let dom = $(domElement)
-        this.canvasContainer = dom.find(".display-div").get(0)
         this.display = display
         this.pth = pth
         this.raytracer = raytracer
@@ -29,20 +32,26 @@ export class ModelingStudio {
 
         this.commandRoot = new CommandRoot(dom, raytracer, pth)
 
+        //Add the listeners to refresh stuff
         this.raytracer.addEventListener('selectchange', () => this.selectedChanged())
         this.pth.addEventListener('selectchange', () => this.cubeList.refreshCompleatly())
+        //Cube selection required stuff
         this.selectedRequired = dom.find('.editor-require-selected')
         this.cubesRequired = dom.find('.editor-require-cubes')
         this.childrenRequired = dom.find('.editor-require-children')
 
+        //Create the transform controls
         this.transformControls = display.createTransformControls()
         this.group.add(this.transformControls)
 
+        //Apply the state highlighting
         applyCubeStateHighlighting(dom, this)
         
+        //Create the copy paste + the delte cube
         this.cubeCopyPaste = new CubeCopyPaste(this, this.commandRoot)
         this.cubeCreateDelete = new CubeCreateDelete(dom, this)
 
+        //Create all the parts
         this.rotationPointMarkers = new RotationPointMarkers(this)
         this.lockedCubes = new LockedCubes(this)    
         this.cubeList = new CubeListBoard(dom.find("#cube-list").get(0), raytracer, pth, this.lockedCubes, display.studioOptions, renameCube)
@@ -54,13 +63,16 @@ export class ModelingStudio {
         this.transformControls.addEventListener('objectChange', () => this.runFrame())
         this.referenceImageHandler = new ReferenceImageHandler(this, dom)
 
-
         this.cubeCommands = new CubeCommands(this.commandRoot, this, dom)
 
+
+        //Bind keybinds
         this.addEventListener('keydown', e => {
             if(document.activeElement.nodeName == "INPUT") {
                 return
             }
+
+            //Delete key pressed
             if(e.event.keyCode === 46) {
                 if(e.event.ctrlKey) {
                     this.cubeCreateDelete.deleteCubes()
@@ -69,12 +81,16 @@ export class ModelingStudio {
                 }
             }
 
+            //Undo/redo stuff
             pth.modelMementoTraverser.onKeyDown(e.event)
         })
 
         applyAdjustScrollable(dom)
     }
 
+    /**
+     * Called per frame when this is active
+     */
     runFrame() {
         this.pth.model.resetAnimations()
         this.pointTracker.update()
@@ -87,11 +103,17 @@ export class ModelingStudio {
         this.rotationPointMarkers.onFrame()
     }
 
+    /**
+     * Called when the model cube hirarchy changes
+     */
     cubeHierarchyChanged() {
         this.cubeList.refreshCompleatly()
         this.refreshChildrenSelected()    
     }
 
+    /**
+     * Called when the modeling tab is set active
+     */
     setActive() {
         window.studioWindowResized()
         this.cubeValues.updateCubeValues()
@@ -100,6 +122,9 @@ export class ModelingStudio {
         this.dragSelection.onActive()
     }
     
+    /**
+     * Called when the modeling tab is set unactive
+     */
     setUnactive() {
         this.display.renderTopGroup.remove(this.group)
         this.transformControls.disableReason('tab')
@@ -107,6 +132,9 @@ export class ModelingStudio {
         this.pointTracker.disable()
     }
 
+    /**
+     * Called when a cube selection changes
+     */
     selectedChanged() {
         this.cubeValues.updateCubeValues()
         this.gumball.selectChange()
@@ -121,6 +149,9 @@ export class ModelingStudio {
         this.refreshChildrenSelected()
     }
 
+    /**
+     * Refreshes the cube dom properties
+     */
     refreshChildrenSelected() {
         let hasChildren = false
         this.raytracer.selectedSet.forEach(cube => hasChildren |= cube.tabulaCube.children.length > 0)
