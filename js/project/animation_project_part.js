@@ -7,15 +7,20 @@ import { ModelListAnimationLoader } from "../formats/animation/model_list_animat
 import { DCALoader } from "../formats/animation/dca_loader.js"
 import { DCMLoader } from "../formats/model/dcm_loader.js"
 
+/**
+ * The files part for the animation page.
+ */
 export class AnimationProjectPart {
 
     constructor(dom, animatorGetter, pth) {
         this.animatorGetter = animatorGetter
         this.pth = pth
+        //The gif exporter
         this.gifExporter = new GifExporter(animatorGetter)
         this.emptyAnimationList = dom.find('.animation-list-entry.empty-column')
         dom.find('.new-animation-button').click(() => this.createNewAnimationTab())
 
+        //Uploads a list of files as textures
         let uploadTextureFile = files => {
             [...files].forEach(async(file) => 
                 this.createAndInitiateNewAnimationTab(file.name.substring(0, file.name.length - 4), await readFile(file))
@@ -25,6 +30,7 @@ export class AnimationProjectPart {
         dom.find('#animation-file-input').on('input', e => uploadTextureFile(getAndDeleteFiles(e)))
         fileUploadBox(dom.find('.animation-drop-area'), files => uploadTextureFile(files))
 
+        //Upload from .tbl files
         dom.find('#animation-tbl-files').on('input', async(e) => {
             let files = [...getAndDeleteFiles(e)]
             let name = this.sharedStart(files.map(f => f.name))
@@ -73,6 +79,11 @@ export class AnimationProjectPart {
         pth.addEventListener('selectchange', () => this.refreshAnimationList())
     }
 
+    /**
+     * Creates a new animation tab from a .dca file.
+     * @param {string} name tab name
+     * @param {ArrayBuffer} arraybuffer the animation data 
+     */
     createAndInitiateNewAnimationTab(name, arraybuffer) {
         let tab = this.createNewAnimationTab(name)
         if(tab) {
@@ -83,6 +94,10 @@ export class AnimationProjectPart {
         return tab
     }
 
+    /**
+     * Called when a new animation tab is added
+     * @param {*} tab the animation tab
+     */
     onAnimationTabAdded(tab) {
         tab.handler.keyframes.forEach(kf =>  {
             tab.handler.ensureLayer(kf.layer)
@@ -92,10 +107,18 @@ export class AnimationProjectPart {
         this.animatorGetter().cubeDisplayValues.updateLoopedElements()
     }
 
+    /**
+     * Toggles an animation tab
+     * @param {*} tab the animation tab to toggle
+     */
     toggleTabOpened(tab) {
         tab._toggleDom.toggleClass('is-activated')
     }
 
+    /**
+     * Creates a new animation tab. Creates the dom elements
+     * @param {*} name the tabs name
+     */
     createNewAnimationTab(name) {
         let tab = this.pth.animationTabs.createNewTab()
         let textElement = tab.textElement
@@ -120,6 +143,7 @@ export class AnimationProjectPart {
             textElement.innerText = name
         }, name)
 
+        //Link all the dom buttons.
         let handler = tab.handler
         dom.find('.download-animation-gif').click(e => {
             this.gifExporter.onOpenModal(handler, tab.name)
@@ -147,6 +171,9 @@ export class AnimationProjectPart {
         return a1.substring(0, i);
     }
 
+    /**
+     * Called when a project changes. Used to refresh the animation entries
+     */
     refreshAnimationList() {
         this.emptyAnimationList.siblings().not('.animation-layer-topbar').detach()
         if(this.pth.anySelected()) {

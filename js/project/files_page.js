@@ -3,6 +3,9 @@ import { AnimationProjectPart } from "./animation_project_part.js"
 import { ModelProjectPart } from "./model_project_part.js"
 import { TextureProjectPart } from "./texture_project_part.js"
 
+/**
+ * The files page element. 
+ */
 export class FilesPage { 
 
     constructor(dom, modellingGetter, textureGetter, animatorGetter, pth) {
@@ -14,11 +17,11 @@ export class FilesPage {
         pth.addEventListener("initiateselection", () => rp.css('display', ''))
     }
 
-
-
     createNewAnimationTab(name) {
        this.animationProjectPart.createNewAnimationTab(name)
     }
+
+    //Methods below are needed as any tab element needs them. Todo: don't do that
 
     runFrame() {
 

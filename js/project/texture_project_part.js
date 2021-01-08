@@ -2,26 +2,44 @@ import { readFile } from "../displays.js"
 import { doubleClickToEdit, downloadCanvas, downloadHref, fileUploadBox, getAndDeleteFiles } from "../util/element_functions.js"
 import { DraggableElementList } from "../util/draggable_element_list.js"
 
+/**
+ * The texture project part
+ */
 export class TextureProjectPart {
 
     constructor(dom, pth) {
         this.pth = pth
         this.emptyTextureList = dom.find('.texture-list-entry.empty-column')
+        //The texture drag list
         this.dragableElementList = new DraggableElementList(false, (a, b, c) => pth.textureManager.groupManager.textureDragged(false, a, b, c))
+        //Upload new texture
         dom.find('#texture-file-input').on('input', e => this.uploadTextureFile(getAndDeleteFiles(e)))
+        
+        //Create new texture
         dom.find('.new-texture-button').click(() => this.createEmptyTexture())
+
+        //Open group modal
         dom.find('.edit-texture-groups').click(() => pth.textureManager.groupManager.openGroupModal())
 
+        //Upload texture files
         fileUploadBox(dom.find('.texture-drop-area'), files => this.uploadTextureFile(files))
      
         pth.addEventListener('selectchange', () => this.refreshTextureLayers())
     }
 
+    /**
+     * Creates a new empty texture
+     */
     createEmptyTexture() {
         this.createTextureElement()
         this.pth.textureManager.refresh()
     }
     
+    /**
+     * Creates a new texture element. 
+     * @param {string} name the name of the texture
+     * @param {*} img the img tag
+     */
     createTextureElement(name, img) {
         let data = this.pth.textureManager.addImage(name, img)
         let cloned = this.emptyTextureList.clone()
@@ -56,6 +74,10 @@ export class TextureProjectPart {
         return data 
     }
 
+    /**
+     * uploads the files as new texture layers
+     * @param {*} files the files to upload
+     */
     async uploadTextureFile(files) {
         Promise.all([...files].map(file => {
             let img = document.createElement("img")
@@ -72,6 +94,9 @@ export class TextureProjectPart {
         .then(() => this.pth.textureManager.refresh())
     }
 
+    /**
+     * Refreshes the texture layers. Used for when the group/project changes.
+     */
     refreshTextureLayers() {
         this.emptyTextureList.siblings().not('.texture-layer-topbar').detach()
         if(this.pth.anySelected()) {

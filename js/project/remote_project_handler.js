@@ -6,16 +6,21 @@ const repoLocation = "project/remote/repositories"
 const repoEditLocation = "project/remote/edit_repositories"
 const repoEntryLocation = "project/remote/repository_entries"
 const newEntryLocation = "project/remote/edit_remote"
+
+/**
+ * The remote project handler. Used to handle remote projects.
+ */
 export class RemoteProjectHandler {
     constructor(pth, mp, tp, ap) {
         this.pth = pth
-        this.mp = mp
-        this.tp = tp
-        this.ap = ap
+        this.mp = mp //Moddeling part
+        this.tp = tp //Texture part
+        this.ap = ap //Animation part
         this.store = new ProjectStore()
 
         this.repoContainer
         this.repoTemplate
+        //Get the repo location modal and set the dom elements
         getModal(repoLocation).then(html => {
             let dom = $(html)
             this.repoContainer = dom.find('.repository-container')
@@ -28,6 +33,7 @@ export class RemoteProjectHandler {
             })
         })
 
+        //Get the repo edit modal and set the dom elements
         this.editRepoTarget
         this.repoEditDoms = {}
         getModal(repoEditLocation).then(html => {
@@ -49,6 +55,7 @@ export class RemoteProjectHandler {
             })
         })
 
+        //Get the repo entry modal and set the dom elements
         this.entryContainer
         this.entryTemplate
         getModal(repoEntryLocation).then(html => {
@@ -69,6 +76,7 @@ export class RemoteProjectHandler {
             })
         })
 
+        //Get the edit entry modal and set the dom elements
         this.editingProject = null
         this.editEntryDoms = {}
         getModal(newEntryLocation).then(html => {

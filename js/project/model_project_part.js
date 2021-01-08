@@ -11,6 +11,9 @@ import { doubleClickToEdit, downloadBlob, fileUploadBox, getAndDeleteFiles } fro
 import { LinkedSelectableList } from "../util/linked_selectable_list.js"
 import { RemoteProjectHandler } from "./remote_project_handler.js"
 
+/**
+ * The modeling part for the animation page.
+ */
 export class ModelProjectPart {
     constructor(dom, pth, modellingGetter, texturePart, animationPart) {
         this.pth = pth
@@ -19,11 +22,14 @@ export class ModelProjectPart {
         this.animationPart = animationPart
         this.emptyModelEntry = dom.find('.model-list-entry.empty-column')
 
+        //The converter for dproj
         this.zipHandler = new DcProjectZipConverter(pth, this, texturePart, animationPart)
 
+        //Project selected list
         this.projectSelectList = new LinkedSelectableList(null, true).onchange(v => pth.selectIndex(parseInt(v.value)))
         this.remoteProjects = new RemoteProjectHandler(pth, this, texturePart, animationPart)
 
+        //Add pth hooks
         pth.addEventListener('newproject', e => this.initiateEntry(e.project))
         pth.addEventListener('deleteproject', e => this.projectSelectList.remove(e.project._element))
         pth.addEventListener('selectchange', e => this.projectSelectList.setValue(e.to, true))
@@ -38,18 +44,35 @@ export class ModelProjectPart {
 
     }
     
+    /**
+     * Upload model files
+     * @param {*} files the files to upload
+     */
     async loadModelFiles(files) {
         [...files].forEach(file => DCMLoader.loadModel(readFile(file), file.name, this.texturePart).then(model => this.pth.createNewProject(model)))
     }
 
+    /**
+     * Upload project files. (.dcproj)
+     * @param {*} files the files to upload
+     */
     async loadProjectFiles(files) {
         [...files].forEach(file => this.zipHandler.readFile(file))
     }
 
+    /**
+     * Adds a new reference image.
+     * @param {*} img the img tag
+     * @param {string} name the name of the reference image
+     */
     addReferenceImage(img, name) {
         return this.modellingGetter().referenceImageHandler.addImage(img, name)
     }
 
+    /**
+     * Initiates the project dom entries.
+     * @param {*} project 
+     */
     initiateEntry(project) {
         let model = project.model
 
