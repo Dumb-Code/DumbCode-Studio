@@ -17,37 +17,31 @@ export async function readBBModel(data, texturePart = null) {
     let obj = JSON.parse(DECODER.decode(await data))
     let model = new DCMModel()
 
+    let fileNameList
+    //All the image promises to load and transform
+    let imagePromises = []
+
     if(texturePart !== null) {
         //Get and open the modal
         let modal = await openModal('project/bbmodel_import')
 
         //Clear the file name entries
-        let fileNameList = modal.find('.file-name-entries')
+        fileNameList = modal.find('.file-name-entries')
         fileNameList.children().remove()
-
-        //All the image promises to load and transform
-        let imagePromises = []
 
         //When the file import box is used, add to the image promises
         let inputDom = modal.find('.bbmodel-file-import')
         inputDom.on('input', e => getAndDeleteFiles(e).forEach(f => {
             fileNameList.append($(document.createElement('div')).text(f.name))
             let img = document.createElement("img")
+            let id = imagePromises.length
             imagePromises.push(
                 readFile(f, (reader, f) => reader.readAsDataURL(f)).then(durl => {
                     img.src = durl
-                    return new Promise(resolve => img.onload = () => resolve({ name: f.name, img }))
+                    return new Promise(resolve => img.onload = () => resolve({ id, name: f.name, img }))
                 })
             )
         }))
-
-        //Iterate over the internal textures and add them to the image promises
-        obj.textures.forEach(t => {
-            let img = document.createElement("img")
-            fileNameList.append($(document.createElement('div')).text(t.name))
-            imagePromises.push(new Promise(resolve => img.onload = () => resolve( { name: t.name, img })))
-            img.src = t.source
-        })
 
         //When the continue button is clicked, apply the changes
         let submitDom = modal.find('.continue-button')
@@ -64,10 +58,32 @@ export async function readBBModel(data, texturePart = null) {
         })
     }
 
+    //Iterate over the internal textures and add them to the image promises
+    let directTexturePromises = []
+    obj.textures.forEach((t, i) => {
+        let img = document.createElement("img")
+        if(fileNameList) {
+            fileNameList.append($(document.createElement('div')).text(t.name))
+        }
+        let promise = new Promise(resolve => img.onload = () => resolve( { id: i, name: t.name, img }))
+        imagePromises.push(promise)
+        directTexturePromises.push(promise)
+        img.src = t.source
+    })
+
+    let fulfilledTextures = await Promise.all(directTexturePromises)
+
+    let scaleGetter = id => {
+        let t = fulfilledTextures.find(t => t.id == id)
+        if(!t) {
+            return 1
+        }
+        return t.img.naturalWidth / obj.resolution.width
+    }
 
     obj.elements.forEach(elem => {
         //Calculate the dimensions
-        let dims = calculateCubeDimensions(elem)
+        let dims = calculateCubeDimensions(elem, scaleGetter)
         //Calculate the offset.
         let off = elem.from.map((e, i) => e - elem.origin[i])
         //Calculate the inflate size
@@ -101,7 +117,7 @@ export async function readBBModel(data, texturePart = null) {
     
 }
 
-function calculateCubeDimensions(elem) {
+function calculateCubeDimensions(elem, scaleGetter) {
     //First, we try and get the dimensions from the element uv. The reason for this is as follows:
     //The actual size of the element can be adjusted with cube grow. The space it takes up on the texturemap
     //however is tied directly to the dimensions. Here, we search the texturemap uv and get a list of all the 
@@ -133,27 +149,29 @@ function calculateCubeDimensions(elem) {
     for(let i = 0; i < 6; i++) {
         let c = elem.faces[directionOrder[i]]
 
+        let scale = scaleGetter(c.texture)
+
         //Get the x location
         let x = xLocations[Math.floor(i/2)]
         if(x !== -1) {
             //Get the to-from
-            xPos.push(Math.abs(c.uv[x] - c.uv[2+x]))
+            xPos.push(Math.round(Math.abs((c.uv[x] - c.uv[2+x])*scale)))
         }   
-        
+
         //Get the y location
         let y = yLocations[Math.floor(i/2)]
         if(y !== -1) {
             //Get the to-from
-            yPos.push(Math.abs(c.uv[y] - c.uv[2+y]))
+            yPos.push(Math.round(Math.abs((c.uv[y] - c.uv[2+y])*scale)))
         }
         
         //Get the z location
         let z = zLocations[Math.floor(i/2)]
         if(z !== -1) {  
             //Get the to-from
-            zPos.push(Math.abs(c.uv[z] - c.uv[2+z]))
-        }   
-    }       
+            zPos.push(Math.round(Math.abs((c.uv[z] - c.uv[2+z])*scale)))
+        }
+    }
     //Gets the mode of an array, or null if there was only unique elements
     function getMode(array) {
         //Countmap stores how many times an element exists.
@@ -200,6 +218,7 @@ function applyReTexturing(allCubes, finished, texSize, texturePart, width) {
         //Set the source canvas to be the image width and draw the image.
         srcC.width = imgData.img.naturalWidth
         srcC.height = imgData.img.naturalWidth
+
         src.clearRect(0, 0, srcC.width, srcC.height)
         src.drawImage(imgData.img, 0, 0, srcC.width, srcC.height)
 
@@ -242,15 +261,37 @@ function applyReTexturing(allCubes, finished, texSize, texturePart, width) {
             //   [U][D]
             //[E][N][W][S]
             function swap(name, xoff, yoff, xSize, ySize) {
-                let uv = c._uvdata[name].uv
                 let tx = c.textureOffset
+                let uvData = c._uvdata[name]
+                let uv = uvData.uv
 
-                //Get the source image data
-                let data = src.getImageData(scale*uv[0], scale*uv[1], scale*(uv[2]-uv[0]), scale*(uv[3]-uv[1]))
+                if((uvData.texture != imgData.id) || (uv[2] === uv[0]) || (uv[3] === uv[1]) || (xSize === 0) || (ySize === 0)) {
+                    return
+                }
                 
+                //Get the source image data
+                let data = src.getImageData(Math.round(scale*uv[0]), Math.round(scale*uv[1]), Math.ceil(scale*(uv[2]-uv[0])), Math.ceil(scale*(uv[3]-uv[1])))
+
+                let xPos = (tx[0]+xoff)*scale
+                let yPos = (tx[1]+yoff)*scale
+                
+                let target = new ImageData(data.width*scale, data.height*scale)
+                for(let x = 0; x < data.width; x++) {
+                    for(let y = 0; y < data.height; y++) {
+                        let srcPixel = x + y*data.width
+                        let destPixel = x + y*target.width
+                        for(let cx = 0; cx < scale; cx++) {
+                            for(let cy = 0; cy < scale; cy++) {
+                                for(let i = 0; i < 4; i++) {
+                                    target.data[4*(scale*destPixel + (cx + cy*target.width)) + i] = data.data[4*srcPixel + i]
+                                }
+                            }
+                        }
+                    }
+                }
                 //Put it in the destination
-                dest.putImageData(data, (tx[0]+xoff)*scale, (tx[1]+yoff)*scale, 0, 0, xSize*scale, ySize*scale)
-            }
+                dest.putImageData(target, xPos, yPos)
+             }
 
             //Swap all the parts
             swap("up", d, 0, w, d)
