@@ -1,4 +1,5 @@
 import { readFile } from "../../displays.js"
+import { CubePointTracker } from "../../modeling/cube_point_tracker.js"
 import { generateSortedTextureOffsets } from "../../util.js"
 import { getAndDeleteFiles } from "../../util/element_functions.js"
 import { DCMCube, DCMModel } from "./dcm_model.js"
@@ -274,18 +275,41 @@ function applyReTexturing(allCubes, finished, texSize, texturePart, width) {
 
                 let xPos = (tx[0]+xoff)*scale
                 let yPos = (tx[1]+yoff)*scale
-                
-                let target = new ImageData(data.width*scale, data.height*scale)
-                for(let x = 0; x < data.width; x++) {
-                    for(let y = 0; y < data.height; y++) {
-                        let srcPixel = x + y*data.width
+
+                let rotation = (uvData.rotation ? uvData.rotation : 0) / 90
+
+                let normalSize = true
+                let target = new ImageData((normalSize?xSize:ySize)*scale, (normalSize?ySize:xSize)*scale)
+                for(let x = 0; x < target.width; x++) {
+                    for(let y = 0; y < target.height; y++) {
+                        let srcX = x / (target.width-1)
+                        let srcY = y / (target.height-1)
+
+                        for(let i = 0; i < rotation; i++) {
+                            // ...    .X.
+                            // ..X -> ...
+                            // ...    ...
+                            // ...    ...
+                            // (2/2, 1/3) -> (1/3, 1 - 2/2)
+                            // (x, y) -> (y, 1 - x)
+                            let x = srcX
+                            srcX = srcY
+                            srcY = 1-x
+                            break
+                        }
+
+                        srcX = Math.floor((Math.floor(srcX * (target.width-1)) / (target.width-1)) * (data.width-1))
+                        srcY = Math.floor((Math.floor(srcY * (target.height-1)) / (target.height-1)) * (data.height-1))
+
+                        // if(imgData.id == 4) {
+                        //     console.log(x, y, Math.floor(srcX*data.width), Math.floor(srcY*data.height))
+                        // }
+
+                        let srcPixel = srcX + srcY*data.width
                         let destPixel = x + y*target.width
-                        for(let cx = 0; cx < scale; cx++) {
-                            for(let cy = 0; cy < scale; cy++) {
-                                for(let i = 0; i < 4; i++) {
-                                    target.data[4*(scale*destPixel + (cx + cy*target.width)) + i] = data.data[4*srcPixel + i]
-                                }
-                            }
+                        
+                        for(let i = 0; i < 4; i++) {
+                            target.data[4*destPixel + i] = data.data[4*srcPixel + i]
                         }
                     }
                 }
