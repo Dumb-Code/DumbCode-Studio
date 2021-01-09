@@ -1,6 +1,6 @@
-import { readFile } from "./displays.js"
-import { MeshStandardMaterial } from "./libs/three.js"
-
+/**
+ * Handles the aniamtions. Instead of being in the root, this should be moved to the animation/ folder
+ */
 export class AnimationHandler {
     
     constructor(tbl) {
@@ -20,22 +20,33 @@ export class AnimationHandler {
         this.events = []
         this.keyframeInfo = []
         this.ikaCubes = [] //Inverse kinematic anchor cubes
-        this.definedKeyframeInfo = new Map()
+        this.definedKeyframeInfo = new Map() //TODO: make this work with animation mementos
         this.playstate = new PlayState()
     }
 
+    /**
+     * Get the total time. This is the time that the last keyframe ends
+     */
     get totalTime() {
         return this.keyframes.map(kf => kf.startTime + kf.duration).reduce((a,b) => Math.max(a,b), 0)
     }
 
+    /**
+     * Gets the minimum time. This is the time where the first keyframe starts
+     */
     get minTime() {
         let ret = this.keyframes.map(kf => kf.startTime).reduce((a,b) => Math.min(a,b), Infinity)
         if(ret == Infinity) {
-            return 0
+            return 0 //Don't be infinity
         }
         return ret
     }
 
+    /**
+     * Called when a cube is renamed.
+     * @param {string} oldName the old cube name
+     * @param {string} newName the new cube name
+     */
     renameCube(oldName, newName) {
         this.keyframes.forEach(kf => kf.renameCube(oldName, newName))
         this.loopKeyframe.renameCube(oldName, newName)
@@ -45,6 +56,10 @@ export class AnimationHandler {
         }
     }
 
+    /**
+     * Animates the handler
+     * @param {number} deltaTime The time since the last frame
+     */
     animate(deltaTime) {
         let previousTicks = this.playstate.ticks
         this.playstate.onFrame(deltaTime)
@@ -53,8 +68,12 @@ export class AnimationHandler {
 
         let ticks = this.forcedAnimationTicks === null ? this.playstate.ticks : this.forcedAnimationTicks
         
+        //If the playstate is playing, and we don't ahve animation ticks
         if(this.playstate.playing && this.forcedAnimationTicks === null) {
+            //If the finished marker is false, and this is looping and has looping data, and the ticks are larger than the start of the looping part:
             if(!this.finishLoopingMarker && this.looping && this.loopData !== null && ticks > this.loopData.start) {
+
+                //If the ticks are after the looping end + the looping duration, then set the ticks back.
                 if(ticks >= this.loopData.end+this.loopData.duration) {
                     ticks = this.loopData.start + ticks - (this.loopData.end+this.loopData.duration)
                     this.playstate.ticks = ticks
@@ -63,7 +82,8 @@ export class AnimationHandler {
                 //TODO: if a layer is invisible, then the looping animation will look wrong. 
                 // To fix this, have a looped keyframe for every layer (eh)
                 // OR, call updateLoopKeyframe every time the visiblity is changed
-    
+
+                //If the ticks are larger than the end, then we animate the looping keyframe, and all the other keyframes at the end position
                 if(ticks >= this.loopData.end) {
                     if(previousTicks < this.loopData.end && this.finishLooping) {
                         this.finishLoopingMarker = true
@@ -80,15 +100,20 @@ export class AnimationHandler {
                 }
             }
 
+            //If not finished looping but the finished looping marker is true, set it to false
             if(!this.finishLooping && this.finishLoopingMarker) {
                 this.finishLoopingMarker = false
             }
         }
 
+        //Animate all the visible keyframes
         this.keyframes.filter(kf => visibleFrames.includes(kf.layer)).forEach(kf => kf.animate(ticks))
 
     }
 
+    /**
+     * Updates the looping keyframe 
+     */
     updateLoopKeyframe() {
         if(this.loopData === null) {
             return
@@ -102,16 +127,19 @@ export class AnimationHandler {
         let loops = this.looping
         this.looping = false
 
+        //Animate at the start of the loop
         this.forcedAnimationTicks = this.loopData.start
         this.tbl.resetAnimations()
         this.animate(0)
         let dataStart = this.captureData()
 
+        //Animate at the end of the loop
         this.forcedAnimationTicks = this.loopData.end
         this.tbl.resetAnimations()
         this.animate(0)
         let dataEnd = this.captureData()
 
+        //Subtract the arrays. Figure out what it takes to go from end to start
         let subArrays = (arr1, arr2) => {
             let arr = []
             for(let i = 0; i < 3; i++) {
@@ -119,7 +147,6 @@ export class AnimationHandler {
             }
             return arr
         }
-
         this.tbl.cubeMap.forEach((_, name) => {
             this.loopKeyframe.rotationMap.set(name, subArrays(dataStart.rot[name], dataEnd.rot[name]))
             this.loopKeyframe.rotationPointMap.set(name, subArrays(dataStart.pos[name], dataEnd.pos[name]))
@@ -132,12 +159,19 @@ export class AnimationHandler {
         this.looping = loops
     }
 
+    /**
+     * Creates a new keyframe and adds it to the keyframe list 
+     */
     createKeyframe() {
         let kf = new KeyFrame(this)
         this.keyframes.push(kf)
         return kf
     }
 
+    /**
+     * Creates new layer info with a spefic id
+     * @param {number} id the keyframe id
+     */
     createLayerInfo(id) {
         let data = { 
             id, 
@@ -150,6 +184,10 @@ export class AnimationHandler {
         return data
     }
 
+    /**
+     * Gets a spefic layer id, or creates one if there isn't one
+     * @param {number} id the id to get
+     */
     ensureLayer(id) {
         if(!this.keyframeInfo.some(layer => layer.id === id)) {
             return this.createLayerInfo(id)
@@ -157,10 +195,17 @@ export class AnimationHandler {
         return this.keyframeInfo.find(layer => layer.id === id)
     }
 
+    /**
+     * Removes the layer's keyframes from the defined info list.
+     * @param {*} id the id to remove 
+     */
     removeDefinedLayers(id) {
         this.keyframes.filter(kf => kf.layer == id).forEach(kf => this.definedKeyframeInfo.delete(kf))
     }
 
+    /**
+     * Ensures the defined layers are updated.
+     */
     ensureDefinedLayers() {
         this.keyframes
         .filter(kf => this.ensureLayer(kf.layer).definedMode === true)
@@ -168,6 +213,10 @@ export class AnimationHandler {
         .forEach(kf => this.updateDefinedKeyframe(kf))
     }
 
+    /**
+     * Updates the defined layer for the keyframe. Essentially captures the data at the end of the keyframe
+     * @param {Keyframe} keyframe the keyframe
+     */
     updateDefinedKeyframe(keyframe) {
         if(this.ensureLayer(keyframe.layer).definedMode !== true) {
             return
@@ -180,6 +229,9 @@ export class AnimationHandler {
         this.definedKeyframeInfo.set(keyframe, this.captureData())
     }
 
+    /**
+     * Captures the current state of the model into an object
+     */
     captureData() {
         let data = { rot:{}, pos:{}, cg: {} }
         this.tbl.cubeMap.forEach((cube, name) => {
@@ -190,6 +242,10 @@ export class AnimationHandler {
         return data
     }
 
+    /**
+     * Fixes the defined layers. Used to ensure the end of a keyframe stays consistent
+     * @param {Keyframe} keyframe the keyframe
+     */
     fixDefinedLayers(keyframe) {
         if(this.ensureLayer(keyframe.layer).definedMode !== true) {
             return
@@ -197,6 +253,7 @@ export class AnimationHandler {
         let layerKfs = this.keyframes.filter(kf => kf.layer === keyframe.layer && kf !== keyframe)
         
         let toEditKeyframes = []
+
         //Get the keyframe whose end position is either during the keyframe,
         //Or is the first after the keyframe is finished
         let minimumLayerEndValue = Infinity
@@ -214,11 +271,12 @@ export class AnimationHandler {
                 }
             }
         })
-
         if(minimumKeyframe != null) {
             toEditKeyframes.push(minimumKeyframe)
         }
 
+        //Iterate over all the keyframes to edit.
+        //Ensure that the end of the keyframe stays consistent, even when the keyframe before it changes
         toEditKeyframes.sort(kf => kf.startTime + kf.duration).forEach(kf => {
             let targetMap = this.definedKeyframeInfo.get(kf)
             this.tbl.resetAnimations()
@@ -270,6 +328,9 @@ export class AnimationHandler {
     }
 }
 
+/**
+ * Keyframe class. Stores infomation about the keyframe
+ */
 class KeyFrame {
 
     constructor(handler) {
@@ -286,18 +347,33 @@ class KeyFrame {
 
         this.progressionPoints = [{required: true, x: 0, y: 1}, {required: true, x: 1, y: 0}]
     }
-
+    
+    /**
+     * Renames a cube
+     * @param {string} oldName old name
+     * @param {string} newName new name
+     */
     renameCube(oldName, newName) {
         this.renameCubeMap(oldName, newName, this.rotationMap)
         this.renameCubeMap(oldName, newName, this.rotationPointMap)
     }
 
+    /**
+     * Renames the entries in a map
+     * @param {string} oldName old name
+     * @param {string} newName new name
+     * @param {Map} map the map to rename
+     */
     renameCubeMap(oldName, newName, map) {
         map.set(newName, map.get(oldName))
         map.delete(oldName)
     }
 
-
+    /**
+     * Gets the value on the progression point graph used for the keyframe. 
+     * Progression points need to be sorted. To sort progression points, call `resortPointsDirty`
+     * @param {number} basePercentage 0 being the start of the keyframe, 1 being the end
+     */
     getProgressionValue(basePercentage) {
         if(basePercentage)
         for(let i = 0; i < this.progressionPoints.length - 1; i++) {
@@ -312,18 +388,29 @@ class KeyFrame {
         return basePercentage //Shouldn't happen. There should always be at least the first and last progression point
     }
 
+    /**
+     * Animates the keyframe at a spefic time
+     * @param {number} animationTicks the time to animate at
+     */
     animate(animationTicks) {
+        //If below 0, then don't even bother animating
         let ticks = (animationTicks - this.startTime) / this.duration
         if(ticks <= 0 || this.skip) {
             return
         }
+        //Clamp at 1
         if(ticks > 1) {
             ticks = 1
         }
         this.animatePercentage(this.getProgressionValue(ticks))
     }
 
+    /**
+     * Animates the keyframe at a spefic time
+     * @param {number} percentageDone the time 0-1 of this keyframe being compleated
+     */
     animatePercentage(percentageDone) {
+        //Animate the rotation
         this.rotationMap.forEach((values, key) => {
             let cube = this.handler.tbl.cubeMap.get(key)?.cubeGroup
             if(cube) {
@@ -332,6 +419,7 @@ class KeyFrame {
             }
         })
 
+        //Animate the position
         this.rotationPointMap.forEach((values, key) => {
             let cube = this.handler.tbl.cubeMap.get(key)?.cubeGroup
             if(cube) {
@@ -339,6 +427,7 @@ class KeyFrame {
             }
         })
 
+        //Animate the cube grow
         this.cubeGrowMap.forEach((values, key) => {
             let cube = this.handler.tbl.cubeMap.get(key)
             if(cube) {
@@ -348,6 +437,7 @@ class KeyFrame {
                 cgg.position.set(cgg.position.x - values[0]*percentageDone, cgg.position.y - values[1]*percentageDone, cgg.position.z - values[2]*percentageDone)
                 cm.scale.set(cm.scale.x + 2*values[0]*percentageDone, cm.scale.y + 2*values[1]*percentageDone, cm.scale.z + 2*values[2]*percentageDone)
 
+                //0 scale fucks up some three.js stuff, we need to account for that
                 if(cm.scale.x === 0) {
                     cm.scale.x = 0.00001
                 }
@@ -361,6 +451,9 @@ class KeyFrame {
         })
     }
 
+    /**
+     * Clones this keyframe.
+     */
     cloneKeyframe() {
         let kf = new KeyFrame(this.handler)
         kf.startTime = this.startTime
@@ -374,11 +467,17 @@ class KeyFrame {
         return kf
     }
 
+    /**
+     * Sorts the progresion point by x coordinate
+     */
     resortPointsDirty() {
         this.progressionPoints = this.progressionPoints.sort((p1, p2) => p1.x - p2.x)
     }
 }
 
+/**
+ * The playstate. Holds information about the time of the animation, and the speed
+ */
 export class PlayState {
     constructor() {
         this.ticks = 0
@@ -393,6 +492,13 @@ export class PlayState {
     }
 }
 
+/**
+ * ByteBuffer is an io thing used to read/write to and from files.
+ * This should not be here, it's only here as it used to only be used with .dca, which was handled here
+ * Move ASAP
+ * 
+ * Also this can most likey be rewritten. It's one of the oldest pieces of code.
+ */
 export class ByteBuffer {
     constructor(buffer = new ArrayBuffer(0)) {
         this.offset = 0
