@@ -95,6 +95,7 @@ export async function readBBModel(data, texturePart = null) {
         total[0] += dims[0]
         total[1] += dims[1]
         total[2] += dims[2]
+
         let cube = new DCMCube(
             elem.name,
             dims,
@@ -180,7 +181,8 @@ function calculateCubeDimensions(elem, scaleGetter) {
         //Set everything into countmap
         array.forEach(d => countMap.set(d, countMap.has(d) ? countMap.get(d)+1 : 1));
         //Reduce the entries, sorting by value (count)
-        let entry = [...countMap.entries()].reduce((prev, curr) => prev[1] < curr[1] ? curr : prev)
+        //The sorting is in place to ensure that if there are 2 modes, the highest (not 0) one is picked
+        let entry = [...countMap.entries()].sort((a, b) => b[0]-a[0]).reduce((prev, curr) => prev[1] < curr[1] ? curr : prev)
 
         //Only return if there is more than 1 element
         if(entry[1] > 1) {
@@ -192,7 +194,7 @@ function calculateCubeDimensions(elem, scaleGetter) {
     //Get the x,y,z mode for the arrays.
     let xMode = getMode(xPos)
     let yMode = getMode(yPos)
-    let zMode = getMode(zPos)       
+    let zMode = getMode(zPos)   
     if(xMode !== null && yMode !== null && zMode != null) {
         return [xMode, yMode, zMode]
     } else {
@@ -282,8 +284,8 @@ function applyReTexturing(allCubes, finished, texSize, texturePart, width) {
                 let target = new ImageData((normalSize?xSize:ySize)*scale, (normalSize?ySize:xSize)*scale)
                 for(let x = 0; x < target.width; x++) {
                     for(let y = 0; y < target.height; y++) {
-                        let srcX = x / (target.width-1)
-                        let srcY = y / (target.height-1)
+                        let srcX = x / (target.width-1) - 0.5
+                        let srcY = y / (target.height-1) - 0.5
 
                         for(let i = 0; i < rotation; i++) {
                             // ...    .X.
@@ -294,12 +296,11 @@ function applyReTexturing(allCubes, finished, texSize, texturePart, width) {
                             // (x, y) -> (y, 1 - x)
                             let x = srcX
                             srcX = srcY
-                            srcY = 1-x
-                            break
+                            srcY = -x
                         }
 
-                        srcX = Math.floor((Math.floor(srcX * (target.width-1)) / (target.width-1)) * (data.width-1))
-                        srcY = Math.floor((Math.floor(srcY * (target.height-1)) / (target.height-1)) * (data.height-1))
+                        srcX = Math.floor((Math.round((srcX + 0.5) * (target.width-1)) / (target.width)) * (data.width))
+                        srcY = Math.floor((Math.round((srcY + 0.5) * (target.height-1)) / (target.height)) * (data.height))
 
                         // if(imgData.id == 4) {
                         //     console.log(x, y, Math.floor(srcX*data.width), Math.floor(srcY*data.height))
