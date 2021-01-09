@@ -99,7 +99,7 @@ export async function readBBModel(data, texturePart = null) {
         let cube = new DCMCube(
             elem.name,
             dims,
-            elem.origin,
+            [elem.origin[0] - 8, elem.origin[1], elem.origin[2] - 8],
             off.map((o, i) => o + cg[i]), //the offset is the position it should be. The cube offset will be moved by -cubeGrow, so we need to account for this.
             elem.rotation ?? [0,0,0],
             [0, 0],
@@ -181,8 +181,8 @@ function calculateCubeDimensions(elem, scaleGetter) {
         //Set everything into countmap
         array.forEach(d => countMap.set(d, countMap.has(d) ? countMap.get(d)+1 : 1));
         //Reduce the entries, sorting by value (count)
-        //The sorting is in place to ensure that if there are 2 modes, the highest (not 0) one is picked
-        let entry = [...countMap.entries()].sort((a, b) => b[0]-a[0]).reduce((prev, curr) => prev[1] < curr[1] ? curr : prev)
+        //The filter is to prevent 0 dimension values, as all other values are more favorable. 
+        let entry = [...countMap.entries()].filter(a => a[0] !== 0).reduce((prev, curr) => prev[1] < curr[1] ? curr : prev)
 
         //Only return if there is more than 1 element
         if(entry[1] > 1) {
@@ -194,7 +194,7 @@ function calculateCubeDimensions(elem, scaleGetter) {
     //Get the x,y,z mode for the arrays.
     let xMode = getMode(xPos)
     let yMode = getMode(yPos)
-    let zMode = getMode(zPos)   
+    let zMode = getMode(zPos)
     if(xMode !== null && yMode !== null && zMode != null) {
         return [xMode, yMode, zMode]
     } else {
