@@ -1,6 +1,10 @@
 import { EventDispatcher } from "../libs/three.js"
 
-function parseOrThrow(value) {
+/**
+ * Parses the value as a number. Returns 0 if the value is invalid
+ * @param {string} value the value to parse
+ */
+function parseOr0(value) {
     let num = parseFloat(value)
     if(isNaN(num)) {
         return 0
@@ -8,11 +12,14 @@ function parseOrThrow(value) {
     return num
 }
 
+/**
+ * Linked elements are elements linked to the ui.
+ */
 export class LinkedElement {
 
     constructor(elems, array = true, parseNum = true, checkbox = false) {
         this.array = array
-        this.parseValue = parseNum ? e => parseOrThrow(e) : e => e 
+        this.parseValue = parseNum ? e => parseOr0(e) : e => e 
         this.checkbox = checkbox
         this.addElement(this.elems = elems)
         this.sliderElems = undefined
@@ -25,6 +32,9 @@ export class LinkedElement {
         this.idf = Math.random()
     }
 
+    /**
+     * Marks this as not having negative numbers
+     */
     absNumber() {
         this.parseValue = e => Math.max(e, 0)
         return this
@@ -44,7 +54,13 @@ export class LinkedElement {
         return this.rawValue
     }
 
+    /**
+     * Sets a value internally. Updates the value varible and the dom elements
+     * @param {number} value the value to set as
+     * @param {number} ignore the index to ignore
+     */
     setInternalValue(value, ignore = -1) {
+        //If is an array, clone it.
         if(this.array && value !== undefined) {
             value = [...value]
         }
@@ -56,6 +72,7 @@ export class LinkedElement {
             this.sliderElems.prop('disabled', value === undefined)
         }
         
+        //If is a number, make it so -0.00 isn't a thing
         if(this.array && value !== undefined) {
             if(typeof value[0] == 'number') {
                 value = value.map(v => this.makeKashHappy(v.toFixed(2)))
@@ -64,6 +81,7 @@ export class LinkedElement {
             value = this.makeKashHappy(value.toFixed(2))
         }
 
+        //If is an array, update each element
         if(this.array) {
             this.elems.each((_,e) => {  
                 let axis = e.getAttribute('axis')
@@ -75,6 +93,7 @@ export class LinkedElement {
                 this.sliderElems.each((_i,e) => e.value = ((value===undefined?0:this.rawValue[e.getAttribute("axis")] + 180) % 360) - 180)
             }
         } else if(ignore != 0) {
+            //Update the single element
             if(this.checkbox) {
                 this.elems.prop('checked', value===undefined?false:value)
             } else {
@@ -83,6 +102,10 @@ export class LinkedElement {
         }
     }
 
+    /**
+     * Make sure there isnt -0.00
+     * @param {string} value the number value
+     */
     makeKashHappy(value) {
         if(value == '-0.00') {
             return '0.00'
@@ -90,16 +113,28 @@ export class LinkedElement {
         return value
     }
 
+    /**
+     * Binds a change listener
+     */
     onchange(listener) {
         this.addEventListener('changed', listener)
         return this
     }
 
+    /**
+     * Adds slider elements
+     * @param {*} sliderElems the slider elements to add
+     */
     withsliders(sliderElems) {
         this.addElement(this.sliderElems = sliderElems, false)
         return this
     }
 
+    /**
+     * 
+     * @param {*} elem Elements to add
+     * @param {*} ensure whehter the element shouldn't be updated when changed. True if is a text box
+     */
     addElement(elem, ensure = true) {
         if(this.array) {
             elem.focusin(e => this.indexSelected = parseInt(e.target.getAttribute('axis')))

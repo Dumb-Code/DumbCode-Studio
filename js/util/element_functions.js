@@ -1,12 +1,21 @@
 const disableSelect = e => e.preventDefault()
 
+/**
+ * Adds callbacks for an element to be dragged around. 
+ * @param {*} element The element to make draggable
+ * @param {*} infoClickGetter the info getter for this element
+ * @param {*} callback the callback for when the element is dragged
+ * @param {*} onreleased the release callback for when a drag stops
+ */
 export function onElementDrag(element, infoClickGetter = () => {}, callback = (dx, dy, info, x, y) => {}, onreleased = (max, dx, dy, x, y) => {}) {
+    //When the element is clicked
     element.onmousedown = e => {
         let doc = element.ownerDocument
         let cx = e.clientX
         let cy = e.clientY
         let max = 0
         let info = infoClickGetter()
+        //The mousemove callback
         let mousemove = evt => {
             let dx = evt.clientX - cx
             let dy = evt.clientY - cy
@@ -16,6 +25,7 @@ export function onElementDrag(element, infoClickGetter = () => {}, callback = (d
             callback(dx, dy, info, evt.clientX, evt.clientY)
             evt.stopPropagation()
         }
+        //Unbind the events
         let mouseup = evt => {
             doc.removeEventListener('mousemove', mousemove)
             doc.removeEventListener('mouseup', mouseup)
@@ -23,6 +33,8 @@ export function onElementDrag(element, infoClickGetter = () => {}, callback = (d
             onreleased(Math.sqrt(max), evt.clientX - cx, evt.clientY - cy, evt.clientX, evt.clientY)
             evt.stopPropagation()
         }
+
+        //Bind the events
         doc.addEventListener('mousemove', mousemove)
         doc.addEventListener('mouseup', mouseup)
         doc.addEventListener('selectstart', disableSelect)
@@ -30,6 +42,12 @@ export function onElementDrag(element, infoClickGetter = () => {}, callback = (d
     }
 }
 
+/**
+ * 
+ * @param {*} container the dom container
+ * @param {*} callback the callback for when the name changed
+ * @param {*} current the current name (if any)
+ */
 export function doubleClickToEdit(container, callback, current) {
     let text = container.find('.dbl-text')
     let textEdit = container.find('.dbl-text-edit')
@@ -82,8 +100,12 @@ let runEventDirectKeys = e => {
     mouseMoveKey(directKeys[1], e.ctrlKey)
     mouseMoveKey(directKeys[2], e.shiftKey)
 }
+/**
+ * Direct keys. Used in every event.
+ */
 let directKeys = ["Alt", "Control", "Shift"]
 
+//Bind the key events
 $(document)
     .keydown(e => {
         keydown(e.key)
@@ -94,16 +116,31 @@ $(document)
         runEventDirectKeys(e)
     })
     .mousemove(e => runEventDirectKeys(e))
+
+/**
+ * Get Whether a key is down
+ * @param {string} key the key to test if down
+ */
 export function isKeyDown(key) {
     return pressedKeys.has(key)
-} 
+}
+
+/**
+ * Binds a callback for a key
+ * @param {string} key the key to bind to 
+ * @param {*} onchange the callback
+ */
 export function listenForKeyChange(key, onchange) {
     let arr = keyListeners.has(key) ? keyListeners.get(key) : []
     arr.push(onchange)
     keyListeners.set(key, arr)
 }
 
-
+/**
+ * Binds the element to be a file upload box. Allows for users to drag and drop files into the area
+ * @param {*} dom the element to bind
+ * @param {*} callback the callback for when a file is uploaded
+ */
 export function fileUploadBox(dom, callback) {
     dom.on('dragenter', e => {
         if(e.originalEvent.dataTransfer.types.includes('Files')) {
@@ -133,7 +170,10 @@ export function fileUploadBox(dom, callback) {
     })
 }
 
-
+/**
+ * Adjusts the inputs in the dom to change when the user is pressing shift or control
+ * @param {*} dom the root element
+ */
 export function applyAdjustScrollable(dom) {
     dom.bind('mousewheel DOMMouseScroll', e => {
         if(e.target.classList.contains("studio-scrollchange") && e.target.disabled !== true && e.target.value !== "") {
@@ -142,8 +182,10 @@ export function applyAdjustScrollable(dom) {
                 direction = -e.detail
             }
 
+            //The step in the direction
             let change = Math.sign(direction) * (e.target.hasAttribute("step-mod") ? parseFloat(e.target.getAttribute('step-mod')) : 1)
            
+            //If has the parent class, then don't apply the changes.
             if(hasParentClass(e.target, "step-constant-marker", "input-top-level")) {
                 let ctrl = e.ctrlKey
                 let shift = e.shiftKey
@@ -157,6 +199,7 @@ export function applyAdjustScrollable(dom) {
                 }
             }
 
+            //Set the event value and dispatch the event
             e.target.value = `${Math.round((parseFloat(e.target.value) + change) * 10000) / 10000}`
             e.target.dispatchEvent(new Event("input"))
 
@@ -167,6 +210,9 @@ export function applyAdjustScrollable(dom) {
     })
 }
 
+/**
+ * Weird function to get if a future parent has a certian class.
+ */
 function hasParentClass(element, className, clazzBeforeCheck) {
     if(element.classList.contains("disable-upwards-looking")) {
         return true
@@ -179,7 +225,10 @@ function hasParentClass(element, className, clazzBeforeCheck) {
 }
 
 
-
+/**
+ * Gets the files from a file input, and removes the events from the element
+ * @param {*} event the upload event 
+ */
 export function getAndDeleteFiles(event) {
     let files = [...event.target.files]
     event.target.value = ""
@@ -188,16 +237,31 @@ export function getAndDeleteFiles(event) {
 
 let a = document.createElement("a");
 
+/**
+ * Downloads a blob as a certian name
+ * @param {string} name name of the blob
+ * @param {Blob} blob the blob to download
+ */
 export function downloadBlob(name, blob) {
     let url = window.URL.createObjectURL(blob)
     downloadHref(name, url)
     window.URL.revokeObjectURL(url)
 }
 
+/**
+ * Downlaods a canvas as a png file
+ * @param {string} name name to download
+ * @param {*} canvas canvas to download
+ */
 export function downloadCanvas(name, canvas) {
     downloadHref(name, canvas.toDataURL("image/png;base64"))
 }
 
+/**
+ * Downloads the dataurl as name
+ * @param {string} name the name of the element
+ * @param {*} href the href to download as
+ */
 export function downloadHref(name, href) {
     a.href = href
     a.download = name
