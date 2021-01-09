@@ -6,6 +6,9 @@ import { TextureTools } from "./texture_tools.js"
 import { EventDispatcher } from "../libs/three.js"
 import { getAndDeleteFiles } from "../util/element_functions.js"
 
+/**
+ * The texture studio. Everything on the texture dom will go through here
+ */
 export class TextureStudio {
 
     constructor(domElement, filesPage, display, raytracer, orbitControls, pth) {
@@ -16,16 +19,21 @@ export class TextureStudio {
         this.raytracer = raytracer
         this.orbitControls = orbitControls
 
+        //Setup stuff for texture studio
         this.studioPanels = new TexturePanels(this, dom)
         this.cubeValues = new TextureCubeValues(dom, raytracer)
         this.textureTools = new TextureTools(dom, this)
         this.texturemapCanvas = new TexturemapCanvas(dom.find('#texture-canvas'), raytracer, this.textureTools, this.cubeValues, pth)
 
         this._textureEmptyLayer = dom.find('.texture-layer.empty-layer')
+        //Bind the elements
         dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(getAndDeleteFiles(e)))
         dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
     }
 
+    /**
+     * Called every frame
+     */
     runFrame() {
         this.raytracer.update()
         this.pth.model.resetAnimations()
@@ -34,7 +42,11 @@ export class TextureStudio {
         this.display.render()
     }
 
+    /**
+     * Called when the texture studio is switched to
+     */
     setActive() {
+        //Make sure that the model is in texture mode.
         this.pth.updateTexture(m => {
             m.map = m._mapCache
             m.wireframe = false
@@ -45,7 +57,11 @@ export class TextureStudio {
 
     }
 
+    /**
+     * Called when the texture manager is set unactive
+     */
     setUnactive() {
+        //Fallback to however it was before
         this.pth.updateTexture(m => {
             if(m._mode === 0 || m._mode === undefined) { //textured is the default mode. So if _mode isn't set, default to it.
                 m.map = m._mapCache 

@@ -2,6 +2,9 @@ import { LayoutPart } from "../util/layout_part.js"
 
 const mainArea = document.getElementById("main-area")
 
+/**
+ * Controls the texture panels.
+ */
 export class TexturePanels {
 
     constructor(studio, dom) {
@@ -12,9 +15,12 @@ export class TexturePanels {
         let tex = dom.find('#panel-texturemap')
         let texPopout = tex.find('.popout-button')
         let mainDisplay = dom.find('.display-div')
+        //The layout parts
         this.texturemapPanel = new LayoutPart(tex, () => this.panelChange())
         this.offsetPanel = new LayoutPart(dom.find('#panel-offset-editing'), () => this.panelChange())
+        //The color picker layout. Needed as the color picker needs weird js
         this.colourPanel = new LayoutPart(dom.find('#panel-colour'), () => this.panelChange(), "popped_out_colour_picker", popped => { 
+            //Get the active color picker and set the color to the new active one 
             if(popped) {
                 let dom = $(this.colourPanel.win.document.body) 
                 let container = dom.find('.element-picker-container')               
@@ -34,6 +40,7 @@ export class TexturePanels {
         })
         this.textureLayersPanel = new LayoutPart(dom.find('#panel-texture-layers'), () => this.panelChange())
         
+        //The button to switch texturemaps
         tex.find('.switch-canvas-button').click(() => {
 
             let switchElemet = document.getElementById("switch-button-texturer");
