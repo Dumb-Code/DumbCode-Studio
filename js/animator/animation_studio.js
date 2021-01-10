@@ -1,4 +1,3 @@
-import { JavaMethodExporter } from '../java_method_exporter.js'
 import { Clock, EventDispatcher, Group } from '../libs/three.js'
 import { Gumball } from './gumball.js'
 import { AnimationPanel } from './animation_panel.js'
@@ -60,7 +59,6 @@ export class AnimationStudio {
         this.keyframeManager = new KeyframeBoardManager(this, dom.find('.keyframe-board'), dom.find('.input-playback-range'))
         this.keyframeSettings = new KeyframeSettings()
         this.panelButtons = new PanelButtons(dom, this)
-        this.methodExporter = new JavaMethodExporter()
         this.progressionCanvas = new ProgressionCanvas(dom, this)
         this.clock = new Clock()
         

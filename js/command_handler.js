@@ -1,5 +1,3 @@
-import { sRGBEncoding } from "./libs/three"
-
 /**
  * Handles the root of commands.
  * 
