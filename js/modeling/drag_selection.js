@@ -128,6 +128,8 @@ export class DragSelection {
             }
         }
 
+        this.raytracer.clearEventData()
+
         //Deselects the relevant cubes.
         let fireEvents = false
         this.previousIntersected.forEach(cube => {

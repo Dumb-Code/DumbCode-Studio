@@ -3,15 +3,22 @@ import { WeightedEventHandler } from "./util.js";
 
 const vector = new Vector3()
 
+/**
+ * Holds the information about the scene
+ */
 export class DinosaurDisplay {
 
     constructor() {
         this.drawWidth = 1
         this.drawHeight = 1
 
+        //The mouse down event handler
         this.mousedown = new WeightedEventHandler()
     }
 
+    /**
+     * Sets up the scene
+     */
     setup(renderer, camera, scene, onTopScene, directionalIndecators) {
         this.renderer = renderer
         this.camera = camera
@@ -78,6 +85,7 @@ export class DinosaurDisplay {
             }
         }
 
+        //Create the bounding box
         let blockGeometry = new BoxBufferGeometry()
         let blockMaterial = new MeshLambertMaterial({ color: 0x2251A9 })
         this.blockElement = new Mesh(blockGeometry, blockMaterial)
@@ -85,14 +93,25 @@ export class DinosaurDisplay {
         this.scene.add(this.blockElement)
     }
 
+    /**
+     * Toggle the grid visability
+     */
     toggleGrid() {
         this.gridGroup.visible = !this.gridGroup.visible
     }
 
+    /**
+     * Toggle the block visability
+     */
     toggleBlock() {
         this.blockElement.visible = !this.blockElement.visible
     }
 
+    /**
+     * Sets the renderer size
+     * @param {number} width the width
+     * @param {number} height the height
+     */
     setSize(width, height) {
         this.drawWidth = width
         this.drawHeight = height
@@ -100,18 +119,10 @@ export class DinosaurDisplay {
     }
 
     /**
-     * @param {Material} material 
+     * Gets the screen coordinate of an object
+     * @param {*} obj the three object to test on
+     * @param {*} camera the camera to use
      */
-    setMainModel(material, model) {
-        // if(this.tbl) {
-        //     this.scene.remove(this.tbl.modelCache)
-        // }
-        // this.allCubes.length = 0
-        // this.tbl = model
-        this.material = material
-        this.scene.add(model.createModel(material))
-    }
-
     toScreenPosition(obj, camera = this.camera) {
 
         obj.updateMatrixWorld()
@@ -125,9 +136,11 @@ export class DinosaurDisplay {
             x: vector.x,
             y: vector.y
         }
+    }
 
-};
-
+    /**
+     * Renders everything.
+     */
     render() {
         this.renderer.render(this.scene, this.camera);
         if(this.onTopScene) {
@@ -141,6 +154,12 @@ export class DinosaurDisplay {
     }
 }
 
+/**
+ * Why is this here.
+ * Helper method to read a file
+ * @param {*} file the file to read
+ * @param {*} readerCallback the reading callback
+ */
 export function readFile(file, readerCallback = (reader, file) => reader.readAsArrayBuffer(file)) {
     return new Promise((resolve, reject) => {
         let reader = new FileReader()

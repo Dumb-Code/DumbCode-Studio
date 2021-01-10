@@ -1,3 +1,6 @@
+//Global functions are functions that can be accessed anywhere.
+//They include mainly inlcude modal stuff and tooltips
+
 loadHtml = async file => {
     return new Promise(resolve => {
         $.get("templates/" + file + ".html", html => {
@@ -84,6 +87,8 @@ let mousePoint = { x:0, y:0 }
 let lockedMousePoint = null
 
 const clampPadding = 5
+//Clamp a value between 0 and max, with width.
+//Clamps with the padding
 function clamp(value, width, max) {
     if(value < clampPadding) {
         return clampPadding
@@ -94,15 +99,20 @@ function clamp(value, width, max) {
     return value
 }
 
+//Updates the tooltip
 function updateTooltip(time) {
     requestAnimationFrame(updateTooltip)
     
+    //If there is a tooltip element
     if(tooltipElement) {
+        //If it's different than the last frame one, then reset the timer
         if(previousElement !== tooltipElement) {
             frameTimeTillShow = time + framesTillShowMs
             lockedMousePoint = null
         }
+        //If the time till show is over, show the tooltip
         if(frameTimeTillShow !== 0 && time >= frameTimeTillShow) {
+            //Cache the mouse point so the mouse stays in the same place
             if(lockedMousePoint === null) {
                 lockedMousePoint = {...mousePoint}
             }
@@ -127,6 +137,7 @@ $(document)
     updateTooltip()
 })
 .mousemove(e => {
+    //When mouse moved, get all the elements under the mouse and find an element (if any) with the tooltip class
     for(let elem of document.elementsFromPoint(e.clientX, e.clientY)) {
         if(elem.classList.contains('tooltip')) {
             tooltipElement = elem

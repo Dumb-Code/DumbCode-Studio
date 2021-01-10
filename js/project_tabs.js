@@ -1,5 +1,8 @@
 import { LinkedSelectableList } from "./util/linked_selectable_list.js"
 
+/**
+ * Used to handle which studio part is selected.
+ */
 export class ProjectTabs {
     constructor() {
         this.files = "file"
@@ -11,6 +14,9 @@ export class ProjectTabs {
         this.selectableList = new LinkedSelectableList($('.tab-controller'), true, "navbar-is-active")
     }
 
+    /**
+     * Get the active area.
+     */
     getActive(files, modeling, texture, animation) {
         let active = this.selectableList.value
         if(active == this.modeling) {
