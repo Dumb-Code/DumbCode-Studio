@@ -279,32 +279,41 @@ function applyReTexturing(allCubes, finished, texSize, texturePart, width) {
                 let yPos = (tx[1]+yoff)*scale
 
                 let rotation = (uvData.rotation ? uvData.rotation : 0) / 90
+                for(let i = 0; i < rotation; i++) {
+                    let newData = new ImageData(data.height, data.width)
+                    //0123
+                    //4567
+                    //
+                    //40
+                    //51
+                    //62
+                    //72
+                    //
+                    //newX = (oldHeight or newWidth) - y
+                    //newY = x
 
-                let normalSize = true
-                let target = new ImageData((normalSize?xSize:ySize)*scale, (normalSize?ySize:xSize)*scale)
+                    for(let x = 0; x < data.width; x++) {
+                        for(let y = 0; y < data.height; y++) {
+                            let newX = data.height - y - 1
+                            let newY = x
+
+                            let srcPixel = x + y*data.width
+                            let destPixel = newX + newY*newData.width
+
+                            for(let i = 0; i < 4; i++) {
+                                newData.data[4*destPixel + i] = data.data[4*srcPixel + i]
+                            }
+                        }
+                    }
+                    data = newData
+                }
+
+                let target = new ImageData(xSize*scale, ySize*scale)
+
                 for(let x = 0; x < target.width; x++) {
                     for(let y = 0; y < target.height; y++) {
-                        let srcX = x / (target.width-1) - 0.5
-                        let srcY = y / (target.height-1) - 0.5
-
-                        for(let i = 0; i < rotation; i++) {
-                            // ...    .X.
-                            // ..X -> ...
-                            // ...    ...
-                            // ...    ...
-                            // (2/2, 1/3) -> (1/3, 1 - 2/2)
-                            // (x, y) -> (y, 1 - x)
-                            let x = srcX
-                            srcX = srcY
-                            srcY = -x
-                        }
-
-                        srcX = Math.floor((Math.round((srcX + 0.5) * (target.width-1)) / (target.width)) * (data.width))
-                        srcY = Math.floor((Math.round((srcY + 0.5) * (target.height-1)) / (target.height)) * (data.height))
-
-                        // if(imgData.id == 4) {
-                        //     console.log(x, y, Math.floor(srcX*data.width), Math.floor(srcY*data.height))
-                        // }
+                        let srcX = Math.floor(x/target.width * data.width)
+                        let srcY = Math.floor(y/target.height * data.height)
 
                         let srcPixel = srcX + srcY*data.width
                         let destPixel = x + y*target.width
