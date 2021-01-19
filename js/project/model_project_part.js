@@ -36,28 +36,36 @@ export class ModelProjectPart {
 
         dom.find('.new-model-button').click(() => pth.createNewProject())
 
-        dom.find('#model-file-input').on('input', e => this.loadModelFiles(getAndDeleteFiles(e)))
-        fileUploadBox(dom.find('.model-drop-area'), files => this.loadModelFiles(files))
+        dom.find('#model-file-input').on('input', e => getAndDeleteFiles(e).forEach(f => this.loadModelFiles(f)))
+        dom.find('#project-file-input').on('input', e => getAndDeleteFiles(e).forEach(f => this.loadProjectFile(f)))
+        fileUploadBox(dom.find('.model-drop-area'), files => {
+            [...files].forEach(f => {
+                if(f.name.endsWith('.dcproj')) {
+                    this.loadProjectFile(f)
+                } else {
+                    this.loadModelFile(f)
+                }
+            })
+        })
 
-        dom.find('#project-file-input').on('input', e => this.loadProjectFiles(getAndDeleteFiles(e)))
 
 
     }
     
     /**
-     * Upload model files
-     * @param {*} files the files to upload
+     * Upload model file
+     * @param {*} file the file to upload
      */
-    async loadModelFiles(files) {
-        [...files].forEach(file => DCMLoader.loadModel(readFile(file), file.name, this.texturePart).then(model => this.pth.createNewProject(model)))
+    async loadModelFile(file) {
+        DCMLoader.loadModel(readFile(file), file.name, this.texturePart).then(model => this.pth.createNewProject(model))
     }
 
     /**
-     * Upload project files. (.dcproj)
-     * @param {*} files the files to upload
+     * Upload project file. (.dcproj)
+     * @param {*} file the file to upload
      */
-    async loadProjectFiles(files) {
-        [...files].forEach(file => this.zipHandler.readFile(file))
+    async loadProjectFile(file) {
+        this.zipHandler.readFile(file)
     }
 
     /**
