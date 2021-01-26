@@ -36,7 +36,7 @@ export class ModelProjectPart {
 
         dom.find('.new-model-button').click(() => pth.createNewProject())
 
-        dom.find('#model-file-input').on('input', e => getAndDeleteFiles(e).forEach(f => this.loadModelFiles(f)))
+        dom.find('#model-file-input').on('input', e => getAndDeleteFiles(e).forEach(f => this.loadModelFile(f)))
         dom.find('#project-file-input').on('input', e => getAndDeleteFiles(e).forEach(f => this.loadProjectFile(f)))
         fileUploadBox(dom.find('.model-drop-area'), files => {
             [...files].forEach(f => {
