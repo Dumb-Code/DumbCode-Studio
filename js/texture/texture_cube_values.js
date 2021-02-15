@@ -6,7 +6,8 @@ import { ToggleableElement } from "../util/toggleable_element.js"
  */
 export class TextureCubeValues {
 
-    constructor(dom, raytracer) {
+    constructor(dom, raytracer, pth, canvas) {
+        this.pth = pth
         this.raytracer = raytracer
 
         //Helper method to get the cube
@@ -17,6 +18,10 @@ export class TextureCubeValues {
         this.textureMirrored = new ToggleableElement(dom.find('.input-texture-mirrored')).onchange(e => getCube()?.updateTextureMirrored(e.value))
         this.raytracer.addEventListener('selectchange', () => this.updateCubeValues())
 
+        this.textureSize = new LinkedElement(dom.find('.input-texure-map-size')).onchange(e => {
+            pth.model.setTextureSize(e.value[0], e.value[1])
+            canvas.drawTextureCanvas()
+        })
     }
 
     /**
@@ -31,6 +36,9 @@ export class TextureCubeValues {
         } else {
             this.textureOffset.setInternalValue(undefined)
             this.textureMirrored.setInternalValue(false)
-        }   
+        }
+
+        this.textureSize.setInternalValue([this.pth.model.texWidth, this.pth.model.texHeight])
+        
     }
 }

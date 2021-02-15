@@ -26,6 +26,7 @@ export class DCMModel {
         this.texWidth = textureSizeChangedEvent.width = width
         this.texHeight = textureSizeChangedEvent.height = height
         this.dispatchEvent( textureSizeChangedEvent )
+        this.traverseAll(cube => cube.updateTexture())
     }
 
     onCubeHierarchyChanged() {

@@ -32,6 +32,7 @@ export class TextureManager {
 
         //When the texture size changed
         model.addEventListener('textureSizeChanged', e => {
+            console.log("Changed")
             this.highlightCanvas.width = e.width
             this.highlightCanvas.height = e.height
             this.highlightContext = this.highlightCanvas.getContext('2d')

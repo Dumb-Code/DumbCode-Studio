@@ -23,32 +23,13 @@ export async function readTblFile(data) {
     let zip = await JSZip.loadAsync(data)
     let json = JSON.parse(await zip.file("model.json").async("string"))
 
-    //Transferable properties
-    model.author = json.authorName
-    model.texWidth = json.textureWidth
-    model.texHeight = json.textureHeight
-
-    let readCube = json => {
-        let children = []
-        json.children.forEach(child => { children.push(readCube(child)) })
-
-        //Allow for .tbl files to have a cubeGrow element. For some reason this is here even tho
-        //.tbl never supported this. Keeping it in.
-        let cubeGrow = json.cubeGrow
-        if(cubeGrow === undefined) {
-            cubeGrow = [json.mcScale, json.mcScale, json.mcScale]
-        }
-        
-        return new DCMCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.txOffset, json.txMirror, cubeGrow, children, model)
+    if(json.projVersion == 4) {
+        parseV4Tbl(model, json)
+    } else if(json.projVersion >= 5) {
+        parseV5Tbl(model, json)
+    } else {
+        console.error("Don't know how to convert tbl with version " + json.projVersion)
     }
-
-    //Navigates a group. Groups just get pushed onto as roots.
-    //The root json is counted as a group, as it has the same properties that we look at (cubes, cubeGroups)
-    let navigateGroup = group => {
-        group.cubes.forEach(cube => model.children.push(readCube(cube)))
-        group.cubeGroups.forEach(g => navigateGroup(g))
-    }
-    navigateGroup(json)
 
     //We need to run the mirroring and invert math, to do that we need three.js stuff, 
     //and for that we need to pass a dummy material.
@@ -64,4 +45,65 @@ export async function readTblFile(data) {
 
     return model
 
+}
+
+function parseV4Tbl(model, json) {
+    //Transferable properties
+    model.author = json.authorName
+    model.texWidth = json.textureWidth
+    model.texHeight = json.textureHeight
+    
+    let readCube = json => {
+        let children = []
+        json.children.forEach(child => { children.push(readCube(child)) })
+    
+        //Allow for .tbl files to have a cubeGrow element. For some reason this is here even tho
+        //.tbl never supported this. Keeping it in.
+        let cubeGrow = json.cubeGrow
+        if(cubeGrow === undefined) {
+            cubeGrow = [json.mcScale, json.mcScale, json.mcScale]
+        }
+        
+        return new DCMCube(json.name, json.dimensions, json.position, json.offset, json.rotation, json.txOffset, json.txMirror, cubeGrow, children, model)
+    }
+    
+    //Navigates a group. Groups just get pushed onto as roots.
+    //The root json is counted as a group, as it has the same properties that we look at (cubes, cubeGroups)
+    let navigateGroup = group => {
+        group.cubes.forEach(cube => model.children.push(readCube(cube)))
+        group.cubeGroups.forEach(g => navigateGroup(g))
+    }
+    navigateGroup(json)
+}
+
+function parseV5Tbl(model, json) {
+    //Transferable properties
+    model.author = json.author
+    model.texWidth = json.texWidth
+    model.texHeight = json.texHeight
+
+    let readPartToCubes = json => {
+        let cubes = json.boxes.map(b => readCube(json, b))
+        if(cubes.length === 0) {
+            console.warn("TODO: move point with matrix when no box route")
+            return
+        }
+        json.children.forEach(child => cubes[0].children.push(...readPartToCubes(child)))
+        return cubes
+    }
+    let readCube = (part, json) => {
+        return new DCMCube(
+            json.name,
+            [json.dimX, json.dimY, json.dimZ],
+            [part.rotPX, part.rotPY, part.rotPZ],
+            [json.posX, json.posY, json.posZ],
+            [part.rotAX, part.rotAY, part.rotAZ],
+            [part.texOffX, part.texOffY],
+            part.mirror,
+            [json.expandX, json.expandY, json.expandZ],
+            [],
+            model
+        )
+    }
+    json.parts.forEach(part => model.children.push(...readPartToCubes(part)))
 }

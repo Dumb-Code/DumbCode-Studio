@@ -21,9 +21,9 @@ export class TextureStudio {
 
         //Setup stuff for texture studio
         this.studioPanels = new TexturePanels(this, dom)
-        this.cubeValues = new TextureCubeValues(dom, raytracer)
         this.textureTools = new TextureTools(dom, this)
         this.texturemapCanvas = new TexturemapCanvas(dom.find('#texture-canvas'), raytracer, this.textureTools, this.cubeValues, pth)
+        this.cubeValues = new TextureCubeValues(dom, raytracer, pth, this.texturemapCanvas)
 
         this._textureEmptyLayer = dom.find('.texture-layer.empty-layer')
         //Bind the elements
