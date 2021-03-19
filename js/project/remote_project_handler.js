@@ -146,7 +146,7 @@ export class RemoteProjectHandler {
         this.currentOpenRepo = current
         let gitinter = this.createGithubInterface()
         this.entryContainer.children().remove()
-        let data = await gitinter.request('studio_remotes')
+        let data = (await gitinter.request('studio_remotes')) ?? []
         data.filter(d => d.type == 'file' && d.name.endsWith('.remote')).forEach(d => {
             let name = d.name.substring(0, d.name.length-7)
             let remoteProject = new RemoteProject(this.pth, this.mp, this.tp, this.ap, name, gitinter)
@@ -200,7 +200,7 @@ export class RemoteProjectHandler {
         return {
             request: url =>
                 fetch(prefix+url+suffix, requestHeaders)
-                .then(response => response.json()),
+                .then(response => response.ok ? response.json() : null),
             commiter: () => new GithubCommiter(current.token, repo, current.branch)
         }
         
