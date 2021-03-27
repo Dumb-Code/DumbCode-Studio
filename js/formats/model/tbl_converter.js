@@ -83,7 +83,8 @@ function parseV5Tbl(model, json) {
     model.texHeight = json.texHeight
 
     let readPartToCubes = json => {
-        let cubes = json.boxes.map(b => readCube(json, b))
+        let name = json.boxes.length === 1 ? json.name : undefined
+        let cubes = json.boxes.map(b => readCube(json, b, name))
         if(cubes.length === 0) {
             console.warn("TODO: move point with matrix when no box route")
             return
@@ -91,9 +92,9 @@ function parseV5Tbl(model, json) {
         json.children.forEach(child => cubes[0].children.push(...readPartToCubes(child)))
         return cubes
     }
-    let readCube = (part, json) => {
+    let readCube = (part, json, name = part.name) => {
         return new DCMCube(
-            json.name,
+            name,
             [json.dimX, json.dimY, json.dimZ],
             [part.rotPX, part.rotPY, part.rotPZ],
             [json.posX, json.posY, json.posZ],
