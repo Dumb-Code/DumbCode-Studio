@@ -1,160 +1,148 @@
-import React from 'react';
+import CubeGrow from "../modules/animator/CubeGrow";
+import Editor from "../modules/animator/Editor";
+import Keyframe from "../modules/animator/Keyframe";
+import Position from "../modules/animator/Position";
+import Progression from "../modules/animator/Progression";
+import Rotation from "../modules/animator/Rotation";
+import ScrubBar from "../modules/animator/ScrubBar";
+import Timeline from "../modules/animator/Timeline";
+import Options from "../modules/common/Options";
 
-import CubeGrow from './../modules/animator/CubeGrow';
-import Editor from './../modules/animator/Editor';
-import Keyframe from './../modules/animator/Keyframe';
-import Position from './../modules/animator/Position';
-import Progression from './../modules/animator/Progression';
-import Rotation from './../modules/animator/Rotation';
-import ScrubBar from './../modules/animator/ScrubBar';
-import Timeline from './../modules/animator/Timeline';
-import Options from './../modules/common/Options';
-
-type Props = {
-  isActive: boolean;
-}
-class Animator extends React.Component<Props> {
-  render() {
-    const { isActive } = this.props
-    return (
-      <section
-        className="section is-mobile has-background-black-ter"
+export default () => {
+  return (
+    <section
+      className="section is-mobile has-background-black-ter"
+      style={{
+        height: "calc(100vh - 52px)",
+      }}
+    >
+      <div
+        className="has-background-black-ter tab-draggable-area"
         style={{
-          height: "calc(100vh - 52px)",
-          display: isActive ? 'block' : 'none',
+          paddingLeft: "15px",
+          paddingTop: "6px",
+          borderBottom: "1px solid black",
+          gridArea: "tab",
+          overflow: "hidden"
         }}
       >
         <div
-          className="has-background-black-ter tab-draggable-area"
+          className="has-background-black-ter"
           style={{
-            paddingLeft: "15px",
-            paddingTop: "6px",
-            borderBottom: "1px solid black",
-            gridArea: "tab",
-            overflow: "hidden"
+            whiteSpace: "nowrap",
+            display: "flex",
+            flexDirection: "row"
           }}
         >
-          <div
-            className="has-background-black-ter"
+          <span
+            className="tab-container"
             style={{
-              whiteSpace: "nowrap",
-              display: "flex",
-              flexDirection: "row"
+              padding: "0px",
+              display: "flex"
             }}
           >
             <span
-              className="tab-container"
+              className="tab-add icon"
               style={{
-                padding: "0px",
-                display: "flex"
+                paddingLeft: "15px",
+                paddingRight: "35px"
               }}
             >
-              <span
-                className="tab-add icon"
-                style={{
-                  paddingLeft: "15px",
-                  paddingRight: "35px"
-                }}
-              >
-                <i className="fas fa-plus"></i>
-              </span>
+              <i className="fas fa-plus"></i>
             </span>
-          </div>
+          </span>
         </div>
+      </div>
+      <div
+        className="display-div editor-part"
+        editor-tab="animation"
+        style={{
+          width: "100%",
+          gridArea: "main"
+        }}
+      >
         <div
-          className="display-div editor-part"
-          editor-tab="animation"
+          className="has-background-black-ter"
           style={{
-            width: "100%",
-            gridArea: "main"
+            float: "right",
+            borderLeft: "1px solid black",
+            gridArea: "side-bar",
+            overflowX: "hidden",
+            overflowY: "auto"
           }}
         >
           <div
-            className="has-background-black-ter"
             style={{
-              float: "right",
-              borderLeft: "1px solid black",
-              gridArea: "side-bar",
-              overflowX: "hidden",
-              overflowY: "auto"
+              borderBottom: "1px solid black"
             }}
           >
-            <div
-              style={{
-                borderBottom: "1px solid black"
-              }}
-            >
-              <div>
-                <Editor />
-              </div>
-              <div>
-                <Keyframe />
-              </div>
-              <div className="columns is-mobile is-gapless mb-0">
-                <div>
-                  <Position />
-                </div>
-                <div>
-                  <CubeGrow />
-                </div>
-              </div>
-              <div
-                style={{
-                  paddingRight: "10px",
-                  marginTop: "0px"
-                }}
-              >
-                <Rotation />
-              </div>
+            <div>
+              <Editor />
             </div>
             <div>
+              <Keyframe />
+            </div>
+            <div className="columns is-mobile is-gapless mb-0">
               <div>
-                <Progression />
+                <Position />
+              </div>
+              <div>
+                <CubeGrow />
               </div>
             </div>
-          </div>
-          <div
-            className="has-background-black-ter"
-            style={{
-              gridArea: "playback"
-            }}
-          >
             <div
               style={{
-                borderTop: "1px solid black"
+                paddingRight: "10px",
+                marginTop: "0px"
               }}
             >
-              <ScrubBar />
+              <Rotation />
             </div>
           </div>
-          <div
-            style={{
-              gridArea: "bottom"
-            }}
-          >
-            <section
-              className="is-mobile has-background-black-ter is-paddingless"
-              style={{
-                borderTop: "1px solid black"
-              }}
-            >
-              <div className="keyframe-board">
-                <Timeline />
-              </div>
-            </section>
-          </div>
-          <div
-            className="has-background-black-ter"
-            style={{
-              gridArea: "options"
-            }}
-          >
-            <Options />
+          <div>
+            <div>
+              <Progression />
+            </div>
           </div>
         </div>
-      </section>
-    );
-  }
-}
-
-export default Animator;
+        <div
+          className="has-background-black-ter"
+          style={{
+            gridArea: "playback"
+          }}
+        >
+          <div
+            style={{
+              borderTop: "1px solid black"
+            }}
+          >
+            <ScrubBar />
+          </div>
+        </div>
+        <div
+          style={{
+            gridArea: "bottom"
+          }}
+        >
+          <section
+            className="is-mobile has-background-black-ter is-paddingless"
+            style={{
+              borderTop: "1px solid black"
+            }}
+          >
+            <div className="keyframe-board">
+              <Timeline />
+            </div>
+          </section>
+        </div>
+        <div
+          className="has-background-black-ter"
+          style={{
+            gridArea: "options"
+          }}
+        >
+          <Options />
+        </div>
+      </div>
+    </section>
+  );}

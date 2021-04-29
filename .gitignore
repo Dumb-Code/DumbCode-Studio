@@ -23,3 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 
 .eslintcache
+
+.cache
+dist
+yarn-error.log
