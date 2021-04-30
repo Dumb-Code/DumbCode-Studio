@@ -1,12 +1,12 @@
 {
-  "name": "react-tailwind",
-  "version": "2.1.0",
-  "description": "Create React App with Tailwind CSS",
+  "name": "dumbcode-studio",
+  "version": "1.0.0",
+  "description": "Dumbcode Studio Modeler Animator and Texturer",
   "license": "MIT",
   "author": {
-    "name": "Amit Agarwal",
-    "email": "amit@labnol.org",
-    "url": "https://www.labnol.org"
+    "name": "DumbCode",
+    "email": "placeholder@dumbcode.net",
+    "url": "https://www.dumbcode.net/"
   },
   "private": false,
   "scripts": {
@@ -48,12 +48,10 @@
   "devDependencies": {
     "autoprefixer": "^10.2.5",
     "cross-env": "^7.0.3",
-    "eslint-plugin-prettier": "^3.3.1",
     "gulp": "^4.0.2",
     "gulp-inline-source": "^4.0.0",
     "gulp-rename": "^2.0.0",
     "gulp-replace": "^1.0.0",
-    "postcss": "^8.2.8",
-    "prettier": "^2.2.1"
+    "postcss": "^8.2.8"
   }
 }
