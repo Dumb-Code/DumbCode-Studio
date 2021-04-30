@@ -14,6 +14,7 @@ a {
   */
 @tailwind components;
 
+/*
 .btn {
   @apply inline-block py-3 px-3 leading-none rounded shadow font-semibold text-sm
 }
@@ -25,6 +26,7 @@ a {
 .btn-indigo:hover {
   @apply bg-indigo-600;
 }
+*/
 
 /**
   * This injects Tailwind's utility classes and any utility classes registered
