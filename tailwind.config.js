@@ -15,6 +15,8 @@ module.exports = {
     './src/**/*.html',
     './src/**/*.js',
     './src/**/*.jsx',
+    './src/**/*.ts',
+    './src/**/*.tsx',
     './public/index.html',
   ],
   plugins: [
