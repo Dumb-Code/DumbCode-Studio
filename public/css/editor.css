@@ -38,7 +38,7 @@
     border-bottom-color: yellow !important;
 }
 
-#main-area.is-modeling > div#modeling-area {
+#main-area > section {
     display: grid;
     grid-template-areas:
     "command command right_top" 
@@ -48,7 +48,7 @@
     "options options right_bottom" 
 }
 
-#main-area.is-texture > div#texture-area {
+#main-area > div#texture-area {
     display: grid;
     grid-template-areas: 
     "main_area texture_map texture_map"
@@ -59,7 +59,7 @@
     height: 100vh;
 }
 
-#main-area.is-animation > div#animation-area {
+#main-area > div#animation-area {
     display: grid;
     grid-template-areas: 
     "tab side-bar"
