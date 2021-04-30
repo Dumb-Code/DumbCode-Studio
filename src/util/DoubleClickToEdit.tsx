@@ -7,11 +7,18 @@ export default ({callback, current, props}:  {
 }) => {
   const [text, setText] = useState(current)
   const [editing, setEditing] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const divRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const onDoubleClick = () => {
     setEditing(true)
-    ref.current?.focus()
+    if(inputRef.current !== null) {
+      //For some reason the display can't be NONE to display it.
+      //We don't need to worry about state here as it's set to this next frame.
+      inputRef.current.style.display = "inherit"
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
   }
 
   const onEditingInput = (str: string) => {
@@ -27,17 +34,17 @@ export default ({callback, current, props}:  {
   
 
   return (
-    <div {...props} ref={ref} onDoubleClick={onDoubleClick}>
-      {editing ? 
-      <input 
-        type="text" 
+    <div {...props} ref={divRef} onDoubleClick={() => onDoubleClick()}>
+      <input
+        style={{display: editing?"inherit":"none" }} //We can't do conditional rendering as we need the ref
+        ref={inputRef}
+        type="text"
         value={text || ''} 
         onInput={e => onEditingInput(e.currentTarget.value)} 
         onBlur={() => setEditing(false)}
         onKeyUp={e => onEditingKeyUp(e.key)}
-      />:
-      <p>{text}</p>
-    }
+      />
+      <p style={{display: editing?"none":"inherit" }}>{text}</p>
     </div>
   )
 }

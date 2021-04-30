@@ -1,8 +1,9 @@
-import { AmbientLight, Color, DirectionalLight, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { AmbientLight, Color, DirectionalLight, PerspectiveCamera, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { ThreeJsContext } from "../contexts/StudioContext";
 
 export const createThreeContext: () => ThreeJsContext = () => {
+  console.log(`Creating ThreeJs (${REVISION}) Context`)
   //Set up the renderer
   const renderer = new WebGLRenderer( { antialias: true, alpha: true } );
   renderer.autoClear = false;

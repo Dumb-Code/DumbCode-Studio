@@ -93,7 +93,7 @@ const ModelEntry = ({project}: {project: DcProject}) => {
   return (
     <div className="model-list-entry columns is-mobile">
       <div className="column is-narrow model-preview"></div>
-      <DoubleClickToEdit callback={project.setName} current={project.name} />
+      <DoubleClickToEdit callback={name => project.setName(name)} current={project.name} />
       <div
         className="column is-narrow github-sync"
         style={{
