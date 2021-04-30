@@ -1,5 +1,6 @@
 import { useStudio } from "../../../contexts/StudioContext";
-import DcProject from "../../../studio/formats/DcProject";
+import DcProject, { newProject } from "../../../studio/formats/DcProject";
+import { loadDCMModel } from "../../../studio/formats/model/DCMLoader";
 import DoubleClickToEdit from "../../../util/DoubleClickToEdit";
 
 export default () => {
@@ -28,7 +29,7 @@ export default () => {
           <span
             className="new-model-button icon is-small clickable tooltip"
             data-tooltip="Create New Model"
-            onClick={() => addProject(new DcProject("New Project!"))}
+            onClick={() => addProject(newProject())}
           >
             <i className="fas fa-plus"></i>
           </span>
@@ -41,6 +42,18 @@ export default () => {
               </div>
             </label>
             <input
+              onInput={e => {
+                const files = e.currentTarget.files
+                if(files) {
+                  for(let i = 0; i < files.length; i++) {
+                    const f = files.item(i)
+                    if(f) {
+                      loadDCMModel(f.arrayBuffer(), f.name)
+                      .then(model => addProject(new DcProject(f.name.substring(0, f.name.lastIndexOf(".")), model)))
+                    }
+                  }
+                }
+              }}
               id="model-file-input"
               className="file-input-hidden"
               type="file"

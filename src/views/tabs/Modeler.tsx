@@ -9,6 +9,7 @@ import Gumball from "../modules/modeler/Gumball";
 import ImageReferenceEdit from "../modules/modeler/ImageReferenceEdit";
 
 export default () => {
+  const { renderer } = useStudio();
   return (
     <section
       className="section is-mobile has-background-black-ter"
@@ -54,58 +55,60 @@ export default () => {
           gridArea: "main_area"
         }}
       >
+      </div>
+      <div
+        id="panel-top"
+        className="editor-part has-background-black-ter object-no-imgref"
+        editor-tab="modeling"
+        style={{
+          gridArea: "right_top",
+          position: "relative",
+          borderLeft: "solid 1px black"
+        }}
+      >
+        <CubeLayers />
+      </div>
+      <div
+        id="plane-panel"
+        className="editor-part has-background-black-ter object-imgref-only"
+        editor-tab="modeling"
+        style={{
+          gridArea: "right_top / right_top / right_bottom / right_bottom",
+          position: "relative",
+          borderLeft: "solid 1px black",
+          display: "none"
+        }}
+      >
+        <ImageReferenceEdit />
+      </div>
+      <div
+        className="has-background-black-ter"
+        style={{
+          gridArea: "gumball",
+          height: "32px"
+        }}
+      >
+        <Gumball />
+      </div>
+      <div
+        className="has-background-black-ter"
+        style={{
+          gridArea: "options"
+        }}
+      >
+        <Options />
+      </div>
+      <div id="right-divider" className="vertical-divider">
         <div
-          id="panel-top"
-          className="editor-part has-background-black-ter object-no-imgref"
-          editor-tab="modeling"
-          style={{
-            gridArea: "right_top",
-            position: "relative",
-            borderLeft: "solid 1px black"
-          }}
+          id="controls-divider"
+          className="horizontal-divider object-no-imgref"
         >
-          <CubeLayers />
-        </div>
-        <div
-          id="plane-panel"
-          className="editor-part has-background-black-ter object-imgref-only"
-          editor-tab="modeling"
-          style={{
-            gridArea: "right_top / right_top / right_bottom / right_bottom",
-            position: "relative",
-            borderLeft: "solid 1px black",
-            display: "none"
-          }}
-        >
-          <ImageReferenceEdit />
-        </div>
-        <div
-          className="has-background-black-ter"
-          style={{
-            gridArea: "gumball",
-            height: "32px"
-          }}
-        >
-          <Gumball />
-        </div>
-        <div
-          className="has-background-black-ter"
-          style={{
-            gridArea: "options"
-          }}
-        >
-          <Options />
-        </div>
-        <div id="right-divider" className="vertical-divider">
-          <div
-            id="controls-divider"
-            className="horizontal-divider object-no-imgref"
-          >
-            <div id="command-divider" className="horizontal-divider">
-              <div id="drag-selection-overlay" />
-            </div>
+          <div id="command-divider" className="horizontal-divider">
+            <div id="drag-selection-overlay" />
           </div>
         </div>
       </div>
+
     </section>
-  );}
+  );
+}
