@@ -1,23 +1,48 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Project from "./tabs/Project";
 import Texturer from "./tabs/Texturer";
 import Modeler from "./tabs/Modeler"
 import Animator from "./tabs/Animator"
+import { StudioContext, StudioContextProvider } from "../contexts/StudioContext";
+import DcProject from "../studio/formats/DcProject";
+import { createThreeContext } from "../studio/ThreeHooks";
 
-enum Tab {
-  Files, Model, Texture, Animation
+type Tab = {
+  name: string;
+  component: () => JSX.Element;
 }
-const tabMap = {
-  [Tab.Files]: () => <Project />,
-  [Tab.Model]: () => <Modeler />,
-  [Tab.Texture]: () => <Texturer />,
-  [Tab.Animation]: () => <Animator />,  
-};
+const Tabs: Tab[] = [
+  { name: "Project", component: () => <Project /> },
+  { name: "Modeling", component: () => <Modeler /> },
+  { name: "Texture", component: () => <Texturer /> },
+  { name: "Animation", component: () => <Animator /> },
+]
 
 export default () => {
-  const [ activeTab, setActiveTab ] = useState(Tab.Files)
+  const [activeTab, setActiveTab] = useState(Tabs[0])
+
+  const three = useMemo(createThreeContext, [])
+
+  const wrap = <T,>(func: (data: T, context: StudioContext) => void) => {
+    return (data: T) => {
+      const cloned = { ...context }
+      func(data, cloned)
+      setContext(cloned)
+    }
+  }
+
+  const [context, setContext] = useState<StudioContext>({
+    selectedProject: null,
+    setSelectedProject: wrap((data, context) => context.selectedProject = data),
+
+    projects: [],
+    setProjects: wrap((data, context) => context.projects = data),
+
+    ...three
+  })
+
   return (
-    <>
+    <StudioContextProvider value={context}>
       <section className="is-fullheight is-flex-mobile is-flex-tablet has-background-black-bis">
         <nav
           className="navbar is-desktop is-marginless heading has-text-weight-bold is-dark has-background-black-bis"
@@ -52,30 +77,7 @@ export default () => {
               display: "flex"
             }}
           >
-            <button
-              className="navbar-item top-nav-item has-background-black-bis has-text-light navbar-is-active"
-              onClick={() => { setActiveTab(Tab.Files) }}
-            >
-              Project
-            </button>
-            <button
-              className="navbar-item top-nav-item has-background-black-bis has-text-light"
-              onClick={() => { setActiveTab(Tab.Model) }}
-            >
-              Modeling
-            </button>
-            <button
-              className="navbar-item top-nav-item has-background-black-bis has-text-light"
-              onClick={() => { setActiveTab(Tab.Texture) }}
-            >
-              Texture
-            </button>
-            <button
-              className="navbar-item top-nav-item has-background-black-bis has-text-light"
-              onClick={() => { setActiveTab(Tab.Animation)}}
-            >
-              Animation
-            </button>
+            {Tabs.map(tab => <NavBarButton key={tab.name} name={tab.name} selected={tab === activeTab} setTab={() => setActiveTab(tab)} />)}
           </div>
           <div
             className="navbar-end top-nav-item has-background-black-bis"
@@ -93,7 +95,7 @@ export default () => {
         </nav>
       </section>
       <div id="main-area" className="has-background-black-ter">
-        {tabMap[activeTab]()}
+        {activeTab.component()}
       </div>
       <div id="editor-mouseover" />
       <div id="directional-indicators">
@@ -104,5 +106,17 @@ export default () => {
         <div data-attribute="z">Z</div>
       </div>
       <div id="modal-area" />
-    </>
-  );}
+    </StudioContextProvider>
+  );
+}
+
+const NavBarButton = ({name, selected, setTab}: {name: string, selected: boolean, setTab: () => void}) => {
+  return (
+    <button
+      className={"navbar-item top-nav-item has-background-black-bis has-text-light" + selected?" navbar-is-active":""}
+      onClick={setTab}
+    >
+      {name}
+    </button>
+  )
+}

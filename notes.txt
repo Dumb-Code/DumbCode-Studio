@@ -1,0 +1,6 @@
+OrbitControls:
+ - Expose rotate methods: https://github.com/Dumb-Code/DumbCode-Studio/commit/27fc8d3c5a54f1246719699b19e371a349cff8c0#diff-4e04a029d7ae8f02009a9efd093de0e4f4dd59847f7a3ba0267c589fa6eb2594
+ - Create Turnoff Method: https://github.com/Dumb-Code/DumbCode-Studio/commit/7905bb24d39f43a8cb0b6fdb09dc73b8b807cc85#diff-4e04a029d7ae8f02009a9efd093de0e4f4dd59847f7a3ba0267c589fa6eb2594
+
+Transform Controls:
+ - Mainly looks and dimensions gizmo https://www.diffchecker.com/fxEtkf8W.

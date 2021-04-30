@@ -1,3 +1,5 @@
+import { useStudio } from "../../contexts/StudioContext";
+import DcProject from "../../studio/formats/DcProject";
 import Options from "../modules/common/Options";
 import CommandInput from "../modules/modeler/CommandInput";
 import CommonCommands from "../modules/modeler/CommonCommands";

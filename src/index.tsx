@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import AppContainer from './containers/AppContainer';
+import AppContainer from './containers/StudioContainer';
 
 ReactDOM.render(
   <React.StrictMode>

@@ -1,4 +1,4 @@
-import App from "../views/App"
+import App from "../views/Studio"
 
 export default () => {
   return <App />}

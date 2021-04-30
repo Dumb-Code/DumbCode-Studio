@@ -1,4 +1,17 @@
+import { useStudio } from "../../../contexts/StudioContext";
+import DcProject from "../../../studio/formats/DcProject";
+import DoubleClickToEdit from "../../../util/DoubleClickToEdit";
+
 export default () => {
+  const { projects, setProjects, selectedProject, setSelectedProject } = useStudio()
+
+  const addProject = (project: DcProject) => {
+    const array = projects.slice(0)
+    array.push(project)
+    setProjects(array)
+  }
+
+
   return (
     <>
       <div
@@ -15,6 +28,7 @@ export default () => {
           <span
             className="new-model-button icon is-small clickable tooltip"
             data-tooltip="Create New Model"
+            onClick={() => addProject(new DcProject("New Project!"))}
           >
             <i className="fas fa-plus"></i>
           </span>
@@ -69,51 +83,54 @@ export default () => {
           height: "82vh"
         }}
       >
-        <div className="model-list-entry columns is-mobile empty-column">
-          <div className="column is-narrow model-preview"></div>
-          <div className="column dbl-click-container model-name-container">
-            <p className="dbl-text">
-              <input className="dbl-text-edit" type="text" />
-            </p>
-          </div>
-          <div
-            className="column is-narrow github-sync"
-            style={{
-              display: "none"
-            }}
-          >
-            <span
-              className="sync-project-button icon is-small clickable tooltip"
-              data-tooltip="Push To Github"
-            >
-              <i className="fas fa-sync"></i>
-            </span>
-          </div>
-          <div className="column is-narrow">
-            <span
-              className="download-project-file icon is-small clickable tooltip"
-              data-tooltip="Download As Project"
-            >
-              <i className="fas fa-file-export"></i>
-            </span>
-          </div>
-          <div className="column is-narrow">
-            <span
-              className="download-model-file icon is-small clickable tooltip "
-              data-tooltip="Download Model"
-            >
-              <i className="fas fa-file-download"></i>
-            </span>
-          </div>
-          <div className="column is-narrow">
-            <span
-              className="close-model-button icon is-small clickable tooltip icon-close-button"
-              data-tooltip="Close Model"
-            >
-              <i className="fas fa-times-circle"></i>
-            </span>
-          </div>
-        </div>
+        {projects.map(p => <ModelEntry key={p.identifier} project={p} />)}
       </div>
     </>
-  );}
+  );
+}
+
+const ModelEntry = ({project}: {project: DcProject}) => {
+  return (
+    <div className="model-list-entry columns is-mobile">
+      <div className="column is-narrow model-preview"></div>
+      <DoubleClickToEdit callback={project.setName} current={project.name} />
+      <div
+        className="column is-narrow github-sync"
+        style={{
+          display: "none"
+        }}
+      >
+        <span
+          className="sync-project-button icon is-small clickable tooltip"
+          data-tooltip="Push To Github"
+        >
+          <i className="fas fa-sync"></i>
+        </span>
+      </div>
+      <div className="column is-narrow">
+        <span
+          className="download-project-file icon is-small clickable tooltip"
+          data-tooltip="Download As Project"
+        >
+          <i className="fas fa-file-export"></i>
+        </span>
+      </div>
+      <div className="column is-narrow">
+        <span
+          className="download-model-file icon is-small clickable tooltip "
+          data-tooltip="Download Model"
+        >
+          <i className="fas fa-file-download"></i>
+        </span>
+      </div>
+      <div className="column is-narrow">
+        <span
+          className="close-model-button icon is-small clickable tooltip icon-close-button"
+          data-tooltip="Close Model"
+        >
+          <i className="fas fa-times-circle"></i>
+        </span>
+      </div>
+    </div>
+  )
+}
