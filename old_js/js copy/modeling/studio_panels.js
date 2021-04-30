@@ -1,0 +1,125 @@
+import { LayoutPart } from "../util/layout_part.js"
+
+const mainArea = document.getElementById("main-area")
+
+/**
+ * Used to control the studio panels. Used for resizing ect
+ */
+export class StudioPanels {
+    constructor(dom) {
+        this.dom = dom
+        this.topPanelDom = dom.find('#panel-top')
+        this.bottomPanelDom = dom.find('#panel-bottom')
+        this.topPanel = new LayoutPart(this.topPanelDom, () => this.rightPanelPopped())
+        this.bottomPanel = new LayoutPart(this.bottomPanelDom, () => this.rightPanelPopped())
+
+        //Setup the dividers to allow for changing the panel size
+        this.rightDivider = dom.find("#right-divider")
+        this.controlsDivider = dom.find("#controls-divider")
+        this.commandDivider = dom.find("#command-divider")
+
+        this.middleSplit = false
+
+        this.commandsArea = 32
+        this.rightArea = 320
+        this.topArea = 430
+
+        //The clicked divider elements
+        let clickedDivider = 0
+        $(document)
+            .mouseup(() => clickedDivider = 0)
+            .mousemove(e => {
+                if(clickedDivider !== 0) {
+                    if(clickedDivider === 1) {
+                        this.rightArea = Math.max(mainArea.clientWidth - e.clientX, 50)
+                    } else if(clickedDivider === 2) {
+                        this.topArea = e.clientY - mainArea.offsetTop
+                    } else if(clickedDivider === 3) {
+                        this.commandsArea = Math.max(e.clientY - mainArea.offsetTop, 32)
+                    }
+                    this.updateAreas()
+                }
+            })
+        
+            $(window).resize(() => this.updateAreas())
+
+        this.rightDivider.mousedown(() => clickedDivider = 1)
+        this.controlsDivider.mousedown(() => clickedDivider = 2)
+        this.commandDivider.mousedown(() => clickedDivider = 3)
+        this.updateAreas()
+    }
+
+    /**
+     * Called when a right panel is popped
+     */
+    rightPanelPopped() {
+        if(this.topPanel.popped && this.bottomPanel.popped) {
+            //All panels popped, remove the right area
+            this.rightArea = 0
+        } else {
+            //Just popped back in
+            if(this.rightArea === 0) {
+                this.rightArea = 320
+            }
+
+            if(this.topPanel.popped !== this.bottomPanel.popped) {
+                //If there is only one panel, it should take up both areas
+                if(this.topPanel.popped) {
+                    this.bottomPanelDom.css('grid-area', 'right_top / right_top / right_bottom / right_bottom')
+                } else {
+                    this.topPanelDom.css('grid-area', 'right_top / right_top / right_bottom / right_bottom')
+                }
+                this.middleSplit = true
+            } else {
+                //Top panel to top panel, bottom panel to bottom panel.
+                this.topPanelDom.css('grid-area', 'right_top / right_top / right_top / right_top')
+                this.bottomPanelDom.css('grid-area', 'right_bottom / right_bottom / right_bottom / right_bottom')
+                this.middleSplit = false
+            }
+
+        }
+        this.updateAreas()
+    }
+
+    /**
+     * Called when something else is using up the right panel
+     */
+    useUpPanel() {
+        if(this.rightArea === 0) {
+            this.rightArea = 320
+        }
+        
+        this.updateAreas()
+    }
+
+    /**
+     * Called when something else stops using the right panels
+     */
+    discardRightPanel() {
+        if(this.topPanel.popped && this.bottomPanel.popped) {
+            this.rightArea = 0
+        }
+        this.updateAreas()
+    }
+
+    /**
+     * Updates all the dom elements.
+     */
+    updateAreas() { 
+        this.rightDivider.css('right', (this.rightArea-4) + "px")
+        this.controlsDivider.css('left', `${mainArea.clientWidth - this.rightArea}px`).css('width', `${this.rightArea}px`).css('top', `${mainArea.offsetTop + this.topArea}px`)
+        this.commandDivider.css('top', `${mainArea.offsetTop + this.commandsArea - 4}px`).css('width', `${mainArea.clientWidth-this.rightArea}px`)
+        
+        this.rightDivider.css('display', this.rightArea === 0 ? 'none' : 'unset')
+        this.controlsDivider.css('display', this.middleSplit ? 'none' : 'unset')
+        this.commandDivider.css('display', this.commandsArea === 0 ? 'none' : 'unset')
+
+        //Update the css grid
+        this.dom
+            .css('grid-template-columns', `32px ${mainArea.clientWidth - 32 - this.rightArea}px ${this.rightArea}px`)
+            .css('grid-template-rows', `${this.commandsArea}px ${this.topArea - this.commandsArea}px ${window.innerHeight - mainArea.offsetTop - this.topArea - 60}px 32px 28px`)
+            
+
+        window.studioWindowResized()
+    }
+}
