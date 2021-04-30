@@ -1,4 +1,5 @@
-import { useStudio } from "../../contexts/StudioContext";
+import { useEffect, useRef } from "react";
+import { useRendererDomRef, useStudio } from "../../contexts/StudioContext";
 import DcProject from "../../studio/formats/DcProject";
 import Options from "../modules/common/Options";
 import CommandInput from "../modules/modeler/CommandInput";
@@ -10,6 +11,9 @@ import ImageReferenceEdit from "../modules/modeler/ImageReferenceEdit";
 
 export default () => {
   const { renderer } = useStudio();
+
+  const ref = useRendererDomRef<HTMLDivElement>()
+
   return (
     <section
       className="section is-mobile has-background-black-ter"
@@ -49,6 +53,7 @@ export default () => {
         <CubeEdit />
       </div>
       <div
+        ref={ref}
         className="display-div editor-part"
         editor-tab="modeling"
         style={{
