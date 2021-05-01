@@ -5,7 +5,7 @@ const ProjectRemote = () => {
                 <p className="flex-grow">REMOTE PROJECTS</p>
                 <p className="text-md">add new icon</p>
             </div>
-            <div className="flex flex-row overflow-y-hidden">
+            <div className="flex flex-row overflow-y-hidden h-full">
                 <div className="w-4/12 border-r border-black flex flex-col overflow-y-scroll">
                     <RemoteEntry org="DumbCode" repo="Project: Nublar" selected={true} setRemote={ () => console.log("set remote") } />
                     <RemoteEntry org="DumbCode" repo="TODM" selected={false} setRemote={ () => console.log("set remote") } />
