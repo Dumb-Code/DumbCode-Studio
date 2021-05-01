@@ -19,7 +19,7 @@ const App = () => {
   const [activeTab, setActiveTab] = useState(Tabs[0]);
 
   return (
-    <div className="h-screen bg-gray-900 align-middle">
+    <div className="flex flex-col h-screen bg-gray-900 align-middle">
       <div className="flex flex-row border-b border-gray-100">
           <div className="flex-grow">
               {Tabs.map(tab => <NavBarButton key={tab.name} name={tab.name} selected={tab === activeTab} setTab={() => setActiveTab(tab)} />)}
@@ -28,7 +28,9 @@ const App = () => {
               v1.0.0
           </div>
       </div>
-      {activeTab.component()}
+      <div className="flex-grow">
+        {activeTab.component()}
+      </div>
     </div>
   );
 };

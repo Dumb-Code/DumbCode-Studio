@@ -13,6 +13,29 @@ module.exports = {
       teal: colors.teal,
       purple: colors.purple,
     },
+    gridTemplateAreas: {
+      'modeling': [
+        'command command rtop',
+        'shortcuts canvas rtop',
+        'shortcuts canvas rbottom',
+        'shortcuts gumball rbottom',
+        'info info rbottom'
+      ],
+      'texture': [
+        'views views views',
+        'tools canvas canvas',
+        'properties properties layers',
+        'info info layers',
+      ],
+      'animator': [
+        'tabs tabs properties',
+        'tools canvas properties',
+        'scrub scrub properties',
+        'timeline timeline properties',
+        'gumball gumball properties',
+        'info info properties'
+      ]
+    }
   },
   variants: {},
   darkMode: false, // or 'media' or 'class'
@@ -28,5 +51,6 @@ module.exports = {
     require('@tailwindcss/typography'),
     require('@tailwindcss/forms'),
     require('@tailwindcss/aspect-ratio'),
+    require('@savvywombat/tailwindcss-grid-areas'),
   ],
 };
