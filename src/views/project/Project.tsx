@@ -8,7 +8,7 @@ const Texturer = () => {
     return (
         <div className="h-full grid grid-areas-project"
             style={{
-                gridTemplateColumns: '20% auto auto',
+                gridTemplateColumns: '20% 40% 40%',
                 gridTemplateRows: '20% 30% 50%'
             }}
         >
