@@ -1,4 +1,4 @@
-import ProjectChangelog from './components/ProjectChangelog'
+import ProjectFeed from './components/ProjectFeed'
 import ProjectModels from './components/ProjectModels'
 import ProjectRemote from './components/ProjectRemote'
 import ProjectAnimations from './components/ProjectAnimations'
@@ -12,7 +12,7 @@ const Texturer = () => {
                 gridTemplateRows: '20% 30% 50%'
             }}
         >
-            <div className="grid-in-changelog border border-black"><ProjectChangelog /></div>
+            <div className="grid-in-changelog border border-black"><ProjectFeed /></div>
             <div className="grid-in-remote border border-black"><ProjectRemote /></div>
             <div className="grid-in-model border border-black"><ProjectModels /></div>
             <div className="grid-in-texture border border-black"><ProjectAnimations /></div>

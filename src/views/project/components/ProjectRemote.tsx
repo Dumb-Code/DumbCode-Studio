@@ -7,9 +7,9 @@ const ProjectRemote = () => {
             </div>
             <div className="flex flex-row h-5/6">
                 <div className="w-4/12 border-r border-black flex flex-col overflow-y-scroll h-full">
-                    <RemoteEntry org="DumbCode" repo="Project: Nublar" selected={true} setRemote={ () => console.log("set remote") } ></RemoteEntry>
-                    <RemoteEntry org="DumbCode" repo="TODM" selected={false} setRemote={ () => console.log("set remote") } ></RemoteEntry>
-                    <RemoteEntry org="DumbCode" repo="Kash's Mom" selected={false} setRemote={ () => console.log("set remote") } ></RemoteEntry>
+                    <RemoteEntry org="DumbCode" repo="Project: Nublar" selected={true} setRemote={ () => console.log("set remote") } />
+                    <RemoteEntry org="DumbCode" repo="TODM" selected={false} setRemote={ () => console.log("set remote") } />
+                    <RemoteEntry org="DumbCode" repo="Kash's Mom" selected={false} setRemote={ () => console.log("set remote") } />
                 </div>
                 <div className="flex-grow flex flex-col overflow-y-scroll h-full">
                     <ProjectEntry name="T-rex" status={100} setRemote={ () => console.log("add project to list")}/>
