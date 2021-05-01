@@ -27,7 +27,7 @@ const ModelEntry = ({name, selected, isRemote, changeModel}: {name: string, sele
             className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"}
             onClick={changeModel}
         >
-            <p className="flex-grow pt-1">{name}</p>
+            <p className="flex-grow pt-1 truncate">{name}</p>
             
             <p className="pt-2 mr-2 text-white flex flex-row">
                 {isRemote ? <SVGPushGithub className="h-5 w-5 mr-1" /> : ""}

@@ -30,7 +30,7 @@ const AnimationEntry = ({name, selected, setRemote}: {name: string, selected: bo
             className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"}
             onClick={setRemote}
         >
-            <p className="flex-grow mt-1">{name}</p>
+            <p className="flex-grow mt-1 truncate">{name}</p>
             
             <p className="mt-2 mr-2 flex flex-row text-white">
                 <SVGRecord className="h-5 w-5 mr-1" />

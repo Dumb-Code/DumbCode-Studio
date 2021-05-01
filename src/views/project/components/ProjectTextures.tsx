@@ -22,7 +22,7 @@ const ProjectTextures = () => {
                         <SVGCrossCircle className="h-5 w-5 transform rotate-45 mr-1" />
                     </p>
                 </div>
-                <div className="border-r border-black flex flex-col overflow-hidden h-full w-full">
+                <div className="border-r border-black flex flex-row overflow-hidden h-full w-full">
                     <div className="flex-grow border-l border-black overflow-y-scroll overflow-x-hidden">
                         <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
                             <p className="flex-grow">SELECTED</p>
@@ -49,7 +49,7 @@ const GroupEntry = ({name, selected}: {name: string, selected: boolean}) => {
 
     return(
         <button className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row"}>
-            <p className="flex-grow mt-1">{name}</p>
+            <p className="flex-grow mt-1 truncate">{name}</p>
             <p className="pt-2 mr-2 flex flex-row text-white">
                 <SVGDownloadCircle className="h-5 w-5 mr-1" />
                 <SVGCrossCircle className="h-5 w-5 hover:text-red-500" />
@@ -62,8 +62,8 @@ const GroupTextureSwitchEntry = ({name, selected}: {name: string, selected: bool
 
     return(
         <button className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 ml-2 rounded-sm h-6 text-left pl-2 w-full flex flex-row pr-6"}>
-            <p className="flex-grow">{name}</p>
-            <p className="pt-0.5 mr-2 flex flex-row text-white">
+            <p className="truncate flex-grow">{name}</p>
+            <p className="pt-0.5 flex flex-row text-white w-12">
                 <SVGDownloadCircle className="h-5 w-5 mr-1" />
                 <SVGCrossCircle className="h-5 w-5 hover:text-red-500" />
             </p>

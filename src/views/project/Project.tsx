@@ -7,7 +7,7 @@ const Texturer = () => {
     return (
         <div className="h-full grid grid-areas-project overflow-hidden"
             style={{
-                gridTemplateColumns: '40% 31% 29%',
+                gridTemplateColumns: '30% 31% 39%',
                 gridTemplateRows: '75% 25%'
             }}
         >

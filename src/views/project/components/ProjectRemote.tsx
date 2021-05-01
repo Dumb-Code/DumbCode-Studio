@@ -39,8 +39,8 @@ const RemoteEntry = ({org, repo, selected, setRemote}: {org: string, repo: strin
             className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 mx-2 rounded-sm h-10 text-left pl-2 pt-1"}
             onClick={setRemote}
         >
-            <p className="text-xs">{org} /</p>
-            <p className="font-bold transform -translate-y-2">{repo}</p>
+            <p className="text-xs truncate">{org} /</p>
+            <p className="font-bold transform -translate-y-2 truncate">{repo}</p>
         </button>
     )
 }
@@ -52,7 +52,7 @@ const ProjectEntry = ({name, status, setRemote}: {name: string, status: number, 
             className={(status === 100 ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-6 text-left pl-2 w-full flex flex-row ml-4"}
             onClick={setRemote}
         >
-            <p className="flex-grow">{name}</p>
+            <p className="flex-grow truncate">{name}</p>
             
             <div className={(status === 100 || status === 0) ? "hidden" : "overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-400 w-40 mt-2"}>
                 <div style={{ width: status+"%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-lightBlue-300"></div>
