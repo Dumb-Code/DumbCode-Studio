@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Project from "../views/project/Project"
 import Modeler from "../views/modeler/Modeler"
 import Animator from "../views/animator/Animator"
 import Texturer from "../views/texturer/Texturer"
@@ -8,7 +9,7 @@ type Tab = {
   component: () => JSX.Element;
 }
 const Tabs: Tab[] = [
-  //{ name: "Project", component: () => <Project /> },
+  { name: "Project", component: () => <Project /> },
   { name: "Modeling", component: () => <Modeler /> },
   { name: "Texture", component: () => <Texturer /> },
   { name: "Animation", component: () => <Animator /> },

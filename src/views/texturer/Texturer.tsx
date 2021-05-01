@@ -15,13 +15,13 @@ const Texturer = () => {
                 gridTemplateColumns: '32px auto 100px',
                 gridTemplateRows: '32px auto 150px 28px'
             }}
-        >            
-            <div className="grid-in-views border"><TexturerViewBar /></div>
-            <div className="grid-in-layers border"><TexturerLayers /></div>
-            <div className="grid-in-tools border"><TexturerTools /></div>
-            <div className="grid-in-canvas border"><StudioCanvas /></div>
-            <div className="grid-in-properties border"><TexturerProperties /></div>
-            <div className="grid-in-info border"><InfoBar /></div>
+        >
+            <div className="grid-in-views border border-black"><TexturerViewBar /></div>
+            <div className="grid-in-layers border border-black"><TexturerLayers /></div>
+            <div className="grid-in-tools border border-black"><TexturerTools /></div>
+            <div className="grid-in-canvas border border-black"><StudioCanvas /></div>
+            <div className="grid-in-properties border border-black"><TexturerProperties /></div>
+            <div className="grid-in-info border border-black"><InfoBar /></div>
         </div>
     )
 }

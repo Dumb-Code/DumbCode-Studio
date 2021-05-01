@@ -3,6 +3,7 @@ const colors = require('tailwindcss/colors');
 module.exports = {
   theme: {
     colors: {
+      black: colors.black,
       cyan: colors.cyan,
       gray: colors.trueGray,
       red: colors.red,
@@ -14,7 +15,11 @@ module.exports = {
       purple: colors.purple,
     },
     gridTemplateAreas: {
-      'modeling': [
+      'project': [
+        'changelog remote texture',
+        'changelog model texture',
+        'changelog model animation'
+      ],'modeling': [
         'command command rtop',
         'shortcuts canvas rtop',
         'shortcuts canvas rbottom',

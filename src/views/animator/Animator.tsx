@@ -17,14 +17,14 @@ const Animator = () => {
                 gridTemplateRows: '32px auto 32px 150px 32px 28px'
             }}
         >
-            <div className="grid-in-tabs border"><AnimatorTabBar /></div>
-            <div className="grid-in-properties border"><AnimatorProperties /></div>
-            <div className="grid-in-tools border"><AnimatorShortcuts /></div>
-            <div className="grid-in-canvas border"><StudioCanvas /></div>
-            <div className="grid-in-scrub border"><AnimatorScrubBar /></div>
-            <div className="grid-in-timeline border"><AnimatorTimeline /></div>
-            <div className="grid-in-gumball border"><GumballPropertiesBar /></div>
-            <div className="grid-in-info border"><InfoBar /></div>
+            <div className="grid-in-tabs border border-black"><AnimatorTabBar /></div>
+            <div className="grid-in-properties border border-black"><AnimatorProperties /></div>
+            <div className="grid-in-tools border border-black"><AnimatorShortcuts /></div>
+            <div className="grid-in-canvas border border-black"><StudioCanvas /></div>
+            <div className="grid-in-scrub border border-black"><AnimatorScrubBar /></div>
+            <div className="grid-in-timeline border border-black"><AnimatorTimeline /></div>
+            <div className="grid-in-gumball border border-black"><GumballPropertiesBar /></div>
+            <div className="grid-in-info border border-black"><InfoBar /></div>
         </div>
     )
 }
