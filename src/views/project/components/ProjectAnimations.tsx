@@ -21,12 +21,12 @@ const AnimationEntry = ({name, selected, setRemote}: {name: string, selected: bo
 
     return(
         <button
-            className={(selected ? "bg-lightBlue-500" : "bg-gray-700") + " my-1 rounded-sm h-10 text-left pl-2 w-full flex flex-row ml-2"}
+            className={(selected ? "bg-lightBlue-500" : "bg-gray-700") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"}
             onClick={setRemote}
         >
-            <p className="flex-grow text-lg mt-1">{name}</p>
+            <p className="flex-grow mt-1">{name}</p>
             
-            icons
+            <p className="mt-1 mr-2">icons</p>
         </button>
     )
 }

@@ -11,7 +11,7 @@ const ProjectRemote = () => {
                     <RemoteEntry org="DumbCode" repo="TODM" selected={false} setRemote={ () => console.log("set remote") } />
                     <RemoteEntry org="DumbCode" repo="Kash's Mom" selected={false} setRemote={ () => console.log("set remote") } />
                 </div>
-                <div className="flex-grow flex flex-col overflow-y-scroll h-full">
+                <div className="flex-grow flex flex-col overflow-y-scroll h-full pr-6">
                     <ProjectEntry name="T-rex" status={100} setRemote={ () => console.log("add project to list")}/>
                     <ProjectEntry name="Stegosaurus" status={0} setRemote={ () => console.log("add project to list")}/>
                     <ProjectEntry name="Trike" status={30} setRemote={ () => console.log("add project to list")}/>
@@ -40,7 +40,7 @@ const ProjectEntry = ({name, status, setRemote}: {name: string, status: number, 
 
     return(
         <button
-            className={(status === 100 ? "bg-lightBlue-500" : "bg-gray-700") + " my-1 rounded-sm h-6 text-left pl-2 flex-grow w-11/12 flex flex-row ml-4"}
+            className={(status === 100 ? "bg-lightBlue-500" : "bg-gray-700") + " my-1 rounded-sm h-6 text-left pl-2 flex-grow w-full flex flex-row ml-4"}
             onClick={setRemote}
         >
             <p className="flex-grow">{name}</p>

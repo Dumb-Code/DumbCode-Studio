@@ -17,10 +17,11 @@ module.exports = {
     },
     gridTemplateAreas: {
       'project': [
-        'changelog remote texture',
-        'changelog model texture',
-        'changelog model animation'
-      ],'modeling': [
+        'changelog remote remote texture',
+        'changelog model animation texture',
+        'changelog model animation texture'
+      ],
+      'modeling': [
         'command command rtop',
         'shortcuts canvas rtop',
         'shortcuts canvas rbottom',
