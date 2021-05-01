@@ -13,8 +13,8 @@ const Texturer = () => {
             }}
         >
             <div className="grid-in-changelog border border-black"><ProjectChangelog /></div>
-            <div className="grid-in-remote border border-black"><ProjectModels /></div>
-            <div className="grid-in-model border border-black"><ProjectRemote /></div>
+            <div className="grid-in-remote border border-black"><ProjectRemote /></div>
+            <div className="grid-in-model border border-black"><ProjectModels /></div>
             <div className="grid-in-texture border border-black"><ProjectAnimations /></div>
             <div className="grid-in-animation border border-black"><ProjectTextures /></div>
         </div>
