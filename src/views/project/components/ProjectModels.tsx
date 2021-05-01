@@ -17,7 +17,7 @@ const ModelEntry = ({name, selected, setRemote}: {name: string, selected: boolea
 
     return(
         <button
-            className={(selected ? "bg-lightBlue-500" : "bg-gray-700") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"}
+            className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"}
             onClick={setRemote}
         >
             <p className="flex-grow pt-1">{name}</p>

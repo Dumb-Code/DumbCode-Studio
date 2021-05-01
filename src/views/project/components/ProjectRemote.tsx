@@ -5,19 +5,20 @@ const ProjectRemote = () => {
                 <p className="flex-grow">REMOTE PROJECTS</p>
                 <p className="text-md">add new icon</p>
             </div>
-            <div className="flex flex-row h-5/6">
-                <div className="w-4/12 border-r border-black flex flex-col overflow-y-scroll h-full">
+            <div className="flex flex-row overflow-y-hidden">
+                <div className="w-4/12 border-r border-black flex flex-col overflow-y-scroll">
                     <RemoteEntry org="DumbCode" repo="Project: Nublar" selected={true} setRemote={ () => console.log("set remote") } />
                     <RemoteEntry org="DumbCode" repo="TODM" selected={false} setRemote={ () => console.log("set remote") } />
                     <RemoteEntry org="DumbCode" repo="Kash's Mom" selected={false} setRemote={ () => console.log("set remote") } />
                 </div>
-                <div className="flex-grow flex flex-col overflow-y-scroll h-full pr-6">
+                <div className="flex-grow flex flex-col overflow-y-scroll pr-6 h-full">
                     <ProjectEntry name="T-rex" status={100} setRemote={ () => console.log("add project to list")}/>
                     <ProjectEntry name="Stegosaurus" status={0} setRemote={ () => console.log("add project to list")}/>
                     <ProjectEntry name="Trike" status={30} setRemote={ () => console.log("add project to list")}/>
                     <ProjectEntry name="Velociraptor" status={100} setRemote={ () => console.log("add project to list")}/>
                     <ProjectEntry name="Mosa" status={50} setRemote={ () => console.log("add project to list")}/>
                     <ProjectEntry name="Kash's Mom" status={0} setRemote={ () => console.log("add project to list")}/>
+
                 </div>
             </div>
         </div>
@@ -27,7 +28,7 @@ const ProjectRemote = () => {
 const RemoteEntry = ({org, repo, selected, setRemote}: {org: string, repo: string, selected: boolean, setRemote: () => void}) => {
     return(
         <button 
-            className={(selected ? "bg-lightBlue-500" : "bg-gray-700") + " my-1 mx-2 rounded-sm h-10 text-left pl-2 pt-1"}
+            className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 mx-2 rounded-sm h-10 text-left pl-2 pt-1"}
             onClick={setRemote}
         >
             <p className="text-xs">{org} /</p>
@@ -40,7 +41,7 @@ const ProjectEntry = ({name, status, setRemote}: {name: string, status: number, 
 
     return(
         <button
-            className={(status === 100 ? "bg-lightBlue-500" : "bg-gray-700") + " my-1 rounded-sm h-6 text-left pl-2 flex-grow w-full flex flex-row ml-4"}
+            className={(status === 100 ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-6 text-left pl-2 w-full flex flex-row ml-4"}
             onClick={setRemote}
         >
             <p className="flex-grow">{name}</p>

@@ -17,9 +17,8 @@ module.exports = {
     },
     gridTemplateAreas: {
       'project': [
-        'changelog remote remote texture',
-        'changelog model animation texture',
-        'changelog model animation texture'
+        'model animation texture',
+        'remote remote texture'
       ],
       'modeling': [
         'command command rtop',
