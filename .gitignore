@@ -5,6 +5,7 @@
 
 # testing
 /coverage
+*.log
 
 # production
 /build
@@ -13,3 +14,9 @@
 .DS_Store
 npm-debug.log*
 .eslintcache
+
+# editor
+.vscode/*
+
+# devfiles
+src/stylesheets/index.css

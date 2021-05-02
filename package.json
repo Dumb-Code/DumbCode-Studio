@@ -10,7 +10,7 @@
   },
   "private": false,
   "scripts": {
-    "tailwind": "npx tailwind build src/tailwind.css -o src/stylesheets/index.css",
+    "tailwind": "npx tailwind build src/stylesheets/tailwind.css -o src/stylesheets/index.css",
     "prestart": "npm run tailwind",
     "start": "react-scripts start",
     "prebuild": "cross-env NODE_ENV=production npm run tailwind",
