@@ -1,12 +1,12 @@
-import { SVGCross } from "../../../components/Icons"
+import { SVGCross, SVGPlus } from "../../../components/Icons"
 
 const ProjectRemote = () => {
     return(
         <div className="rounded-sm bg-gray-800 h-full flex flex-col overflow-hidden">
-            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-2 flex flex-row">
-                <p className="flex-grow">REMOTE PROJECTS</p>
+            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+                <p className="flex-grow mt-1 ml-1">REMOTE PROJECTS</p>
                 <p className="flex flex-row">
-                    <SVGCross className="h-5 w-5 transform rotate-45 mr-1" />
+                    <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"><SVGPlus className="h-4 w-4 mr-1" /></button>
                 </p>
             </div>
             <div className="flex flex-row overflow-y-hidden h-full">

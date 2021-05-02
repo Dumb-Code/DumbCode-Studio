@@ -1,13 +1,13 @@
-import { SVGCross, SVGDownload } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SVGPlus } from "../../../components/Icons"
 
 const ProjectTextures = () => {
     return(
         <div className="flex flex-col h-full">
             <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden flex-grow">
-                <div className="bg-gray-900 text-gray-400 font-bold text-xs p-2 flex flex-row">
-                    <p className="flex-grow">TEXTURE GROUPS</p>
+                <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+                    <p className="flex-grow mt-1 ml-1">TEXTURE GROUPS</p>
                     <p className="flex flex-row">
-                        <SVGCross className="h-5 w-5 transform rotate-45 mr-1" />
+                        <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"><SVGPlus className="h-4 w-4 mr-1" /></button>
                     </p>
                 </div>
                 <div className="border-r border-black flex flex-col overflow-y-scroll h-3/6 w-full pr-6">
@@ -16,10 +16,10 @@ const ProjectTextures = () => {
                     <GroupEntry name="jp_female" selected={true} />
                     <GroupEntry name="jp_male" selected={false} />
                 </div>
-                <div className="bg-gray-900 text-gray-400 font-bold text-xs p-2 flex flex-row">
-                    <p className="flex-grow">TEXTURES</p>
+                <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+                    <p className="flex-grow mt-1 ml-1">TEXTURES</p>
                     <p className="flex flex-row">
-                        <SVGCross className="h-5 w-5 transform rotate-45 mr-1" />
+                        <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"><SVGPlus className="h-4 w-4 mr-1" /></button>
                     </p>
                 </div>
                 <div className="border-r border-black flex flex-row overflow-hidden h-full w-full">
