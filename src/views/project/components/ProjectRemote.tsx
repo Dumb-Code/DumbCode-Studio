@@ -1,4 +1,4 @@
-import { SVGCrossCircle } from "../../../components/Icons"
+import { SVGCross } from "../../../components/Icons"
 
 const ProjectRemote = () => {
     return(
@@ -6,7 +6,7 @@ const ProjectRemote = () => {
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-2 flex flex-row">
                 <p className="flex-grow">REMOTE PROJECTS</p>
                 <p className="flex flex-row">
-                    <SVGCrossCircle className="h-5 w-5 transform rotate-45 mr-1" />
+                    <SVGCross className="h-5 w-5 transform rotate-45 mr-1" />
                 </p>
             </div>
             <div className="flex flex-row overflow-y-hidden h-full">
@@ -24,7 +24,7 @@ const ProjectRemote = () => {
                     <ProjectEntry name="Kash's Mom" status={0} setRemote={ () => console.log("add project to list")}/>
                     <div>
                         <p className="flex flex-row bg-gray-600 mx-4 rounded mt-1 mb-6 w-full text-white">
-                            <SVGCrossCircle className="h-5 w-5 transform rotate-45 ml-2 mt-0.5 mr-1" /> Add New Remote Project
+                            <SVGCross className="h-5 w-5 transform rotate-45 ml-2 mt-0.5 mr-1" /> Add New Remote Project
                         </p>
                     </div>
                 </div>

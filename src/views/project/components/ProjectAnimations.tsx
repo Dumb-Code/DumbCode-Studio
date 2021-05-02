@@ -1,4 +1,4 @@
-import { SVGCrossCircle, SVGDownloadCircle, SVGRecord } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SVGUpload } from "../../../components/Icons"
 
 const ProjectAnimations = () => {
     return(
@@ -6,9 +6,9 @@ const ProjectAnimations = () => {
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-2 flex flex-row">
                 <p className="flex-grow">ANIMATIONS</p>
                 <p className="flex flex-row">
-                    <SVGCrossCircle className="h-5 w-5 transform rotate-45 mr-1" />
-                    <SVGDownloadCircle className="h-5 w-5 mr-1 transform rotate-180" />
-                    <SVGDownloadCircle className="h-5 w-5" />
+                    <SVGCross className="h-5 w-5 transform rotate-45 mr-1" />
+                    <SVGUpload className="h-5 w-5 mr-1" />
+                    <SVGDownload className="h-5 w-5" />
                 </p>
             </div>
             <div className="border-r border-black flex flex-col overflow-y-scroll h-full w-full pr-6">
@@ -32,10 +32,9 @@ const AnimationEntry = ({name, selected, setRemote}: {name: string, selected: bo
         >
             <p className="flex-grow mt-1 truncate">{name}</p>
             
-            <p className="mt-2 mr-2 flex flex-row text-white">
-                <SVGRecord className="h-5 w-5 mr-1" />
-                <SVGDownloadCircle className="h-5 w-5 mr-1" />
-                <SVGCrossCircle className="h-5 w-5 hover:text-red-500" />
+            <p className="mr-2 flex flex-row text-white">
+                <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SVGDownload className="h-4 w-4" /></button>
+                <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
             </p>
         </button>
     )
