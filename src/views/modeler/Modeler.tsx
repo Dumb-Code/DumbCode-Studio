@@ -18,7 +18,7 @@ const Modeler = () => {
         >
             {/* The boreders are to visulize where everything is. */}
             <div className="grid-in-command border border-black"><ModelerCommandInput /></div>
-            <div className="grid-in-rtop border border-black"><ModelerCubeList /></div>
+            <div className="grid-in-rtop min-h-0 border border-black"><ModelerCubeList /></div>
             <div className="grid-in-rbottom border border-black"><ModelerProperties /></div>
             <div className="grid-in-shortcuts border border-black"><ModelerShortcuts /></div>
             <div className="grid-in-canvas border border-black"><StudioCanvas /></div>

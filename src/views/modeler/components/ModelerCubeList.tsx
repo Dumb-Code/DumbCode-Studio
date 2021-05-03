@@ -35,7 +35,7 @@ const ModelerCubeList = () => {
                     <b className="flex-grow" />
                 </button>
             </div>
-            <div className="border-r border-black flex flex-col w-full pr-2 pl-1 h-full">
+            <div className="border-r border-black flex flex-col w-full pr-2 pl-1 min-h-0">
                 <CubeList />
             </div>
         </div>

@@ -31,7 +31,7 @@ const StudioContainer = () => {
             v1.0.0
           </div>
         </div>
-        <div className="flex-grow">
+        <div className="flex-grow min-h-0">
           {activeTab.component()}
         </div>
       </div>
