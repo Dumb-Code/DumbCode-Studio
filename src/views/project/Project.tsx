@@ -5,7 +5,7 @@ import ProjectTextures from './components/ProjectTextures'
 
 const Texturer = () => {
     return (
-        <div className="h-full grid grid-areas-project overflow-hidden"
+        <div className="h-full grid grid-areas-project overflow-hidden mx-2 bg-black"
             style={{
                 gridTemplateColumns: '30% 30% 40%',
                 gridTemplateRows: '75% 25%'
