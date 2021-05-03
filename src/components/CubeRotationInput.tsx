@@ -25,14 +25,14 @@ const InputField = ({axis, percentage}: {axis: string, percentage: number}) => {
     }
     
     return(
-        <div className="flex flex-row mb-1 h-7 col-span-2">
+        <div className="flex flex-row mb-2 h-7 col-span-2">
             <div className={colors + " rounded-l px-2 text-white font-bold border-gray-900 pt-1.5 text-xs"}>
                 {axis.toUpperCase()}
             </div>
             <div className=" w-20">
                 <NumericInput size={20} mobile={false} />
             </div>
-            <div className="rounded-r bg-gray-900 flex-grow pr-4">
+            <div className="rounded-r bg-gray-900 flex-grow pr-4 h-8 pl-2">
                 <Slider
                     xmin={-180}
                     xmax={180}
