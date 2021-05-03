@@ -4,7 +4,7 @@ import ModelerProperties from "./components/ModelerProperties"
 import ModelerShortcuts from "./components/ModelerShortcuts"
 import StudioCanvas from "../../components/StudioCanvas"
 import GumballPropertiesBar from "../../components/GumballPropertiesBar"
-import CubeList from "./components/ModelerCubeList"
+import ModelerCubeList from "./components/ModelerCubeList"
 
 const Modeler = () => {
     return(
@@ -18,7 +18,7 @@ const Modeler = () => {
         >
             {/* The boreders are to visulize where everything is. */}
             <div className="grid-in-command border border-black"><ModelerCommandInput /></div>
-            <div className="grid-in-rtop border border-black"><CubeList /></div>
+            <div className="grid-in-rtop border border-black"><ModelerCubeList /></div>
             <div className="grid-in-rbottom border border-black"><ModelerProperties /></div>
             <div className="grid-in-shortcuts border border-black"><ModelerShortcuts /></div>
             <div className="grid-in-canvas border border-black"><StudioCanvas /></div>

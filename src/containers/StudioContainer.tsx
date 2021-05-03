@@ -44,7 +44,7 @@ export default App;
 export const NavBarButton = ({ name, selected, setTab }: { name: string, selected: boolean, setTab: () => void }) => {
   return (
     <button
-      className={(selected ? "bg-lightBlue-500 text-gray-800" : "bg-gray-900 hover:bg-gray-800 text-gray-400 border-t border-l border-r border-none") + " focus:outline-none mt-0.5 hover:text-white rounded-t w-32 py-1 px-2"}
+      className={(selected ? "bg-lightBlue-500 text-white" : "bg-gray-900 hover:bg-gray-800 text-gray-400 border-t border-l border-r border-none") + " focus:outline-none mt-0.5 hover:text-white rounded-t w-32 py-1 px-2"}
       onClick={setTab}
     >
       {name}

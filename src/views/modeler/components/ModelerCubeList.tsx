@@ -1,14 +1,73 @@
-const CubeList = () => {
+import { List, arrayMove } from 'react-movable';
+import { useState } from 'react';
+import { SVGChevronDown, SVGEye, SVGEyeOff, SVGLocked, SVGUnlocked } from '../../../components/Icons';
+
+const ModelerCubeList = () => {
     return(
         <div className="rounded-sm bg-gray-800 h-full flex flex-col overflow-hidden">
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
                 <p className="flex-grow my-0.5">CUBE LIST</p>
             </div>
-            <div className="border-r border-black flex flex-col h-full w-full pr-6">
-                cube list
+            <div className="border-r border-black flex flex-col h-full w-full pr-2 pl-1 overflow-y-scroll">
+                <CubeList />
             </div>
         </div>
     )
 }
 
-export default CubeList;
+type CubeItem = {
+    name: string;
+    visible: boolean;
+    locked: boolean;
+    selected: boolean;
+    hasChildren: boolean;
+    indentAmmount: number;
+    collapsed: boolean;
+}
+
+const CubeList = () => {
+
+    const Cubes: CubeItem[] = [
+        { name: "A Normal Cube", visible: true, locked: false, selected: false, hasChildren: false, indentAmmount: 0, collapsed: false },
+        { name: "Hidden Cube", visible: false, locked: false, selected: false, hasChildren: false, indentAmmount: 0, collapsed: false },
+        { name: "Locked Cube", visible: true, locked: true, selected: false, hasChildren: false, indentAmmount: 0, collapsed: false },
+        { name: "Active Cube", visible: true, locked: false, selected: true, hasChildren: false, indentAmmount: 0, collapsed: false },
+        { name: "Parent Cube", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 0, collapsed: false },
+        { name: "Child Cube", visible: true, locked: false, selected: false, hasChildren: false, indentAmmount: 1, collapsed: false },
+        { name: "Parent Cube 2", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 0, collapsed: false },
+        { name: "Child Cube 2", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 1, collapsed: false },
+        { name: "Child Cube 2", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 2, collapsed: true },
+    ]
+
+    const [items, setItems] = useState(Cubes);
+
+    return (
+        <List
+        values={items}
+        onChange={({ oldIndex, newIndex }) =>
+            setItems(arrayMove(items, oldIndex, newIndex))
+        }
+            renderList={({ children, props }) => <ul className="-mr-2" {...props}>{children}</ul>}
+            renderItem={({ value, props }) => <CubeItem item={value} props={props} />}
+        />
+    )
+}
+
+const CubeItem = ({props, item}: {props: any, item: CubeItem}) => {
+
+    return(
+        <li {...props} className={((item.visible) ? (item.locked ? "bg-gray-900" : (item.selected ? "bg-lightBlue-500 hover:bg-lightBlue-400" : "bg-gray-700 hover:bg-gray-600")) : "bg-gray-900 cursor-not-allowed") + " ml-2 my-1"} style={{marginLeft: (item.indentAmmount * 15) + "px"}}>
+            <div className="flex flex-row py-0.5">
+                {!item.hasChildren || <button className={(!item.collapsed || "transform -rotate-90") + " bg-gray-800 hover:bg-black rounded px-1 py-1 text-white ml-0.5"}><SVGChevronDown className="h-4 w-4" /></button>}
+                <p className="truncate text-white text-s pl-1 flex-grow cursor-move">{item.name}</p>
+                <div className="flex flex-row text-white m-0 p-0">
+                    <button className={(item.locked ? "bg-red-800 hover:bg-red-600" : "bg-gray-800 hover:bg-black") + " rounded px-1 py-1 mr-1"}>{item.locked ? <SVGLocked className="h-4 w-4" /> : <SVGUnlocked className="h-4 w-4" />}</button>
+                    <button className={(item.visible ? "bg-gray-800 hover:bg-black" : "bg-red-800 hover:bg-red-600") + " rounded px-1 py-1 mr-1"}>{item.visible ? <SVGEye className="h-4 w-4" /> : <SVGEyeOff className="h-4 w-4" />}</button>
+                </div>
+            </div>
+        </li>
+    )
+
+}
+
+export default ModelerCubeList;
