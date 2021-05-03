@@ -16,7 +16,7 @@ const Tabs: Tab[] = [
   { name: "Animation", component: () => <Animator /> },
 ]
 
-const App = () => {
+const StudioContainer = () => {
 
   const [activeTab, setActiveTab] = useState(Tabs[0]);
 
@@ -39,7 +39,7 @@ const App = () => {
   );
 };
 
-export default App;
+export default StudioContainer;
 
 export const NavBarButton = ({ name, selected, setTab }: { name: string, selected: boolean, setTab: () => void }) => {
   return (

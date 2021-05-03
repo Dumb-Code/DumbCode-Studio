@@ -1,6 +1,6 @@
 import { List, arrayMove } from 'react-movable';
 import { useState } from 'react';
-import { SVGChevronDown, SVGEye, SVGEyeOff, SVGLocked, SVGUnlocked } from '../../../components/Icons';
+import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 
 const ModelerCubeList = () => {
     return(
@@ -8,7 +8,34 @@ const ModelerCubeList = () => {
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
                 <p className="flex-grow my-0.5">CUBE LIST</p>
             </div>
-            <div className="border-r border-black flex flex-col h-full w-full pr-2 pl-1 overflow-y-scroll">
+            <div className="flex flex-row mx-1">
+                <button className="flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mr-0.5 flex flex-row">
+                    <b className="flex-grow" />
+                    <SVGPlus className="h-6 w-6" />
+                    <SVGCube className="h-5 w-5 mt-0.5" />
+                    <b className="flex-grow" />
+                </button>
+                <button className="flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mx-0.5 flex flex-row">
+                    <b className="flex-grow" />
+                    <SVGPlus className="h-6 w-6" />
+                    <SVGCube className="h-5 w-5 mt-0.5" />
+                    <SVGCube className="h-4 w-4 mt-1.5" />
+                    <b className="flex-grow" />
+                </button>
+                <button className="flex-grow bg-red-500 hover:bg-red-600 rounded text-white mx-0.5 flex flex-row">
+                    <b className="flex-grow" />
+                    <SVGTrash className="h-5 w-5 mt-0.5" />
+                    <b className="flex-grow" />
+                </button>
+                <button className="flex-grow bg-red-500 hover:bg-red-600 rounded text-white ml-0.5 flex flex-row">
+                    <b className="flex-grow" />
+                    <SVGTrash className="h-5 w-5 mt-0.5" />
+                    <SVGCube className="h-5 w-5 mt-0.5" />
+                    <SVGCube className="h-4 w-4 mt-1.5" />
+                    <b className="flex-grow" />
+                </button>
+            </div>
+            <div className="border-r border-black flex flex-col w-full pr-2 pl-1 h-full">
                 <CubeList />
             </div>
         </div>
@@ -36,7 +63,16 @@ const CubeList = () => {
         { name: "Child Cube", visible: true, locked: false, selected: false, hasChildren: false, indentAmmount: 1, collapsed: false },
         { name: "Parent Cube 2", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 0, collapsed: false },
         { name: "Child Cube 2", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 1, collapsed: false },
-        { name: "Child Cube 2", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 2, collapsed: true },
+        { name: "Child Cube 3", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 2, collapsed: true },
+        { name: "A Normal Cube 2", visible: true, locked: false, selected: false, hasChildren: false, indentAmmount: 0, collapsed: false },
+        { name: "Hidden Cube 2", visible: false, locked: false, selected: false, hasChildren: false, indentAmmount: 0, collapsed: false },
+        { name: "Locked Cube 2", visible: true, locked: true, selected: false, hasChildren: false, indentAmmount: 0, collapsed: false },
+        { name: "Active Cube 2", visible: true, locked: false, selected: true, hasChildren: false, indentAmmount: 0, collapsed: false },
+        { name: "Parent Cube 3", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 0, collapsed: false },
+        { name: "Child Cube 4", visible: true, locked: false, selected: false, hasChildren: false, indentAmmount: 1, collapsed: false },
+        { name: "Parent Cube 4", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 0, collapsed: false },
+        { name: "Child Cube 5", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 1, collapsed: false },
+        { name: "Child Cube 6", visible: true, locked: false, selected: false, hasChildren: true, indentAmmount: 2, collapsed: true },
     ]
 
     const [items, setItems] = useState(Cubes);
@@ -47,7 +83,7 @@ const CubeList = () => {
         onChange={({ oldIndex, newIndex }) =>
             setItems(arrayMove(items, oldIndex, newIndex))
         }
-            renderList={({ children, props }) => <ul className="-mr-2" {...props}>{children}</ul>}
+            renderList={({ children, props }) => <ul className="-mr-2 overflow-y-scroll" style={{height: '100%'}} {...props}>{children}</ul>}
             renderItem={({ value, props }) => <CubeItem item={value} props={props} />}
         />
     )
