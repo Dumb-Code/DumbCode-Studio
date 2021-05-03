@@ -84,13 +84,12 @@ const CubeList = () => {
             setItems(arrayMove(items, oldIndex, newIndex))
         }
             renderList={({ children, props }) => <ul className="-mr-2 overflow-y-scroll" style={{height: '100%'}} {...props}>{children}</ul>}
-            renderItem={({ value, props }) => <CubeItem item={value} props={props} />}
+            renderItem={({ value, props }) => <CubeItemEntry item={value} props={props} />}
         />
     )
 }
 
-const CubeItem = ({props, item}: {props: any, item: CubeItem}) => {
-
+const CubeItemEntry = ({props, item}: {props: any, item: CubeItem}) => {
     return(
         <li {...props} className={((item.visible) ? (item.locked ? "bg-gray-900" : (item.selected ? "bg-lightBlue-500 hover:bg-lightBlue-400" : "bg-gray-700 hover:bg-gray-600")) : "bg-gray-900 cursor-not-allowed") + " ml-2 my-1"} style={{marginLeft: (item.indentAmmount * 15) + "px"}}>
             <div className="flex flex-row py-0.5">
