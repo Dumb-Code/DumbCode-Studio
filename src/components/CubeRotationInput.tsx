@@ -1,3 +1,5 @@
+import Slider from 'react-input-slider'
+
 const CubeRotationInput = ({title}: {title: string}) => {
     return(
         <div>
@@ -27,10 +29,17 @@ const InputField = ({axis, percentage}: {axis: string, percentage: number}) => {
                 {axis.toUpperCase()}
             </div>
             <input type="number" className="border-none text-xs bg-gray-900 w-20 text-white" />
-            <div className="rounded-r bg-gray-900 flex-grow pr-4 pt-1">
-                <div className="overflow-hidden h-1 mb-4 text-xs flex rounded bg-gray-400 mt-2">
-                    <div style={{ width: percentage+"%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-lightBlue-300"></div>
-                </div>
+            <div className="rounded-r bg-gray-900 flex-grow pr-4 w-40">
+                <Slider
+                    xmin={-180}
+                    xmax={180}
+                    axis="x"
+                    styles={{
+                        track: { height: 6, backgroundColor: '#BFDBFE', width: '100%' },
+                        active: { backgroundColor: '#60A5FA' },
+                        thumb: { width: 15, height: 15 }
+                    }}
+                />
             </div>
         </div>
     )
