@@ -1,4 +1,5 @@
 import Slider from 'react-input-slider'
+import NumericInput from 'react-numeric-input';
 
 const CubeRotationInput = ({title}: {title: string}) => {
     return(
@@ -28,8 +29,10 @@ const InputField = ({axis, percentage}: {axis: string, percentage: number}) => {
             <div className={colors + " rounded-l px-2 text-white font-bold border-gray-900 pt-1.5 text-xs"}>
                 {axis.toUpperCase()}
             </div>
-            <input type="number" className="border-none text-xs bg-gray-900 w-20 text-white" />
-            <div className="rounded-r bg-gray-900 flex-grow pr-4 w-40">
+            <div className=" w-20">
+                <NumericInput size={20} mobile={false} />
+            </div>
+            <div className="rounded-r bg-gray-900 flex-grow pr-4">
                 <Slider
                     xmin={-180}
                     xmax={180}
