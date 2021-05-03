@@ -1,7 +1,7 @@
 const CubeInput = ({title}: {title: string}) => {
     return(
         <div>
-            <p className="ml-1">{title}</p>
+            <p className="ml-1 text-gray-600 text-xs">{title}</p>
             <div className="flex flex-col p-1">
                 <InputField axis="x" />
                 <InputField axis="y" />
@@ -23,10 +23,10 @@ const InputField = ({axis}: {axis: string}) => {
     
     return(
         <div className="flex flex-row mb-1 h-7">
-            <div className={colors + " rounded-l px-2 text-white font-bold border-gray-900 pt-1.5"}>
+            <div className={colors + " rounded-l px-2 text-white font-bold border-gray-900 pt-1.5 text-xs"}>
                 {axis.toUpperCase()}
             </div>
-            <input type="number" className="rounded-r border-none text-xs bg-gray-900 w-full">
+            <input type="number" className="rounded-r border-none text-xs bg-gray-900 w-full text-white">
             </input>
         </div>
     )
