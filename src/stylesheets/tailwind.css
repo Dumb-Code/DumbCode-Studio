@@ -44,6 +44,10 @@ a {
   @apply bg-gray-900 outline-none border-none shadow-none h-full w-full text-white !important;
 }
 
+.studio-canvas-container canvas {
+  @apply absolute;
+}
+
 /**
   * This injects Tailwind's utility classes and any utility classes registered
   * by plugins.
