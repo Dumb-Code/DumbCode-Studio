@@ -1,9 +1,9 @@
-import { List, arrayMove } from 'react-movable';
+import { List, arrayMove, IItemProps } from 'react-movable';
 import { useState } from 'react';
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 
 const ModelerCubeList = () => {
-    return(
+    return (
         <div className="rounded-sm bg-gray-800 h-full flex flex-col overflow-hidden">
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
                 <p className="flex-grow my-0.5">CUBE LIST</p>
@@ -79,19 +79,43 @@ const CubeList = () => {
 
     return (
         <List
-        values={items}
-        onChange={({ oldIndex, newIndex }) =>
-            setItems(arrayMove(items, oldIndex, newIndex))
-        }
-            renderList={({ children, props }) => <ul className="-mr-2 overflow-y-scroll" style={{height: '100%'}} {...props}>{children}</ul>}
-            renderItem={({ value, props }) => <CubeItemEntry item={value} props={props} />}
+            values={items}
+            onChange={({ oldIndex, newIndex }) =>
+                setItems(arrayMove(items, oldIndex, newIndex))
+            }
+            renderList={({ children, props }) => {
+                console.log(props)
+                return <ul className="-mr-2 overflow-y-scroll" {...props}>{children}</ul>
+            }}
+            renderItem={({ value, props }) => {
+                return <CubeItem item={value} props={props} />
+            }}
         />
     )
 }
 
-const CubeItemEntry = ({props, item}: {props: any, item: CubeItem}) => {
-    return(
-        <li {...props} className={((item.visible) ? (item.locked ? "bg-gray-900" : (item.selected ? "bg-lightBlue-500 hover:bg-lightBlue-400" : "bg-gray-700 hover:bg-gray-600")) : "bg-gray-900 cursor-not-allowed") + " ml-2 my-1"} style={{marginLeft: (item.indentAmmount * 15) + "px"}}>
+const CubeItem = ({ props, item }: { props: IItemProps, item: CubeItem }) => {
+    let itemBackgroundColor: string
+    if(item.visible) {
+        if(item.locked) {
+            itemBackgroundColor = "bg-gray-900"
+        } else if(item.selected) {
+            itemBackgroundColor = "bg-lightBlue-500 hover:bg-lightBlue-400"
+        } else {
+            itemBackgroundColor = "bg-gray-700 hover:bg-gray-600"
+        }
+    } else {
+        itemBackgroundColor = "bg-gray-900 cursor-not-allowed"
+    }
+    return (
+        <li
+            {...props}
+            className={`${itemBackgroundColor} ml-2 my-1`} 
+            style={{
+                ...props.style,
+                listStyleType: 'none',
+                marginLeft: (item.indentAmmount * 15) + "px" 
+            }} >
             <div className="flex flex-row py-0.5">
                 {!item.hasChildren || <button className={(!item.collapsed || "transform -rotate-90") + " bg-gray-800 hover:bg-black rounded px-1 py-1 text-white ml-0.5"}><SVGChevronDown className="h-4 w-4" /></button>}
                 <p className="truncate text-white text-s pl-1 flex-grow cursor-move">{item.name}</p>
