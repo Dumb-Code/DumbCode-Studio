@@ -1,5 +1,5 @@
 import Dropup, { DropupItem } from './Dropup'
-import { SVGCube, SVGGrid } from './Icons';
+import { SVGCube, SVGEye, SVGGrid, SVGLocked } from './Icons';
 
 const InfoBar = () => {
     return(
@@ -9,7 +9,13 @@ const InfoBar = () => {
             <TextureGroupDropup />
             <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGGrid className="h-4 w-4 mr-1" /></button>
             <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGCube className="h-4 w-4 mr-1" /></button>
+            <button className="bg-gray-900 hover:bg-gray-800 rounded px-2 my-0.5 mr-1 text-white text-xs">0 Total Cubes</button>
+
+            {/*The following elements need to only show up when a cube is selected*/}
             <button className="bg-gray-900 hover:bg-gray-800 rounded px-2 my-0.5 mr-1 text-white text-xs">0 Cubes Selected</button>
+            <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGEye className="h-4 w-4 mr-1" /></button>
+            <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGLocked className="h-4 w-4 mr-1" /></button>
+            <button className="bg-gray-900 hover:bg-gray-800 rounded px-2 my-0.5 mr-1 text-white text-xs">0 Child Cubes</button>
         </div>
     )
 }
