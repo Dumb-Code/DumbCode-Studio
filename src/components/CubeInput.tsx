@@ -3,7 +3,7 @@ import NumericInput from 'react-numeric-input';
 const CubeInput = ({title}: {title: string}) => {
     return(
         <div>
-            <p className="ml-1 text-gray-600 text-xs">{title}</p>
+            <p className="ml-1 text-gray-400 text-xs">{title}</p>
             <div className="flex flex-col p-1">
                 <InputField axis="x" />
                 <InputField axis="y" />
@@ -29,7 +29,7 @@ const InputField = ({axis}: {axis: string}) => {
                 {axis.toUpperCase()}
             </div>
             
-            <NumericInput value={0} size={6} mobile={false} />
+            <NumericInput value={0} size={6} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
         </div>
     )
 }

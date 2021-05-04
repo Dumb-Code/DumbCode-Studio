@@ -3,7 +3,7 @@ import { SVGCube, SVGEye, SVGGrid, SVGLocked } from './Icons';
 
 const InfoBar = () => {
     return(
-        <div className="rounded-sm bg-black h-full px-2 flex flex-row">
+        <div className="rounded-sm bg-black h-full flex flex-row">
             <DisplayModeDropup />
             <RenderModeDropup />
             <TextureGroupDropup />

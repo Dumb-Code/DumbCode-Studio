@@ -4,7 +4,7 @@ import NumericInput from 'react-numeric-input';
 const CubeRotationInput = ({title}: {title: string}) => {
     return(
         <div>
-            <p className="ml-1 text-gray-600 text-xs">{title}</p>
+            <p className="ml-1 text-gray-400 text-xs">{title}</p>
             <div className="flex flex-col p-1">
                 <InputField axis="x" percentage={45} />
                 <InputField axis="y" percentage={90} />
@@ -30,7 +30,7 @@ const InputField = ({axis, percentage}: {axis: string, percentage: number}) => {
                 {axis.toUpperCase()}
             </div>
             <div className=" w-20 h-7">
-                <NumericInput value={0} size={2} mobile={false} />
+                <NumericInput value={0} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
             </div>
             <div className="rounded-r bg-gray-700 flex-grow pr-4 pl-2 h-8">
                 <Slider
