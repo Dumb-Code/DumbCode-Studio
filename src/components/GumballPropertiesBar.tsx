@@ -28,8 +28,6 @@ const GumballToggle = () => {
 }
 
 const TransformationTypeSelect = () => {
-    {/* Select object or gumball transformations */}
-
     const [objectMode, setObjectMode] = useState(true);
 
     return(
@@ -43,9 +41,7 @@ const TransformationTypeSelect = () => {
     )
 }
 
-{/* Object Selected */}
 const ObjectTransformationModeSelect = () => {
-    {/* Object Selected -> Select move rotate or dimension */}
 
     const [transformMode, setTransformMode] = useState("move");
 
@@ -62,7 +58,6 @@ const ObjectTransformationModeSelect = () => {
 }
 
 const ObjectMoveOptions = () => {
-    {/* Object Selected -> Move Selected -> (world/local) (position/offset/rotationPt) */}
 
     const [isMoveLocal, setScopeLocal] = useState(true);
     const [moveType, setTransformMode] = useState("position");
@@ -85,7 +80,6 @@ const ObjectMoveOptions = () => {
 }
 
 const ObjectRotateOptions = () => {
-    {/* Object Selected -> Rotate Selected -> (world/local) (rotate/rotateAroundPoint) */}
 
     const [isRotLocal, setScopeLocal] = useState(true);
     const [isAroundPoint, setAroundPoint] = useState(false);
@@ -105,11 +99,7 @@ const ObjectRotateOptions = () => {
     )
 }
 
-{/* Gumball Selected */}
 const GumballTransformationModeSelect = () => {
-    {/* [] Automatically Move to Rotation Points */}
-    {/* Relocate Gumball Dropup */}
-    {/* Move Rotate */}
 
     const [isGumballMove, setGumballMove] = useState(true);
 
@@ -125,11 +115,6 @@ const GumballTransformationModeSelect = () => {
 }
 
 const RelocateGumballDropup = () => {
-    {/* World Origin */}
-    {/* Selected Cube RP Position */}
-    {/* Selected Cube RP Rotation */}
-    {/* Selected Cube RP Position and Rotation */}
-    {/* Snap Point */}
 
     return (
         <div>

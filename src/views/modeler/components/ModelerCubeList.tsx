@@ -87,13 +87,13 @@ const CubeList = () => {
                 return <ul className="-mr-2 overflow-y-scroll" {...props}>{children}</ul>
             }}
             renderItem={({ value, props }) => {
-                return <CubeItem item={value} props={props} />
+                return <CubeListItem item={value} props={props} />
             }}
         />
     )
 }
 
-const CubeItem = ({ props, item }: { props: IItemProps, item: CubeItem }) => {
+const CubeListItem = ({ props, item }: { props: IItemProps, item: CubeItem }) => {
     
     let itemBackgroundColor: string
     if(item.visible && !item.locked) {
