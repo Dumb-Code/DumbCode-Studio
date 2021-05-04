@@ -48,6 +48,14 @@ a {
   @apply absolute;
 }
 
+.tooltip {
+  @apply invisible absolute;
+}
+
+.has-tooltip:hover .tooltip {
+  @apply visible z-50;
+}
+
 /**
   * This injects Tailwind's utility classes and any utility classes registered
   * by plugins.
