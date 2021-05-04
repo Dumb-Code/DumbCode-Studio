@@ -5,7 +5,6 @@ import TexturerTools from "./components/TexturerTools"
 import StudioCanvas from "../../components/StudioCanvas"
 import TexturerProperties from "./components/TexturerProperties"
 
-
 const Texturer = () => {
     return (
         <div className="h-full grid grid-areas-texture"
