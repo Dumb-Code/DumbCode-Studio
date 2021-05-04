@@ -30,9 +30,9 @@ module.exports = {
       ],
       'texture': [
         'views views views',
-        'tools canvas canvas',
-        'properties properties layers',
-        'info info layers',
+        'tools canvas layers',
+        'properties properties properties',
+        'info info info',
       ],
       'animator': [
         'tabs tabs properties',
