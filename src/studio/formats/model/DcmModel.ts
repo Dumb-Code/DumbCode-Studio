@@ -8,9 +8,10 @@ const textureSizeChangedEvent = { type: "textureSizeChanged", width: 64, height:
 
 
 export interface CubeParent {
-  addChild(child: DCMCube, silent: boolean): void
-  deleteChild(child: DCMCube, silent: boolean): void
+  addChild(child: DCMCube, silent?: boolean): void
+  deleteChild(child: DCMCube, silent?: boolean): void
   getChildren(): DCMCube[]
+  children: DCMCube[]
   onChildrenChange(children: DCMCube[], silent: boolean): void
 }
 
@@ -24,6 +25,7 @@ const invalidParent: CubeParent = {
   getChildren() {
     throw new Error("Invalid Call On Parent")
   },
+  children: [],
   onChildrenChange() {
     throw new Error("Invalid Call On Parent")
   }
@@ -58,7 +60,7 @@ export class DCMModel extends EventDispatcher implements CubeParent {
     this.modelCache = new Group()
   }
 
-  setTextureSize(width, height) {
+  setTextureSize(width: number, height: number) {
     this.texWidth = textureSizeChangedEvent.width = width
     this.texHeight = textureSizeChangedEvent.height = height
     this.dispatchEvent(textureSizeChangedEvent)

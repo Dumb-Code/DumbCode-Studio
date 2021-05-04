@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo, useState, ReactNode } from 'react';
 import { Camera, Scene, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import DcProject from '../studio/formats/DcProject';
+import DcProject, { newProject } from '../studio/formats/DcProject';
 import { createThreeContext } from './ThreeContext';
 
 export type ThreeJsContext = {
@@ -21,7 +21,7 @@ export type StudioContext = {
   projects: DcProject[],
   setProjects: (projects: DcProject[]) => void,
 
-  selectedProject: DcProject | null,
+  selectedProject: DcProject,
   setSelectedProject: (project: DcProject) => void
 
 } & ThreeJsContext
@@ -47,7 +47,7 @@ export const StudioContextProvider = ({children}: {children?: ReactNode}) => {
 
   const [context, setContext] = useState<StudioContext>(() => {
     return {
-      selectedProject: null,
+      selectedProject: newProject(),
       setSelectedProject: wrap((data, context) => context.selectedProject = data),
 
       projects: [],
