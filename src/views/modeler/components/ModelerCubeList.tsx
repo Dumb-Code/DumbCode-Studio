@@ -95,18 +95,14 @@ const CubeList = () => {
 }
 
 const CubeItem = ({ props, item }: { props: IItemProps, item: CubeItem }) => {
+    
     let itemBackgroundColor: string
-    if(item.visible) {
-        if(item.locked) {
-            itemBackgroundColor = "bg-gray-900"
-        } else if(item.selected) {
-            itemBackgroundColor = "bg-lightBlue-500 hover:bg-lightBlue-400"
-        } else {
-            itemBackgroundColor = "bg-gray-700 hover:bg-gray-600"
-        }
+    if(item.visible && !item.locked) {
+        itemBackgroundColor = item.selected ? "bg-lightBlue-500 hover:bg-lightBlue-400" : "bg-gray-700 hover:bg-gray-600"
     } else {
-        itemBackgroundColor = "bg-gray-900 cursor-not-allowed"
+        itemBackgroundColor = "bg-gray-900"
     }
+
     return (
         <li
             {...props}
@@ -118,7 +114,7 @@ const CubeItem = ({ props, item }: { props: IItemProps, item: CubeItem }) => {
             }} >
             <div className="flex flex-row py-0.5">
                 {!item.hasChildren || <button className={(!item.collapsed || "transform -rotate-90") + " bg-gray-800 hover:bg-black rounded px-1 py-1 text-white ml-0.5"}><SVGChevronDown className="h-4 w-4" /></button>}
-                <p className="truncate text-white text-s pl-1 flex-grow cursor-move">{item.name}</p>
+                <p className={(item.locked ? "cursor-not-allowed" : "cursor-move" ) + " truncate text-white text-s pl-1 flex-grow"}>{item.name}</p>
                 <div className="flex flex-row text-white m-0 p-0">
                     <button className={(item.locked ? "bg-red-800 hover:bg-red-600" : "bg-gray-800 hover:bg-black") + " rounded px-1 py-1 mr-1"}>{item.locked ? <SVGLocked className="h-4 w-4" /> : <SVGUnlocked className="h-4 w-4" />}</button>
                     <button className={(item.visible ? "bg-gray-800 hover:bg-black" : "bg-red-800 hover:bg-red-600") + " rounded px-1 py-1 mr-1"}>{item.visible ? <SVGEye className="h-4 w-4" /> : <SVGEyeOff className="h-4 w-4" />}</button>
@@ -126,7 +122,6 @@ const CubeItem = ({ props, item }: { props: IItemProps, item: CubeItem }) => {
             </div>
         </li>
     )
-
 }
 
 export default ModelerCubeList;
