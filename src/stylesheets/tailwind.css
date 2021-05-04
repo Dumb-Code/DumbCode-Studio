@@ -56,6 +56,14 @@ a {
   @apply visible z-50;
 }
 
+.has-tooltip:active .tooltip {
+  @apply visible z-50;
+}
+
+.has-tooltip:focus .tooltip {
+  @apply visible z-50 bg-red-500;
+}
+
 button {
   @apply focus:outline-none !important;
 }
