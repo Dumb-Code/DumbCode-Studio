@@ -23,18 +23,15 @@ const ProjectModels = () => {
 const ModelEntry = ({name, selected, isRemote, changeModel}: {name: string, selected: boolean, isRemote: boolean, changeModel: () => void}) => {
 
     return(
-        <button
-            className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"}
-            onClick={changeModel}
-        >
-            <p className="flex-grow pt-1 truncate">{name}</p>
+        <div className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} >
+            <button className="flex-grow truncate text-left" onClick={changeModel}>{name}</button>
             
             <p className="pt-0 mr-2 text-white flex flex-row">
                 {isRemote ? <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}><SVGPushGithub className="h-4 w-4 mr-1" /></button> : ""}
                 <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}><SVGDownload className="h-4 w-4 mr-1" /></button>
                 <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
             </p>
-        </button>
+        </div>
     )
 }
 

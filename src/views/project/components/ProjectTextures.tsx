@@ -48,26 +48,26 @@ const ProjectTextures = () => {
 const GroupEntry = ({name, selected}: {name: string, selected: boolean}) => {
 
     return(
-        <button className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row"}>
-            <p className="flex-grow mt-1 truncate">{name}</p>
+        <div className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row"}>
+            <button className="flex-grow truncate text-left">{name}</button>
             <p className="mr-2 flex flex-row text-white">
                 <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SVGDownload className="h-4 w-4" /></button>
                 <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
             </p>
-        </button>
+        </div>
     )
 }
 
 const GroupTextureSwitchEntry = ({name, selected}: {name: string, selected: boolean}) => {
 
     return(
-        <button className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-2 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row pr-6"}>
-            <p className="truncate flex-grow mt-1">{name}</p>
+        <div className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-2 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row pr-6"}>
+            <button className="truncate flex-grow text-left">{name}</button>
             <p className="flex flex-row text-white w-12">
                 <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SVGDownload className="h-4 w-4" /></button>
                 <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
             </p>
-        </button>
+        </div>
     )
 }
 
