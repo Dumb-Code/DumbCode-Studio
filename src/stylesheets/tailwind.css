@@ -48,6 +48,10 @@ a {
   @apply absolute;
 }
 
+.dcs-cube-head .sortable-ghost {
+  @apply ml-4;
+}
+
 /**
   * This injects Tailwind's utility classes and any utility classes registered
   * by plugins.

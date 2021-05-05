@@ -13,7 +13,7 @@ export interface CubeParent {
   deleteChild(child: DCMCube, silent?: boolean): void
   getChildren(): DCMCube[]
   children: DCMCube[]
-  onChildrenChange(children: DCMCube[], silent: boolean): void
+  onChildrenChange(children?: DCMCube[], silent?: boolean): void
 }
 
 const invalidParent: CubeParent = {
