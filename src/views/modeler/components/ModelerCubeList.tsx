@@ -37,7 +37,7 @@ const ModelerCubeList = () => {
                     <b className="flex-grow" />
                 </button>
             </div>
-            <div className="border-r border-black flex flex-col w-full pr-2 pl-1 min-h-0 overflow-y-scroll h-full">
+            <div className="border-r border-black flex flex-col w-full pr-2 pl-1 min-h-0 overflow-x-hidden overflow-y-scroll h-full">
                 <CubeList />
             </div>
         </div>
@@ -68,7 +68,7 @@ const CubeList = () => {
                 {
                     //HEAD, for dropping onto, the onUpdate delegates it to the proper list
                     cube.cube instanceof DCMCube &&
-                    <div className={first ? "" : "pt-1"}>
+                    <div className={first ? "" : "pt-0.5"}>
                         < ReactSortable
                             list={[cube]}
                             setList={(l) => {
@@ -125,7 +125,7 @@ const CubeList = () => {
                         preventOnFilter={false}
                         filter={() => false}
                         group={{ name: 'cubes', pull: true, put: true }}
-                        className={(cube.id === "root" ? "" : "pl-4") + (cube.children.length ? ' pb-1' : '')}
+                        className={(cube.id === "root" ? "" : "pl-4")}
                     >
                         {cube.children.map((cube, idx) =>
                             <div
