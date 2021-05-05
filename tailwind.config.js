@@ -2,6 +2,11 @@ const colors = require('tailwindcss/colors');
 
 module.exports = {
   theme: {
+    extend: {
+      transitionProperty: {
+        'height': 'height'
+      }
+    },
     colors: {
       black: colors.black,
       white: colors.white,
@@ -29,10 +34,10 @@ module.exports = {
         'info info rbottom'
       ],
       'texture': [
-        'views views views',
+        'views views layers',
         'tools canvas layers',
-        'properties properties properties',
-        'info info info',
+        'properties properties layers',
+        'info info layers',
       ],
       'animator': [
         'tabs tabs properties',

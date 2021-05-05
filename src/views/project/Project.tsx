@@ -8,7 +8,7 @@ const Texturer = () => {
         <div className="h-full grid grid-areas-project overflow-hidden mx-2 bg-black"
             style={{
                 gridTemplateColumns: '30% 30% 40%',
-                gridTemplateRows: '75% 25%'
+                gridTemplateRows: 'auto min-content'
             }}
         >
             <div className="p-2 bg-black grid-in-remote"><ProjectRemote /></div>
