@@ -125,7 +125,7 @@ const CubeList = () => {
                         preventOnFilter={false}
                         filter={() => false}
                         group={{ name: 'cubes', pull: true, put: true }}
-                        className={(cube.id === "root" ? "" : "pl-4")}
+                        className={(cube.id === "root" ? "" : "pl-4") + (cube.children.length ? ' pb-0.5' : '')}
                     >
                         {cube.children.map((cube, idx) =>
                             <div
