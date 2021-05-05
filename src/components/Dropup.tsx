@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 export default function Dropup({title, header, children}) {
     return(
-        <div className="text-right mx-1">
+        <div className="text-right">
         <Menu as="div" className="relative inline-block text-left">
             {({ open }) => (
             <>

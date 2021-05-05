@@ -11,7 +11,7 @@ const ProjectModels = () => {
                     <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"><SVGDownload className="h-4 w-4 mr-1" /></button>
                 </p>
             </div>
-            <div className="border-r border-black flex flex-col overflow-y-scroll h-full w-full pr-6">
+            <div className="flex flex-col overflow-y-scroll h-full w-full pr-6">
                 <ModelEntry name="T-rex" selected={true} isRemote={true} changeModel={ () => console.log("set model") } />
                 <ModelEntry name="Velociraptor" selected={false} isRemote={true} changeModel={ () => console.log("set model") } />
                 <ModelEntry name="Velociraptor" selected={false} isRemote={false} changeModel={ () => console.log("set model") } />

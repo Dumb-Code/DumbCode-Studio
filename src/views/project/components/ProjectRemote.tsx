@@ -36,7 +36,7 @@ const ProjectRemote = () => {
 const RemoteEntry = ({org, repo, selected, setRemote}: {org: string, repo: string, selected: boolean, setRemote: () => void}) => {
     return(
         <button 
-            className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 mx-2 rounded-sm h-10 text-left pl-2 pt-1"}
+            className={(selected ? "bg-purple-500" : "bg-gray-700 text-white") + " my-1 mx-2 rounded-sm h-10 text-left pl-2 pt-1"}
             onClick={setRemote}
         >
             <p className="text-xs truncate">{org} /</p>
@@ -48,14 +48,14 @@ const RemoteEntry = ({org, repo, selected, setRemote}: {org: string, repo: strin
 const ProjectEntry = ({name, status, setRemote}: {name: string, status: number, setRemote: () => void}) => {
 
     return(
-        <div className={(status === 100 ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-6 text-left pl-2 w-full flex flex-row ml-4"} >
+        <div className={(status === 100 ? "bg-purple-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-6 text-left pl-2 w-full flex flex-row ml-4"} >
             <button className="flex-grow truncate text-left" onClick={setRemote}>{name}</button>
             
             <div className={(status === 100 || status === 0) ? "hidden" : "overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-400 w-40 mt-2"}>
-                <div style={{ width: status+"%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-lightBlue-300"></div>
+                <div style={{ width: status+"%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-300"></div>
             </div>
 
-            <div className={(status === 100 ? "bg-lightBlue-300 text-lightBlue-700" : "bg-gray-400 text-gray-700") + " px-2 rounded-xl text-xs w-20 text-center font-bold m-1"}>
+            <div className={(status === 100 ? "bg-purple-300 text-purple-700" : "bg-gray-400 text-gray-700") + " px-2 rounded-xl text-xs w-20 text-center font-bold m-1"}>
                 {status === 100 ? "LOADED" : status === 0 ? "UNLOADED" : "LOADING.."}
             </div>
         </div>

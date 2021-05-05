@@ -11,7 +11,7 @@ const ProjectAnimations = () => {
                     <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"><SVGDownload className="h-4 w-4 mr-1" /></button>
                 </p>
             </div>
-            <div className="border-r border-black flex flex-col overflow-y-scroll h-full w-full pr-6">
+            <div className="flex flex-col overflow-y-scroll h-full w-full pr-6">
                 <AnimationEntry name="roar" selected={true} setRemote={ () => console.log("set remote") } />
                 <AnimationEntry name="walk" selected={true} setRemote={ () => console.log("set remote") } />
                 <AnimationEntry name="bite" selected={false} setRemote={ () => console.log("set remote") } />
@@ -26,12 +26,12 @@ const ProjectAnimations = () => {
 const AnimationEntry = ({name, selected, setRemote}: {name: string, selected: boolean, setRemote: () => void}) => {
 
     return(
-        <div className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} >
+        <div className={(selected ? "bg-yellow-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} >
             <button className="flex-grow truncate text-left" onClick={setRemote}>{name}</button>
             
             <p className="mr-2 flex flex-row text-white">
-                <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SVGDownload className="h-4 w-4" /></button>
-                <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
+                <button className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SVGDownload className="h-4 w-4" /></button>
+                <button className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
             </p>
         </div>
     )

@@ -10,7 +10,7 @@ const ModelerCubeList = () => {
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
                 <p className="flex-grow my-0.5">CUBE LIST</p>
             </div>
-            <div className="flex flex-row mx-1">
+            <div className="flex flex-row mx-1 bg-gray-900 pb-1">
                 <button className="flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mr-0.5 flex flex-row">
                     <b className="flex-grow" />
                     <SVGPlus className="h-6 w-6" />
@@ -104,7 +104,6 @@ const CubeList = () => {
                             <div ref={ref}>
                                 <CubeItemEntry cube={cube.cube} />
                             </div>
-
                         </ReactSortable>
                     </div>
                 }
@@ -137,8 +136,6 @@ const CubeList = () => {
                                 <Cube cube={cube} />
                             </div>
                         )}
-
-
                     </ReactSortable>
                 }
             </div >
@@ -168,8 +165,9 @@ const CubeItemEntry = ({ cube }: { cube: DCMCube }) => {
             itemBackgroundColor = "bg-gray-700 hover:bg-gray-600"
         }
     } else {
-        itemBackgroundColor = "bg-gray-900 cursor-not-allowed"
+        itemBackgroundColor = item.locked ? "bg-gray-100 bg-opacity-30 text-gray-400" : "bg-gray-700 bg-opacity-40 text-gray-500"
     }
+
     return (
         <div className={`${itemBackgroundColor} ml-2 my-1`}>
             <div className="flex flex-row py-0.5">
