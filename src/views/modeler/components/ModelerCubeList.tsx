@@ -165,7 +165,7 @@ const CubeItemEntry = ({ cube }: { cube: DCMCube }) => {
             itemBackgroundColor = "bg-gray-700 hover:bg-gray-600"
         }
     } else {
-        itemBackgroundColor = item.locked ? "bg-gray-100 bg-opacity-30 text-gray-400" : "bg-gray-700 bg-opacity-40 text-gray-500"
+        itemBackgroundColor = locked ? "bg-gray-100 bg-opacity-30 text-gray-400" : "bg-gray-700 bg-opacity-40 text-gray-500"
     }
 
     return (
