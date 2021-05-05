@@ -18,7 +18,7 @@ const Animator = () => {
             }}
         >
             <div className="grid-in-tabs border border-black"><AnimatorTabBar /></div>
-            <div className="grid-in-properties border border-black"><AnimatorProperties /></div>
+            <div className="grid-in-properties border border-black h-full"><AnimatorProperties /></div>
             <div className="grid-in-tools border border-black"><AnimatorShortcuts /></div>
             <div className="grid-in-canvas border border-black"><StudioCanvas /></div>
             <div className="grid-in-scrub border border-black"><AnimatorScrubBar /></div>
