@@ -1,4 +1,5 @@
 import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, EventDispatcher, Material } from "three";
+import { v4 as uuidv4 } from "uuid"
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
@@ -8,10 +9,11 @@ const textureSizeChangedEvent = { type: "textureSizeChanged", width: 64, height:
 
 
 export interface CubeParent {
-  addChild(child: DCMCube, silent: boolean): void
-  deleteChild(child: DCMCube, silent: boolean): void
+  addChild(child: DCMCube, silent?: boolean): void
+  deleteChild(child: DCMCube, silent?: boolean): void
   getChildren(): DCMCube[]
-  onChildrenChange(children: DCMCube[], silent: boolean): void
+  children: DCMCube[]
+  onChildrenChange(children?: DCMCube[], silent?: boolean): void
 }
 
 const invalidParent: CubeParent = {
@@ -24,6 +26,7 @@ const invalidParent: CubeParent = {
   getChildren() {
     throw new Error("Invalid Call On Parent")
   },
+  children: [],
   onChildrenChange() {
     throw new Error("Invalid Call On Parent")
   }
@@ -40,6 +43,7 @@ export class DCMModel extends EventDispatcher implements CubeParent {
   maxCubeLevel: number
 
   cubeMap: Map<string, DCMCube>
+  identifierCubeMap: Map<string, DCMCube>
   children: DCMCube[]
 
   modelCache: Group
@@ -53,12 +57,13 @@ export class DCMModel extends EventDispatcher implements CubeParent {
     this.maxCubeLevel = 0
 
     this.cubeMap = new Map()
+    this.identifierCubeMap = new Map()
     this.children = []
 
     this.modelCache = new Group()
   }
 
-  setTextureSize(width, height) {
+  setTextureSize(width: number, height: number) {
     this.texWidth = textureSizeChangedEvent.width = width
     this.texHeight = textureSizeChangedEvent.height = height
     this.dispatchEvent(textureSizeChangedEvent)
@@ -148,6 +153,7 @@ export class DCMModel extends EventDispatcher implements CubeParent {
 }
 
 export class DCMCube implements CubeParent {
+  identifier: string
   name: string
   dimension: [number, number, number]
   rotationPoint: [number, number, number]
@@ -179,6 +185,7 @@ export class DCMCube implements CubeParent {
     cubeGrow: [number, number, number],
     children: DCMCube[],
     model: DCMModel) {
+    this.identifier = uuidv4()
     this.name = name
     this.dimension = dimension
     this.rotationPoint = rotationPoint
@@ -199,6 +206,7 @@ export class DCMCube implements CubeParent {
       counter += 1
     }
     model.cubeMap.set(this.name, this)
+    model.identifierCubeMap.set(this.identifier, this)
 
     this.uvBuffer = new BufferAttribute(new Float32Array(new Array(6 * 4 * 2)), 2)
 

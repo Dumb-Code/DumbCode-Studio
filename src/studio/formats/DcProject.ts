@@ -1,5 +1,5 @@
-import { DCMModel } from './model/DcmModel';
-import { Group } from "three"
+import { DCMCube, DCMModel } from './model/DcmModel';
+import { Group, MeshLambertMaterial } from "three"
 
 export default class DcProject {
   identifier: number
@@ -8,7 +8,7 @@ export default class DcProject {
   group: Group
 
   model: DCMModel
-  
+
   constructor(name: string, model: DCMModel) {
     this.identifier = Math.random()
     this.name = name
@@ -24,5 +24,23 @@ export default class DcProject {
     return this.name
   }
 }
+const model = new DCMModel()
+export const newProject = () => {
+  const model = new DCMModel()
 
-export const newProject = () => new DcProject("New Project", new DCMModel())
+  model.children.push(
+    new DCMCube("hello", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model),
+    new DCMCube("How", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model),
+    new DCMCube("How2", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model),
+    new DCMCube("How3", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model),
+    new DCMCube("How4", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [
+      new DCMCube("Are", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [
+        new DCMCube("Are2", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model)
+      ], model),
+    ], model),
+  )
+  model.onCubeHierarchyChanged()
+  model.createModel(new MeshLambertMaterial())
+
+  return new DcProject("New Project", model);
+}
