@@ -1,10 +1,8 @@
-import { List, arrayMove, IItemProps } from 'react-movable';
-import { BaseSyntheticEvent, useState } from 'react';
-import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
-import { DragDropContext, Draggable, DraggableProvided, DraggableStateSnapshot, Droppable, DroppableProvided, DroppableStateSnapshot, DropResult } from 'react-beautiful-dnd';
-import { useStudio } from '../../../contexts/StudioContext';
+import { SVGCube, SVGPlus, SVGTrash } from '../../../components/Icons';
+import { DCMCube } from '../../../studio/formats/model/DcmModel';
 import { useModelRootCubes } from '../../../studio/formats/model/ModelHooks';
-import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
+import { ItemInterface, ReactSortable } from "react-sortablejs";
+import { CSSProperties, useRef, useState } from 'react';
 
 const ModelerCubeList = () => {
     return (
@@ -46,126 +44,99 @@ const ModelerCubeList = () => {
     )
 }
 
+class CubeItem implements ItemInterface {
+    cube: DCMCube | null
+    id: string
+    parent?: CubeItem
+    children: CubeItem[]
+
+    constructor(parent?: CubeItem, cube?: DCMCube) {
+        this.cube = cube ?? null
+        this.id = cube?.identifier ?? 'root'
+        this.children = cube?.children?.map(c => new CubeItem(this, c)) ?? []
+    }
+}
+
 const CubeList = () => {
     const [model, cubes] = useModelRootCubes()
+    const [items, setItems] = useState(() => cubes.map(c => new CubeItem(undefined, c)))
 
-    const findCubeByName = (name: string) => {
-        const cube = model.cubeMap.get(name)
-        if (cube === undefined) {
-            throw new Error(`Cube With Name ${name} cannot be found ???`)
-        }
-        return cube
-    }
+    let counter = 0
 
-    const findParentByName = (name: string) => {
-        if (name === "root") {
-            return model
-        }
-        if (name.startsWith("cube:")) {
-            return findCubeByName(name.substring(5))
-        }
-        throw new Error(`Unable to infer parent from ${name}`)
-    }
+    const space = 10
 
-    const onDragEnd = ({ combine, draggableId, source, destination }: DropResult) => {
-        if(destination && destination.droppableId.endsWith(draggableId)) {
-            return
+    const Cube = ({ cube }: { cube: CubeItem | undefined }) => {
+        const css1: CSSProperties = {
+            backgroundColor: `hsl(${counter * 150}, 50%, 50%)`,
         }
 
-        const dragged = findCubeByName(draggableId)
-        dragged.parent.deleteChild(dragged)
-
-        if (combine !== null && combine !== undefined) {
-            const onto = findCubeByName(combine.draggableId)
-            onto.addChild(dragged)
-            return
+        const css2: CSSProperties = {
+            backgroundColor: `hsl(${counter++ * 150}, 75%, 50%)`,
+            paddingBottom: cube?.children?.length ? '10px' : '',
+            paddingLeft: '0.5rem'
         }
 
-        if (destination) {
-            let dest = destination.index
+        const ref = useRef<ReactSortable<CubeItem>>(null);
 
-            //If on the same list and is dragged further on
-            if (source.droppableId === destination.droppableId && destination.index > source.index) {
-                dest -= 1
-            }
 
-            const parent = findParentByName(destination.droppableId)
-            parent.children.splice(dest, 0, dragged)
-            parent.onChildrenChange()
-            
-            return
-        }
-
-        model.addChild(dragged)
-    }
-
-    const renderCube = (cube: DCMCube, index: number, isDragging: boolean) => { 
         return (
-            <Draggable draggableId={cube.name} key={cube.name} index={index} isDragDisabled={isDragging}>
-                {(provided, snapshot) => {
-                    return (
-                        <div
-                            className={"pl-2 " + ((snapshot.isDragging || isDragging) ? "bg-green-200" : (snapshot.combineTargetFor != null ? "bg-green-300" : "bg-green-500"))}
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            // onDragStart={e => console.log(e)}
-                            // style={ isDragging ? {}: {...provided.draggableProps.style}}
-                          
-                        >
-                            {cube.name}
-                            {
-                                cube.children.length !== 0 &&
-                                renderCubeList(`cube:${cube.name}`, cube.children, isDragging || snapshot.isDragging)
-                            }
-                        </div>
-                    )
-                }}
-            </Draggable>
+            <div>
+                {/* HEAD, for dropping onto, the onUpdate delegates it to the proper list */}
+                <ReactSortable
+                    list={cube ? [cube] : []}
+                    setList={() => {}}
+                    onUpdate={e => {
+                        if (ref.current !== null) {
+                            ref.current.onUpdate({
+                                ...e,
+                                clones: []
+                            })
+                        }
+                        e.preventDefault()
+                    }}
+                    preventOnFilter={false}
+                    filter={() => true}
+                    style={css1}
+                >
+                    <div >
+                        {cube?.cube?.name}
+                    </div>
+                </ReactSortable>
 
+                <ReactSortable
+                    ref={ref}
+                    list={cube?.children}
+                    setList={l => {
+                        console.log(l)
+                    }}
+                    animation={150}
+                    fallbackOnBody
+                    preventOnFilter={false}
+                    filter={() => false}
+                    group={{ name: 'cubes', pull: true, put: true }}
+                    style={css2}
+                >
+                    {cube?.children.map((cube) =>
+                        <div
+                            key={cube.cube?.identifier ?? ''}
+                            data-cube={cube.cube?.identifier}
+                            // className={cube !== undefined ? "pl-2" : ""}
+                        >
+                            <Cube cube={cube} />
+                        </div>
+                    )}
+
+
+                </ReactSortable>
+            </div>
         )
     }
-
-    const renderCubeList = (key: string, cubes: DCMCube[], isDragging: boolean) => {
-        return (
-            <Droppable droppableId={key} type={key} key={key} isCombineEnabled >
-                {(provided, snapshot) => {
-                    return (
-                        <div
-                            className={snapshot.isDraggingOver ? "bg-gray-200" : "bg-gray-500"}
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                        >
-                            {cubes.map((c, i) => renderCube(c, i, isDragging))}
-                            {provided.placeholder}
-                        </div>
-                    )
-                }}
-            </Droppable>
-        )
-    }
-
-    // const renderCube = (cube: DCMCube, index: number) => {
-    //     return (
-    //         <Droppable droppableId={cube.name} type={cube.name} key={cube.name}>
-    //             {(dropProvided, dropSnapshot) => (
-    // <div
-    //     className={dropSnapshot.isDraggingOver ? "bg-gray-200" : "bg-gray-500"}
-    //     ref={dropProvided.innerRef}
-    //     {...dropProvided.droppableProps}
-    // >
-
-    //                 </div>
-    //             )}
-    //         </Droppable>
-    //     )
-    // }
 
     return (
-        <DragDropContext onDragEnd={onDragEnd} >
-            {renderCubeList("root", cubes, false)}
-        </DragDropContext>
-    )
+        <div>
+            {items.map(i => <Cube cube={i} />)}
+            {/* <Cube cubes={items} /> */}
+        </div>)
 }
 
 // const CubeItem = ({ props, item }: { props: IItemProps, item: CubeItem }) => {
