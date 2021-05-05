@@ -152,53 +152,38 @@ const CubeList = () => {
 const CubeItemEntry = ({ cube }: { cube: DCMCube }) => {
     let itemBackgroundColor: string
 
-    const visible = true
-    const locked = false
+    const[visible, setVisible] = useState(true);
+    const[locked, setLocked] = useState(false);
+
     const selected = false
     const collapsed = false
-    if (visible) {
-        if (locked) {
-            itemBackgroundColor = "bg-gray-900"
-        } else if (selected) {
-            itemBackgroundColor = "bg-lightBlue-500 hover:bg-lightBlue-400"
-        } else {
-            itemBackgroundColor = "bg-gray-700 hover:bg-gray-600"
-        }
+
+    if(visible && !locked) {
+        itemBackgroundColor = selected ? "bg-lightBlue-500 hover:bg-lightBlue-400 text-white" : "bg-gray-700 hover:bg-gray-600 text-white"
     } else {
         itemBackgroundColor = locked ? "bg-gray-100 bg-opacity-30 text-gray-400" : "bg-gray-700 bg-opacity-40 text-gray-500"
     }
 
     return (
-        <div className={`${itemBackgroundColor} ml-2 my-1`}>
+        <div className={`${itemBackgroundColor} ml-2 my-0.5`}>
             <div className="flex flex-row py-0.5">
                 {
                     cube.children.length !== 0 &&
-                    <button
-                        className={(collapsed ? "transform -rotate-90" : "") + " bg-gray-800 hover:bg-black rounded px-1 py-1 text-white ml-0.5"}>
-                        <SVGChevronDown className="h-4 w-4" />
-                    </button>
+                    <button className={(collapsed ? "transform -rotate-90" : "") + " bg-gray-800 hover:bg-black rounded px-1 py-1 text-white ml-0.5"}><SVGChevronDown className="h-4 w-4" /></button>
                 }
                 <p className="truncate text-white text-s pl-1 flex-grow cursor-move">{cube.name}</p>
                 <div className="flex flex-row text-white m-0 p-0">
                     {
                         locked ?
-                            <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1">
-                                <SVGLocked className="h-4 w-4" />
-                            </button>
-                            :
-                            <button className="bg-gray-800 hover:bg-black rounded px-1 py-1 mr-1">
-                                <SVGUnlocked className="h-4 w-4" />
-                            </button>
+                        <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setLocked(false)}><SVGLocked className="h-4 w-4" /></button>
+                        :
+                        <button className="bg-gray-800 hover:bg-black rounded px-1 py-1 mr-1" onClick={() => setLocked(true)}><SVGUnlocked className="h-4 w-4" /></button>
                     }
                     {
                         visible ?
-                            <button className="bg-gray-800 hover:bg-black rounded px-1 py-1 mr-1">
-                                <SVGEye className="h-4 w-4" />
-                            </button>
-                            :
-                            <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1">
-                                <SVGEyeOff className="h-4 w-4" />
-                            </button>
+                        <button className="bg-gray-800 hover:bg-black rounded px-1 py-1 mr-1" onClick={() => setVisible(false)}><SVGEye className="h-4 w-4" /></button>
+                        :
+                        <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setVisible(true)}><SVGEyeOff className="h-4 w-4" /></button>
                     }
                 </div>
             </div>
