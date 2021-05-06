@@ -37,25 +37,14 @@ export const useStudio = () => {
 export const StudioContextProvider = ({children}: {children?: ReactNode}) => {
   const three = useMemo(createThreeContext, [])
 
-  const wrap = <T,>(func: (data: T, context: StudioContext) => void) => {
-    return (data: T) => {
-      const cloned = { ...context }
-      func(data, cloned)
-      setContext(cloned)
-    }
+  const [projects, setProjects] = useState<DcProject[]>([])
+  const [selectedProject, setSelectedProject] = useState(newProject())
+
+  const context = {
+    projects, setProjects,
+    selectedProject, setSelectedProject,
+    ...three
   }
-
-  const [context, setContext] = useState<StudioContext>(() => {
-    return {
-      selectedProject: newProject(),
-      setSelectedProject: wrap((data, context) => context.selectedProject = data),
-
-      projects: [],
-      setProjects: wrap((data, context) => context.projects = data),
-
-      ...three
-    }
-  })
 
   return (
     <CreatedContext.Provider value={context}>

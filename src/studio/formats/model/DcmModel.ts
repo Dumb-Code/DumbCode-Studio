@@ -112,7 +112,7 @@ export class DCMModel extends EventDispatcher implements CubeParent {
   }
 
   deleteChild(child: DCMCube, silent = false) {
-    this.onChildrenChange(this.children.filter(c => c != child), silent)
+    this.onChildrenChange(this.children.filter(c => c !== child), silent)
   }
 
   getChildren() {
@@ -278,7 +278,7 @@ export class DCMCube implements CubeParent {
   }
 
   deleteChild(child: DCMCube, silent = false) {
-    this.onChildrenChange(this.children.filter(c => c != child), silent)
+    this.onChildrenChange(this.children.filter(c => c !== child), silent)
   }
 
   getChildren() {

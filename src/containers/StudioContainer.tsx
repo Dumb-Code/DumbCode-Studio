@@ -26,7 +26,7 @@ const StudioContainer = () => {
       <div className="flex flex-col h-screen bg-black align-middle">
         <div className="flex flex-row border-b border-white">
           <div className="flex-grow pl-4">
-            {Tabs.map(tab => <NavBarButton tab={tab} selected={tab === activeTab} setTab={() => setActiveTab(tab)} />)}
+            {Tabs.map(tab => <NavBarButton key={tab.name} tab={tab} selected={tab === activeTab} setTab={() => setActiveTab(tab)} />)}
           </div>
           <div className="text-gray-200 mt-1 mr-2">
             v1.0.0

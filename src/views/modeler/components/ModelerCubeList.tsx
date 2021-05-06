@@ -58,7 +58,7 @@ class CubeItem implements ItemInterface {
 }
 
 const CubeList = () => {
-    const [model, cubes] = useModelRootCubes()
+    const [model] = useModelRootCubes()
     const root = new CubeItem(model)
 
     const Cube = ({ cube, first = false }: { cube: CubeItem, first?: boolean }) => {

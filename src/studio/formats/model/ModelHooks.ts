@@ -1,11 +1,11 @@
 import { DCMModel, DCMCube } from './DcmModel';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useStudio } from "../../../contexts/StudioContext"
 
 export const useModelRootCubes: () => [ DCMModel, DCMCube[] ] = () => {
   const { selectedProject } = useStudio()
 
-  const gatherChildren = () => [...(selectedProject.model?.children ?? [])]
+  const gatherChildren = useCallback(() => [...selectedProject.model.children], [selectedProject.model.children])
 
   const [children, setChildren] = useState(gatherChildren)
 
@@ -18,7 +18,7 @@ export const useModelRootCubes: () => [ DCMModel, DCMCube[] ] = () => {
       model.addEventListener('hierarchyChanged', listener)
       return () => model.removeEventListener('hierarchyChanged', listener)
     }
-  }, [selectedProject])
+  }, [selectedProject, gatherChildren])
 
   return [ selectedProject.model, children ]
 }

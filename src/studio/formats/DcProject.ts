@@ -1,16 +1,21 @@
+import { loadDCMModel } from './model/DCMLoader';
+import { WritableFile } from './../util/FileTypes';
 import { DCMCube, DCMModel } from './model/DcmModel';
 import { Group, MeshLambertMaterial } from "three"
+import { ReadableFile } from '../util/FileTypes';
+import { v4 as uuidv4 } from "uuid"
 
 export default class DcProject {
-  identifier: number
+  identifier: string
 
   name: string
   group: Group
 
   model: DCMModel
+  modelWritableFile?: WritableFile
 
   constructor(name: string, model: DCMModel) {
-    this.identifier = Math.random()
+    this.identifier = uuidv4()
     this.name = name
     this.group = new Group()
     this.model = model
@@ -24,7 +29,6 @@ export default class DcProject {
     return this.name
   }
 }
-const model = new DCMModel()
 export const newProject = () => {
   const model = new DCMModel()
 
@@ -43,4 +47,16 @@ export const newProject = () => {
   model.createModel(new MeshLambertMaterial())
 
   return new DcProject("New Project", model);
+}
+
+export const createProject = async(read: ReadableFile) => {
+  const file = await read.asFile()
+  const model = await loadDCMModel(file.arrayBuffer(), file.name)
+  const project = new DcProject(file.name.substring(0, file.name.lastIndexOf(".")), model)
+  
+  if(read.asWritable) {
+    project.modelWritableFile = read.asWritable()
+  }
+
+  return project
 }
