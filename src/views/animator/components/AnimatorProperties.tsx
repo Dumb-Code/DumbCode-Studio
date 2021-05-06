@@ -9,7 +9,7 @@ import { SVGMinus, SVGPlus } from "../../../components/Icons";
 
 const AnimatorProperties = () => {
     return(
-        <div className="overflow-y-scroll h-full">
+        <div className="overflow-y-scroll h-full bg-gray-800">
             <AnimatorCubeProperties />
             <AnimatorLoopingProperties />
             <AnimatorIKProperties />
