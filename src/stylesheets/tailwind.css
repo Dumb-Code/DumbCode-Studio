@@ -48,6 +48,10 @@ a {
   @apply absolute;
 }
 
+.dcs-cube-head .sortable-ghost {
+  @apply ml-4;
+}
+
 .tooltip {
   @apply invisible absolute;
 }
