@@ -4,15 +4,41 @@ import Slider from 'react-input-slider'
 import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
 import Dropup, { DropupItem } from "../../../components/Dropup";
+import { useState } from "react";
+import { SVGMinus, SVGPlus } from "../../../components/Icons";
 
 const AnimatorProperties = () => {
     return(
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col overflow-y-scroll h-full">
+            <AnimatorCubeProperties />
+            <AnimatorLoopingProperties />
+            <AnimatorIKProperties />
+            <AnimatorProgressionProperties />
+        </div>
+    )
+}
 
-            <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
-                <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
-                    <p className="my-0.5">CUBE PROPERTIES</p>
-                </div>
+const MinimizeButton = ({active, toggle}: {active: boolean, toggle: (boolean) => void}) => {
+    return(
+        active ? 
+        <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 my-0.5 mr-1" 
+        onClick={() => toggle(true)}><SVGMinus className="h-4 w-4 mr-1" /></button> : 
+        <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 my-0.5 mr-1" 
+        onClick={() => toggle(false)}><SVGPlus className="h-4 w-4 mr-1" /></button>
+    )
+}
+
+const AnimatorCubeProperties = () => {
+
+    const[propertiesActive, setPropertiesActive] = useState(true);
+
+    return(
+        <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
+            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+                <p className="my-0.5 flex-grow">CUBE PROPERTIES</p>
+                <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)}/>
+            </div>
+            <div className={(propertiesActive ? "h-64" : "h-0") + " transition-height ease-in-out duration-200"}>
                 <div className="w-full grid grid-cols-2 px-2 pt-1">
                     <CubeInput title="POSITIONS" />
                     <CubeInput title="CUBE GROW" />
@@ -21,11 +47,21 @@ const AnimatorProperties = () => {
                     <CubeRotationInput title="ROTATION" />
                 </div>
             </div>
+        </div>
+    )
+}
 
-            <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
-                <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
-                    <p className="my-0.5">LOOPING PROPERTIES</p>
-                </div>
+const AnimatorLoopingProperties = () => {
+
+    const[loopingActive, setLoopingActive] = useState(true);
+
+    return(
+        <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
+            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+                <p className="my-0.5 flex-grow">LOOPING PROPERTIES</p>
+                <MinimizeButton active={loopingActive} toggle={() => setLoopingActive(!loopingActive)}/>
+            </div>
+            <div className={(loopingActive ? "h-32" : "h-0") + " transition-height ease-in-out duration-200"}>
                 <div className="w-full flex flex-row px-2 pt-1">
                     <LoopCheck title="LOOP" />
                     <TitledField title="START" />
@@ -37,22 +73,78 @@ const AnimatorProperties = () => {
                     <TitledField title="FRAME LENGTH" />
                 </div>
             </div>
+        </div>
+    )
+}
 
-            <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
-                <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
-                    <p className="my-0.5">INVERSE KINEMATICS</p>
-                </div>
+const AnimatorIKProperties = () => {
+
+    const[ikActive, setIKActive] = useState(false);
+
+    return(
+        <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
+            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+                <p className="my-0.5 flex-grow">INVERSE KINEMATICS</p>
+                <MinimizeButton active={ikActive} toggle={() => setIKActive(!ikActive)}/>
+            </div>
+            <div className={(ikActive ? "h-10" : "h-0") + " transition-height ease-in-out duration-200"}>
                 <div className="w-full flex flex-row px-2 pt-1">
                     <IKCheck title="ANCHOR" />
                 </div>
             </div>
+        </div>
+    )
+}
 
-            <div className="rounded-sm bg-gray-800 flex flex-col pb-1 flex-grow">
-                <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
-                    <p className="my-0.5">PROGRESSION POINTS</p>
-                </div>
-                <div className="w-full flex flex-row px-2 pt-1 flex-grow">
-                    <ProgressionPoints />
+const AnimatorProgressionProperties = () => {
+
+    const[progressionActive, setProgressionActive] = useState(false);
+
+    return(
+        <div className="rounded-sm bg-gray-800 flex flex-col pb-1">
+            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+                <p className="my-0.5 flex-grow">PROGRESSION POINTS</p>
+                <MinimizeButton active={progressionActive} toggle={() => setProgressionActive(!progressionActive)}/>
+            </div>
+            <div className={(progressionActive ? "h-96" : "h-0 overflow-hidden") + " transition-height ease-in-out duration-200"}>
+                <div className="flex flex-col h-full p-2">
+                    <div className="flex-grow bg-gray-900 rounded w-full text-gray-400 pl-4">
+                        graph goes here
+                    </div>
+                    <div className="flex flex-row mt-2">
+                        <Checkbox value={true} extraText="START" />
+                        <Checkbox value={true} extraText="END" />
+                        <Dropup title="Default Graph" header="SELECT ONE" right={true} className="h-8 pt-2" >
+                            <DropupItem name="Sin" onSelect={() => console.log("swap graph")} />
+                            <DropupItem name="Quadratic" onSelect={() => console.log("swap graph")} />
+                            <DropupItem name="Cubic" onSelect={() => console.log("swap graph")} />
+                            <DropupItem name="Quartic" onSelect={() => console.log("swap graph")} />
+                            <DropupItem name="Quintic" onSelect={() => console.log("swap graph")} />
+                            <DropupItem name="Exponential" onSelect={() => console.log("swap graph")} />
+                            <DropupItem name="Circular" onSelect={() => console.log("swap graph")} />
+                            <DropupItem name="Back" onSelect={() => console.log("swap graph")} />
+                            <DropupItem name="Elastic" onSelect={() => console.log("swap graph")} />
+                            <DropupItem name="Bounce" onSelect={() => console.log("swap graph")} />
+                        </Dropup>
+                    </div>
+                    <div className="text-gray-500 font-bold text-xs p-1">
+                        <p className="my-0.5">POINT RESOLUTION</p>
+                    </div>
+                    <div className="flex flex-row mb-2 h-7 col-span-2">
+                        <div className=" w-20 h-7">
+                            <NumericInput value={0} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
+                        </div>
+                        <div className="rounded-r bg-gray-700 flex-grow pr-4 pl-2 h-8">
+                            <Slider
+                                xmin={1} xmax={100} axis="x"
+                                styles={{
+                                    track: { height: 6, backgroundColor: '#27272A', width: '100%' },
+                                    active: { backgroundColor: '#0EA5E9' },
+                                    thumb: { width: 15, height: 15 }
+                                }}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -92,50 +184,6 @@ const TitledField = ({title}: {title: string}) => {
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7">
                     <NumericInput value={0} size={6} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
-                </div>
-            </div>
-        </div>
-    )
-}
-
-const ProgressionPoints = () => {
-    return(
-        <div className="flex flex-col w-full">
-            <div className="flex-grow bg-gray-900 rounded w-full text-gray-400 pl-4">
-                graph goes here
-            </div>
-            <div className="flex flex-row mt-2">
-                <Checkbox value={true} extraText="START" />
-                <Checkbox value={true} extraText="END" />
-                <Dropup title="Default Graph" header="SELECT ONE" right={true} className="h-8 pt-2" >
-                    <DropupItem name="Sin" onSelect={() => console.log("swap graph")} />
-                    <DropupItem name="Quadratic" onSelect={() => console.log("swap graph")} />
-                    <DropupItem name="Cubic" onSelect={() => console.log("swap graph")} />
-                    <DropupItem name="Quartic" onSelect={() => console.log("swap graph")} />
-                    <DropupItem name="Quintic" onSelect={() => console.log("swap graph")} />
-                    <DropupItem name="Exponential" onSelect={() => console.log("swap graph")} />
-                    <DropupItem name="Circular" onSelect={() => console.log("swap graph")} />
-                    <DropupItem name="Back" onSelect={() => console.log("swap graph")} />
-                    <DropupItem name="Elastic" onSelect={() => console.log("swap graph")} />
-                    <DropupItem name="Bounce" onSelect={() => console.log("swap graph")} />
-                </Dropup>
-            </div>
-            <div className="text-gray-500 font-bold text-xs p-1">
-                <p className="my-0.5">POINT RESOLUTION</p>
-            </div>
-            <div className="flex flex-row mb-2 h-7 col-span-2">
-                <div className=" w-20 h-7">
-                    <NumericInput value={0} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
-                </div>
-                <div className="rounded-r bg-gray-700 flex-grow pr-4 pl-2 h-8">
-                    <Slider
-                        xmin={1} xmax={100} axis="x"
-                        styles={{
-                            track: { height: 6, backgroundColor: '#27272A', width: '100%' },
-                            active: { backgroundColor: '#0EA5E9' },
-                            thumb: { width: 15, height: 15 }
-                        }}
-                    />
                 </div>
             </div>
         </div>
