@@ -2,11 +2,11 @@ import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTras
 import { CubeParent, DCMCube } from '../../../studio/formats/model/DcmModel';
 import { useModelRootCubes } from '../../../studio/formats/model/ModelHooks';
 import { ItemInterface, ReactSortable } from "react-sortablejs";
-import { CSSProperties, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 const ModelerCubeList = () => {
     return (
-        <div className="rounded-sm bg-gray-800 h-full flex flex-col overflow-hidden">
+        <div className="rounded-sm bg-gray-800 flex flex-col h-full">
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
                 <p className="flex-grow my-0.5">CUBE LIST</p>
             </div>
@@ -37,7 +37,7 @@ const ModelerCubeList = () => {
                     <b className="flex-grow" />
                 </button>
             </div>
-            <div className="border-r border-black flex flex-col w-full pr-2 pl-1 min-h-0 overflow-x-hidden overflow-y-scroll h-full">
+            <div className="border-r border-black flex flex-col w-full pr-2 pl-1 overflow-x-hidden overflow-y-scroll flex-grow">
                 <CubeList />
             </div>
         </div>

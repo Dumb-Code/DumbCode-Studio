@@ -5,6 +5,9 @@ module.exports = {
     extend: {
       transitionProperty: {
         'height': 'height'
+      },
+      height: {
+        104: '27rem'
       }
     },
     colors: {
@@ -27,11 +30,10 @@ module.exports = {
         'remote remote texture'
       ],
       'modeling': [
-        'command command rtop',
-        'shortcuts canvas rtop',
-        'shortcuts canvas rbottom',
-        'shortcuts gumball rbottom',
-        'info info rbottom'
+        'command command sidebar',
+        'shortcuts canvas sidebar',
+        'shortcuts gumball sidebar',
+        'info info sidebar'
       ],
       'texture': [
         'views views layers',
