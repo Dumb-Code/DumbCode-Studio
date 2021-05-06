@@ -32,7 +32,7 @@ module.exports = {
       'modeling': [
         'command command sidebar',
         'shortcuts canvas sidebar',
-        'shortcuts gumball sidebar',
+        'gumball gumball sidebar',
         'info info sidebar'
       ],
       'texture': [

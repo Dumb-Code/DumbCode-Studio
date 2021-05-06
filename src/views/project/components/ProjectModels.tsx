@@ -1,5 +1,5 @@
 import ClickableInput from "../../../components/ClickableInput"
-import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGTerminal, SVGUpload } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcProject, { createProject, newProject } from "../../../studio/formats/DcProject"
 import { FileSystemsAccessApi } from "../../../studio/util/FileTypes"
@@ -38,7 +38,7 @@ const ProjectModels = () => {
     )
 }
 
-const SaveIcon = FileSystemsAccessApi ? SVGTerminal : SVGDownload
+const SaveIcon = FileSystemsAccessApi ? SVGSave : SVGDownload
 const ModelEntry = ({ name, selected, isRemote, changeModel }: { name: string, selected: boolean, isRemote: boolean, changeModel: () => void }) => {
     return (
         <div className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} >
