@@ -5,7 +5,7 @@ import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
 import Dropup, { DropupItem } from "../../../components/Dropup";
 import { useState } from "react";
-import { SVGMinus, SVGPlus } from "../../../components/Icons";
+import { MinimizeButton } from "../../../components/MinimizeButton";
 
 const AnimatorProperties = () => {
     return(
@@ -15,16 +15,6 @@ const AnimatorProperties = () => {
             <AnimatorIKProperties />
             <AnimatorProgressionProperties />
         </div>
-    )
-}
-
-const MinimizeButton = ({active, toggle}: {active: boolean, toggle: (boolean) => void}) => {
-    return(
-        active ? 
-        <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 my-0.5 mr-1" 
-        onClick={() => toggle(true)}><SVGMinus className="h-4 w-4 mr-1" /></button> : 
-        <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 my-0.5 mr-1" 
-        onClick={() => toggle(false)}><SVGPlus className="h-4 w-4 mr-1" /></button>
     )
 }
 

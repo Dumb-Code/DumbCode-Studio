@@ -1,5 +1,6 @@
-import { SVGCross, SVGMinus, SVGPlus } from "../../../components/Icons"
+import { SVGCross } from "../../../components/Icons"
 import { useState } from 'react'
+import { MinimizeButton } from "../../../components/MinimizeButton";
 
 const ProjectRemote = () => {
 
@@ -9,14 +10,7 @@ const ProjectRemote = () => {
         <div className="rounded-sm bg-gray-800 h-full flex flex-col overflow-hidden">
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">REMOTE PROJECTS</p>
-                <p className="flex flex-row">
-                    {
-                        remoteShown ? 
-                        <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1" onClick={() => showRemote(false)}><SVGMinus className="h-4 w-4 mr-1" /></button> 
-                        : 
-                        <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1" onClick={() => showRemote(true)}><SVGPlus className="h-4 w-4 mr-1" /></button>
-                    }
-                </p>
+                <MinimizeButton active={remoteShown} toggle={() => showRemote(!remoteShown)}/>
             </div>
             <div className={(remoteShown ? "h-48" : "h-0") + " flex flex-row overflow-y-hidden transition-height transform duration-200 ease-in-out"}>
                 <div className="w-4/12 border-r border-black flex flex-col overflow-y-scroll">
