@@ -19,10 +19,10 @@ export type ThreeJsContext = {
 }
 export type StudioContext = {
   projects: DcProject[],
-  setProjects: (projects: DcProject[]) => void,
+  addProject: (projects: DcProject) => void,
 
   selectedProject: DcProject,
-  setSelectedProject: (project: DcProject) => void
+  selectProject: (project: DcProject) => void
 
 } & ThreeJsContext
 const CreatedContext = createContext<StudioContext | null>(null);
@@ -34,15 +34,29 @@ export const useStudio = () => {
   return context
 }
 
-export const StudioContextProvider = ({children}: {children?: ReactNode}) => {
+export const StudioContextProvider = ({ children }: { children?: ReactNode }) => {
   const three = useMemo(createThreeContext, [])
 
   const [projects, setProjects] = useState<DcProject[]>([])
-  const [selectedProject, setSelectedProject] = useState(newProject())
+  const [selectedProject, setSelectedProject] = useState(newProject)
 
-  const context = {
-    projects, setProjects,
-    selectedProject, setSelectedProject,
+  const context: StudioContext = {
+    projects,
+    addProject: project => {
+      setProjects(projects.concat([project]))
+      context.selectProject(project)
+    },
+
+    selectedProject,
+    selectProject: project => {
+      console.log(project, selectedProject)
+      if (project !== selectedProject) {
+        three.scene.remove(selectedProject.group)
+        three.scene.add(project.group)
+      }
+      setSelectedProject(project)
+    },
+
     ...three
   }
 

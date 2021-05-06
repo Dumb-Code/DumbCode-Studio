@@ -3,19 +3,17 @@ import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGTerminal, SVGUpload }
 import { useStudio } from "../../../contexts/StudioContext"
 import DcProject, { createProject, newProject } from "../../../studio/formats/DcProject"
 import { FileSystemsAccessApi } from "../../../studio/util/FileTypes"
-
+import { useFileUpload } from "../../../studio/util/FileUploadBox"
 const modelExtensions = [".dcm", ".tbl", ".bbmodel"]
 
 const ProjectModels = () => {
-    const { selectedProject, setSelectedProject, projects, setProjects } = useStudio()
-    
-    const addProject = (project: DcProject) => {
-        setProjects(projects.concat([project]))
-        setSelectedProject(project)
-    }
+    const { selectedProject, selectProject, projects, addProject } = useStudio()
+
+
+    const [ref, isDragging] = useFileUpload<HTMLDivElement>(modelExtensions, file => createProject(file).then(addProject))
 
     return (
-        <div className="rounded-sm bg-gray-800 h-full flex flex-col overflow-hidden">
+        <div ref={ref} className={`rounded-sm bg-${isDragging?'red':'gray'}-800 h-full flex flex-col overflow-hidden`}>
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">MODELS</p>
                 <p className="text-md flex flex-row">
@@ -33,7 +31,7 @@ const ProjectModels = () => {
             </div>
             <div className="flex flex-col overflow-y-scroll h-full w-full pr-6">
                 {projects.map(project =>
-                    <ModelEntry name={project.name} selected={project === selectedProject} isRemote={false} changeModel={() => setSelectedProject(project)} />
+                    <ModelEntry key={project.identifier} name={project.name} selected={project === selectedProject} isRemote={false} changeModel={() => selectProject(project)} />
                 )}
             </div>
         </div>

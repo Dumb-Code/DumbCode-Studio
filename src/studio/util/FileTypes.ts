@@ -1,5 +1,10 @@
+export const FileSystemsAccessApi = window.showOpenFilePicker !== undefined
+if (FileSystemsAccessApi) {
+  console.log("Using FileSystemAccess where available.")
+}
+
 export type ReadableFile = {
-  asFile: () => PromiseLike<File>
+  asFile: () => File | PromiseLike<File>
   asWritable?: () => WritableFile
 }
 
@@ -9,17 +14,19 @@ export type WritableFile = {
 
 // const WritableFileRefreshLoop
 
-export const createWriteableFile = (file: FileSystemFileHandle): WritableFile => {
+export const createReadableFile = (file: File) => { return { asFile: () => file } }
+export const createReadableFileExtended = (handle: FileSystemFileHandle) => {
   return {
-    write: async(blob) => {
-      const writable = await file.createWritable()
-      await writable.write(blob)
-      await writable.close()
+    asFile: () => handle.getFile(),
+    asWritable: () => {
+      return {
+        write: async (blob) => {
+          const writable = await handle.createWritable()
+          await writable.write(blob)
+          await writable.close()
+        }
+      }
     }
   }
 }
 
-export const FileSystemsAccessApi = window.showOpenFilePicker !== undefined
-if(FileSystemsAccessApi) {
-  console.log("Using FileSystemAccess where available.")
-}

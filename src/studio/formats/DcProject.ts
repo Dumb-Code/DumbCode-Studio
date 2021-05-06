@@ -1,9 +1,16 @@
 import { loadDCMModel } from './model/DCMLoader';
 import { WritableFile } from './../util/FileTypes';
 import { DCMCube, DCMModel } from './model/DcmModel';
-import { Group, MeshLambertMaterial } from "three"
+import { DoubleSide, Group, MeshLambertMaterial } from "three"
 import { ReadableFile } from '../util/FileTypes';
 import { v4 as uuidv4 } from "uuid"
+
+const material = new MeshLambertMaterial( {
+  color: 0x777777,
+  // transparent: true,
+  side: DoubleSide,
+  alphaTest: 0.0001,
+} )
 
 export default class DcProject {
   identifier: string
@@ -14,11 +21,15 @@ export default class DcProject {
   model: DCMModel
   modelWritableFile?: WritableFile
 
+  materials: ProjectMaterials
+
   constructor(name: string, model: DCMModel) {
     this.identifier = uuidv4()
     this.name = name
     this.group = new Group()
     this.model = model
+    this.materials = createMaterialsObject()
+    this.group.add(this.model.createModel(this.materials.normal))
   }
 
   setName(name: string) {
@@ -29,6 +40,26 @@ export default class DcProject {
     return this.name
   }
 }
+
+type ProjectMaterials = {
+  normal: MeshLambertMaterial;
+  highlight: MeshLambertMaterial;
+  selected: MeshLambertMaterial;
+}
+const createMaterialsObject = (): ProjectMaterials => {
+  let normal = material.clone()
+  
+  let highlight = material.clone()
+  highlight.emissive.setHex( 0xFF0000 )
+  
+  let selected = material.clone()
+  selected.emissive.setHex( 0x000066 )
+
+  return { normal, highlight, selected }
+}
+
+
+
 export const newProject = () => {
   const model = new DCMModel()
 

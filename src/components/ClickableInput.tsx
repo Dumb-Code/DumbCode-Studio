@@ -1,5 +1,5 @@
 import { FC, useRef } from "react"
-import { createWriteableFile, FileSystemsAccessApi, ReadableFile } from "../studio/util/FileTypes"
+import { createReadableFile, createReadableFileExtended, FileSystemsAccessApi, ReadableFile } from "../studio/util/FileTypes"
 
 type Props = {
   description: string
@@ -21,7 +21,7 @@ const ClickableInput: FC<Props> = (props) => {
             for(let i = 0; i < files.length; i++) {
               const file = files.item(i)
               if(file !== null) {
-                props.onFile({ asFile: () => Promise.resolve(file) })
+                props.onFile(createReadableFile(file))
               }
             }
           }
@@ -47,10 +47,7 @@ const ExtendedFilesClickableInput: FC<Props> = (props) => {
         } 
       }]
     }).then(res => {
-      res.forEach(handle => props.onFile({
-        asFile: () => handle.getFile(),
-        asWritable: () => createWriteableFile(handle)
-      }))
+      res.forEach(handle => props.onFile(createReadableFileExtended(handle)))
     }).catch(() => {})
   }
   return (
