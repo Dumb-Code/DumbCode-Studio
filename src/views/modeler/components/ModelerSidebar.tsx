@@ -4,7 +4,7 @@ import ModelerProperties from "./ModelerProperties";
 const ModelerSidebar = () => {
     return(
         <div className="flex flex-col h-full">
-            <div className="flex-grow">
+            <div className="flex-grow min-h-0">
                 <ModelerCubeList />
             </div>
             <ModelerProperties />
