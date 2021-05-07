@@ -4,6 +4,7 @@ import { DCMCube, DCMModel } from './model/DcmModel';
 import { DoubleSide, Group, MeshLambertMaterial } from "three"
 import { ReadableFile } from '../util/FileTypes';
 import { v4 as uuidv4 } from "uuid"
+import TextureManager from './textures/TextureManager';
 
 const material = new MeshLambertMaterial( {
   color: 0x777777,
@@ -21,6 +22,7 @@ export default class DcProject {
   model: DCMModel
   modelWritableFile?: WritableFile
 
+  textureManager: TextureManager
   materials: ProjectMaterials
 
   constructor(name: string, model: DCMModel) {
@@ -28,6 +30,7 @@ export default class DcProject {
     this.name = name
     this.group = new Group()
     this.model = model
+    this.textureManager = new TextureManager(model)
     this.materials = createMaterialsObject()
     this.group.add(this.model.createModel(this.materials.normal))
   }

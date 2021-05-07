@@ -1,12 +1,14 @@
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, EventDispatcher, Material } from "three";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, Material } from "three";
 import { v4 as uuidv4 } from "uuid"
+import EventManager from "../../util/EventManager";
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
 
-const hierarchyChangedEvent = { type: "hierarchyChanged" }
-const textureSizeChangedEvent = { type: "textureSizeChanged", width: 64, height: 64 }
-
+interface EventTypes {
+  "hierarchyChanged": null
+  "textureSizeChanged": { width: number, height: number }
+}
 
 export interface CubeParent {
   addChild(child: DCMCube, silent?: boolean): void
@@ -33,7 +35,7 @@ const invalidParent: CubeParent = {
 }
 Object.freeze(invalidParent)
 
-export class DCMModel extends EventDispatcher implements CubeParent {
+export class DCMModel extends EventManager<EventTypes> implements CubeParent {
 
   author: string
 
@@ -64,9 +66,9 @@ export class DCMModel extends EventDispatcher implements CubeParent {
   }
 
   setTextureSize(width: number, height: number) {
-    this.texWidth = textureSizeChangedEvent.width = width
-    this.texHeight = textureSizeChangedEvent.height = height
-    this.dispatchEvent(textureSizeChangedEvent)
+    this.texWidth = width
+    this.texHeight = height
+    this.dispatchEvent("textureSizeChanged", { width, height })
     this.traverseAll(cube => cube.updateTexture())
   }
 
@@ -74,7 +76,7 @@ export class DCMModel extends EventDispatcher implements CubeParent {
     this.maxCubeLevel = 0
     this.cubeMap.clear()
     this.children.forEach(child => child.recalculateHierarchy(0, this))
-    this.dispatchEvent(hierarchyChangedEvent)
+    this.dispatchEvent("hierarchyChanged", null)
   }
 
   createModel(material: Material) {
