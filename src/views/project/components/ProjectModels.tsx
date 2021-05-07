@@ -9,7 +9,6 @@ const modelExtensions = [".dcm", ".tbl", ".bbmodel"]
 const ProjectModels = () => {
     const { selectedProject, selectProject, projects, addProject } = useStudio()
 
-
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(modelExtensions, file => createProject(file).then(addProject))
 
     return (
