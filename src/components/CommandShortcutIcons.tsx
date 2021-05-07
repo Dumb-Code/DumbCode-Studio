@@ -25,7 +25,7 @@ export const CommandShortcutIconWithSubCommands = ({command, description, childr
         <div className={(subCommandsVisible || "has-tooltip") + " -mb-0.5"} onContextMenu={() => setSubVisible(!subCommandsVisible)} onClick={() => setSubVisible(false)} style={{marginBottom: '0.5px'}}>
             <button className="bg-gray-700 rounded p-0.5 text-gray-300" onClick={() => console.log("run command " + command)}>
                 <SVGCube className="h-5 w-5" />
-                <div className="absolute ml-5 -mt-0.5 bg-white rounded-br h-1 w-1"></div>
+                <div className="absolute ml-5 -mt-0.5 bg-gray-300 rounded-br h-1 w-1"></div>
             </button>
             <div className={subCommandsVisible ? "invisible h-0 " : "tooltip ml-9 bg-gray-700 -mt-8 rounded p-1 text-gray-300 w-48 border border-black"}>
                 <p className="mb-1">{command}</p>
