@@ -1,7 +1,9 @@
 import Dropup, { DropupItem } from './Dropup'
 import { SVGCube, SVGEye, SVGGrid, SVGLocked, SVGRedo, SVGUndo } from './Icons';
+import { ButtonWithTooltip } from './Tooltips';
 
 const InfoBar = () => {
+
     return(
         <div className="rounded-sm bg-black h-full flex flex-row">
             <DisplayModeDropup />
@@ -19,8 +21,13 @@ const InfoBar = () => {
 
             <div className="flex-grow"></div>
 
-            <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGUndo className="h-3 w-3 mr-1" /></button>
-            <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGRedo className="h-3 w-3 mr-1" /></button>
+            <ButtonWithTooltip className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white" delay={500} tooltip="Undo the last operation">
+                <SVGUndo className="h-3 w-3 mr-1" />
+            </ButtonWithTooltip>
+
+            <ButtonWithTooltip className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white" delay={500} tooltip="Redo the last undo">
+                <SVGRedo className="h-3 w-3 mr-1" />
+            </ButtonWithTooltip>
         </div>
     )
 }
