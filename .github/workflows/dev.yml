@@ -21,6 +21,7 @@ jobs:
       with:
         server: 51.222.31.214
         port: 22
+        protocol: ftps
         username: ubuntu
         password: ${{ secrets.WEBSITE_FTP_PASSWORD }}
         local-dir: ./build/
