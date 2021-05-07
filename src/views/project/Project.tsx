@@ -9,7 +9,7 @@ const Texturer = () => {
             style={{
                 gridTemplateColumns: '30% 30% 40%',
                 gridTemplateRows: 'auto min-content'
-            }}
+            }} 
         >
             <div className="p-2 bg-black grid-in-remote"><ProjectRemote /></div>
             <div className="p-2 bg-black grid-in-model"><ProjectModels /></div>
