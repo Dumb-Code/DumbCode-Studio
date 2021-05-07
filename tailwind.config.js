@@ -36,7 +36,6 @@ module.exports = {
         'info info sidebar'
       ],
       'texture': [
-        'views views layers',
         'tools canvas layers',
         'properties properties layers',
         'info info layers',
