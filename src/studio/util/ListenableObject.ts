@@ -1,5 +1,4 @@
-import { DependencyList, useEffect, useState } from 'react';
-import { ReinhardToneMapping } from 'three';
+import { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 export class LO<T> {
   constructor(
@@ -34,6 +33,6 @@ export const useListenableObject = <T>(obj: LO<T>): [T, (val: T) => void] => {
     }
     obj.addListener(setState)
     return () => obj.removeListener(setState)
-  })
+  }, [state, setState, obj])
   return [ state, (val: T) => obj.value = val]
 }

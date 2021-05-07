@@ -1,4 +1,4 @@
-import { RefObject, useRef, useState, useEffect, useCallback } from 'react';
+import { RefObject, useRef, useState, useEffect } from 'react';
 import { createReadableFile, FileSystemsAccessApi, createReadableFileExtended, ReadableFile } from './FileTypes';
 
 export const useFileUpload = <T extends HTMLElement,>(
@@ -9,7 +9,10 @@ export const useFileUpload = <T extends HTMLElement,>(
   const [dragging, setDragging] = useState(false)
 
   useEffect(() => {
-    if (ref.current === null) {
+
+    var currentRef = ref.current;
+
+    if (currentRef === null) {
       console.warn("File Upload Ref was not set.")
     } else {
 
@@ -30,23 +33,27 @@ export const useFileUpload = <T extends HTMLElement,>(
         }
       }
 
-
       const onDragEnter = wrapEvent(true)
       const onDragOver = wrapEvent(true)
       const onDragLeave = wrapEvent(false)
       const onDrop = (e: DragEvent) => {
         const items = e.dataTransfer?.items
         if (items !== undefined) {
+
+          const validName = (name: string) => extensions.includes(name.substring(name.lastIndexOf(".")))
+
+          const cast = function(handle) {
+            if (handle instanceof FileSystemFileHandle && validName(handle.name)) {
+              onChange(createReadableFileExtended(handle as FileSystemFileHandle))
+            }
+          }
+
           for (let i = 0; i < items.length; i++) {
             const item = items[i]
 
-            const validName = (name: string) => extensions.includes(name.substring(name.lastIndexOf(".")))
-
             if (FileSystemsAccessApi) {
-              item.getAsFileSystemHandle().then(handle => {
-                if (handle instanceof FileSystemFileHandle && validName(handle.name)) {
-                  onChange(createReadableFileExtended(handle as FileSystemFileHandle))
-                }
+              item.getAsFileSystemHandle().then((handle) => {
+                cast(handle)
               })
             } else {
               const file = item.getAsFile()
@@ -61,21 +68,21 @@ export const useFileUpload = <T extends HTMLElement,>(
         }
       }
 
-      ref.current.addEventListener('dragenter', onDragEnter)
-      ref.current.addEventListener('dragover', onDragOver)
-      ref.current.addEventListener('dragleave', onDragLeave)
-      ref.current.addEventListener('drop', onDrop)
+      currentRef.addEventListener('dragenter', onDragEnter)
+      currentRef.addEventListener('dragover', onDragOver)
+      currentRef.addEventListener('dragleave', onDragLeave)
+      currentRef.addEventListener('drop', onDrop)
 
       return () => {
-        if (ref.current !== null) {
-          ref.current.removeEventListener('dragenter', onDragEnter)
-          ref.current.removeEventListener('dragover', onDragOver)
-          ref.current.removeEventListener('dragleave', onDragLeave)
-          ref.current.removeEventListener('drop', onDrop)
+        if (currentRef !== null) {
+          currentRef.removeEventListener('dragenter', onDragEnter)
+          currentRef.removeEventListener('dragover', onDragOver)
+          currentRef.removeEventListener('dragleave', onDragLeave)
+          currentRef.removeEventListener('drop', onDrop)
         }
       }
     }
-  }, [])
+  }, [extensions, onChange])
 
   return [ref, dragging]
 }

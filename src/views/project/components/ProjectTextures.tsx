@@ -1,4 +1,3 @@
-import { Group } from "three"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
@@ -63,8 +62,8 @@ const ProjectTextures = () => {
                                 <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
                                     <p className="flex-grow">AVALIBLE</p>
                                 </div>
-                                {textures.filter(t => !selectedGroupTextures.includes(t.identifier)).map(t => {
-                                    <GroupTextureSwitchEntry texture={t} selected={false} />
+                                {textures.filter(t => !selectedGroupTextures.includes(t.identifier)).map((t) => {
+                                    return(<GroupTextureSwitchEntry texture={t} selected={false} />)
                                 })
                                 }
                             </div>

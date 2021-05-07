@@ -1,7 +1,7 @@
 import ClickableInput from "../../../components/ClickableInput"
 import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
-import DcProject, { createProject, newProject } from "../../../studio/formats/DcProject"
+import { createProject, newProject } from "../../../studio/formats/DcProject"
 import { FileSystemsAccessApi } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 const modelExtensions = [".dcm", ".tbl", ".bbmodel"]

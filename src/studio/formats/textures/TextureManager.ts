@@ -2,6 +2,19 @@ import { LO } from './../../util/ListenableObject';
 import { v4 as uuidv4 } from 'uuid';
 import { DCMModel } from './../model/DcmModel';
 
+export class TextureGroup {
+  readonly identifier: string;
+  name: LO<string>
+  textures: LO<readonly string[]>
+  isDefault: boolean
+
+  constructor(name: string, isDefault: boolean) {
+    this.identifier = uuidv4()
+    this.isDefault = isDefault
+    this.name = new LO(name)
+    this.textures = new LO([] as const as readonly string[])
+  }
+}
 
 export default class TextureManager {
   readonly model: DCMModel
@@ -14,20 +27,6 @@ export default class TextureManager {
   
   constructor(model: DCMModel) {
     this.model = model
-  }
-}
-
-export class TextureGroup {
-  readonly identifier: string;
-  name: LO<string>
-  textures: LO<readonly string[]>
-  isDefault: boolean
-
-  constructor(name: string, isDefault: boolean) {
-    this.identifier = uuidv4()
-    this.isDefault = isDefault
-    this.name = new LO(name)
-    this.textures = new LO([] as const as readonly string[])
   }
 }
 

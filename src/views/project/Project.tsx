@@ -2,8 +2,6 @@ import ProjectModels from './components/ProjectModels'
 import ProjectRemote from './components/ProjectRemote'
 import ProjectAnimations from './components/ProjectAnimations'
 import ProjectTextures from './components/ProjectTextures'
-import { useState } from 'react'
-import { useStudio } from '../../contexts/StudioContext'
 
 const Texturer = () => {
     return (
