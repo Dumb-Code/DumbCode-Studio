@@ -20,6 +20,7 @@ jobs:
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
         server: 51.222.31.214
+        port: 22
         username: ubuntu
         password: ${{ secrets.WEBSITE_FTP_PASSWORD }}
         local-dir: ./build/
