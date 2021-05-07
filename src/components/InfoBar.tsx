@@ -1,5 +1,5 @@
 import Dropup, { DropupItem } from './Dropup'
-import { SVGCube, SVGEye, SVGGrid, SVGLocked } from './Icons';
+import { SVGCube, SVGEye, SVGGrid, SVGLocked, SVGRedo, SVGUndo } from './Icons';
 
 const InfoBar = () => {
     return(
@@ -16,6 +16,11 @@ const InfoBar = () => {
             <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGEye className="h-4 w-4 mr-1" /></button>
             <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGLocked className="h-4 w-4 mr-1" /></button>
             <button className="bg-gray-900 hover:bg-gray-800 rounded px-2 my-0.5 mr-1 text-white text-xs">0 Child Cubes</button>
+
+            <div className="flex-grow"></div>
+
+            <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGUndo className="h-3 w-3 mr-1" /></button>
+            <button className="bg-gray-900 hover:bg-gray-800 rounded pr-1 pl-2 py-1 my-0.5 mr-1 text-white"><SVGRedo className="h-3 w-3 mr-1" /></button>
         </div>
     )
 }
