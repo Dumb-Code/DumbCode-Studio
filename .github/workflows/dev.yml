@@ -24,4 +24,4 @@ jobs:
         ftp-username: ubuntu
         ftp-password: ${{ secrets.WEBSITE_FTP_PASSWORD }}
         known-hosts: ${{ secrets.WEBSITE_FTP_KNOWN_HOSTS }}
-        args: --delete
+        args: --all
