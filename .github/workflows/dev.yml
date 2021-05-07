@@ -1,4 +1,4 @@
-name: Publish Website
+name: Publish Dev Website
 on:
   push:
     branches: [ react ]
