@@ -6,7 +6,7 @@ on:
 jobs:
   FTP-Deploy-Action:
     name: FTP-Deploy-Action
-    runs-on: windows-latest
+    runs-on: linux-latest
     steps:
     - uses: actions/checkout@v2.1.0
       with:
