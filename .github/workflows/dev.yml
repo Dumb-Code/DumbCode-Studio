@@ -1,0 +1,23 @@
+name: Publish Dev Website
+on:
+  push:
+    branches: [ react ]
+
+jobs:
+  FTP-Deploy-Action:
+    name: FTP-Deploy-Action
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.1.0
+      with:
+        fetch-depth: 2
+    - name: Create-Build
+      run: yarn build
+    - name: FTP-Deploy-Action
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+        server: dev.dumbcode.net
+        username: ubuntu
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./build/
+        server-dir: ./var/www/dumbcode.net/dev/
