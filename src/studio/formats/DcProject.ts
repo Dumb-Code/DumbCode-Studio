@@ -25,6 +25,8 @@ export default class DcProject {
   textureManager: TextureManager
   materials: ProjectMaterials
 
+  isDefaultProject: boolean = false
+
   constructor(name: string, model: DCMModel) {
     this.identifier = uuidv4()
     this.name = name

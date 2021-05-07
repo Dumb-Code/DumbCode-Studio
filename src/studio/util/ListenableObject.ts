@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { DependencyList, useEffect, useState } from 'react';
 import { ReinhardToneMapping } from 'three';
+import { v4 } from 'uuid';
 export class LO<T> {
   constructor(
     private _value: T,
-    private listners: Set<((newValue: T, oldValue: T) => void)> = new Set()
+    private listners: Set<((newValue: T, oldValue: T) => void)> = new Set(),
+    public identifier = v4()
   ) {}
 
   get value() {
@@ -11,8 +13,8 @@ export class LO<T> {
   }
 
   set value(value: T) {
-    this._value = value
     this.listners.forEach(l => l(value, this._value))
+    this._value = value
   }
 
   addListener = (func: (newValue: T, oldValue: T) => void) => {
@@ -24,12 +26,14 @@ export class LO<T> {
   }
 }
 
-export const useListenableObject = <T>(obj: LO<T>) => {
+export const useListenableObject = <T>(obj: LO<T>): [T, (val: T) => void] => {
   const [state, setState] = useState(obj.value)
   useEffect(() => {
+    if(state !== obj.value) {
+      setState(obj.value)
+    }
     obj.addListener(setState)
     return () => obj.removeListener(setState)
-  }, [obj])
-  
-  return state
+  })
+  return [ state, (val: T) => obj.value = val]
 }

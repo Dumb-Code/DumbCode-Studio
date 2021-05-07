@@ -38,7 +38,11 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
   const three = useMemo(createThreeContext, [])
 
   const [projects, setProjects] = useState<DcProject[]>([])
-  const [selectedProject, setSelectedProject] = useState(newProject)
+  const [selectedProject, setSelectedProject] = useState(() => {
+    const project = newProject()
+    project.isDefaultProject = true
+    return project
+  })
 
   const context: StudioContext = {
     projects,
@@ -49,7 +53,6 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
 
     selectedProject,
     selectProject: project => {
-      console.log(project, selectedProject)
       if (project !== selectedProject) {
         three.scene.remove(selectedProject.group)
         three.scene.add(project.group)

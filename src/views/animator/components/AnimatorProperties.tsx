@@ -8,7 +8,7 @@ import { useState } from "react";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 
 const AnimatorProperties = () => {
-    return(
+    return (
         <div className="overflow-y-scroll h-full bg-gray-800">
             <AnimatorCubeProperties />
             <AnimatorLoopingProperties />
@@ -20,13 +20,13 @@ const AnimatorProperties = () => {
 
 const AnimatorCubeProperties = () => {
 
-    const[propertiesActive, setPropertiesActive] = useState(true);
+    const [propertiesActive, setPropertiesActive] = useState(true);
 
-    return(
+    return (
         <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                 <p className="my-0.5 flex-grow">CUBE PROPERTIES</p>
-                <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)}/>
+                <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)} />
             </div>
             <div className={(propertiesActive ? "h-64" : "h-0") + " transition-height ease-in-out duration-200"}>
                 <div className="w-full grid grid-cols-2 px-2 pt-1">
@@ -43,13 +43,13 @@ const AnimatorCubeProperties = () => {
 
 const AnimatorLoopingProperties = () => {
 
-    const[loopingActive, setLoopingActive] = useState(true);
+    const [loopingActive, setLoopingActive] = useState(true);
 
-    return(
+    return (
         <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                 <p className="my-0.5 flex-grow">LOOPING PROPERTIES</p>
-                <MinimizeButton active={loopingActive} toggle={() => setLoopingActive(!loopingActive)}/>
+                <MinimizeButton active={loopingActive} toggle={() => setLoopingActive(!loopingActive)} />
             </div>
             <div className={(loopingActive ? "h-32" : "h-0") + " transition-height ease-in-out duration-200"}>
                 <div className="w-full flex flex-row px-2 pt-1">
@@ -69,13 +69,13 @@ const AnimatorLoopingProperties = () => {
 
 const AnimatorIKProperties = () => {
 
-    const[ikActive, setIKActive] = useState(false);
+    const [ikActive, setIKActive] = useState(false);
 
-    return(
+    return (
         <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                 <p className="my-0.5 flex-grow">INVERSE KINEMATICS</p>
-                <MinimizeButton active={ikActive} toggle={() => setIKActive(!ikActive)}/>
+                <MinimizeButton active={ikActive} toggle={() => setIKActive(!ikActive)} />
             </div>
             <div className={(ikActive ? "h-10" : "h-0") + " transition-height ease-in-out duration-200"}>
                 <div className="w-full flex flex-row px-2 pt-1">
@@ -88,13 +88,13 @@ const AnimatorIKProperties = () => {
 
 const AnimatorProgressionProperties = () => {
 
-    const[progressionActive, setProgressionActive] = useState(false);
+    const [progressionActive, setProgressionActive] = useState(false);
 
-    return(
+    return (
         <div className="rounded-sm bg-gray-800 flex flex-col pb-1">
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                 <p className="my-0.5 flex-grow">PROGRESSION POINTS</p>
-                <MinimizeButton active={progressionActive} toggle={() => setProgressionActive(!progressionActive)}/>
+                <MinimizeButton active={progressionActive} toggle={() => setProgressionActive(!progressionActive)} />
             </div>
             <div className={(progressionActive ? "h-96" : "h-0 overflow-hidden") + " transition-height ease-in-out duration-200"}>
                 <div className="flex flex-col h-full p-2">
@@ -141,8 +141,8 @@ const AnimatorProgressionProperties = () => {
     )
 }
 
-const LoopCheck = ({title}: {title: string}) => {
-    return(
+const LoopCheck = ({ title }: { title: string }) => {
+    return (
         <div>
             <p className="ml-1 text-gray-400 text-xs">{title}</p>
             <div className="flex flex-col p-1">
@@ -154,8 +154,8 @@ const LoopCheck = ({title}: {title: string}) => {
     )
 }
 
-const IKCheck = ({title}: {title: string}) => {
-    return(
+const IKCheck = ({ title }: { title: string }) => {
+    return (
         <div className="flex flex-row">
             <p className="ml-1 text-gray-400 text-xs mr-2 mt-2">{title}</p>
             <div className="flex flex-col p-1">
@@ -167,8 +167,8 @@ const IKCheck = ({title}: {title: string}) => {
     )
 }
 
-const TitledField = ({title}: {title: string}) => {
-    return(
+const TitledField = ({ title }: { title: string }) => {
+    return (
         <div>
             <p className="ml-1 text-gray-400 text-xs">{title}</p>
             <div className="flex flex-col p-1">

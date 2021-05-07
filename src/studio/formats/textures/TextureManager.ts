@@ -7,10 +7,10 @@ export default class TextureManager {
   readonly model: DCMModel
 
   selectedGroup = new LO(new TextureGroup("Default", true))
-  groups = new LO<TextureGroup[]>([ this.selectedGroup.value ])
+  groups = new LO<readonly TextureGroup[]>([ this.selectedGroup.value ])
 
   activeTexture = new LO<Texture | null>(null)
-  textures = new LO<Texture[]>([])
+  textures = new LO<readonly Texture[]>([])
   
   constructor(model: DCMModel) {
     this.model = model
@@ -19,21 +19,21 @@ export default class TextureManager {
 
 export class TextureGroup {
   readonly identifier: string;
-  name: string
-  textures: string[]
-  readonly isDefault: boolean
+  name: LO<string>
+  textures: LO<readonly string[]>
+  isDefault: boolean
 
   constructor(name: string, isDefault: boolean) {
     this.identifier = uuidv4()
     this.isDefault = isDefault
-    this.name = name
-    this.textures = []
+    this.name = new LO(name)
+    this.textures = new LO([] as const as readonly string[])
   }
 }
 
 export class Texture {
   readonly identifier: string
-  readonly name: string
+  name: LO<string>
   width: number
   height: number
   hidden: boolean
@@ -49,11 +49,11 @@ export class Texture {
     this.height = model.texHeight
 
     if(element === undefined) {
-      this.name = "New Texture"
+      this.name = new LO("New Texture")
       element = document.createElement("img")
     } else {
       //We know that name is not undefined here
-      this.name = name as string
+      this.name = new LO(name as string)
       this.width = element.naturalWidth
       this.height = element.naturalHeight
     }
