@@ -21,6 +21,6 @@ jobs:
       with:
         server: dev.dumbcode.net
         username: ubuntu
-        password: ${{ secrets.FTP_PASSWORD }}
+        password: ${{ secrets.WEBSITE_FTP_PASSWORD }}
         local-dir: ./build/
         server-dir: ./var/www/dumbcode.net/dev/
