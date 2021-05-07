@@ -24,3 +24,4 @@ jobs:
         password: ${{ secrets.WEBSITE_FTP_PASSWORD }}
         local-dir: ./build/
         server-dir: ./var/www/dumbcode.net/dev/
+        known-hosts: ${{ secrets.WEBSITE_FTP_KNOWN_HOSTS }}
