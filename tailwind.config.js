@@ -60,6 +60,7 @@ module.exports = {
     './src/**/*.ts',
     './src/**/*.tsx',
     './public/index.html',
+    './public/normalize.css',
   ],
   plugins: [
     require('@tailwindcss/typography'),
