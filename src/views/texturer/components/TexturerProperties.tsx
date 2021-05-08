@@ -33,10 +33,10 @@ const TexturerProperties = () => {
 
     return (
         <div className="rounded-sm bg-gray-800 h-full flex flex-row">
-            <HSLColorBox resolution={25} height={25} hue={hue} addSw={addSwatch} removeSw={removeSwatch} />
+            <HSLColorBox resolution={25} height={25} hue={hue} swatches={swatches} addSw={addSwatch} removeSw={removeSwatch} />
             <HueSelector hue={hue} setHue={setHue} />
             <div className="mx-2 my-1 h-full overflow-y-hidden">
-                <SwatchesPannel swatches={swatches} />
+                <SwatchesPannel swatches={swatches} setHue={setHue} />
             </div>
         </div>
     )
@@ -44,17 +44,17 @@ const TexturerProperties = () => {
 
 export default TexturerProperties;
 
-const SwatchButton = ({ swatch }: { swatch: Swatch }) => {
+const SwatchButton = ({ swatch, setHue }: { swatch: Swatch, setHue: (hue: number) => void }) => {
     return (
-        <div className="w-5 h-5" style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }}></div>
+        <div className="w-5 h-5" style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }} onClick={() => setHue(swatch.h)}></div>
     )
 }
 
-const SwatchesPannel = ({ swatches }: { swatches: readonly Swatch[] }) => {
+const SwatchesPannel = ({ swatches, setHue }: { swatches: readonly Swatch[], setHue: (hue: number) => void }) => {
 
     return (
         <div className="grid grid-rows-6 grid-flow-col gap-1">
-            {swatches.map((swatch, i) => <SwatchButton key={i} swatch={swatch} />)}
+            {swatches.map((swatch, i) => <SwatchButton key={i} swatch={swatch} setHue={setHue} />)}
         </div>
     )
 }
@@ -83,7 +83,7 @@ const HueSelector = ({ hue, setHue }: { hue: number, setHue: any }) => {
     )
 }
 
-const HSLColorBox = ({ resolution, height, hue, addSw, removeSw }: { resolution: number, height: number, hue: number, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void }) => {
+const HSLColorBox = ({ resolution, height, hue, swatches, addSw, removeSw }: { resolution: number, height: number, hue: number, swatches: readonly Swatch[], addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void }) => {
 
     //H values are determined by a seperate slider, so we will just store that in a prop
 
@@ -112,6 +112,14 @@ const HSLColorBox = ({ resolution, height, hue, addSw, removeSw }: { resolution:
         lValues.push(colLValues)
     }
 
+    function selected(swatch: Swatch) {
+        for (let si = 0; si < swatches.length; si++) {
+            if(swatches[si].h === swatch.h && swatches[si].s === swatch.s && swatches[si].l === swatch.l) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     return (
         <table className="w-1/2 h-full">
@@ -120,7 +128,7 @@ const HSLColorBox = ({ resolution, height, hue, addSw, removeSw }: { resolution:
                     <tr key={y}>{
                         Array.from({ length: resolution }, (_, x) => {
                             const boxVal: Swatch = { h: hue, s: sValues[x], l: lValues[x][y] }
-                            return <ColorBox key={x} swatch={boxVal} addSw={addSw} removeSw={removeSw} />
+                            return <ColorBox key={x} selected={selected(boxVal)} swatch={boxVal} addSw={addSw} removeSw={removeSw} />
                         })
                     }</tr>
                 )
@@ -129,12 +137,9 @@ const HSLColorBox = ({ resolution, height, hue, addSw, removeSw }: { resolution:
     )
 }
 
-const ColorBox = ({ swatch, addSw, removeSw }: { swatch: Swatch, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void }) => {
-
-    const [selected, setSelected] = useState(false);
+const ColorBox = ({ swatch, selected, addSw, removeSw }: { swatch: Swatch, selected: boolean, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void }) => {
 
     function toggleColor() {
-        setSelected(!selected)
         selected ? removeSw(swatch) : addSw(swatch)
     }
 
