@@ -150,7 +150,7 @@ const ColorBox = ({ swatch, selected, addSw, removeSw }: { swatch: Swatch, selec
     return (
         <td className="w-1 p-0" style={{ height: "2%" }}>
             <div
-                className={(!selected || "border-2 border-black") + " h-full m-0 p-0"}
+                className={(!selected || "border " + (swatch.l < 20 ? "border-white" : "border-black")) + " h-full m-0 p-0"}
                 style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }}
                 onClick={() => toggleColor()}
             ></div>
