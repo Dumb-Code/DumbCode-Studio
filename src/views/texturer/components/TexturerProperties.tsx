@@ -13,7 +13,7 @@ const TexturerProperties = () => {
 
     const[swatches, setSwatches] = useState<readonly Swatch[]>([])
 
-    function addSwatch({color}: {color: Swatch}) {
+    const addSwatch = (color: Swatch) => {
         console.log("add " + color)
         var newSwatches = new Array<Swatch>()
         for (let i = 0; i < swatches.length; i++) {
@@ -23,7 +23,7 @@ const TexturerProperties = () => {
         setSwatches(newSwatches)
     }
 
-    function removeSwatch({color}: {color: Swatch}) {
+    const removeSwatch = (color: Swatch) => {
         var newSwatches = new Array<Swatch>()
         for (let i = 0; i < swatches.length; i++) {
             if (swatches[i] !== color) {
@@ -34,7 +34,7 @@ const TexturerProperties = () => {
 
     return(
         <div className="rounded-sm bg-gray-800 h-full flex flex-row">
-            <HSLColorBox resolution={25} height={25} hue={hue} addSw={(swatch) => addSwatch(swatch)} removeSw={(swatch) => removeSwatch(swatch)} />
+            <HSLColorBox resolution={25} height={25} hue={hue} addSw={addSwatch} removeSw={removeSwatch} />
             <HueSelector hue={hue} setHue={setHue} />
             <div className="mx-2 my-1 h-full overflow-y-hidden">
                 <SwatchesPannel swatches={swatches} />
@@ -55,7 +55,7 @@ const SwatchesPannel = ({swatches}: {swatches: readonly Swatch[]}) => {
 
     return(
         <div className="grid grid-rows-6 grid-flow-col gap-1">
-            {swatches.map((swatch) => <SwatchButton swatch={swatch} /> )}
+            {swatches.map((swatch, i) => <SwatchButton key={i} swatch={swatch} /> )}
         </div>
     )
 }
@@ -84,7 +84,7 @@ const HueSelector = ({hue, setHue}: {hue: number, setHue: any}) => {
     )
 }
 
-const HSLColorBox = ({resolution, height, hue, addSw, removeSw}: {resolution: number, height: number, hue: number, addSw: (number) => void, removeSw: (number) => void}) => {
+const HSLColorBox = ({resolution, height, hue, addSw, removeSw}: {resolution: number, height: number, hue: number, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void}) => {
 
     //H values are determined by a seperate slider, so we will just store that in a prop
 
@@ -119,7 +119,7 @@ const HSLColorBox = ({resolution, height, hue, addSw, removeSw}: {resolution: nu
         let boxes = new Array()
         for (let x = 0; x < height; x++) {
             var boxVal: Swatch = {h:hue, s:sValues[x], l:lValues[x][y]}
-            boxes.push(<ColorBox swatch={boxVal} addSw={(swatch) => addSw(swatch)} removeSw={(swatch) => removeSw(swatch)} />)
+            boxes.push(<ColorBox key={`${x},${y}`} swatch={boxVal} addSw={addSw} removeSw={removeSw} />)
         }
         items.push(<tr>{boxes}</tr>)
     }
@@ -129,7 +129,7 @@ const HSLColorBox = ({resolution, height, hue, addSw, removeSw}: {resolution: nu
     )
 }
 
-const ColorBox = ({swatch, addSw, removeSw}: {swatch: Swatch, addSw: (swatch) => void, removeSw: (swatch) => void}) => {
+const ColorBox = ({swatch, addSw, removeSw}: {swatch: Swatch, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void}) => {
 
     const[selected, setSelected] = useState(false);
 
