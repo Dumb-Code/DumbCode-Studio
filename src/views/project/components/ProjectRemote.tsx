@@ -9,7 +9,7 @@ const ProjectRemote = ({remoteShown, showRemote}: {remoteShown: boolean, showRem
                 <p className="flex-grow mt-1 ml-1">REMOTE SETTINGS</p>
                 <MinimizeButton active={remoteShown} toggle={() => showRemote(!remoteShown)}/>
             </div>
-            <div className="flex flex-row overflow-y-hidden transition-height transform duration-200 ease-in-out">
+            <div className={(remoteShown ? "h-48" : "h-0") + " flex flex-row overflow-y-hidden transition-height transform duration-200 ease-in-out"}>
                 <div className="w-4/12 flex flex-col">
                     <div className="bg-gray-800 text-gray-400 font-bold text-xs px-1 border-b border-r border-black">
                         <p className="flex-grow my-0.5 ml-1">REMOTE REPOSITORIES</p>
