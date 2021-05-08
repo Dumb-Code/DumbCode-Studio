@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
+import Slider from 'react-input-slider';
 
 const TexturerProperties = () => {
 
@@ -16,10 +17,26 @@ const TexturerProperties = () => {
 export default TexturerProperties;
 
 const HueSelector = ({hue, setHue}: {hue: number, setHue: any}) => {
+
+    const [sliderHue, setSLiderHue] = useState(hue)
+
+    function changeHue(newHue) {
+        setSLiderHue(newHue);
+        setHue(newHue * 3.6)
+    }
+
     return(
-        <div className="h-full w-8" style={{background: 'linear-gradient(to bottom, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'}} onClick={() => {setHue(Math.random() * 360)}}>
-            test
-        </div>
+        <Slider
+        axis="y"
+        y={sliderHue}
+        onChange={({y}) => changeHue(y)}
+        styles={{
+            track: { width: 6, background: 'linear-gradient(to bottom, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)', height: '100%' },
+            active: { background: 'transparent'},
+            thumb: { width: 15, height: 15 }
+        }}
+    />
+
     )
 }
 
