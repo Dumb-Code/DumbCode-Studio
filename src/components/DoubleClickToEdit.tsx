@@ -3,10 +3,11 @@ import { LO, useListenableObject } from "../studio/util/ListenableObject";
 
 type DivExtended = {
   className?: string,
+  disabled?: boolean,
   inputClassName?: string,
   props?: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>
 }
-const DblClickEditInternal = ({ callback, text, className, inputClassName, props }:
+const DblClickEditInternal = ({ callback, text, className, inputClassName, disabled, props }:
   {
     callback: (str: string) => void,
     text: string,
@@ -17,6 +18,9 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, props
   const inputRef = useRef<HTMLInputElement>(null)
 
   const onDoubleClick = () => {
+    if(disabled) {
+      return
+    }
     setEditing(true)
     if (inputRef.current !== null) {
       //For some reason the display can't be NONE to display it.
@@ -37,11 +41,12 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, props
     }
   }
 
+  const openEdit = editing && !disabled
 
   return (
     <div {...props} className={className} ref={divRef} onDoubleClick={() => onDoubleClick()}>
       <input
-        style={{ display: editing ? "inherit" : "none" }} //We can't do conditional rendering as we need the ref
+        style={{ display: openEdit ? "inherit" : "none" }} //We can't do conditional rendering as we need the ref
         className={inputClassName}
         ref={inputRef}
         type="text"
@@ -50,25 +55,25 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, props
         onBlur={() => setEditing(false)}
         onKeyUp={e => onEditingKeyUp(e.key)}
       />
-      {editing || text}
+      {openEdit || text}
     </div>
   )
 }
-export const DoubleClickToEdit = ({ callback, current, className, inputClassName, props }:
+export const DoubleClickToEdit = ({ callback, current, className, inputClassName, disabled, props }:
   {
     callback: (str: string) => void,
     current?: string,
   } & DivExtended
 ) => {
   const [text, setText] = useState(current ?? '')
-  return <DblClickEditInternal text={text} callback={t => { setText(t); callback(t); }} className={className} inputClassName={inputClassName} props={props} />
+  return <DblClickEditInternal text={text} callback={t => { setText(t); callback(t); }} className={className} inputClassName={inputClassName} disabled={disabled} props={props} />
 }
 
-export const DblClickEditLO = ({ obj, className, inputClassName, props }:
+export const DblClickEditLO = ({ obj, className, inputClassName, disabled, props }:
   {
     obj: LO<string>
   } & DivExtended
 ) => {
   const [text, setText] = useListenableObject(obj)
-  return <DblClickEditInternal text={text} callback={setText} className={className} inputClassName={inputClassName} props={props} />
+  return <DblClickEditInternal text={text} callback={setText} className={className} inputClassName={inputClassName} disabled={disabled} props={props} />
 }
