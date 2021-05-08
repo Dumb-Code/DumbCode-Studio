@@ -7,6 +7,7 @@ type DivExtended = {
   inputClassName?: string,
   props?: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>
 }
+
 const DblClickEditInternal = ({ callback, text, className, inputClassName, disabled, props }:
   {
     callback: (str: string) => void,
