@@ -112,12 +112,13 @@ const HSLColorBox = ({ resolution, height, hue, addSw, removeSw }: { resolution:
         lValues.push(colLValues)
     }
 
+
     return (
         <table className="w-1/2 h-full">
             <tbody>{
-                Array(resolution).map((_, y) =>
+                Array.from({ length: resolution }, (_, y) =>
                     <tr key={y}>{
-                        Array(height).map((_, x) => {
+                        Array.from({ length: resolution }, (_, x) => {
                             const boxVal: Swatch = { h: hue, s: sValues[x], l: lValues[x][y] }
                             return <ColorBox key={x} swatch={boxVal} addSw={addSw} removeSw={removeSw} />
                         })
