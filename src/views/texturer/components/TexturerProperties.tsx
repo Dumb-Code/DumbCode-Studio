@@ -9,13 +9,13 @@ type Swatch = {
 
 const TexturerProperties = () => {
 
-    const[hue, setHue] = useState(0)
+    const [hue, setHue] = useState(0)
 
-    const[swatches, setSwatches] = useState<readonly Swatch[]>([])
+    const [swatches, setSwatches] = useState<readonly Swatch[]>([])
 
     const addSwatch = (color: Swatch) => {
         console.log("add " + color)
-        var newSwatches = new Array<Swatch>()
+        const newSwatches = new Array<Swatch>()
         for (let i = 0; i < swatches.length; i++) {
             newSwatches.push(swatches[i])
         }
@@ -24,7 +24,7 @@ const TexturerProperties = () => {
     }
 
     const removeSwatch = (color: Swatch) => {
-        var newSwatches = new Array<Swatch>()
+        const newSwatches: Swatch[] = []
         for (let i = 0; i < swatches.length; i++) {
             if (swatches[i] !== color) {
                 newSwatches.push(swatches[i]);
@@ -32,7 +32,7 @@ const TexturerProperties = () => {
         }
     }
 
-    return(
+    return (
         <div className="rounded-sm bg-gray-800 h-full flex flex-row">
             <HSLColorBox resolution={25} height={25} hue={hue} addSw={addSwatch} removeSw={removeSwatch} />
             <HueSelector hue={hue} setHue={setHue} />
@@ -45,22 +45,22 @@ const TexturerProperties = () => {
 
 export default TexturerProperties;
 
-const SwatchButton = ({swatch}: {swatch: Swatch}) => {
-    return(
-        <div className="w-5 h-5" style={{backgroundColor: "hsl(" + swatch.h +", " + swatch.s + "%, " + swatch.l + "%)"}}></div>
+const SwatchButton = ({ swatch }: { swatch: Swatch }) => {
+    return (
+        <div className="w-5 h-5" style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }}></div>
     )
 }
 
-const SwatchesPannel = ({swatches}: {swatches: readonly Swatch[]}) => {
+const SwatchesPannel = ({ swatches }: { swatches: readonly Swatch[] }) => {
 
-    return(
+    return (
         <div className="grid grid-rows-6 grid-flow-col gap-1">
-            {swatches.map((swatch, i) => <SwatchButton key={i} swatch={swatch} /> )}
+            {swatches.map((swatch, i) => <SwatchButton key={i} swatch={swatch} />)}
         </div>
     )
 }
 
-const HueSelector = ({hue, setHue}: {hue: number, setHue: any}) => {
+const HueSelector = ({ hue, setHue }: { hue: number, setHue: any }) => {
 
     const [sliderHue, setSLiderHue] = useState(hue)
 
@@ -69,14 +69,14 @@ const HueSelector = ({hue, setHue}: {hue: number, setHue: any}) => {
         setHue(newHue * 3.6)
     }
 
-    return(
+    return (
         <Slider
             axis="y"
             y={sliderHue}
-            onChange={({y}) => changeHue(y)}
+            onChange={({ y }) => changeHue(y)}
             styles={{
                 track: { width: 6, background: 'linear-gradient(to bottom, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)', height: '100%' },
-                active: { background: 'transparent'},
+                active: { background: 'transparent' },
                 thumb: { width: 15, height: 15 }
             }}
         />
@@ -84,54 +84,65 @@ const HueSelector = ({hue, setHue}: {hue: number, setHue: any}) => {
     )
 }
 
-const HSLColorBox = ({resolution, height, hue, addSw, removeSw}: {resolution: number, height: number, hue: number, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void}) => {
+const HSLColorBox = ({ resolution, height, hue, addSw, removeSw }: { resolution: number, height: number, hue: number, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void }) => {
 
     //H values are determined by a seperate slider, so we will just store that in a prop
 
     //S values of hsl increase as the box does from 0 to 100 left to right
-    const sValues = new Array()
+    const sValues: number[] = []
     for (let s = 0; s < resolution; s++) {
         sValues.push((100 / resolution) * s)
     }
 
     //L values are weird, TL: 100% TR: 50% Bottom: 0% so we need to interpolate horizontally the max
     //values then interpolate vertically between those max values and 0 (top to bottom)
-    const lValues = new Array()
+    const lValues: number[][] = []
     for (let ly = 0; ly < height; ly++) {
 
-        let topValue = 100 - ((50 / resolution) * ly)
-        
-        let colLValues = new Array()
+        const topValue = 100 - ((50 / resolution) * ly)
+
+        const colLValues: number[] = []
 
         for (let lx = 0; lx < resolution; lx++) {
-    
-            let value = topValue - ((topValue / height) * lx)
+
+            const value = topValue - ((topValue / height) * lx)
             colLValues.push(value)
-    
+
         }
 
         lValues.push(colLValues)
     }
 
-    //Create a table out of the colors
-    const items = new Array()
-    for (let y = 0; y < resolution; y++) {
-        let boxes = new Array()
-        for (let x = 0; x < height; x++) {
-            var boxVal: Swatch = {h:hue, s:sValues[x], l:lValues[x][y]}
-            boxes.push(<ColorBox key={`${x},${y}`} swatch={boxVal} addSw={addSw} removeSw={removeSw} />)
-        }
-        items.push(<tr>{boxes}</tr>)
-    }
+    console.log(indexedArray(resolution).map(y =>
+        <tr key={y}> {
+            indexedArray(height).map(x => {
+                const boxVal: Swatch = { h: hue, s: sValues[x], l: lValues[x][y] }
+                return <ColorBox key={x} swatch={boxVal} addSw={addSw} removeSw={removeSw} />
+            })
+        }</tr>
+    ))
 
-    return(
-        <table className="w-1/2 h-full"><tbody>{items}</tbody></table>
+    return (
+        <table className="w-1/2 h-full">
+            <tbody>{
+                indexedArray(resolution).map(y =>
+                    <tr key={y}>{
+                        indexedArray(height).map(x => {
+                            const boxVal: Swatch = { h: hue, s: sValues[x], l: lValues[x][y] }
+                            return <ColorBox key={x} swatch={boxVal} addSw={addSw} removeSw={removeSw} />
+                        })
+                    }</tr>
+                )
+            }</tbody>
+        </table>
     )
 }
 
-const ColorBox = ({swatch, addSw, removeSw}: {swatch: Swatch, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void}) => {
+const indexedArray = (amount: number) => Array.from(Array(amount).keys())
 
-    const[selected, setSelected] = useState(false);
+const ColorBox = ({ swatch, addSw, removeSw }: { swatch: Swatch, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void }) => {
+
+    const [selected, setSelected] = useState(false);
 
     function toggleColor() {
         console.log(swatch) //Prints the correct value
@@ -139,11 +150,11 @@ const ColorBox = ({swatch, addSw, removeSw}: {swatch: Swatch, addSw: (swatch: Sw
         selected ? removeSw(swatch) : addSw(swatch)
     }
 
-    return(
-        <td className="w-1 p-0" style={{height: "2%"}}>
-            <div 
-                className={(!selected || "border-2 border-black") + " h-full m-0 p-0"} 
-                style={{backgroundColor: "hsl(" + swatch.h +", " + swatch.s + "%, " + swatch.l + "%)"}} 
+    return (
+        <td className="w-1 p-0" style={{ height: "2%" }}>
+            <div
+                className={(!selected || "border-2 border-black") + " h-full m-0 p-0"}
+                style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }}
                 onClick={() => toggleColor()}
             ></div>
         </td>
