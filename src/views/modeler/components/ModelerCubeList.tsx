@@ -10,7 +10,7 @@ const ModelerCubeList = () => {
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
                 <p className="flex-grow my-0.5">CUBE LIST</p>
             </div>
-            <div className="flex flex-row mx-1 bg-gray-900 pb-1">
+            <div className="flex flex-row px-1 bg-gray-900 pb-1">
                 <button className="flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mr-0.5 flex flex-row">
                     <b className="flex-grow" />
                     <SVGPlus className="h-6 w-6" />
