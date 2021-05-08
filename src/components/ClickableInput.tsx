@@ -4,6 +4,7 @@ import { createReadableFile, createReadableFileExtended, FileSystemsAccessApi, R
 type Props = {
   description: string
   accept: string[]
+  disabled?: boolean
   multiple?: boolean
   onFile: (file: ReadableFile) => void
   className?: string
@@ -14,6 +15,7 @@ const ClickableInput: FC<Props> = (props) => {
   return (
     <>
       <input
+        disabled={props.disabled}
         ref={ref}
         onChange={e => {
           const files = e.currentTarget.files
@@ -51,7 +53,7 @@ const ExtendedFilesClickableInput: FC<Props> = (props) => {
     }).catch(() => {})
   }
   return (
-    <button className={props.className} children={props.children} onClick={onClick}/>
+    <button disabled={props.disabled} className={props.className} children={props.children} onClick={onClick}/>
   )
 }
 

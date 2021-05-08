@@ -6,6 +6,7 @@ if (FileSystemsAccessApi) {
 export type ReadableFile = {
   asFile: () => File | PromiseLike<File>
   asWritable?: () => WritableFile
+  name: string
 }
 
 export type WritableFile = {
@@ -14,8 +15,13 @@ export type WritableFile = {
 
 // const WritableFileRefreshLoop
 
-export const createReadableFile = (file: File) => { return { asFile: () => file } }
-export const createReadableFileExtended = (handle: FileSystemFileHandle) => {
+export const createReadableFile = (file: File): ReadableFile => { 
+  return { 
+    asFile: () => file,
+    name: file.name
+   } 
+}
+export const createReadableFileExtended = (handle: FileSystemFileHandle): ReadableFile => {
   return {
     asFile: () => handle.getFile(),
     asWritable: () => {
@@ -26,7 +32,16 @@ export const createReadableFileExtended = (handle: FileSystemFileHandle) => {
           await writable.close()
         }
       }
-    }
+    },
+    name: handle.name
   }
 }
 
+export const readFileDataUrl = (file: ReadableFile) => {
+  return new Promise<string>(async (resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = error => reject(error)
+    reader.readAsDataURL(await file.asFile())
+  })
+}

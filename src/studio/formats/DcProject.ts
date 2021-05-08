@@ -5,6 +5,7 @@ import { DoubleSide, Group, MeshLambertMaterial } from "three"
 import { ReadableFile } from '../util/FileTypes';
 import { v4 as uuidv4 } from "uuid"
 import TextureManager from './textures/TextureManager';
+import { LO } from '../util/ListenableObject';
 
 const material = new MeshLambertMaterial( {
   color: 0x777777,
@@ -16,7 +17,7 @@ const material = new MeshLambertMaterial( {
 export default class DcProject {
   identifier: string
 
-  name: string
+  name: LO<string>
   group: Group
 
   model: DCMModel
@@ -29,7 +30,7 @@ export default class DcProject {
 
   constructor(name: string, model: DCMModel) {
     this.identifier = uuidv4()
-    this.name = name
+    this.name = new LO(name)
     this.group = new Group()
     this.model = model
     this.textureManager = new TextureManager(model)
@@ -38,11 +39,11 @@ export default class DcProject {
   }
 
   setName(name: string) {
-    this.name = name
+    this.name.value = name
   }
 
   getName() {
-    return this.name
+    return this.name.value
   }
 }
 
