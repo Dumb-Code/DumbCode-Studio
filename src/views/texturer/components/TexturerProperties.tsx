@@ -57,7 +57,7 @@ const SwatchButton = ({ swatch, setHue, removeSw }: { swatch: Swatch, setHue: (h
 const SwatchesPannel = ({ swatches, setHue, removeSw }: { swatches: readonly Swatch[], setHue: (hue: number) => void, removeSw: (swatch: Swatch) => void }) => {
 
     return (
-        <div className="grid grid-rows-6 grid-flow-col gap-1">
+        <div className="grid grid-rows-6 grid-flow-col gap-1 overflow-x-scroll">
             {swatches.map((swatch, i) => <SwatchButton key={i} swatch={swatch} setHue={setHue} removeSw={removeSw} />)}
         </div>
     )

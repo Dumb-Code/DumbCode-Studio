@@ -1,5 +1,5 @@
 import InfoBar from "../../components/InfoBar"
-import TexturerLayers from "./components/TexturerLayers"
+import TexturerSidebar from "./components/TexturerSidebar"
 import TexturerTools from "./components/TexturerTools"
 import TexturerProperties from "./components/TexturerProperties"
 import { TexturerViewport } from "./components/TexturerViewport"
@@ -14,7 +14,7 @@ const Texturer = () => {
                 gridTemplateRows: 'auto 150px 28px'
             }}
         >
-            <div className="grid-in-layers border border-black"><TexturerLayers /></div>
+            <div className="grid-in-layers border border-black"><TexturerSidebar /></div>
             <div className="grid-in-tools border border-black"><TexturerTools /></div>
             <div className="grid-in-canvas border border-black"><TexturerViewport /></div>
             <div className="grid-in-properties border border-black"><TexturerProperties /></div>
