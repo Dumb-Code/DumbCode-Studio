@@ -115,9 +115,9 @@ const HSLColorBox = ({ resolution, height, hue, addSw, removeSw }: { resolution:
     return (
         <table className="w-1/2 h-full">
             <tbody>{
-                indexedArray(resolution).map(y =>
+                Array(resolution).map((_, y) =>
                     <tr key={y}>{
-                        indexedArray(height).map(x => {
+                        Array(height).map((_, x) => {
                             const boxVal: Swatch = { h: hue, s: sValues[x], l: lValues[x][y] }
                             return <ColorBox key={x} swatch={boxVal} addSw={addSw} removeSw={removeSw} />
                         })
@@ -127,8 +127,6 @@ const HSLColorBox = ({ resolution, height, hue, addSw, removeSw }: { resolution:
         </table>
     )
 }
-
-const indexedArray = (amount: number) => Array.from(Array(amount).keys())
 
 const ColorBox = ({ swatch, addSw, removeSw }: { swatch: Swatch, addSw: (swatch: Swatch) => void, removeSw: (swatch: Swatch) => void }) => {
 
