@@ -14,7 +14,6 @@ const TexturerProperties = () => {
     const [swatches, setSwatches] = useState<readonly Swatch[]>([])
 
     const addSwatch = (color: Swatch) => {
-        console.log("add " + color)
         const newSwatches = new Array<Swatch>()
         for (let i = 0; i < swatches.length; i++) {
             newSwatches.push(swatches[i])
@@ -113,15 +112,6 @@ const HSLColorBox = ({ resolution, height, hue, addSw, removeSw }: { resolution:
         lValues.push(colLValues)
     }
 
-    console.log(indexedArray(resolution).map(y =>
-        <tr key={y}> {
-            indexedArray(height).map(x => {
-                const boxVal: Swatch = { h: hue, s: sValues[x], l: lValues[x][y] }
-                return <ColorBox key={x} swatch={boxVal} addSw={addSw} removeSw={removeSw} />
-            })
-        }</tr>
-    ))
-
     return (
         <table className="w-1/2 h-full">
             <tbody>{
@@ -145,7 +135,6 @@ const ColorBox = ({ swatch, addSw, removeSw }: { swatch: Swatch, addSw: (swatch:
     const [selected, setSelected] = useState(false);
 
     function toggleColor() {
-        console.log(swatch) //Prints the correct value
         setSelected(!selected)
         selected ? removeSw(swatch) : addSw(swatch)
     }
