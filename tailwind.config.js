@@ -4,7 +4,8 @@ module.exports = {
   theme: {
     extend: {
       transitionProperty: {
-        'height': 'height'
+        'height': 'height',
+        'grid-template-rows': 'grid-template-rows'
       },
       height: {
         104: '27rem'
