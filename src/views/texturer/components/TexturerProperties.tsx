@@ -22,13 +22,14 @@ const TexturerProperties = () => {
         setSwatches(newSwatches)
     }
 
-    const removeSwatch = (color: Swatch) => {
+    const removeSwatch = (swatch: Swatch) => {
         const newSwatches: Swatch[] = []
-        for (let i = 0; i < swatches.length; i++) {
-            if (swatches[i] !== color) {
-                newSwatches.push(swatches[i]);
+        for (let si = 0; si < swatches.length; si++) {
+            if (swatches[si].h !== swatch.h || swatches[si].s !== swatch.s || swatches[si].l !== swatch.l) {
+                newSwatches.push(swatches[si]);
             }
         }
+        setSwatches(newSwatches)
     }
 
     return (
@@ -36,7 +37,7 @@ const TexturerProperties = () => {
             <HSLColorBox resolution={25} height={25} hue={hue} swatches={swatches} addSw={addSwatch} removeSw={removeSwatch} />
             <HueSelector hue={hue} setHue={setHue} />
             <div className="mx-2 my-1 h-full overflow-y-hidden">
-                <SwatchesPannel swatches={swatches} setHue={setHue} />
+                <SwatchesPannel swatches={swatches} setHue={setHue} removeSw={removeSwatch} />
             </div>
         </div>
     )
@@ -44,17 +45,20 @@ const TexturerProperties = () => {
 
 export default TexturerProperties;
 
-const SwatchButton = ({ swatch, setHue }: { swatch: Swatch, setHue: (hue: number) => void }) => {
+const SwatchButton = ({ swatch, setHue, removeSw }: { swatch: Swatch, setHue: (hue: number) => void, removeSw: (swatch: Swatch) => void }) => {
     return (
-        <div className="w-5 h-5" style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }} onClick={() => setHue(swatch.h)}></div>
+        <div className="w-5 h-5" style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }} 
+            onClick={() => setHue(swatch.h)}
+            onDoubleClick={() => removeSw(swatch)}
+        ></div>
     )
 }
 
-const SwatchesPannel = ({ swatches, setHue }: { swatches: readonly Swatch[], setHue: (hue: number) => void }) => {
+const SwatchesPannel = ({ swatches, setHue, removeSw }: { swatches: readonly Swatch[], setHue: (hue: number) => void, removeSw: (swatch: Swatch) => void }) => {
 
     return (
         <div className="grid grid-rows-6 grid-flow-col gap-1">
-            {swatches.map((swatch, i) => <SwatchButton key={i} swatch={swatch} setHue={setHue} />)}
+            {swatches.map((swatch, i) => <SwatchButton key={i} swatch={swatch} setHue={setHue} removeSw={removeSw} />)}
         </div>
     )
 }
