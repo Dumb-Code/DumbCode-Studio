@@ -1,4 +1,4 @@
-import { StudioBuffer } from './../../util/StudioBuffer';
+import { StudioBuffer } from '../../util/StudioBuffer';
 import { MeshLambertMaterial } from 'three';
 import { DCMCube, DCMModel } from './DcmModel';
 

@@ -19,7 +19,7 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
   const inputRef = useRef<HTMLInputElement>(null)
 
   const onDoubleClick = () => {
-    if(disabled) {
+    if (disabled) {
       return
     }
     setEditing(true)
@@ -45,7 +45,11 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
   const openEdit = editing && !disabled
 
   return (
-    <div {...props} className={className} ref={divRef} onDoubleClick={() => onDoubleClick()}>
+    <div
+      {...props}
+      className={className}
+      ref={divRef}
+    >
       <input
         style={{ display: openEdit ? "inherit" : "none" }} //We can't do conditional rendering as we need the ref
         className={inputClassName}
@@ -55,8 +59,19 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
         onInput={e => onEditingInput(e.currentTarget.value)}
         onBlur={() => setEditing(false)}
         onKeyUp={e => onEditingKeyUp(e.key)}
+        onClick={e => e.stopPropagation()}
       />
-      {openEdit || text}
+      {
+        openEdit ||
+        <span
+          onClick={e => e.stopPropagation()}
+          onDoubleClick={e => {
+            onDoubleClick()
+            e.stopPropagation()
+          }}
+        >
+          {text}
+        </span>}
     </div>
   )
 }

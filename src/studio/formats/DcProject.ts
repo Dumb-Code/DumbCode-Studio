@@ -1,30 +1,33 @@
-import { loadDCMModel } from './model/DCMLoader';
 import { WritableFile } from './../util/FileTypes';
 import { DCMCube, DCMModel } from './model/DcmModel';
-import { DoubleSide, Group, MeshLambertMaterial } from "three"
+import { DoubleSide, Group, MeshLambertMaterial, Texture } from "three"
 import { ReadableFile } from '../util/FileTypes';
 import { v4 as uuidv4 } from "uuid"
 import TextureManager from './textures/TextureManager';
 import { LO } from '../util/ListenableObject';
+import DcaTabs from './animations/DcaTabs';
+import { loadDCMModel } from './model/DCMLoader';
 
-const material = new MeshLambertMaterial( {
+const material = new MeshLambertMaterial({
   color: 0x777777,
   // transparent: true,
   side: DoubleSide,
   alphaTest: 0.0001,
-} )
+})
 
 export default class DcProject {
   identifier: string
 
-  name: LO<string>
+  readonly name: LO<string>
   group: Group
 
   model: DCMModel
   modelWritableFile?: WritableFile
 
   textureManager: TextureManager
+  animationTabs: DcaTabs
   materials: ProjectMaterials
+  previousThreeTexture: Texture | null
 
   isDefaultProject: boolean = false
 
@@ -33,9 +36,11 @@ export default class DcProject {
     this.name = new LO(name)
     this.group = new Group()
     this.model = model
-    this.textureManager = new TextureManager(model)
+    this.textureManager = new TextureManager(this)
+    this.animationTabs = new DcaTabs()
     this.materials = createMaterialsObject()
     this.group.add(this.model.createModel(this.materials.normal))
+    this.previousThreeTexture = null
   }
 
   setName(name: string) {
@@ -44,6 +49,28 @@ export default class DcProject {
 
   getName() {
     return this.name.value
+  }
+
+  /**
+ * Helper method to update all the materials for the selected project.
+ * @param {function} callback the material callback
+ */
+  updateTexture(callback: (mat: MeshLambertMaterial) => void) {
+    callback(this.materials.normal)
+    callback(this.materials.selected)
+    callback(this.materials.highlight)
+
+    this.materials.normal.needsUpdate = true
+    this.materials.selected.needsUpdate = true
+    this.materials.highlight.needsUpdate = true
+  }
+
+  /**
+   * Sets the texture to all the materials for the currently selected project.
+   */
+  setTexture(tex: Texture) {
+    this.updateTexture(m => m.map = tex)
+    this.previousThreeTexture = tex
   }
 }
 
@@ -54,12 +81,12 @@ type ProjectMaterials = {
 }
 const createMaterialsObject = (): ProjectMaterials => {
   let normal = material.clone()
-  
+
   let highlight = material.clone()
-  highlight.emissive.setHex( 0xFF0000 )
-  
+  highlight.emissive.setHex(0xFF0000)
+
   let selected = material.clone()
-  selected.emissive.setHex( 0x000066 )
+  selected.emissive.setHex(0x000066)
 
   return { normal, highlight, selected }
 }
@@ -86,12 +113,12 @@ export const newProject = () => {
   return new DcProject("New Project", model);
 }
 
-export const createProject = async(read: ReadableFile) => {
+export const createProject = async (read: ReadableFile) => {
   const file = await read.asFile()
   const model = await loadDCMModel(file.arrayBuffer(), file.name)
   const project = new DcProject(file.name.substring(0, file.name.lastIndexOf(".")), model)
-  
-  if(read.asWritable) {
+
+  if (read.asWritable) {
     project.modelWritableFile = read.asWritable()
   }
 

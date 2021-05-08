@@ -439,7 +439,7 @@ export class DCMCube implements CubeParent {
     this.updateRotationVisuals(values)
   }
 
-  _genereateFaceData(face, tm, toff, tw, th, offU, offV, heightU, heightV) {
+  _genereateFaceData(face: number, tm: boolean, toff: [number, number], tw: number, th: number, offU: number, offV: number, heightU: number, heightV: number) {
 
     let u = toff[0]
     let v = toff[1]
@@ -449,10 +449,28 @@ export class DCMCube implements CubeParent {
       heightU *= -1
     }
 
+    const off = 0.001
+
     let uMin = (u + offU) / tw
     let vMin = (v + offV) / th
     let uMax = (u + offU + heightU) / tw
     let vMax = (v + offV + heightV) / th
+
+    if(uMin < uMax) {
+      uMin += off
+      uMax -= off
+    } else {
+      uMin -= off
+      uMax += off
+    }
+
+    if(vMin < vMax) {
+      vMin += off
+      vMax -= off
+    } else {
+      vMin -= off
+      vMax += off
+    }
 
     this.uvBuffer.set([
       uMax, vMax,

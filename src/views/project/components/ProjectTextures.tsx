@@ -6,6 +6,7 @@ import { useStudio } from "../../../contexts/StudioContext"
 import DcProject from "../../../studio/formats/DcProject"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
 import { ReadableFile, readFileDataUrl } from "../../../studio/util/FileTypes"
+import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
 const imageExtensions = [".png", ".jpeg", ".gif"]
@@ -46,12 +47,17 @@ const ProjectTextures = ({ project }: { project: DcProject }) => {
     const notSelectedTextures = mappedTextures.filter(t => !selectedGroupTextures.includes(t.id))
 
     const addGroup = () => setGroup(groups.concat([new TextureGroup("New Group", false)]))
+    const uploadTexture = (file: ReadableFile) =>
+        readFileToImg(file)
+            .then(img => project.textureManager.addTexture(file.name, img))
+    const [ref, isDragging] = useFileUpload<HTMLDivElement>(imageExtensions, uploadTexture)
+
 
     const defaultProject = project.isDefaultProject
 
     return (
         <div className="flex flex-col h-full">
-            <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden flex-grow">
+            <div ref={ref} className={`rounded-sm bg-${isDragging?'red':'gray'}-800 flex flex-col overflow-hidden flex-grow`}>
                 <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                     <p className="flex-grow mt-1 ml-1">TEXTURE GROUPS</p>
                     <p className="flex flex-row">
@@ -72,7 +78,7 @@ const ProjectTextures = ({ project }: { project: DcProject }) => {
                     <p className="flex flex-row">
                         <button disabled={defaultProject} onClick={() => project.textureManager.addTexture()} className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"><SVGPlus className="h-4 w-4 mr-1" /></button>
                         <ClickableInput
-                            onFile={file => readFileToImg(file).then(img => project.textureManager.addTexture(file.name, img))}
+                            onFile={uploadTexture}
                             accept={imageExtensions}
                             disabled={defaultProject}
                             multiple
@@ -174,7 +180,7 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
     const height = 50
     return (
         <div className={(selected ? "bg-green-500" : "bg-gray-700 text-white") + " my-2 ml-2 rounded-sm text-left pl-2 w-full flex flex-row pr-6"}>
-            <div className="table" style={{height: `${height}px`, maxWidth: `${height}px`}}>
+            <div className="table" style={{ height: `${height}px`, maxWidth: `${height}px` }}>
                 <div ref={ref} className="table-cell align-middle">
                 </div>
             </div>

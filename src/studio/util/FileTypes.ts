@@ -45,3 +45,12 @@ export const readFileDataUrl = (file: ReadableFile) => {
     reader.readAsDataURL(await file.asFile())
   })
 }
+
+export const readFileArrayBuffer = (file: ReadableFile) => {
+  return new Promise<ArrayBuffer>(async (resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as ArrayBuffer)
+    reader.onerror = error => reject(error)
+    reader.readAsArrayBuffer(await file.asFile())
+  })
+}

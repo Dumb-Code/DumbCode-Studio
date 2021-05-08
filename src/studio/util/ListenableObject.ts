@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import { v4 } from 'uuid';
 export class LO<T> {
   constructor(
     private _value: T,
     private listners: Set<((newValue: T, oldValue: T) => void)> = new Set(),
-    public identifier = v4()
-  ) {}
+  ) { }
 
   get value() {
     return this._value
@@ -28,11 +26,76 @@ export class LO<T> {
 export const useListenableObject = <T>(obj: LO<T>): [T, (val: T) => void] => {
   const [state, setState] = useState(obj.value)
   useEffect(() => {
-    if(state !== obj.value) {
+    if (state !== obj.value) {
       setState(obj.value)
     }
     obj.addListener(setState)
     return () => obj.removeListener(setState)
   }, [state, setState, obj])
-  return [ state, (val: T) => obj.value = val]
+  return [state, val => obj.value = val]
+}
+
+
+
+export class LOMap<K, V> extends Map<K, V> {
+  constructor(
+    private listners: Map<K, Set<((newValue: V | undefined, oldValue: V | undefined) => void)>> = new Map()
+  ) {
+    super()
+  }
+
+  clear() {
+    this.forEach((v, k) => {
+      const get = this.listners.get(k)
+      if (get !== undefined) {
+        get.forEach(l => l(undefined, v))
+      }
+    })
+    super.clear()
+  }
+
+  delete(key: K) {
+    const get = this.listners.get(key)
+    if (get !== undefined) {
+      get.forEach(l => l(undefined, this.get(key) ?? undefined))
+    }
+    return super.delete(key);
+  }
+
+  set(key: K, value: V) {
+    const get = this.listners.get(key)
+    if (get !== undefined) {
+      get.forEach(l => l(value, this.get(key) ?? undefined))
+    }
+    super.set(key, value)
+    return this
+  }
+
+
+  addListener(key: K, func: (newValue: V | undefined, oldValue: V | undefined) => void) {
+    const arr = this.listners.get(key) ?? new Set()
+    arr.add(func)
+    this.listners.set(key, arr)
+  }
+
+  removeListener(key: K, func: (newValue: V | undefined, oldValue: V | undefined) => void) {
+    const arr = this.listners.get(key)
+    if (arr !== undefined) {
+      arr.delete(func)
+    }
+  }
+}
+
+
+export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K): [V | undefined, (val: V) => void] => {
+  const [state, setState] = useState(obj.get(key))
+  useEffect(() => {
+    const v = obj.get(key)
+    if (state !== v) {
+      setState(v)
+    }
+    obj.addListener(key, setState)
+    return () => obj.removeListener(key, setState)
+  }, [state, setState, obj, key])
+  return [state, val => obj.set(key, val)]
 }
