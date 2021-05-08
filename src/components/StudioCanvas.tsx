@@ -15,16 +15,16 @@ const StudioCanvas = () => {
             }
         })
 
-        observer.observe(ref.current)
+        const currentRef = ref.current
 
-        setSize(ref.current.clientWidth, ref.current.clientHeight)
-        ref.current.appendChild(renderer.domElement)
+        observer.observe(currentRef)
+
+        setSize(currentRef.clientWidth, currentRef.clientHeight)
+        currentRef.appendChild(renderer.domElement)
 
         return () => {
             observer.disconnect()
-            if(ref.current !== null) {
-                ref.current.removeChild(renderer.domElement)
-            }
+            currentRef.removeChild(renderer.domElement)
         }
     }, [renderer.domElement, setSize])
 

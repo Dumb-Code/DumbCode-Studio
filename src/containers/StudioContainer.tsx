@@ -3,7 +3,7 @@ import Project from "../views/project/Project"
 import Modeler from "../views/modeler/Modeler"
 import Animator from "../views/animator/Animator"
 import Texturer from "../views/texturer/Texturer"
-import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
+import { StudioContextProvider } from "../contexts/StudioContext";
 
 type Tab = {
   name: string;

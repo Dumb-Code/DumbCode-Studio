@@ -9,8 +9,7 @@ export const useFileUpload = <T extends HTMLElement,>(
   const [dragging, setDragging] = useState(false)
 
   useEffect(() => {
-
-    var currentRef = ref.current;
+    const currentRef = ref.current;
 
     if (currentRef === null) {
       console.warn("File Upload Ref was not set.")
@@ -42,7 +41,7 @@ export const useFileUpload = <T extends HTMLElement,>(
 
           const validName = (name: string) => extensions.includes(name.substring(name.lastIndexOf(".")))
 
-          const cast = function(handle) {
+          const cast = function (handle) {
             if (handle instanceof FileSystemFileHandle && validName(handle.name)) {
               onChange(createReadableFileExtended(handle as FileSystemFileHandle))
             }
@@ -74,12 +73,10 @@ export const useFileUpload = <T extends HTMLElement,>(
       currentRef.addEventListener('drop', onDrop)
 
       return () => {
-        if (currentRef !== null) {
-          currentRef.removeEventListener('dragenter', onDragEnter)
-          currentRef.removeEventListener('dragover', onDragOver)
-          currentRef.removeEventListener('dragleave', onDragLeave)
-          currentRef.removeEventListener('drop', onDrop)
-        }
+        currentRef.removeEventListener('dragenter', onDragEnter)
+        currentRef.removeEventListener('dragover', onDragOver)
+        currentRef.removeEventListener('dragleave', onDragLeave)
+        currentRef.removeEventListener('drop', onDrop)
       }
     }
   }, [extensions, onChange])

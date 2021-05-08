@@ -1,5 +1,4 @@
 import { ReactSortable, ItemInterface } from "react-sortablejs"
-import { utils } from "sortablejs"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus, SVGUpload } from "../../../components/Icons"

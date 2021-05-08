@@ -2,7 +2,6 @@ import { useRef, useEffect } from 'react';
 import { LO, useListenableObject } from './../../util/ListenableObject';
 import { v4 as uuidv4 } from 'uuid';
 import { DCMModel } from './../model/DcmModel';
-import { createNamedExports } from 'typescript';
 
 export class TextureGroup {
   readonly identifier: string;
@@ -116,13 +115,11 @@ export const useTextureDomRef = <T extends HTMLElement>(texture: Texture, classN
       cloned.className = className
     }
 
-    ref.current.appendChild(cloned)
-    return () => {
-      if (ref.current !== null) {
-        ref.current.removeChild(cloned)
-      }
-    }
-  }, [img])
+    const currentRef = ref.current
+
+    currentRef.appendChild(cloned)
+    return () => { currentRef.removeChild(cloned) }
+  }, [img, className])
 
   return ref
 }
