@@ -28,9 +28,7 @@ export default class DcProject {
   animationTabs: DcaTabs
   materials: ProjectMaterials
   previousThreeTexture: Texture | null
-
-  isDefaultProject = false
-
+  
   constructor(name: string, model: DCMModel) {
     this.identifier = uuidv4()
     this.name = new LO(name)

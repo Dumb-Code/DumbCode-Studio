@@ -66,7 +66,7 @@ const ProjectTextures = () => {
                 </div>
 
                 <div className="flex flex-row overflow-hidden h-full w-full">
-                <div className="flex-grow flex flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+                    <div className="flex-grow flex flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
                         <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
                             <p className="flex-grow">SELECTED</p>
                         </div>
@@ -126,13 +126,9 @@ const SelectedTexturesList = ({ project }: { project: DcProject }) => {
     const [textures] = useListenableObject(project.textureManager.textures)
 
     const selectedTextures = selectedGroupTextures
-        .map(g => {
-            const found = textures.find(t => t.identifier === g)
-            if (found === undefined) {
-                throw new Error("Unable to find texture with identifier " + g)
-            }
-            return new WrappedTexture(found)
-        })
+        .map(g => textures.find(t => t.identifier === g))
+        .filter((g): g is Texture => g !== undefined)
+        .map(g => new WrappedTexture(g))
 
     return (
         <ReactSortable

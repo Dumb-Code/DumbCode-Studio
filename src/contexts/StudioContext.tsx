@@ -74,9 +74,7 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
 
   return (
     <CreatedContext.Provider value={context}>
-      <div key={selectedProject?.identifier ?? 'noproject'}>
-        {children}
-      </div>
+      {children}
     </CreatedContext.Provider>
   )
 }
