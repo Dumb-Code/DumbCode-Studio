@@ -2,7 +2,7 @@ import { SVGEye, SVGLocked, SVGPlus, SVGSettings } from "../../../components/Ico
 
 const AnimatorTimeline = () => {
     return(
-        <div className="rounded-sm bg-gray-800 h-full flex flex-col pt-2">
+        <div className="rounded-sm bg-gray-800 h-full flex flex-col pt-2 overflow-x-hidden overflow-y-scroll">
             <AnimationLayer index={0} numStacked={1} />
             <AnimationLayer index={1} numStacked={3} />
             <AnimationLayer index={2} numStacked={4} />
