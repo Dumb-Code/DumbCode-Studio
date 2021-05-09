@@ -72,6 +72,10 @@ button {
   @apply focus:outline-none !important;
 }
 
+.icon-button {
+  @apply bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1
+}
+
 /**
   * This injects Tailwind's utility classes and any utility classes registered
   * by plugins.

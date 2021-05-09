@@ -21,125 +21,64 @@ const readFileToImg = async (file: ReadableFile) => {
 }
 
 const ProjectTextures = () => {
-    const { selectedProject: project } = useStudio()
+    const { getSelectedProject, hasProject } = useStudio()
 
-    const [selectedGroup, setSelectedGroup] = useListenableObject(project.textureManager.selectedGroup)
-    const [selectedGroupTextures, setSelectedGroupTextures] = useListenableObject(selectedGroup.textures)
+    const addGroup = () => {
+        const groups = getSelectedProject().textureManager.groups
+        groups.value = groups.value.concat([new TextureGroup("New Group", false)])
+    }
 
-    const [groups, setGroup] = useListenableObject(project.textureManager.groups)
-    const [textures] = useListenableObject(project.textureManager.textures)
+    const addTexture = (name?: string, img?: HTMLImageElement) => {
+        getSelectedProject().textureManager.addTexture(name, img)
+    }
 
-    const mappedTextures = textures.map(t => new WrappedTexture(t))
-    const selectedTextures = selectedGroupTextures
-        .map(g => {
-            const found = mappedTextures.find(t => t.id === g)
-            if (found === undefined) {
-                throw new Error("Unable to find texture with identifier " + g)
-            }
-            return found
-        })
-    const notSelectedTextures = mappedTextures.filter(t => !selectedGroupTextures.includes(t.id))
-
-    const addGroup = () => setGroup(groups.concat([new TextureGroup("New Group", false)]))
     const uploadTexture = (file: ReadableFile) =>
         readFileToImg(file)
-            .then(img => project.textureManager.addTexture(file.name, img))
+            .then(img => addTexture(file.name, img))
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(imageExtensions, uploadTexture)
-
-
-    const defaultProject = project.isDefaultProject
 
     return (
         <div className="flex flex-col h-full">
-            <div ref={ref} className={`rounded-sm bg-${isDragging?'red':'gray'}-800 flex flex-col overflow-hidden flex-grow`}>
+            <div ref={ref} className={`rounded-sm bg-${isDragging ? 'red' : 'gray'}-800 flex flex-col overflow-hidden flex-grow`}>
                 <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                     <p className="flex-grow mt-1 ml-1">TEXTURE GROUPS</p>
                     <p className="flex flex-row">
-                        <button disabled={defaultProject} className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1" onClick={addGroup}><SVGPlus className="h-4 w-4 mr-1" /></button>
+                        <button className="icon-button" onClick={addGroup}><SVGPlus className="h-4 w-4 mr-1" /></button>
                     </p>
                 </div>
                 <div className="flex flex-col overflow-y-scroll h-3/6 w-full pr-6">
-                    {
-                        defaultProject ?
-                            <div>No Model</div> :
-                            groups.map(g =>
-                                <GroupEntry key={g.identifier} onClick={() => setSelectedGroup(g)} group={g} selected={g === selectedGroup} />
-                            )
-                    }
+                    {hasProject && <GroupList project={getSelectedProject()} />}
                 </div>
                 <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                     <p className="flex-grow mt-1 ml-1">TEXTURES</p>
                     <p className="flex flex-row">
-                        <button disabled={defaultProject} onClick={() => project.textureManager.addTexture()} className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"><SVGPlus className="h-4 w-4 mr-1" /></button>
+                        <button onClick={() => addTexture()} className="icon-button"><SVGPlus className="h-4 w-4 mr-1" /></button>
                         <ClickableInput
                             onFile={uploadTexture}
                             accept={imageExtensions}
-                            disabled={defaultProject}
                             multiple
                             description="Texture Files"
-                            className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"
+                            className="icon-button"
                         >
                             <SVGUpload className="h-4 w-4 mr-1" />
                         </ClickableInput>
                     </p>
                 </div>
-                {defaultProject ?
-                    <div className="h-full w-full"> No Model</div>
-                    :
-                    <div className="flex flex-row overflow-hidden h-full w-full">
-                        <div className="flex-grow flex flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
-                            <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
-                                <p className="flex-grow">SELECTED</p>
-                            </div>
-                            <ReactSortable
-                                // Again, sortable.js is kinda wack, and we need to cause a complete remount of the list to have the changed props in effect
-                                key={`group.sortable.1.${selectedGroup.isDefault}`}
-                                list={selectedTextures}
-                                setList={(list, _, d) => {
-                                    if (d.dragging !== null) {
-                                        const list1 = list.map(l => l.id)
-                                        const list2 = selectedGroupTextures
-                                        if (list1.length !== list2.length || list1.some((l, i) => l !== list2[i])) {
-                                            //Fuck sortable js and it's DOM changing shit
-                                            //Might be fixed by moving to onMove
-                                            setTimeout(() => setSelectedGroupTextures(list1), 1)
-                                        }
-                                    }
-                                }}
-                                animation={150}
-                                fallbackOnBody
-                                className="flex-grow"
-                                disabled={selectedGroup.isDefault}
-                                group={{ name: 'textures-on-group', pull: true, put: true }}
-                            >
-                                {selectedTextures
-                                    .map(t =>
-                                        <GroupTextureSwitchEntry key={t.id} texture={t.texture} selected={true} />
-                                    )
-                                }
-                            </ReactSortable>
+
+                <div className="flex flex-row overflow-hidden h-full w-full">
+                <div className="flex-grow flex flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+                        <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
+                            <p className="flex-grow">SELECTED</p>
                         </div>
-                        <div className="flex-grow flex flex-col border-r border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}>
-                            <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
-                                <p className="flex-grow">AVALIBLE</p>
-                            </div>
-                            <ReactSortable
-                                key={`group.sortable.2.${selectedGroup.isDefault}`}
-                                list={notSelectedTextures}
-                                setList={() => { }}
-                                animation={150}
-                                fallbackOnBody
-                                className="flex-grow"
-                                disabled={selectedGroup.isDefault}
-                                group={{ name: 'textures-on-group', pull: true, put: true }}
-                            >
-                                {notSelectedTextures.map((t) =>
-                                    <GroupTextureSwitchEntry key={t.id} texture={t.texture} selected={false} />
-                                )}
-                            </ReactSortable>
-                        </div>
+                        {hasProject && <SelectedTexturesList project={getSelectedProject()} />}
                     </div>
-                }
+                    <div className="flex-grow flex flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+                        <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
+                            <p className="flex-grow">AVAILABLE</p>
+                        </div>
+                        {hasProject && <NonSelectedTextures project={getSelectedProject()} />}
+                    </div>
+                </div>
             </div>
         </div>
     )
@@ -155,6 +94,18 @@ class WrappedTexture implements ItemInterface {
     }
 }
 
+const GroupList = ({ project }: { project: DcProject }) => {
+    const [selectedGroup, setSelectedGroup] = useListenableObject(project.textureManager.selectedGroup)
+    const [groups] = useListenableObject(project.textureManager.groups)
+    return (
+        <>
+            {groups.map(g =>
+                <GroupEntry key={g.identifier} onClick={() => setSelectedGroup(g)} group={g} selected={g === selectedGroup} />
+            )}
+        </>
+    )
+}
+
 const GroupEntry = ({ group, selected, onClick }: { group: TextureGroup, selected: boolean, onClick: () => void }) => {
     return (
         <div onClick={onClick} className={(selected ? "bg-green-500" : "bg-gray-700 text-white") + " my-1 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row"}>
@@ -164,6 +115,83 @@ const GroupEntry = ({ group, selected, onClick }: { group: TextureGroup, selecte
                 <button className={(selected ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
             </p>
         </div>
+    )
+}
+
+const SelectedTexturesList = ({ project }: { project: DcProject }) => {
+
+    const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
+    const [selectedGroupTextures, setSelectedGroupTextures] = useListenableObject(selectedGroup.textures)
+
+    const [textures] = useListenableObject(project.textureManager.textures)
+
+    const selectedTextures = selectedGroupTextures
+        .map(g => {
+            const found = textures.find(t => t.identifier === g)
+            if (found === undefined) {
+                throw new Error("Unable to find texture with identifier " + g)
+            }
+            return new WrappedTexture(found)
+        })
+
+    return (
+        <ReactSortable
+            // Again, sortable.js is kinda wack, and we need to cause a complete remount of the list to have the changed props in effect
+            key={`group.sortable.1.${selectedGroup.isDefault}`}
+            list={selectedTextures}
+            setList={(list, _, d) => {
+                if (d.dragging !== null) {
+                    const list1 = list.map(l => l.id)
+                    const list2 = selectedGroupTextures
+                    if (list1.length !== list2.length || list1.some((l, i) => l !== list2[i])) {
+                        //Fuck sortable js and it's DOM changing shit
+                        //Might be fixed by moving to onMove
+                        setTimeout(() => setSelectedGroupTextures(list1), 1)
+                    }
+                }
+            }}
+            animation={150}
+            fallbackOnBody
+            className="flex-grow"
+            disabled={selectedGroup.isDefault}
+            group={{ name: 'textures-on-group', pull: true, put: true }}
+        >
+            {selectedTextures
+                .map(t =>
+                    <GroupTextureSwitchEntry key={t.id} texture={t.texture} selected={true} />
+                )
+            }
+        </ReactSortable>
+
+    )
+}
+
+const NonSelectedTextures = ({ project }: { project: DcProject }) => {
+
+    const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
+    const [selectedGroupTextures] = useListenableObject(selectedGroup.textures)
+
+    const [textures] = useListenableObject(project.textureManager.textures)
+
+    const notSelectedTextures = textures
+        .filter(t => !selectedGroupTextures.includes(t.identifier))
+        .map(t => new WrappedTexture(t))
+
+    return (
+        <ReactSortable
+            key={`group.sortable.2.${selectedGroup.isDefault}`}
+            list={notSelectedTextures}
+            setList={() => { }}
+            animation={150}
+            fallbackOnBody
+            className="flex-grow"
+            disabled={selectedGroup.isDefault}
+            group={{ name: 'textures-on-group', pull: true, put: true }}
+        >
+            {notSelectedTextures.map((t) =>
+                <GroupTextureSwitchEntry key={t.id} texture={t.texture} selected={false} />
+            )}
+        </ReactSortable>
     )
 }
 

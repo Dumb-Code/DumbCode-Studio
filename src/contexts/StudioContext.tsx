@@ -21,9 +21,10 @@ export type StudioContext = {
   projects: DcProject[],
   addProject: (projects: DcProject) => void,
 
+  hasProject: boolean
+  getSelectedProject: () => DcProject
   selectedProject: DcProject,
-  selectProject: (project: DcProject) => void
-
+  selectProject: (project: DcProject) => void,
 } & ThreeJsContext
 const CreatedContext = createContext<StudioContext | null>(null);
 export const useStudio = () => {
@@ -38,11 +39,7 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
   const three = useMemo(createThreeContext, [])
 
   const [projects, setProjects] = useState<DcProject[]>([])
-  const [selectedProject, setSelectedProject] = useState(() => {
-    const project = newProject()
-    project.isDefaultProject = true
-    return project
-  })
+  const [selectedProject, setSelectedProject] = useState<DcProject|null>(null)
 
   const context: StudioContext = {
     projects,
@@ -51,10 +48,22 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
       context.selectProject(project)
     },
 
-    selectedProject,
+    hasProject: selectedProject !== null,
+    get selectedProject() { return context.getSelectedProject() },
+    getSelectedProject: () => {
+      if(selectedProject === null) {
+        const project = newProject()
+        context.addProject(project)
+        return project
+      }
+      return selectedProject
+    },
+
     selectProject: project => {
       if (project !== selectedProject) {
-        three.scene.remove(selectedProject.group)
+        if(selectedProject !== null) {
+          three.scene.remove(selectedProject.group)
+        }
         three.scene.add(project.group)
       }
       setSelectedProject(project)
@@ -65,7 +74,7 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
 
   return (
     <CreatedContext.Provider value={context}>
-      <div key={selectedProject.identifier}>
+      <div key={selectedProject?.identifier ?? 'noproject'}>
         {children}
       </div>
     </CreatedContext.Provider>

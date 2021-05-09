@@ -13,61 +13,64 @@ import { StudioBuffer } from "../../../studio/util/StudioBuffer"
 const animationExtensions = [".dca"]
 
 const ProjectAnimations = () => {
-
-    const { selectedProject: project } = useStudio()
-
-    const [animations, setAnimations] = useListenableObject(project.animationTabs.animations)
-    const [tabs, setTabs] = useListenableObject(project.animationTabs.tabs)
+    const { hasProject, getSelectedProject } = useStudio()
 
     const addAnimation = (animation: DcaAnimation) => {
-        setAnimations(animations.concat([animation]))
+        const tabs = getSelectedProject().animationTabs
+        tabs.animations.value = tabs.animations.value.concat([animation])
+        tabs.tabs.value = tabs.tabs.value.concat([animation.identifier])
     }
 
-    const uploadFile = (file: ReadableFile) =>
+    const uploadFile = (file: ReadableFile) => {
+        const project = getSelectedProject()
         readFileArrayBuffer(file)
             .then(buff =>
                 addAnimation(loadDCAAnimation(project, file.name.substring(0, file.name.lastIndexOf(".")), new StudioBuffer(buff)))
             )
+    }
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(animationExtensions, uploadFile)
+
 
     return (
         <div ref={ref} className={`rounded-sm bg-${isDragging ? 'red' : 'gray'}-800 h-full flex flex-col overflow-hidden`}>
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">ANIMATIONS</p>
                 <p className="flex flex-row">
-                    <button disabled={project.isDefaultProject} className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1" onClick={() => addAnimation(new DcaAnimation(project, "New Animation"))}><SVGPlus className="h-4 w-4 mr-1" /></button>
+                    <button className="icon-button" onClick={() => addAnimation(new DcaAnimation(getSelectedProject(), "New Animation"))}><SVGPlus className="h-4 w-4 mr-1" /></button>
                     <ClickableInput
                         onFile={uploadFile}
                         accept={animationExtensions}
-                        disabled={project.isDefaultProject}
                         multiple
                         description="Texture Files"
-                        className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"
+                        className="icon-button"
                     >
                         <SVGUpload className="h-4 w-4 mr-1" />
                     </ClickableInput>
                 </p>
             </div>
             <div className="flex flex-col overflow-y-scroll h-full w-full pr-6">
-                {project.isDefaultProject ?
-                    <div>No Model</div>
-                    :
-                    animations.map(a =>
-                        <AnimationEntry key={a.identifier} animation={a} selected={tabs.includes(a.identifier)} toggleAnimation={() => {
-                            if (tabs.includes(a.identifier)) {
-                                setTabs(tabs.filter(t => t !== a.identifier))
-                            } else {
-                                setTabs([a.identifier].concat(tabs))
-                            }
-                        }} />)
-                }
+                {hasProject && <AnimationEntries project={getSelectedProject()} />}
             </div>
         </div >
     )
 }
 
-const AnimationEntry = ({ animation, selected, toggleAnimation }: { animation: DcaAnimation, selected: boolean, toggleAnimation: () => void }) => {
+const AnimationEntries = ({project}: {project: DcProject}) => {
+    const [animations] = useListenableObject(project.animationTabs.animations)
+    const [tabs, setTabs] = useListenableObject(project.animationTabs.tabs)
+    return (<>
+        {animations.map(a =>
+            <AnimationEntry key={a.identifier} animation={a} selected={tabs.includes(a.identifier)} toggleAnimation={() => {
+                if (tabs.includes(a.identifier)) {
+                    setTabs(tabs.filter(t => t !== a.identifier))
+                } else {
+                    setTabs([a.identifier].concat(tabs))
+                }
+            }} />)}
+    </>)
+}
 
+const AnimationEntry = ({ animation, selected, toggleAnimation }: { animation: DcaAnimation, selected: boolean, toggleAnimation: () => void }) => {
     return (
         <div className={(selected ? "bg-yellow-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} onClick={toggleAnimation}>
             <DblClickEditLO obj={animation.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />

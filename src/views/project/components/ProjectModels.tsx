@@ -9,34 +9,42 @@ import { LO } from "../../../studio/util/ListenableObject"
 const modelExtensions = [".dcm", ".tbl", ".bbmodel"]
 
 const ProjectModels = () => {
-    const { selectedProject, selectProject, projects, addProject } = useStudio()
+    const { hasProject, addProject } = useStudio()
 
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(modelExtensions, file => createProject(file).then(addProject))
 
     return (
-        <div ref={ref} className={`rounded-sm bg-${isDragging?'red':'gray'}-800 h-full flex flex-col overflow-hidden`}>
+        <div ref={ref} className={`rounded-sm bg-${isDragging ? 'red' : 'gray'}-800 h-full flex flex-col overflow-hidden`}>
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">MODELS</p>
                 <p className="text-md flex flex-row">
-                    <button className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1" onClick={() => addProject(newProject())}><SVGPlus className="h-4 w-4 mr-1" /></button>
+                    <button className="icon-button" onClick={() => addProject(newProject())}><SVGPlus className="h-4 w-4 mr-1" /></button>
                     <ClickableInput
                         onFile={file => createProject(file).then(addProject)}
                         accept={modelExtensions}
                         multiple
                         description="Model Files"
-                        className="bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1"
+                        className="icon-button"
                     >
                         <SVGUpload className="h-4 w-4 mr-1" />
                     </ClickableInput>
                 </p>
             </div>
             <div className="flex flex-col overflow-y-scroll h-full w-full pr-6">
-                {projects.map(project =>
-                    <ModelEntry key={project.identifier} name={project.name} selected={project === selectedProject} isRemote={false} changeModel={() => selectProject(project)} />
-                )}
+                {hasProject && <ModelEntries />}
             </div>
         </div>
     )
+}
+
+const ModelEntries = () => {
+    const { selectedProject, selectProject, projects } = useStudio()
+
+    return (<>
+        {projects.map(project =>
+            <ModelEntry key={project.identifier} name={project.name} selected={project === selectedProject} isRemote={false} changeModel={() => selectProject(project)} />
+        )}
+    </>)
 }
 
 const SaveIcon = FileSystemsAccessApi ? SVGSave : SVGDownload

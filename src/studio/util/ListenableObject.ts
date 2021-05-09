@@ -10,7 +10,10 @@ export class LO<T> {
   }
 
   set value(value: T) {
-    this.listners.forEach(l => l(value, this._value))
+    if(value !== this._value) {
+      this.listners.forEach(l => l(value, this._value))
+      this._value = value
+    }
     this._value = value
   }
 

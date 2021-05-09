@@ -29,7 +29,7 @@ export default class DcProject {
   materials: ProjectMaterials
   previousThreeTexture: Texture | null
 
-  isDefaultProject: boolean = false
+  isDefaultProject = false
 
   constructor(name: string, model: DCMModel) {
     this.identifier = uuidv4()
