@@ -4,7 +4,7 @@ import ProjectAnimations from './components/ProjectAnimations'
 import ProjectTextures from './components/ProjectTextures'
 import { useState } from 'react'
 
-const Texturer = () => {
+const Project = () => {
 
     const[remoteShown, showRemote] = useState(false);
 
@@ -23,4 +23,4 @@ const Texturer = () => {
     )
 }
 
-export default Texturer;
+export default Project;
