@@ -20,15 +20,9 @@ const readFileToImg = async (file: ReadableFile) => {
     })
 }
 
-//The wrapper helps with the complete refreshing of all states when the project is changed.
-//This is done by setting the key of the element ot the project identifier. When that changes,
-//It's unmounted and remounted.
-const ProjectTexturesWrapper = () => {
-    const { selectedProject } = useStudio()
-    return <ProjectTextures key={selectedProject.identifier} project={selectedProject} />
-}
+const ProjectTextures = () => {
+    const { selectedProject: project } = useStudio()
 
-const ProjectTextures = ({ project }: { project: DcProject }) => {
     const [selectedGroup, setSelectedGroup] = useListenableObject(project.textureManager.selectedGroup)
     const [selectedGroupTextures, setSelectedGroupTextures] = useListenableObject(selectedGroup.textures)
 
@@ -193,4 +187,4 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
     )
 }
 
-export default ProjectTexturesWrapper
+export default ProjectTextures

@@ -12,18 +12,12 @@ import { StudioBuffer } from "../../../studio/util/StudioBuffer"
 
 const animationExtensions = [".dca"]
 
-//See ProjectTexturesWrapper for more info
-const ProjectAnimationsWrapper = () => {
-    const { selectedProject } = useStudio()
-    return <ProjectAnimations key={selectedProject.identifier} project={selectedProject} />
-}
+const ProjectAnimations = () => {
 
-const ProjectAnimations = ({ project }: { project: DcProject }) => {
+    const { selectedProject: project } = useStudio()
 
     const [animations, setAnimations] = useListenableObject(project.animationTabs.animations)
     const [tabs, setTabs] = useListenableObject(project.animationTabs.tabs)
-
-
 
     const addAnimation = (animation: DcaAnimation) => {
         setAnimations(animations.concat([animation]))
@@ -86,4 +80,4 @@ const AnimationEntry = ({ animation, selected, toggleAnimation }: { animation: D
     )
 }
 
-export default ProjectAnimationsWrapper;
+export default ProjectAnimations;
