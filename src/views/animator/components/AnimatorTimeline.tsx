@@ -42,7 +42,7 @@ const TimelineLayer = ({numStacked, color}: {numStacked: number, color: string})
     var elements = new Array(numStacked)
 
     for (let i = 0; i < numStacked; i++) {
-        elements[i] = <KeyFrame layerColor={color} start={Math.random() * 400} length={Math.random() * 200 + 50} />;
+        elements[i] = <KeyFrame key={i} layerColor={color} start={Math.random() * 400} length={Math.random() * 200 + 50} />;
     }
 
     return(
