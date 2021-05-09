@@ -3,7 +3,7 @@ import Project from "../views/project/Project"
 import Modeler from "../views/modeler/Modeler"
 import Animator from "../views/animator/Animator"
 import Texturer from "../views/texturer/Texturer"
-import { StudioContextProvider } from "../contexts/StudioContext";
+import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
 
 type Tab = {
   name: string;
@@ -19,26 +19,41 @@ const Tabs: Tab[] = [
 
 const StudioContainer = () => {
 
-  const [activeTab, setActiveTab] = useState(Tabs[0]);
 
   return (
     <StudioContextProvider>
-      <div className="flex flex-col h-screen bg-black align-middle">
-        <div className="flex flex-row border-b border-white">
-          <div className="flex-grow pl-4">
-            {Tabs.map(tab => <NavBarButton key={tab.name} tab={tab} selected={tab === activeTab} setTab={() => setActiveTab(tab)} />)}
-          </div>
-          <div className="text-gray-200 mt-1 mr-2">
-            v1.0.0
-          </div>
-        </div>
-        <div className="flex-grow min-h-0">
-          {activeTab.component()}
-        </div>
-      </div>
+      <StudioApp />
     </StudioContextProvider>
   );
 };
+
+const StudioApp = () => {
+  const [activeTab, setActiveTab] = useState(Tabs[0])
+  const { hasProject, getSelectedProject } = useStudio()
+
+  const tabChanged = ((tab: Tab) => {
+    if (tab !== Tabs[0] && !hasProject) {
+      getSelectedProject()
+    }
+    setActiveTab(tab)
+  })
+
+  return (
+    <div className="flex flex-col h-screen bg-black align-middle">
+      <div className="flex flex-row border-b border-white">
+        <div className="flex-grow pl-4">
+          {Tabs.map(tab => <NavBarButton key={tab.name} tab={tab} selected={tab === activeTab} setTab={() => tabChanged(tab)} />)}
+        </div>
+        <div className="text-gray-200 mt-1 mr-2">
+          v1.0.0
+          </div>
+      </div>
+      <div className="flex-grow min-h-0">
+        {activeTab.component()}
+      </div>
+    </div>
+  )
+}
 
 export default StudioContainer;
 
