@@ -85,9 +85,7 @@ export const loadDCAAnimation = (project: DcProject, name: string, buffer: Studi
 
   repairKeyframes(project.model, version, keyframes, false)
 
-  const animation = new DcaAnimation(project, name)
-  project.animationTabs.animations.value = project.animationTabs.animations.value.concat([animation])
-  return animation
+  return new DcaAnimation(project, name)
 }
 
 export const repairKeyframes = (model: DCMModel, version: number, keyframes: DcaKeyframe[], alreadyFlipped = false) => {

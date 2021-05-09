@@ -26,7 +26,6 @@ const ProjectAnimations = ({ project }: { project: DcProject }) => {
 
 
     const addAnimation = (animation: DcaAnimation) => {
-        console.log(animation)
         setAnimations(animations.concat([animation]))
     }
 
