@@ -27,7 +27,7 @@ const TexturerTextureWindow = ({setStateWith}: {setStateWith: any}) => {
 const TexturerModelWindow = ({setStateWith}: {setStateWith: any}) => {
 
     return(
-        <div className="h-full w-full">
+        <div className="h-full w-full border-black border-b">
             <button className="bg-gray-900 absolute z-10 w-20 rounded-br text-gray-400 pr-1" onDoubleClick={() => {setStateWith("both")}}>Model</button>
             <StudioCanvas />
         </div>
@@ -38,7 +38,7 @@ const TexturerBothWindows = ({setStateWith}: {setStateWith: any}) => {
 
     return(
         <div className="flex flex-row h-full">
-            <div className="w-1/2 border-r border-black">
+            <div className="w-1/2 border-r border-black border-b">
                 <button className="bg-gray-900 absolute z-10 w-20 rounded-br text-gray-400 pr-1" onDoubleClick={() => {setStateWith("model")}}>Model</button>
                 <StudioCanvas />
             </div>

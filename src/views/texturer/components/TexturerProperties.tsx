@@ -33,11 +33,21 @@ const TexturerProperties = () => {
     }
 
     return (
-        <div className="rounded-sm bg-gray-800 h-full flex flex-row">
-            <HSLColorBox resolution={25} height={25} hue={hue} swatches={swatches} addSw={addSwatch} removeSw={removeSwatch} />
-            <HueSelector hue={hue} setHue={setHue} />
-            <div className="mx-2 my-1 h-full overflow-y-hidden">
-                <SwatchesPannel swatches={swatches} setHue={setHue} removeSw={removeSwatch} />
+        <div className="rounded-sm bg-gray-900 h-full flex flex-row">
+            <div className="ml-3 mr-3 my-2 pt-1">
+                <HueSelector hue={hue} setHue={setHue} />
+            </div>
+            <div className="h-full flex flex-row w-full bg-gray-800">
+                <div className="w-1/2">
+                    <p className="bg-gray-900 h-4 w-full text-xs text-gray-300">COLOR SELECTOR</p>
+                    <HSLColorBox resolution={25} height={25} hue={hue} swatches={swatches} addSw={addSwatch} removeSw={removeSwatch} />
+                </div>
+                <div className="w-1/2">
+                    <p className="bg-gray-900 h-4 w-full text-xs text-gray-300">SWATCHES</p>
+                    <div className="mx-2 my-1 h-full overflow-y-hidden w-min">
+                        <SwatchesPannel swatches={swatches} setHue={setHue} removeSw={removeSwatch} />
+                    </div>
+                </div>
             </div>
         </div>
     )
@@ -47,7 +57,7 @@ export default TexturerProperties;
 
 const SwatchButton = ({ swatch, setHue, removeSw }: { swatch: Swatch, setHue: (hue: number) => void, removeSw: (swatch: Swatch) => void }) => {
     return (
-        <div className="w-5 h-5" style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }} 
+        <div className="w-5 h-5 border border-black" style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }} 
             onClick={() => setHue(swatch.h)}
             onDoubleClick={() => removeSw(swatch)}
         ></div>
@@ -57,8 +67,9 @@ const SwatchButton = ({ swatch, setHue, removeSw }: { swatch: Swatch, setHue: (h
 const SwatchesPannel = ({ swatches, setHue, removeSw }: { swatches: readonly Swatch[], setHue: (hue: number) => void, removeSw: (swatch: Swatch) => void }) => {
 
     return (
-        <div className="grid grid-rows-6 grid-flow-col gap-1 overflow-x-scroll">
+        <div className="grid grid-rows-5 grid-flow-col gap-1 overflow-x-scroll pb-4 pt-1 ">
             {swatches.map((swatch, i) => <SwatchButton key={i} swatch={swatch} setHue={setHue} removeSw={removeSw} />)}
+            <div className="w-5 h-5 border border-black pl-1 hover:bg-gray-700 cursor-pointer"><p className="-mt-1">+</p></div>
         </div>
     )
 }
@@ -80,7 +91,7 @@ const HueSelector = ({ hue, setHue }: { hue: number, setHue: any }) => {
             styles={{
                 track: { width: 6, background: 'linear-gradient(to bottom, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)', height: '100%' },
                 active: { background: 'transparent' },
-                thumb: { width: 15, height: 15 }
+                thumb: { width: 15, height: 15, opacity: '80%' }
             }}
         />
 
@@ -126,7 +137,7 @@ const HSLColorBox = ({ resolution, height, hue, swatches, addSw, removeSw }: { r
     }
 
     return (
-        <table className="w-1/2 h-full">
+        <table className="w-full h-full">
             <tbody>{
                 Array.from({ length: resolution }, (_, y) =>
                     <tr key={y}>{
