@@ -1,6 +1,17 @@
-import { AmbientLight, BoxBufferGeometry, Camera, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, REVISION, Scene, WebGLRenderer } from "three";
+import { useEffect } from 'react';
+import { AmbientLight, BoxBufferGeometry, Camera, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { ThreeJsContext } from "./StudioContext";
+import { ThreeJsContext, useStudio } from "./StudioContext";
+
+export const useOnFrameCallback = (callback: () => void) => {
+  const { onFrameListeners } = useStudio()
+  useEffect(() => {
+    onFrameListeners.add(callback)
+    return () => {
+      onFrameListeners.delete(callback)
+    }
+  })
+}
 
 export const createThreeContext: () => ThreeJsContext = () => {
   console.log(`Creating ThreeJs (${REVISION}) Context`)
@@ -25,6 +36,9 @@ export const createThreeContext: () => ThreeJsContext = () => {
   controls.screenSpacePanning = true
   controls.update()
 
+
+  const raycaster = new Raycaster()
+
   const grid = createGrid()
   scene.add(grid)
 
@@ -34,8 +48,12 @@ export const createThreeContext: () => ThreeJsContext = () => {
   let width = 100
   let height = 100
 
+  const onFrameListeners = new Set<() => void>()
+
   const onFrame = () => {
     requestAnimationFrame(onFrame)
+
+    onFrameListeners.forEach(l => l())
 
     renderer.render(scene, camera)
 
@@ -46,7 +64,7 @@ export const createThreeContext: () => ThreeJsContext = () => {
   onFrame()
 
   return {
-    renderer, camera, scene, onTopScene, controls,
+    renderer, camera, scene, onTopScene, controls, raycaster, onFrameListeners,
 
     setSize: (w, h) => {
       width = w

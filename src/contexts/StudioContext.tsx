@@ -1,5 +1,5 @@
-import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
-import { Camera, Scene, WebGLRenderer } from 'three';
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { Camera, Raycaster, Scene, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DcProject, { newProject } from '../studio/formats/DcProject';
 import { createThreeContext } from './ThreeContext';
@@ -10,6 +10,8 @@ export type ThreeJsContext = {
   renderer: WebGLRenderer,
   camera: Camera,
   controls: OrbitControls,
+  raycaster: Raycaster,
+  onFrameListeners: Set<() => void>,
 
   setSize: (width: number, height: number) => void
   getSize: () => { width: number; height: number; }
@@ -35,8 +37,9 @@ export const useStudio = () => {
   return context
 }
 
+const three = createThreeContext()
+
 export const StudioContextProvider = ({ children }: { children?: ReactNode }) => {
-  const three = useMemo(createThreeContext, [])
 
   const [projects, setProjects] = useState<DcProject[]>([])
   const [selectedProject, setSelectedProject] = useState<DcProject | null>(null)

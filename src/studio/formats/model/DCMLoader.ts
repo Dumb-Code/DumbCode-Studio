@@ -42,7 +42,7 @@ export const loadDCMModel = async(arrayBuffer: ArrayBuffer | PromiseLike<ArrayBu
             }
             return cubes
         }
-        model.children = readCubes()    
+        model.children.value = readCubes()    
     }
 
     //We need to invert the model. For this to work, we need three.js data. For that to happen, we need objects with geometry.
@@ -85,25 +85,25 @@ export const writeModel = model => {
 
     //Function to write an array easily.
     //This doesn't do `arr.forEach`, as we need a defined amount of numbers written
-    let writeArr = (arr, amount) => {
+    let writeArr = (arr: readonly number[], amount: number) => {
         for(let i = 0; i < amount; i++) {
             buffer.writeNumber(arr[i])
         }
     }
 
     //Recursive function to write a list of cubes.
-    let writeCubes = (cubes: DCMCube[]) => {
+    let writeCubes = (cubes: readonly DCMCube[]) => {
         buffer.writeNumber(cubes.length)
         cubes.forEach(cube => {
-            buffer.writeString(cube.name)
-            writeArr(cube.dimension, 3)
-            writeArr(cube.rotationPoint, 3)
-            writeArr(cube.offset, 3)
-            writeArr(cube.rotation, 3)
-            writeArr(cube.textureOffset, 2)
-            buffer.writeBool(cube.textureMirrored)
-            writeArr(cube.cubeGrow, 3)
-            writeCubes(cube.children)
+            buffer.writeString(cube.name.value)
+            writeArr(cube.dimension.value, 3)
+            writeArr(cube.rotationPoint.value, 3)
+            writeArr(cube.offset.value, 3)
+            writeArr(cube.rotation.value, 3)
+            writeArr(cube.textureOffset.value, 2)
+            buffer.writeBool(cube.textureMirrored.value)
+            writeArr(cube.cubeGrow.value, 3)
+            writeCubes(cube.children.value)
         })
     }
 

@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useStudio } from "../contexts/StudioContext";
+import { useSelectedCubeManagerRef as useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
 const StudioCanvas = () => {
     const { renderer, setSize } = useStudio()
+    useSelectedCubeManager()
     const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -16,9 +18,7 @@ const StudioCanvas = () => {
         })
 
         const currentRef = ref.current
-
         observer.observe(currentRef)
-
         setSize(currentRef.clientWidth, currentRef.clientHeight)
         currentRef.appendChild(renderer.domElement)
 

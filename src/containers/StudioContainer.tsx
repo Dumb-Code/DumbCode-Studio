@@ -24,8 +24,6 @@ const Tabs: Tab[] = [
 ]
 
 const StudioContainer = () => {
-
-
   return (
     <StudioContextProvider>
       <StudioApp />

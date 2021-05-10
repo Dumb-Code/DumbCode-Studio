@@ -11,7 +11,7 @@ const ModelerCommandInput = () => {
                 <input type="text" className="text-xs bg-gray-900 text-gray-300 border-none flex-grow focus:outline-none focus:ring-0" placeholder="type your command here" />
             </div>
             {/* Active command feedback */}
-            <div className="relative z-50 transform translate-x-10 text-xs mt-1 text-white">
+            <div className="relative inline-block z-50 transform translate-x-10 text-xs mt-1 text-white">
                 <p className="underline">command: snap</p>
                 click on first snap point<br/>
             </div>

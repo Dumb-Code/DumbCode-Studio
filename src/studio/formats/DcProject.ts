@@ -1,5 +1,5 @@
 import { WritableFile } from './../util/FileTypes';
-import { DCMCube, DCMModel } from './model/DcmModel';
+import { DCMModel } from './model/DcmModel';
 import { DoubleSide, Group, MeshLambertMaterial, Texture } from "three"
 import { ReadableFile } from '../util/FileTypes';
 import { v4 as uuidv4 } from "uuid"
@@ -7,6 +7,7 @@ import TextureManager from './textures/TextureManager';
 import { LO } from '../util/ListenableObject';
 import DcaTabs from './animations/DcaTabs';
 import { loadDCMModel } from './model/DCMLoader';
+import SelectedCubeManager from '../util/SelectedCubeManager';
 
 const material = new MeshLambertMaterial({
   color: 0x777777,
@@ -28,7 +29,9 @@ export default class DcProject {
   animationTabs: DcaTabs
   materials: ProjectMaterials
   previousThreeTexture: Texture | null
-  
+
+  selectedCubeManager = new SelectedCubeManager()
+
   constructor(name: string, model: DCMModel) {
     this.identifier = uuidv4()
     this.name = new LO(name)
@@ -37,6 +40,8 @@ export default class DcProject {
     this.textureManager = new TextureManager(this)
     this.animationTabs = new DcaTabs()
     this.materials = createMaterialsObject()
+    this.model.materials = this.materials
+    this.model.selectedCubeManager = this.selectedCubeManager
     this.group.add(this.model.createModel(this.materials.normal))
     this.previousThreeTexture = null
   }
@@ -72,7 +77,7 @@ export default class DcProject {
   }
 }
 
-type ProjectMaterials = {
+export type ProjectMaterials = {
   normal: MeshLambertMaterial;
   highlight: MeshLambertMaterial;
   selected: MeshLambertMaterial;
@@ -92,23 +97,7 @@ const createMaterialsObject = (): ProjectMaterials => {
 
 
 export const newProject = () => {
-  const model = new DCMModel()
-
-  model.children.push(
-    new DCMCube("hello", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model),
-    new DCMCube("How", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model),
-    new DCMCube("How2", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model),
-    new DCMCube("How3", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model),
-    new DCMCube("How4", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [
-      new DCMCube("Are", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [
-        new DCMCube("Are2", [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model)
-      ], model),
-    ], model),
-  )
-  model.onCubeHierarchyChanged()
-  model.createModel(new MeshLambertMaterial())
-
-  return new DcProject("New Project", model);
+  return new DcProject("New Project", new DCMModel());
 }
 
 export const createProject = async (read: ReadableFile) => {

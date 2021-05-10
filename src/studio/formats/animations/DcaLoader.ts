@@ -158,11 +158,11 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
 
   //Root cubes will have the move direction flipped.
   if (version <= 4 && alreadyFlipped !== true) {
-    model.children.forEach(root => {
+    model.children.value.forEach(root => {
       keyframes.forEach(keyframe => {
-        const arr = keyframe.position.get(root.name)
+        const arr = keyframe.position.get(root.name.value)
         if (arr !== undefined) {
-          keyframe.position.set(root.name, [-arr[0], -arr[1], arr[2]])
+          keyframe.position.set(root.name.value, [-arr[0], -arr[1], arr[2]])
         }
       })
     })

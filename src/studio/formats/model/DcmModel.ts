@@ -1,6 +1,9 @@
+import { LO } from './../../util/ListenableObject';
 import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, Material } from "three";
 import { v4 as uuidv4 } from "uuid"
 import EventManager from "../../util/EventManager";
+import { ProjectMaterials } from '../DcProject';
+import SelectedCubeManager from '../../util/SelectedCubeManager';
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
@@ -11,11 +14,10 @@ interface EventTypes {
 }
 
 export interface CubeParent {
-  addChild(child: DCMCube, silent?: boolean): void
-  deleteChild(child: DCMCube, silent?: boolean): void
-  getChildren(): DCMCube[]
-  children: DCMCube[]
-  onChildrenChange(children?: DCMCube[], silent?: boolean): void
+  addChild(child: DCMCube): void
+  deleteChild(child: DCMCube): void
+  children: LO<readonly DCMCube[]>
+  getChildren(): readonly DCMCube[]
 }
 
 const invalidParent: CubeParent = {
@@ -25,11 +27,8 @@ const invalidParent: CubeParent = {
   deleteChild() {
     throw new Error("Invalid Call On Parent")
   },
+  children: new LO<readonly DCMCube[]>([]),
   getChildren() {
-    throw new Error("Invalid Call On Parent")
-  },
-  children: [],
-  onChildrenChange() {
     throw new Error("Invalid Call On Parent")
   }
 }
@@ -46,10 +45,13 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
 
   cubeMap: Map<string, DCMCube>
   identifierCubeMap: Map<string, DCMCube>
-  children: DCMCube[]
+  children = new LO<readonly DCMCube[]>([])
 
   modelCache: Group
   material?: Material
+
+  materials?: ProjectMaterials
+  selectedCubeManager?: SelectedCubeManager
 
   constructor() {
     super()
@@ -60,9 +62,14 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
 
     this.cubeMap = new Map()
     this.identifierCubeMap = new Map()
-    this.children = []
 
     this.modelCache = new Group()
+
+    this.children.addListener(arr => {
+      if (this.material !== undefined) {
+        this.onChildrenChange(arr)
+      }
+    })
   }
 
   setTextureSize(width: number, height: number) {
@@ -75,7 +82,7 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
   onCubeHierarchyChanged() {
     this.maxCubeLevel = 0
     this.cubeMap.clear()
-    this.children.forEach(child => child.recalculateHierarchy(0, this))
+    this.children.value.forEach(child => child.recalculateHierarchy(0, this))
     this.dispatchEvent("hierarchyChanged", null)
   }
 
@@ -87,7 +94,7 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
     this.modelCache.scale.set(1 / 16, 1 / 16, 1 / 16)
     this.modelCache.position.set(0.5, 0, 0.5)
 
-    this.children.forEach(child => this.modelCache.add(child.createGroup()))
+    this.children.value.forEach(child => this.modelCache.add(child.createGroup()))
 
     return this.modelCache
   }
@@ -97,7 +104,7 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
   }
 
   traverseAll(func: (cube: DCMCube) => void) {
-    this.children.forEach(child => child.traverse(cube => func(cube)))
+    this.children.value.forEach(child => child.traverse(cube => func(cube)))
   }
 
   gatherAllCubes(arr: DCMCube[] = []) {
@@ -109,25 +116,21 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
     this.modelCache.updateMatrixWorld(force)
   }
 
-  addChild(child: DCMCube, silent = false) {
-    this.onChildrenChange(this.children.concat(child), silent)
+  addChild(child: DCMCube) {
+    this.children.value = this.children.value.concat(child)
   }
 
-  deleteChild(child: DCMCube, silent = false) {
-    this.onChildrenChange(this.children.filter(c => c !== child), silent)
+  deleteChild(child: DCMCube) {
+    this.children.value = this.children.value.filter(c => c !== child)
   }
 
   getChildren() {
-    return this.children
+    return this.children.value
   }
 
-  onChildrenChange(childern = this.children, silent = false) {
-    this.children.forEach(child => child.cubeGroup ? this.modelCache.remove(child.cubeGroup) : null)
-    this.children = childern;
-    this.children.forEach(child => this.modelCache.add(child.createGroup()))
-    if (!silent) {
-      this.onCubeHierarchyChanged()
-    }
+  onChildrenChange(children: readonly DCMCube[]) {
+    this.children.value.forEach(child => child.cubeGroup ? this.modelCache.remove(child.cubeGroup) : null)
+    children.forEach(child => this.modelCache.add(child.createGroup()))
   }
 
   resetAnimations() {
@@ -136,7 +139,7 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
   }
 
   resetVisuals() {
-    this.children.forEach(child => child.resetVisuals())
+    this.children.value.forEach(child => child.resetVisuals())
   }
 
   cloneModel() {
@@ -146,7 +149,7 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
     model.texWidth = this.texWidth
     model.texHeight = this.texHeight
 
-    model.children = this.children.map(c => c.cloneCube(model))
+    model.children.value = this.children.value.map(c => c.cloneCube(model))
 
     model.onCubeHierarchyChanged()
 
@@ -156,19 +159,21 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
 
 export class DCMCube implements CubeParent {
   identifier: string
-  name: string
-  dimension: [number, number, number]
-  rotationPoint: [number, number, number]
-  offset: [number, number, number]
-  rotation: [number, number, number]
-  textureOffset: [number, number]
-  textureMirrored: boolean
-  cubeGrow: [number, number, number]
-  children: DCMCube[]
+  readonly name: LO<string>
+  readonly dimension: LO<readonly [number, number, number]>
+  readonly rotationPoint: LO<readonly [number, number, number]>
+  readonly offset: LO<readonly [number, number, number]>
+  readonly rotation: LO<readonly [number, number, number]>
+  readonly textureOffset: LO<readonly [number, number]>
+  readonly textureMirrored: LO<boolean>
+  readonly cubeGrow: LO<readonly [number, number, number]>
+  readonly children: LO<readonly DCMCube[]>
+
+  readonly mouseState = new LO<"none" | "hover" | "selected">("none")
 
   model: DCMModel
   parent: CubeParent
-  
+
   hierarchyLevel: number
   uvBuffer: BufferAttribute
 
@@ -178,40 +183,57 @@ export class DCMCube implements CubeParent {
 
   constructor(
     name: string,
-    dimension: [number, number, number],
-    rotationPoint: [number, number, number],
-    offset: [number, number, number],
-    rotation: [number, number, number],
-    textureOffset: [number, number],
+    dimension: readonly [number, number, number],
+    rotationPoint: readonly [number, number, number],
+    offset: readonly [number, number, number],
+    rotation: readonly [number, number, number],
+    textureOffset: readonly [number, number],
     textureMirrored: boolean,
-    cubeGrow: [number, number, number],
-    children: DCMCube[],
+    cubeGrow: readonly [number, number, number],
+    children: readonly DCMCube[],
     model: DCMModel) {
     this.identifier = uuidv4()
-    this.name = name
-    this.dimension = dimension
-    this.rotationPoint = rotationPoint
-    this.offset = offset
-    this.rotation = rotation
-    this.textureOffset = textureOffset
-    this.textureMirrored = textureMirrored
-    this.cubeGrow = cubeGrow
-    this.children = children
+    this.name = new LO(name)
+    this.dimension = new LO<readonly [number, number, number]>(dimension)
+    this.rotationPoint = new LO<readonly [number, number, number]>(rotationPoint)
+    this.offset = new LO<readonly [number, number, number]>(offset)
+    this.rotation = new LO<readonly [number, number, number]>(rotation)
+    this.textureOffset = new LO<readonly [number, number]>(textureOffset)
+    this.textureMirrored = new LO<boolean>(textureMirrored)
+    this.cubeGrow = new LO<readonly [number, number, number]>(cubeGrow)
+    this.children = new LO<readonly DCMCube[]>(children)
     this.model = model
     this.hierarchyLevel = 0
 
     this.parent = invalidParent
 
     let counter = 0
-    while (model.cubeMap.has(this.name)) {
-      this.name = name + "~" + counter
+    while (model.cubeMap.has(this.name.value)) {
+      this.name.value = name + "~" + counter
       counter += 1
     }
-    model.cubeMap.set(this.name, this)
+    model.cubeMap.set(this.name.value, this)
     model.identifierCubeMap.set(this.identifier, this)
 
     this.uvBuffer = new BufferAttribute(new Float32Array(new Array(6 * 4 * 2)), 2)
 
+    this.mouseState.addListener(v => {
+      if (this.model.selectedCubeManager !== undefined && this.model.materials !== undefined && this.cubeMesh !== undefined) {
+        switch (v) {
+          case "hover":
+            this.model.selectedCubeManager.onMouseOverMesh(this.cubeMesh)
+            this.cubeMesh.material = this.model.materials.highlight
+            break
+          case "selected":
+            this.cubeMesh.material = this.model.materials.selected
+            break
+          case "none":
+            this.model.selectedCubeManager.onMouseOffMesh(this.cubeMesh)
+            this.cubeMesh.material = this.model.materials.normal
+            break
+        }
+      }
+    })
   }
 
 
@@ -225,7 +247,7 @@ export class DCMCube implements CubeParent {
     this.cubeGrowGroup = new Group()
     this.cubeGrowGroup.userData.cube = this
 
-    if(this.model.material === undefined) {
+    if (this.model.material === undefined) {
       throw new Error("Tried to create cube before model was initilized")
     }
 
@@ -248,13 +270,14 @@ export class DCMCube implements CubeParent {
     this.updateOffset()
     this.updateCubeGrow()
 
-    this.onChildrenChange(this.children, true)
+
+    this.onChildrenChange(this.children.value)
 
     return this.cubeGroup
   }
 
   getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3()) {
-    if(this.cubeMesh === undefined) {
+    if (this.cubeMesh === undefined) {
       throw new Error("Cube mesh was null")
     }
     let w = this.dimension[0] + this.cubeGrow[0] * 2 + 0.0001
@@ -268,29 +291,29 @@ export class DCMCube implements CubeParent {
   recalculateHierarchy(hierarchyLevel: number, parent: CubeParent) {
     this.hierarchyLevel = hierarchyLevel
     this.parent = parent
-    this.model.cubeMap.set(this.name, this)
-    this.children.forEach(child => child.recalculateHierarchy(this.hierarchyLevel + 1, this))
-    if (this.children.length === 0) {
+    this.model.cubeMap.set(this.name.value, this)
+    this.children.value.forEach(child => child.recalculateHierarchy(this.hierarchyLevel + 1, this))
+    if (this.children.value.length === 0) {
       this.model.maxCubeLevel = Math.max(this.model.maxCubeLevel, this.hierarchyLevel)
     }
   }
 
-  addChild(child: DCMCube, silent = false) {
-    this.onChildrenChange(this.children.concat(child), silent)
+  addChild(child: DCMCube) {
+    this.children.value = this.children.value.concat(child)
   }
 
-  deleteChild(child: DCMCube, silent = false) {
-    this.onChildrenChange(this.children.filter(c => c !== child), silent)
+  deleteChild(child: DCMCube) {
+    this.children.value = this.children.value.filter(c => c !== child)
   }
 
   getChildren() {
-    return this.children
+    return this.children.value
   }
 
   cloneCube(model = this.model) {
-    return new DCMCube(this.name.replace(/~\d+$/, ""), this.dimension, this.rotationPoint, this.offset,
-      this.rotation, this.textureOffset, this.textureMirrored, this.cubeGrow,
-      this.children.map(c => c.cloneCube(model)), model)
+    return new DCMCube(this.name.value.replace(/~\d+$/, ""), this.dimension.value, this.rotationPoint.value, this.offset.value,
+      this.rotation.value, this.textureOffset.value, this.textureMirrored.value, this.cubeGrow.value,
+      this.children.value.map(c => c.cloneCube(model)), model)
   }
 
   updateMatrixWorld(force = true) {
@@ -299,23 +322,20 @@ export class DCMCube implements CubeParent {
 
   traverse(callback) {
     callback(this)
-    this.children.forEach(c => c.traverse(callback))
+    this.children.value.forEach(c => c.traverse(callback))
   }
 
-  onChildrenChange(children = this.children, silent = false) {
-    this.children.forEach(child => child.cubeGroup ? this.cubeGroup?.remove(child.cubeGroup) : null)
-    this.children = children;
-    this.children.forEach(child => this.cubeGroup?.add(child.createGroup()))
-    if (!silent) {
-      this.model.onCubeHierarchyChanged()
-    }
+  onChildrenChange(children: readonly DCMCube[]) {
+    this.children.value.forEach(child => child.cubeGroup ? this.cubeGroup?.remove(child.cubeGroup) : null)
+    this.children.value = children;
+    this.children.value.forEach(child => this.cubeGroup?.add(child.createGroup()))
   }
 
   getAllChildrenCubes(arr: DCMCube[] = [], includeSelf = false) {
     if (includeSelf) {
       arr.push(this)
     }
-    this.children.forEach(c => {
+    this.children.value.forEach(c => {
       c.getAllChildrenCubes(arr)
       arr.push(c)
     })
@@ -323,7 +343,7 @@ export class DCMCube implements CubeParent {
   }
 
   resetVisuals() {
-    this.children.forEach(child => child.resetVisuals())
+    this.children.value.forEach(child => child.resetVisuals())
 
     this.updateGeometry({ shouldUpdateTexture: false })
     this.updateCubeGrow()
@@ -331,7 +351,7 @@ export class DCMCube implements CubeParent {
     this.updateRotationVisuals()
   }
 
-  updateGeometry({ dimension = this.dimension, cubeGrow = this.cubeGrow, shouldUpdateTexture = true } = {}) {
+  updateGeometry({ dimension = this.dimension.value, cubeGrow = this.cubeGrow.value, shouldUpdateTexture = true } = {}) {
     let w = dimension[0] + cubeGrow[0] * 2
     let h = dimension[1] + cubeGrow[1] * 2
     let d = dimension[2] + cubeGrow[2] * 2
@@ -352,20 +372,20 @@ export class DCMCube implements CubeParent {
     }
   }
 
-  updatePositionVisuals(position = this.rotationPoint) {
+  updatePositionVisuals(position = this.rotationPoint.value) {
     this.cubeGroup?.position.set(position[0], position[1], position[2])
   }
 
-  updateRotationVisuals(rotation = this.rotation) {
+  updateRotationVisuals(rotation = this.rotation.value) {
     this.cubeGroup?.rotation.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180)
   }
 
-  updateCubeGrowVisuals(value = this.cubeGrow) {
+  updateCubeGrowVisuals(value = this.cubeGrow.value) {
     this.cubeGrowGroup?.position.set(-value[0], -value[1], -value[2])
     this.updateGeometry({ cubeGrow: value })
   }
 
-  updateTexture({ textureOffset = this.textureOffset, dimension = this.dimension, texWidth = this.model.texWidth, texHeight = this.model.texHeight, textureMirrored = this.textureMirrored } = {}) {
+  updateTexture({ textureOffset = this.textureOffset.value, dimension = this.dimension.value, texWidth = this.model.texWidth, texHeight = this.model.texHeight, textureMirrored = this.textureMirrored.value } = {}) {
 
     let tm = textureMirrored
     let to = textureOffset
@@ -386,60 +406,60 @@ export class DCMCube implements CubeParent {
     this.uvBuffer.needsUpdate = true
   }
 
-  updateCubeName(value = this.name) {
-    this.name = value;
+  updateCubeName(value = this.name.value) {
+    this.name.value = value;
   }
 
-  updateDimension(values = this.dimension, visualOnly = false) {
+  updateDimension(values = this.dimension.value, visualOnly = false) {
     if (visualOnly !== true) {
-      this.dimension = [Math.round(values[0]), Math.round(values[1]), Math.round(values[2])]
+      this.dimension.value = [Math.round(values[0]), Math.round(values[1]), Math.round(values[2])]
     }
     this.updateGeometry({ dimension: values })
   }
 
-  updateCubeGrow(value = this.cubeGrow, visualOnly = false) {
+  updateCubeGrow(value = this.cubeGrow.value, visualOnly = false) {
     if (visualOnly !== true) {
-      this.cubeGrow = value
+      this.cubeGrow.value = value
     }
     this.updateCubeGrowVisuals(value)
   }
 
-  updateTextureOffset(values = this.textureOffset, visualOnly = false) {
+  updateTextureOffset(values = this.textureOffset.value, visualOnly = false) {
     if (visualOnly !== true) {
-      this.textureOffset = [Math.round(values[0]), Math.round(values[1])]
+      this.textureOffset.value = [Math.round(values[0]), Math.round(values[1])]
     }
     this.updateTexture({ textureOffset: values })
   }
 
-  updateTextureMirrored(value = this.textureMirrored, visualOnly = false) {
+  updateTextureMirrored(value = this.textureMirrored.value, visualOnly = false) {
     if (visualOnly !== true) {
-      this.textureMirrored = value
+      this.textureMirrored.value = value
     }
     this.updateTexture({ textureMirrored: value })
   }
 
-  updateOffset(values = this.offset, visualOnly = false) {
+  updateOffset(values = this.offset.value, visualOnly = false) {
     if (visualOnly !== true) {
-      this.offset = values
+      this.offset.value = values
     }
     this.cubeMesh?.position.set(values[0], values[1], values[2])
   }
 
-  updatePosition(values = this.rotationPoint, visualOnly = false) {
+  updatePosition(values = this.rotationPoint.value, visualOnly = false) {
     if (visualOnly !== true) {
-      this.rotationPoint = values
+      this.rotationPoint.value = values
     }
     this.updatePositionVisuals(values)
   }
 
-  updateRotation(values = this.rotation, visualOnly = false) {
+  updateRotation(values = this.rotation.value, visualOnly = false) {
     if (visualOnly !== true) {
-      this.rotation = values
+      this.rotation.value = values
     }
     this.updateRotationVisuals(values)
   }
 
-  _genereateFaceData(face: number, tm: boolean, toff: [number, number], tw: number, th: number, offU: number, offV: number, heightU: number, heightV: number) {
+  _genereateFaceData(face: number, tm: boolean, toff: readonly [number, number], tw: number, th: number, offU: number, offV: number, heightU: number, heightV: number) {
 
     let u = toff[0]
     let v = toff[1]
@@ -456,7 +476,7 @@ export class DCMCube implements CubeParent {
     let uMax = (u + offU + heightU) / tw
     let vMax = (v + offV + heightV) / th
 
-    if(uMin < uMax) {
+    if (uMin < uMax) {
       uMin += off
       uMax -= off
     } else {
@@ -464,7 +484,7 @@ export class DCMCube implements CubeParent {
       uMax += off
     }
 
-    if(vMin < vMax) {
+    if (vMin < vMax) {
       vMin += off
       vMax -= off
     } else {
