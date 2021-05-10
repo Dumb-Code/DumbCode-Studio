@@ -3,7 +3,7 @@ import { useState } from "react"
 const AppearangeOptions = () => {
 
     const [darkMode, setDarkMode] = useState(true);
-    const [compactMode, setCompactkMode] = useState(false);
+    const [compactMode, setCompactMode] = useState(false);
 
     return(
         <div className="">
@@ -17,7 +17,7 @@ const AppearangeOptions = () => {
 
             <p className="text-gray-900 text-xs font-semibold mt-4">MODE SELECTION</p>
             <p className="text-gray-900 text-xs mb-2">Allows you to fine tune some of the layouts.</p>
-            <button className={(compactMode || "ring-2 ring-lightBlue-500") + " bg-gray-800 rounded w-80 text-white font-semibold p-2 text-left pl-4 my-1"}>Normal Mode</button>
+            <button className={(compactMode || "ring-2 ring-lightBlue-500") + " bg-gray-800 rounded w-80 text-white font-semibold p-2 text-left pl-4 my-1"} onClick={() => setCompactMode(false)}>Normal Mode</button>
             <br />
             <button className={(!compactMode || "ring-2 ring-lightBlue-500") + " bg-gray-600 rounded w-80 text-gray-800 font-semibold p-2 text-left pl-4 my-1 cursor-not-allowed"}>Compact Mode</button>
         </div>

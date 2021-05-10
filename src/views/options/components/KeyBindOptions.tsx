@@ -1,10 +1,7 @@
-import { useState } from "react"
 import { InfoBubble } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 
 const KeyBindOptions = () => {
-
-    const [language, setMotion] = useState("normal")
 
     return(
         <div className="pb-8">
