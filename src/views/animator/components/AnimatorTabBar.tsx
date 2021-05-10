@@ -5,13 +5,13 @@ import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
 const AnimatorTabBar = () => {
-    const { selectedProject } = useStudio()
+    const { getSelectedProject } = useStudio()
+    const selectedProject = getSelectedProject()
+
     const [animations] = useListenableObject(selectedProject.animationTabs.animations)
     const [tabs] = useListenableObject(selectedProject.animationTabs.tabs)
     const [selectedTab] = useListenableObject(selectedProject.animationTabs.selectedAnimation)
 
-
-    console.log(animations)
     return (
         <div className="rounded-sm bg-gray-800 h-full flex flex-row">
             {

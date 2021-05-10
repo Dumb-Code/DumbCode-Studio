@@ -1,3 +1,4 @@
+import { ReactNode } from "react"
 import { ReactSortable, ItemInterface } from "react-sortablejs"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
@@ -5,7 +6,7 @@ import { SVGCross, SVGDownload, SVGPlus, SVGUpload } from "../../../components/I
 import { useStudio } from "../../../contexts/StudioContext"
 import DcProject from "../../../studio/formats/DcProject"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
-import { ReadableFile, readFileDataUrl } from "../../../studio/util/FileTypes"
+import { ReadableFile, readFileDataUrl, SaveIcon } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
@@ -64,21 +65,10 @@ const ProjectTextures = () => {
                         </ClickableInput>
                     </p>
                 </div>
-
                 <div className="flex flex-row overflow-hidden h-full w-full">
-                    <div className="flex-grow flex flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
-                        <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
-                            <p className="flex-grow">SELECTED</p>
-                        </div>
-                        {hasProject && <SelectedTexturesList project={getSelectedProject()} />}
-                    </div>
-                    <div className="flex-grow flex flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
-                        <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
-                            <p className="flex-grow">AVAILABLE</p>
-                        </div>
-                        {hasProject && <NonSelectedTextures project={getSelectedProject()} />}
-                    </div>
+                    {hasProject && <TextureLists project={getSelectedProject()} />}
                 </div>
+
             </div>
         </div>
     )
@@ -96,32 +86,68 @@ class WrappedTexture implements ItemInterface {
 
 const GroupList = ({ project }: { project: DcProject }) => {
     const [selectedGroup, setSelectedGroup] = useListenableObject(project.textureManager.selectedGroup)
-    const [groups] = useListenableObject(project.textureManager.groups)
+    const [groups, setGroups] = useListenableObject(project.textureManager.groups)
+
+    const removeGroup = (group: TextureGroup) => setGroups(groups.filter(g => g !== group))
+
     return (
         <>
             {groups.map(g =>
-                <GroupEntry key={g.identifier} onClick={() => setSelectedGroup(g)} group={g} selected={g === selectedGroup} />
+                <GroupEntry
+                    key={g.identifier}
+                    onClick={() => setSelectedGroup(g)}
+                    group={g}
+                    selected={g === selectedGroup}
+                    removeGroup={() => removeGroup(g)}
+                />
             )}
         </>
     )
 }
 
-const GroupEntry = ({ group, selected, onClick }: { group: TextureGroup, selected: boolean, onClick: () => void }) => {
+const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureGroup, selected: boolean, onClick: () => void, removeGroup: () => void }) => {
     return (
         <div onClick={onClick} className={(selected ? "bg-green-500" : "bg-gray-700 text-white") + " my-1 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row"}>
             <DblClickEditLO obj={group.name} disabled={group.isDefault} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
             <p className="mr-2 flex flex-row text-white">
-                <button className={(selected ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SVGDownload className="h-4 w-4" /></button>
-                <button className={(selected ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
+                <button className={(selected ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 " + (group.isDefault ? '' : 'mr-1')}><SVGDownload className="h-4 w-4" /></button>
+                {!group.isDefault && <button onClick={e => { removeGroup(); e.stopPropagation() }} className={(selected ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>}
             </p>
         </div>
+    )
+}
+
+const TextureLists = ({ project }: { project: DcProject }) => {
+    const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
+    if(selectedGroup.isDefault) {
+        return (
+            <div className="flex-grow flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+                 <SelectedTexturesList project={project} />
+            </div>
+        )
+    }
+    return (
+        <>
+            <div className="flex-grow flex flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+                <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
+                    <p className="flex-grow">SELECTED</p>
+                </div>
+                <SelectedTexturesList project={project} />
+            </div>
+            <div className="flex-grow flex flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+                <div className="bg-gray-800 text-gray-400 font-bold text-xs px-2 flex flex-row border-b border-black mb-2">
+                    <p className="flex-grow">AVAILABLE</p>
+                </div>
+                <NonSelectedTextures project={project} />
+            </div>
+        </>
     )
 }
 
 const SelectedTexturesList = ({ project }: { project: DcProject }) => {
 
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
-    const [selectedGroupTextures, setSelectedGroupTextures] = useListenableObject(selectedGroup.textures)
+    const [selectedGroupTextures, setSelectedGroupTextures] = useListenableObject(selectedGroup.textures, true)
 
     const [textures] = useListenableObject(project.textureManager.textures)
 
@@ -135,21 +161,18 @@ const SelectedTexturesList = ({ project }: { project: DcProject }) => {
             // Again, sortable.js is kinda wack, and we need to cause a complete remount of the list to have the changed props in effect
             key={`group.sortable.1.${selectedGroup.isDefault}`}
             list={selectedTextures}
-            setList={(list, _, d) => {
-                if (d.dragging !== null) {
-                    const list1 = list.map(l => l.id)
-                    const list2 = selectedGroupTextures
-                    if (list1.length !== list2.length || list1.some((l, i) => l !== list2[i])) {
-                        //Fuck sortable js and it's DOM changing shit
-                        //Might be fixed by moving to onMove
-                        setTimeout(() => setSelectedGroupTextures(list1), 1)
-                    }
+            setList={list => {
+                const list1 = list.map(l => l.id)
+                const list2 = selectedGroupTextures
+                if (list1.length !== list2.length || list1.some((l, i) => l !== list2[i])) {
+                    //Fuck sortable js and it's DOM changing shit
+                    //Might be fixed by moving to onMove
+                    setTimeout(() => setSelectedGroupTextures(list1), 1)
                 }
             }}
             animation={150}
             fallbackOnBody
             className="flex-grow"
-            disabled={selectedGroup.isDefault}
             group={{ name: 'textures-on-group', pull: true, put: true }}
         >
             {selectedTextures
@@ -163,9 +186,8 @@ const SelectedTexturesList = ({ project }: { project: DcProject }) => {
 }
 
 const NonSelectedTextures = ({ project }: { project: DcProject }) => {
-
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
-    const [selectedGroupTextures] = useListenableObject(selectedGroup.textures)
+    const [selectedGroupTextures] = useListenableObject(selectedGroup.textures, true)
 
     const [textures] = useListenableObject(project.textureManager.textures)
 
@@ -181,7 +203,6 @@ const NonSelectedTextures = ({ project }: { project: DcProject }) => {
             animation={150}
             fallbackOnBody
             className="flex-grow"
-            disabled={selectedGroup.isDefault}
             group={{ name: 'textures-on-group', pull: true, put: true }}
         >
             {notSelectedTextures.map((t) =>
@@ -199,13 +220,13 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
     return (
         <div className={(selected ? "bg-green-500" : "bg-gray-700 text-white") + " my-2 ml-2 rounded-sm text-left pl-2 w-full flex flex-row pr-6"}>
             <div className="table" style={{ height: `${height}px`, maxWidth: `${height}px` }}>
-                <div ref={ref} className="table-cell align-middle">
+                <div ref={ref} className="table-cell align-middle p-1 pl-0">
                 </div>
             </div>
             <DblClickEditLO obj={texture.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
             <p className="flex flex-row text-white w-12">
-                <button className={(selected ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SVGDownload className="h-4 w-4" /></button>
-                <button className={(selected ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
+                <button className={(selected ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SaveIcon className="h-4 w-4" /></button>
+                <button onClick={e => { ; e.stopPropagation() }} className={(selected ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
             </p>
         </div>
     )

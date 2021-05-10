@@ -3,7 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useStudio } from "../../../contexts/StudioContext"
 
 export const useModelRootCubes: () => [ DCMModel, DCMCube[] ] = () => {
-  const { selectedProject } = useStudio()
+  const { getSelectedProject } = useStudio()
+  const selectedProject = getSelectedProject()
 
   const gatherChildren = useCallback(() => [...selectedProject.model.children], [selectedProject.model.children])
 

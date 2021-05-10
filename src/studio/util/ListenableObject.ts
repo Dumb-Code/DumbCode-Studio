@@ -11,8 +11,9 @@ export class LO<T> {
 
   set value(value: T) {
     if(value !== this._value) {
-      this.listners.forEach(l => l(value, this._value))
-      this._value = value
+      //We need to clone the listeners, as they can be changed while being called
+      //Otherwise more than one listner will mean a infinate virtually untraceable loop
+      Array.from(this.listners).forEach(l => l(value, this._value))
     }
     this._value = value
   }
@@ -26,8 +27,8 @@ export class LO<T> {
   }
 }
 
-export const useListenableObject = <T>(obj: LO<T>): [T, (val: T) => void] => {
-  const [state, setState] = useState(obj.value)
+export const useListenableObject = <T>(obj: LO<T>, debug?: boolean): [T, (val: T) => void] => {
+  const [state, setState] = useState(() => obj.value)
   useEffect(() => {
     if (state !== obj.value) {
       setState(obj.value)

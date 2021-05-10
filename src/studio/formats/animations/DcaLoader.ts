@@ -1,12 +1,15 @@
 import { DCMModel } from './../model/DcmModel';
-import DcaAnimation, { DcaKeyframe } from './DcaAnimation';
+import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from './DcaAnimation';
 import { StudioBuffer } from './../../util/StudioBuffer';
 import DcProject from '../DcProject';
 
-const compilerWarningsRemove = (a: any) => { }
+const compilerWarningsRemove = (_: any) => { }
 
 
 export const loadDCAAnimation = (project: DcProject, name: string, buffer: StudioBuffer) => {
+
+  const animation = new DcaAnimation(project, name)
+
   const version = buffer.readNumber()
   //In version 1 we use a differnet type of string handling
   if (version < 1) {
@@ -15,14 +18,10 @@ export const loadDCAAnimation = (project: DcProject, name: string, buffer: Studi
 
   //Read the loop data
   if (version >= 9 && buffer.readBool()) {
-    const loopData = {  //TODO
-      start: buffer.readNumber(),
-      end: buffer.readNumber(),
-      duration: buffer.readNumber()
-    };
-    compilerWarningsRemove(loopData)
-  } else {
-    // const loopData = null  //TODO
+    animation.keyframeData.start.value = buffer.readNumber()
+    animation.keyframeData.end.value = buffer.readNumber()
+    animation.keyframeData.duration.value = buffer.readNumber()
+    animation.keyframeData.exits.value = true
   }
   //Read the keyframes
   const keyframes: DcaKeyframe[] = []
@@ -34,8 +33,7 @@ export const loadDCAAnimation = (project: DcProject, name: string, buffer: Studi
     kf.startTime.value = buffer.readNumber()
     kf.duration.value = buffer.readNumber()
     if (version >= 4) {
-      const layer = Math.round(buffer.readNumber()) //TODO
-      compilerWarningsRemove(layer)
+      kf.layerId = buffer.readInteger()
     }
 
     let rotSize = buffer.readNumber()
@@ -85,7 +83,9 @@ export const loadDCAAnimation = (project: DcProject, name: string, buffer: Studi
 
   repairKeyframes(project.model, version, keyframes, false)
 
-  return new DcaAnimation(project, name)
+  animation.keyframes.value = keyframes
+
+  return animation
 }
 
 export const repairKeyframes = (model: DCMModel, version: number, keyframes: DcaKeyframe[], alreadyFlipped = false) => {

@@ -1,3 +1,4 @@
+import { SVGSave, SVGDownload } from './../../components/Icons';
 export const FileSystemsAccessApi = window.showOpenFilePicker !== undefined
 if (FileSystemsAccessApi) {
   console.log("Using FileSystemAccess where available.")
@@ -54,3 +55,5 @@ export const readFileArrayBuffer = (file: ReadableFile) => {
     reader.readAsArrayBuffer(await file.asFile())
   })
 }
+
+export const SaveIcon = FileSystemsAccessApi ? SVGSave : SVGDownload

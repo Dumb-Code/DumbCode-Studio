@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useState, ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
 import { Camera, Scene, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DcProject, { newProject } from '../studio/formats/DcProject';
@@ -19,11 +19,11 @@ export type ThreeJsContext = {
 }
 export type StudioContext = {
   projects: DcProject[],
-  addProject: (projects: DcProject) => void,
+  addProject: (project: DcProject) => void,
+  removeProject: (project: DcProject) => void,
 
   hasProject: boolean
   getSelectedProject: () => DcProject
-  selectedProject: DcProject,
   selectProject: (project: DcProject) => void,
 } & ThreeJsContext
 const CreatedContext = createContext<StudioContext | null>(null);
@@ -39,7 +39,8 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
   const three = useMemo(createThreeContext, [])
 
   const [projects, setProjects] = useState<DcProject[]>([])
-  const [selectedProject, setSelectedProject] = useState<DcProject|null>(null)
+  const [selectedProject, setSelectedProject] = useState<DcProject | null>(null)
+
 
   const context: StudioContext = {
     projects,
@@ -47,12 +48,30 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
       setProjects(projects.concat([project]))
       context.selectProject(project)
     },
+    removeProject: project => {
+      three.scene.remove(project.group)
+
+      const index = projects.indexOf(project)
+
+      setProjects(projects.filter(p => p !== project))
+
+      if (selectedProject === project) {
+        const newIndex = index === projects.length - 1 ? projects.length - 2 : index + 1
+        if (newIndex !== -1) {
+          context.selectProject(projects[newIndex])
+        } else {
+          setSelectedProject(null)
+        }
+      }
+
+    },
 
     hasProject: selectedProject !== null,
-    get selectedProject() { return context.getSelectedProject() },
+    // get selectedProject() { return context.getSelectedProject() },
     getSelectedProject: () => {
-      if(selectedProject === null) {
+      if (selectedProject === null) {
         const project = newProject()
+        console.trace(project)
         context.addProject(project)
         return project
       }
@@ -61,7 +80,7 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
 
     selectProject: project => {
       if (project !== selectedProject) {
-        if(selectedProject !== null) {
+        if (selectedProject !== null) {
           three.scene.remove(selectedProject.group)
         }
         three.scene.add(project.group)
