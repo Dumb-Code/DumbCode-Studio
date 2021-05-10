@@ -1,5 +1,5 @@
 import { DCMModel } from './../model/DcmModel';
-import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from './DcaAnimation';
+import DcaAnimation, { DcaKeyframe } from './DcaAnimation';
 import { StudioBuffer } from './../../util/StudioBuffer';
 import DcProject from '../DcProject';
 

@@ -1,4 +1,3 @@
-import { ReactNode } from "react"
 import { ReactSortable, ItemInterface } from "react-sortablejs"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"

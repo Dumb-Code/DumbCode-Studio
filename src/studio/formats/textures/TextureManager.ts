@@ -5,35 +5,25 @@ import { useDomParent } from '../../util/DomParentRef';
 import DcProject from '../DcProject';
 import { CanvasTexture, NearestFilter } from 'three';
 
-export class TextureGroup {
-  readonly identifier: string;
-  readonly name: LO<string>
-  readonly textures: LO<readonly string[]>
-  isDefault: boolean
-
-  constructor(name: string, isDefault: boolean) {
-    this.identifier = uuidv4()
-    this.isDefault = isDefault
-    this.name = new LO(name)
-    this.textures = new LO([] as const as readonly string[])
-  }
-}
-
 export default class TextureManager {
   readonly project: DcProject
 
   readonly canvas: HTMLCanvasElement
   readonly canvasContext: CanvasRenderingContext2D
 
-  readonly defaultGroup = new TextureGroup("Default", true)
-  selectedGroup = new LO<TextureGroup>(this.defaultGroup)
-  groups = new LO<readonly TextureGroup[]>([this.selectedGroup.value])
+  readonly defaultGroup: TextureGroup
+  readonly selectedGroup: LO<TextureGroup>
+  readonly groups: LO<readonly TextureGroup[]>
 
   activeTexture = new LO<Texture | null>(null)
   textures = new LO<readonly Texture[]>([])
 
   constructor(project: DcProject) {
     this.project = project
+
+    this.defaultGroup = new TextureGroup("Default", true)
+    this.selectedGroup = new LO<TextureGroup>(this.defaultGroup)
+    this.groups = new LO<readonly TextureGroup[]>([this.selectedGroup.value])
 
     this.canvas = document.createElement("canvas")
     const ctx = this.canvas.getContext("2d")
@@ -101,6 +91,20 @@ export default class TextureManager {
     return this._gcd(b, a % b);
   }
 
+}
+
+export class TextureGroup {
+  readonly identifier: string;
+  readonly name: LO<string>
+  readonly textures: LO<readonly string[]>
+  isDefault: boolean
+
+  constructor(name: string, isDefault: boolean) {
+    this.identifier = uuidv4()
+    this.isDefault = isDefault
+    this.name = new LO(name)
+    this.textures = new LO([] as const as readonly string[])
+  }
 }
 
 export class Texture {

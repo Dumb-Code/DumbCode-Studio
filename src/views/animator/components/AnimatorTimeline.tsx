@@ -1,5 +1,4 @@
-import { createContext, MouseEvent, RefObject, useContext, useEffect, useMemo, useRef } from "react";
-import { convertToObject } from "typescript";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { SVGEye, SVGLocked, SVGPlus, SVGSettings } from "../../../components/Icons";
 import { useStudio } from "../../../contexts/StudioContext";
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
@@ -18,7 +17,7 @@ const AnimatorTimeline = () => {
     )
 }
 
-type ListenerEffect = (func: (scroll: number, zoom: number) => void) => () => () => void
+type ListenerEffect = (func: (scroll: number, zoom: number) => void) => () => void
 
 const ScrollZoomContext = createContext<{
     readonly addListenerEffect: ListenerEffect
@@ -34,23 +33,21 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     const [layers, setLayers] = useListenableObject(animation.keyframeLayers)
     const [keyframes] = useListenableObject(animation.keyframes)
 
-    const listeners = new Set<(scroll: number, zoom: number) => void>()
+    const listeners = useRef(new Set<(scroll: number, zoom: number) => void>())
     const scroll = useRef(animation.scroll.value)
     const zoom = useRef(animation.zoom.value)
     const addListenerEffect: ListenerEffect = (func: (scroll: number, zoom: number) => void) => {
+        listeners.current.add(func)
         return () => {
-            listeners.add(func)
-            return () => {
-                listeners.delete(func)
-            }
+            listeners.current.delete(func)
         }
     }
 
 
-    const onScrollChange = (val: number) => {
+    const onScrollChange = useCallback((val: number) => {
         scroll.current = val
-        listeners.forEach(l => l(scroll.current, zoom.current))
-    }
+        listeners.current.forEach(l => l(scroll.current, zoom.current))
+    }, [])
     useEffect(() => {
         animation.scroll.addListener(onScrollChange)
 
@@ -67,7 +64,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
         }
 
         return () => animation.scroll.removeListener(onScrollChange)
-    }, [keyframes, layers, setLayers])
+    }, [keyframes, layers, setLayers, animation.scroll, onScrollChange])
 
     const context = {
         addListenerEffect,
@@ -171,12 +168,15 @@ const TimelineLayer = ({ color, keyframes }: { color: string, keyframes: DcaKeyf
     const ref = useRef<HTMLDivElement>(null)
 
     const { addListenerEffect, scroll } = useContext(ScrollZoomContext)
-    useEffect(addListenerEffect((scroll) => {
-        if (ref.current === null) {
-            throw new Error("Ref not set")
+    useEffect(() => {
+        const callback = (scroll: number) => {
+            if (ref.current === null) {
+                throw new Error("Ref not set")
+            }
+            ref.current.style.backgroundPositionX = `${-scroll}px`
         }
-        ref.current.style.backgroundPositionX = `${-scroll}px`
-    }))
+        addListenerEffect(callback)
+    }, [addListenerEffect])
     return (
         <div ref={ref} className="bg-gray-900 relative h-full " style={{ backgroundPositionX: `${-scroll}px`, backgroundImage: `repeating-linear-gradient(90deg, #363636  0px, #363636  ${width - 1}px, #4A4A4A  ${width - 1}px, #4A4A4A  ${width}px)` }}>
             {keyframes.map(kf =>
@@ -193,13 +193,16 @@ const KeyFrame = ({ layerColor, keyframe }: { layerColor: string, keyframe: DcaK
     const ref = useRef<HTMLDivElement>(null)
 
     const { addListenerEffect, scroll } = useContext(ScrollZoomContext)
-    useEffect(addListenerEffect((scroll) => {
-        if (ref.current === null) {
-            throw new Error("Ref not set")
+    useEffect(() => {
+        const callback = (scroll: number) => {
+            if (ref.current === null) {
+                throw new Error("Ref not set")
+            }
+            ref.current.style.left = `${start * width * blockPerSecond - scroll}px`
+            ref.current.style.width = `${length * width * blockPerSecond}px`
         }
-        ref.current.style.left = `${start * width * blockPerSecond - scroll}px`
-        ref.current.style.width = `${length * width * blockPerSecond}px`
-    }))
+        addListenerEffect(callback)
+    }, [addListenerEffect, length, start])
 
     return (
         <div

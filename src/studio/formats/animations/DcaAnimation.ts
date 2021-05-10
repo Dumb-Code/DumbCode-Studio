@@ -1,4 +1,3 @@
-import { NumericInput } from 'react-numeric-input';
 import { v4 } from 'uuid';
 import { LO, LOMap } from './../../util/ListenableObject';
 import DcProject from '../DcProject';
@@ -14,7 +13,7 @@ export default class DcaAnimation {
   readonly displayTime = new LO(0)
   displayTimeMatch: boolean = true
 
-  readonly keyframeData = new KeyframeLoopData()
+  readonly keyframeData: KeyframeLoopData
   readonly keyframeLayers = new LO<readonly KeyframeLayerData[]>([])
 
   readonly scroll = new LO(0)
@@ -23,6 +22,7 @@ export default class DcaAnimation {
   constructor(project: DcProject, name: string) {
     this.name = new LO(name)
     this.project = project
+    this.keyframeData = new KeyframeLoopData()
 
     this.time.addListener(value => {
       if (this.displayTimeMatch) {

@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react';
-import { convertToObject } from 'typescript';
 export const useDraggbleRef = <T extends HTMLElement, O>(
   initialGetter: () => O,
   onDrag: (data: {dx: number, dy: number, initial: O, x: number, y: number}) => void,
