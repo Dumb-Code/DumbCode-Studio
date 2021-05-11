@@ -31,7 +31,7 @@ const ModelerProperties = () => {
                     <WrapObject element={props => <CubeInput title={"DIMENSIONS"} {...props} />} object={firstSelected?.dimension} />
                     <WrapObject element={props => <CubeInput title={"POSITIONS"} {...props} />} object={firstSelected?.position} />
                     <WrapObject element={props => <CubeInput title={"OFFSET"} {...props} />} object={firstSelected?.offset} />
-                    <WrapObject element={props => <CubeInput title={"CUBE GROW"} {...props} />} object={firstSelected?.offset} />
+                    <WrapObject element={props => <CubeInput title={"CUBE GROW"} {...props} />} object={firstSelected?.cubeGrow} />
                 </div>
                 <div className="px-2">
                     <WrapObject element={props => <CubeRotationInput title={"ROTATION"} {...props} />} object={firstSelected?.rotation} />
