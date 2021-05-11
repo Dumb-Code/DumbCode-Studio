@@ -3,7 +3,7 @@ import { useStudio } from "../contexts/StudioContext";
 import { useSelectedCubeManagerRef as useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
 const StudioCanvas = () => {
-    const { renderer, setSize } = useStudio()
+    const { renderer, setSize, onMouseDown } = useStudio()
     useSelectedCubeManager()
     const ref = useRef<HTMLDivElement>(null)
 
@@ -29,7 +29,7 @@ const StudioCanvas = () => {
     }, [renderer.domElement, setSize])
 
     return (
-        <div ref={ref} className="studio-canvas-container rounded-sm bg-gray-800 h-full" />
+        <div ref={ref} onPointerDown={e => onMouseDown.fireEvent(e)} className="studio-canvas-container rounded-sm bg-gray-800 h-full" />
     )
 }
 

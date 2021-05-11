@@ -18,14 +18,14 @@ export const useDraggbleRef = <T extends HTMLElement, O>(
     }
 
     const bindEvents = () => {
-      document.addEventListener('mousemove', mouseMove)
-      document.addEventListener('mouseup', mouseUp)
+      document.addEventListener('pointermove', mouseMove)
+      document.addEventListener('pointerup', mouseUp)
       document.addEventListener('selectstart', disableEvent)
     }
 
     const unbindEvents = () => {
-      document.removeEventListener('mousemove', mouseMove)
-      document.removeEventListener('mouseup', mouseUp)
+      document.removeEventListener('pointermove', mouseMove)
+      document.removeEventListener('pointerup', mouseUp)
       document.removeEventListener('selectstart', disableEvent)
     }
 

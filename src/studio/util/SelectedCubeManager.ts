@@ -1,14 +1,20 @@
 import { LO } from './ListenableObject';
 import { DCMModel, DCMCube } from './../formats/model/DcmModel';
 import { Camera, Mesh, Raycaster } from 'three';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Vector2 } from 'three';
 import { useStudio } from '../../contexts/StudioContext';
+import DcProject from '../formats/DcProject';
 export default class SelectedCubeManager {
   mouseOverDiv = false
   disabled = false
   previousEventMouse = new Vector2()
   mouse = new Vector2()
+
+  mouseDown = false
+  mouseClickDown = new Vector2()
+
+  listneres: Set<(project: DcProject) => boolean> = new Set()
 
   mouseOverMesh: Mesh | null = null
   mouseOver: LO<string | null> = new LO<string | null>(null)
@@ -23,6 +29,47 @@ export default class SelectedCubeManager {
       this.previousEventMouse.set(x, y)
       this.mouseOverDiv = x > rect.left && x < rect.right && y > rect.top && y < rect.bottom
     }
+  }
+
+  onMouseDown(x: number, y: number) {
+    this.mouseClickDown.x = x
+    this.mouseClickDown.y = y
+    this.mouseDown = true
+  }
+
+  onMouseUp(project: DcProject, x: number, y: number) {
+    if (!this.mouseDown) {
+      return
+    }
+    this.mouseDown = false
+    let xMove = Math.abs(this.mouseClickDown.x - x)
+    let yMove = Math.abs(this.mouseClickDown.y - y)
+
+    if (xMove < 5 && yMove < 5 && this.mouse.x >= -1 && this.mouse.x <= 1 && this.mouse.y >= -1 && this.mouse.y <= 1) {
+      let ignore = false
+      this.listneres.forEach(listener => {
+        ignore = listener(project) || ignore
+      })
+      if (!ignore) {
+        if (this.mouseOverMesh !== null) {
+          this.getCube(this.mouseOverMesh).mouseState.value = "selected"
+        } else {
+          project.model.cubeMap.forEach(v => {
+            if (v.mouseState.value === "selected") {
+              v.mouseState.value = this.mouseOver.value === v.identifier ? "hover" : "none"
+            }
+          })
+        }
+      }
+    }
+  }
+
+  onCubeSelected(cube: DCMCube) {
+    this.selected.value = this.selected.value.concat(cube.identifier)
+  }
+
+  onCubeUnSelected(cube: DCMCube) {
+    this.selected.value = this.selected.value.filter(l => l !== cube.identifier)
   }
 
   onMouseOffMesh(mesh: Mesh) {
@@ -56,24 +103,27 @@ export default class SelectedCubeManager {
 
 
   update(raycaster: Raycaster, camera: Camera, model: DCMModel) {
-    if(!this.mouseOverDiv) {
+    if (!this.mouseOverDiv) {
       return
     }
-    const intersections = this.gatherIntersections(raycaster, camera, model)
-    // if(!mouseDown)
-    if (intersections.length > 0) {
-      const mesh = intersections[0].object as Mesh
-      if (this.mouseOverMesh !== mesh) {
-        const cube = this.getCube(mesh)
-        if (cube.mouseState.value !== "selected") {
-          cube.mouseState.value = "hover"
-        }
-      }
 
-    } else if (this.mouseOverMesh !== null) {
-      const cube = this.getCube(this.mouseOverMesh)
-      if(cube.mouseState.value !== "selected") {
-        cube.mouseState.value = "none"
+    if (!this.mouseDown) {
+      const intersections = this.gatherIntersections(raycaster, camera, model)
+      if (intersections.length > 0) {
+        const mesh = intersections[0].object as Mesh
+        if (this.mouseOverMesh !== mesh) {
+          const cube = this.getCube(mesh)
+          if (cube.mouseState.value !== "selected") {
+            cube.mouseState.value = "hover"
+          }
+        }
+      } else if (this.mouseOverMesh !== null) {
+        const cube = this.getCube(this.mouseOverMesh)
+        if (cube.mouseState.value !== "selected") {
+          cube.mouseState.value = "none"
+        } else {
+          this.onMouseOffMesh(this.mouseOverMesh)
+        }
       }
     }
   }
@@ -85,10 +135,11 @@ export default class SelectedCubeManager {
 }
 
 export const useSelectedCubeManagerRef = () => {
-  const { renderer, getSelectedProject, onFrameListeners, raycaster, camera } = useStudio()
+  const { renderer, getSelectedProject, onFrameListeners, raycaster, camera, onMouseDown } = useStudio()
 
   const dom = renderer.domElement
-  const { selectedCubeManager: cubeManager, model } = getSelectedProject()
+  const project = getSelectedProject()
+  const { selectedCubeManager: cubeManager, model } = project
 
   useEffect(() => {
     const callback = () => {
@@ -98,11 +149,22 @@ export const useSelectedCubeManagerRef = () => {
       const rect = dom.getBoundingClientRect()
       cubeManager.onMouseMove(rect, e.clientX, e.clientY, true)
     }
+    const mouseDown = (e: React.MouseEvent) => {
+      cubeManager.onMouseDown(e.clientX, e.clientY)
+      return true
+    }
+    const mouseUp = (e: MouseEvent) => {
+      cubeManager.onMouseUp(project, e.clientX, e.clientY)
+    }
     onFrameListeners.add(callback)
-    document.addEventListener("mousemove", mouseMove)
+    document.addEventListener("pointermove", mouseMove)
+    document.addEventListener("pointerup", mouseUp, false)
+    onMouseDown.addListener(999, mouseDown)
     return () => {
       onFrameListeners.delete(callback)
-      document.removeEventListener("mousemove", mouseMove)
+      document.removeEventListener("pointermove", mouseMove)
+      document.removeEventListener("pointerup", mouseUp, false)
+      onMouseDown.removeListener(mouseDown)
     }
-  }, [cubeManager, dom, raycaster, camera, model, onFrameListeners])
+  }, [cubeManager, dom, raycaster, camera, model, onFrameListeners, project, onMouseDown])
 }

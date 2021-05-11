@@ -24,7 +24,7 @@ export const ButtonWithTooltip = ({delay, className, tooltip, children, directio
     }
 
     return(
-        <button className={className} onMouseOver={() => turnOn()} onMouseLeave={() => turnOff()}>
+        <button className={className} onPointerOver={() => turnOn()} onPointerLeave={() => turnOff()}>
             {children}
             <Tooltip  text={tooltip} shown={tooltipShown} direction={direction} />
         </button>

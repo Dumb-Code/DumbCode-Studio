@@ -2,6 +2,7 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 import { Camera, Raycaster, Scene, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DcProject, { newProject } from '../studio/formats/DcProject';
+import IndexedEventHandler from '../studio/util/WeightedEventHandler';
 import { createThreeContext } from './ThreeContext';
 
 export type ThreeJsContext = {
@@ -11,6 +12,7 @@ export type ThreeJsContext = {
   camera: Camera,
   controls: OrbitControls,
   raycaster: Raycaster,
+  onMouseDown: IndexedEventHandler<React.MouseEvent>
   onFrameListeners: Set<() => void>,
 
   setSize: (width: number, height: number) => void
@@ -43,7 +45,6 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
 
   const [projects, setProjects] = useState<DcProject[]>([])
   const [selectedProject, setSelectedProject] = useState<DcProject | null>(null)
-
 
   const context: StudioContext = {
     projects,

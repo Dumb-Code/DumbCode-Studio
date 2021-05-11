@@ -207,7 +207,7 @@ const CubeItemEntry = ({ cube }: { cube: DCMCube }) => {
     }
 
     return (
-        <div onMouseEnter={() => setIfNotSelected("hover")} onMouseLeave={() => setIfNotSelected("none")} className={`${itemBackgroundColor} ml-2 my-0.5`}>
+        <div onPointerEnter={() => setIfNotSelected("hover")} onPointerLeave={() => setIfNotSelected("none")} onClick={() => setMouseState("selected")} className={`${itemBackgroundColor} ml-2 my-0.5`}>
             <div className="flex flex-row py-0.5">
                 {
                     cube.getChildren().length !== 0 &&

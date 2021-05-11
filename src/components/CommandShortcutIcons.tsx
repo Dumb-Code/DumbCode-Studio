@@ -31,7 +31,7 @@ export const CommandShortcutIconWithSubCommands = ({command, description, childr
                 <p className="mb-1">{command}</p>
                 <p className="text-xs">{description}</p>
             </div>
-            <div onMouseLeave={() => setSubVisible(false)}>
+            <div onPointerLeave={() => setSubVisible(false)}>
                 {!subCommandsVisible || 
                 <div className="absolute left-8 ml-0.5 -mt-8 pt-1 px-0.5 rounded bg-gray-800 z-50" onClick={() => setSubVisible(false)}>
                     {children}

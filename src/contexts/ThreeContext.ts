@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { AmbientLight, BoxBufferGeometry, Camera, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import IndexedEventHandler from '../studio/util/WeightedEventHandler';
 import { ThreeJsContext, useStudio } from "./StudioContext";
 
 export const useOnFrameCallback = (callback: () => void) => {
@@ -36,8 +37,9 @@ export const createThreeContext: () => ThreeJsContext = () => {
   controls.screenSpacePanning = true
   controls.update()
 
-
   const raycaster = new Raycaster()
+
+  const onMouseDown = new IndexedEventHandler<React.MouseEvent>()
 
   const grid = createGrid()
   scene.add(grid)
@@ -64,7 +66,8 @@ export const createThreeContext: () => ThreeJsContext = () => {
   onFrame()
 
   return {
-    renderer, camera, scene, onTopScene, controls, raycaster, onFrameListeners,
+    renderer, camera, scene, onTopScene, controls, 
+    raycaster, onMouseDown, onFrameListeners,
 
     setSize: (w, h) => {
       width = w

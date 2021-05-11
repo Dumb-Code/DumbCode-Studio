@@ -218,6 +218,7 @@ export class DCMCube implements CubeParent {
     this.uvBuffer = new BufferAttribute(new Float32Array(new Array(6 * 4 * 2)), 2)
 
     this.mouseState.addListener(v => {
+      console.log(v)
       if (this.model.selectedCubeManager !== undefined && this.model.materials !== undefined && this.cubeMesh !== undefined) {
         switch (v) {
           case "hover":
@@ -225,10 +226,12 @@ export class DCMCube implements CubeParent {
             this.cubeMesh.material = this.model.materials.highlight
             break
           case "selected":
+            this.model.selectedCubeManager.onCubeSelected(this)
             this.cubeMesh.material = this.model.materials.selected
             break
           case "none":
             this.model.selectedCubeManager.onMouseOffMesh(this.cubeMesh)
+            this.model.selectedCubeManager.onCubeUnSelected(this)
             this.cubeMesh.material = this.model.materials.normal
             break
         }

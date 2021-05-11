@@ -28,9 +28,9 @@ const AnimatorScrubBar = () => {
                 <div className="flex-grow"></div>
             </div>
             <div className="rounded-sm bg-gray-800 h-full"
-                onMouseMove={(mouse) => setBarWidth(mouse.pageX - 8)} 
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
+                onPointerMove={(mouse) => setBarWidth(mouse.pageX - 8)} 
+                onPointerEnter={() => setIsHovering(true)}
+                onPointerLeave={() => setIsHovering(false)}
                 onClick={() => setPosition(barWidth)}>
                 <div className={"transform -translate-y-2 bg-gray-500 w-full h-2 relative top-7 transition-transform ease-in-out cursor-pointer"}></div>
                 <div className={"transform -translate-y-3 bg-white h-2 relative top-7 -mt-1 transition-transform ease-in-out cursor-pointer"} style={{width: (isHovering ? (barWidth < position ? position : barWidth + 8) : 0)}}></div>
@@ -39,9 +39,9 @@ const AnimatorScrubBar = () => {
             <div className={(isHovering ? "h-4 w-4 opacity-100" : "opacity-0 h-0 w-0") + "  cursor-pointer rounded-full bg-lightBlue-400 relative transform -translate-y-1.5 transition-opacity ease-in-out duration-100"} 
             style={{left: (isHovering ? barWidth : position)}}
             onClick={() => setPosition(barWidth)}
-            onMouseMove={(mouse) => setBarWidth(mouse.pageX - 8)}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)} >
+            onPointerMove={(mouse) => setBarWidth(mouse.pageX - 8)}
+            onPointerEnter={() => setIsHovering(true)}
+            onPointerLeave={() => setIsHovering(false)} >
             </div>
         </div>
     )
