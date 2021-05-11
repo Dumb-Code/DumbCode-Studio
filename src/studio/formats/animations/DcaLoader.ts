@@ -107,7 +107,7 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
         }
 
         kf.rotation.forEach((arr, key) => transformArr(arr, map.get(key)?.rotation))
-        kf.position.forEach((arr, key) => transformArr(arr, map.get(key)?.rotationPoint))
+        kf.position.forEach((arr, key) => transformArr(arr, map.get(key)?.position))
       })
     }
 

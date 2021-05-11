@@ -161,7 +161,7 @@ export class DCMCube implements CubeParent {
   identifier: string
   readonly name: LO<string>
   readonly dimension: LO<readonly [number, number, number]>
-  readonly rotationPoint: LO<readonly [number, number, number]>
+  readonly position: LO<readonly [number, number, number]>
   readonly offset: LO<readonly [number, number, number]>
   readonly rotation: LO<readonly [number, number, number]>
   readonly textureOffset: LO<readonly [number, number]>
@@ -195,7 +195,7 @@ export class DCMCube implements CubeParent {
     this.identifier = uuidv4()
     this.name = new LO(name)
     this.dimension = new LO<readonly [number, number, number]>(dimension)
-    this.rotationPoint = new LO<readonly [number, number, number]>(rotationPoint)
+    this.position = new LO<readonly [number, number, number]>(rotationPoint)
     this.offset = new LO<readonly [number, number, number]>(offset)
     this.rotation = new LO<readonly [number, number, number]>(rotation)
     this.textureOffset = new LO<readonly [number, number]>(textureOffset)
@@ -217,8 +217,20 @@ export class DCMCube implements CubeParent {
 
     this.uvBuffer = new BufferAttribute(new Float32Array(new Array(6 * 4 * 2)), 2)
 
+
+    this.position.addListener(values => this.updatePositionVisuals(values))
+    this.rotation.addListener(values => this.updateRotationVisuals(values))
+    this.cubeGrow.addListener(value => this.updateCubeGrowVisuals({ value }))
+
+    this.offset.addListener(values => this.updateOffset(values))
+    this.dimension.addListener(dimension => this.updateGeometry({ dimension }))
+    
+    this.textureOffset.addListener(textureOffset => this.updateTexture({ textureOffset }))
+    this.textureMirrored.addListener(textureMirrored => this.updateTexture({ textureMirrored }))
+
+    this.children.addListener(ar => this.onChildrenChange(ar))
+
     this.mouseState.addListener(v => {
-      console.log(v)
       if (this.model.selectedCubeManager !== undefined && this.model.materials !== undefined && this.cubeMesh !== undefined) {
         switch (v) {
           case "hover":
@@ -268,11 +280,10 @@ export class DCMCube implements CubeParent {
     this.cubeGroup.add(this.cubeGrowGroup)
 
     this.cubeGroup.rotation.order = "ZYX"
-    this.updatePosition()
-    this.updateRotation()
     this.updateOffset()
-    this.updateCubeGrow()
-
+    this.updateCubeGrowVisuals({ shouldUpdateTexture: false })
+    this.updatePositionVisuals()
+    this.updateRotationVisuals()
 
     this.onChildrenChange(this.children.value)
 
@@ -314,7 +325,7 @@ export class DCMCube implements CubeParent {
   }
 
   cloneCube(model = this.model) {
-    return new DCMCube(this.name.value.replace(/~\d+$/, ""), this.dimension.value, this.rotationPoint.value, this.offset.value,
+    return new DCMCube(this.name.value.replace(/~\d+$/, ""), this.dimension.value, this.position.value, this.offset.value,
       this.rotation.value, this.textureOffset.value, this.textureMirrored.value, this.cubeGrow.value,
       this.children.value.map(c => c.cloneCube(model)), model)
   }
@@ -348,8 +359,7 @@ export class DCMCube implements CubeParent {
   resetVisuals() {
     this.children.value.forEach(child => child.resetVisuals())
 
-    this.updateGeometry({ shouldUpdateTexture: false })
-    this.updateCubeGrow()
+    this.updateCubeGrowVisuals({ shouldUpdateTexture: false })
     this.updatePositionVisuals()
     this.updateRotationVisuals()
   }
@@ -375,7 +385,7 @@ export class DCMCube implements CubeParent {
     }
   }
 
-  updatePositionVisuals(position = this.rotationPoint.value) {
+  updatePositionVisuals(position = this.position.value) {
     this.cubeGroup?.position.set(position[0], position[1], position[2])
   }
 
@@ -383,9 +393,13 @@ export class DCMCube implements CubeParent {
     this.cubeGroup?.rotation.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180)
   }
 
-  updateCubeGrowVisuals(value = this.cubeGrow.value) {
+  updateCubeGrowVisuals({ value = this.cubeGrow.value, shouldUpdateTexture = true }) {
     this.cubeGrowGroup?.position.set(-value[0], -value[1], -value[2])
-    this.updateGeometry({ cubeGrow: value })
+    this.updateGeometry({ cubeGrow: value, shouldUpdateTexture })
+  }
+
+  updateOffset(values = this.offset.value) {
+    this.cubeMesh?.position.set(values[0], values[1], values[2])
   }
 
   updateTexture({ textureOffset = this.textureOffset.value, dimension = this.dimension.value, texWidth = this.model.texWidth, texHeight = this.model.texHeight, textureMirrored = this.textureMirrored.value } = {}) {
@@ -407,59 +421,6 @@ export class DCMCube implements CubeParent {
     this._genereateFaceData(5, tm, to, tw, th, d + w, d + h, -w, -h)
 
     this.uvBuffer.needsUpdate = true
-  }
-
-  updateCubeName(value = this.name.value) {
-    this.name.value = value;
-  }
-
-  updateDimension(values = this.dimension.value, visualOnly = false) {
-    if (visualOnly !== true) {
-      this.dimension.value = [Math.round(values[0]), Math.round(values[1]), Math.round(values[2])]
-    }
-    this.updateGeometry({ dimension: values })
-  }
-
-  updateCubeGrow(value = this.cubeGrow.value, visualOnly = false) {
-    if (visualOnly !== true) {
-      this.cubeGrow.value = value
-    }
-    this.updateCubeGrowVisuals(value)
-  }
-
-  updateTextureOffset(values = this.textureOffset.value, visualOnly = false) {
-    if (visualOnly !== true) {
-      this.textureOffset.value = [Math.round(values[0]), Math.round(values[1])]
-    }
-    this.updateTexture({ textureOffset: values })
-  }
-
-  updateTextureMirrored(value = this.textureMirrored.value, visualOnly = false) {
-    if (visualOnly !== true) {
-      this.textureMirrored.value = value
-    }
-    this.updateTexture({ textureMirrored: value })
-  }
-
-  updateOffset(values = this.offset.value, visualOnly = false) {
-    if (visualOnly !== true) {
-      this.offset.value = values
-    }
-    this.cubeMesh?.position.set(values[0], values[1], values[2])
-  }
-
-  updatePosition(values = this.rotationPoint.value, visualOnly = false) {
-    if (visualOnly !== true) {
-      this.rotationPoint.value = values
-    }
-    this.updatePositionVisuals(values)
-  }
-
-  updateRotation(values = this.rotation.value, visualOnly = false) {
-    if (visualOnly !== true) {
-      this.rotation.value = values
-    }
-    this.updateRotationVisuals(values)
   }
 
   _genereateFaceData(face: number, tm: boolean, toff: readonly [number, number], tw: number, th: number, offU: number, offV: number, heightU: number, heightV: number) {

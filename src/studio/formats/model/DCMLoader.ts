@@ -97,7 +97,7 @@ export const writeModel = model => {
         cubes.forEach(cube => {
             buffer.writeString(cube.name.value)
             writeArr(cube.dimension.value, 3)
-            writeArr(cube.rotationPoint.value, 3)
+            writeArr(cube.position.value, 3)
             writeArr(cube.offset.value, 3)
             writeArr(cube.rotation.value, 3)
             writeArr(cube.textureOffset.value, 2)

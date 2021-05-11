@@ -52,7 +52,12 @@ export default class SelectedCubeManager {
       })
       if (!ignore) {
         if (this.mouseOverMesh !== null) {
-          this.getCube(this.mouseOverMesh).mouseState.value = "selected"
+          const cube = this.getCube(this.mouseOverMesh)
+          if (cube.mouseState.value !== "selected") {
+            cube.mouseState.value = "selected"
+          } else {
+            cube.mouseState.value = this.mouseOver.value === cube.identifier ? "hover" : "none"
+          }
         } else {
           project.model.cubeMap.forEach(v => {
             if (v.mouseState.value === "selected") {
@@ -65,7 +70,19 @@ export default class SelectedCubeManager {
   }
 
   onCubeSelected(cube: DCMCube) {
-    this.selected.value = this.selected.value.concat(cube.identifier)
+    //TODO if ctrl is pressed don't do this:
+    const keep = false
+    if(!keep) {
+      cube.model.cubeMap.forEach(v => {
+        if (v.mouseState.value === "selected") {
+          v.mouseState.value = this.mouseOver.value === v.identifier ? "hover" : "none"
+        }
+      })
+      this.selected.value = [cube.identifier]
+    } else {
+      this.selected.value = this.selected.value.concat(cube.identifier)
+    }
+    
   }
 
   onCubeUnSelected(cube: DCMCube) {
