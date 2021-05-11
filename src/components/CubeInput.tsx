@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import NumericInput from 'react-numeric-input';
+import { SVGLocked, SVGUnlocked } from './Icons';
 
 const axis = [
     { axis: "x", color: "red" },
@@ -6,15 +8,25 @@ const axis = [
     { axis: "z", color: "lightBlue" },
 ] as const
 
-const CubeInput = ({ title, value, setValue }: {
+const CubeInput = ({ title, value, setValue, lock }: {
     title: string
     value?: readonly [number, number, number]
     setValue?: (value: readonly [number, number, number]) => void
+    lock?: boolean
 }) => {
+
+    const[isLocked, setLocked] = useState(lock)
 
     return (
         <div>
-            <p className="ml-1 text-gray-400 text-xs">{title}</p>
+            <div className="flex flex-row">
+                <p className="ml-1 text-gray-400 text-xs flex-grow">{title}</p>
+                {lock === undefined || 
+                    <button className={(isLocked ? "bg-red-600" : "bg-gray-900") + " text-xs rounded mr-1 h-4 w-4 p-0.5 text-white"} onClick={() => setLocked(!isLocked)}>
+                        {isLocked ? <SVGLocked /> : <SVGUnlocked />}
+                    </button>
+                }
+            </div>
             <div className="flex flex-col p-1">
                 {axis.map((a, idx) =>
                     <InputField
