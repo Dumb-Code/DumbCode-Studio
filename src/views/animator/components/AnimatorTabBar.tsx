@@ -24,9 +24,9 @@ const AnimatorTabBar = () => {
 
 const AnimatorTab = ({animation, selected}: {animation: DcaAnimation, selected: boolean}) => {
     return(
-        <div className={(selected ? "bg-lightBlue-500" : "bg-gray-900") + " w-32 truncate flex flex-row rounded m-1"}>
-            <DblClickEditLO obj={animation.name} className={(selected ? "text-white" : "text-gray-400") + " flex-grow -mt-1.5"} inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
-            <button className="h-4 w-4 bg-gray-800 hover:bg-red-600 rounded pl-0.5 mt-0.5 mr-1 hover:text-white text-gray-400 opacity-30 hover:opacity-100"><SVGCross className="h-3 w-3 mr-1" /></button>
+        <div className={(selected ? "bg-lightBlue-500" : "bg-gray-900") + " min-w-32 truncate flex flex-row rounded m-1"}>
+            <DblClickEditLO obj={animation.name} className={(selected ? "text-white" : "text-gray-400") + " flex-grow px-2"} inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
+            <button className="h-4 w-4 bg-gray-800 hover:bg-red-600 rounded pl-0.5 mt-1 mr-1 hover:text-white text-gray-400 opacity-30 hover:opacity-100"><SVGCross className="h-3 w-3 mr-1" /></button>
         </div>
     )
 }
