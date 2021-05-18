@@ -6,8 +6,28 @@ import AnimatorScrubBar from "./components/AnimatorScrubBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import GumballPropertiesBar from "../../components/GumballPropertiesBar"
 import InfoBar from "../../components/InfoBar"
+import { useStudio } from "../../contexts/StudioContext"
+import { useEffect } from "react"
 
 const Animator = () => {
+
+    const { getSelectedProject, onFrameListeners } = useStudio()
+    const project = getSelectedProject()
+
+    useEffect(() => {
+        const onFrame = (deltaTime: number) => {
+            project.model.resetVisuals()
+            const selected = project.animationTabs.selectedAnimation
+            if(selected.value !== null) {
+                selected.value.animate(deltaTime)
+            }
+        }
+        onFrameListeners.add(onFrame)
+        return () => {
+            onFrameListeners.delete(onFrame)
+        }
+    })
+    
     return (
         <div className="grid grid-areas-animator h-full"
             style={{

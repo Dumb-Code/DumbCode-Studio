@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
+
+type Listener<T> = (
+  newValue: T,
+  oldValue: T,
+  naughtyModifyValue: (t: T) => void
+) => void
+
 export class LO<T> {
   constructor(
     private _value: T,
-    private listners: Set<((newValue: T, oldValue: T) => void)> = new Set(),
+    private listners: Set<Listener<T>> = new Set(),
   ) { }
 
   get value() {
@@ -10,24 +17,45 @@ export class LO<T> {
   }
 
   set value(value: T) {
-    if(value !== this._value) {
+    let newValue = value
+    if (value !== this._value) {
       //We need to clone the listeners, as they can be changed while being called
       //Otherwise more than one listner will mean a infinate virtually untraceable loop
-      Array.from(this.listners).forEach(l => l(value, this._value))
+      Array.from(this.listners).forEach(l => l(value, this._value, val => newValue = val))
     }
-    this._value = value
+    this._value = newValue
   }
 
-  addListener = (func: (newValue: T, oldValue: T) => void) => {
+  addListener = (func: Listener<T>) => {
     this.listners.add(func)
   }
 
-  removeListener = (func: (newValue: T, oldValue: T) => void) => {
+  removeListener = (func: Listener<T>) => {
     this.listners.delete(func)
   }
 }
 
-export const useListenableObject = <T>(obj: LO<T>, debug?: boolean): [T, (val: T) => void] => {
+export const useListenableObjectNullable = <T>(obj: LO<T> | undefined): [T | undefined, (val: T) => void] => {
+  const [state, setState] = useState<T | undefined>(() => obj?.value)
+  useEffect(() => {
+    if (obj === undefined) {
+      return
+    }
+    if (state !== obj.value) {
+      setState(obj.value)
+    }
+    obj.addListener(setState)
+    return () => obj.removeListener(setState)
+  }, [state, setState, obj])
+  return [state, val => {
+    if (obj !== undefined) {
+      obj.value = val
+    }
+  }]
+}
+
+
+export const useListenableObject = <T>(obj: LO<T>): [T, (val: T) => void] => {
   const [state, setState] = useState(() => obj.value)
   useEffect(() => {
     if (state !== obj.value) {

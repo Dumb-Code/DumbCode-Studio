@@ -146,7 +146,7 @@ const TextureLists = ({ project }: { project: DcProject }) => {
 const SelectedTexturesList = ({ project }: { project: DcProject }) => {
 
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
-    const [selectedGroupTextures, setSelectedGroupTextures] = useListenableObject(selectedGroup.textures, true)
+    const [selectedGroupTextures, setSelectedGroupTextures] = useListenableObject(selectedGroup.textures)
 
     const [textures] = useListenableObject(project.textureManager.textures)
 
@@ -186,7 +186,7 @@ const SelectedTexturesList = ({ project }: { project: DcProject }) => {
 
 const NonSelectedTextures = ({ project }: { project: DcProject }) => {
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
-    const [selectedGroupTextures] = useListenableObject(selectedGroup.textures, true)
+    const [selectedGroupTextures] = useListenableObject(selectedGroup.textures)
 
     const [textures] = useListenableObject(project.textureManager.textures)
 

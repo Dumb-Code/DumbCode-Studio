@@ -1,5 +1,5 @@
 import { DCMModel } from './../model/DcmModel';
-import DcaAnimation, { DcaKeyframe } from './DcaAnimation';
+import DcaAnimation, { DcaKeyframe, ProgressionPoint } from './DcaAnimation';
 import { StudioBuffer } from './../../util/StudioBuffer';
 import DcProject from '../DcProject';
 
@@ -55,12 +55,11 @@ export const loadDCAAnimation = (project: DcProject, name: string, buffer: Studi
 
     if (version >= 2) {
       let ppSize = buffer.readNumber()
+      const arr: ProgressionPoint[] = []
       for (let p = 0; p < ppSize; p++) {
-        //TODO:
-        const progressionPoints = { required: p < 2, x: buffer.readNumber(), y: buffer.readNumber() }
-        compilerWarningsRemove(progressionPoints)
+        arr.push({ required: p < 2, x: buffer.readNumber(), y: buffer.readNumber() })
       }
-      // kf.progressionPoints = kf.progressionPoints.filter(p => p.required || p.x > 0 || p.x < 1)
+      kf.progressionPoints.value = arr
       // kf.resortPointsDirty()
     }
   }
@@ -114,7 +113,7 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
     //Sort the keyframes, and animate at the start time
     let sorted = [...keyframes].sort((a, b) => a.startTime.value - b.startTime.value)
     sorted.forEach((kf, index) => {
-      model.resetAnimations()
+      model.resetVisuals()
       keyframes.forEach(_kf => _kf.animate(kf.startTime.value))
 
       //If the next keyframe start time is before this end point, then it'll get cut off.

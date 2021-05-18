@@ -1,18 +1,7 @@
-import { useEffect } from 'react';
-import { AmbientLight, BoxBufferGeometry, Camera, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
+import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
-import { ThreeJsContext, useStudio } from "./StudioContext";
-
-export const useOnFrameCallback = (callback: () => void) => {
-  const { onFrameListeners } = useStudio()
-  useEffect(() => {
-    onFrameListeners.add(callback)
-    return () => {
-      onFrameListeners.delete(callback)
-    }
-  })
-}
+import { ThreeJsContext } from "./StudioContext";
 
 export const createThreeContext: () => ThreeJsContext = () => {
   console.log(`Creating ThreeJs (${REVISION}) Context`)
@@ -50,12 +39,15 @@ export const createThreeContext: () => ThreeJsContext = () => {
   let width = 100
   let height = 100
 
-  const onFrameListeners = new Set<() => void>()
+  const clock = new Clock()
+
+  const onFrameListeners = new Set<(deltaTime: number) => void>()
 
   const onFrame = () => {
     requestAnimationFrame(onFrame)
 
-    onFrameListeners.forEach(l => l())
+    const deltaTime = clock.getDelta()
+    onFrameListeners.forEach(l => l(deltaTime))
 
     renderer.render(scene, camera)
 

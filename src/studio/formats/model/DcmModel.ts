@@ -133,11 +133,6 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
     children.forEach(child => this.modelCache.add(child.createGroup()))
   }
 
-  resetAnimations() {
-    //todo: rename
-    this.resetVisuals()
-  }
-
   resetVisuals() {
     this.children.value.forEach(child => child.resetVisuals())
   }

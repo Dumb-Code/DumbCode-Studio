@@ -13,7 +13,7 @@ export type ThreeJsContext = {
   controls: OrbitControls,
   raycaster: Raycaster,
   onMouseDown: IndexedEventHandler<React.MouseEvent>
-  onFrameListeners: Set<() => void>,
+  onFrameListeners: Set<(deltaTime: number) => void>,
 
   setSize: (width: number, height: number) => void
   getSize: () => { width: number; height: number; }

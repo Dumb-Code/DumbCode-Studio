@@ -7,10 +7,12 @@ export default class DcaAnimation {
   readonly project: DcProject
 
   name: LO<string>
-  readonly keyframes = new LO<readonly DcaKeyframe[]>([] as const)
+  readonly keyframes = new LO<readonly DcaKeyframe[]>([])
 
   readonly time = new LO(0)
   readonly displayTime = new LO(0)
+  readonly maxTime = new LO(1)
+  readonly playing = new LO(false)
   displayTimeMatch: boolean = true
 
   readonly keyframeData: KeyframeLoopData
@@ -29,13 +31,22 @@ export default class DcaAnimation {
         this.displayTime.value = value
       }
     })
+
+    this.keyframes.addListener(value => {
+      this.maxTime.value = Math.max(...value.map(k => k.startTime.value + k.duration.value))
+    })
   }
 
   animate(delta: number) {
-    this.time.value += delta
-    //TODO
+    if(this.playing.value) {
+      this.time.value += delta
+    }
+    
+    this.keyframes.value.forEach(kf => kf.animate(this.time.value))
   }
 }
+
+export type ProgressionPoint = { required?: boolean, x: number, y: number }
 
 export class DcaKeyframe {
   readonly identifier: string
@@ -49,11 +60,17 @@ export class DcaKeyframe {
   readonly position = new LOMap<string, readonly [number, number, number]>()
   readonly cubeGrow = new LOMap<string, readonly [number, number, number]>()
 
+  readonly progressionPoints = new LO<readonly ProgressionPoint[]>([])
+
   skip = false
 
   constructor(project: DcProject) {
     this.identifier = v4()
     this.project = project
+
+    this.progressionPoints.addListener((val, _, naughtyModifyValue) => {
+      naughtyModifyValue(Array.from(val).sort((a, b) => a.x - b.x))
+    })
   }
 
   animate(time: number) {
@@ -70,17 +87,16 @@ export class DcaKeyframe {
   }
 
   getProgressionValue(basePercentage: number) {
-    //TODO:
-    // if(basePercentage)
-    // for(let i = 0; i < this.progressionPoints.length - 1; i++) {
-    //     let point = this.progressionPoints[i]
-    //     let next = this.progressionPoints[i + 1]
+    const progressionPoints = this.progressionPoints.value
+    for(let i = 0; i < progressionPoints.length - 1; i++) {
+        let point = progressionPoints[i]
+        let next = progressionPoints[i + 1]
 
-    //     if(basePercentage > point.x && basePercentage < next.x) {
-    //         let interpolateBetweenAmount = (basePercentage - point.x) / (next.x - point.x)
-    //         return 1 - (point.y + (next.y - point.y) * interpolateBetweenAmount)
-    //     }
-    // }
+        if(basePercentage > point.x && basePercentage < next.x) {
+            let interpolateBetweenAmount = (basePercentage - point.x) / (next.x - point.x)
+            return 1 - (point.y + (next.y - point.y) * interpolateBetweenAmount)
+        }
+    }
     return basePercentage //Shouldn't happen. There should always be at least the first and last progression point
   }
 
