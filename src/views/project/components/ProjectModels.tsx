@@ -1,11 +1,12 @@
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGPlus, SVGPushGithub, SVGUpload } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
-import { createProject, newProject } from "../../../studio/formats/DcProject"
-import { SaveIcon } from "../../../studio/util/FileTypes"
+import DcProject, { createProject, getProjectName, newProject } from "../../../studio/formats/DcProject"
+import { writeModel } from "../../../studio/formats/model/DCMLoader"
+import { FileSystemsAccessApi } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
-import { LO } from "../../../studio/util/ListenableObject"
+import { useListenableObject } from "../../../studio/util/ListenableObject"
 const modelExtensions = [".dcm", ".tbl", ".bbmodel"]
 
 const ProjectModels = () => {
@@ -45,9 +46,8 @@ const ModelEntries = () => {
         {projects.map(project =>
             <ModelEntry
                 key={project.identifier}
-                name={project.name}
+                project={project}
                 selected={project === selectedProject}
-                isRemote={false}
                 changeModel={() => selectProject(project)}
                 removeProject={() => removeProject(project)}
             />
@@ -55,15 +55,48 @@ const ModelEntries = () => {
     </>)
 }
 
-const ModelEntry = ({ name, selected, isRemote, changeModel, removeProject }: { name: LO<string>, selected: boolean, isRemote: boolean, changeModel: () => void, removeProject: () => void }) => {
+const ModelEntry = ({ project, selected, changeModel, removeProject }: { project: DcProject, selected: boolean, changeModel: () => void, removeProject: () => void }) => {
+    const [isModelDirty] = useListenableObject(project.model.needsSaving)
+    const [isSaveable] = useListenableObject(project.saveableFile)
+    const saveModel = async () => {
+        try {
+            const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeModel(project.model).getAsBlob())
+            project.name.value = getProjectName(name)
+            project.saveableFile.value = true
+            project.model.needsSaving.value = false
+        } catch(e) {
+            console.error(e)
+            //Ignore e
+        }
+    }
+    const linkedToFile = isSaveable && FileSystemsAccessApi
+    const SaveIcon = linkedToFile ? SVGSave : SVGDownload
+
+    const isRemote = false
+
+    const iconButtonClass = (selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900")
+
     return (
         <div className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} onClick={changeModel}>
-            <DblClickEditLO obj={name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
+            <DblClickEditLO obj={project.name} disabled={linkedToFile} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
 
             <p className="pt-0 mr-2 text-white flex flex-row">
-                {isRemote && <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}><SVGPushGithub className="h-4 w-4 mr-1" /></button>}
-                <button className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}><SaveIcon className="h-4 w-4 mr-1" /></button>
-                <button onClick={e => { removeProject(); e.stopPropagation() }} className={(selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
+                {isRemote &&
+                    <button
+                        className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}>
+                        <SVGPushGithub className="h-4 w-4 mr-1" />
+                    </button>
+                }
+                <button
+                    onClick={e => { saveModel(); e.stopPropagation() }}
+                    className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}>
+                    <SaveIcon className="h-4 w-4 mr-1" />
+                </button>
+                <button
+                    onClick={e => { removeProject(); e.stopPropagation() }}
+                    className={iconButtonClass + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}>
+                    <SVGCross className="h-4 w-4 group-hover:text-red-500" />
+                </button>
             </p>
         </div>
     )

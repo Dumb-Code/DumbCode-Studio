@@ -6,31 +6,73 @@ if (FileSystemsAccessApi) {
 
 export type ReadableFile = {
   asFile: () => File | PromiseLike<File>
-  asWritable?: () => WritableFile
+  asWritable: () => WritableFile
   name: string
 }
 
 export type WritableFile = {
-  write: (blob: Blob) => void
+  write: (projectName: string, blob: Blob) => Promise<any>
 }
 
 // const WritableFileRefreshLoop
 
-export const createReadableFile = (file: File): ReadableFile => { 
-  return { 
+const defaultWritable: WritableFile = {
+  write: async(name, blob) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    return name
+  }
+}
+
+//Gets the writeable file for where nothing has been defined.
+export const getUndefinedWritable = (description: string, accept: string[]): WritableFile => {
+  if (!FileSystemsAccessApi) {
+    return defaultWritable
+  }
+  let name: string|null = null
+  let file: WritableFile|null = null
+  return {
+    write: async (name, blob) => {
+      if (file === null) {
+        const picked = await window.showSaveFilePicker({
+          types: [{
+            description,
+            accept: {
+              "custom/dumbcode": accept
+            }
+          }]
+        })
+        const readable = createReadableFileExtended(picked)
+        name = readable.name
+        file = readable.asWritable()
+      }
+      file.write(name, blob)
+      return name
+    }
+  }
+}
+
+export const createReadableFile = (file: File): ReadableFile => {
+  return {
     asFile: () => file,
-    name: file.name
-   } 
+    name: file.name,
+    asWritable: () => defaultWritable,
+  }
 }
 export const createReadableFileExtended = (handle: FileSystemFileHandle): ReadableFile => {
   return {
     asFile: () => handle.getFile(),
     asWritable: () => {
       return {
-        write: async (blob) => {
+        write: async (_, blob) => {
           const writable = await handle.createWritable()
           await writable.write(blob)
           await writable.close()
+          return handle.name
         }
       }
     },

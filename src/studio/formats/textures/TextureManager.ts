@@ -128,8 +128,8 @@ export class Texture {
 
     if (element === undefined) {
       this.name = new LO("New Texture")
-      this.width = model.texWidth
-      this.height = model.texHeight
+      this.width = model.textureWidth.value
+      this.height = model.textureHeight.value
       element = document.createElement("img")
     } else {
       //We know that name is not undefined here

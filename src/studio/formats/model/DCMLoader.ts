@@ -18,9 +18,9 @@ export const loadDCMModel = async(arrayBuffer: ArrayBuffer | PromiseLike<ArrayBu
     
         //Read the model meta
         version = buffer.readNumber()
-        model.author = buffer.readString()
-        model.texWidth = buffer.readInteger()
-        model.texHeight = buffer.readInteger()
+        model.author.value = buffer.readString()
+        model.textureWidth.value = buffer.readInteger()
+        model.textureHeight.value = buffer.readInteger()
     
         //Recursive method to read a list of cubes
         let readCubes = () => {
@@ -65,7 +65,7 @@ export const loadDCMModel = async(arrayBuffer: ArrayBuffer | PromiseLike<ArrayBu
  * @param {DCMModel} model the model
  * @returns a ByteBuffer with the model written to it 
  */
-export const writeModel = model => {
+export const writeModel = (model: DCMModel) => {
     let buffer = new StudioBuffer()
 
     //0 - internally used version
@@ -79,9 +79,9 @@ export const writeModel = model => {
     buffer.writeNumber(2) //Version
     
     //Write the model meta
-    buffer.writeString(model.author)
-    buffer.writeNumber(model.texWidth)
-    buffer.writeNumber(model.texHeight)
+    buffer.writeString(model.author.value)
+    buffer.writeNumber(model.textureWidth.value)
+    buffer.writeNumber(model.textureHeight.value)
 
     //Function to write an array easily.
     //This doesn't do `arr.forEach`, as we need a defined amount of numbers written
@@ -107,7 +107,7 @@ export const writeModel = model => {
         })
     }
 
-    writeCubes(model.children)
+    writeCubes(model.children.value)
 
     return buffer
 }

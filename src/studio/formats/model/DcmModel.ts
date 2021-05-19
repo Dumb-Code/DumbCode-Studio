@@ -1,17 +1,11 @@
 import { LO } from './../../util/ListenableObject';
 import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, Material } from "three";
 import { v4 as uuidv4 } from "uuid"
-import EventManager from "../../util/EventManager";
 import { ProjectMaterials } from '../DcProject';
 import SelectedCubeManager from '../../util/SelectedCubeManager';
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
-
-interface EventTypes {
-  "hierarchyChanged": null
-  "textureSizeChanged": { width: number, height: number }
-}
 
 export interface CubeParent {
   addChild(child: DCMCube): void
@@ -34,18 +28,20 @@ const invalidParent: CubeParent = {
 }
 Object.freeze(invalidParent)
 
-export class DCMModel extends EventManager<EventTypes> implements CubeParent {
+export class DCMModel implements CubeParent {
 
-  author: string
+  readonly author = new LO("???")
 
-  texWidth: number
-  texHeight: number
+  readonly textureWidth = new LO(64)
+  readonly textureHeight = new LO(64)
 
   maxCubeLevel: number
 
   cubeMap: Map<string, DCMCube>
   identifierCubeMap: Map<string, DCMCube>
   children = new LO<readonly DCMCube[]>([])
+
+  readonly needsSaving = new LO(false)
 
   modelCache: Group
   material?: Material
@@ -54,10 +50,6 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
   selectedCubeManager?: SelectedCubeManager
 
   constructor() {
-    super()
-    this.author = "???"
-    this.texWidth = 64
-    this.texHeight = 64
     this.maxCubeLevel = 0
 
     this.cubeMap = new Map()
@@ -70,20 +62,22 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
         this.onChildrenChange(arr)
       }
     })
-  }
 
-  setTextureSize(width: number, height: number) {
-    this.texWidth = width
-    this.texHeight = height
-    this.dispatchEvent("textureSizeChanged", { width, height })
-    this.traverseAll(cube => cube.updateTexture())
+    const refreshTextures = () => this.traverseAll(cube => cube.updateTexture())
+    this.textureWidth.addListener(refreshTextures)
+    this.textureHeight.addListener(refreshTextures)
+
+    const onDirty = () => this.needsSaving.value = true
+    this.children.addListener(onDirty)
+    this.textureWidth.addListener(onDirty)
+    this.textureHeight.addListener(onDirty)
+    this.author.addListener(onDirty)
   }
 
   onCubeHierarchyChanged() {
     this.maxCubeLevel = 0
     this.cubeMap.clear()
     this.children.value.forEach(child => child.recalculateHierarchy(0, this))
-    this.dispatchEvent("hierarchyChanged", null)
   }
 
   createModel(material: Material) {
@@ -140,9 +134,9 @@ export class DCMModel extends EventManager<EventTypes> implements CubeParent {
   cloneModel() {
     let model = new DCMModel()
 
-    model.author = this.author
-    model.texWidth = this.texWidth
-    model.texHeight = this.texHeight
+    model.author.value = this.author.value
+    model.textureWidth.value = this.textureWidth.value
+    model.textureHeight.value = this.textureHeight.value
 
     model.children.value = this.children.value.map(c => c.cloneCube(model))
 
@@ -187,16 +181,18 @@ export class DCMCube implements CubeParent {
     cubeGrow: readonly [number, number, number],
     children: readonly DCMCube[],
     model: DCMModel) {
+
+    const onDirty = () => model.needsSaving.value = true
     this.identifier = uuidv4()
     this.name = new LO(name)
-    this.dimension = new LO<readonly [number, number, number]>(dimension)
-    this.position = new LO<readonly [number, number, number]>(rotationPoint)
-    this.offset = new LO<readonly [number, number, number]>(offset)
-    this.rotation = new LO<readonly [number, number, number]>(rotation)
-    this.textureOffset = new LO<readonly [number, number]>(textureOffset)
-    this.textureMirrored = new LO<boolean>(textureMirrored)
-    this.cubeGrow = new LO<readonly [number, number, number]>(cubeGrow)
-    this.children = new LO<readonly DCMCube[]>(children)
+    this.dimension = new LO<readonly [number, number, number]>(dimension, onDirty)
+    this.position = new LO<readonly [number, number, number]>(rotationPoint, onDirty)
+    this.offset = new LO<readonly [number, number, number]>(offset, onDirty)
+    this.rotation = new LO<readonly [number, number, number]>(rotation, onDirty)
+    this.textureOffset = new LO<readonly [number, number]>(textureOffset, onDirty)
+    this.textureMirrored = new LO<boolean>(textureMirrored, onDirty)
+    this.cubeGrow = new LO<readonly [number, number, number]>(cubeGrow, onDirty)
+    this.children = new LO<readonly DCMCube[]>(children, onDirty)
     this.model = model
     this.hierarchyLevel = 0
 
@@ -219,7 +215,7 @@ export class DCMCube implements CubeParent {
 
     this.offset.addListener(values => this.updateOffset(values))
     this.dimension.addListener(dimension => this.updateGeometry({ dimension }))
-    
+
     this.textureOffset.addListener(textureOffset => this.updateTexture({ textureOffset }))
     this.textureMirrored.addListener(textureMirrored => this.updateTexture({ textureMirrored }))
 
@@ -397,7 +393,7 @@ export class DCMCube implements CubeParent {
     this.cubeMesh?.position.set(values[0], values[1], values[2])
   }
 
-  updateTexture({ textureOffset = this.textureOffset.value, dimension = this.dimension.value, texWidth = this.model.texWidth, texHeight = this.model.texHeight, textureMirrored = this.textureMirrored.value } = {}) {
+  updateTexture({ textureOffset = this.textureOffset.value, dimension = this.dimension.value, texWidth = this.model.textureWidth.value, texHeight = this.model.textureHeight.value, textureMirrored = this.textureMirrored.value } = {}) {
 
     let tm = textureMirrored
     let to = textureOffset

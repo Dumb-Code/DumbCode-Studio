@@ -1,4 +1,4 @@
-import { WritableFile } from './../util/FileTypes';
+import { getUndefinedWritable } from './../util/FileTypes';
 import { DCMModel } from './model/DcmModel';
 import { DoubleSide, Group, MeshLambertMaterial, Texture } from "three"
 import { ReadableFile } from '../util/FileTypes';
@@ -23,7 +23,8 @@ export default class DcProject {
   group: Group
 
   model: DCMModel
-  modelWritableFile?: WritableFile
+  readonly saveableFile = new LO(false)
+  modelWritableFile = getUndefinedWritable("Model File", [".dcm"])
 
   textureManager: TextureManager
   animationTabs: DcaTabs
@@ -44,14 +45,6 @@ export default class DcProject {
     this.model.selectedCubeManager = this.selectedCubeManager
     this.group.add(this.model.createModel(this.materials.normal))
     this.previousThreeTexture = null
-  }
-
-  setName(name: string) {
-    this.name.value = name
-  }
-
-  getName() {
-    return this.name.value
   }
 
   /**
@@ -103,11 +96,12 @@ export const newProject = () => {
 export const createProject = async (read: ReadableFile) => {
   const file = await read.asFile()
   const model = await loadDCMModel(file.arrayBuffer(), file.name)
-  const project = new DcProject(file.name.substring(0, file.name.lastIndexOf(".")), model)
+  const project = new DcProject(getProjectName(file.name), model)
 
-  if (read.asWritable) {
-    project.modelWritableFile = read.asWritable()
-  }
+  project.saveableFile.value = true
+  project.modelWritableFile = read.asWritable()
 
   return project
 }
+
+export const getProjectName = (name: string) => name.substring(0, name.lastIndexOf("."))

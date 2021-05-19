@@ -9,8 +9,13 @@ type Listener<T> = (
 export class LO<T> {
   constructor(
     private _value: T,
+    defaultCallback?: Listener<T>,
     private listners: Set<Listener<T>> = new Set(),
-  ) { }
+  ) {
+    if (defaultCallback) {
+      this.listners.add(defaultCallback)
+    }
+  }
 
   get value() {
     return this._value
