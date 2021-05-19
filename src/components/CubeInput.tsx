@@ -31,6 +31,7 @@ const CubeInput = ({ title, value, setValue, lock }: {
                 {axis.map((a, idx) =>
                     <InputField
                         {...a}
+                        key={a.axis}
                         value={value ? value[idx] : null}
                         setValue={v => {
                             if (setValue && value) {
