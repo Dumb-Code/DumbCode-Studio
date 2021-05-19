@@ -30,12 +30,13 @@ jobs:
     if: failure()
     runs-on: ubuntu-latest
     steps:
+    - name: Set env
+      run: echo ::set-env name=PAYLOAD::[Click to view.](https://github.com/${{ env.GITHUB_REPOSITORY }}/runs/${{ env.GITHUB_RUN_ID }})
     - uses: sarisia/actions-status-discord@v1.8.5
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        PAYLOAD: "[Click to view.](https://github.com/${{ env.GITHUB_REPOSITORY }}/runs/${{ env.GITHUB_RUN_ID }})"
       with:
         status: failure
         nodetail: true
         title: Error In Job
-        description: ${{ PAYLOAD }}
+        description: ${{ env.PAYLOAD }}
