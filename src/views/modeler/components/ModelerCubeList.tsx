@@ -7,8 +7,6 @@ import { useListenableObject } from '../../../studio/util/ListenableObject';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 
 
-const cringe = ""
-
 const createCube = (model: DCMModel) => {
     let map = model.cubeMap
     let name = "newcube"
