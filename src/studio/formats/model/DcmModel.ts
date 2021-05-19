@@ -1,7 +1,7 @@
 import { LO } from './../../util/ListenableObject';
 import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, Material } from "three";
 import { v4 as uuidv4 } from "uuid"
-import { ProjectMaterials } from '../DcProject';
+import DcProject, { ProjectMaterials } from '../DcProject';
 import SelectedCubeManager from '../../util/SelectedCubeManager';
 
 const tempVector = new Vector3()
@@ -30,14 +30,13 @@ Object.freeze(invalidParent)
 
 export class DCMModel implements CubeParent {
 
+  parentProject?: DcProject
   readonly author = new LO("???")
 
   readonly textureWidth = new LO(64)
   readonly textureHeight = new LO(64)
 
-  maxCubeLevel: number
-
-  cubeMap: Map<string, DCMCube>
+  cubeMap: Map<string, Set<DCMCube>>
   identifierCubeMap: Map<string, DCMCube>
   children = new LO<readonly DCMCube[]>([])
 
@@ -50,8 +49,6 @@ export class DCMModel implements CubeParent {
   selectedCubeManager?: SelectedCubeManager
 
   constructor() {
-    this.maxCubeLevel = 0
-
     this.cubeMap = new Map()
     this.identifierCubeMap = new Map()
 
@@ -74,15 +71,8 @@ export class DCMModel implements CubeParent {
     this.author.addListener(onDirty)
   }
 
-  onCubeHierarchyChanged() {
-    this.maxCubeLevel = 0
-    this.cubeMap.clear()
-    this.children.value.forEach(child => child.recalculateHierarchy(0, this))
-  }
-
   createModel(material: Material) {
     this.material = material
-    this.onCubeHierarchyChanged()
 
     this.modelCache.clear()
     this.modelCache.scale.set(1 / 16, 1 / 16, 1 / 16)
@@ -140,8 +130,6 @@ export class DCMModel implements CubeParent {
 
     model.children.value = this.children.value.map(c => c.cloneCube(model))
 
-    model.onCubeHierarchyChanged()
-
     return model
   }
 }
@@ -184,7 +172,7 @@ export class DCMCube implements CubeParent {
 
     const onDirty = () => model.needsSaving.value = true
     this.identifier = uuidv4()
-    this.name = new LO(name)
+    this.name = new LO(name, onDirty)
     this.dimension = new LO<readonly [number, number, number]>(dimension, onDirty)
     this.position = new LO<readonly [number, number, number]>(rotationPoint, onDirty)
     this.offset = new LO<readonly [number, number, number]>(offset, onDirty)
@@ -203,11 +191,15 @@ export class DCMCube implements CubeParent {
       this.name.value = name + "~" + counter
       counter += 1
     }
-    model.cubeMap.set(this.name.value, this)
     model.identifierCubeMap.set(this.identifier, this)
 
     this.uvBuffer = new BufferAttribute(new Float32Array(new Array(6 * 4 * 2)), 2)
 
+    this.name.addListener((newValue, oldValue) => {
+      this.model.parentProject?.renameCube(oldValue, newValue)
+      this.model.cubeMap.get(oldValue)?.delete(this)
+      this.pushNameToModel(newValue)
+    })
 
     this.position.addListener(values => this.updatePositionVisuals(values))
     this.rotation.addListener(values => this.updateRotationVisuals(values))
@@ -242,6 +234,11 @@ export class DCMCube implements CubeParent {
     })
   }
 
+  pushNameToModel(name = this.name.value) {
+    const set = this.model.cubeMap.get(name) ?? new Set()
+    set.add(this)
+    this.model.cubeMap.set(name, set)
+  }
 
   createGroup() {
     if (this.cubeGroup !== undefined && this.cubeMesh !== undefined) {
@@ -291,16 +288,6 @@ export class DCMCube implements CubeParent {
     tempVector.set(xDelta * w / 16, yDelta * h / 16, zDelta * d / 16).applyQuaternion(this.cubeMesh.getWorldQuaternion(tempQuaterion))
     this.cubeMesh.getWorldPosition(vector).add(tempVector)
     return vector
-  }
-
-  recalculateHierarchy(hierarchyLevel: number, parent: CubeParent) {
-    this.hierarchyLevel = hierarchyLevel
-    this.parent = parent
-    this.model.cubeMap.set(this.name.value, this)
-    this.children.value.forEach(child => child.recalculateHierarchy(this.hierarchyLevel + 1, this))
-    if (this.children.value.length === 0) {
-      this.model.maxCubeLevel = Math.max(this.model.maxCubeLevel, this.hierarchyLevel)
-    }
   }
 
   addChild(child: DCMCube) {

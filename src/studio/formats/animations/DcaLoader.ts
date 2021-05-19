@@ -1,7 +1,9 @@
-import { DCMModel } from './../model/DcmModel';
+import { LO } from './../../util/ListenableObject';
+import { DCMModel, DCMCube } from './../model/DcmModel';
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from './DcaAnimation';
 import { StudioBuffer } from './../../util/StudioBuffer';
 import DcProject from '../DcProject';
+import { LOMap } from '../../util/ListenableObject';
 
 const compilerWarningsRemove = (_: any) => { }
 
@@ -96,17 +98,28 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
     if (version === 3) {
       keyframes.forEach(kf => {
         //Function to mutate array to array+subvalue
-        function transformArr(arr, subValue) {
-          if (subValue === null) {
-            return
-          }
-          for (let i = 0; i < 3; i++) {
-            arr[i] = arr[i] + subValue[i]
-          }
+        function transformMap(
+          partMap: LOMap<string, readonly [number, number, number]>,
+          func: (c: DCMCube) => LO<readonly [number, number, number]>
+        ) {
+          partMap.forEach((value, key) => {
+            const s = map.get(key)
+            if (s === undefined || s.size === 0) {
+              return
+            }
+            //Just get the first cube. There should be only one anyway.
+            //Maybe log if theres more than 1?
+            const val = func(Array.from(s)[0]).value
+            partMap.set(key, [
+              value[0] + val[0],
+              value[1] + val[1],
+              value[2] + val[2]
+            ])
+          })
         }
 
-        kf.rotation.forEach((arr, key) => transformArr(arr, map.get(key)?.rotation))
-        kf.position.forEach((arr, key) => transformArr(arr, map.get(key)?.position))
+        transformMap(kf.rotation, cube => cube.rotation)
+        transformMap(kf.position, cube => cube.position)
       })
     }
 
@@ -132,24 +145,34 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
       //If we then where the cube is when it's animated, we can caluclate
       //how much it should have to move.
       kf.rotation.forEach((arr, key) => {
-        const rot = map.get(key)?.cubeGroup?.rotation
-        if (rot !== undefined) {
-          kf.rotation.set(key, [
-            (arr[0] - rot.x * 180 / Math.PI) * step,
-            (arr[1] - rot.y * 180 / Math.PI) * step,
-            (arr[2] - rot.z * 180 / Math.PI) * step,
-          ])
+        //Just get the first cube. There should be only one anyway.
+        //Maybe log if theres more than 1?
+        const set = map.get(key)
+        if (set !== undefined && set.size !== 0) {
+          const rot = Array.from(set)[0].cubeGroup?.rotation
+          if (rot !== undefined) {
+            kf.rotation.set(key, [
+              (arr[0] - rot.x * 180 / Math.PI) * step,
+              (arr[1] - rot.y * 180 / Math.PI) * step,
+              (arr[2] - rot.z * 180 / Math.PI) * step,
+            ])
+          }
         }
-
       })
+
       kf.position.forEach((arr, key) => {
-        const pos = map.get(key)?.cubeGroup?.position
-        if (pos !== undefined) {
-          kf.position.set(key, [
-            (arr[0] - pos.x) * step,
-            (arr[1] - pos.y) * step,
-            (arr[2] - pos.z) * step,
-          ])
+        //Just get the first cube. There should be only one anyway.
+        //Maybe log if theres more than 1?
+        const set = map.get(key)
+        if (set !== undefined && set.size !== 0) {
+          const pos = Array.from(set)[0].cubeGroup?.position
+          if (pos !== undefined) {
+            kf.position.set(key, [
+              (arr[0] - pos.x) * step,
+              (arr[1] - pos.y) * step,
+              (arr[2] - pos.z) * step,
+            ])
+          }
         }
       })
     })

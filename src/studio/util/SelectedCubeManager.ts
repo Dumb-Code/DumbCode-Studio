@@ -59,7 +59,7 @@ export default class SelectedCubeManager {
             cube.mouseState.value = this.mouseOver.value === cube.identifier ? "hover" : "none"
           }
         } else {
-          project.model.cubeMap.forEach(v => {
+          project.model.identifierCubeMap.forEach(v => {
             if (v.mouseState.value === "selected") {
               v.mouseState.value = this.mouseOver.value === v.identifier ? "hover" : "none"
             }
@@ -73,7 +73,7 @@ export default class SelectedCubeManager {
     //TODO if ctrl is pressed don't do this:
     const keep = false
     if(!keep) {
-      cube.model.cubeMap.forEach(v => {
+      cube.model.identifierCubeMap.forEach(v => {
         if (v.mouseState.value === "selected") {
           v.mouseState.value = this.mouseOver.value === v.identifier ? "hover" : "none"
         }

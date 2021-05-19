@@ -4,6 +4,7 @@ import { ItemInterface, ReactSortable } from "react-sortablejs";
 import { useRef, useState } from 'react';
 import { useStudio } from '../../../contexts/StudioContext';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
+import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 
 const createCube = (model: DCMModel) => {
     let map = model.cubeMap
@@ -207,13 +208,13 @@ const CubeItemEntry = ({ cube }: { cube: DCMCube }) => {
     }
 
     return (
-        <div onPointerEnter={() => setIfNotSelected("hover")} onPointerLeave={() => setIfNotSelected("none")} onClick={() => setMouseState("selected")} className={`${itemBackgroundColor} ml-2 my-0.5`}>
+        <div onPointerEnter={() => setIfNotSelected("hover")} onPointerLeave={() => setIfNotSelected("none")} onClick={e => { setMouseState("selected"); e.stopPropagation() }} className={`${itemBackgroundColor} ml-2 my-0.5`}>
             <div className="flex flex-row py-0.5">
                 {
                     cube.getChildren().length !== 0 &&
                     <button className={(collapsed ? "transform -rotate-90" : "") + " bg-gray-800 hover:bg-black rounded px-1 py-1 text-white ml-0.5"}><SVGChevronDown className="h-4 w-4" /></button>
                 }
-                <p className="truncate text-white text-s pl-1 flex-grow cursor-pointer">{cube.name.value}</p>
+                <DblClickEditLO obj={cube.name} className="truncate text-white text-s pl-1 flex-grow cursor-pointer" inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
                 <div className="flex flex-row text-white m-0 p-0">
                     {
                         locked ?

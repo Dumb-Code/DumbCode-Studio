@@ -33,7 +33,7 @@ export const getUndefinedWritable = (description: string, accept: string[]): Wri
   if (!FileSystemsAccessApi) {
     return defaultWritable
   }
-  let name: string|null = null
+  let saveName: string|null = null
   let file: WritableFile|null = null
   return {
     write: async (name, blob) => {
@@ -47,11 +47,13 @@ export const getUndefinedWritable = (description: string, accept: string[]): Wri
           }]
         })
         const readable = createReadableFileExtended(picked)
-        name = readable.name
+        saveName = readable.name
         file = readable.asWritable()
       }
-      file.write(name, blob)
-      return name
+      
+      //saveName should never by null, but if it is then test.
+      file.write(saveName ?? name, blob)
+      return saveName
     }
   }
 }

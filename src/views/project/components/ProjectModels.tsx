@@ -15,7 +15,7 @@ const ProjectModels = () => {
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(modelExtensions, file => createProject(file).then(addProject))
 
     return (
-        <div ref={ref} className={`rounded-sm bg-${isDragging ? 'red' : 'gray'}-800 h-full flex flex-col overflow-hidden`}>
+        <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'bg-gray-800'} h-full flex flex-col overflow-hidden`}>
             <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">MODELS</p>
                 <p className="text-md flex flex-row">
@@ -64,7 +64,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
             project.name.value = getProjectName(name)
             project.saveableFile.value = true
             project.model.needsSaving.value = false
-        } catch(e) {
+        } catch (e) {
             console.error(e)
             //Ignore e
         }

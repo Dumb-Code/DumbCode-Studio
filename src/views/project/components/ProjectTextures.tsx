@@ -39,7 +39,7 @@ const ProjectTextures = () => {
 
     return (
         <div className="flex flex-col h-full">
-            <div ref={ref} className={`rounded-sm bg-${isDragging ? 'red' : 'gray'}-800 flex flex-col overflow-hidden flex-grow`}>
+            <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'bg-gray-800'} flex flex-col overflow-hidden flex-grow`}>
                 <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
                     <p className="flex-grow mt-1 ml-1">TEXTURE GROUPS</p>
                     <p className="flex flex-row">

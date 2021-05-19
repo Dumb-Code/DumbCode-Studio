@@ -3,7 +3,7 @@ import CubeInput from "../../../components/CubeInput"
 import CubeRotationInput from "../../../components/CubeRotationInput"
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { useStudio } from "../../../contexts/StudioContext";
-import { LO, useListenableObject } from "../../../studio/util/ListenableObject";
+import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 
 const ModelerProperties = () => {
     const { getSelectedProject } = useStudio()
@@ -27,35 +27,40 @@ const ModelerProperties = () => {
                     <p className="text-gray-400 text-xs mt-1">CUBE NAME</p>
                 </div>
                 <div className="w-full grid grid-cols-2 px-2 pt-1">
-                    <input className="border-none text-white bg-gray-700 pt-1.5 mb-1 text-xs h-7 col-span-2 mx-1 rounded focus:outline-none focus:ring-gray-800" type="text" />
-                    <WrapObject element={props => <CubeInput title={"DIMENSIONS"} {...props} />} object={firstSelected?.dimension} />
-                    <WrapObject element={props => <CubeInput title={"POSITIONS"} {...props} />} object={firstSelected?.position} />
-                    <WrapObject element={props => <CubeInput title={"OFFSET"} {...props} />} object={firstSelected?.offset} />
-                    <WrapObject element={props => <CubeInput title={"CUBE GROW"} {...props} lock={true} />} object={firstSelected?.cubeGrow} />
+                    <WrappedCubeName obj={firstSelected?.name} />
+                    <WrappedCubeInput title={"DIMENSIONS"} obj={firstSelected?.dimension} />
+                    <WrappedCubeInput title={"POSITIONS"} obj={firstSelected?.position} />
+                    <WrappedCubeInput title={"OFFSET"} obj={firstSelected?.offset} />
+                    <WrappedCubeInput title={"CUBE GROW"} obj={firstSelected?.cubeGrow} />
                 </div>
                 <div className="px-2">
-                    <WrapObject element={props => <CubeRotationInput title={"ROTATION"} {...props} />} object={firstSelected?.rotation} />
+                    <WrappedCubeInputRotation title={"ROTATION"} obj={firstSelected?.rotation} />
                 </div>
             </div>
         </div>
     )
 }
 
-const WrapObject = ({ object, element: Element }: {
-    object: LO<readonly [number, number, number]> | undefined,
-    element: (props: {
-        value?: readonly [number, number, number],
-        setValue?: (val: readonly [number, number, number]) => void
-    }) => JSX.Element,
-}) => {
-    const Defined = ({ object }: { object: LO<readonly [number, number, number]> }) => {
-        const [value, setValue] = useListenableObject(object)
-        return Element({ value, setValue })
-    }
-    return object !== undefined ?
-        <Defined object={object} /> :
-        Element({})
+const WrappedCubeName = ({ obj }: { obj?: LO<string> }) => {
+    const [value, setValue] = useListenableObjectNullable(obj)
+    return (
+        <input
+            className="border-none text-white bg-gray-700 pt-1.5 mb-1 text-xs h-7 col-span-2 mx-1 rounded focus:outline-none focus:ring-gray-800"
+            type="text"
+            value={value}
+            onChange={e => setValue(e.currentTarget.value)}
+        />
+    )
 }
 
+const WrappedCubeInput = ({ title, obj }: { title: string, obj?: LO<readonly [number, number, number]> }) => {
+    const [value, setValue] = useListenableObjectNullable(obj)
+    return <CubeInput title={title} value={value} setValue={setValue} />
+}
+
+const WrappedCubeInputRotation = ({ title, obj }: { title: string, obj?: LO<readonly [number, number, number]> }) => {
+    const [value, setValue] = useListenableObjectNullable(obj)
+    return <CubeRotationInput title={title} value={value} setValue={setValue} />
+}
 
 export default ModelerProperties;

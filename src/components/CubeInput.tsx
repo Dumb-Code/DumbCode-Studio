@@ -3,9 +3,9 @@ import NumericInput from 'react-numeric-input';
 import { SVGLocked, SVGUnlocked } from './Icons';
 
 const axis = [
-    { axis: "x", color: "red" },
-    { axis: "y", color: "green" },
-    { axis: "z", color: "lightBlue" },
+    { axis: "x", color: "bg-red-500" },
+    { axis: "y", color: "bg-green-500" },
+    { axis: "z", color: "bg-lightBlue-500" },
 ] as const
 
 const CubeInput = ({ title, value, setValue, lock }: {
@@ -57,7 +57,7 @@ const InputField = ({ axis, color, value, setValue }: {
 }) => {
     return (
         <div className="flex flex-row mb-1 h-7">
-            <div className={`bg-${color}-500 rounded-l px-2 text-white font-bold border-gray-900 pt-1.5 text-xs`}>
+            <div className={`${color} rounded-l px-2 text-white font-bold border-gray-900 pt-1.5 text-xs`}>
                 {axis.toUpperCase()}
             </div>
 

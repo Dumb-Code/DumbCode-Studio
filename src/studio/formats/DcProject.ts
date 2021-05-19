@@ -22,7 +22,7 @@ export default class DcProject {
   readonly name: LO<string>
   group: Group
 
-  model: DCMModel
+  readonly model: DCMModel
   readonly saveableFile = new LO(false)
   modelWritableFile = getUndefinedWritable("Model File", [".dcm"])
 
@@ -38,6 +38,7 @@ export default class DcProject {
     this.name = new LO(name)
     this.group = new Group()
     this.model = model
+    model.parentProject = this
     this.textureManager = new TextureManager(this)
     this.animationTabs = new DcaTabs()
     this.materials = createMaterialsObject()
@@ -68,6 +69,20 @@ export default class DcProject {
     this.updateTexture(m => m.map = tex)
     this.previousThreeTexture = tex
   }
+
+  renameCube(oldName: string, newName: string) {
+    for (let animaion of this.animationTabs.animations.value) {
+      for (let keyframe of animaion.keyframes.value) {
+        for (let map of [keyframe.position, keyframe.rotation, keyframe.cubeGrow]) {
+          const value = map.get(oldName)
+          if (value !== undefined) {
+            map.set(newName, value)
+            map.delete(oldName)
+          }
+        }
+      }
+    }
+  }
 }
 
 export type ProjectMaterials = {
@@ -86,8 +101,6 @@ const createMaterialsObject = (): ProjectMaterials => {
 
   return { normal, highlight, selected }
 }
-
-
 
 export const newProject = () => {
   return new DcProject("New Project", new DCMModel());
