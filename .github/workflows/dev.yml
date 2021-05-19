@@ -37,4 +37,4 @@ jobs:
         status: failure
         nodetail: true
         title: Error In Job
-        description: "[Click to view.](https://github.com/${{ github.repository	}}/runs/${{ github.run_number	 }})"
+        description: "[Click to view.](https://github.com/${{ github.repository }}/runs/${{ github.run_id }})"
