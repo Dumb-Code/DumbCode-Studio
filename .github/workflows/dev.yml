@@ -10,6 +10,7 @@ jobs:
     outputs:
       job_id: ${{ job.container.id }}
     steps:
+    - run: echo ${{ job.container.id }}
     - uses: actions/checkout@v2.1.0
       with:
         fetch-depth: 2
