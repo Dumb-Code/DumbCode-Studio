@@ -33,3 +33,7 @@ jobs:
     - uses: sarisia/actions-status-discord@v1.8.5
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      with:
+        status: "failure"
+        title: "Error In Job"
+        description: [Click to view.](https://github.com/${{GITHUB_REPOSITORY}}/runs/${{GITHUB_RUN_ID}})
