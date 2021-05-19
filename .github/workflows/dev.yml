@@ -34,7 +34,7 @@ jobs:
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       with:
-        status: "failure"
+        status: failure
         nodetail: true
-        title: "Error In Job"
+        title: Error In Job
         description: [Click to view.](https://github.com/${{GITHUB_REPOSITORY}}/runs/${{GITHUB_RUN_ID}})
