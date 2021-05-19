@@ -27,10 +27,10 @@ jobs:
         args: --all
   GithubActionIfFail:
     steps:
-      - uses: sarisia/actions-status-discord@v1.8.5
-      if: ${{ job.status === 'failure' }}
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      with:
-        nocontext: true
-        color: 0xff91a4
+    - uses: sarisia/actions-status-discord@v1.8.5
+    if: ${{ job.status === 'failure' }}
+    env:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+    with:
+      nocontext: true
+      color: 0xff91a4
