@@ -7,10 +7,7 @@ jobs:
   FTP-Deploy-Action:
     name: FTP-Deploy-Action
     runs-on: ubuntu-latest
-    outputs:
-      job_id: ${{ job.container.id }}
     steps:
-    - run: echo ${{ job.container.id }}
     - uses: actions/checkout@v2.1.0
       with:
         fetch-depth: 2
@@ -40,4 +37,4 @@ jobs:
         status: failure
         nodetail: true
         title: Error In Job
-        description: "[Click to view.](https://github.com/${{ github.repository }}/runs/${{ needs.FTP-Deploy-Action.outputs.job_id }}?check_suite_focus=true)"
+        description: "[Click to view.](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
