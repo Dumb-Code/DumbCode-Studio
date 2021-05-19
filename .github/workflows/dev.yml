@@ -37,4 +37,4 @@ jobs:
         status: failure
         nodetail: true
         title: Error In Job
-        description: "[Click to view.](https://github.com/${{ github.repository }}/actions/runs/${{ jobs.FTP-Deploy-Action.container.id }}?check_suite_focus=true)"
+        description: "[Click to view.](https://github.com/${{ github.repository }}/runs/${{ needs.FTP-Deploy-Action.container.id }}?check_suite_focus=true)"
