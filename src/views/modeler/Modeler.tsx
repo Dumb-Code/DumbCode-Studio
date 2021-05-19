@@ -4,8 +4,22 @@ import ModelerSidebar from "./components/ModelerSidebar"
 import ModelerShortcuts from "./components/ModelerShortcuts"
 import StudioCanvas from "../../components/StudioCanvas"
 import GumballPropertiesBar from "../../components/GumballPropertiesBar"
+import { useEffect } from "react"
+import { useStudio } from "../../contexts/StudioContext"
 
 const Modeler = () => {
+    const { getSelectedProject, onFrameListeners } = useStudio()
+    const project = getSelectedProject()
+
+    useEffect(() => {
+        const onFrame = () => {
+            project.model.resetVisuals()
+        }
+        onFrameListeners.add(onFrame)
+        return () => {
+            onFrameListeners.delete(onFrame)
+        }
+    })
     return(
         <div className="h-full grid grid-areas-modeling"
             style={{

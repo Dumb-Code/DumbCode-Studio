@@ -3,8 +3,22 @@ import TexturerSidebar from "./components/TexturerSidebar"
 import TexturerTools from "./components/TexturerTools"
 import TexturerProperties from "./components/TexturerProperties"
 import { TexturerViewport } from "./components/TexturerViewport"
+import { useStudio } from "../../contexts/StudioContext"
+import { useEffect } from "react"
 
 const Texturer = () => {
+    const { getSelectedProject, onFrameListeners } = useStudio()
+    const project = getSelectedProject()
+
+    useEffect(() => {
+        const onFrame = () => {
+            project.model.resetVisuals()
+        }
+        onFrameListeners.add(onFrame)
+        return () => {
+            onFrameListeners.delete(onFrame)
+        }
+    })
     return (
         <div className="h-full grid grid-areas-texture"
             style={{
