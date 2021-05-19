@@ -25,3 +25,10 @@ jobs:
         ftp-password: ${{ secrets.WEBSITE_FTP_PASSWORD }}
         known-hosts: ${{ secrets.WEBSITE_FTP_KNOWN_HOSTS }}
         args: --all
+  GithubActionIfFail:
+    if: ${{ job.status === 'failure' }}
+    env:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+    with:
+      nocontext: true
+      color: 0xff91a4
