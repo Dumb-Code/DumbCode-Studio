@@ -1,7 +1,7 @@
 import { LO } from './../../util/ListenableObject';
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, Material } from "three";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, MeshLambertMaterial, DoubleSide } from "three";
 import { v4 as uuidv4 } from "uuid"
-import DcProject, { ProjectMaterials } from '../DcProject';
+import DcProject from '../DcProject';
 import SelectedCubeManager from '../../util/SelectedCubeManager';
 
 const tempVector = new Vector3()
@@ -42,23 +42,19 @@ export class DCMModel implements CubeParent {
 
   readonly needsSaving = new LO(false)
 
-  modelCache: Group
-  material?: Material
+  readonly materials: ProjectMaterials
 
-  materials?: ProjectMaterials
+  readonly modelGroup: Group
+
   selectedCubeManager?: SelectedCubeManager
 
   constructor() {
     this.cubeMap = new Map()
     this.identifierCubeMap = new Map()
 
-    this.modelCache = new Group()
+    this.materials = new ProjectMaterials()
 
-    this.children.addListener(arr => {
-      if (this.material !== undefined) {
-        this.onChildrenChange(arr)
-      }
-    })
+    this.children.addListener(arr => this.onChildrenChange(arr))
 
     const refreshTextures = () => this.traverseAll(cube => cube.updateTexture())
     this.textureWidth.addListener(refreshTextures)
@@ -69,22 +65,11 @@ export class DCMModel implements CubeParent {
     this.textureWidth.addListener(onDirty)
     this.textureHeight.addListener(onDirty)
     this.author.addListener(onDirty)
-  }
 
-  createModel(material: Material) {
-    this.material = material
-
-    this.modelCache.clear()
-    this.modelCache.scale.set(1 / 16, 1 / 16, 1 / 16)
-    this.modelCache.position.set(0.5, 0, 0.5)
-
-    this.children.value.forEach(child => this.modelCache.add(child.createGroup()))
-
-    return this.modelCache
-  }
-
-  invalidateModelCache() {
-    this.traverseAll(cube => cube.cubeGroup = undefined)
+    this.modelGroup = new Group()
+    this.modelGroup.clear()
+    this.modelGroup.scale.set(1 / 16, 1 / 16, 1 / 16)
+    this.modelGroup.position.set(0.5, 0, 0.5)
   }
 
   traverseAll(func: (cube: DCMCube) => void) {
@@ -97,7 +82,7 @@ export class DCMModel implements CubeParent {
   }
 
   updateMatrixWorld(force = true) {
-    this.modelCache.updateMatrixWorld(force)
+    this.modelGroup.updateMatrixWorld(force)
   }
 
   addChild(child: DCMCube) {
@@ -113,8 +98,8 @@ export class DCMModel implements CubeParent {
   }
 
   onChildrenChange(children: readonly DCMCube[]) {
-    this.children.value.forEach(child => child.cubeGroup ? this.modelCache.remove(child.cubeGroup) : null)
-    children.forEach(child => this.modelCache.add(child.createGroup()))
+    this.children.value.forEach(child => child.cubeGroup ? this.modelGroup.remove(child.cubeGroup) : null)
+    children.forEach(child => this.modelGroup.add(child.createGroup()))
   }
 
   resetVisuals() {
@@ -250,11 +235,7 @@ export class DCMCube implements CubeParent {
     this.cubeGrowGroup = new Group()
     this.cubeGrowGroup.userData.cube = this
 
-    if (this.model.material === undefined) {
-      throw new Error("Tried to create cube before model was initilized")
-    }
-
-    this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.material)
+    this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.materials.normal)
     this.cubeMesh.userData.cube = this
     this.cubeMesh.userData.group = this.cubeGroup
 
@@ -440,5 +421,28 @@ export class DCMCube implements CubeParent {
       uMax, vMin,
       uMin, vMin,
     ], face * 8)
+  }
+}
+
+
+const material = new MeshLambertMaterial({
+  color: 0x777777,
+  // transparent: true,
+  side: DoubleSide,
+  alphaTest: 0.0001,
+})
+export class ProjectMaterials {
+  readonly normal: MeshLambertMaterial
+  readonly highlight: MeshLambertMaterial
+  readonly selected: MeshLambertMaterial
+
+  constructor() {
+    this.normal = material.clone()
+
+    this.highlight = material.clone()
+    this.highlight.emissive.setHex(0xFF0000)
+
+    this.selected = material.clone()
+    this.selected.emissive.setHex(0x000066)
   }
 }

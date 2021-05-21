@@ -1,6 +1,6 @@
 import { getUndefinedWritable } from './../util/FileTypes';
 import { DCMModel } from './model/DcmModel';
-import { DoubleSide, Group, MeshLambertMaterial, Texture } from "three"
+import { Group, MeshLambertMaterial, Texture } from "three"
 import { ReadableFile } from '../util/FileTypes';
 import { v4 as uuidv4 } from "uuid"
 import TextureManager from './textures/TextureManager';
@@ -8,13 +8,6 @@ import { LO } from '../util/ListenableObject';
 import DcaTabs from './animations/DcaTabs';
 import { loadDCMModel } from './model/DCMLoader';
 import SelectedCubeManager from '../util/SelectedCubeManager';
-
-const material = new MeshLambertMaterial({
-  color: 0x777777,
-  // transparent: true,
-  side: DoubleSide,
-  alphaTest: 0.0001,
-})
 
 export default class DcProject {
   identifier: string
@@ -28,7 +21,6 @@ export default class DcProject {
 
   textureManager: TextureManager
   animationTabs: DcaTabs
-  materials: ProjectMaterials
   previousThreeTexture: Texture | null
 
   selectedCubeManager = new SelectedCubeManager()
@@ -41,10 +33,8 @@ export default class DcProject {
     model.parentProject = this
     this.textureManager = new TextureManager(this)
     this.animationTabs = new DcaTabs()
-    this.materials = createMaterialsObject()
-    this.model.materials = this.materials
     this.model.selectedCubeManager = this.selectedCubeManager
-    this.group.add(this.model.createModel(this.materials.normal))
+    this.group.add(this.model.modelGroup)
     this.previousThreeTexture = null
   }
 
@@ -53,13 +43,13 @@ export default class DcProject {
  * @param {function} callback the material callback
  */
   updateTexture(callback: (mat: MeshLambertMaterial) => void) {
-    callback(this.materials.normal)
-    callback(this.materials.selected)
-    callback(this.materials.highlight)
+    callback(this.model.materials.normal)
+    callback(this.model.materials.selected)
+    callback(this.model.materials.highlight)
 
-    this.materials.normal.needsUpdate = true
-    this.materials.selected.needsUpdate = true
-    this.materials.highlight.needsUpdate = true
+    this.model.materials.normal.needsUpdate = true
+    this.model.materials.selected.needsUpdate = true
+    this.model.materials.highlight.needsUpdate = true
   }
 
   /**
@@ -83,23 +73,6 @@ export default class DcProject {
       }
     }
   }
-}
-
-export type ProjectMaterials = {
-  normal: MeshLambertMaterial;
-  highlight: MeshLambertMaterial;
-  selected: MeshLambertMaterial;
-}
-const createMaterialsObject = (): ProjectMaterials => {
-  let normal = material.clone()
-
-  let highlight = material.clone()
-  highlight.emissive.setHex(0xFF0000)
-
-  let selected = material.clone()
-  selected.emissive.setHex(0x000066)
-
-  return { normal, highlight, selected }
 }
 
 export const newProject = () => {

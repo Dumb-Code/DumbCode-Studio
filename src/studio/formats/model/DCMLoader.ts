@@ -1,5 +1,4 @@
 import { StudioBuffer } from '../../util/StudioBuffer';
-import { MeshLambertMaterial } from 'three';
 import { DCMCube, DCMModel } from './DcmModel';
 
 
@@ -49,13 +48,10 @@ export const loadDCMModel = async(arrayBuffer: ArrayBuffer | PromiseLike<ArrayBu
     //For that to happen we need material. This just creates a basic material so the math works.
     //Maybe in the future we can push this until after the material is added, so we don't have to do a dummy material.
     if(version < 2) {
-        model.createModel(new MeshLambertMaterial())
-        model.modelCache.updateMatrix()
-        model.modelCache.updateMatrixWorld(true)
+        model.modelGroup.updateMatrix()
+        model.modelGroup.updateMatrixWorld(true)
 
-        // runInvertMath(model)
-        
-        model.invalidateModelCache()
+        // runInvertMath(model)        
     }
     return model
 }

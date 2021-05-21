@@ -147,7 +147,7 @@ export default class SelectedCubeManager {
 
   gatherIntersections(raycaster: Raycaster, camera: Camera, model: DCMModel) {
     raycaster.setFromCamera(this.mouse, camera)
-    return raycaster.intersectObjects(model.modelCache.children, true)
+    return raycaster.intersectObjects(model.modelGroup.children, true)
   }
 }
 
