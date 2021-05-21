@@ -1,12 +1,14 @@
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SVGGrid, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcProject, { createProject, getProjectName, newProject } from "../../../studio/formats/DcProject"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
-import { FileSystemsAccessApi } from "../../../studio/util/FileTypes"
+import { FileSystemsAccessApi, defaultWritable } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter';
+
 const modelExtensions = [".dcm", ".tbl", ".bbmodel"]
 
 const ProjectModels = () => {
@@ -69,6 +71,13 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
             //Ignore e
         }
     }
+
+    const exportToObj = async () => {
+        const exporter = new OBJExporter()
+        const value = exporter.parse(project.model.modelGroup)
+        defaultWritable.write(project.name.value + ".obj", new Blob([value]))
+    }
+
     const linkedToFile = isSaveable && FileSystemsAccessApi
     const SaveIcon = linkedToFile ? SVGSave : SVGDownload
 
@@ -87,6 +96,11 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         <SVGPushGithub className="h-4 w-4 mr-1" />
                     </button>
                 }
+                <button
+                    onClick={e => { exportToObj(); e.stopPropagation() }}
+                    className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}>
+                    <SVGGrid className="h-4 w-4 mr-1" />
+                </button>
                 <button
                     onClick={e => { saveModel(); e.stopPropagation() }}
                     className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}>

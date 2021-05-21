@@ -11,12 +11,12 @@ export type ReadableFile = {
 }
 
 export type WritableFile = {
-  write: (projectName: string, blob: Blob) => Promise<any>
+  write: (name: string, blob: Blob) => Promise<any>
 }
 
 // const WritableFileRefreshLoop
 
-const defaultWritable: WritableFile = {
+export const defaultWritable: WritableFile = {
   write: async(name, blob) => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
