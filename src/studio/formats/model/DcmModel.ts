@@ -1,5 +1,5 @@
 import { LO } from './../../util/ListenableObject';
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, MeshLambertMaterial, DoubleSide } from "three";
+import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, MeshLambertMaterial, DoubleSide, MeshBasicMaterial } from "three";
 import { v4 as uuidv4 } from "uuid"
 import DcProject from '../DcProject';
 import SelectedCubeManager from '../../util/SelectedCubeManager';
@@ -54,7 +54,10 @@ export class DCMModel implements CubeParent {
 
     this.materials = new ProjectMaterials()
 
-    this.children.addListener(arr => this.onChildrenChange(arr))
+    this.children.addListener((newChildren, oldChildren) => {
+      oldChildren.forEach(child => this.modelGroup.remove(child.cubeGroup))
+      newChildren.forEach(child => this.modelGroup.add(child.cubeGroup))
+    })
 
     const refreshTextures = () => this.traverseAll(cube => cube.updateTexture())
     this.textureWidth.addListener(refreshTextures)
@@ -97,11 +100,6 @@ export class DCMModel implements CubeParent {
     return this.children.value
   }
 
-  onChildrenChange(children: readonly DCMCube[]) {
-    this.children.value.forEach(child => child.cubeGroup ? this.modelGroup.remove(child.cubeGroup) : null)
-    children.forEach(child => this.modelGroup.add(child.createGroup()))
-  }
-
   resetVisuals() {
     this.children.value.forEach(child => child.resetVisuals())
   }
@@ -136,12 +134,11 @@ export class DCMCube implements CubeParent {
   model: DCMModel
   parent: CubeParent
 
-  hierarchyLevel: number
-  uvBuffer: BufferAttribute
+  readonly uvBuffer: BufferAttribute
 
-  cubeGroup?: Group
-  cubeGrowGroup?: Group
-  cubeMesh?: Mesh
+  readonly cubeGroup: Group
+  readonly cubeGrowGroup: Group
+  readonly cubeMesh: Mesh
 
   constructor(
     name: string,
@@ -167,7 +164,6 @@ export class DCMCube implements CubeParent {
     this.cubeGrow = new LO<readonly [number, number, number]>(cubeGrow, onDirty)
     this.children = new LO<readonly DCMCube[]>(children, onDirty)
     this.model = model
-    this.hierarchyLevel = 0
 
     this.parent = invalidParent
 
@@ -196,7 +192,10 @@ export class DCMCube implements CubeParent {
     this.textureOffset.addListener(textureOffset => this.updateTexture({ textureOffset }))
     this.textureMirrored.addListener(textureMirrored => this.updateTexture({ textureMirrored }))
 
-    this.children.addListener(ar => this.onChildrenChange(ar))
+    this.children.addListener((newChildren, oldChildren) => {
+      oldChildren.forEach(child => this.cubeGroup.remove(child.cubeGroup))
+      newChildren.forEach(child => this.cubeGroup.add(child.cubeGroup))
+    })
 
     this.mouseState.addListener(v => {
       if (this.model.selectedCubeManager !== undefined && this.model.materials !== undefined && this.cubeMesh !== undefined) {
@@ -217,6 +216,12 @@ export class DCMCube implements CubeParent {
         }
       }
     })
+
+    this.cubeGroup = new Group();
+    this.cubeGrowGroup = new Group()
+    this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.materials.normal)
+    children.forEach(child => this.cubeGroup.add(child.cubeGroup))
+    this.createGroup()
   }
 
   pushNameToModel(name = this.name.value) {
@@ -226,18 +231,7 @@ export class DCMCube implements CubeParent {
   }
 
   createGroup() {
-    if (this.cubeGroup !== undefined && this.cubeMesh !== undefined) {
-      return this.cubeGroup
-    }
-    this.cubeGroup = new Group();
-    this.cubeGroup.userData.cube = this
-
-    this.cubeGrowGroup = new Group()
-    this.cubeGrowGroup.userData.cube = this
-
-    this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.materials.normal)
-    this.cubeMesh.userData.cube = this
-    this.cubeMesh.userData.group = this.cubeGroup
+    this.setUserData()
 
     this.cubeMesh.position.set(0.5, 0.5, 0.5)
     this.cubeMesh.updateMatrix();
@@ -250,19 +244,26 @@ export class DCMCube implements CubeParent {
 
     this.cubeGroup.rotation.order = "ZYX"
     this.updateOffset()
-    this.updateCubeGrowVisuals({ shouldUpdateTexture: false })
+    this.updateCubeGrowVisuals({})
     this.updatePositionVisuals()
     this.updateRotationVisuals()
+  }
 
-    this.onChildrenChange(this.children.value)
+  setUserData() {
+    this.cubeGroup.userData.cube = this
+    this.cubeGrowGroup.userData.cube = this
+    this.cubeMesh.userData.cube = this
+    this.cubeMesh.userData.group = this.cubeGroup
+  }
 
-    return this.cubeGroup
+  removeUserData() {
+    delete this.cubeGroup.userData.cube
+    delete this.cubeGrowGroup.userData.cube
+    delete this.cubeMesh.userData.cube
+    delete this.cubeMesh.userData.group
   }
 
   getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3()) {
-    if (this.cubeMesh === undefined) {
-      throw new Error("Cube mesh was null")
-    }
     let w = this.dimension[0] + this.cubeGrow[0] * 2 + 0.0001
     let h = this.dimension[1] + this.cubeGrow[1] * 2 + 0.0001
     let d = this.dimension[2] + this.cubeGrow[2] * 2 + 0.0001
@@ -290,18 +291,12 @@ export class DCMCube implements CubeParent {
   }
 
   updateMatrixWorld(force = true) {
-    this.cubeGroup?.updateMatrixWorld(force)
+    this.cubeGroup.updateMatrixWorld(force)
   }
 
   traverse(callback) {
     callback(this)
     this.children.value.forEach(c => c.traverse(callback))
-  }
-
-  onChildrenChange(children: readonly DCMCube[]) {
-    this.children.value.forEach(child => child.cubeGroup ? this.cubeGroup?.remove(child.cubeGroup) : null)
-    this.children.value = children;
-    this.children.value.forEach(child => this.cubeGroup?.add(child.createGroup()))
   }
 
   getAllChildrenCubes(arr: DCMCube[] = [], includeSelf = false) {
@@ -345,20 +340,20 @@ export class DCMCube implements CubeParent {
   }
 
   updatePositionVisuals(position = this.position.value) {
-    this.cubeGroup?.position.set(position[0], position[1], position[2])
+    this.cubeGroup.position.set(position[0], position[1], position[2])
   }
 
   updateRotationVisuals(rotation = this.rotation.value) {
-    this.cubeGroup?.rotation.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180)
+    this.cubeGroup.rotation.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180)
   }
 
   updateCubeGrowVisuals({ value = this.cubeGrow.value, shouldUpdateTexture = true }) {
-    this.cubeGrowGroup?.position.set(-value[0], -value[1], -value[2])
+    this.cubeGrowGroup.position.set(-value[0], -value[1], -value[2])
     this.updateGeometry({ cubeGrow: value, shouldUpdateTexture })
   }
 
   updateOffset(values = this.offset.value) {
-    this.cubeMesh?.position.set(values[0], values[1], values[2])
+    this.cubeMesh.position.set(values[0], values[1], values[2])
   }
 
   updateTexture({ textureOffset = this.textureOffset.value, dimension = this.dimension.value, texWidth = this.model.textureWidth.value, texHeight = this.model.textureHeight.value, textureMirrored = this.textureMirrored.value } = {}) {
@@ -431,10 +426,16 @@ const material = new MeshLambertMaterial({
   side: DoubleSide,
   alphaTest: 0.0001,
 })
+
+const exportMaterial = new MeshBasicMaterial({
+  alphaTest: 0.0001
+})
 export class ProjectMaterials {
   readonly normal: MeshLambertMaterial
   readonly highlight: MeshLambertMaterial
   readonly selected: MeshLambertMaterial
+  
+  readonly export: MeshBasicMaterial
 
   constructor() {
     this.normal = material.clone()
@@ -444,5 +445,7 @@ export class ProjectMaterials {
 
     this.selected = material.clone()
     this.selected.emissive.setHex(0x000066)
+
+    this.export = exportMaterial.clone()
   }
 }

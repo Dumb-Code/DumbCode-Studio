@@ -7,7 +7,9 @@ import { writeModel } from "../../../studio/formats/model/DCMLoader"
 import { FileSystemsAccessApi, defaultWritable } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
-import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter';
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
+import { DCMCube } from "../../../studio/formats/model/DcmModel"
+import { Material } from "three"
 
 const modelExtensions = [".dcm", ".tbl", ".bbmodel"]
 
@@ -73,9 +75,25 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
     }
 
     const exportToObj = async () => {
-        const exporter = new OBJExporter()
-        const value = exporter.parse(project.model.modelGroup)
-        defaultWritable.write(project.name.value + ".obj", new Blob([value]))
+        const exporter = new GLTFExporter()
+        const oldCubeMaterials = new Map<DCMCube, Material | Material[]>()
+        project.model.traverseAll(cube => {
+            cube.removeUserData()
+            oldCubeMaterials.set(cube, cube.cubeMesh.material)
+            cube.cubeMesh.material = project.model.materials.export
+        })
+        exporter.parse(project.model.modelGroup, value => {
+            defaultWritable.write(project.name.value + ".gltf", new Blob([JSON.stringify(value)]))
+        }, { includeCustomExtensions: false })
+        project.model.traverseAll(cube => {
+            cube.setUserData()
+            const mats = oldCubeMaterials.get(cube)
+            if(mats === undefined) {
+                throw new Error("Cube Not Present In Material Map?????")
+            }
+            cube.cubeMesh.material = mats
+        })
+
     }
 
     const linkedToFile = isSaveable && FileSystemsAccessApi
