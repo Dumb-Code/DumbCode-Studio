@@ -1,6 +1,6 @@
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGDownload, SVGGrid, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcProject, { createProject, getProjectName, newProject } from "../../../studio/formats/DcProject"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
@@ -8,6 +8,7 @@ import { FileSystemsAccessApi, defaultWritable } from "../../../studio/util/File
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
+import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter';
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import { Material } from "three"
 
@@ -74,7 +75,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
         }
     }
 
-    const exportToObj = async () => {
+    const exportToGLTF = async () => {
         const exporter = new GLTFExporter()
         const oldCubeMaterials = new Map<DCMCube, Material | Material[]>()
         project.model.traverseAll(cube => {
@@ -88,12 +89,17 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
         project.model.traverseAll(cube => {
             cube.setUserData()
             const mats = oldCubeMaterials.get(cube)
-            if(mats === undefined) {
+            if (mats === undefined) {
                 throw new Error("Cube Not Present In Material Map?????")
             }
             cube.cubeMesh.material = mats
         })
+    }
 
+    const exportToObj = async () => {
+        const exporter = new OBJExporter()
+        const value = exporter.parse(project.model.modelGroup)
+        defaultWritable.write(project.name.value + ".obj", new Blob([value]))
     }
 
     const linkedToFile = isSaveable && FileSystemsAccessApi
@@ -117,7 +123,12 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                 <button
                     onClick={e => { exportToObj(); e.stopPropagation() }}
                     className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}>
-                    <SVGGrid className="h-4 w-4 mr-1" />
+                    OBJ
+                </button>
+                <button
+                    onClick={e => { exportToGLTF(); e.stopPropagation() }}
+                    className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}>
+                    GLTF
                 </button>
                 <button
                     onClick={e => { saveModel(); e.stopPropagation() }}
