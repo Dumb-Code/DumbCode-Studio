@@ -1,6 +1,6 @@
 import { getUndefinedWritable } from './../util/FileTypes';
 import { DCMModel } from './model/DcmModel';
-import { Group, MeshLambertMaterial, Texture } from "three"
+import { Group, Material, MeshLambertMaterial, Texture } from "three"
 import { ReadableFile } from '../util/FileTypes';
 import { v4 as uuidv4 } from "uuid"
 import TextureManager from './textures/TextureManager';
@@ -42,21 +42,24 @@ export default class DcProject {
  * Helper method to update all the materials for the selected project.
  * @param {function} callback the material callback
  */
-  updateTexture(callback: (mat: MeshLambertMaterial) => void) {
+  updateTexture(callback: (mat: Material) => void) {
     callback(this.model.materials.normal)
     callback(this.model.materials.selected)
     callback(this.model.materials.highlight)
+    callback(this.model.materials.export)
+    
 
     this.model.materials.normal.needsUpdate = true
     this.model.materials.selected.needsUpdate = true
     this.model.materials.highlight.needsUpdate = true
+    this.model.materials.export.needsUpdate = true
   }
 
   /**
    * Sets the texture to all the materials for the currently selected project.
    */
   setTexture(tex: Texture) {
-    this.updateTexture(m => m.map = tex)
+    this.updateTexture(m => m['map'] = tex)
     this.previousThreeTexture = tex
   }
 
