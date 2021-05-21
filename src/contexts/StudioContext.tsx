@@ -44,7 +44,8 @@ const three = createThreeContext()
 export const StudioContextProvider = ({ children }: { children?: ReactNode }) => {
 
   const [projects, setProjects] = useState<DcProject[]>([])
-  const [selectedProject, setSelectedProject] = useState<DcProject | null>(null)
+  //NOT const, as we want to make sure that the selectedProject ALWAYS points to the correct project
+  let [selectedProject, setSelectedProject] = useState<DcProject | null>(null)
 
   const context: StudioContext = {
     projects,
@@ -89,6 +90,8 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
         }
         three.scene.add(project.group)
       }
+
+      selectedProject = project
       setSelectedProject(project)
     },
 
