@@ -1,6 +1,6 @@
 import { getUndefinedWritable } from './../util/FileTypes';
 import { DCMModel } from './model/DcmModel';
-import { Group, Material, MeshLambertMaterial, Texture } from "three"
+import { Group, Material, Texture } from "three"
 import { ReadableFile } from '../util/FileTypes';
 import { v4 as uuidv4 } from "uuid"
 import TextureManager from './textures/TextureManager';
