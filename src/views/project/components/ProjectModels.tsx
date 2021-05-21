@@ -1,6 +1,6 @@
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SVGGrid, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcProject, { createProject, getProjectName, newProject } from "../../../studio/formats/DcProject"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
@@ -11,7 +11,10 @@ import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
 import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter';
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import { Material } from "three"
+import { ContextMenu, ContextMenuTrigger } from "react-contextmenu"
+import { MenuItem } from "react-contextmenu"
 
+const SAVE_AS_CONTEXT = "studio-project-models-save-as"
 const modelExtensions = [".dcm", ".tbl", ".bbmodel"]
 
 const ProjectModels = () => {
@@ -112,8 +115,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
     return (
         <div className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} onClick={changeModel}>
             <DblClickEditLO obj={project.name} disabled={linkedToFile} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
-
-            <p className="pt-0 mr-2 text-white flex flex-row">
+            <div className="pt-0 mr-2 text-white flex flex-row">
                 {isRemote &&
                     <button
                         className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}>
@@ -121,26 +123,39 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                     </button>
                 }
                 <button
-                    onClick={e => { exportToObj(); e.stopPropagation() }}
-                    className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}>
-                    OBJ
-                </button>
-                <button
-                    onClick={e => { exportToGLTF(); e.stopPropagation() }}
-                    className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}>
-                    GLTF
-                </button>
-                <button
                     onClick={e => { saveModel(); e.stopPropagation() }}
                     className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}>
                     <SaveIcon className="h-4 w-4 mr-1" />
                 </button>
+                <ContextMenuTrigger id={SAVE_AS_CONTEXT} mouseButton={0}>
+                    <div
+                        className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}>
+                        <SVGGrid className="h-4 w-4 mr-1" />
+                    </div>
+                </ContextMenuTrigger>
+                <ContextMenu id={SAVE_AS_CONTEXT} className="border border-solid border-black bg-gray-800">
+                    <MenuItem
+                        onClick={e => { exportToObj(); e.stopPropagation() }}
+                    >
+                        <div className="hover:bg-gray-500 cursor-pointer p-1">
+                            .OBJ
+                        </div>
+                    </MenuItem>
+                    <MenuItem
+                        onClick={e => { exportToGLTF(); e.stopPropagation() }}
+
+                    >
+                        <div className="hover:bg-gray-500 cursor-pointer p-1">
+                            .GLTF
+                        </div>
+                    </MenuItem>
+                </ContextMenu>
                 <button
                     onClick={e => { removeProject(); e.stopPropagation() }}
                     className={iconButtonClass + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}>
                     <SVGCross className="h-4 w-4 group-hover:text-red-500" />
                 </button>
-            </p>
+            </div>
         </div>
     )
 }
