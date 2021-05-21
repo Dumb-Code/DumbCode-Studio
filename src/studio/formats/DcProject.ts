@@ -10,20 +10,20 @@ import { loadDCMModel } from './model/DCMLoader';
 import SelectedCubeManager from '../util/SelectedCubeManager';
 
 export default class DcProject {
-  identifier: string
+  readonly identifier: string
 
   readonly name: LO<string>
-  group: Group
+  readonly group: Group
 
   readonly model: DCMModel
   readonly saveableFile = new LO(false)
   modelWritableFile = getUndefinedWritable("Model File", [".dcm"])
 
-  textureManager: TextureManager
-  animationTabs: DcaTabs
+  readonly textureManager: TextureManager
+  readonly animationTabs: DcaTabs
   previousThreeTexture: Texture | null
 
-  selectedCubeManager = new SelectedCubeManager()
+  readonly selectedCubeManager = new SelectedCubeManager()
 
   constructor(name: string, model: DCMModel) {
     this.identifier = uuidv4()
