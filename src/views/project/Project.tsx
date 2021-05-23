@@ -15,10 +15,10 @@ const Project = () => {
                 gridTemplateRows: "auto " + (remoteShown ? "237px" : "44px")
             }} 
         >
-            <div className="p-2 bg-black grid-in-remote"><ProjectRemote remoteShown={remoteShown} showRemote={showRemote} /></div>
-            <div className="p-2 bg-black grid-in-model"><ProjectModels /></div>
-            <div className="p-2 bg-black grid-in-texture"><ProjectTextures /></div>
-            <div className="p-2 bg-black grid-in-animation"><ProjectAnimations /></div>
+            <div className="p-2 bg-gray-200 dark:bg-black grid-in-remote"><ProjectRemote remoteShown={remoteShown} showRemote={showRemote} /></div>
+            <div className="p-2 bg-gray-200 dark:bg-black grid-in-model"><ProjectModels /></div>
+            <div className="p-2 bg-gray-200 dark:bg-black grid-in-texture"><ProjectTextures /></div>
+            <div className="p-2 bg-gray-200 dark:bg-black grid-in-animation"><ProjectAnimations /></div>
         </div>
     )
 }

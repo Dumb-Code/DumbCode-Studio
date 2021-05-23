@@ -52,7 +52,7 @@ module.exports = {
     }
   },
   variants: {},
-  darkMode: false, // or 'media' or 'class'
+  darkMode: 'class', // or 'media' or 'class'
   purge: [
     './src/**/*.html',
     './src/**/*.js',

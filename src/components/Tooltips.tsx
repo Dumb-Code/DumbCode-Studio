@@ -49,24 +49,24 @@ export const Tooltip = ({text, shown, direction}: {text: string, shown: boolean,
     var decorationStyles = ""
 
     if (direction === "top") {
-        tooltipStyles = "bg-gray-700 -mt-12 z-10 px-3 rounded"
+        tooltipStyles = "bg-gray-100 dark:bg-gray-700 -mt-12 z-10 px-3 rounded"
         tooltipStyleObject = {marginLeft: -(text.length * 7)/2}
-        decorationStyles = "h-2 w-2 transform rotate-45 translate-y-5 bg-gray-700 absolute left-2 z-0"
+        decorationStyles = "h-2 w-2 transform rotate-45 translate-y-5 bg-gray-100 dark:bg-gray-700 absolute left-2 z-0"
     }
     if (direction === "bottom") {
-        tooltipStyles = "bg-gray-700 mt-4 z-10 px-3 rounded"
+        tooltipStyles = "bg-gray-100 dark:bg-gray-700 mt-4 z-10 px-3 rounded"
         tooltipStyleObject = {marginLeft: -(text.length * 7)/2}
-        decorationStyles = "h-2 w-2 transform rotate-45 -translate-y-1 bg-gray-700 absolute left-2 z-0"
+        decorationStyles = "h-2 w-2 transform rotate-45 -translate-y-1 bg-gray-100 dark:bg-gray-700 absolute left-2 z-0"
     }
     if (direction === "right") {
-        tooltipStyles = "bg-gray-700 -mt-5 ml-10 z-10 px-3 rounded"
+        tooltipStyles = "bg-gray-100 dark:bg-gray-700 -mt-5 ml-10 z-10 px-3 rounded"
         tooltipStyleObject = {}
-        decorationStyles = "h-2 w-2 transform rotate-45 translate-y-2 translate-x-9 bg-gray-700 absolute z-0"
+        decorationStyles = "h-2 w-2 transform rotate-45 translate-y-2 translate-x-9 bg-gray-100 dark:bg-gray-700 absolute z-0"
     }
     if (direction === "left") {
-        tooltipStyles = "bg-gray-700 -mt-5 z-10 px-3 rounded transform -translate-x-10"
+        tooltipStyles = "bg-gray-100 dark:bg-gray-700 -mt-5 z-10 px-3 rounded transform -translate-x-10"
         tooltipStyleObject = {marginLeft: -(text.length * 7)}
-        decorationStyles = "h-2 w-2 transform rotate-45 translate-y-2 -translate-x-3.5 bg-gray-700 absolute z-0"
+        decorationStyles = "h-2 w-2 transform rotate-45 translate-y-2 -translate-x-3.5 bg-gray-100 dark:bg-gray-700 absolute z-0"
     }
 
     return(

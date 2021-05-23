@@ -50,13 +50,13 @@ const KeyBindOptions = () => {
 const KeyBindOption = ({name, selected, moreInfo}: {name: string, selected: string, moreInfo: string}) => {
     return(
         <div className="flex flex-row w-3/4">
-            <div className="bg-gray-800 m-0.5 rounded-l p-1 text-gray-300 font-semibold pl-3 flex-grow flex flex-row">
+            <div className="dark:bg-gray-800 bg-gray-300 w-40 m-0.5 rounded-l p-1 text-black dark:text-gray-400 pl-3 flex-grow flex flex-row">
                 {name}
                 <ButtonWithTooltip className="w-5 -mt-1" delay={0} tooltip={moreInfo} direction="right">
                     <InfoBubble className="w-4 h-4 mt-1 ml-2" />
                 </ButtonWithTooltip>
             </div>
-            <div className="bg-gray-800 w-40 m-0.5 rounded-r p-1 text-gray-400 pl-2 hover:bg-gray-600">{selected}</div>
+            <div className="dark:bg-gray-800 bg-gray-300 w-40 m-0.5 rounded-r p-1 text-black dark:text-gray-400 pl-2 dark:hover:bg-gray-600 hover:bg-gray-200">{selected}</div>
         </div>
     )
 }

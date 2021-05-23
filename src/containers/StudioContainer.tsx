@@ -32,8 +32,13 @@ const StudioContainer = () => {
 };
 
 const StudioApp = () => {
+
   const [activeTab, setActiveTab] = useState(Tabs[1])
   const { hasProject, getSelectedProject } = useStudio()
+
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.classList.add('dark')
+  }
 
   const tabChanged = ((tab: Tab) => {
     if (tab !== Tabs[0] && !hasProject) {
@@ -43,16 +48,16 @@ const StudioApp = () => {
   })
 
   return (
-    <div className="flex flex-col h-screen bg-black align-middle">
-      <div className="flex flex-row border-b border-white">
+    <div className="flex flex-col h-screen bg-gray-300 dark:bg-black align-middle">
+      <div className="flex flex-row border-b dark:border-white border-black">
         <div className="flex-grow pl-4">
           {Tabs.map(tab => <NavBarButton key={tab.name} tab={tab} selected={tab === activeTab} setTab={() => tabChanged(tab)} />)}
         </div>
-        <div className="text-gray-200 mt-1 mr-2">
+        <div className="dark:text-gray-200 text-black mt-1 mr-2">
           v1.0.0
-          </div>
+        </div>
       </div>
-      <div className="flex-grow min-h-0">
+      <div className={"flex-grow min-h-0"}>
         {activeTab.component()}
       </div>
     </div>
@@ -64,7 +69,7 @@ export default StudioContainer;
 export const NavBarButton = ({ selected, tab, setTab }: { selected: boolean, tab: Tab, setTab: () => void }) => {
   return (
     <button
-      className={tab.extraClasses + " " + (selected ? tab.color + " text-white" : "bg-gray-900 hover:bg-gray-800 text-gray-400") + " focus:outline-none mt-0.5 hover:text-white rounded-t py-1 px-2 mr-0.5"}
+      className={tab.extraClasses + " " + (selected ? tab.color + " text-white" : "dark:bg-gray-900 bg-gray-100 dark:hover:bg-gray-800 hover:bg-gray-100 text-black dark:text-gray-400") + " focus:outline-none mt-0.5 hover:text-black dark:hover:text-white rounded-t py-1 px-2 mr-0.5"}
       onClick={setTab}
     >
       {tab.titleComponent()}
