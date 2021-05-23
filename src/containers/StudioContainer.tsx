@@ -43,6 +43,7 @@ const StudioApp = () => {
     if (tab !== Tabs[0] && !hasProject) {
       getSelectedProject()
     }
+    setSettingsOpen(false)
     setActiveTab(tab)
   })
 
