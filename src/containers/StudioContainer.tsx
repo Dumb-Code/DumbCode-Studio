@@ -47,34 +47,36 @@ const StudioApp = () => {
   })
 
   return (
-    <div className={"flex flex-col h-screen bg-gray-300 dark:bg-black align-middle " + (darkMode ? "dark" : "")}>
-      <div className="flex flex-row border-b dark:border-white border-black">
-        <div className="flex-grow pl-4">
-          <NavBarButton
-            color="bg-red-500"
-            className="w-9 transform translate-y-1.5"
-            selected={settingsOpen}
-            onClick={() => setSettingsOpen(!settingsOpen)}
-          >
-            <SVGSettings className="w-5 h-5 px-0.5" />
-          </NavBarButton>
-          {Tabs.map(tab =>
+    <div className={darkMode ? "dark" : ""}>
+      <div className={"flex flex-col h-screen bg-gray-300 dark:bg-black align-middle"}>
+        <div className="flex flex-row border-b dark:border-white border-black">
+          <div className="flex-grow pl-4">
             <NavBarButton
-              key={tab.name}
-              color={tab.color}
-              className="w-32"
-              selected={tab === activeTab}
-              onClick={() => tabChanged(tab)} >
-              <p>{tab.name}</p>
+              color="bg-red-500"
+              className="w-9 transform translate-y-1.5"
+              selected={settingsOpen}
+              onClick={() => setSettingsOpen(!settingsOpen)}
+            >
+              <SVGSettings className="w-5 h-5 px-0.5" />
             </NavBarButton>
-          )}
+            {Tabs.map(tab =>
+              <NavBarButton
+                key={tab.name}
+                color={tab.color}
+                className="w-32"
+                selected={tab === activeTab}
+                onClick={() => tabChanged(tab)} >
+                <p>{tab.name}</p>
+              </NavBarButton>
+            )}
+          </div>
+          <div className="dark:text-gray-200 text-black mt-1 mr-2">
+            v1.0.0
         </div>
-        <div className="dark:text-gray-200 text-black mt-1 mr-2">
-          v1.0.0
         </div>
-      </div>
-      <div className={"flex-grow min-h-0"}>
-        {settingsOpen ? <Options /> : activeTab.component()}
+        <div className={"flex-grow min-h-0"}>
+          {settingsOpen ? <Options /> : activeTab.component()}
+        </div>
       </div>
     </div>
   )
