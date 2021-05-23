@@ -1,10 +1,10 @@
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
-import { CubeParent, DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
-import { ItemInterface, ReactSortable } from "react-sortablejs";
-import { useRef, useState } from 'react';
+import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
+import { MutableRefObject, useRef, useState } from 'react';
 import { useStudio } from '../../../contexts/StudioContext';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
+import { BackSide } from 'three';
 
 
 const createCube = (model: DCMModel) => {
@@ -75,111 +75,112 @@ const ModelerCubeList = () => {
     )
 }
 
-class CubeItem implements ItemInterface {
-    cube: CubeParent
-    id: string
-    parent?: CubeItem
-    children: CubeItem[] = []
+const CubeListItem = ({ cube, dragData }: {
+    cube: DCMCube
+    dragData: MutableRefObject<DCMCube | null>
+}) => {
+    const [children] = useListenableObject(cube.children)
+    const [dragState, setDragState] = useState<"bottom" | "on" | "top" | null>(null)
+    const [isDragging, setIsDragging] = useState(false)
 
-    constructor(cube: CubeParent, identifier?: string) {
-        this.cube = cube
-        this.id = identifier ?? 'root'
-    }
-}
+    const onCubeDroppedOntoThis = (_: React.DragEvent<HTMLDivElement>) => {
+        const cubeDragged = dragData.current
+        if (cubeDragged === null) {
+            return
+        }
 
-const CubeList = ({ model }: { model: DCMModel }) => {
-    const root = new CubeItem(model)
+        cubeDragged.parent.deleteChild(cubeDragged)
+        if (dragState === "on") {
+            cube.addChild(cubeDragged)
+        } else {
+            const parentCubes = [...cube.parent.children.value]
 
-    const Cube = ({ cube, first = false }: { cube: CubeItem, first?: boolean }) => {
-        const ref = useRef<HTMLDivElement>(null);
-        const [children, setChildren] = useListenableObject(cube.cube.children)
-        cube.children = children.map(c => new CubeItem(c, c.identifier))
-        return (
-            <div>
-                {
-                    //HEAD, for dropping onto, the onUpdate delegates it to the proper list
-                    cube.cube instanceof DCMCube &&
-                    <div className={first ? "" : "pt-0.5"}>
-                        < ReactSortable
-                            list={[cube]}
-                            setList={(l) => {
-                                const found = l[1]?.cube
-                                if (found instanceof DCMCube) {
-                                    setChildren([found].concat(cube.cube.getChildren()))
-                                }
-                            }}
-                            onChange={() => {
-                                if (ref.current !== null) {
-                                    const sortableContainer = ref.current.parentElement
-                                    if (sortableContainer !== null) {
-                                        const children = sortableContainer.childNodes
-                                        if (children.length === 2) {
-                                            if (ref.current === children[1]) {
-                                                sortableContainer.insertBefore(children[1], children[0])
-                                            }
-                                        } else if (children.length !== 1) {
-                                            console.error(`Don't know how to handle children of length ${children.length}`)
-                                        }
-                                    }
-                                }
-                            }}
-                            group={{ name: 'cubes', pull: false, put: true }}
-                            preventOnFilter={false}
-                            filter={() => true}
-                            animation={150}
-                            fallbackOnBody
-                            className="dcs-cube-head"
-                        >
-                            {/* The ref needs to be on the first child of the head sortable */}
-                            <div ref={ref}>
-                                <CubeItemEntry cube={cube.cube} />
-                            </div>
-                        </ReactSortable>
-                    </div>
-                }
-                {cube.children.length !== 0 &&
-                    <ReactSortable
-                        list={cube.children}
-                        setList={(list, _, d) => {
-                            if (d.dragging !== null) {
-                                const list1 = list.map(l => l.id)
-                                const list2 = cube.cube.getChildren().map(l => l.identifier)
-                                if (list1.length !== list2.length || list1.some((l, i) => l !== list2[i])) {
-                                    //Filter is weird: https://stackoverflow.com/a/51577579
-                                    setChildren(list.map(l => l.cube).filter((cube): cube is DCMCube => cube !== null))
-                                }
-                            }
-                        }}
-                        animation={150}
-                        fallbackOnBody
-                        preventOnFilter={false}
-                        filter={() => false}
-                        group={{ name: 'cubes', pull: true, put: true }}
-                        className={(cube.id === "root" ? "" : "pl-4") + (cube.children.length ? ' pb-0.5' : '')}
-                    >
-                        {cube.children.map((cube, idx) =>
-                            <div
-                                key={cube.id ?? ''}
-                                data-cube={cube.id}
-                            // className={cube !== undefined ? "pl-2" : ""}
-                            >
-                                <Cube cube={cube} />
-                            </div>
-                        )}
-                    </ReactSortable>
-                }
-            </div >
-        )
+            let index = parentCubes.indexOf(cube)
+            if (dragState === "bottom") {
+                index++
+            }
+
+            parentCubes.splice(index, 0, cubeDragged)
+            cube.parent.children.value = parentCubes
+        }
     }
 
     return (
-        <div>
-            {/* {items.map(i => <Cube cube={i} />)} */}
-            <Cube cube={root} first />
-        </div>)
+        <div
+            onDragStart={e => {
+                setIsDragging(true)
+                dragData.current = cube
+            }}
+            onDragEnd={e => {
+                setIsDragging(false)
+                dragData.current = null
+                e.preventDefault()
+                e.stopPropagation()
+            }}
+
+            onDragOver={e => {
+                if (dragData.current === cube) {
+                    return
+                }
+                let rect = e.currentTarget.getBoundingClientRect()
+                let yPerc = (e.clientY - rect.top) / rect.height
+
+                if (yPerc <= 1 / 3) {
+                    setDragState("top")
+                } else if (yPerc >= 2 / 3) {
+                    setDragState("bottom")
+                } else {
+                    setDragState("on")
+                }
+
+                e.preventDefault()
+                e.stopPropagation()
+            }}
+            onDragLeave={e => {
+                setDragState(null)
+                e.preventDefault()
+                e.stopPropagation()
+            }}
+            onDrop={e => {
+                setDragState(null)
+                e.preventDefault()
+                e.stopPropagation()
+                onCubeDroppedOntoThis(e)
+            }}
+            draggable
+        >
+            <div><CubeItemEntry cube={cube} dragState={dragState} isDragging={isDragging} /></div>
+            {
+                <div className="ml-2">{children.map(c =>
+                    <CubeListItem
+                        key={c.identifier}
+                        cube={c}
+                        dragData={dragData}
+                    />
+                )}</div>
+            }
+            <div></div>
+        </div>
+    )
 }
 
-const CubeItemEntry = ({ cube }: { cube: DCMCube }) => {
+const CubeList = ({ model }: { model: DCMModel }) => {
+    const [children] = useListenableObject(model.children)
+    const dragData = useRef<DCMCube | null>(null)
+    return (
+        <div>
+            {children.map(c =>
+                <CubeListItem
+                    key={c.identifier}
+                    cube={c}
+                    dragData={dragData}
+                />
+            )}
+        </div>
+    )
+}
+
+const CubeItemEntry = ({ cube, dragState, isDragging }: { cube: DCMCube, dragState: "top" | "bottom" | "on" | null, isDragging: boolean }) => {
     let itemBackgroundColor: string
 
     const [visible, setVisible] = useState(true);
@@ -193,7 +194,7 @@ const CubeItemEntry = ({ cube }: { cube: DCMCube }) => {
         itemBackgroundColor = "text-white "
         if (mouseState === "selected") {
             itemBackgroundColor += "bg-lightBlue-500 hover:bg-lightBlue-400"
-        } else if (mouseState === "hover") {
+        } else if (mouseState === "hover" && !isDragging) {
             itemBackgroundColor += "bg-red-600"
         } else {
             itemBackgroundColor += "bg-gray-700"
@@ -209,7 +210,17 @@ const CubeItemEntry = ({ cube }: { cube: DCMCube }) => {
     }
 
     return (
-        <div onPointerEnter={() => setIfNotSelected("hover")} onPointerLeave={() => setIfNotSelected("none")} onClick={e => { setMouseState("selected"); e.stopPropagation() }} className={`${itemBackgroundColor} ml-2 my-0.5`}>
+        <div
+            onPointerEnter={() => setIfNotSelected("hover")}
+            onPointerLeave={() => setIfNotSelected("none")}
+            onClick={e => { setMouseState("selected"); e.stopPropagation() }}
+            className={`${itemBackgroundColor} ml-2 my-0.5`}
+            style={{
+                borderTop: `2px solid ${dragState === "top" ? "#4287f5" : "transparent"}`,
+                borderBottom: `2px solid ${dragState === "bottom" ? "#4287f5" : "transparent"}`,
+                backgroundColor: dragState === "on" ? "#4287f5" : undefined
+            }}
+        >
             <div className="flex flex-row py-0.5">
                 {
                     cube.getChildren().length !== 0 &&
