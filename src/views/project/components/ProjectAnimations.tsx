@@ -32,8 +32,8 @@ const ProjectAnimations = () => {
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(animationExtensions, uploadFile)
 
     return (
-        <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'bg-gray-800'} h-full flex flex-col overflow-hidden`}>
-            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+        <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'dark:bg-gray-800 bg-gray-100'} h-full flex flex-col overflow-hidden`}>
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">ANIMATIONS</p>
                 <p className="flex flex-row">
                     <button className="icon-button" onClick={() => addAnimation(new DcaAnimation(getSelectedProject(), "New Animation"))}><SVGPlus className="h-4 w-4 mr-1" /></button>
@@ -78,11 +78,11 @@ const AnimationEntries = ({ project }: { project: DcProject }) => {
 
 const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation }: { animation: DcaAnimation, selected: boolean, toggleAnimation: () => void, removeAnimation: () => void }) => {
     return (
-        <div className={(selected ? "bg-yellow-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} onClick={toggleAnimation}>
+        <div className={(selected ? "bg-yellow-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} onClick={toggleAnimation}>
             <DblClickEditLO obj={animation.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
             <p className="mr-2 flex flex-row text-white">
-                <button className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SaveIcon className="h-4 w-4" /></button>
-                <button onClick={e => { removeAnimation(); e.stopPropagation() }} className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "bg-gray-800 hover:bg-gray-900") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
+                <button className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:hover:bg-gray-900 hover:bg-gray-300 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SaveIcon className="h-4 w-4" /></button>
+                <button onClick={e => { removeAnimation(); e.stopPropagation() }} className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
             </p>
         </div>
     )

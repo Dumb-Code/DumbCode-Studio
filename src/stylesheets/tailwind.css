@@ -73,7 +73,7 @@ button {
 }
 
 .icon-button {
-  @apply bg-gray-800 hover:bg-black rounded pr-1 pl-2 py-1 my-0.5 mr-1
+  @apply dark:bg-gray-800 bg-gray-200 dark:hover:bg-black hover:bg-gray-100 rounded pr-1 pl-2 py-1 my-0.5 mr-1
 }
 
 /**

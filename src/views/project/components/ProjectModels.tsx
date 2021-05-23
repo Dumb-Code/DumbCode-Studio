@@ -23,8 +23,8 @@ const ProjectModels = () => {
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(modelExtensions, file => createProject(file).then(addProject))
 
     return (
-        <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'bg-gray-800'} h-full flex flex-col overflow-hidden`}>
-            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+        <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'dark:bg-gray-800 bg-gray-100'} h-full flex flex-col overflow-hidden`}>
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">MODELS</p>
                 <p className="text-md flex flex-row">
                     <button className="icon-button" onClick={() => addProject(newProject())}><SVGPlus className="h-4 w-4 mr-1" /></button>
@@ -109,11 +109,11 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
 
     const isRemote = false
 
-    const iconButtonClass = (selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "bg-gray-800 hover:bg-gray-900")
+    const iconButtonClass = (selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white")
 
     return (
-        <div className={(selected ? "bg-lightBlue-500" : "bg-gray-700 text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} onClick={changeModel}>
-            <DblClickEditLO obj={project.name} disabled={linkedToFile} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
+        <div className={(selected ? "bg-lightBlue-500" : "dark:bg-gray-700 bg-gray-200 text-black dark:text-white") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} onClick={changeModel}>
+            <DblClickEditLO obj={project.name} disabled={linkedToFile} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full dark:bg-gray-500 text-black" />
             <div className="pt-0 mr-2 text-white flex flex-row">
                 {isRemote &&
                     <button

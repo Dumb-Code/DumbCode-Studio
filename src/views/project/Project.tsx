@@ -9,7 +9,7 @@ const Project = () => {
     const[remoteShown, showRemote] = useState(false);
 
     return (
-        <div className="h-full grid grid-areas-project overflow-hidden mx-2 bg-black transition-grid-template-rows ease-in-out duration-200"
+        <div className="h-full grid grid-areas-project overflow-hidden mx-2 bg-white dark:bg-black transition-grid-template-rows ease-in-out duration-200"
             style={{
                 gridTemplateColumns: '30% 30% 40%',
                 gridTemplateRows: "auto " + (remoteShown ? "237px" : "44px")
