@@ -4,7 +4,6 @@ import { MutableRefObject, useRef, useState } from 'react';
 import { useStudio } from '../../../contexts/StudioContext';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
-import { BackSide } from 'three';
 
 
 const createCube = (model: DCMModel) => {
