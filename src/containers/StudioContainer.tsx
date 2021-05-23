@@ -65,7 +65,7 @@ const StudioApp = () => {
                 key={tab.name}
                 color={tab.color}
                 className="w-32"
-                selected={tab === activeTab}
+                selected={tab === activeTab && !settingsOpen}
                 onClick={() => tabChanged(tab)} >
                 <p>{tab.name}</p>
               </NavBarButton>
