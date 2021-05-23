@@ -56,7 +56,10 @@ export class DCMModel implements CubeParent {
 
     this.children.addListener((newChildren, oldChildren) => {
       oldChildren.forEach(child => this.modelGroup.remove(child.cubeGroup))
-      newChildren.forEach(child => this.modelGroup.add(child.cubeGroup))
+      newChildren.forEach(child => {
+        child.parent = this
+        this.modelGroup.add(child.cubeGroup)
+      })
     })
 
     const refreshTextures = () => this.traverseAll(cube => cube.updateTexture())
@@ -194,7 +197,10 @@ export class DCMCube implements CubeParent {
 
     this.children.addListener((newChildren, oldChildren) => {
       oldChildren.forEach(child => this.cubeGroup.remove(child.cubeGroup))
-      newChildren.forEach(child => this.cubeGroup.add(child.cubeGroup))
+      newChildren.forEach(child => {
+        child.parent = this
+        this.cubeGroup.add(child.cubeGroup)
+      })
     })
 
     this.mouseState.addListener(v => {
