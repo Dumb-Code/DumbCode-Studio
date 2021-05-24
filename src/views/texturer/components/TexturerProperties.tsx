@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Slider from 'react-input-slider';
+import { useOptions } from '../../../contexts/OptionsContext';
 
 type Swatch = {
     h: number,
@@ -33,17 +34,17 @@ const TexturerProperties = () => {
     }
 
     return (
-        <div className="rounded-sm bg-gray-900 h-full flex flex-row">
+        <div className="rounded-sm dark:bg-gray-900 bg-gray-200 h-full flex flex-row">
             <div className="ml-3 mr-3 my-2 pt-1">
                 <HueSelector hue={hue} setHue={setHue} />
             </div>
-            <div className="h-full flex flex-row w-full bg-gray-800">
+            <div className="h-full flex flex-row w-full dark:bg-gray-800 bg-gray-200">
                 <div className="w-1/2">
-                    <p className="bg-gray-900 h-4 w-full text-xs text-gray-300">COLOR SELECTOR</p>
+                    <p className="dark:bg-gray-900 bg-gray-300 h-4 w-full text-xs dark:text-gray-300 text-black">COLOR SELECTOR</p>
                     <HSLColorBox resolution={25} height={25} hue={hue} swatches={swatches} addSw={addSwatch} removeSw={removeSwatch} />
                 </div>
                 <div className="w-1/2">
-                    <p className="bg-gray-900 h-4 w-full text-xs text-gray-300">SWATCHES</p>
+                    <p className="dark:bg-gray-900 bg-gray-300 h-4 w-full text-xs dark:text-gray-300 text-black">SWATCHES</p>
                     <div className="mx-2 my-1 h-full overflow-y-hidden w-min">
                         <SwatchesPannel swatches={swatches} setHue={setHue} removeSw={removeSwatch} />
                     </div>
@@ -77,6 +78,7 @@ const SwatchesPannel = ({ swatches, setHue, removeSw }: { swatches: readonly Swa
 const HueSelector = ({ hue, setHue }: { hue: number, setHue: any }) => {
 
     const [sliderHue, setSLiderHue] = useState(hue)
+    const { darkMode } = useOptions()
 
     function changeHue(newHue) {
         setSLiderHue(newHue);
@@ -91,7 +93,7 @@ const HueSelector = ({ hue, setHue }: { hue: number, setHue: any }) => {
             styles={{
                 track: { width: 6, background: 'linear-gradient(to bottom, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)', height: '100%' },
                 active: { background: 'transparent' },
-                thumb: { width: 15, height: 15, opacity: '80%' }
+                thumb: { width: 15, height: 15, opacity: '80%', background:(darkMode ? 'white' : '#161616') }
             }}
         />
 

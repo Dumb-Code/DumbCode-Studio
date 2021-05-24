@@ -28,11 +28,11 @@ const Texturer = () => {
                 gridTemplateRows: 'auto 150px 28px'
             }}
         >
-            <div className="grid-in-layers border border-black"><TexturerSidebar /></div>
-            <div className="grid-in-tools border border-black"><TexturerTools /></div>
-            <div className="grid-in-canvas border border-black"><TexturerViewport /></div>
-            <div className="grid-in-properties border border-black"><TexturerProperties /></div>
-            <div className="grid-in-info border border-black"><InfoBar /></div>
+            <div className="grid-in-layers border dark:border-black border-white"><TexturerSidebar /></div>
+            <div className="grid-in-tools border dark:border-black border-white"><TexturerTools /></div>
+            <div className="grid-in-canvas border dark:border-black border-white"><TexturerViewport /></div>
+            <div className="grid-in-properties border dark:border-black border-white"><TexturerProperties /></div>
+            <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
         </div>
     )
 }
