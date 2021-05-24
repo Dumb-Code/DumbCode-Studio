@@ -1,6 +1,6 @@
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
-import { MutableRefObject, RefObject, useRef, useState } from 'react';
+import { MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
 import { useStudio } from '../../../contexts/StudioContext';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
@@ -80,19 +80,27 @@ const ModelerCubeList = () => {
 }
 
 type DragState = "bottom" | "on" | "top" | null
-const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mouseDraggedElementRef }: {
+const CubeListItem = ({
+    cube, dragData, setDragData, dragOverRef, dragEndRef, mouseDraggedElementRef,
+    clearPreviousDragState, onDragFinish, parentAnimateChildRemove
+}: {
     cube: DCMCube
     dragData: DragData | null
     setDragData: (val: DragData | null) => void
     dragOverRef: MutableRefObject<boolean>
     dragEndRef: RefObject<HTMLDivElement>
     mouseDraggedElementRef: RefObject<HTMLDivElement>
+    clearPreviousDragState: MutableRefObject<(cube: DCMCube) => void>
+    onDragFinish: () => void
+    parentAnimateChildRemove?: () => void
 }) => {
     const [children] = useListenableObject(cube.children)
     const [dragState, setDragState] = useState<DragState>(null)
     const [isDragging, setIsDragging] = useState(false)
+    const [hasAnimationChildrenForce, setHasAnimationChildrenForce] = useState<boolean | null>(null)
 
-    //This gets reset when `children` of parent change, due to the key being different (children size changes)
+    //How on earth does this get reset? who knows. I think maybe because the list size changes, 
+    //so the children `key` is compleatly refreshed
     const [isAnimating, setIsAnimating] = useState(false)
 
     const draggableRef = useRef<HTMLDivElement>(null)
@@ -100,6 +108,19 @@ const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mo
     const remainGhostRef = useRef<HTMLDivElement>(null)
     const bottomGhostRef = useRef<HTMLDivElement>(null)
     const topGhostRef = useRef<HTMLDivElement>(null)
+
+    const childAnimateRemove = () => {
+        if (children.length === 1) {
+            setHasAnimationChildrenForce(false)
+        }
+    }
+
+    //TODO: is this needed?
+    useEffect(() => {
+        if (!hasAnimationChildrenForce && children.length === 0) {
+            setHasAnimationChildrenForce(null)
+        }
+    })
 
     //Called when a cube is dropped onto this element
     const onCubeDroppedOntoThis = (_: React.DragEvent<HTMLDivElement>) => {
@@ -123,6 +144,10 @@ const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mo
             style.top = rect.y + "px"
         }
 
+        if (dragState === "on") {
+            setHasAnimationChildrenForce(true)
+        }
+
         //After the 300ms (.3 seconds), clear the animations and perform the actual cube change
         setTimeout(() => {
             if (mouseDraggedElementRef.current !== null) {
@@ -133,6 +158,7 @@ const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mo
             } else {
                 cleanupRef(bottomGhostRef)
             }
+            setHasAnimationChildrenForce(null)
 
             cubeDragged.cube.parent.deleteChild(cubeDragged.cube)
             if (dragState === "on") {
@@ -195,6 +221,10 @@ const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mo
                         return
                     }
 
+                    if (parentAnimateChildRemove) {
+                        parentAnimateChildRemove()
+                    }
+
                     const rect = draggableRef.current.getBoundingClientRect()
 
                     //set the drag image to be empty
@@ -253,6 +283,9 @@ const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mo
 
                         //Clear the drag data
                         setDragData(null)
+
+                        //Cause a re-render
+                        onDragFinish()
                     }, 300)
                     e.preventDefault()
                     e.stopPropagation()
@@ -277,6 +310,13 @@ const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mo
                         setDragState("on")
                     }
 
+                    clearPreviousDragState.current(cube)
+                    clearPreviousDragState.current = (c => {
+                        if(c !== cube) {
+                            setDragState(null)
+                        }
+                    })
+
                     e.preventDefault()
                     e.stopPropagation()
                 }}
@@ -298,16 +338,19 @@ const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mo
                 draggable
             >
                 <div ref={draggableRef} className={(isDragging || isAnimating) ? "hidden" : ""}>
-                    <div ref={cubeItemRef}><CubeItemEntry cube={cube} dragState={dragState} isDragging={isDragging} /></div>
+                    <div ref={cubeItemRef}><CubeItemEntry cube={cube} dragState={dragState} isDragging={isDragging} hasChildren={hasAnimationChildrenForce !== null ? hasAnimationChildrenForce : children.length !== 0} /></div>
                     <div className="ml-2">{children.map(c =>
                         <CubeListItem
-                            key={children.length + "#" + c.identifier}
+                            key={c.identifier}
                             cube={c}
                             dragData={dragData}
                             setDragData={setDragData}
                             dragOverRef={dragOverRef}
                             dragEndRef={dragEndRef}
                             mouseDraggedElementRef={mouseDraggedElementRef}
+                            clearPreviousDragState={clearPreviousDragState}
+                            onDragFinish={onDragFinish}
+                            parentAnimateChildRemove={childAnimateRemove}
                         />
                     )}</div>
                 </div>
@@ -330,13 +373,14 @@ const CubeList = ({ model }: { model: DCMModel }) => {
     const dragOverRef = useRef(false)
     const dragEndRef = useRef<HTMLDivElement>(null)
     const mouseDraggedElementRef = useRef<HTMLDivElement>(null)
+    const clearPreviousDragState = useRef(() => { })
 
     //The element for the dragged mouse cube element
     const MouseCubeEntry = ({ cube }: { cube: DCMCube }) => {
         const [children] = useListenableObject(cube.children)
         return (
             <>
-                <div style={{ width: dragData?.width + "px" }}><CubeItemEntry cube={cube} dragState={null} isDragging={false} /></div>
+                <div style={{ width: dragData?.width + "px" }}><CubeItemEntry cube={cube} dragState={null} isDragging={false} hasChildren={children.length !== 0} /></div>
                 <div className="ml-2">{children.map(c =>
                     <MouseCubeEntry
                         key={c.identifier}
@@ -347,17 +391,26 @@ const CubeList = ({ model }: { model: DCMModel }) => {
         )
     }
 
+    //Key is used to make sure that no cubes can be stuck "animating"
+    //Meaning they never show. TODO, in the future remote this
+    const [key, setKey] = useState(0)
+    const onDragFinish = () => {
+        setKey(key + 1)
+    }
+
     return (
-        <div>
+        <div key={key}>
             {children.map(c =>
                 <CubeListItem
-                    key={children.length + "#" + c.identifier}
+                    key={c.identifier}
                     cube={c}
                     dragData={dragData}
                     setDragData={setDragData}
                     dragOverRef={dragOverRef}
                     dragEndRef={dragEndRef}
+                    onDragFinish={onDragFinish}
                     mouseDraggedElementRef={mouseDraggedElementRef}
+                    clearPreviousDragState={clearPreviousDragState}
                 />
             )}
             <div ref={dragEndRef} />
@@ -378,7 +431,7 @@ const CubeList = ({ model }: { model: DCMModel }) => {
     )
 }
 
-const CubeItemEntry = ({ cube, dragState, isDragging }: { cube: DCMCube, dragState: DragState, isDragging: boolean }) => {
+const CubeItemEntry = ({ cube, dragState, isDragging, hasChildren }: { cube: DCMCube, dragState: DragState, isDragging: boolean, hasChildren: boolean }) => {
     let itemBackgroundColor: string
 
     const [visible, setVisible] = useState(true);
@@ -420,10 +473,9 @@ const CubeItemEntry = ({ cube, dragState, isDragging }: { cube: DCMCube, dragSta
             }}
         >
             <div className="flex flex-row py-0.5">
-                {
-                    cube.getChildren().length !== 0 &&
-                    <button className={(collapsed ? "transform -rotate-90" : "") + " dark:bg-gray-800 bg-gray-600 dark:hover:bg-black hover:bg-gray-700 rounded px-1 py-1 text-white ml-0.5"}><SVGChevronDown className="h-4 w-4" /></button>
-                }
+                <button className={(collapsed ? "transform -rotate-90" : "") + (hasChildren ? " px-1" : " w-0") + " ml-0.5 py-1 transition-all transition-300 dark:bg-gray-800 bg-gray-600 dark:hover:bg-black hover:bg-gray-700 rounded text-white overflow-hidden"}>
+                    <SVGChevronDown className="w-4 h-4" />
+                </button>
                 <DblClickEditLO obj={cube.name} className="truncate text-white text-s pl-1 flex-grow cursor-pointer" inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
                 <div className="flex flex-row text-white m-0 p-0">
                     {
