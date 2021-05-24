@@ -29,11 +29,11 @@ a {
 */
 
 .react-numeric-input {
-  @apply bg-gray-700 outline-none border-none rounded-r text-white text-xs w-full !important;
+  @apply dark:bg-gray-700 bg-gray-300 outline-none border-none rounded-r dark:text-white text-black text-xs w-full !important;
 }
 
 .react-numeric-input b {
-  @apply bg-gray-400 outline-none border-gray-700 border-t border-b shadow-none text-white pl-0.5 !important;
+  @apply bg-gray-400 outline-none dark:border-gray-700 border-white border-t border-b shadow-none text-white pl-0.5 !important;
 }
 
 .react-numeric-input b i {
@@ -41,7 +41,7 @@ a {
 }
 
 .react-numeric-input input {
-  @apply bg-gray-700 outline-none border-none shadow-none h-full w-full text-white !important;
+  @apply dark:bg-gray-700 bg-gray-300 outline-none border-none shadow-none h-full w-full dark:text-white text-black !important;
 }
 
 .studio-canvas-container canvas {

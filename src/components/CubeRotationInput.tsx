@@ -14,7 +14,7 @@ const CubeRotationInput = ({ title, value, setValue }: {
 }) => {
     return (
         <div>
-            <p className="ml-1 text-gray-400 text-xs">{title}</p>
+            <p className="ml-1 dark:text-gray-400 text-black text-xs">{title}</p>
             <div className="flex flex-col p-1">
                 {axis.map((a, idx) =>
                     <InputField
@@ -58,7 +58,7 @@ const InputField = ({ axis, color, value, setValue }: {
             <div className=" w-20 h-7">
                 <NumericInput value={value?.toFixed(2) ?? ""} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
             </div>
-            <div className="rounded-r bg-gray-700 flex-grow pr-4 pl-2 h-8">
+            <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
                 <Slider
                     xmin={-180}
                     xmax={180}

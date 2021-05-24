@@ -3,7 +3,7 @@ import ModelerProperties from "./ModelerProperties";
 
 const ModelerSidebar = () => {
     return (
-        <div className="flex flex-col flex-col-reverse h-full">
+        <div className="flex flex-col-reverse h-full">
             <div>
                 <ModelerProperties />
             </div>
