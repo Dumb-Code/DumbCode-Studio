@@ -20,11 +20,17 @@ export const useOptions = () => {
 }
 
 export const OptionsContextProvider = ({ children }: { children?: ReactNode }) => {
-  const { scene } = useStudio()
+  const { scene, setGridColor } = useStudio()
   const [darkMode, setDarkMode] = useState(true)
   const [compactMode, setCompactMode] = useState(false)
 
   scene.background = new Color(darkMode ? 0x363636 : 0xF3F4F6)
+
+  if(darkMode) {
+    setGridColor(0x121212, 0x1c1c1c, 0x292929)
+  } else {
+    setGridColor(0x737373, 0x525252, 0x404040)
+  }
 
   return (
     <Context.Provider value={{ darkMode, setDarkMode, compactMode, setCompactMode }}>

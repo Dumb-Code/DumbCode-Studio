@@ -30,7 +30,7 @@ export const createThreeContext: () => ThreeJsContext = () => {
 
   const onMouseDown = new IndexedEventHandler<React.MouseEvent>()
 
-  const grid = createGrid()
+  const { grid, majorGridMaterial, minorGridMaterial, subGridMaterial } = createGrid()
   scene.add(grid)
 
   const box = createBox()
@@ -58,15 +58,15 @@ export const createThreeContext: () => ThreeJsContext = () => {
   onFrame()
 
   return {
-    renderer, camera, scene, onTopScene, controls, 
+    renderer, camera, scene, onTopScene, controls,
     raycaster, onMouseDown, onFrameListeners,
 
     setSize: (w, h) => {
       width = w
       height = h
       renderer.setSize(width, height)
-      
-      if(camera instanceof PerspectiveCamera) {
+
+      if (camera instanceof PerspectiveCamera) {
         camera.aspect = width / height
         camera.updateProjectionMatrix()
       } else {
@@ -79,8 +79,13 @@ export const createThreeContext: () => ThreeJsContext = () => {
     },
 
     toggleBox: () => box.visible = !box.visible,
-    toggleGrid: () => grid.visible = !grid.visible
+    toggleGrid: () => grid.visible = !grid.visible,
 
+    setGridColor: (majorColor, minorColor, subColor) => {
+      majorGridMaterial.color.set(majorColor)
+      minorGridMaterial.color.set(minorColor)
+      subGridMaterial.color.set(subColor)
+    }
   }
 }
 
@@ -125,9 +130,14 @@ const createGrid = () => {
   gridGroup.userData.dontRenderGif = true
 
   let matrix = new Matrix4().makeRotationZ(Math.PI / 2)
-  let mesh1 = new Mesh(new CylinderBufferGeometry(0.005, 0.005, gridSquares - 1), new MeshBasicMaterial({ color: 0x121212 }))
-  let mesh2 = new Mesh(new CylinderBufferGeometry(0.003, 0.003, gridSquares - 1), new MeshBasicMaterial({ color: 0x1c1c1c }))
-  let mesh3 = new Mesh(new CylinderBufferGeometry(0.002, 0.002, gridSquares - 1), new MeshBasicMaterial({ color: 0x292929 }))
+
+  const majorGridMaterial = new MeshBasicMaterial({ color: 0x121212 })
+  const minorGridMaterial = new MeshBasicMaterial({ color: 0x1c1c1c })
+  const subGridMaterial = new MeshBasicMaterial({ color: 0x292929 })
+
+  let mesh1 = new Mesh(new CylinderBufferGeometry(0.005, 0.005, gridSquares - 1), majorGridMaterial)
+  let mesh2 = new Mesh(new CylinderBufferGeometry(0.003, 0.003, gridSquares - 1), minorGridMaterial)
+  let mesh3 = new Mesh(new CylinderBufferGeometry(0.002, 0.002, gridSquares - 1), subGridMaterial)
 
   mesh1.geometry.applyMatrix4(matrix);
   mesh2.geometry.applyMatrix4(matrix);
@@ -176,5 +186,8 @@ const createGrid = () => {
       }
     }
   }
-  return gridGroup
+  return {
+    grid: gridGroup,
+    majorGridMaterial, minorGridMaterial, subGridMaterial
+  }
 }

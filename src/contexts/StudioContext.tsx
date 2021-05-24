@@ -20,6 +20,8 @@ export type ThreeJsContext = {
 
   toggleGrid: () => void
   toggleBox: () => void
+
+  setGridColor: (majorColor: number, minorColor: number, subColor: number) => void
 }
 export type StudioContext = {
   projects: DcProject[],
