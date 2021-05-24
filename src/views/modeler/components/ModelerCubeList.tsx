@@ -1,6 +1,6 @@
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
-import { MutableRefObject, RefObject, useRef, useState } from 'react';
+import { MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
 import { useStudio } from '../../../contexts/StudioContext';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
@@ -92,8 +92,7 @@ const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mo
     const [dragState, setDragState] = useState<DragState>(null)
     const [isDragging, setIsDragging] = useState(false)
 
-    //Some fucking how this gets set to false EXACTLY where I need it to be
-    //But I have absolutly no fucking idea why
+    //This gets reset when `children` of parent change, due to the key being different (children size changes)
     const [isAnimating, setIsAnimating] = useState(false)
 
     const draggableRef = useRef<HTMLDivElement>(null)
@@ -302,7 +301,7 @@ const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mo
                     <div ref={cubeItemRef}><CubeItemEntry cube={cube} dragState={dragState} isDragging={isDragging} /></div>
                     <div className="ml-2">{children.map(c =>
                         <CubeListItem
-                            key={c.identifier}
+                            key={children.length + "#" + c.identifier}
                             cube={c}
                             dragData={dragData}
                             setDragData={setDragData}
@@ -352,7 +351,7 @@ const CubeList = ({ model }: { model: DCMModel }) => {
         <div>
             {children.map(c =>
                 <CubeListItem
-                    key={c.identifier}
+                    key={children.length + "#" + c.identifier}
                     cube={c}
                     dragData={dragData}
                     setDragData={setDragData}
