@@ -9,7 +9,7 @@ import { MinimizeButton } from "../../../components/MinimizeButton";
 
 const AnimatorProperties = () => {
     return (
-        <div className="overflow-y-scroll h-full bg-gray-800">
+        <div className="overflow-y-scroll h-full dark:bg-gray-800 bg-gray-200">
             <AnimatorCubeProperties />
             <AnimatorLoopingProperties />
             <AnimatorIKProperties />
@@ -23,8 +23,8 @@ const AnimatorCubeProperties = () => {
     const [propertiesActive, setPropertiesActive] = useState(true);
 
     return (
-        <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
-            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="my-0.5 flex-grow">CUBE PROPERTIES</p>
                 <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)} />
             </div>
@@ -46,8 +46,8 @@ const AnimatorLoopingProperties = () => {
     const [loopingActive, setLoopingActive] = useState(true);
 
     return (
-        <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
-            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="my-0.5 flex-grow">LOOPING PROPERTIES</p>
                 <MinimizeButton active={loopingActive} toggle={() => setLoopingActive(!loopingActive)} />
             </div>
@@ -72,8 +72,8 @@ const AnimatorIKProperties = () => {
     const [ikActive, setIKActive] = useState(false);
 
     return (
-        <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden pb-1">
-            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="my-0.5 flex-grow">INVERSE KINEMATICS</p>
                 <MinimizeButton active={ikActive} toggle={() => setIKActive(!ikActive)} />
             </div>
@@ -91,14 +91,14 @@ const AnimatorProgressionProperties = () => {
     const [progressionActive, setProgressionActive] = useState(false);
 
     return (
-        <div className="rounded-sm bg-gray-800 flex flex-col pb-1">
-            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col pb-1">
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="my-0.5 flex-grow">PROGRESSION POINTS</p>
                 <MinimizeButton active={progressionActive} toggle={() => setProgressionActive(!progressionActive)} />
             </div>
             <div className={(progressionActive ? "h-96" : "h-0 overflow-hidden") + " transition-height ease-in-out duration-200"}>
                 <div className="flex flex-col h-full p-2">
-                    <div className="flex-grow bg-gray-900 rounded w-full text-gray-400 pl-4">
+                    <div className="flex-grow dark:bg-gray-900 bg-gray-300 rounded w-full dark:text-gray-400 text-gray-800 pl-4">
                         graph goes here
                     </div>
                     <div className="flex flex-row mt-2">
@@ -124,7 +124,7 @@ const AnimatorProgressionProperties = () => {
                         <div className=" w-20 h-7">
                             <NumericInput value={0} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
                         </div>
-                        <div className="rounded-r bg-gray-700 flex-grow pr-4 pl-2 h-8">
+                        <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
                             <Slider
                                 xmin={1} xmax={100} axis="x"
                                 styles={{
@@ -157,7 +157,7 @@ const LoopCheck = ({ title }: { title: string }) => {
 const IKCheck = ({ title }: { title: string }) => {
     return (
         <div className="flex flex-row">
-            <p className="ml-1 text-gray-400 text-xs mr-2 mt-2">{title}</p>
+            <p className="ml-1 dark:text-gray-400 text-black text-xs mr-2 mt-2">{title}</p>
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7">
                     <Checkbox value={false} />
