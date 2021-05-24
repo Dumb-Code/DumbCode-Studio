@@ -1,6 +1,6 @@
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
-import { MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, RefObject, useRef, useState } from 'react';
 import { useStudio } from '../../../contexts/StudioContext';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
