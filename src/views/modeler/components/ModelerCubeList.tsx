@@ -120,7 +120,7 @@ const CubeListItem = ({
         if (!hasAnimationChildrenForce && children.length === 0) {
             setHasAnimationChildrenForce(null)
         }
-    })
+    }, [hasAnimationChildrenForce, children.length])
 
     //Called when a cube is dropped onto this element
     const onCubeDroppedOntoThis = (_: React.DragEvent<HTMLDivElement>) => {
