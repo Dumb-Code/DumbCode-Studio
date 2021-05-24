@@ -1,10 +1,15 @@
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
-import { MutableRefObject, useRef, useState } from 'react';
+import { MutableRefObject, RefObject, useRef, useState } from 'react';
 import { useStudio } from '../../../contexts/StudioContext';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
+import { createPortal } from 'react-dom';
+import { useOptions } from '../../../contexts/OptionsContext';
 
+const overlayDiv = document.getElementById("overlay")
+
+const emptySpan = document.createElement("span")
 
 const createCube = (model: DCMModel) => {
     let map = model.cubeMap
@@ -74,98 +79,275 @@ const ModelerCubeList = () => {
     )
 }
 
-const CubeListItem = ({ cube, dragData }: {
+type DragState = "bottom" | "on" | "top" | null
+const CubeListItem = ({ cube, dragData, setDragData, dragOverRef, dragEndRef, mouseDraggedElementRef }: {
     cube: DCMCube
-    dragData: MutableRefObject<DCMCube | null>
+    dragData: DragData | null
+    setDragData: (val: DragData | null) => void
+    dragOverRef: MutableRefObject<boolean>
+    dragEndRef: RefObject<HTMLDivElement>
+    mouseDraggedElementRef: RefObject<HTMLDivElement>
 }) => {
     const [children] = useListenableObject(cube.children)
-    const [dragState, setDragState] = useState<"bottom" | "on" | "top" | null>(null)
+    const [dragState, setDragState] = useState<DragState>(null)
     const [isDragging, setIsDragging] = useState(false)
 
+    //Some fucking how this gets set to false EXACTLY where I need it to be
+    //But I have absolutly no fucking idea why
+    const [isAnimating, setIsAnimating] = useState(false)
+
+    const draggableRef = useRef<HTMLDivElement>(null)
+    const cubeItemRef = useRef<HTMLDivElement>(null)
+    const remainGhostRef = useRef<HTMLDivElement>(null)
+    const bottomGhostRef = useRef<HTMLDivElement>(null)
+    const topGhostRef = useRef<HTMLDivElement>(null)
+
+    //Called when a cube is dropped onto this element
     const onCubeDroppedOntoThis = (_: React.DragEvent<HTMLDivElement>) => {
-        const cubeDragged = dragData.current
+        const cubeDragged = dragData
         if (cubeDragged === null) {
             return
         }
 
-        cubeDragged.parent.deleteChild(cubeDragged)
-        if (dragState === "on") {
-            cube.addChild(cubeDragged)
+        if (dragState === "top") {
+            animateRef(topGhostRef, true, dragData?.height)
         } else {
-            const parentCubes = [...cube.parent.children.value]
+            animateRef(bottomGhostRef, true, dragData?.height)
+        }
 
-            let index = parentCubes.indexOf(cube)
-            if (dragState === "bottom") {
-                index++
+        const ref = dragState === "top" ? topGhostRef : bottomGhostRef
+        if (ref.current !== null && mouseDraggedElementRef.current !== null) {
+            const rect = ref.current.getBoundingClientRect()
+            const style = mouseDraggedElementRef.current.style
+            style.transition = "all 0.3s"
+            style.left = rect.x + "px"
+            style.top = rect.y + "px"
+        }
+
+        //After the 300ms (.3 seconds), clear the animations and perform the actual cube change
+        setTimeout(() => {
+            if (mouseDraggedElementRef.current !== null) {
+                mouseDraggedElementRef.current.style.transition = ""
+            }
+            if (dragState === "top") {
+                cleanupRef(topGhostRef)
+            } else {
+                cleanupRef(bottomGhostRef)
             }
 
-            parentCubes.splice(index, 0, cubeDragged)
-            cube.parent.children.value = parentCubes
+            cubeDragged.cube.parent.deleteChild(cubeDragged.cube)
+            if (dragState === "on") {
+                cube.addChild(cubeDragged.cube)
+            } else {
+                const parentCubes = [...cube.parent.children.value]
+
+                let index = parentCubes.indexOf(cube)
+                if (dragState === "bottom") {
+                    index++
+                }
+
+                parentCubes.splice(index, 0, cubeDragged.cube)
+                cube.parent.children.value = parentCubes
+            }
+        }, 300)
+    }
+
+    //Animate the ref
+    const animateRef = (ref: RefObject<HTMLDivElement>, reverse: boolean, height: number | undefined) => {
+        if (ref.current !== null && height !== undefined && draggableRef.current !== null) {
+            const rect = draggableRef.current.getBoundingClientRect()
+            const style = ref.current.style
+            style.height = reverse ? "0" : (height + "px")
+            style.width = rect.width + "px"
+            style.transition = "height 0.3s"
+            setTimeout(() => style.height = reverse ? (height + "px") : "0", 1) //Need to call next frame
+        }
+    }
+
+    //Clear the animation from the ref
+    const cleanupRef = (ref: RefObject<HTMLDivElement>) => {
+        if (ref.current !== null) {
+            const style = ref.current.style
+            style.transition = ""
+            style.height = ""
+            style.width = ""
         }
     }
 
     return (
-        <div
-            onDragStart={e => {
-                setIsDragging(true)
-                dragData.current = cube
-            }}
-            onDragEnd={e => {
-                setIsDragging(false)
-                dragData.current = null
-                e.preventDefault()
-                e.stopPropagation()
-            }}
+        <div>
+            {/* The top ghost element for when cubes are dragged above */}
+            <div ref={topGhostRef} />
+            <div
+                // Per frame, when this cube is dragged, set the mouse dragged element to be the position
+                onDrag={e => {
+                    //Note that at the end of a drag, clientXY is 0, we don't want this
+                    if (mouseDraggedElementRef.current !== null && (e.clientX !== 0 || e.clientY !== 0)) {
+                        const style = mouseDraggedElementRef.current.style
+                        style.left = e.clientX + "px"
+                        style.top = e.clientY + "px"
+                    }
+                    e.preventDefault()
+                }}
 
-            onDragOver={e => {
-                if (dragData.current === cube) {
-                    return
-                }
-                let rect = e.currentTarget.getBoundingClientRect()
-                let yPerc = (e.clientY - rect.top) / rect.height
+                //Called when the cube is started to drag.
+                onDragStart={e => {
+                    if (draggableRef.current === null || cubeItemRef.current === null) {
+                        return
+                    }
 
-                if (yPerc <= 1 / 3) {
-                    setDragState("top")
-                } else if (yPerc >= 2 / 3) {
-                    setDragState("bottom")
-                } else {
-                    setDragState("on")
-                }
+                    const rect = draggableRef.current.getBoundingClientRect()
 
-                e.preventDefault()
-                e.stopPropagation()
-            }}
-            onDragLeave={e => {
-                setDragState(null)
-                e.preventDefault()
-                e.stopPropagation()
-            }}
-            onDrop={e => {
-                setDragState(null)
-                e.preventDefault()
-                e.stopPropagation()
-                onCubeDroppedOntoThis(e)
-            }}
-            draggable
-        >
-            <div><CubeItemEntry cube={cube} dragState={dragState} isDragging={isDragging} /></div>
-            {
-                <div className="ml-2">{children.map(c =>
-                    <CubeListItem
-                        key={c.identifier}
-                        cube={c}
-                        dragData={dragData}
-                    />
-                )}</div>
-            }
-            <div></div>
+                    //set the drag image to be empty
+                    e.dataTransfer.setDragImage(emptySpan, 0, 0)
+
+                    //animate the remain ghost, as to make it not jump
+                    animateRef(remainGhostRef, false, rect.height)
+
+                    //Set the mouse dragged element to be at the current mouse
+                    if (mouseDraggedElementRef.current !== null) {
+                        const style = mouseDraggedElementRef.current.style
+                        style.left = rect.x + "px"
+                        style.top = rect.y + "px"
+                    }
+
+                    //Update the props
+
+                    setDragData({
+                        cube,
+                        width: rect.width,
+                        height: rect.height,
+                    })
+
+                    setIsDragging(true)
+                    e.stopPropagation()
+                }}
+
+                //Called when the element is stopped dragging
+                onDragEnd={e => {
+                    //Un-animate the remain ref
+                    cleanupRef(remainGhostRef)
+                    setIsDragging(false)
+                    setIsAnimating(true)
+
+                    //If dragOverRef.current is null, then the cube has been dropped on empty space.
+                    if (!dragOverRef.current && mouseDraggedElementRef.current !== null && dragEndRef.current !== null) {
+                        const style = mouseDraggedElementRef.current.style
+                        const rect = dragEndRef.current.getBoundingClientRect()
+                        style.transition = "all 0.3s"
+                        style.left = rect.x + "px"
+                        style.top = rect.y + "px"
+                    }
+
+                    //After .3 seconds, do the actual cube movements
+                    setTimeout(() => {
+                        if (!dragOverRef.current) {
+                            if (mouseDraggedElementRef.current !== null) {
+                                mouseDraggedElementRef.current.style.transition = ""
+                            }
+                            if (dragData !== null) {
+                                const cube = dragData.cube
+                                cube.parent.deleteChild(cube)
+                                cube.model.addChild(cube)
+                            }
+                        }
+
+                        //Clear the drag data
+                        setDragData(null)
+                    }, 300)
+                    e.preventDefault()
+                    e.stopPropagation()
+                }}
+
+                //Called when a cube is dragged over this
+                onDragOver={e => {
+                    if (dragData?.cube === cube || cubeItemRef.current === null) {
+                        return
+                    }
+                    dragOverRef.current = true
+
+                    //Set the drag state based on the y position
+                    let rect = cubeItemRef.current.getBoundingClientRect()
+                    let yPerc = (e.clientY - rect.top) / rect.height
+
+                    if (yPerc <= 1 / 4) {
+                        setDragState("top")
+                    } else if (yPerc >= 3 / 4) {
+                        setDragState("bottom")
+                    } else {
+                        setDragState("on")
+                    }
+
+                    e.preventDefault()
+                    e.stopPropagation()
+                }}
+                //Called when a cube exits being dragged over this
+                onDragLeave={e => {
+                    dragOverRef.current = false
+                    setDragState(null)
+                    e.preventDefault()
+                    e.stopPropagation()
+                }}
+
+                //Called when a cube is dropped on this
+                onDrop={e => {
+                    setDragState(null)
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onCubeDroppedOntoThis(e)
+                }}
+                draggable
+            >
+                <div ref={draggableRef} className={(isDragging || isAnimating) ? "hidden" : ""}>
+                    <div ref={cubeItemRef}><CubeItemEntry cube={cube} dragState={dragState} isDragging={isDragging} /></div>
+                    <div className="ml-2">{children.map(c =>
+                        <CubeListItem
+                            key={c.identifier}
+                            cube={c}
+                            dragData={dragData}
+                            setDragData={setDragData}
+                            dragOverRef={dragOverRef}
+                            dragEndRef={dragEndRef}
+                            mouseDraggedElementRef={mouseDraggedElementRef}
+                        />
+                    )}</div>
+                </div>
+                <div ref={remainGhostRef}></div>
+            </div>
+            <div ref={bottomGhostRef} />
         </div>
     )
 }
 
+type DragData = {
+    cube: DCMCube
+    width: number
+    height: number
+}
 const CubeList = ({ model }: { model: DCMModel }) => {
+    const { darkMode } = useOptions()
     const [children] = useListenableObject(model.children)
-    const dragData = useRef<DCMCube | null>(null)
+    const [dragData, setDragData] = useState<DragData | null>(null)
+    const dragOverRef = useRef(false)
+    const dragEndRef = useRef<HTMLDivElement>(null)
+    const mouseDraggedElementRef = useRef<HTMLDivElement>(null)
+
+    //The element for the dragged mouse cube element
+    const MouseCubeEntry = ({ cube }: { cube: DCMCube }) => {
+        const [children] = useListenableObject(cube.children)
+        return (
+            <>
+                <div style={{ width: dragData?.width + "px" }}><CubeItemEntry cube={cube} dragState={null} isDragging={false} /></div>
+                <div className="ml-2">{children.map(c =>
+                    <MouseCubeEntry
+                        key={c.identifier}
+                        cube={c}
+                    />
+                )}</div>
+            </>
+        )
+    }
+
     return (
         <div>
             {children.map(c =>
@@ -173,13 +355,31 @@ const CubeList = ({ model }: { model: DCMModel }) => {
                     key={c.identifier}
                     cube={c}
                     dragData={dragData}
+                    setDragData={setDragData}
+                    dragOverRef={dragOverRef}
+                    dragEndRef={dragEndRef}
+                    mouseDraggedElementRef={mouseDraggedElementRef}
                 />
             )}
+            <div ref={dragEndRef} />
+            { overlayDiv !== null &&
+                createPortal(
+                    <div className={"relative " + darkMode ? "dark" : ""}>
+                        <div
+                            ref={mouseDraggedElementRef}
+                            className="absolute"
+                        >
+                            {dragData !== null && <MouseCubeEntry cube={dragData.cube} />}
+                        </div>
+                    </div>,
+                    overlayDiv
+                )
+            }
         </div>
     )
 }
 
-const CubeItemEntry = ({ cube, dragState, isDragging }: { cube: DCMCube, dragState: "top" | "bottom" | "on" | null, isDragging: boolean }) => {
+const CubeItemEntry = ({ cube, dragState, isDragging }: { cube: DCMCube, dragState: DragState, isDragging: boolean }) => {
     let itemBackgroundColor: string
 
     const [visible, setVisible] = useState(true);
