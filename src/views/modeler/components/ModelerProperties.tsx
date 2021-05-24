@@ -17,14 +17,14 @@ const ModelerProperties = () => {
     const [propertiesActive, setPropertiesActive] = useState(true);
 
     return (
-        <div className="rounded-sm bg-gray-800 flex flex-col overflow-hidden">
-            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1 flex flex-row">
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden">
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="my-0.5 flex-grow">CUBE PROPERTIES</p>
                 <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)} />
             </div>
             <div className={(propertiesActive ? "h-104" : "h-0") + " transition-height ease-in-out duration-200"}>
                 <div className="pl-3">
-                    <p className="text-gray-400 text-xs mt-1">CUBE NAME</p>
+                    <p className="dark:text-gray-400 text-black text-xs mt-1">CUBE NAME</p>
                 </div>
                 <div className="w-full grid grid-cols-2 px-2 pt-1">
                     <WrappedCubeName obj={firstSelected?.name} />
@@ -45,7 +45,7 @@ const WrappedCubeName = ({ obj }: { obj?: LO<string> }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return (
         <input
-            className="border-none text-white bg-gray-700 pt-1.5 mb-1 text-xs h-7 col-span-2 mx-1 rounded focus:outline-none focus:ring-gray-800"
+            className="border-none dark:text-white text-black dark:bg-gray-700 bg-white pt-1.5 mb-1 text-xs h-7 col-span-2 mx-1 rounded focus:outline-none focus:ring-gray-800"
             type="text"
             value={value}
             onChange={e => setValue(e.currentTarget.value)}

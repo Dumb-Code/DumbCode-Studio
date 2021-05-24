@@ -30,12 +30,12 @@ const Modeler = () => {
             }}
         >
             {/* The boreders are to visulize where everything is. */}
-            <div className="grid-in-command border border-black"><ModelerCommandInput /></div>
-            <div className="grid-in-sidebar min-h-0 border border-black"><ModelerSidebar /></div>
-            <div className="grid-in-shortcuts border border-black"><ModelerShortcuts /></div>
-            <div className="grid-in-canvas border border-black"><StudioCanvas /></div>
-            <div className="grid-in-gumball border border-black"><GumballPropertiesBar /></div>
-            <div className="grid-in-info border border-black"><InfoBar /></div>
+            <div className="grid-in-command border dark:border-black border-white"><ModelerCommandInput /></div>
+            <div className="grid-in-sidebar min-h-0 border dark:border-black border-white"><ModelerSidebar /></div>
+            <div className="grid-in-shortcuts border dark:border-black border-white"><ModelerShortcuts /></div>
+            <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
+            <div className="grid-in-gumball border dark:border-black border-white"><GumballPropertiesBar /></div>
+            <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
         </div>
     )
 }

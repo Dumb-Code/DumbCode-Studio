@@ -37,14 +37,14 @@ const Animator = () => {
                 gridTemplateRows: '32px minmax(0px, 1fr) 32px 150px 30px 28px'
             }}
         >
-            <div className="grid-in-tabs border border-black"><AnimatorTabBar /></div>
-            <div className="grid-in-properties border border-black h-full"><AnimatorProperties /></div>
-            <div className="grid-in-tools border border-black"><AnimatorShortcuts /></div>
-            <div className="grid-in-canvas border border-black"><StudioCanvas /></div>
-            <div className="grid-in-scrub border border-black"><AnimatorScrubBar /></div>
-            <div className="grid-in-timeline border border-black"><AnimatorTimeline /></div>
-            <div className="grid-in-gumball border border-black"><GumballPropertiesBar /></div>
-            <div className="grid-in-info border border-black"><InfoBar /></div>
+            <div className="grid-in-tabs border dark:border-black border-white"><AnimatorTabBar /></div>
+            <div className="grid-in-properties border dark:border-black h-full border-white"><AnimatorProperties /></div>
+            <div className="grid-in-tools border dark:border-black border-white"><AnimatorShortcuts /></div>
+            <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
+            <div className="grid-in-scrub border dark:border-black border-white"><AnimatorScrubBar /></div>
+            <div className="grid-in-timeline border dark:border-black border-white"><AnimatorTimeline /></div>
+            <div className="grid-in-gumball border dark:border-black border-white"><GumballPropertiesBar /></div>
+            <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
         </div>
     )
 }

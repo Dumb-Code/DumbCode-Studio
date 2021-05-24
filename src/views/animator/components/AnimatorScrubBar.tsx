@@ -66,24 +66,24 @@ const AnimatorScrubBar = () => {
     const position = Math.min(value / max, 1)
 
     return (
-        <div className="h-full bg-gray-800 pt-2">
+        <div className="h-full dark:bg-gray-800 bg-white pt-2">
             <div className="absolute flex flex-row w-4/5 transform -translate-y-3.5 ml-14">
                 <div className="flex-grow"></div>
-                <button className="bg-gray-900 px-1 rounded-tl-md pt-1 text-gray-400 hover:text-red-500 border-l-2 border-t-2 border-black">
+                <button className="dark:bg-gray-900 bg-gray-200 px-1 rounded-tl-md pt-1 dark:text-gray-400 text-black hover:text-red-500 border-l-2 border-t-2 dark:border-black border-white">
                     <SVGStop className="h-6 w-6" />
                 </button>
-                <button className="bg-gray-900 px-2 text-white hover:text-lightBlue-500 border-t-2 border-black" onClick={() => setPlaying(!isPlaying)}>
+                <button className="dark:bg-gray-900 bg-gray-200 px-2 dark:text-white text-gray-900 hover:text-lightBlue-500 border-t-2 dark:border-black border-white" onClick={() => setPlaying(!isPlaying)}>
                     {isPlaying
                         ? <SVGPause className="h-8 w-8" />
                         : <SVGPlay className="h-8 w-8" />
                     }
                 </button>
-                <button className="bg-gray-900 px-1 rounded-tr-md pt-1 text-gray-400 hover:text-yellow-400 border-r-2 border-t-2 border-black">
+                <button className="dark:bg-gray-900 bg-gray-200 px-1 rounded-tr-md pt-1 dark:text-gray-400 text-black hover:text-yellow-400 border-r-2 border-t-2 dark:border-black border-white">
                     <SVGRestart className="h-6 w-6" />
                 </button>
                 <div className="flex-grow"></div>
             </div>
-            <div className="rounded-sm bg-gray-800 h-full"
+            <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full"
                 onPointerDown={() => setIsDragging(true)}
                 onPointerEnter={() => setIsHovering(true)}
                 onPointerLeave={() => setIsHovering(false)}
@@ -94,7 +94,7 @@ const AnimatorScrubBar = () => {
                     className="transform -translate-y-2 bg-gray-500 w-full h-2 relative top-7 transition-transform ease-in-out cursor-pointer"
                 />
                 <div
-                    className="transform -translate-y-3 bg-white h-2 relative top-7 -mt-1 transition-transform ease-in-out cursor-pointer"
+                    className="transform -translate-y-3 dark:bg-white bg-gray-600 h-2 relative top-7 -mt-1 transition-transform ease-in-out cursor-pointer"
                     style={{
                         width: 100 * (isMoving ? (mouseHoverX < position ? position : mouseHoverX) : 0) + "%"
                     }}

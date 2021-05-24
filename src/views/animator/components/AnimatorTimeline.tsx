@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { SVGEye, SVGLocked, SVGPlus, SVGSettings } from "../../../components/Icons";
+import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef";
@@ -11,7 +12,7 @@ const AnimatorTimeline = () => {
 
     const [animation] = useListenableObject(selectedProject.animationTabs.selectedAnimation)
     return (
-        <div className="rounded-sm bg-gray-800 h-full pt-2 overflow-x-hidden overflow-y-scroll">
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full pt-2 overflow-x-hidden overflow-y-scroll">
             { animation !== null && <AnimationLayers animation={animation} />}
         </div>
     )
@@ -140,11 +141,11 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     return (
         <div className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
-                <input type="text" className="w-36 border-none bg-gray-900 rounded mr-0.5 pt-0.5 h-6" placeholder="some layer name" />
-                <button className="bg-gray-900 hover:bg-gray-800 rounded pr-0.5 pl-1 py-1 mr-0.5 text-white h-6"><SVGPlus className="h-4 w-4 mr-1" /></button>
-                <button className="bg-gray-900 hover:bg-gray-800 rounded pr-0.5 pl-1 py-1 mr-0.5 text-white h-6"><SVGEye className="h-4 w-4 mr-1" /></button>
-                <button className="bg-gray-900 hover:bg-gray-800 rounded pr-0.5 pl-1 py-1 mr-0.5 text-white h-6"><SVGLocked className="h-4 w-4 mr-1" /></button>
-                <button className="bg-gray-900 hover:bg-gray-800 rounded pr-0.5 pl-1 py-1 mr-0.5 text-white h-6"><SVGSettings className="h-4 w-4 mr-1" /></button>
+                <input type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 rounded mr-0.5 pt-0.5 h-6 text-s" placeholder="layer name" />
+                <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGPlus className="h-4 w-4 mr-1" /></button>
+                <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGEye className="h-4 w-4 mr-1" /></button>
+                <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGLocked className="h-4 w-4 mr-1" /></button>
+                <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGSettings className="h-4 w-4 mr-1" /></button>
             </div>
             <div ref={draggingRef} className="flex flex-col w-full h-full" >
                 <TimelineLayers color={color} animation={animation} layers={layers} />
@@ -167,6 +168,8 @@ const TimelineLayers = ({ color, animation, layers }: { color: string, animation
 const TimelineLayer = ({ color, keyframes }: { color: string, keyframes: DcaKeyframe[] }) => {
     const ref = useRef<HTMLDivElement>(null)
 
+    const { darkMode } = useOptions()
+
     const { addListenerEffect, scroll } = useContext(ScrollZoomContext)
     useEffect(() => {
         const callback = (scroll: number) => {
@@ -178,7 +181,7 @@ const TimelineLayer = ({ color, keyframes }: { color: string, keyframes: DcaKeyf
         addListenerEffect(callback)
     }, [addListenerEffect])
     return (
-        <div ref={ref} className="bg-gray-900 relative h-full " style={{ backgroundPositionX: `${-scroll}px`, backgroundImage: `repeating-linear-gradient(90deg, #363636  0px, #363636  ${width - 1}px, #4A4A4A  ${width - 1}px, #4A4A4A  ${width}px)` }}>
+        <div ref={ref} className="bg-gray-900 relative h-full " style={{ backgroundPositionX: `${-scroll}px`, backgroundImage: `repeating-linear-gradient(90deg, ${darkMode ? "#363636" : "#D4D4D4"}  0px, ${darkMode ? "#363636" : "#D4D4D4"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width}px)` }}>
             {keyframes.map(kf =>
                 <KeyFrame key={kf.identifier} layerColor={color} keyframe={kf} />
             )}

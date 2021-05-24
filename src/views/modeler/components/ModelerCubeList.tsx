@@ -36,11 +36,11 @@ const ModelerCubeList = () => {
 
 
     return (
-        <div className="rounded-sm bg-gray-800 flex flex-col h-full">
-            <div className="bg-gray-900 text-gray-400 font-bold text-xs p-1">
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col h-full">
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 twxt-black font-bold text-xs p-1">
                 <p className="flex-grow my-0.5">CUBE LIST</p>
             </div>
-            <div className="flex flex-row px-1 bg-gray-900 pb-1">
+            <div className="flex flex-row px-1 dark:bg-gray-900 bg-gray-200 pb-1 pt-0.5">
                 <button onClick={createSiblingCube} className="flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mr-0.5 flex flex-row">
                     <b className="flex-grow" />
                     <SVGPlus className="h-6 w-6" />
@@ -196,10 +196,10 @@ const CubeItemEntry = ({ cube, dragState, isDragging }: { cube: DCMCube, dragSta
         } else if (mouseState === "hover" && !isDragging) {
             itemBackgroundColor += "bg-red-600"
         } else {
-            itemBackgroundColor += "bg-gray-700"
+            itemBackgroundColor += "dark:bg-gray-700 bg-gray-400"
         }
     } else {
-        itemBackgroundColor = locked ? "bg-gray-100 bg-opacity-30 text-gray-400" : "bg-gray-700 bg-opacity-40 text-gray-500"
+        itemBackgroundColor = locked ? "dark:bg-gray-100 bg-gray-500 bg-opacity-30 text-gray-400 rounded" : "bg-gray-700 bg-opacity-40 text-gray-500 rounded"
     }
 
     const setIfNotSelected = (state: "none" | "hover") => {
@@ -217,13 +217,13 @@ const CubeItemEntry = ({ cube, dragState, isDragging }: { cube: DCMCube, dragSta
             style={{
                 borderTop: `2px solid ${dragState === "top" ? "#4287f5" : "transparent"}`,
                 borderBottom: `2px solid ${dragState === "bottom" ? "#4287f5" : "transparent"}`,
-                backgroundColor: dragState === "on" ? "#4287f5" : undefined
+                backgroundColor: dragState === "on" ? "#93C5FD" : undefined
             }}
         >
             <div className="flex flex-row py-0.5">
                 {
                     cube.getChildren().length !== 0 &&
-                    <button className={(collapsed ? "transform -rotate-90" : "") + " bg-gray-800 hover:bg-black rounded px-1 py-1 text-white ml-0.5"}><SVGChevronDown className="h-4 w-4" /></button>
+                    <button className={(collapsed ? "transform -rotate-90" : "") + " dark:bg-gray-800 bg-gray-600 dark:hover:bg-black hover:bg-gray-700 rounded px-1 py-1 text-white ml-0.5"}><SVGChevronDown className="h-4 w-4" /></button>
                 }
                 <DblClickEditLO obj={cube.name} className="truncate text-white text-s pl-1 flex-grow cursor-pointer" inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
                 <div className="flex flex-row text-white m-0 p-0">
@@ -231,11 +231,11 @@ const CubeItemEntry = ({ cube, dragState, isDragging }: { cube: DCMCube, dragSta
                         locked ?
                             <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setLocked(false)}><SVGLocked className="h-4 w-4" /></button>
                             :
-                            <button className="bg-gray-800 hover:bg-black rounded px-1 py-1 mr-1" onClick={() => setLocked(true)}><SVGUnlocked className="h-4 w-4" /></button>
+                            <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={() => setLocked(true)}><SVGUnlocked className="h-4 w-4" /></button>
                     }
                     {
                         visible ?
-                            <button className="bg-gray-800 hover:bg-black rounded px-1 py-1 mr-1" onClick={() => setVisible(false)}><SVGEye className="h-4 w-4" /></button>
+                            <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={() => setVisible(false)}><SVGEye className="h-4 w-4" /></button>
                             :
                             <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setVisible(true)}><SVGEyeOff className="h-4 w-4" /></button>
                     }
