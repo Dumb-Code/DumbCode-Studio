@@ -3,26 +3,8 @@ import { Camera, Raycaster, Scene, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DcProject, { newProject } from '../studio/formats/DcProject';
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
-import { createThreeContext } from './ThreeContext';
+import { createThreeContext, ThreeJsContext } from './ThreeContext';
 
-export type ThreeJsContext = {
-  scene: Scene,
-  onTopScene: Scene,
-  renderer: WebGLRenderer,
-  camera: Camera,
-  controls: OrbitControls,
-  raycaster: Raycaster,
-  onMouseDown: IndexedEventHandler<React.MouseEvent>
-  onFrameListeners: Set<(deltaTime: number) => void>,
-
-  setSize: (width: number, height: number) => void
-  getSize: () => { width: number; height: number; }
-
-  toggleGrid: () => void
-  toggleBox: () => void
-
-  setGridColor: (majorColor: number, minorColor: number, subColor: number) => void
-}
 export type StudioContext = {
   projects: DcProject[],
   addProject: (project: DcProject) => void,

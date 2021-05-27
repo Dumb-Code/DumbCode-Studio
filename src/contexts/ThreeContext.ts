@@ -1,7 +1,25 @@
 import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
-import { ThreeJsContext } from "./StudioContext";
+
+export type ThreeJsContext = {
+  scene: Scene,
+  onTopScene: Scene,
+  renderer: WebGLRenderer,
+  camera: Camera,
+  controls: OrbitControls,
+  raycaster: Raycaster,
+  onMouseDown: IndexedEventHandler<React.MouseEvent>
+  onFrameListeners: Set<(deltaTime: number) => void>,
+
+  setSize: (width: number, height: number) => void
+  getSize: () => { width: number; height: number; }
+
+  toggleGrid: () => void
+  toggleBox: () => void
+
+  setGridColor: (majorColor: number, minorColor: number, subColor: number) => void
+}
 
 export const createThreeContext: () => ThreeJsContext = () => {
   console.log(`Creating ThreeJs (${REVISION}) Context`)
