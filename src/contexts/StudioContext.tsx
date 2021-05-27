@@ -1,8 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { Camera, Raycaster, Scene, WebGLRenderer } from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DcProject, { newProject } from '../studio/formats/DcProject';
-import IndexedEventHandler from '../studio/util/WeightedEventHandler';
 import { createThreeContext, ThreeJsContext } from './ThreeContext';
 
 export type StudioContext = {
