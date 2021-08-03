@@ -461,6 +461,7 @@ class KeyFrame {
 
         kf.rotationMap = new Map(this.rotationMap)
         kf.rotationPointMap = new Map(this.rotationPointMap)
+        kf.cubeGrowMap = new Map(this.cubeGrowMap)
 
         kf.progressionPoints = this.progressionPoints.map(p => { return {...p} })
 
