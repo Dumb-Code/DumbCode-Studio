@@ -95,6 +95,14 @@ export class AnimationStudio {
             if(e.event.keyCode == 46) {
                 this.panelButtons.deleteKeyframe(this)
             }
+
+            let handler = this.pth.animationTabs.active
+            if(e.event.keyCode == 78 && handler !== null && handler.selectedKeyFrame !== undefined) {
+                let cloned = handler.selectedKeyFrame.cloneKeyframe()
+                handler.keyframes.push(cloned)
+                this.selectKeyframe(cloned)
+                this.keyframeManager.reframeKeyframes()
+            }
         })
         
         //Apply the adjustable scrollable handler stuff.
