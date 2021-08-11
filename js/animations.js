@@ -252,34 +252,34 @@ export class AnimationHandler {
         }
         let layerKfs = this.keyframes.filter(kf => kf.layer === keyframe.layer && kf !== keyframe)
         
-        let toEditKeyframes = []
-        if(includeSelf) {
-            toEditKeyframes.push(keyframe)
-        }
+        let toEditKeyframes = [ ...layerKfs ]
+        // if(includeSelf) {
+        //     toEditKeyframes.push(keyframe)
+        // }
 
-        //Get the keyframe whose end position is either during the keyframe,
-        //Or is the first after the keyframe is finished
-        let minimumLayerEndValue = Infinity
-        let minimumKeyframe = null
-        layerKfs.forEach(kf => {
-            let endTime = kf.startTime + kf.duration
+        // //Get the keyframe whose end position is either during the keyframe,
+        // //Or is the first after the keyframe is finished
+        // let minimumLayerEndValue = Infinity
+        // let minimumKeyframe = null
+        // layerKfs.forEach(kf => {
+        //     let endTime = kf.startTime + kf.duration
 
-            if(
-                (endTime > keyframe.startTime && endTime < keyframe.startTime + keyframe.duration) ||
-                (endTime > keyframe.previousStartTime && endTime < keyframe.previousStartTime + keyframe.previousDuration)
-            ) {
-                toEditKeyframes.push(kf)
-            } else {
-                let deltaEndTime = endTime - keyframe.startTime-keyframe.duration
-                if(deltaEndTime > 0 && deltaEndTime < minimumLayerEndValue) {
-                    minimumLayerEndValue = deltaEndTime
-                    minimumKeyframe = kf
-                }
-            }
-        })
-        if(minimumKeyframe != null) {
-            toEditKeyframes.push(minimumKeyframe)
-        }
+        //     if(
+        //         (endTime > keyframe.startTime && endTime < keyframe.startTime + keyframe.duration) ||
+        //         (endTime > keyframe.previousStartTime && endTime < keyframe.previousStartTime + keyframe.previousDuration)
+        //     ) {
+        //         toEditKeyframes.push(kf)
+        //     } else {
+        //         let deltaEndTime = endTime - keyframe.startTime-keyframe.duration
+        //         if(deltaEndTime > 0 && deltaEndTime < minimumLayerEndValue) {
+        //             minimumLayerEndValue = deltaEndTime
+        //             minimumKeyframe = kf
+        //         }
+        //     }
+        // })
+        // if(minimumKeyframe != null) {
+        //     toEditKeyframes.push(minimumKeyframe)
+        // }
 
         keyframe.previousStartTime = keyframe.startTime
         keyframe.previousDuration = keyframe.duration
