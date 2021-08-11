@@ -62,6 +62,18 @@ export class DCMModel {
         return arr
     }
 
+    cloneModel() {
+        const model = new DCMModel()
+        model.author = this.author
+        model.fileName = this.fileName
+        model.texWidth = this.texWidth
+        model.texHeight = this.texHeight
+        
+        model.children = this.children.map(c => c.cloneCube())
+
+        return model
+    }
+
     updateMatrixWorld(force = true) {
         this.modelCache.updateMatrixWorld(force)
     }

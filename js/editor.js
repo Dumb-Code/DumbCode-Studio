@@ -15,7 +15,7 @@ import { StudioOptions } from "./studio_options.js";
 
 const major = 0
 const minor = 8
-const patch = 12
+const patch = 13
 
 const version = `${major}.${minor}.${patch}`
 document.getElementById("dumbcode-studio-version").innerText = `v${version}`

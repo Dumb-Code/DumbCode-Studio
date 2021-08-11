@@ -1,4 +1,7 @@
 import { AnimationHandler, ByteBuffer } from "../../animations.js"
+import { MeshLambertMaterial } from "../../libs/three.js"
+import { runInvertMath, runMirrorMath } from "../../modeling/cube_commands.js"
+import { worldPos, worldX, worldY } from "../model/tbl_converter.js"
 
 const rotArr = new Array(3)
 const posArr = new Array(3)
@@ -100,7 +103,23 @@ DCALoader.importAnimation = (handler, buffer) => {
 DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
     //If the keyframe version is <= 3, then the keyframe data is a list of points for the animation to follow.
     //The following code is to convert that list of points into a list of changes.
-    if(version <= 3) {        
+    if(version <= 3) {
+        
+
+        const oldModel = handler.tbl
+
+        const model = handler.tbl.cloneModel()
+        //We need to run the mirroring and invert math, to do that we need three.js stuff, 
+        //and for that we need to pass a dummy material.
+        model.createModel(new MeshLambertMaterial())
+        model.modelCache.updateMatrix()
+        model.modelCache.updateMatrixWorld(true)
+        runInvertMath(model)
+        runMirrorMath(worldPos, worldY, null, model, false)
+        runMirrorMath(worldPos, worldX, null, model, false)
+        
+        handler.tbl = model
+
         let map = handler.tbl.cubeMap
         //At version 3, we have the keyframe data being subtracted from the default.
         if(version === 3) {
@@ -134,7 +153,6 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
                 let dist = next.startTime - kf.startTime
                 //Keyframes intersect
                 if(dist < kf.duration) {
-                    mod = dist / kf.duration
                     kf.duration = dist
                 }
             }
@@ -155,6 +173,8 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
                 }
             })
         })
+
+        handler.tbl = oldModel
     }
 
     //Root cubes will have the move direction flipped.

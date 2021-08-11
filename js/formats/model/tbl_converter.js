@@ -8,9 +8,9 @@ import { runInvertMath, runMirrorMath } from "../../modeling/cube_commands.js"
 //we need to flip around a point inbetween the x axis and the y axis 
 // x: 8/16 (not sure -- investigate)
 // y: 12/16 as the tbl origin is at 24/16
-let worldPos = new Vector3(8/16, 12/16, 0)
-let worldX = new Vector3(1, 0, 0)
-let worldY = new Vector3(0, 1, 0)
+export let worldPos = new Vector3(8/16, 12/16, 0)
+export let worldX = new Vector3(1, 0, 0)
+export let worldY = new Vector3(0, 1, 0)
 
 /**
  * Reads and converts a .tbl model to a DCMModel
@@ -44,7 +44,6 @@ export async function readTblFile(data) {
     model.invalidateModelCache()
 
     return model
-
 }
 
 function parseV4Tbl(model, json) {
