@@ -470,6 +470,7 @@ class KeyFrame {
         let kf = new KeyFrame(this.handler)
         kf.startTime = this.startTime
         kf.duration = this.duration
+        kf.layer = this.layer
 
         if(fullCopy === true) {
             kf.rotationMap = new Map(this.rotationMap)
