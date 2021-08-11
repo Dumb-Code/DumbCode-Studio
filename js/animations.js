@@ -472,12 +472,12 @@ class KeyFrame {
         kf.duration = this.duration
         kf.layer = this.layer
 
+        kf.progressionPoints = this.progressionPoints.map(p => { return {...p} })
+
         if(fullCopy === true) {
             kf.rotationMap = new Map(this.rotationMap)
             kf.rotationPointMap = new Map(this.rotationPointMap)
-            kf.cubeGrowMap = new Map(this.cubeGrowMap)
-    
-            kf.progressionPoints = this.progressionPoints.map(p => { return {...p} })
+            kf.cubeGrowMap = new Map(this.cubeGrowMap)    
         }
         
 
