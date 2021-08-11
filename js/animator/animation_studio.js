@@ -98,8 +98,12 @@ export class AnimationStudio {
 
             let handler = this.pth.animationTabs.active
             if(e.event.keyCode == 78 && handler !== null && handler.selectedKeyFrame !== undefined) {
-                let cloned = handler.selectedKeyFrame.cloneKeyframe()
+                let isDefined = handler.ensureLayer(handler.selectedKeyFrame.layer).definedMode === true
+                let cloned = handler.selectedKeyFrame.cloneKeyframe(!isDefined)
                 handler.keyframes.push(cloned)
+                if(isDefined) {
+                    handler.ensureDefinedLayers()
+                }
                 this.selectKeyframe(cloned)
                 this.keyframeManager.reframeKeyframes()
             }

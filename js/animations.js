@@ -246,13 +246,16 @@ export class AnimationHandler {
      * Fixes the defined layers. Used to ensure the end of a keyframe stays consistent
      * @param {Keyframe} keyframe the keyframe
      */
-    fixDefinedLayers(keyframe) {
+    fixDefinedLayers(keyframe, includeSelf = false) {
         if(this.ensureLayer(keyframe.layer).definedMode !== true) {
             return
         }
         let layerKfs = this.keyframes.filter(kf => kf.layer === keyframe.layer && kf !== keyframe)
         
         let toEditKeyframes = []
+        if(includeSelf) {
+            toEditKeyframes.push(keyframe)
+        }
 
         //Get the keyframe whose end position is either during the keyframe,
         //Or is the first after the keyframe is finished
@@ -261,7 +264,10 @@ export class AnimationHandler {
         layerKfs.forEach(kf => {
             let endTime = kf.startTime + kf.duration
 
-            if(endTime > keyframe.startTime && endTime < keyframe.startTime + keyframe.duration) {
+            if(
+                (endTime > keyframe.startTime && endTime < keyframe.startTime + keyframe.duration) ||
+                (endTime > keyframe.previousStartTime && endTime < keyframe.previousStartTime + keyframe.previousDuration)
+            ) {
                 toEditKeyframes.push(kf)
             } else {
                 let deltaEndTime = endTime - keyframe.startTime-keyframe.duration
@@ -274,6 +280,9 @@ export class AnimationHandler {
         if(minimumKeyframe != null) {
             toEditKeyframes.push(minimumKeyframe)
         }
+
+        keyframe.previousStartTime = keyframe.startTime
+        keyframe.previousDuration = keyframe.duration
 
         //Iterate over all the keyframes to edit.
         //Ensure that the end of the keyframe stays consistent, even when the keyframe before it changes
@@ -340,6 +349,9 @@ class KeyFrame {
 
         this.startTime = 0
         this.duration = 0
+
+        this.previousStartTime = 0
+        this.previousDuration = 0
 
         this.rotationMap = new Map();
         this.rotationPointMap = new Map();
@@ -454,16 +466,19 @@ class KeyFrame {
     /**
      * Clones this keyframe.
      */
-    cloneKeyframe() {
+    cloneKeyframe(fullCopy = true) {
         let kf = new KeyFrame(this.handler)
         kf.startTime = this.startTime
         kf.duration = this.duration
 
-        kf.rotationMap = new Map(this.rotationMap)
-        kf.rotationPointMap = new Map(this.rotationPointMap)
-        kf.cubeGrowMap = new Map(this.cubeGrowMap)
-
-        kf.progressionPoints = this.progressionPoints.map(p => { return {...p} })
+        if(fullCopy === true) {
+            kf.rotationMap = new Map(this.rotationMap)
+            kf.rotationPointMap = new Map(this.rotationPointMap)
+            kf.cubeGrowMap = new Map(this.cubeGrowMap)
+    
+            kf.progressionPoints = this.progressionPoints.map(p => { return {...p} })
+        }
+        
 
         return kf
     }

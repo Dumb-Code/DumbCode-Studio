@@ -366,6 +366,8 @@ export class KeyframeBoardManager {
                     }
                 })
             }
+
+            this.getHandler().fixDefinedLayers(kf, true)
         }, max => {
             //Toggle selection of the keyframe if the mouse hasn't moved 2px
             if(max < 2) {
