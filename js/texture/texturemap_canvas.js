@@ -23,12 +23,14 @@ export class TexturemapCanvas {
                 textureTools.mouseOverPixel()
                 return
             }
-            let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
-            textureTools.mouseOverPixel(mouseX/size, mouseY/size, this._mouseOverContext)
+            let aspect = this.pth.model.texWidth / this.pth.model.texHeight
+            let tw = Math.min(this.parnetNode.width(), this.parnetNode.height() * aspect)
+            let th = tw / aspect
+            textureTools.mouseOverPixel(mouseX/tw, mouseY/th, this._mouseOverContext)
             let mouseDown = ((buttons & 1) === 1) && textureTools.canDraw()
             if(mouseDown) {
                 //Draw the pixel
-                textureTools.mouseDown(mouseX/size, mouseY/size, true)
+                textureTools.mouseDown(mouseX/tw, mouseY/th, true)
                 return
             }
             
@@ -152,12 +154,13 @@ export class TexturemapCanvas {
      * @param {*} onlyUpdateContext Whether only the context should be updated
      */
     mouseOverCanvas(type, mouseX, mouseY, buttons, misscallback, onlyUpdateContext) {
-        //The minimum size. This assumes a square?
-        let size = Math.min(this.parnetNode.width(), this.parnetNode.height())
+        let aspect = this.pth.model.texWidth / this.pth.model.texHeight
+        let tw = Math.min(this.parnetNode.width(), this.parnetNode.height() * aspect)
+        let th = tw / aspect
 
         //The scale width and height
-        let su = this.pth.model.texWidth/size
-        let sv = this.pth.model.texHeight/size
+        let su = this.pth.model.texWidth/tw
+        let sv = this.pth.model.texHeight/th
 
         //Whether it's been handled or not
         let overHandled = false
@@ -211,7 +214,7 @@ export class TexturemapCanvas {
                 }
                 //Set the mouse over context, update the texture tools and handle the event
                 this._mouseOverContext = { cube, face: mouseOverArea }
-                this.textureTools.mouseOverPixel(mouseX/size, mouseY/size, this._mouseOverContext)
+                this.textureTools.mouseOverPixel(mouseX/tw, mouseY/th, this._mouseOverContext)
                 overHandled = true
             }
         })
