@@ -235,7 +235,14 @@ function frame() {
 }
 
 function runFrame() {
-    activeTab.runFrame()
+    try {
+        activeTab.runFrame()
+    } catch(e) {
+        console.log("Error Caught. Going to project page.")
+        console.error(e)
+        projectTabs.selectableList.value = "file"
+        $('#error-line').text("Error Caught (see console for more): " + e)
+    }
 }
 
 function renameCube(cube, newValue) {
