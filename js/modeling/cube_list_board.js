@@ -21,6 +21,13 @@ export class CubeListBoard {
             //This means when the control key isn't held, the cube stays in the same place
             lockedCubes.createLockedCubesCache(e.ctrlKey ? undefined : [draggedCube.name], true)
 
+            for(let p = droppedOnto.parent; p; p = p.parent) {
+                if(p === draggedCube) {
+                    console.log("Cannot Drop Cube Onto child (in this version)")
+                    return
+                }
+            }
+
             //Delete the cube from the parent
             draggedCube.parent.deleteChild(draggedCube, true)
             if(drop === "on") {
