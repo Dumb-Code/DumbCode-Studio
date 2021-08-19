@@ -54,7 +54,7 @@ export class StudioOptions {
             switch(e.value) {
                 case "perspective":
                     if(display.camera.isOrthographicCamera) {
-                        cam = new PerspectiveCamera((foundPerspective.val() ?? 65) / display.camera.zoom, foundCanvas.clientWidth / foundCanvas.clientHeight, 0.1, 700)           
+                        cam = new PerspectiveCamera(foundPerspective.val() ?? 65, foundCanvas.clientWidth / foundCanvas.clientHeight, 0.1, 700)           
                     } else {
                         cam = display.camera
                     }
