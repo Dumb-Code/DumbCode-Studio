@@ -1,5 +1,5 @@
 import { doubleClickToEdit } from "./util/element_functions.js";
-import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture, TubeBufferGeometry } from "./libs/three.js";
+import { PerspectiveCamera, OrthographicCamera, Texture, CanvasTexture, TubeBufferGeometry, Vector3 } from "./libs/three.js";
 import { LinkedSelectableList } from "./util/linked_selectable_list.js";
 
 /**
@@ -53,16 +53,33 @@ export class StudioOptions {
             let cam
             switch(e.value) {
                 case "perspective":
-                    cam = new PerspectiveCamera(foundPerspective.val(), foundCanvas.clientWidth / foundCanvas.clientHeight, 0.1, 700)           
-                    cam.zoom = display.camera.zoom / (display.camera.isOrthographicCamera ? 100 : 1)
-                    cam.updateProjectionMatrix()
+                    if(display.camera.isOrthographicCamera) {
+                        cam = new PerspectiveCamera((foundPerspective.val() ?? 65) / display.camera.zoom, foundCanvas.clientWidth / foundCanvas.clientHeight, 0.1, 700)           
+                    } else {
+                        cam = display.camera
+                    }
                     break;
                 case "orthographic":
-                    cam = new OrthographicCamera(foundCanvas.clientWidth / -2, foundCanvas.clientWidth / 2, foundCanvas.clientHeight / 2, foundCanvas.clientHeight / -2, 0.1, 700)
-                    cam.zoom = display.camera.zoom * (display.camera.isPerspectiveCamera ? 100 : 1)
-                    cam.updateProjectionMatrix()
+                    if(display.camera.isPerspectiveCamera) {
+                        let direction = display.camera.getWorldDirection(new Vector3())
+                        let depth = display.camera.position.clone().multiplyScalar(-1).dot(direction)
+
+                        let halfHeight = Math.tan(display.camera.fov * Math.PI / 180 / 2 ) * depth
+                        let halfWidth = halfHeight * (foundCanvas.clientWidth / foundCanvas.clientHeight)
+
+                        halfHeight /= display.camera.zoom;
+	                    halfWidth /= display.camera.zoom;
+
+                        cam = new OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, -5, 700)
+                    } else {
+                        cam = display.camera
+                    }
+                    
                     break
             }
+
+            cam.zoom = display.camera.zoom;
+            cam.updateProjectionMatrix()
 
             cameraModeConatiner.text(e.value.charAt(0).toUpperCase() + e.value.slice(1))
 
