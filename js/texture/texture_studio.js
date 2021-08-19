@@ -4,7 +4,7 @@ import { TexturemapCanvas } from "./texturemap_canvas.js"
 import { TextureCubeValues } from "./texture_cube_values.js"
 import { TextureTools } from "./texture_tools.js"
 import { EventDispatcher } from "../libs/three.js"
-import { getAndDeleteFiles } from "../util/element_functions.js"
+import { applyAdjustScrollable, getAndDeleteFiles } from "../util/element_functions.js"
 
 /**
  * The texture studio. Everything on the texture dom will go through here
@@ -29,6 +29,8 @@ export class TextureStudio {
         //Bind the elements
         dom.find('.texture-file-input').on('input', e => filesPage.textureProjectPart.uploadTextureFile(getAndDeleteFiles(e)))
         dom.find('.new-texture-button').click(() => filesPage.textureProjectPart.createEmptyTexture())
+
+        applyAdjustScrollable(dom)
     }
 
     /**
