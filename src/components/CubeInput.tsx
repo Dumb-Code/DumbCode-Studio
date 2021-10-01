@@ -8,11 +8,12 @@ const axis = [
     { axis: "z", color: "bg-lightBlue-500" },
 ] as const
 
-const CubeInput = ({ title, value, setValue, lock }: {
+const CubeInput = ({ title, value, setValue, lock, lockPositive }: {
     title: string
     value?: readonly [number, number, number]
     setValue?: (value: readonly [number, number, number]) => void
-    lock?: boolean
+    lock?: boolean,
+    lockPositive?: boolean
 }) => {
 
     const[isLocked, setLocked] = useState(lock)
@@ -42,6 +43,7 @@ const CubeInput = ({ title, value, setValue, lock }: {
                                 ])
                             }
                         }}
+                        lockPositive={lockPositive}
                     />
                 )}
             </div>
@@ -49,11 +51,12 @@ const CubeInput = ({ title, value, setValue, lock }: {
     )
 }
 
-const InputField = ({ axis, color, value, setValue }: {
+const InputField = ({ axis, color, value, setValue, lockPositive }: {
     axis: string,
     color: string,
     value: number|null,
-    setValue: (val: number) => void
+    setValue: (val: number) => void,
+    lockPositive: boolean|undefined
 }) => {
     return (
         <div className="flex flex-row mb-1 h-7">
@@ -68,7 +71,7 @@ const InputField = ({ axis, color, value, setValue }: {
                 className="focus:outline-none focus:ring-gray-800 border-none"
                 onChange={(val: number | null) => {
                     if (val !== null) {
-                        setValue(val)
+                        (val < 0 && (lockPositive !== null && lockPositive === true)) ? setValue(0) : setValue(val)
                     }
                 }}
             />

@@ -28,7 +28,7 @@ const ModelerProperties = () => {
                 </div>
                 <div className="w-full grid grid-cols-2 px-2 pt-1">
                     <WrappedCubeName obj={firstSelected?.name} />
-                    <WrappedCubeInput title={"DIMENSIONS"} obj={firstSelected?.dimension} />
+                    <WrappedCubeInputDimensions title={"DIMENSIONS"} obj={firstSelected?.dimension} />
                     <WrappedCubeInput title={"POSITIONS"} obj={firstSelected?.position} />
                     <WrappedCubeInput title={"OFFSET"} obj={firstSelected?.offset} />
                     <WrappedCubeInput title={"CUBE GROW"} obj={firstSelected?.cubeGrow} />
@@ -56,6 +56,11 @@ const WrappedCubeName = ({ obj }: { obj?: LO<string> }) => {
 const WrappedCubeInput = ({ title, obj }: { title: string, obj?: LO<readonly [number, number, number]> }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeInput title={title} value={value} setValue={setValue} />
+}
+
+const WrappedCubeInputDimensions = ({ title, obj }: { title: string, obj?: LO<readonly [number, number, number]> }) => {
+    const [value, setValue] = useListenableObjectNullable(obj)
+    return <CubeInput title={title} value={value} setValue={setValue} lockPositive={true} />
 }
 
 const WrappedCubeInputRotation = ({ title, obj }: { title: string, obj?: LO<readonly [number, number, number]> }) => {
