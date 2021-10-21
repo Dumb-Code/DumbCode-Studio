@@ -1,0 +1,40 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Github HTML Auth</title>
+</head>
+<body>
+  <h2 id="error"></h2>
+  <p id="error_desc"></p>
+  <script defer>
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code")
+    fetch("https://dev.dumbcode.net/oauth/go/github?code=" + code, { headers: { 'Accept': 'application/json', } })
+    .then(v => v.json())
+    .then(j => {
+      if(j.access_token) {
+        let arr = []
+        const stored = localStorage.getItem("github-access-tokens")
+        try {
+          arr = JSON.parse(stored ?? "[]")
+        } catch (error) {
+          console.error(`Unable to parse local storage: "${stored}"` , error)
+        }
+        arr.push(j.access_token)
+        localStorage.setItem("github-access-tokens", JSON.stringify(arr))
+
+        window.close()
+        return
+      }
+      console.warn(j)
+      if(j.error) {
+        document.getElementById("error").innerText = j.error
+        document.getElementById("error_desc").innerText = j.error_description
+      }
+    })
+
+  </script>
+</body>
+</html>
