@@ -5,7 +5,7 @@ import { useGithubAccessTokens } from "../../../studio/util/LocalStorageHook"
 const LinkedAccounts = () => {
 
   const linkGH = () => {
-    window.open("https://github.com/login/oauth/authorize?client_id=6df7dd9f54d48a6ab3a2?scope=repo", "Auth Github", "width=500,height=500")
+    window.open("https://github.com/login/oauth/authorize?client_id=6df7dd9f54d48a6ab3a2&scope=repo", "Auth Github", "width=500,height=500")
   }
 
   const [accessTokens, setAccessTokens] = useGithubAccessTokens()
@@ -25,7 +25,7 @@ const LinkedAccounts = () => {
           <p className="text-gray-900 text-s mb-1 mt-2">Linked accounts:</p>
           <div className="bg-gray-200 dark:bg-gray-800 rounded border border-black dark:text-white ">
             { 
-              accessTokens.length === 0? <div className="flex flex-col justify-center h-10">It seems rather empty here...</div> :
+              accessTokens.length === 0? <div className="pl-3 flex flex-col justify-center h-10">It seems rather empty here...</div> :
               accessTokens.map((t, i) => 
                 <div key={t}
                  className={"flex flex-col justify-center h-10 border-black " + (i === 0 ? '' : 'border-t')}>
