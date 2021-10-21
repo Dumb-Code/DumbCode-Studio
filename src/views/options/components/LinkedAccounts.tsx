@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import { InfoBubble, SVGCross, SVGGithub } from "../../../components/Icons"
-import { useGithubAccessTokens, useLocalStorage } from "../../../studio/util/LocalStorageHook"
+import { SVGGithub } from "../../../components/Icons"
+import { useGithubAccessTokens } from "../../../studio/util/LocalStorageHook"
 
 const LinkedAccounts = () => {
 
@@ -58,7 +58,7 @@ const GithubAccessToken = ({token, removeToken}: {token: string, removeToken: ()
 
   return (
     <div className="flex flex-row items-center justify-center">
-      <div className="pl-3"><img width={25} src={result?.avatar_url ?? ''} /></div>
+      <div className="pl-3"><img width={25} src={result?.avatar_url ?? ''} alt="Profile" /></div>
       <div className="pl-3 flex-grow">{result?.name ?? 'Loading...'}</div>
       <button onClick={removeToken} className="mr-3 px-1 bg-red-600 hover:bg-red-300 rounded-md	">
         <div className="flex flex-row items-center justify-center text-black">Remove</div>
