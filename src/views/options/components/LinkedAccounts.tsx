@@ -23,12 +23,12 @@ const LinkedAccounts = () => {
             <SVGGithub width="20px" /> <span className="px-2">Add Github Account.</span>
           </button>
           <p className="text-gray-900 text-s mb-1 mt-2">Linked accounts:</p>
-          <div className="bg-gray-200 dark:bg-gray-800 rounded border border-black ">
+          <div className="bg-gray-200 dark:bg-gray-800 rounded border border-black dark:text-white ">
             { 
               accessTokens.length === 0? <div className="flex flex-col justify-center h-10">It seems rather empty here...</div> :
               accessTokens.map((t, i) => 
                 <div key={t}
-                 className={"dark:text-white flex flex-col justify-center h-10 border-black " + (i === 0 ? '' : 'border-t')}>
+                 className={"flex flex-col justify-center h-10 border-black " + (i === 0 ? '' : 'border-t')}>
                   <GithubAccessToken token={t} removeToken={() => removeToken(i)} />
                 </div>
               ) 
