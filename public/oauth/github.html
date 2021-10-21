@@ -16,6 +16,7 @@
     .then(v => v.json())
     .then(j => {
       if(j.access_token) {
+        console.log(j)
         let arr = []
         const stored = localStorage.getItem("github-access-tokens")
         try {
