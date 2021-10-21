@@ -4,6 +4,7 @@ import LanguageOptions from "./components/LanguageOptions"
 import AcessibilityOptions from "./components/AcessibilityOptions"
 import KeyBindOptions from "./components/KeyBindOptions"
 import LinksToOurStuff from "./components/LinksToOurStuff"
+import LinkedAccounts from "./components/LinkedAccounts"
 
 type OptionsTab = {
     name: string;
@@ -12,6 +13,7 @@ type OptionsTab = {
 
 const OptionsTabs: OptionsTab[] = [
     { name: "Appearance", component: () => <AppearanceOptions /> },
+    { name: "Linked Accounts", component: () => <LinkedAccounts /> },
     { name: "Language", component: () => <LanguageOptions /> },
     { name: "Acessibility", component: () => <AcessibilityOptions /> },
     { name: "Key Binds", component: () => <KeyBindOptions /> },
@@ -28,7 +30,7 @@ const Options = () => {
                 <p className="dark:text-black text-gray-600 font-semibold text-xs w-44 pl-2 mb-1">APP SETTINGS</p>
                 {OptionsTabs.map(tab => <OptionsPageButton key={tab.name} tab={tab} selected={tab === optionsTab} setTab={() => setOptionsTab(tab)} />)}
             </div>
-            <div className="w-3/4 h-full overflow-y-scroll dark:bg-gray-700 bg-gray-100 p-6">
+            <div className="w-3/4 h-full dark:bg-gray-700 bg-gray-100 p-6">
                 {optionsTab.component()}
             </div>
         </div>

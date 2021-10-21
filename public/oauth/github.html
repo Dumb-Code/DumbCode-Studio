@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Github HTML Auth</title>
 </head>
-<body>
-  <h2 id="error"></h2>
-  <p id="error_desc"></p>
+<body style="background: #242424; margin: auto">
+  <h1>Authorizing...</h1>
+  <h2 id="error" style="color: red"></h2>
+  <p id="error_desc" style="color: red"></p>
   <script defer>
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code")
