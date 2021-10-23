@@ -10,7 +10,7 @@ export const useLocalStorage = (key: string) => {
       if(storage !== current) {
         setStorage(current)
       }
-    }, 1000)
+    }, 100)
     return () => clearInterval(interval)
   })
 

@@ -7,6 +7,7 @@ import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
 import { SVGSettings } from "../components/Icons";
 import Options from "../views/options/Options";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
+import DialogBoxes from "../dialogboxes/DialogBoxes";
 
 type Tab = {
   name: string;
@@ -26,7 +27,9 @@ const StudioContainer = () => {
   return (
     <StudioContextProvider>
       <OptionsContextProvider>
-        <StudioApp />
+        <DialogBoxes>
+          <StudioApp />
+        </DialogBoxes>
       </OptionsContextProvider>
     </StudioContextProvider>
   );

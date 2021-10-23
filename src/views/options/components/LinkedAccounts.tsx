@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
 import { SVGGithub } from "../../../components/Icons"
+import { useFetchRequest } from "../../../studio/util/FetchHooks"
 import { useGithubAccessTokens } from "../../../studio/util/LocalStorageHook"
 
 const LinkedAccounts = () => {
@@ -38,23 +38,8 @@ const LinkedAccounts = () => {
   )
 }
 
-const useFetchRequest = (url: string, token: string) => {
-  const [result, setResult] = useState<any>()
-  useEffect(() => {
-    fetch(url, {
-      headers: { 
-        "Authorization": `token ${token}`
-      }
-    })
-  .then(j => j.json())
-  .then(j => setResult(j))
-  }, [url, token])
-  return result
-}
-
 const GithubAccessToken = ({token, removeToken}: {token: string, removeToken: () => void}) => {
   const result = useFetchRequest("https://api.github.com/user", token)
-
 
   return (
     <div className="flex flex-row items-center justify-center">

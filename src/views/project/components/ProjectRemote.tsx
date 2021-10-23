@@ -1,7 +1,8 @@
 import { MouseEventHandler, RefObject, useMemo, useState } from "react";
-import { ContextMenu, ContextMenuTrigger } from "react-contextmenu";
 import { SVGCross } from "../../../components/Icons"
 import { MinimizeButton } from "../../../components/MinimizeButton";
+import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";
+import RemoteProjectsDialogBox from "../../../dialogboxes/RemoteProjectsDialogBox";
 
 type StoredRepo = {
     token: string
@@ -12,32 +13,10 @@ type StoredRepo = {
     // unsyncedEntries: 
 }
 
-const CREATE_REMOTE_PROJECTS = "studio-project-remotes-create"
-
-
-const storageKey = "dumbcode.remoteproject"
-
-
 const ProjectRemote = ({ remoteShown, showRemote, divHeightRef }: { remoteShown: boolean, showRemote: (val: boolean) => void, divHeightRef: RefObject<HTMLDivElement> }) => {
 
-    const [repos, _setRepos] = useState<readonly StoredRepo[]>(() => {
-        const item = localStorage.getItem(storageKey)
-        if (item !== null) {
-            return JSON.parse(item)
-        }
-        return []
-    })
 
-    const setRepos = (repos: StoredRepo[]) => {
-        _setRepos(repos)
-        localStorage.setItem(storageKey, JSON.stringify(repos))
-    }
-
-    const addRepo = (repo: StoredRepo) => {
-        setRepos([...repos, repo])
-    }
-
-    const [selectedRepo, setSelectedRepo] = useState<StoredRepo | null>(null)
+    const dialogBoxes = useDialogBoxes()
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-100 flex flex-col overflow-hidden">
@@ -51,17 +30,9 @@ const ProjectRemote = ({ remoteShown, showRemote, divHeightRef }: { remoteShown:
                         <p className="flex-grow my-0.5 ml-1">REMOTE REPOSITORIES</p>
                     </div>
                     <div className="dark:border-r border-black flex flex-col overflow-y-scroll pr-6">
-                        {repos.map((r, i) =>
-                            <RepositoryEntry key={i} repo={r} selected={r === selectedRepo} selectRemote={() => setSelectedRepo(r)} />
-                        )}
-                        <ContextMenuTrigger id={CREATE_REMOTE_PROJECTS} mouseButton={0}>
-                            <button className="flex flex-row dark:bg-gray-900 bg-gray-300 mx-2 rounded mt-1 mb-6 dark:text-gray-400 text-black w-full">
-                                <SVGCross className="h-5 w-5 transform rotate-45 ml-2 mt-0.5 mr-1 text-white" /> Add New Remote Repository
-                            </button>
-                        </ContextMenuTrigger>
-                        <ContextMenu id={CREATE_REMOTE_PROJECTS} className="bg-gray-900 text-white p-3 border-blue-500 border-2">
-                            <AddNewRepoContextMenu addRepo={addRepo} />
-                        </ContextMenu>
+                        <button onClick={() => dialogBoxes.setDialogBox(() => <RemoteProjectsDialogBox />)} className="flex flex-row dark:bg-gray-900 bg-gray-300 mx-2 rounded mt-1 mb-6 dark:text-gray-400 text-black w-full">
+                            <SVGCross className="h-5 w-5 transform rotate-45 ml-2 mt-0.5 mr-1 text-white" /> Open Remote Repository
+                        </button>
                     </div>
                 </div>
                 <div className="flex flex-col flex-grow">
@@ -94,7 +65,7 @@ const AddNewRepoContextMenu = ({addRepo}: {addRepo: (repo: StoredRepo) => void})
 
     const isValid = useMemo(() => repoOwner.length !== 0 && repoName.length !== 0, [repoOwner, repoName])
 
-    console.log(isValid)
+    console.log(addRepo)
 
     const submit: MouseEventHandler<HTMLSpanElement> = event => {
         event.stopPropagation()
@@ -118,6 +89,7 @@ const AddNewRepoContextMenu = ({addRepo}: {addRepo: (repo: StoredRepo) => void})
         <span className={isValid ? "bg-blue-500" : "bg-red-500"} onClick={submit}>Submit</span>
     </> )
 }
+
 
 const RepositoryEntry = ({ repo, selected, selectRemote: setRemote }: { repo: StoredRepo, selected: boolean, selectRemote: () => void }) => {
     return (
@@ -150,3 +122,9 @@ const ProjectEntry = ({ name, status, setRemote }: { name: string, status: numbe
 }
 
 export default ProjectRemote;
+
+//Disalbe ts warnings for unused vars
+if(false) {
+    console.log(AddNewRepoContextMenu)
+    console.log(RepositoryEntry)
+}
