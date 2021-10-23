@@ -1,5 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react"
 import React, { FC, Fragment, useContext, useState } from "react"
+import { useOptions } from "../contexts/OptionsContext"
 
 type DialogContextType = {
   setDialogBox: (val: () => JSX.Element) => void
@@ -38,8 +39,9 @@ const DialogBoxes: FC = ({children}) => {
   )
 }
 
-export const OpenedDialogBox: FC<{className?: string, title: () => JSX.Element}> = ({title: Title, className = "", children}) => {
+export const OpenedDialogBox: FC<{width?: string, height?: string, title: () => JSX.Element}> = ({title: Title, width="500px", height="500px", children}) => {
   const dialogBox = useOpenedDialogBoxes()
+  const { darkMode } = useOptions()
 
   return (
     <Transition 
@@ -56,13 +58,19 @@ export const OpenedDialogBox: FC<{className?: string, title: () => JSX.Element}>
     <Dialog 
       as="div"
       onClose={() => dialogBox.clear()} 
-      className={"fixed inset-0 z-10 aa " + className}
+      className={"fixed inset-0 z-10 " + (darkMode ? "dark" : "") }
     >
-      <div id="DialogCloseBoundry" className="min-h-screen px-4 text-center bg-gray-800 bg-opacity-60" onClick={e => e.currentTarget.id === "DialogCloseBoundry" && dialogBox.clear()}>
+      <div id="DialogCloseBoundry" className="px-4 py-4 text-center bg-black bg-opacity-80 dark:text-white h-full" onClick={e => e.currentTarget.id === "DialogCloseBoundry" && dialogBox.clear()}>
           <Dialog.Overlay />
-          <div onClick={e => e.stopPropagation()} className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
-            <Dialog.Title><Title /></Dialog.Title>
-            {children}
+          <div
+            style={{width, height}} 
+            onClick={e => e.stopPropagation()} 
+            className="inline-block w-full h-full max-w-full max-h-full p-6 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-2xl"
+          >
+            <div className="flex flex-col w-full h-full">
+              <Dialog.Title><Title /></Dialog.Title>
+              <div className="flex-grow">{children}</div>
+            </div>
           </div>
         </div>
       </Dialog>

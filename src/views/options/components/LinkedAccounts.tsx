@@ -1,5 +1,5 @@
 import { SVGGithub } from "../../../components/Icons"
-import { useFetchRequest } from "../../../studio/util/FetchHooks"
+import { useFetchGithubUserDetails } from "../../../studio/util/FetchHooks"
 import { useGithubAccessTokens } from "../../../studio/util/LocalStorageHook"
 
 const LinkedAccounts = () => {
@@ -39,7 +39,7 @@ const LinkedAccounts = () => {
 }
 
 const GithubAccessToken = ({token, removeToken}: {token: string, removeToken: () => void}) => {
-  const result = useFetchRequest("https://api.github.com/user", token)
+  const result = useFetchGithubUserDetails(token)
 
   return (
     <div className="flex flex-row items-center justify-center">
