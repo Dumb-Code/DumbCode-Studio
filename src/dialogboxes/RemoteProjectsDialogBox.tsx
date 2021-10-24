@@ -1,6 +1,7 @@
 import { Listbox, Transition } from "@headlessui/react"
 import { Fragment, useState } from "react"
-import { SVGChevronDown, SVGPlus } from "../components/Icons"
+import { SVGChevronDown, SVGOpenLink, SVGPlus } from "../components/Icons"
+import PagedFetchResult from "../components/PagedFetchResult"
 import { useFetchGithubUserDetails } from "../studio/util/FetchHooks"
 import { useGithubAccessTokens } from "../studio/util/LocalStorageHook"
 import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes"
@@ -12,19 +13,44 @@ const RemoteProjectsDialogBox = () => {
 
   const [selectedAccount, setSelectedAccount] = useState(accessTokens.length === 0 ? '' : accessTokens[0]);
 
+  const [search, setSearch] = useState("")
+
   return (
     <OpenedDialogBox width="800px" height="800px" title={Title}>
       <div className="flex flex-col h-full">
         <div className="flex flex-row w-full justify-center items-center">
           <TokenSelectionListBox accessTokens={accessTokens} selected={selectedAccount} setSelected={setSelectedAccount} />
-          <input className="flex flex-grow ml-5 p-0 h-8 dark:bg-gray-500 rounded dark:placeholder-gray-800" type="text" placeholder="Search Repositories" />
+          <input value={search} onChange={e => setSearch(e.target.value)} className="flex flex-grow ml-5 p-0 h-8 dark:bg-gray-500 rounded dark:placeholder-gray-800" type="text" placeholder="Search Repositories" />
         </div>
-        <div className="flex-grow mt-2 mb-2 bg-gray-300 dark:bg-gray-700">
+        <div className="flex-grow overflow-y-auto h-0 mt-2 mb-2 bg-gray-300 dark:bg-gray-700">
+          <RepositoryList search={search.toLowerCase()} token={selectedAccount} />
         </div>
         <button onClick={dialogBox.clear} className="bg-blue-200 rounded border border-black text-black">Close</button>
-
       </div>
     </OpenedDialogBox>
+  )
+}
+
+const RepositoryList = ({token, search}: {token: string, search: string}) => {
+  return (
+    <PagedFetchResult
+      baseUrl="https://api.github.com/user/repos"
+      token={token}
+      predicate={r => search.split(" ").some(s => r.owner.login.toLowerCase().includes(s) || r.name.toLowerCase().includes(s))}
+      loading={() => <div className="flex flex-col justify-center items-center">Loading...</div>}
+    >
+      {({ value }) =>
+        <div className="group border-t border-b border-black flex flex-row p-2 items-center hover:bg-gray-500">
+          <img className="rounded border border-black" width={40} src={value.owner.avatar_url ?? ''} alt="Profile" />
+          <div className="pl-3 flex-grow group-hover:text-gray-300 dark:group-hover:text-gray-800">
+            {value.owner.login} / {value.name}
+          </div>
+          <a className="ml-3" target="_blank" rel="noreferrer" href={value.html_url} onClick={e=>e.stopPropagation()}>
+            <SVGOpenLink className="text-gray-400 hover:text-gray-200" width={16}/>
+          </a>
+        </div>
+      }
+    </PagedFetchResult>
   )
 }
 
