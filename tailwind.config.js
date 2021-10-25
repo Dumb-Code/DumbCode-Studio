@@ -12,6 +12,7 @@ module.exports = {
       }
     },
     colors: {
+      transparent: 'transparent',
       black: colors.black,
       white: colors.white,
       cyan: colors.cyan,

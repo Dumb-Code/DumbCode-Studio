@@ -227,3 +227,21 @@ export const SVGOpenLink = (props: SVGProps<SVGSVGElement>) => {
       </svg>
     );
 }
+
+
+export const SVGSearch = (props: SVGProps<SVGSVGElement>) => {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg"  fill="currentColor" viewBox="0 0 24 24" {...props}>
+        <path d="M23.809 21.646l-6.205-6.205a9.68 9.68 0 001.857-5.711C19.461 4.365 15.096 0 9.73 0 4.365 0 0 4.365 0 9.73c0 5.366 4.365 9.73 9.73 9.73a9.678 9.678 0 005.487-1.698L21.455 24l2.354-2.354zM2.854 9.73c0-3.792 3.085-6.877 6.877-6.877s6.877 3.085 6.877 6.877-3.085 6.877-6.877 6.877A6.884 6.884 0 012.854 9.73z" />
+       </svg>
+    );
+}
+
+
+export const SVGTick = (props: SVGProps<SVGSVGElement>) => {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg"  fill="currentColor" viewBox="0 0 24 24" {...props}>
+        <path d="M20.285 2L9 13.567 3.714 8.556 0 12.272 9 21 24 5.715z" />
+    </svg>
+    );
+}
