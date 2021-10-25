@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import DcProject, { newProject } from '../studio/formats/DcProject';
+import DcProject, { newProject } from '../studio/formats/project/DcProject';
 import { createThreeContext, ThreeJsContext } from './ThreeContext';
 
 export type StudioContext = {

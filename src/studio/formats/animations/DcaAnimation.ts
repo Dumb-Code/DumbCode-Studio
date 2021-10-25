@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
 import { LO, LOMap } from './../../util/ListenableObject';
-import DcProject from '../DcProject';
+import DcProject from '../project/DcProject';
 
 export default class DcaAnimation {
   readonly identifier = v4()

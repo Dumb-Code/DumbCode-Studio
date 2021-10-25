@@ -2,7 +2,7 @@ import { LO, useListenableObject } from './../../util/ListenableObject';
 import { v4 as uuidv4 } from 'uuid';
 import { DCMModel } from './../model/DcmModel';
 import { useDomParent } from '../../util/DomParentRef';
-import DcProject from '../DcProject';
+import DcProject from '../project/DcProject';
 import { CanvasTexture, NearestFilter } from 'three';
 
 export default class TextureManager {

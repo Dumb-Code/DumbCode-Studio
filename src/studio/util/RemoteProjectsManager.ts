@@ -1,18 +1,12 @@
+import { RemoteRepo, remoteRepoEqual } from '../formats/project/DcRemoteRepos';
 import { useLocalStorage } from './LocalStorageHook';
-
-export type RemoteProject = {
-  owner: string,
-  repo: string,
-  token: string,
-  branch: string,
-}
 
 const localStorageKey = "github-recent-remote-projects"
 
-const tryParse = (item: string | null) => {
+const tryParseArray = (item: string | null) => {
   if(item !== null) {
     try {
-      return JSON.parse(item) as RemoteProject[]
+      return JSON.parse(item) as []
     } catch(e) {
       console.warn(`Unable to parse '${item}' as json array`, e)
     }
@@ -20,31 +14,29 @@ const tryParse = (item: string | null) => {
   return null
 }
 
-
-
 export const getRecentGithubRemoteProjects = () => {
-  const list: RemoteProject[] = []
-  const parsed = tryParse(localStorage.getItem(localStorageKey))
+  const list: RemoteRepo[] = []
+  const parsed = tryParseArray(localStorage.getItem(localStorageKey))
   if(parsed !== null) {
     list.push(...parsed)
   }
   return list
 }
 
-export const addRecentGithubRemoteProject = (project: RemoteProject) => {
+export const addRecentGithubRemoteProject = (project: RemoteRepo) => {
   const list = getRecentGithubRemoteProjects()
-  const filtered = list.filter(p => p.owner!==project.owner || p.repo!==project.repo || p.token!==project.token || p.branch!==project.branch)
+  const filtered = list.filter(p => !remoteRepoEqual(project, p))
   filtered.unshift(project)
   localStorage.setItem(localStorageKey, JSON.stringify(filtered))
 }
 
-export const removeRecentGithubRemoteProject = (project: RemoteProject) => {
+export const removeRecentGithubRemoteProject = (project: RemoteRepo) => {
   const list = getRecentGithubRemoteProjects()
-  const filtered = list.filter(p => p.owner!==project.owner || p.repo!==project.repo || p.token!==project.token || p.branch!==project.branch)
+  const filtered = list.filter(p => !remoteRepoEqual(project, p))
   localStorage.setItem(localStorageKey, JSON.stringify(filtered))
 }
 
 export const useRecentGithubRemoteProjects = () => {
   const [item] = useLocalStorage(localStorageKey)
-  return tryParse(item) ?? []
+  return tryParseArray(item) ?? []
 }

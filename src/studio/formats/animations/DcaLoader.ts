@@ -2,7 +2,7 @@ import { LO } from './../../util/ListenableObject';
 import { DCMModel, DCMCube } from './../model/DcmModel';
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from './DcaAnimation';
 import { StudioBuffer } from './../../util/StudioBuffer';
-import DcProject from '../DcProject';
+import DcProject from '../project/DcProject';
 import { LOMap } from '../../util/ListenableObject';
 
 const compilerWarningsRemove = (_: any) => { }

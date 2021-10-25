@@ -1,7 +1,7 @@
 import { LO } from './../../util/ListenableObject';
 import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, MeshLambertMaterial, DoubleSide, MeshBasicMaterial } from "three";
 import { v4 as uuidv4 } from "uuid"
-import DcProject from '../DcProject';
+import DcProject from '../project/DcProject';
 import SelectedCubeManager from '../../util/SelectedCubeManager';
 
 const tempVector = new Vector3()
