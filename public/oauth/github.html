@@ -12,6 +12,16 @@
   <script defer>
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code")
+    const state = localStorage.getItem("github-state")
+    if(state === null) {
+      document.getElementById("error").innerText = "No State. Invalid Call."
+      return
+    }
+    if(true) {
+      document.getElementById("error").innerText = "No State. Invalid Call. " + urlParams.get("state") + "::" + state
+      return
+    }
+    localStorage.removeItem("github-state")
     fetch("https://dev.dumbcode.net/oauth/go/github?code=" + code, { headers: { 'Accept': 'application/json', } })
     .then(v => v.json())
     .then(j => {

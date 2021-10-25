@@ -5,7 +5,9 @@ import { useGithubAccessTokens } from "../../../studio/util/LocalStorageHook"
 const LinkedAccounts = () => {
 
   const linkGH = () => {
-    window.open("https://github.com/login/oauth/authorize?client_id=6df7dd9f54d48a6ab3a2&scope=repo", "Auth Github", "width=500,height=500")
+    const state = (Math.random() + 1).toString(36)
+    localStorage.setItem("github-state", state)
+    window.open(`https://github.com/login/oauth/authorize?client_id=6df7dd9f54d48a6ab3a2&scope=repo&state=${state}`, "Auth Github", "width=500,height=500")
   }
 
   const [accessTokens, setAccessTokens] = useGithubAccessTokens()
