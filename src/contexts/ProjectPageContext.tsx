@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useState } from "react";
-import DcRemoteRepo, { RemoteRepo } from "../studio/formats/project/DcRemoteRepos";
+import DcRemoteRepo from "../studio/formats/project/DcRemoteRepos";
 
-type ProjectPageContext = {
+type ProjectPageContextType = {
   remoteSettingsOpen: boolean,
   setRemoteSettingsOpen: (value: boolean) => void
 
@@ -9,7 +9,7 @@ type ProjectPageContext = {
   setSelectedRepo: (value: DcRemoteRepo) => void
 }
 
-const Context = createContext<ProjectPageContext>({
+const Context = createContext<ProjectPageContextType>({
   remoteSettingsOpen: false,
   setRemoteSettingsOpen: () => { },
   selectedRepo: null,

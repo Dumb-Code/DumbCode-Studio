@@ -2,7 +2,7 @@ import ProjectModels from './components/ProjectModels'
 import ProjectRemote from './components/ProjectRemote'
 import ProjectAnimations from './components/ProjectAnimations'
 import ProjectTextures from './components/ProjectTextures'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { useAnimationHook } from '../../studio/util/AnimationHooks'
 import { useProjectPageContext } from '../../contexts/ProjectPageContext'
 

@@ -7,7 +7,7 @@ import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";
 import RemoteProjectsDialogBox from "../../../dialogboxes/RemoteProjectsDialogBox";
 import RemoteRepositoriesDialogBox from "../../../dialogboxes/RemoteRepositoriesDialogBox";
 import { loadRemoteProject } from "../../../studio/formats/project/DcRemoteProject";
-import DcRemoteRepo, { loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual } from "../../../studio/formats/project/DcRemoteRepos";
+import { loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual } from "../../../studio/formats/project/DcRemoteRepos";
 import { removeRecentGithubRemoteProject, useRecentGithubRemoteProjects } from "../../../studio/util/RemoteProjectsManager";
 
 const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElement> }) => {
