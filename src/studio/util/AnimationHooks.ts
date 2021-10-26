@@ -13,11 +13,16 @@ export const useAnimationHook = (active: boolean, callback: (percent: number) =>
                 timeoutRef.current = undefined
             }
         }
-        if (currentActive.current !== undefined && currentActive.current !== active) {
+        if (currentActive.current !== active) {
             let totalmsRun = 0
 
-            const oldFrom = active ? 1 : 0
-            const oldTo = active ? 0 : 1
+            let oldFrom = active ? 1 : 0
+            let oldTo = active ? 0 : 1
+
+            //First frame
+            if (currentActive.current === undefined) {
+                oldTo = oldFrom
+            }
 
             const fromPercent = oldFrom + (oldTo - oldFrom) * (currentPercentage.current ?? 1);
             const targetPercent = active ? 1 : 0

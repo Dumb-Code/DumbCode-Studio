@@ -1,6 +1,7 @@
 import { RefObject, useState } from "react";
 import { SVGCross, SVGTrash } from "../../../components/Icons"
 import { MinimizeButton } from "../../../components/MinimizeButton";
+import { useProjectPageContext } from "../../../contexts/ProjectPageContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";
 import RemoteProjectsDialogBox from "../../../dialogboxes/RemoteProjectsDialogBox";
@@ -9,22 +10,24 @@ import { loadRemoteProject } from "../../../studio/formats/project/DcRemoteProje
 import DcRemoteRepo, { loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual } from "../../../studio/formats/project/DcRemoteRepos";
 import { removeRecentGithubRemoteProject, useRecentGithubRemoteProjects } from "../../../studio/util/RemoteProjectsManager";
 
-const ProjectRemote = ({ remoteShown, showRemote, divHeightRef }: { remoteShown: boolean, showRemote: (val: boolean) => void, divHeightRef: RefObject<HTMLDivElement> }) => {
+const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElement> }) => {
 
     const { addProject } = useStudio()
+
+    const { remoteSettingsOpen, setRemoteSettingsOpen, selectedRepo: loadedRepo, setSelectedRepo: loadRepo } = useProjectPageContext()
 
     const dialogBoxes = useDialogBoxes()
 
     const projects = useRecentGithubRemoteProjects()
 
-    const [selectedRemote, setSelectedRemote] = useState<DcRemoteRepo | null>(null)
-    const [selectedRepo, setSelectedRepo] = useState<RemoteRepo | null>(null)
+    // const [selectedRemote, setSelectedRemote] = useState<DcRemoteRepo | null>(null)
+    const [selectedRepo, setSelectedRepo] = useState<RemoteRepo | null>(loadedRepo?.repo ?? null)
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-100 flex flex-col overflow-hidden">
             <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row dark:border-b border-black">
                 <p className="flex-grow mt-1 ml-1">REMOTE SETTINGS</p>
-                <MinimizeButton active={remoteShown} toggle={() => showRemote(!remoteShown)} />
+                <MinimizeButton active={remoteSettingsOpen} toggle={() => setRemoteSettingsOpen(!remoteSettingsOpen)} />
             </div>
             <div ref={divHeightRef} className={"h-0 flex flex-row overflow-y-hidden"}>
                 <div className="w-4/12 flex flex-col">
@@ -42,7 +45,7 @@ const ProjectRemote = ({ remoteShown, showRemote, divHeightRef }: { remoteShown:
                                 selected={selectedRepo !== null && remoteRepoEqual(p, selectedRepo)}
                                 // contentLoaded={selectedRemote !== null && remoteRepoEqual(selectedRemote.repo, p)}
                                 setRemote={() => {
-                                    loadDcRemoteRepo(p).then(p => setSelectedRemote(p))
+                                    loadDcRemoteRepo(p).then(p => loadRepo(p))
                                     setSelectedRepo(p)
                                 }}
                             />)}
@@ -56,8 +59,8 @@ const ProjectRemote = ({ remoteShown, showRemote, divHeightRef }: { remoteShown:
                         </button>
                     </div>
                     <div className="flex flex-col overflow-y-scroll pr-2 h-full">
-                        {selectedRemote !== null && selectedRepo !== null &&
-                            selectedRemote.projects.map((project, i) => <ProjectEntry key={i} project={project} repo={selectedRepo} setProject={() => loadRemoteProject(selectedRemote, project).then(r => r !== null && addProject(r))} />)
+                        {loadedRepo !== null && selectedRepo !== null &&
+                            loadedRepo.projects.map((project, i) => <ProjectEntry key={i} project={project} repo={selectedRepo} setProject={() => loadRemoteProject(loadedRepo, project).then(r => r !== null && addProject(r))} />)
                         }
                         {/* <ProjectEntry name="T-rex" status={100} setRemote={() => console.log("add project to list")} />
                         <ProjectEntry name="Stegosaurus" status={0} setRemote={() => console.log("add project to list")} />

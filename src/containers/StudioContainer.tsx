@@ -8,6 +8,7 @@ import { SVGSettings } from "../components/Icons";
 import Options from "../views/options/Options";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
 import DialogBoxes from "../dialogboxes/DialogBoxes";
+import ProjectPageContext from "../contexts/ProjectPageContext";
 
 type Tab = {
   name: string;
@@ -27,9 +28,11 @@ const StudioContainer = () => {
   return (
     <StudioContextProvider>
       <OptionsContextProvider>
-        <DialogBoxes>
-          <StudioApp />
-        </DialogBoxes>
+        <ProjectPageContext>
+          <DialogBoxes>
+            <StudioApp />
+          </DialogBoxes>
+        </ProjectPageContext>
       </OptionsContextProvider>
     </StudioContextProvider>
   );

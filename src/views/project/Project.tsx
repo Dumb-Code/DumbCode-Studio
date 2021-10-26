@@ -4,6 +4,7 @@ import ProjectAnimations from './components/ProjectAnimations'
 import ProjectTextures from './components/ProjectTextures'
 import { useRef, useState } from 'react'
 import { useAnimationHook } from '../../studio/util/AnimationHooks'
+import { useProjectPageContext } from '../../contexts/ProjectPageContext'
 
 function easeInOutCubic(x: number): number {
     return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -11,12 +12,12 @@ function easeInOutCubic(x: number): number {
 
 const Project = () => {
 
-    const [remoteShown, showRemote] = useState(false);
+    const { remoteSettingsOpen } = useProjectPageContext()
 
     const gridRef = useRef<HTMLDivElement>(null)
     const divHeightRef = useRef<HTMLDivElement>(null)
 
-    useAnimationHook(remoteShown, percentRaw => {
+    useAnimationHook(remoteSettingsOpen, percentRaw => {
         //Apply easing function to percentRaw
         const percent = easeInOutCubic(percentRaw)
 
@@ -37,7 +38,7 @@ const Project = () => {
                 gridTemplateRows: "auto 44px"
             }}
         >
-            <div className="p-2 bg-gray-200 dark:bg-black grid-in-remote"><ProjectRemote remoteShown={remoteShown} showRemote={showRemote} divHeightRef={divHeightRef} /></div>
+            <div className="p-2 bg-gray-200 dark:bg-black grid-in-remote"><ProjectRemote divHeightRef={divHeightRef} /></div>
             <div className="p-2 bg-gray-200 dark:bg-black grid-in-model"><ProjectModels /></div>
             <div className="p-2 bg-gray-200 dark:bg-black grid-in-texture"><ProjectTextures /></div>
             <div className="p-2 bg-gray-200 dark:bg-black grid-in-animation"><ProjectAnimations /></div>
