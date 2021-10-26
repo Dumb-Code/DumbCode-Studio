@@ -118,10 +118,10 @@ const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureG
 
 const TextureLists = ({ project }: { project: DcProject }) => {
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
-    if(selectedGroup.isDefault) {
+    if (selectedGroup.isDefault) {
         return (
             <div className="flex-grow flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
-                 <SelectedTexturesList project={project} />
+                <SelectedTexturesList project={project} />
             </div>
         )
     }
@@ -171,7 +171,7 @@ const SelectedTexturesList = ({ project }: { project: DcProject }) => {
             }}
             animation={150}
             fallbackOnBody
-            className="flex-grow pr-4"
+            className="flex-grow pr-4 h-0"
             group={{ name: 'textures-on-group', pull: true, put: true }}
         >
             {selectedTextures
@@ -201,7 +201,7 @@ const NonSelectedTextures = ({ project }: { project: DcProject }) => {
             setList={() => { }}
             animation={150}
             fallbackOnBody
-            className="flex-grow pr-4"
+            className="flex-grow pr-4 h-0"
             group={{ name: 'textures-on-group', pull: true, put: true }}
         >
             {notSelectedTextures.map((t) =>
@@ -223,9 +223,9 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
                 </div>
             </div>
             <DblClickEditLO obj={texture.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
-            <p className="flex flex-row text-white">
-                <button className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SaveIcon className="h-4 w-4 mx-2" /></button>
-                <button onClick={e => { ; e.stopPropagation() }} className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500 mx-2" /></button>
+            <p className="flex flex-col text-white items-center justify-center">
+                <button className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded h-5 w-5 p-0.5 mb-1"}><SaveIcon className="h-4 w-4" /></button>
+                <button onClick={e => { ; e.stopPropagation() }} className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded group h-5 w-5 p-0.5"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
             </p>
         </div>
     )
