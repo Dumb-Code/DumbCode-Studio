@@ -3,7 +3,7 @@ import Dropup, { DropupItem } from "./Dropup";
 import { Switch } from "@headlessui/react";
 
 const GumballPropertiesBar = () => {
-    return(
+    return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full">
             <GumballToggle />
         </div>
@@ -12,7 +12,7 @@ const GumballPropertiesBar = () => {
 
 const GumballToggle = () => {
 
-    const[gumballEnabled, enableGumball] = useState(true);
+    const [gumballEnabled, enableGumball] = useState(true);
 
     return (
         <div className="flex flex-row">
@@ -24,19 +24,19 @@ const GumballToggle = () => {
             </Switch>
             {!gumballEnabled || <TransformationTypeSelect />}
         </div>
-      );
+    );
 }
 
 const TransformationTypeSelect = () => {
     const [objectMode, setObjectMode] = useState(true);
 
-    return(
+    return (
         <div className="flex flex-row">
             <div className="flex flex-row p-0.5 mr-2">
                 <button className={(objectMode ? "bg-green-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setObjectMode(true)}>Object</button>
                 <button className={(objectMode ? "dark:bg-gray-700 bg-gray-400 text-black" : "bg-green-500 text-white") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setObjectMode(false)}>Gumball</button>
             </div>
-            {objectMode ? <ObjectTransformationModeSelect /> : <GumballTransformationModeSelect /> }
+            {objectMode ? <ObjectTransformationModeSelect /> : <GumballTransformationModeSelect />}
         </div>
     )
 }
@@ -45,14 +45,14 @@ const ObjectTransformationModeSelect = () => {
 
     const [transformMode, setTransformMode] = useState("move");
 
-    return(
+    return (
         <div className="flex flex-row transition ease-in-out duration-200">
             <div className="flex flex-row p-0.5 mr-2">
                 <button className={(transformMode === "move" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setTransformMode("move")}>Move</button>
                 <button className={(transformMode === "rotate" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " py-1 px-2 border-l border-r dark:border-black border-white text-xs"} onClick={() => setTransformMode("rotate")}>Rotate</button>
                 <button className={(transformMode === "dimension" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setTransformMode("dimension")}>Dimension</button>
             </div>
-            {(transformMode === "move") ? <ObjectMoveOptions /> : (transformMode === "rotate") ? <ObjectRotateOptions /> : (transformMode === "dimension") || <p>You done messed up</p> }
+            {(transformMode === "move") ? <ObjectMoveOptions /> : (transformMode === "rotate") ? <ObjectRotateOptions /> : (transformMode === "dimension") || <p>You done messed up</p>}
         </div>
     )
 }
@@ -67,7 +67,7 @@ const ObjectMoveOptions = () => {
             <div className="flex flex-row p-0.5 mr-2">
                 <button className={(isMoveLocal ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setScopeLocal(true)}>Local</button>
                 <button className={(isMoveLocal ? "dark:bg-gray-700 bg-gray-400 text-black" : "bg-lightBlue-500 text-white") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setScopeLocal(false)}>World</button>
-                
+
             </div>
             <div className="flex flex-row p-0.5 mr-2">
                 <button className={(moveType === "position" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setTransformMode("position")}>Position</button>
@@ -89,7 +89,7 @@ const ObjectRotateOptions = () => {
             <div className="flex flex-row p-0.5 mr-2">
                 <button className={(isRotLocal ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setScopeLocal(true)}>Local</button>
                 <button className={(isRotLocal ? "dark:bg-gray-700 bg-gray-400 text-black" : "bg-lightBlue-500 text-white") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setScopeLocal(false)}>World</button>
-                
+
             </div>
             <div className="flex flex-row p-0.5 mr-2">
                 <button className={(isAroundPoint ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setAroundPoint(false)}>Normal</button>
@@ -103,7 +103,7 @@ const GumballTransformationModeSelect = () => {
 
     const [isGumballMove, setGumballMove] = useState(true);
 
-    return(
+    return (
         <div className="flex flex-row">
             <div className="flex flex-row p-0.5 mr-2">
                 <button className={(isGumballMove ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setGumballMove(true)}>Position</button>
@@ -120,11 +120,11 @@ const RelocateGumballDropup = () => {
         <div>
             <Dropup title="Relocate Gumball" header="RELOCATE MODE">
                 <div className="p-0.5">
-                    <DropupItem name="To World Origin" onSelect={() => console.log("set mode")}/>
-                    <DropupItem name="Cube Rotation Point (Position)" onSelect={() => console.log("set mode")}/>
-                    <DropupItem name="Cube Rotation Point (Rotation)" onSelect={() => console.log("set mode")}/>
-                    <DropupItem name="Cube Rotation Point (Both)" onSelect={() => console.log("set mode")}/>
-                    <DropupItem name="Custom (Snap Point)" onSelect={() => console.log("set mode")}/>
+                    <DropupItem name="To World Origin" onSelect={() => console.log("set mode")} />
+                    <DropupItem name="Cube Rotation Point (Position)" onSelect={() => console.log("set mode")} />
+                    <DropupItem name="Cube Rotation Point (Rotation)" onSelect={() => console.log("set mode")} />
+                    <DropupItem name="Cube Rotation Point (Both)" onSelect={() => console.log("set mode")} />
+                    <DropupItem name="Custom (Snap Point)" onSelect={() => console.log("set mode")} />
                 </div>
             </Dropup>
         </div>

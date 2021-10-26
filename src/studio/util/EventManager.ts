@@ -2,11 +2,11 @@ export default class EventManager<T> {
 
   constructor(
     public handlers: EventTypeList<T, any>[] = []
-  ) {}
+  ) { }
 
   _findEventArray = <K extends keyof T>(k: K) => {
     const existing = this.handlers.find(t => t.type === k)
-    if(existing !== undefined) {
+    if (existing !== undefined) {
       return (existing as EventTypeList<T, K>).array
     }
 
@@ -37,5 +37,5 @@ class EventTypeList<T, K extends keyof T> {
   constructor(
     public type: K,
     public array: Set<(e: T[K]) => void> = new Set(),
-  ) {}
+  ) { }
 }

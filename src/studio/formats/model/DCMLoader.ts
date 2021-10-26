@@ -2,30 +2,30 @@ import { StudioBuffer } from '../../util/StudioBuffer';
 import { DCMCube, DCMModel } from './DcmModel';
 
 
-export const loadDCMModel = async(arrayBuffer: ArrayBuffer | PromiseLike<ArrayBuffer>, name = "") => {
+export const loadDCMModel = async (arrayBuffer: ArrayBuffer | PromiseLike<ArrayBuffer>, name = "") => {
     let model: DCMModel
     let version = 2
     //Maybe in the future we shouldn't do it based of file name?
-    if(name.endsWith('.tbl') && false) {
+    if (name.endsWith('.tbl') && false) {
         // model = await readTblFile(arrayBuffer)
-    } else if(name.endsWith('.bbmodel') && false) {
+    } else if (name.endsWith('.bbmodel') && false) {
         // model = await readBBModel(arrayBuffer, texturePart)
     } else {
         let buffer = new StudioBuffer(await arrayBuffer)
 
         model = new DCMModel()
-    
+
         //Read the model meta
         version = buffer.readNumber()
         model.author.value = buffer.readString()
         model.textureWidth.value = buffer.readInteger()
         model.textureHeight.value = buffer.readInteger()
-    
+
         //Recursive method to read a list of cubes
         let readCubes = () => {
             let cubes: DCMCube[] = []
             let amount = buffer.readNumber()
-            for(let i = 0; i < amount; i++) {
+            for (let i = 0; i < amount; i++) {
                 cubes.push(new DCMCube(
                     buffer.readString(), //Name
                     [buffer.readInteger(), buffer.readInteger(), buffer.readInteger()], //Dimension
@@ -41,13 +41,13 @@ export const loadDCMModel = async(arrayBuffer: ArrayBuffer | PromiseLike<ArrayBu
             }
             return cubes
         }
-        model.children.value = readCubes()    
+        model.children.value = readCubes()
     }
 
     //We need to invert the model. For this to work, we need three.js data. For that to happen, we need objects with geometry.
     //For that to happen we need material. This just creates a basic material so the math works.
     //Maybe in the future we can push this until after the material is added, so we don't have to do a dummy material.
-    if(version < 2) {
+    if (version < 2) {
         model.modelGroup.updateMatrix()
         model.modelGroup.updateMatrixWorld(true)
 
@@ -73,7 +73,7 @@ export const writeModel = (model: DCMModel) => {
     //2 - Model is inverted. This is done to fix tbl imported models. Having a version of 2 marks it as inverted
     //    (27 DEC 2020) [ba91a6db089353646b976c1fabb251910640db62]
     buffer.writeNumber(2) //Version
-    
+
     //Write the model meta
     buffer.writeString(model.author.value)
     buffer.writeNumber(model.textureWidth.value)
@@ -82,7 +82,7 @@ export const writeModel = (model: DCMModel) => {
     //Function to write an array easily.
     //This doesn't do `arr.forEach`, as we need a defined amount of numbers written
     let writeArr = (arr: readonly number[], amount: number) => {
-        for(let i = 0; i < amount; i++) {
+        for (let i = 0; i < amount; i++) {
             buffer.writeNumber(arr[i])
         }
     }

@@ -25,7 +25,7 @@ module.exports = {
       lightBlue: colors.lightBlue,
       teal: colors.teal,
       purple: colors.purple,
-      blue: colors.blue ,
+      blue: colors.blue,
     },
     gridTemplateAreas: {
       'project': [

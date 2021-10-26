@@ -10,7 +10,7 @@ import DcRemoteRepo, { loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteR
 import { removeRecentGithubRemoteProject, useRecentGithubRemoteProjects } from "../../../studio/util/RemoteProjectsManager";
 
 const ProjectRemote = ({ remoteShown, showRemote, divHeightRef }: { remoteShown: boolean, showRemote: (val: boolean) => void, divHeightRef: RefObject<HTMLDivElement> }) => {
-    
+
     const { addProject } = useStudio()
 
     const dialogBoxes = useDialogBoxes()
@@ -35,29 +35,29 @@ const ProjectRemote = ({ remoteShown, showRemote, divHeightRef }: { remoteShown:
                         </button>
                     </div>
                     <div className="dark:border-r border-black flex flex-col overflow-y-scroll flex-grow">
-                        { projects.map((p, i) => 
-                        <RepositoryEntry 
-                            key={i} 
-                            repo={p} 
-                            selected={selectedRepo !== null && remoteRepoEqual(p, selectedRepo)}
-                            // contentLoaded={selectedRemote !== null && remoteRepoEqual(selectedRemote.repo, p)}
-                            setRemote={() => {
-                                loadDcRemoteRepo(p).then(p => setSelectedRemote(p))
-                                setSelectedRepo(p)
-                            }} 
-                        />) }
+                        {projects.map((p, i) =>
+                            <RepositoryEntry
+                                key={i}
+                                repo={p}
+                                selected={selectedRepo !== null && remoteRepoEqual(p, selectedRepo)}
+                                // contentLoaded={selectedRemote !== null && remoteRepoEqual(selectedRemote.repo, p)}
+                                setRemote={() => {
+                                    loadDcRemoteRepo(p).then(p => setSelectedRemote(p))
+                                    setSelectedRepo(p)
+                                }}
+                            />)}
                     </div>
                 </div>
                 <div className="flex flex-col flex-grow">
-                <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b dark:border-r border-black flex flex-row items-center">
+                    <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b dark:border-r border-black flex flex-row items-center">
                         <p className="flex-grow my-0.5 ml-1">REMOTE PROJECTS</p>
                         <button className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteProjectsDialogBox />)} >
                             <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
                         </button>
                     </div>
                     <div className="flex flex-col overflow-y-scroll pr-2 h-full">
-                        { selectedRemote !== null && selectedRepo !== null && 
-                            selectedRemote.projects.map((project, i) => <ProjectEntry key={i} project={project} repo={selectedRepo} setProject={() => loadRemoteProject(selectedRemote, project).then(r => r !== null && addProject(r))}/>)
+                        {selectedRemote !== null && selectedRepo !== null &&
+                            selectedRemote.projects.map((project, i) => <ProjectEntry key={i} project={project} repo={selectedRepo} setProject={() => loadRemoteProject(selectedRemote, project).then(r => r !== null && addProject(r))} />)
                         }
                         {/* <ProjectEntry name="T-rex" status={100} setRemote={() => console.log("add project to list")} />
                         <ProjectEntry name="Stegosaurus" status={0} setRemote={() => console.log("add project to list")} />
@@ -80,7 +80,7 @@ const RepositoryEntry = ({ repo, selected, setRemote }: { repo: RemoteRepo, sele
                 className={(selected ? "bg-purple-500" : "dark:bg-gray-700 bg-gray-300 dark:text-white text-black") + " rounded-sm text-left flex w-full flex-col relative"}
                 onClick={setRemote}
             >
-                <div onClick={e => {e.stopPropagation(); removeRepoEntry()}} className="absolute top-0 right-0 text-red-600 hover:text-red-400 ">
+                <div onClick={e => { e.stopPropagation(); removeRepoEntry() }} className="absolute top-0 right-0 text-red-600 hover:text-red-400 ">
                     <SVGTrash className="w-4" />
                 </div>
                 <div className="text-xs truncate">{repo.owner} /</div>
@@ -93,10 +93,10 @@ const RepositoryEntry = ({ repo, selected, setRemote }: { repo: RemoteRepo, sele
     )
 }
 
-const ProjectEntry = ({ project, repo, setProject }: { project: RemoteProjectEntry, repo: RemoteRepo, setProject: () => void}) => {
+const ProjectEntry = ({ project, repo, setProject }: { project: RemoteProjectEntry, repo: RemoteRepo, setProject: () => void }) => {
     //TODO: this
     const [status, setStatus] = useState(0)
-    if(setStatus as any){} //ts ignore
+    if (setStatus as any) { } //ts ignore
     return (
         <div onClick={setProject} className={(status === 100 ? "bg-purple-500" : "dark:bg-gray-700 bg-gray-300 dark:text-white text-black") + " my-1 rounded-sm h-6 text-left pl-2 flex flex-row ml-4"} >
             <button className="flex-grow truncate text-left">{project.name}</button>

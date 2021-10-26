@@ -1,7 +1,7 @@
 import { SVGTerminal } from "../../../components/Icons"
 
 const ModelerCommandInput = () => {
-    return(
+    return (
         <div className="has-tooltip">
             {/* Actual Command input region */}
             <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full flex flex-row">
@@ -13,17 +13,17 @@ const ModelerCommandInput = () => {
             {/* Active command feedback */}
             <div className="relative inline-block z-50 transform translate-x-10 text-xs mt-1 dark:text-white text-black">
                 <p className="underline">command: snap</p>
-                click on first snap point<br/>
+                click on first snap point<br />
             </div>
             {/* Command feedback history */}
             <div className="tooltip transform translate-x-10 text-xs mt-1 dark:text-gray-400 text-gray-400">
                 <p className="underline">command: mirror y</p>
-                12 cubes mirrored<br/>
+                12 cubes mirrored<br />
                 <p className="underline">command: refImages</p>
-                opening reference images dialogue...<br/>
+                opening reference images dialogue...<br />
                 <p className="underline">command: snap</p>
-                click on first snap point<br/>
-                click on target snap point<br/>
+                click on first snap point<br />
+                click on target snap point<br />
                 6 objects moved
             </div>
         </div>

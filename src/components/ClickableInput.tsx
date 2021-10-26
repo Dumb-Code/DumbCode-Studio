@@ -19,10 +19,10 @@ const ClickableInput: FC<Props> = (props) => {
         ref={ref}
         onChange={e => {
           const files = e.currentTarget.files
-          if(files !== null) {
-            for(let i = 0; i < files.length; i++) {
+          if (files !== null) {
+            for (let i = 0; i < files.length; i++) {
               const file = files.item(i)
-              if(file !== null) {
+              if (file !== null) {
                 props.onFile(createReadableFile(file))
               }
             }
@@ -33,7 +33,7 @@ const ClickableInput: FC<Props> = (props) => {
         type="file"
         multiple={props.multiple ?? false}
       />
-      <button className={props.className} children={props.children} onClick={() => ref.current?.click()}/>
+      <button className={props.className} children={props.children} onClick={() => ref.current?.click()} />
     </>
   )
 }
@@ -44,16 +44,16 @@ const ExtendedFilesClickableInput: FC<Props> = (props) => {
       multiple: props.multiple ?? false,
       types: [{
         description: props.description,
-        accept: { 
-          "custom/dumbcode": props.accept 
-        } 
+        accept: {
+          "custom/dumbcode": props.accept
+        }
       }]
     }).then(res => {
       res.forEach(handle => props.onFile(createReadableFileExtended(handle)))
-    }).catch(() => {})
+    }).catch(() => { })
   }
   return (
-    <button disabled={props.disabled} className={props.className} children={props.children} onClick={onClick}/>
+    <button disabled={props.disabled} className={props.className} children={props.children} onClick={onClick} />
   )
 }
 

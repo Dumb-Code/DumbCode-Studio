@@ -58,7 +58,7 @@ export default TexturerProperties;
 
 const SwatchButton = ({ swatch, setHue, removeSw }: { swatch: Swatch, setHue: (hue: number) => void, removeSw: (swatch: Swatch) => void }) => {
     return (
-        <div className="w-5 h-5 border border-black" style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }} 
+        <div className="w-5 h-5 border border-black" style={{ backgroundColor: "hsl(" + swatch.h + ", " + swatch.s + "%, " + swatch.l + "%)" }}
             onClick={() => setHue(swatch.h)}
             onDoubleClick={() => removeSw(swatch)}
         ></div>
@@ -93,7 +93,7 @@ const HueSelector = ({ hue, setHue }: { hue: number, setHue: any }) => {
             styles={{
                 track: { width: 6, background: 'linear-gradient(to bottom, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)', height: '100%' },
                 active: { background: 'transparent' },
-                thumb: { width: 15, height: 15, opacity: '80%', background:(darkMode ? 'white' : '#161616') }
+                thumb: { width: 15, height: 15, opacity: '80%', background: (darkMode ? 'white' : '#161616') }
             }}
         />
 
@@ -131,7 +131,7 @@ const HSLColorBox = ({ resolution, height, hue, swatches, addSw, removeSw }: { r
 
     function selected(swatch: Swatch) {
         for (let si = 0; si < swatches.length; si++) {
-            if(swatches[si].h === swatch.h && swatches[si].s === swatch.s && swatches[si].l === swatch.l) {
+            if (swatches[si].h === swatch.h && swatches[si].s === swatch.s && swatches[si].l === swatch.l) {
                 return true;
             }
         }

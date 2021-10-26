@@ -49,7 +49,7 @@ const AnimatorScrubBar = () => {
                 if (x < 0) x = 0
                 if (x > width) x = width
                 setMouseHoverX(x / width)
-                if(isDragging) {
+                if (isDragging) {
                     setBarPosition()
                 }
             }

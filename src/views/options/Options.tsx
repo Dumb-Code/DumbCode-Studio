@@ -22,9 +22,9 @@ const OptionsTabs: OptionsTab[] = [
 
 const Options = () => {
 
-    const[optionsTab, setOptionsTab] = useState(OptionsTabs[0])
+    const [optionsTab, setOptionsTab] = useState(OptionsTabs[0])
 
-    return(
+    return (
         <div className="flex flex-row h-full overflow-y-hidden">
             <div className="flex flex-col w-1/4 dark:bg-gray-800 bg-gray-200 pt-8 items-end">
                 <p className="dark:text-black text-gray-600 font-semibold text-xs w-44 pl-2 mb-1">APP SETTINGS</p>
@@ -37,8 +37,8 @@ const Options = () => {
     )
 }
 
-const OptionsPageButton = ({tab, setTab, selected}: {tab: OptionsTab, setTab: () => void, selected: boolean}) => {
-    return(
+const OptionsPageButton = ({ tab, setTab, selected }: { tab: OptionsTab, setTab: () => void, selected: boolean }) => {
+    return (
         <button className={(selected ? "bg-gray-400 dark:bg-gray-700" : "bg-gray-200 dark:bg-gray-800") + " rounded dark:text-white text-black py-1 my-1 hover:bg-gray-100 dark:hover:bg-gray-900 w-40 mr-4 text-left pl-2"} onClick={() => setTab()}>{tab.name}</button>
     )
 }

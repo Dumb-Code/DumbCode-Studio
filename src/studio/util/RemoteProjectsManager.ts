@@ -4,10 +4,10 @@ import { useLocalStorage } from './LocalStorageHook';
 const localStorageKey = "github-recent-remote-projects"
 
 const tryParseArray = (item: string | null) => {
-  if(item !== null) {
+  if (item !== null) {
     try {
       return JSON.parse(item) as []
-    } catch(e) {
+    } catch (e) {
       console.warn(`Unable to parse '${item}' as json array`, e)
     }
   }
@@ -17,7 +17,7 @@ const tryParseArray = (item: string | null) => {
 export const getRecentGithubRemoteProjects = () => {
   const list: RemoteRepo[] = []
   const parsed = tryParseArray(localStorage.getItem(localStorageKey))
-  if(parsed !== null) {
+  if (parsed !== null) {
     list.push(...parsed)
   }
   return list

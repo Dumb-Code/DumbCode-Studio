@@ -6,7 +6,7 @@ type DialogContextType = {
   setDialogBox: (val: () => JSX.Element) => void
 }
 const DialogContext = React.createContext<DialogContextType>({
-  setDialogBox: () => {}
+  setDialogBox: () => { }
 })
 
 type OpenedDialogContextType = {
@@ -14,11 +14,11 @@ type OpenedDialogContextType = {
   showDialogBox: boolean
 }
 const OpenedDialogContext = React.createContext<OpenedDialogContextType>({
-  clear: () => {},
+  clear: () => { },
   showDialogBox: false,
 })
 
-const DialogBoxes: FC = ({children}) => {
+const DialogBoxes: FC = ({ children }) => {
   const [ElementFunc, setElementFunc] = useState<null | (() => JSX.Element)>(null)
   const [showDialogBox, setShowDialogBox] = useState(false)
   return (
@@ -32,20 +32,20 @@ const DialogBoxes: FC = ({children}) => {
         clear: () => setShowDialogBox(false),
         showDialogBox,
       }}>
-        { ElementFunc !== null && <ElementFunc /> }
+        {ElementFunc !== null && <ElementFunc />}
       </OpenedDialogContext.Provider>
       {children}
     </DialogContext.Provider>
   )
 }
 
-export const OpenedDialogBox: FC<{width?: string, height?: string, title: () => JSX.Element}> = ({title: Title, width="500px", height="500px", children}) => {
+export const OpenedDialogBox: FC<{ width?: string, height?: string, title: () => JSX.Element }> = ({ title: Title, width = "500px", height = "500px", children }) => {
   const dialogBox = useOpenedDialogBoxes()
   const { darkMode } = useOptions()
 
   return (
-    <Transition 
-      appear 
+    <Transition
+      appear
       show={dialogBox.showDialogBox}
       as={Fragment}
       enter="transition duration-100 ease-out"
@@ -55,16 +55,16 @@ export const OpenedDialogBox: FC<{width?: string, height?: string, title: () => 
       leaveFrom="transform scale-100 opacity-100"
       leaveTo="transform scale-95 opacity-0"
     >
-    <Dialog 
-      as="div"
-      onClose={() => dialogBox.clear()} 
-      className={"fixed inset-0 z-10 " + (darkMode ? "dark" : "") }
-    >
-      <div id="DialogCloseBoundry" className="px-4 py-4 text-center bg-black bg-opacity-80 dark:text-white h-full" onClick={e => e.currentTarget.id === "DialogCloseBoundry" && dialogBox.clear()}>
+      <Dialog
+        as="div"
+        onClose={() => dialogBox.clear()}
+        className={"fixed inset-0 z-10 " + (darkMode ? "dark" : "")}
+      >
+        <div id="DialogCloseBoundry" className="px-4 py-4 text-center bg-black bg-opacity-80 dark:text-white h-full" onClick={e => e.currentTarget.id === "DialogCloseBoundry" && dialogBox.clear()}>
           <Dialog.Overlay />
           <div
-            style={{width, height}} 
-            onClick={e => e.stopPropagation()} 
+            style={{ width, height }}
+            onClick={e => e.stopPropagation()}
             className="inline-block w-full h-full max-w-full max-h-full p-6 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-2xl"
           >
             <div className="flex flex-col w-full h-full">
@@ -78,6 +78,6 @@ export const OpenedDialogBox: FC<{width?: string, height?: string, title: () => 
   )
 }
 
-export const useDialogBoxes = () => useContext(DialogContext) 
-export const useOpenedDialogBoxes = () => useContext(OpenedDialogContext) 
+export const useDialogBoxes = () => useContext(DialogContext)
+export const useOpenedDialogBoxes = () => useContext(OpenedDialogContext)
 export default DialogBoxes

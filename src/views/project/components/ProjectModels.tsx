@@ -142,7 +142,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         onClick={e => { saveModel(); e.stopPropagation() }}
                     >
                         <div className="hover:bg-gray-700 cursor-pointer p-1 rounded w-48 m-1 flex flex-row">
-                        <p className="text-gray-300">{project.name.value}</p><p className="text-lightBlue-400 font-bold">.dcm</p>
+                            <p className="text-gray-300">{project.name.value}</p><p className="text-lightBlue-400 font-bold">.dcm</p>
                         </div>
                     </MenuItem>
                     <MenuItem
@@ -157,7 +157,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
 
                     >
                         <div className="hover:bg-gray-700 cursor-pointer p-1 rounded w-48 m-1 flex flex-row">
-                        <p className="text-gray-300">{project.name.value}</p><p className="text-lightBlue-400 font-bold">.gltf</p>
+                            <p className="text-gray-300">{project.name.value}</p><p className="text-lightBlue-400 font-bold">.gltf</p>
                         </div>
                     </MenuItem>
                 </ContextMenu>

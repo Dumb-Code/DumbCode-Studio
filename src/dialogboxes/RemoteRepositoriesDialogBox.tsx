@@ -20,7 +20,7 @@ const RemoteRepositoriesDialogBox = () => {
   const [searchedUsername, setSearchedUsername] = useState<string | null>(null)
 
   useEffect(() => {
-    if(username === null && currentSelectUser !== null) {
+    if (username === null && currentSelectUser !== null) {
       const login = currentSelectUser.login
       setUsername(login)
       setSearchedUsername(login)
@@ -39,12 +39,12 @@ const RemoteRepositoriesDialogBox = () => {
           }} />
           <input onKeyPress={e => e.key === "Enter" && setSearchedUsername(username)} value={username ?? ""} onChange={e => setUsername(e.target.value)} className="ml-4 w-32 text-black p-0 m-0 rounded-none rounded-l pl-1 h-8 dark:bg-gray-500 dark:placeholder-gray-800 " type="text" placeholder="Username" />
           <button onClick={() => setSearchedUsername(username)} className="h-8 rounded-none rounded-r p-1 ml-0 flex items-center justify-center dark:text-gray-700 bg-blue-500">
-                <SVGSearch width={16} />
+            <SVGSearch width={16} />
           </button>
           <input value={search} onChange={e => setSearch(e.target.value)} className="flex flex-grow ml-4 w-full text-black p-0 pl-1 h-8 dark:bg-gray-500 rounded dark:placeholder-gray-800" type="text" placeholder="Search Repositories" />
         </div>
         <div className="flex-grow overflow-y-auto h-0 mt-2 mb-2 bg-gray-300 dark:bg-gray-700">
-          { searchedUsername !== null &&
+          {searchedUsername !== null &&
             <RepositoryList search={search.toLowerCase()} tokenUsername={currentSelectUser?.login} username={searchedUsername} token={selectedAccount} close={dialogBox.clear} />
           }
         </div>
@@ -54,7 +54,7 @@ const RemoteRepositoriesDialogBox = () => {
   )
 }
 
-const RepositoryList = ({token, tokenUsername, username, search, close}: {token: string, tokenUsername?: string, username: string, search: string, close: () => void}) => {
+const RepositoryList = ({ token, tokenUsername, username, search, close }: { token: string, tokenUsername?: string, username: string, search: string, close: () => void }) => {
   const setRepo = (owner: string, repo: string, branch: string) => {
     addRecentGithubRemoteProject({ owner, repo, token, branch })
     close()
@@ -66,7 +66,7 @@ const RepositoryList = ({token, tokenUsername, username, search, close}: {token:
       token={token}
       predicate={r => search.split(" ").every(s => r.owner.login.toLowerCase().replaceAll("-", "").includes(s) || r.name.toLowerCase().replaceAll("-", "").includes(s))}
       loading={() => <div className="h-full flex flex-col justify-center items-center text-gray-500">Loading...</div>}
-      error={status => <div className="h-full flex flex-col justify-center items-center text-gray-500">{status === 404 ? `User '${username}' Not Found` : <span className="text-lg text-red-700">Error {status}</span> }</div>}
+      error={status => <div className="h-full flex flex-col justify-center items-center text-gray-500">{status === 404 ? `User '${username}' Not Found` : <span className="text-lg text-red-700">Error {status}</span>}</div>}
       empty={() => <div className="h-full flex flex-col justify-center items-center text-gray-500">User has no Repositories</div>}
     >
       {({ value }) => <RepositoryEntry value={value} token={token} setRepo={setRepo} />}
@@ -74,7 +74,7 @@ const RepositoryList = ({token, tokenUsername, username, search, close}: {token:
   )
 }
 
-const RepositoryEntry = ({value, token, setRepo}: {value: any, token: string, setRepo: (owner: string, repo: string, branch: string) => void}) => {
+const RepositoryEntry = ({ value, token, setRepo }: { value: any, token: string, setRepo: (owner: string, repo: string, branch: string) => void }) => {
   const [branch, setBranch] = useState(value.default_branch)
   return (
     <div onClick={() => setRepo(value.owner.login, value.name, branch)} className="group border-t border-b border-black flex flex-row p-2 items-center hover:bg-gray-500">
@@ -87,11 +87,11 @@ const RepositoryEntry = ({value, token, setRepo}: {value: any, token: string, se
           baseUrl={value.url + "/branches"}
           token={token}
         >
-        {({value: branchValue}) => <option value={branchValue.name}>{branchValue.name}</option>}
+          {({ value: branchValue }) => <option value={branchValue.name}>{branchValue.name}</option>}
         </PagedFetchResult>
       </select>
-      <a className="ml-3" target="_blank" rel="noreferrer" href={value.html_url} onClick={e=>e.stopPropagation()}>
-        <SVGOpenLink className="text-gray-400 hover:text-gray-200" width={16}/>
+      <a className="ml-3" target="_blank" rel="noreferrer" href={value.html_url} onClick={e => e.stopPropagation()}>
+        <SVGOpenLink className="text-gray-400 hover:text-gray-200" width={16} />
       </a>
     </div>
   )
@@ -99,12 +99,12 @@ const RepositoryEntry = ({value, token, setRepo}: {value: any, token: string, se
 
 
 //Abstract to a seperate component
-const TokenSelectionListBox = ({accessTokens, selected, setSelected}: {accessTokens: string[], selected: string, setSelected: (token: string) => void}) =>  {
+const TokenSelectionListBox = ({ accessTokens, selected, setSelected }: { accessTokens: string[], selected: string, setSelected: (token: string) => void }) => {
   return (
     <div className="w-48" >
       <Listbox value={selected} onChange={setSelected}>
         <div className="relative mt-1 h-8">
-        <Listbox.Button className="relative w-48 h-8 pl-3 pr-10 text-left bg-white dark:bg-gray-600 rounded-lg shadow-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-opacity-75 focus-visible:ring-white focus-visible:ring-offset-orange-300 focus-visible:ring-offset-2 focus-visible:border-indigo-500 sm:text-sm">
+          <Listbox.Button className="relative w-48 h-8 pl-3 pr-10 text-left bg-white dark:bg-gray-600 rounded-lg shadow-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-opacity-75 focus-visible:ring-white focus-visible:ring-offset-orange-300 focus-visible:ring-offset-2 focus-visible:border-indigo-500 sm:text-sm">
             <span className="block truncate"><GithubAccount token={selected} /></span>
             <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
               <SVGChevronDown
@@ -119,7 +119,7 @@ const TokenSelectionListBox = ({accessTokens, selected, setSelected}: {accessTok
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-              <Listbox.Options className="absolute w-48 py-1 mt-1 overflow-auto text-base bg-white dark:bg-gray-600 rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="absolute w-48 py-1 mt-1 overflow-auto text-base bg-white dark:bg-gray-600 rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {accessTokens.map(at => (
                 <Listbox.Option
                   key={at}
@@ -153,7 +153,7 @@ const TokenSelectionListBox = ({accessTokens, selected, setSelected}: {accessTok
 }
 
 
-const GithubAccount = ({token}: {token: string}) => {
+const GithubAccount = ({ token }: { token: string }) => {
   const result = useFetchGithubUserDetails(token)
 
   return (

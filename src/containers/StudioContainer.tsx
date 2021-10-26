@@ -76,7 +76,7 @@ const StudioApp = () => {
           </div>
           <div className="dark:text-gray-200 text-black mt-1 mr-2">
             v1.0.0
-        </div>
+          </div>
         </div>
         <div className={"flex-grow min-h-0"}>
           {settingsOpen ? <Options /> : activeTab.component()}

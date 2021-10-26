@@ -16,13 +16,13 @@ const CubeInput = ({ title, value, setValue, lock, lockPositive }: {
     lockPositive?: boolean
 }) => {
 
-    const[isLocked, setLocked] = useState(lock)
+    const [isLocked, setLocked] = useState(lock)
 
     return (
         <div>
             <div className="flex flex-row">
                 <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow">{title}</p>
-                {lock === undefined || 
+                {lock === undefined ||
                     <button className={(isLocked ? "bg-red-600" : "dark:bg-gray-900 bg-white") + " text-xs rounded mr-1 h-4 w-4 p-0.5 text-white"} onClick={() => setLocked(!isLocked)}>
                         {isLocked ? <SVGLocked /> : <SVGUnlocked />}
                     </button>
@@ -54,9 +54,9 @@ const CubeInput = ({ title, value, setValue, lock, lockPositive }: {
 const InputField = ({ axis, color, value, setValue, lockPositive }: {
     axis: string,
     color: string,
-    value: number|null,
+    value: number | null,
     setValue: (val: number) => void,
-    lockPositive: boolean|undefined
+    lockPositive: boolean | undefined
 }) => {
     return (
         <div className="flex flex-row mb-1 h-7">

@@ -17,7 +17,7 @@ export type WritableFile = {
 // const WritableFileRefreshLoop
 
 export const defaultWritable: WritableFile = {
-  write: async(name, blob) => {
+  write: async (name, blob) => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -33,8 +33,8 @@ export const getUndefinedWritable = (description: string, accept: string[]): Wri
   if (!FileSystemsAccessApi) {
     return defaultWritable
   }
-  let saveName: string|null = null
-  let file: WritableFile|null = null
+  let saveName: string | null = null
+  let file: WritableFile | null = null
   return {
     write: async (name, blob) => {
       if (file === null) {
@@ -50,7 +50,7 @@ export const getUndefinedWritable = (description: string, accept: string[]): Wri
         saveName = readable.name
         file = readable.asWritable()
       }
-      
+
       //saveName should never by null, but if it is then test.
       file.write(saveName ?? name, blob)
       return saveName

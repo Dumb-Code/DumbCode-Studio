@@ -1,6 +1,6 @@
 import { Switch } from "@headlessui/react"
 
-const Toggle = ({checked, setChecked, className = ""}: {checked: boolean, setChecked: (value: boolean) => void, className?: string}) => {
+const Toggle = ({ checked, setChecked, className = "" }: { checked: boolean, setChecked: (value: boolean) => void, className?: string }) => {
   return (
     <Switch
       checked={checked}

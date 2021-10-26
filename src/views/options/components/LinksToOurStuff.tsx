@@ -1,6 +1,6 @@
 const LinksToOurStuff = () => {
 
-    return(
+    return (
         <div className="">
             <p className="text-white font-semibold mb-2">DUMBCODE LINKS</p>
 

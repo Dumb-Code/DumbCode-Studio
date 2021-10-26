@@ -1,8 +1,8 @@
 import { useRef, useEffect } from 'react';
 export const useDraggbleRef = <T extends HTMLElement, O>(
   initialGetter: () => O,
-  onDrag: (data: {dx: number, dy: number, initial: O, x: number, y: number}) => void,
-  onReleased?: (data: {max: number, dx: number, dy: number, initial: O, x: number, y: number}) => void
+  onDrag: (data: { dx: number, dy: number, initial: O, x: number, y: number }) => void,
+  onReleased?: (data: { max: number, dx: number, dy: number, initial: O, x: number, y: number }) => void
 ) => {
   const ref = useRef<T>(null)
 
@@ -47,13 +47,13 @@ export const useDraggbleRef = <T extends HTMLElement, O>(
     }
     const mouseUp = (e: MouseEvent) => {
       unbindEvents()
-      if(onReleased) {
+      if (onReleased) {
         onReleased({
-          max: Math.sqrt(max.current), 
-          dx: e.clientX - xRef.current, 
+          max: Math.sqrt(max.current),
+          dx: e.clientX - xRef.current,
           dy: e.clientY - yRef.current,
           initial: initialRef.current,
-          x: e.clientX, 
+          x: e.clientX,
           y: e.clientY
         })
       }
@@ -73,10 +73,10 @@ export const useDraggbleRef = <T extends HTMLElement, O>(
       }
     }
 
-    if(isDragging.current) {
+    if (isDragging.current) {
       bindEvents()
     }
-    
+
     currentRef.addEventListener("mousedown", mouseDown)
     return () => {
       currentRef.removeEventListener("mousedown", mouseDown)

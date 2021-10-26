@@ -15,33 +15,33 @@ export const useFetchRequest = (url: string, token: string | null) => {
   const cachedResult = responseCache.get(cacheKey) ?? emptyResponse
   const [result, setResult] = useState<FetchResponse>(cachedResult)
   useEffect(() => {
-    if(cachedResult.status !== -1) {
+    if (cachedResult.status !== -1) {
       return
     }
     const controller = new AbortController()
     fetch(url, {
-      headers: token ? { 
+      headers: token ? {
         "Authorization": `token ${token}`
       } : {},
       signal: controller.signal
     })
-    .then(r => {
-      if(r.ok) {
-        return r.json()
-        .then(j => {
-          return {
-            status: 200,
-            result: j
-          }
-        })
-      }
-      return { status: r.status } as FetchResponse
-    })
-    .then(r => {
-      responseCache.set(cacheKey, r)
-      setResult(r)
-    })
-    .catch(() => {})
+      .then(r => {
+        if (r.ok) {
+          return r.json()
+            .then(j => {
+              return {
+                status: 200,
+                result: j
+              }
+            })
+        }
+        return { status: r.status } as FetchResponse
+      })
+      .then(r => {
+        responseCache.set(cacheKey, r)
+        setResult(r)
+      })
+      .catch(() => { })
     return () => controller.abort()
   }, [url, token, cacheKey, cachedResult])
   return result

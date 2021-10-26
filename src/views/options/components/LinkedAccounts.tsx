@@ -17,30 +17,30 @@ const LinkedAccounts = () => {
     setAccessTokens(accessTokens)
   }
 
-  return(
-      <div className="">
-          <p className="text-white font-semibold mb-2">Github</p>
-          <p className="text-gray-900 text-xs mb-1">Link your github account to allow for remote project syncing.</p>
-          <button onClick={linkGH} className="dark:bg-gray-800 bg-gray-300 rounded text-white font-semibold p-2 text-left pl-4 my-1 hover:bg-purple-600 flex flex-row justify items-center">
-            <SVGGithub width="20px" /> <span className="px-2">Add Github Account.</span>
-          </button>
-          <p className="text-gray-900 text-s mb-1 mt-2">Linked accounts:</p>
-          <div className="bg-gray-200 dark:bg-gray-800 rounded border border-black dark:text-white ">
-            { 
-              accessTokens.length === 0? <div className="pl-3 flex flex-col justify-center h-10">It seems rather empty here...</div> :
-              accessTokens.map((t, i) => 
-                <div key={t}
-                 className={"flex flex-col justify-center h-10 border-black " + (i === 0 ? '' : 'border-t')}>
-                  <GithubAccessToken token={t} removeToken={() => removeToken(i)} />
-                </div>
-              ) 
-            }
-          </div>
+  return (
+    <div className="">
+      <p className="text-white font-semibold mb-2">Github</p>
+      <p className="text-gray-900 text-xs mb-1">Link your github account to allow for remote project syncing.</p>
+      <button onClick={linkGH} className="dark:bg-gray-800 bg-gray-300 rounded text-white font-semibold p-2 text-left pl-4 my-1 hover:bg-purple-600 flex flex-row justify items-center">
+        <SVGGithub width="20px" /> <span className="px-2">Add Github Account.</span>
+      </button>
+      <p className="text-gray-900 text-s mb-1 mt-2">Linked accounts:</p>
+      <div className="bg-gray-200 dark:bg-gray-800 rounded border border-black dark:text-white ">
+        {
+          accessTokens.length === 0 ? <div className="pl-3 flex flex-col justify-center h-10">It seems rather empty here...</div> :
+            accessTokens.map((t, i) =>
+              <div key={t}
+                className={"flex flex-col justify-center h-10 border-black " + (i === 0 ? '' : 'border-t')}>
+                <GithubAccessToken token={t} removeToken={() => removeToken(i)} />
+              </div>
+            )
+        }
       </div>
+    </div>
   )
 }
 
-const GithubAccessToken = ({token, removeToken}: {token: string, removeToken: () => void}) => {
+const GithubAccessToken = ({ token, removeToken }: { token: string, removeToken: () => void }) => {
   const result = useFetchGithubUserDetails(token)
 
   return (

@@ -440,7 +440,7 @@ export class ProjectMaterials {
   readonly normal: MeshLambertMaterial
   readonly highlight: MeshLambertMaterial
   readonly selected: MeshLambertMaterial
-  
+
   readonly export: MeshBasicMaterial
 
   constructor() {

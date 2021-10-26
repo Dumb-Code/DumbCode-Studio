@@ -72,7 +72,7 @@ export default class SelectedCubeManager {
   onCubeSelected(cube: DCMCube) {
     //TODO if ctrl is pressed don't do this:
     const keep = false
-    if(!keep) {
+    if (!keep) {
       cube.model.identifierCubeMap.forEach(v => {
         if (v.mouseState.value === "selected") {
           v.mouseState.value = this.mouseOver.value === v.identifier ? "hover" : "none"
@@ -82,7 +82,7 @@ export default class SelectedCubeManager {
     } else {
       this.selected.value = this.selected.value.concat(cube.identifier)
     }
-    
+
   }
 
   onCubeUnSelected(cube: DCMCube) {

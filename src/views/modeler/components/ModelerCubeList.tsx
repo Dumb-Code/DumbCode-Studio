@@ -312,7 +312,7 @@ const CubeListItem = ({
 
                     clearPreviousDragState.current(cube)
                     clearPreviousDragState.current = (c => {
-                        if(c !== cube) {
+                        if (c !== cube) {
                             setDragState(null)
                         }
                     })
@@ -414,7 +414,7 @@ const CubeList = ({ model }: { model: DCMModel }) => {
                 />
             )}
             <div ref={dragEndRef} />
-            { overlayDiv !== null &&
+            {overlayDiv !== null &&
                 createPortal(
                     <div className={"relative " + darkMode ? "dark" : ""}>
                         <div

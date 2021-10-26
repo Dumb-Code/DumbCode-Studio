@@ -11,8 +11,8 @@ function easeInOutCubic(x: number): number {
 
 const Project = () => {
 
-    const[remoteShown, showRemote] = useState(false);
-    
+    const [remoteShown, showRemote] = useState(false);
+
     const gridRef = useRef<HTMLDivElement>(null)
     const divHeightRef = useRef<HTMLDivElement>(null)
 
@@ -20,11 +20,11 @@ const Project = () => {
         //Apply easing function to percentRaw
         const percent = easeInOutCubic(percentRaw)
 
-        if(gridRef.current !== null) {
+        if (gridRef.current !== null) {
             gridRef.current.style.gridTemplateRows = `auto ${44 + (237 - 44) * percent}px`
         }
 
-        if(divHeightRef.current !== null) {
+        if (divHeightRef.current !== null) {
             divHeightRef.current.style.height = `${0 + (12 - 0) * percent}rem`
         }
     })

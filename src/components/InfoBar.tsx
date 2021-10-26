@@ -4,7 +4,7 @@ import { ButtonWithTooltip } from './Tooltips';
 
 const InfoBar = () => {
 
-    return(
+    return (
         <div className="rounded-sm dark:bg-black bg-white h-full flex flex-row">
             <DisplayModeDropup />
             <RenderModeDropup />
@@ -37,9 +37,9 @@ const DisplayModeDropup = () => {
         <div className="mx-0.5">
             <Dropup title="Display Mode" header="DISPLAY MODE">
                 <div className="px-0.5 py-1">
-                    <DropupItem name="Textured" onSelect={() => console.log("set mode")}/>
-                    <DropupItem name="White" onSelect={() => console.log("set mode")}/>
-                    <DropupItem name="Outline" onSelect={() => console.log("set mode")}/>
+                    <DropupItem name="Textured" onSelect={() => console.log("set mode")} />
+                    <DropupItem name="White" onSelect={() => console.log("set mode")} />
+                    <DropupItem name="Outline" onSelect={() => console.log("set mode")} />
                 </div>
             </Dropup>
         </div>
@@ -51,8 +51,8 @@ const RenderModeDropup = () => {
         <div className="mx-0.5">
             <Dropup title="Set View" header="SET PERSPECTIVE">
                 <div className="px-0.5 py-1">
-                    <DropupItem name="Perspective" onSelect={() => console.log("set perspective")}/>
-                    <DropupItem name="Orthographic" onSelect={() => console.log("set perspective")}/>
+                    <DropupItem name="Perspective" onSelect={() => console.log("set perspective")} />
+                    <DropupItem name="Orthographic" onSelect={() => console.log("set perspective")} />
                 </div>
             </Dropup>
         </div>
@@ -64,9 +64,9 @@ const TextureGroupDropup = () => {
         <div className="mx-0.5">
             <Dropup title="Texture Group" header="SET GROUP">
                 <div className="px-0.5 py-1">
-                    <DropupItem name="Default" onSelect={() => console.log("set group")}/>
-                    <DropupItem name="JP Female" onSelect={() => console.log("set group")}/>
-                    <DropupItem name="JP Male" onSelect={() => console.log("set group")}/>
+                    <DropupItem name="Default" onSelect={() => console.log("set group")} />
+                    <DropupItem name="JP Female" onSelect={() => console.log("set group")} />
+                    <DropupItem name="JP Male" onSelect={() => console.log("set group")} />
                 </div>
             </Dropup>
         </div>

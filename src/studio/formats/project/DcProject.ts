@@ -47,7 +47,7 @@ export default class DcProject {
     callback(this.model.materials.selected)
     callback(this.model.materials.highlight)
     callback(this.model.materials.export)
-    
+
 
     this.model.materials.normal.needsUpdate = true
     this.model.materials.selected.needsUpdate = true
