@@ -24,8 +24,7 @@ const ProjectTextures = () => {
     const { getSelectedProject, hasProject } = useStudio()
 
     const addGroup = () => {
-        const groups = getSelectedProject().textureManager.groups
-        groups.value = groups.value.concat([new TextureGroup("New Group", false)])
+        getSelectedProject().textureManager.addGroup(new TextureGroup("New Group", false))
     }
 
     const addTexture = (name?: string, img?: HTMLImageElement) => {

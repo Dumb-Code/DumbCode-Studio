@@ -23,7 +23,11 @@ export default class TextureManager {
 
     this.defaultGroup = new TextureGroup("Default", true)
     this.selectedGroup = new LO<TextureGroup>(this.defaultGroup)
-    this.groups = new LO<readonly TextureGroup[]>([this.selectedGroup.value])
+    this.groups = new LO<readonly TextureGroup[]>([this.defaultGroup])
+
+    this.defaultGroup.textures.addListener(() => this.refresh())
+    this.selectedGroup.addListener(value => this.refresh(value))
+    this.textures.addListener(() => this.refresh())
 
     this.canvas = document.createElement("canvas")
     const ctx = this.canvas.getContext("2d")
@@ -39,7 +43,6 @@ export default class TextureManager {
     texture.element.addListener(() => this.refresh())
     this.textures.value = this.textures.value.concat([texture])
     this.defaultGroup.textures.value = [texture.identifier].concat(this.defaultGroup.textures.value)
-    this.refresh()
     return texture
   }
 
@@ -51,8 +54,13 @@ export default class TextureManager {
     return found
   }
 
-  refresh() {
-    const textures = this.selectedGroup.value.textures.value
+  addGroup(...groups: TextureGroup[]) {
+    groups.forEach(group => group.textures.addListener(() => this.refresh()))
+    this.groups.value = this.groups.value.concat(...groups)
+  }
+
+  refresh(groupToUse: TextureGroup = this.selectedGroup.value) {
+    const textures = groupToUse.textures.value
       .map(t => this.findTexture(t))
       .filter(t => !t.hidden.value)
 

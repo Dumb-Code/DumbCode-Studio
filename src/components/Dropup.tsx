@@ -52,11 +52,11 @@ Dropup.defaultProps = {
     details: null,
 }
 
-export const DropupItem = ({ name, onSelect }: { name: string, onSelect: () => void }) => {
+export const DropupItem = ({ name, onSelect, selected }: { name: string, onSelect: () => void, selected?: boolean }) => {
     return (
         <Menu.Item>
             {({ active }) => (
-                <button className={`${active ? "dark:bg-gray-700 dark:text-white bg-gray-400 text-black" : "dark:text-white text-black dark:bg-gray-900 bg-gray-300"} group flex rounded-md items-center w-full px-2 py-2 text-sm`} onClick={onSelect}>
+                <button className={`${selected ? "dark:bg-blue-700 dark:text-white bg-blue-400 text-black" : (active ? "dark:bg-gray-700 dark:text-white bg-gray-400 text-black" : "dark:text-white text-black dark:bg-gray-900 bg-gray-300")} group flex rounded-md items-center w-full px-2 py-2 text-sm`} onClick={onSelect}>
                     {name}
                 </button>
             )}

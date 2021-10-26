@@ -69,6 +69,5 @@ const loadAllTextures = async (repo: DcRemoteRepo, entry: NonNullable<RemoteProj
     return newGroup
   }))
 
-  const current = project.textureManager.groups.value
-  project.textureManager.groups.value = current.concat(finishedGroups)
+  project.textureManager.addGroup(...finishedGroups)
 }

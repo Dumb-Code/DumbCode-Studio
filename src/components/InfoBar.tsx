@@ -1,3 +1,6 @@
+import { TextureGroup } from '../studio/formats/textures/TextureManager';
+import { useListenableObject } from '../studio/util/ListenableObject';
+import { useTextureGroupSelect } from '../studio/util/StudioHooks';
 import Dropup, { DropupItem } from './Dropup'
 import { SVGCube, SVGEye, SVGGrid, SVGLocked, SVGRedo, SVGUndo } from './Icons';
 import { ButtonWithTooltip } from './Tooltips';
@@ -60,17 +63,25 @@ const RenderModeDropup = () => {
 }
 
 const TextureGroupDropup = () => {
+    const groups = useTextureGroupSelect()
     return (
         <div className="mx-0.5">
             <Dropup title="Texture Group" header="SET GROUP">
                 <div className="px-0.5 py-1">
-                    <DropupItem name="Default" onSelect={() => console.log("set group")} />
-                    <DropupItem name="JP Female" onSelect={() => console.log("set group")} />
-                    <DropupItem name="JP Male" onSelect={() => console.log("set group")} />
+                    {groups.map(g => <GroupDropupItem key={g.group.identifier} {...g} />)}
                 </div>
             </Dropup>
         </div>
     );
+}
+
+const GroupDropupItem = ({ group, selected, setSelected }: {
+    group: TextureGroup;
+    selected: boolean;
+    setSelected: () => void;
+}) => {
+    const [name] = useListenableObject(group.name)
+    return <DropupItem name={name} selected={selected} onSelect={setSelected} />
 }
 
 export default InfoBar;
