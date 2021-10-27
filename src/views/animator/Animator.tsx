@@ -38,7 +38,7 @@ const Animator = () => {
                 gridTemplateRows: '32px minmax(0px, 1fr) 32px 150px 30px 28px'
             }}
         >
-            <div className="grid-in-tabs border dark:border-black border-white"><AnimatorTabBar /></div>
+            <div className="grid-in-tabs border dark:border-black border-white overflow-hidden"><AnimatorTabBar /></div>
             <div className="grid-in-properties border dark:border-black h-full border-white"><AnimatorProperties /></div>
             <div className="grid-in-tools border dark:border-black border-white"><AnimatorShortcuts /></div>
             <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>

@@ -15,12 +15,7 @@ const animationExtensions = [".dca"]
 const ProjectAnimations = () => {
     const { hasProject, getSelectedProject } = useStudio()
 
-    const addAnimation = (animation: DcaAnimation) => {
-        const tabs = getSelectedProject().animationTabs
-        tabs.animations.value = tabs.animations.value.concat([animation])
-        tabs.tabs.value = tabs.tabs.value.concat([animation.identifier])
-        tabs.selectedAnimation.value = animation
-    }
+    const addAnimation = (animation: DcaAnimation) => getSelectedProject().animationTabs.addAnimation(animation)
 
     const uploadFile = (file: ReadableFile) => {
         const project = getSelectedProject()
@@ -48,8 +43,10 @@ const ProjectAnimations = () => {
                     </ClickableInput>
                 </p>
             </div>
-            <div className="flex flex-col overflow-y-scroll h-full w-full pr-6">
-                {hasProject && <AnimationEntries project={getSelectedProject()} />}
+            <div className="overflow-y-scroll h-full w-full">
+                <div className="h-0 flex flex-col m-1 mt-2">
+                    {hasProject && <AnimationEntries project={getSelectedProject()} />}
+                </div>
             </div>
         </div >
     )
@@ -78,12 +75,14 @@ const AnimationEntries = ({ project }: { project: DcProject }) => {
 
 const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation }: { animation: DcaAnimation, selected: boolean, toggleAnimation: () => void, removeAnimation: () => void }) => {
     return (
-        <div className={(selected ? "bg-yellow-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " my-1 rounded-sm h-8 text-left pl-2 w-full flex flex-row ml-2"} onClick={toggleAnimation}>
-            <DblClickEditLO obj={animation.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
-            <p className="mr-2 flex flex-row text-white">
-                <button className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:hover:bg-gray-900 hover:bg-gray-300 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SaveIcon className="h-4 w-4" /></button>
-                <button onClick={e => { removeAnimation(); e.stopPropagation() }} className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
-            </p>
+        <div>
+            <div className={(selected ? "bg-yellow-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " flex-shrink-0 rounded-sm h-8 text-left pl-2 mb-2 flex flex-row ml-2"} onClick={toggleAnimation}>
+                <DblClickEditLO obj={animation.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
+                <p className="mr-2 flex flex-row text-white">
+                    <button className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SaveIcon className="h-4 w-4" /></button>
+                    <button onClick={e => { removeAnimation(); e.stopPropagation() }} className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
+                </p>
+            </div>
         </div>
     )
 }

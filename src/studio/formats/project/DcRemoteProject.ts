@@ -1,9 +1,17 @@
+import { StudioBuffer } from './../../util/StudioBuffer';
+import { loadDCAAnimation } from '../animations/DcaLoader';
 import { loadDCMModel } from '../model/DCMLoader';
 import { TextureGroup } from '../textures/TextureManager';
 import DcProject from './DcProject';
 import { DcRemoteRepoContentGetterCounter, RemoteProjectEntry } from './DcRemoteRepos';
 
 export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, entry: RemoteProjectEntry) => {
+  let animationPaths: { name: string; path: string; }[] = []
+  if (entry.animationFolder) {
+    animationPaths = await getAllAnimationPaths(repo, entry.animationFolder)
+    repo.addUnforseenRequests(animationPaths.length)
+  }
+
   const model = await loadRemoteModel(repo, entry)
   if (model === null) {
     alert("Unable to load model at \n" + entry.model)
@@ -17,6 +25,9 @@ export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, 
   }
 
   let animations: Promise<any> | null = null
+  if (entry.animationFolder) {
+    animations = loadAllAnimations(repo, animationPaths, project)
+  }
   let referenceImages: Promise<any> | null = null
 
 
@@ -83,11 +94,36 @@ const loadAllTextures = async (repo: DcRemoteRepoContentGetterCounter, entry: No
   project.textureManager.addGroup(...finishedGroups)
 }
 
+const getAllAnimationPaths = async (repo: DcRemoteRepoContentGetterCounter, animationFolder: string) => {
+  const res = await repo.getContent(animationFolder)
+  if (res.type !== "dir") {
+    alert(animationFolder + " is not a folder")
+    return []
+  }
+  return res.files.filter(f => f.path.endsWith(".dca"))
+}
+
+const loadAllAnimations = async (repo: DcRemoteRepoContentGetterCounter, animations: { name: string; path: string; }[], project: DcProject) => {
+  const loadedAnimations = await Promise.all(animations.map(async (animation) => {
+    const content = await repo.getContent(animation.path)
+    if (content.type === "file") {
+      const arraybuffer = Uint8Array.from(content.content, c => c.charCodeAt(0)).buffer
+      return loadDCAAnimation(project, content.name, new StudioBuffer(arraybuffer))
+    }
+    return null
+  }))
+
+  loadedAnimations.forEach(t => t !== null && project.animationTabs.addAnimation(t))
+}
+
 export const countTotalRequests = (project: RemoteProjectEntry) =>
   1 //model
+
   + (
     project.texture ?
       project.texture?.groups.map(g => g.textures.length).reduce((a, b) => a + b, 0) :
       0
   ) //texture
+
+  + (project.animationFolder ? 1 : 0) //query the animation folder, we then add the amount of .dcas on.
   ;

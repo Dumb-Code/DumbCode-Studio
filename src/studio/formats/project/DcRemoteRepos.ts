@@ -22,6 +22,7 @@ export type DcRemoteRepoContentGetterCounter = {
   readonly getContent: (path: string, decodeBase64?: boolean) => ContentReturnType
   readonly addListener: (func: (value: number, total: number) => void) => void
   readonly removeListener: (func: (value: number, total: number) => void) => void
+  readonly addUnforseenRequests: (totalToAdd: number) => void
 }
 
 const tryParseArray = (item: string | null) => {
@@ -90,6 +91,10 @@ const getCountedContentGetter: (total: number, repo: DcRemoteRepo) => DcRemoteRe
 
   return {
     repo: repo.repo,
+    addUnforseenRequests: t => {
+      total += t
+      counterListeners.forEach(l => l(counter, total))
+    },
     addListener: func => counterListeners.add(func),
     removeListener: func => counterListeners.delete(func),
     getContent: (path, decodeBase64) => repo.getContent(path, decodeBase64).then(r => {

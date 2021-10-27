@@ -64,7 +64,7 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
       {
         openEdit ||
         <span
-          onClick={e => e.stopPropagation()}
+          // onClick={e => e.stopPropagation()}
           onDoubleClick={e => {
             onDoubleClick()
             e.stopPropagation()
