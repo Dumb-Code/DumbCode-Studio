@@ -1,4 +1,4 @@
-import { RefObject, useState } from "react";
+import { RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { SVGCross, SVGTrash } from "../../../components/Icons"
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { useProjectPageContext } from "../../../contexts/ProjectPageContext";
@@ -6,22 +6,25 @@ import { useStudio } from "../../../contexts/StudioContext";
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";
 import RemoteProjectsDialogBox from "../../../dialogboxes/RemoteProjectsDialogBox";
 import RemoteRepositoriesDialogBox from "../../../dialogboxes/RemoteRepositoriesDialogBox";
-import { loadRemoteProject } from "../../../studio/formats/project/DcRemoteProject";
-import { loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual } from "../../../studio/formats/project/DcRemoteRepos";
+import DcProject from "../../../studio/formats/project/DcProject";
+import { countTotalRequests, loadRemoteProject } from "../../../studio/formats/project/DcRemoteProject";
+import DcRemoteRepo, { DcRemoteRepoContentGetterCounter, loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual } from "../../../studio/formats/project/DcRemoteRepos";
 import { removeRecentGithubRemoteProject, useRecentGithubRemoteProjects } from "../../../studio/util/RemoteProjectsManager";
 
 const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElement> }) => {
-
-    const { addProject } = useStudio()
-
     const { remoteSettingsOpen, setRemoteSettingsOpen, selectedRepo: loadedRepo, setSelectedRepo: loadRepo } = useProjectPageContext()
-
     const dialogBoxes = useDialogBoxes()
-
     const projects = useRecentGithubRemoteProjects()
-
-    // const [selectedRemote, setSelectedRemote] = useState<DcRemoteRepo | null>(null)
     const [selectedRepo, setSelectedRepo] = useState<RemoteRepo | null>(loadedRepo?.repo ?? null)
+
+    const { projects: openedProjects } = useStudio()
+
+    const zippedProjects = useMemo(() => loadedRepo !== null && loadedRepo.projects.map(project => {
+        return {
+            project,
+            studio: openedProjects.find(p => p.remoteUUID === project.uuid) ?? null
+        }
+    }), [loadedRepo, openedProjects])
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-100 flex flex-col overflow-hidden">
@@ -59,15 +62,9 @@ const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElemen
                         </button>
                     </div>
                     <div className="flex flex-col overflow-y-scroll pr-2 h-full">
-                        {loadedRepo !== null && selectedRepo !== null &&
-                            loadedRepo.projects.map((project, i) => <ProjectEntry key={i} project={project} repo={selectedRepo} setProject={() => loadRemoteProject(loadedRepo, project).then(r => r !== null && addProject(r))} />)
+                        {loadedRepo !== null && zippedProjects !== false &&
+                            zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} />)
                         }
-                        {/* <ProjectEntry name="T-rex" status={100} setRemote={() => console.log("add project to list")} />
-                        <ProjectEntry name="Stegosaurus" status={0} setRemote={() => console.log("add project to list")} />
-                        <ProjectEntry name="Trike" status={30} setRemote={() => console.log("add project to list")} />
-                        <ProjectEntry name="Velociraptor" status={100} setRemote={() => console.log("add project to list")} />
-                        <ProjectEntry name="Mosa" status={50} setRemote={() => console.log("add project to list")} />
-                        <ProjectEntry name="Kash's Mom" status={0} setRemote={() => console.log("add project to list")} /> */}
                     </div>
                 </div>
             </div>
@@ -96,20 +93,58 @@ const RepositoryEntry = ({ repo, selected, setRemote }: { repo: RemoteRepo, sele
     )
 }
 
-const ProjectEntry = ({ project, repo, setProject }: { project: RemoteProjectEntry, repo: RemoteRepo, setProject: () => void }) => {
-    //TODO: this
-    const [status, setStatus] = useState(0)
-    if (setStatus as any) { } //ts ignore
+const ProjectEntry = ({ project, repo, linked }: { project: RemoteProjectEntry, repo: DcRemoteRepo, linked: DcProject | null }) => {
+    const { selectProject, addProject } = useStudio()
+
+    const counterRef = useRef<DcRemoteRepoContentGetterCounter | null>(null)
+
+    const [status, setStatus] = useState(-1)
+
+    const fullyLinked = useRef(false)
+
+    const setProject = () => {
+        if (linked !== null) {
+            selectProject(linked)
+            return
+        }
+        const ref = counterRef.current = repo.createCounter(countTotalRequests(project))
+        loadRemoteProject(ref, project).then(p => p !== null && addProject(p))
+        setStatus(0)
+    }
+
+    useEffect(() => {
+        if (linked === null && counterRef.current !== null) {
+            const listner = (value: number, total: number) => setStatus(Math.floor(value / total * 100))
+            counterRef.current.addListener(listner)
+            return () => {
+                if (counterRef.current !== null) {
+                    counterRef.current.removeListener(listner)
+                }
+            }
+        }
+    }, [linked, status])
+
+    if (linked) {
+        fullyLinked.current = true
+    }
+
+    if (status === 100 && !linked && fullyLinked.current) {
+        fullyLinked.current = false
+        setStatus(0)
+    }
+
+    const effectiveStatus = linked ? 100 : status
+
     return (
-        <div onClick={setProject} className={(status === 100 ? "bg-purple-500" : "dark:bg-gray-700 bg-gray-300 dark:text-white text-black") + " my-1 rounded-sm h-6 text-left pl-2 flex flex-row ml-4"} >
+        <div onClick={setProject} className={(effectiveStatus === 100 ? "bg-purple-500" : "dark:bg-gray-700 bg-gray-300 dark:text-white text-black") + " my-1 rounded-sm h-6 text-left pl-2 flex flex-row ml-4"} >
             <button className="flex-grow truncate text-left">{project.name}</button>
 
-            <div className={(status === 100 || status === 0) ? "hidden" : "overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200 flex-grow mt-2"}>
-                <div style={{ width: status + "%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-500"></div>
+            <div className={(effectiveStatus === 100 || effectiveStatus <= 0) ? "hidden" : "overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200 flex-grow mt-2"}>
+                <div style={{ width: Math.max(effectiveStatus, 0) + "%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-500"></div>
             </div>
 
-            <div className={(status === 100 ? "bg-purple-300 text-purple-700" : "dark:bg-gray-400 bg-white text-gray-700") + " flex-shrink px-2 rounded-xl text-xs w-20 text-center font-bold m-1"}>
-                {status === 100 ? "LOADED" : status === 0 ? "UNLOADED" : "LOADING.."}
+            <div className={(effectiveStatus === 100 ? "bg-purple-300 text-purple-700" : "dark:bg-gray-400 bg-white text-gray-700") + " flex-shrink px-2 rounded-xl text-xs w-20 text-center font-bold m-1"}>
+                {effectiveStatus === 100 ? "LOADED" : effectiveStatus <= 0 ? "UNLOADED" : "LOADING.."}
             </div>
         </div>
     )

@@ -8,6 +8,7 @@ import { LO } from '../../util/ListenableObject';
 import DcaTabs from '../animations/DcaTabs';
 import { loadDCMModel } from '../model/DCMLoader';
 import SelectedCubeManager from '../../util/SelectedCubeManager';
+import { RemoteRepo } from './DcRemoteRepos';
 
 export default class DcProject {
   readonly identifier: string
@@ -24,6 +25,9 @@ export default class DcProject {
   previousThreeTexture: Texture | null
 
   readonly selectedCubeManager = new SelectedCubeManager()
+
+  remoteLink?: RemoteRepo
+  remoteUUID?: string
 
   constructor(name: string, model: DCMModel) {
     this.identifier = uuidv4()

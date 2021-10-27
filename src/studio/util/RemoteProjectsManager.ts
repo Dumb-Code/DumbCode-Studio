@@ -36,7 +36,7 @@ export const removeRecentGithubRemoteProject = (project: RemoteRepo) => {
   localStorage.setItem(localStorageKey, JSON.stringify(filtered))
 }
 
-export const useRecentGithubRemoteProjects = () => {
+export const useRecentGithubRemoteProjects: () => RemoteRepo[] = () => {
   const [item] = useLocalStorage(localStorageKey)
   return tryParseArray(item) ?? []
 }

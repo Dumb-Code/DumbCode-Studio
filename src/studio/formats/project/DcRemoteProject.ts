@@ -1,9 +1,9 @@
 import { loadDCMModel } from '../model/DCMLoader';
 import { TextureGroup } from '../textures/TextureManager';
 import DcProject from './DcProject';
-import DcRemoteRepo, { RemoteProjectEntry } from './DcRemoteRepos';
+import { DcRemoteRepoContentGetterCounter, RemoteProjectEntry } from './DcRemoteRepos';
 
-export const loadRemoteProject = async (repo: DcRemoteRepo, entry: RemoteProjectEntry) => {
+export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, entry: RemoteProjectEntry) => {
   const model = await loadRemoteModel(repo, entry)
   if (model === null) {
     alert("Unable to load model at \n" + entry.model)
@@ -11,16 +11,23 @@ export const loadRemoteProject = async (repo: DcRemoteRepo, entry: RemoteProject
   }
   const project = new DcProject(entry.name, model)
 
-  // project.textureManager.addTexture()
+  let textures: Promise<any> | null = null
   if (entry.texture) {
-    loadAllTextures(repo, entry.texture, project)
+    textures = loadAllTextures(repo, entry.texture, project)
   }
-  //TODO: load the rest of the projects :)
 
+  let animations: Promise<any> | null = null
+  let referenceImages: Promise<any> | null = null
+
+
+  await Promise.all([textures, animations, referenceImages])
+
+  project.remoteLink = repo.repo
+  project.remoteUUID = entry.uuid
   return project
 }
 
-const loadRemoteModel = async (repo: DcRemoteRepo, entry: RemoteProjectEntry) => {
+const loadRemoteModel = async (repo: DcRemoteRepoContentGetterCounter, entry: RemoteProjectEntry) => {
   const model = await repo.getContent(entry.model)
   if (model.type === "file") {
     const arraybuffer = Uint8Array.from(model.content, c => c.charCodeAt(0)).buffer
@@ -29,7 +36,7 @@ const loadRemoteModel = async (repo: DcRemoteRepo, entry: RemoteProjectEntry) =>
   return null
 }
 
-const loadIndividualTexture = async (repo: DcRemoteRepo, baseLoc: string, texture: string) => {
+const loadIndividualTexture = async (repo: DcRemoteRepoContentGetterCounter, baseLoc: string, texture: string) => {
   return repo.getContent(`${baseLoc}${texture}.png`, true)
     .then(async (d) => {
       if (d.type === "file") {
@@ -46,7 +53,7 @@ const loadIndividualTexture = async (repo: DcRemoteRepo, baseLoc: string, textur
     })
 }
 
-const loadAllTextures = async (repo: DcRemoteRepo, entry: NonNullable<RemoteProjectEntry['texture']>, project: DcProject) => {
+const loadAllTextures = async (repo: DcRemoteRepoContentGetterCounter, entry: NonNullable<RemoteProjectEntry['texture']>, project: DcProject) => {
   const { baseFolder, groups } = entry
   const groupData = await Promise.all(groups.map(async (group) => {
     const baseLoc = `${baseFolder}/${group.folderName}${group.folderName === '' ? '' : '/'}`
@@ -69,5 +76,18 @@ const loadAllTextures = async (repo: DcRemoteRepo, entry: NonNullable<RemoteProj
     return newGroup
   }))
 
+  //Set the default group textures to be properly ordered
+  const textures = finishedGroups.flatMap(g => g.textures.value)
+  project.textureManager.defaultGroup.textures.value = textures
+
   project.textureManager.addGroup(...finishedGroups)
 }
+
+export const countTotalRequests = (project: RemoteProjectEntry) =>
+  1 //model
+  + (
+    project.texture ?
+      project.texture?.groups.map(g => g.textures.length).reduce((a, b) => a + b, 0) :
+      0
+  ) //texture
+  ;

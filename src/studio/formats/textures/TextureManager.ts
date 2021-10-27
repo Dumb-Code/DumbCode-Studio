@@ -68,6 +68,7 @@ export default class TextureManager {
     //Get the width/height to render. Gets the width/height needed for all textures to render fully
     const width = this.canvas.width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
     const height = this.canvas.height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
+    this.canvasContext.imageSmoothingEnabled = false
 
     //Draw white if no textures
     if (this.textures.value.length === 0) {

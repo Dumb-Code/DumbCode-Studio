@@ -1,15 +1,27 @@
 import { Octokit } from "@octokit/rest"
 
 const path_StudioRemoteBase = ".studio_remote.json"
+
+type ContentReturnType = Promise<
+  { type: "file", name: string, content: string } |
+  { type: "dir", files: { name: string, path: string }[] } |
+  { type: "other" }
+>
+
 export default interface DcRemoteRepo {
   readonly repo: RemoteRepo
   readonly projects: RemoteProjectEntry[]
 
-  readonly getContent: (path: string, decodeBase64?: boolean) => Promise<
-    { type: "file", name: string, content: string } |
-    { type: "dir", files: { name: string, path: string }[] } |
-    { type: "other" }
-  >
+  readonly createCounter: (total: number) => DcRemoteRepoContentGetterCounter
+
+  readonly getContent: (path: string, decodeBase64?: boolean) => ContentReturnType
+}
+
+export type DcRemoteRepoContentGetterCounter = {
+  readonly repo: RemoteRepo
+  readonly getContent: (path: string, decodeBase64?: boolean) => ContentReturnType
+  readonly addListener: (func: (value: number, total: number) => void) => void
+  readonly removeListener: (func: (value: number, total: number) => void) => void
 }
 
 const tryParseArray = (item: string | null) => {
@@ -37,9 +49,11 @@ export const loadDcRemoteRepo = async (repo: RemoteRepo): Promise<DcRemoteRepo> 
   const studioRootFile = await getContent(path_StudioRemoteBase)
   const studioRoots: RemoteProjectEntry[] = studioRootFile && "content" in studioRootFile.data ? tryParseArray(atob(studioRootFile.data.content)) : []
 
-  return {
+
+  const ret: DcRemoteRepo = {
     repo,
     projects: studioRoots,
+    createCounter: total => getCountedContentGetter(total, ret),
     getContent: async (path, base64 = false) => {
       const result = await getContent(path)
       if (!result) {
@@ -67,6 +81,24 @@ export const loadDcRemoteRepo = async (repo: RemoteRepo): Promise<DcRemoteRepo> 
       return { type: "other" }
     }
   }
+  return ret
+}
+
+const getCountedContentGetter: (total: number, repo: DcRemoteRepo) => DcRemoteRepoContentGetterCounter = (total, repo) => {
+  let counter = 0;
+  const counterListeners = new Set<(value: number, total: number) => void>()
+
+  return {
+    repo: repo.repo,
+    addListener: func => counterListeners.add(func),
+    removeListener: func => counterListeners.delete(func),
+    getContent: (path, decodeBase64) => repo.getContent(path, decodeBase64).then(r => {
+      counter++
+      counterListeners.forEach(l => l(counter, total))
+      return r
+    })
+  }
+
 }
 
 export type RemoteRepo = {
@@ -83,7 +115,7 @@ export const remoteRepoEqual = (repo1: RemoteRepo, repo2: RemoteRepo) =>
   repo1.branch === repo2.branch
 
 export type RemoteProjectEntry = {
-  version: number
+  uuid: string
   name: string,
   model: string
   texture?: {
