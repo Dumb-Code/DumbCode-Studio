@@ -1,8 +1,6 @@
-import { remoteRepoEqual } from './../project/DcRemoteRepos';
 import { v4 } from 'uuid';
 import { LO, LOMap } from './../../util/ListenableObject';
 import DcProject from '../project/DcProject';
-import { convertToObject } from 'typescript';
 
 export default class DcaAnimation {
   readonly identifier = v4()

@@ -39,11 +39,11 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     const listeners = useRef(new Set<(scroll: number, zoom: number) => void>())
     const scroll = useRef(animation.scroll.value)
     const zoom = useRef(animation.zoom.value)
-    const addListener: ListenerEffect = func => {
+    const addListener: ListenerEffect = useCallback(func => {
         func(scroll.current, zoom.current)
         listeners.current.add(func)
-    }
-    const removeListener: ListenerEffect = func => listeners.current.delete(func)
+    }, [])
+    const removeListener: ListenerEffect = useCallback(func => listeners.current.delete(func), [])
 
 
     const onScrollChange = useCallback((val: number) => {
@@ -178,7 +178,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
             removeListener(scrollCallback)
             animation.time.removeListener(timeCallback)
         }
-    }, [])
+    }, [addListener, removeListener, timeMarkerRef, animation.time])
 
 
     return (
@@ -225,7 +225,7 @@ const TimelineLayer = ({ color, keyframes, animation }: { color: string, keyfram
         }
         addListener(callback)
         return () => removeListener(callback)
-    }, [])
+    }, [addListener, removeListener])
     return (
         <div ref={ref} className="bg-gray-900 relative h-full " style={{ backgroundPositionX: `${-scroll}px`, backgroundImage: `repeating-linear-gradient(90deg, ${darkMode ? "#363636" : "#D4D4D4"}  0px, ${darkMode ? "#363636" : "#D4D4D4"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width}px)` }}>
             {keyframes.map(kf =>
@@ -255,7 +255,7 @@ const KeyFrame = ({ layerColor, keyframe, animation }: { layerColor: string, ani
         }
         addListener(callback)
         return () => removeListener(callback)
-    }, [length, start, ref.current])
+    }, [length, start, addListener, removeListener])
 
     return (
         <div
