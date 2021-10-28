@@ -142,7 +142,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
 
     const timeMarkerRef = useDraggbleRef<HTMLDivElement, number>(
         () => animation.time.value,
-        ({ dx, initial }) => animation.time.value = Math.max(dx / (blockPerSecond * width) - initial, 0)
+        ({ dx, initial }) => animation.time.value = Math.max(dx / (blockPerSecond * width) + initial, 0)
     )
 
     const timeRef = useRef(animation.time.value)
