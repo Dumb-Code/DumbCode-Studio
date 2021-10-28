@@ -18,14 +18,16 @@ const AnimatorTimeline = () => {
     )
 }
 
-type ListenerEffect = (func: (scroll: number, zoom: number) => void) => () => void
+type ListenerEffect = (func: (scroll: number, zoom: number) => void) => void
 
 const ScrollZoomContext = createContext<{
-    readonly addListenerEffect: ListenerEffect
+    readonly addListener: ListenerEffect
+    readonly removeListener: ListenerEffect
     readonly scroll: number
     readonly zoom: number
 }>({
-    addListenerEffect: () => { throw new Error("Invalid Call") },
+    addListener: () => { throw new Error("Invalid Call") },
+    removeListener: () => { throw new Error("Invalid Call") },
     scroll: 0,
     zoom: 1,
 })
@@ -37,12 +39,11 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     const listeners = useRef(new Set<(scroll: number, zoom: number) => void>())
     const scroll = useRef(animation.scroll.value)
     const zoom = useRef(animation.zoom.value)
-    const addListenerEffect: ListenerEffect = (func: (scroll: number, zoom: number) => void) => {
+    const addListener: ListenerEffect = func => {
+        func(scroll.current, zoom.current)
         listeners.current.add(func)
-        return () => {
-            listeners.current.delete(func)
-        }
     }
+    const removeListener: ListenerEffect = func => listeners.current.delete(func)
 
 
     const onScrollChange = useCallback((val: number) => {
@@ -68,7 +69,8 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     }, [keyframes, layers, setLayers, animation.scroll, onScrollChange])
 
     const context = {
-        addListenerEffect,
+        addListener,
+        removeListener,
         zoom: zoom.current,
         scroll: scroll.current
     }
@@ -138,6 +140,47 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
         ({ dx, initial }) => animation.scroll.value = Math.max(initial - dx, 0)
     )
 
+    const timeMarkerRef = useDraggbleRef<HTMLDivElement, number>(
+        () => animation.time.value,
+        ({ dx, initial }) => animation.time.value = Math.max(dx / (blockPerSecond * width) - initial, 0)
+    )
+
+    const timeRef = useRef(animation.time.value)
+    const scrollRef = useRef(0)
+
+
+    const { addListener, removeListener } = useContext(ScrollZoomContext)
+
+
+    useEffect(() => {
+        const updateAndSetLeft = () => {
+            const ref = timeMarkerRef.current
+            if (ref === null) {
+                return
+            }
+            const amount = timeRef.current * width * blockPerSecond - scrollRef.current
+            ref.style.display = amount < 0 ? "none" : "initial"
+            ref.style.left = `${amount}px`
+        }
+        const scrollCallback = (scroll: number) => {
+            scrollRef.current = scroll
+            updateAndSetLeft()
+        }
+        addListener(scrollCallback)
+
+        const timeCallback = (time: number) => {
+            timeRef.current = time
+            updateAndSetLeft()
+        }
+        animation.time.addListener(timeCallback)
+
+        return () => {
+            removeListener(scrollCallback)
+            animation.time.removeListener(timeCallback)
+        }
+    }, [])
+
+
     return (
         <div className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
@@ -147,8 +190,11 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
                 <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGLocked className="h-4 w-4 mr-1" /></button>
                 <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGSettings className="h-4 w-4 mr-1" /></button>
             </div>
-            <div ref={draggingRef} className="flex flex-col w-full h-full" >
-                <TimelineLayers color={color} animation={animation} layers={layers} />
+            <div className="relative w-full">
+                <div ref={draggingRef} className="flex flex-col w-full h-full overflow-hidden">
+                    <TimelineLayers color={color} animation={animation} layers={layers} />
+                </div>
+                <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 h-7 -top-0.5" />
             </div>
         </div>
     )
@@ -160,57 +206,62 @@ const width = 24
 const TimelineLayers = ({ color, animation, layers }: { color: string, animation: DcaAnimation, layers: DcaKeyframe[][] }) => {
     return (<>
         {layers.map((layer, i) =>
-            <TimelineLayer key={i} keyframes={layer} color={color} />
+            <TimelineLayer key={i} keyframes={layer} color={color} animation={animation} />
         )}
     </>)
 }
 
-const TimelineLayer = ({ color, keyframes }: { color: string, keyframes: DcaKeyframe[] }) => {
+const TimelineLayer = ({ color, keyframes, animation }: { color: string, keyframes: DcaKeyframe[], animation: DcaAnimation }) => {
     const ref = useRef<HTMLDivElement>(null)
 
     const { darkMode } = useOptions()
 
-    const { addListenerEffect, scroll } = useContext(ScrollZoomContext)
+    const { addListener, removeListener, scroll } = useContext(ScrollZoomContext)
     useEffect(() => {
         const callback = (scroll: number) => {
-            if (ref.current === null) {
-                throw new Error("Ref not set")
+            if (ref.current !== null) {
+                ref.current.style.backgroundPositionX = `${-scroll}px`
             }
-            ref.current.style.backgroundPositionX = `${-scroll}px`
         }
-        addListenerEffect(callback)
-    }, [addListenerEffect])
+        addListener(callback)
+        return () => removeListener(callback)
+    }, [])
     return (
         <div ref={ref} className="bg-gray-900 relative h-full " style={{ backgroundPositionX: `${-scroll}px`, backgroundImage: `repeating-linear-gradient(90deg, ${darkMode ? "#363636" : "#D4D4D4"}  0px, ${darkMode ? "#363636" : "#D4D4D4"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width}px)` }}>
             {keyframes.map(kf =>
-                <KeyFrame key={kf.identifier} layerColor={color} keyframe={kf} />
+                <KeyFrame key={kf.identifier} layerColor={color} animation={animation} keyframe={kf} />
             )}
         </div>
     )
 }
 
-const KeyFrame = ({ layerColor, keyframe }: { layerColor: string, keyframe: DcaKeyframe }) => {
+const KeyFrame = ({ layerColor, keyframe, animation }: { layerColor: string, animation: DcaAnimation, keyframe: DcaKeyframe }) => {
     const [start] = useListenableObject(keyframe.startTime)
     const [length] = useListenableObject(keyframe.duration)
+    const [selected, setSelected] = useListenableObject(keyframe.selected)
 
     const ref = useRef<HTMLDivElement>(null)
 
-    const { addListenerEffect, scroll } = useContext(ScrollZoomContext)
+    const { addListener, removeListener, scroll } = useContext(ScrollZoomContext)
     useEffect(() => {
         const callback = (scroll: number) => {
-            if (ref.current === null) {
-                throw new Error("Ref not set")
+            // if (ref.current === null) {
+            //     throw new Error("Ref not set")
+            // }
+            if (ref.current !== null) {
+                ref.current.style.left = `${start * width * blockPerSecond - scroll}px`
+                ref.current.style.width = `${length * width * blockPerSecond}px`
             }
-            ref.current.style.left = `${start * width * blockPerSecond - scroll}px`
-            ref.current.style.width = `${length * width * blockPerSecond}px`
         }
-        addListenerEffect(callback)
-    }, [addListenerEffect, length, start])
+        addListener(callback)
+        return () => removeListener(callback)
+    }, [length, start, ref.current])
 
     return (
         <div
             ref={ref}
-            className={layerColor + " h-1 mt-1 mb-1.5 absolute"}
+            onClick={() => setSelected(!selected)}
+            className={"h-1 mt-1 mb-1.5 absolute " + (selected ? " bg-red-200" : layerColor)}
             style={{ left: `${(start + scroll) * width * blockPerSecond}px`, width: `${(length + scroll) * width * blockPerSecond}px` }}
         >
         </div>

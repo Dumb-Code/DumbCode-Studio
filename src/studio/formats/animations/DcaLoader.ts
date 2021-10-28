@@ -29,7 +29,7 @@ export const loadDCAAnimation = (project: DcProject, name: string, buffer: Studi
   const keyframes: DcaKeyframe[] = []
   let length = buffer.readNumber()
   for (let i = 0; i < length; i++) {
-    let kf = new DcaKeyframe(project)
+    let kf = new DcaKeyframe(project, animation)
     keyframes.push(kf)
 
     kf.startTime.value = buffer.readNumber()

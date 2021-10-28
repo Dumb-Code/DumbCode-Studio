@@ -176,6 +176,7 @@ export class DCMCube implements CubeParent {
       counter += 1
     }
     model.identifierCubeMap.set(this.identifier, this)
+    this.pushNameToModel()
 
     this.uvBuffer = new BufferAttribute(new Float32Array(new Array(6 * 4 * 2)), 2)
 
@@ -231,6 +232,9 @@ export class DCMCube implements CubeParent {
   }
 
   pushNameToModel(name = this.name.value) {
+    if (name !== this.name.value) {
+      this.model.cubeMap.get(this.name.value)?.delete(this)
+    }
     const set = this.model.cubeMap.get(name) ?? new Set()
     set.add(this)
     this.model.cubeMap.set(name, set)

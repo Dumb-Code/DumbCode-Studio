@@ -17,9 +17,9 @@ const Animator = () => {
     useEffect(() => {
         const onFrame = (deltaTime: number) => {
             project.model.resetVisuals()
-            const selected = project.animationTabs.selectedAnimation
-            if (selected.value !== null) {
-                selected.value.animate(deltaTime)
+            const selected = project.animationTabs.selectedAnimation.value
+            if (selected !== null) {
+                selected.animate(deltaTime)
             }
         }
         onFrameListeners.add(onFrame)

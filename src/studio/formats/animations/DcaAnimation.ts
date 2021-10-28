@@ -1,6 +1,8 @@
+import { remoteRepoEqual } from './../project/DcRemoteRepos';
 import { v4 } from 'uuid';
 import { LO, LOMap } from './../../util/ListenableObject';
 import DcProject from '../project/DcProject';
+import { convertToObject } from 'typescript';
 
 export default class DcaAnimation {
   readonly identifier = v4()
@@ -8,6 +10,7 @@ export default class DcaAnimation {
 
   name: LO<string>
   readonly keyframes = new LO<readonly DcaKeyframe[]>([])
+  readonly selectedKeyframes = new Set<DcaKeyframe>()
 
   readonly time = new LO(0)
   readonly displayTime = new LO(0)
@@ -41,9 +44,19 @@ export default class DcaAnimation {
     if (this.playing.value) {
       this.time.value += delta
     }
-
     this.keyframes.value.forEach(kf => kf.animate(this.time.value))
   }
+
+  // toggleSelected(keyframe: DcaKeyframe) {
+  //   const index = this.selectedKeyframes.value.indexOf(keyframe)
+  //   if (index !== -1) {
+  //     this.selectedKeyframes.value = [...this.selectedKeyframes.value].splice(index, 1)
+  //     keyframe.selected.value = false
+  //   } else {
+  //     this.selectedKeyframes.value = this.selectedKeyframes.value.concat(keyframe)
+  //     keyframe.selected.value = true
+  //   }
+  // }
 }
 
 export type ProgressionPoint = { required?: boolean, x: number, y: number }
@@ -56,6 +69,8 @@ export class DcaKeyframe {
   readonly startTime = new LO(0)
   readonly duration = new LO(0)
 
+  readonly selected = new LO(false)
+
   readonly rotation = new LOMap<string, readonly [number, number, number]>()
   readonly position = new LOMap<string, readonly [number, number, number]>()
   readonly cubeGrow = new LOMap<string, readonly [number, number, number]>()
@@ -64,12 +79,20 @@ export class DcaKeyframe {
 
   skip = false
 
-  constructor(project: DcProject) {
+  constructor(project: DcProject, animation: DcaAnimation) {
     this.identifier = v4()
     this.project = project
 
     this.progressionPoints.addListener((val, _, naughtyModifyValue) => {
       naughtyModifyValue(Array.from(val).sort((a, b) => a.x - b.x))
+    })
+
+    this.selected.addListener(val => {
+      if (val) {
+        animation.selectedKeyframes.add(this)
+      } else {
+        animation.selectedKeyframes.delete(this)
+      }
     })
   }
 
