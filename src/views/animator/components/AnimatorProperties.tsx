@@ -4,24 +4,49 @@ import Slider from 'react-input-slider'
 import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
 import Dropup, { DropupItem } from "../../../components/Dropup";
-import { useState } from "react";
 import { MinimizeButton } from "../../../components/MinimizeButton";
+import { usePanelToggle } from "../../../contexts/StudioPanelsContext";
+import { useStudio } from "../../../contexts/StudioContext";
+import { LOMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import DcaAnimation from "../../../studio/formats/animations/DcaAnimation";
 
 const AnimatorProperties = () => {
+
+    const { getSelectedProject } = useStudio()
+    const project = getSelectedProject()
+
+    const [selectedCubes] = useListenableObject(project.selectedCubeManager.selected)
+    const singleSelectedCube = selectedCubes.length === 1 ? project.model.identifierCubeMap.get(selectedCubes[0]) : undefined
+    const [cubeName] = useListenableObjectNullable(singleSelectedCube?.name)
+
+    const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
     return (
         <div className="overflow-y-scroll h-full dark:bg-gray-800 bg-gray-200">
-            <AnimatorCubeProperties />
-            <AnimatorLoopingProperties />
-            <AnimatorIKProperties />
-            <AnimatorProgressionProperties />
+            <AnimatorCubeProperties animation={animation} cubeName={cubeName} />
+            <AnimatorLoopingProperties animation={animation} />
+            <AnimatorIKProperties animation={animation} />
+            <AnimatorProgressionProperties animation={animation} />
         </div>
     )
 }
 
-const AnimatorCubeProperties = () => {
+const AnimatorCubeProperties = ({ animation, cubeName }: { animation: DcaAnimation | null, cubeName: string | undefined }) => {
 
-    const [propertiesActive, setPropertiesActive] = useState(true);
+    const [propertiesActive, setPropertiesActive] = usePanelToggle("animator_cube")
 
+    const [rawKfs] = useListenableObjectNullable(animation?.selectedKeyframes)
+    const keyframes = rawKfs ?? []
+    const selectedKf = keyframes.length === 1 ? keyframes[0] : null
+
+    const [startTime] = useListenableObjectNullable(selectedKf?.startTime)
+    const [duration] = useListenableObjectNullable(selectedKf?.duration)
+    if (animation !== null) {
+        if (startTime !== undefined && duration !== undefined) {
+            animation.forceAnimationTime = startTime + duration
+        } else {
+            animation.forceAnimationTime = null
+        }
+    }
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
             <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
@@ -30,20 +55,20 @@ const AnimatorCubeProperties = () => {
             </div>
             <div className={(propertiesActive ? "h-64" : "h-0") + " transition-height ease-in-out duration-200"}>
                 <div className="w-full grid grid-cols-2 px-2 pt-1">
-                    <CubeInput title="POSITIONS" />
-                    <CubeInput title="CUBE GROW" />
+                    <WrappedCubeInput title="POSITIONS" cubeName={cubeName} obj={selectedKf?.position} />
+                    <WrappedCubeInput title="CUBE GROW" cubeName={cubeName} obj={selectedKf?.cubeGrow} />
                 </div>
                 <div className="px-2">
-                    <CubeRotationInput title="ROTATION" />
+                    <WrappedCubeRotationInput title="ROTATION" cubeName={cubeName} obj={selectedKf?.rotation} />
                 </div>
             </div>
         </div>
     )
 }
 
-const AnimatorLoopingProperties = () => {
+const AnimatorLoopingProperties = ({ animation }: { animation: DcaAnimation | null }) => {
 
-    const [loopingActive, setLoopingActive] = useState(true);
+    const [loopingActive, setLoopingActive] = usePanelToggle("animator_looping");
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
@@ -67,9 +92,9 @@ const AnimatorLoopingProperties = () => {
     )
 }
 
-const AnimatorIKProperties = () => {
+const AnimatorIKProperties = ({ animation }: { animation: DcaAnimation | null }) => {
 
-    const [ikActive, setIKActive] = useState(false);
+    const [ikActive, setIKActive] = usePanelToggle("animator_ik");
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
@@ -86,9 +111,9 @@ const AnimatorIKProperties = () => {
     )
 }
 
-const AnimatorProgressionProperties = () => {
+const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation | null }) => {
 
-    const [progressionActive, setProgressionActive] = useState(false);
+    const [progressionActive, setProgressionActive] = usePanelToggle("animator_pp");
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col pb-1">
@@ -178,6 +203,18 @@ const TitledField = ({ title }: { title: string }) => {
             </div>
         </div>
     )
+}
+
+const WrappedCubeInput = ({ title, cubeName, obj }: { title: string, cubeName: string | undefined, obj?: LOMap<string, readonly [number, number, number]> }) => {
+    const [rawValue, setValue] = useListenableObjectInMapNullable(obj, cubeName)
+    const value = obj !== undefined && cubeName !== undefined && rawValue === undefined ? [0, 0, 0] as const : rawValue
+    return <CubeInput title={title} value={value} setValue={setValue} />
+}
+
+const WrappedCubeRotationInput = ({ title, cubeName, obj }: { title: string, cubeName: string | undefined, obj?: LOMap<string, readonly [number, number, number]> }) => {
+    const [rawValue, setValue] = useListenableObjectInMapNullable(obj, cubeName)
+    const value = obj !== undefined && cubeName !== undefined && rawValue === undefined ? [0, 0, 0] as const : rawValue
+    return <CubeRotationInput title={title} value={value} setValue={setValue} />
 }
 
 export default AnimatorProperties;

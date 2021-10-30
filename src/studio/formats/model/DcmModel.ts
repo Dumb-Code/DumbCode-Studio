@@ -132,7 +132,8 @@ export class DCMCube implements CubeParent {
   readonly cubeGrow: LO<readonly [number, number, number]>
   readonly children: LO<readonly DCMCube[]>
 
-  readonly mouseState = new LO<"none" | "hover" | "selected">("none")
+  readonly mouseHover = new LO(false)
+  readonly selected = new LO(false)
 
   model: DCMModel
   parent: CubeParent
@@ -204,23 +205,25 @@ export class DCMCube implements CubeParent {
       })
     })
 
-    this.mouseState.addListener(v => {
+    this.mouseHover.addListener(isHovering => {
       if (this.model.selectedCubeManager !== undefined && this.model.materials !== undefined && this.cubeMesh !== undefined) {
-        switch (v) {
-          case "hover":
-            this.model.selectedCubeManager.onMouseOverMesh(this.cubeMesh)
-            this.cubeMesh.material = this.model.materials.highlight
-            break
-          case "selected":
-            this.model.selectedCubeManager.onCubeSelected(this)
-            this.cubeMesh.material = this.model.materials.selected
-            break
-          case "none":
-            this.model.selectedCubeManager.onMouseOffMesh(this.cubeMesh)
-            this.model.selectedCubeManager.onCubeUnSelected(this)
-            this.cubeMesh.material = this.model.materials.normal
-            break
+        if (isHovering) {
+          this.model.selectedCubeManager.onMouseOverMesh(this.cubeMesh)
+        } else {
+          this.model.selectedCubeManager.onMouseOffMesh(this.cubeMesh)
         }
+        this.updateMaterials({ hovering: isHovering })
+      }
+    })
+
+    this.selected.addListener(isSelected => {
+      if (this.model.selectedCubeManager !== undefined && this.model.materials !== undefined && this.cubeMesh !== undefined) {
+        if (isSelected) {
+          this.model.selectedCubeManager.onCubeSelected(this)
+        } else {
+          this.model.selectedCubeManager.onCubeUnSelected(this)
+        }
+        this.updateMaterials({ selected: isSelected })
       }
     })
 
@@ -229,6 +232,16 @@ export class DCMCube implements CubeParent {
     this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.materials.normal)
     children.forEach(child => this.cubeGroup.add(child.cubeGroup))
     this.createGroup()
+  }
+
+  updateMaterials({ selected = this.selected.value, hovering = this.mouseHover.value }) {
+    if (selected) {
+      this.cubeMesh.material = this.model.materials.selected
+    } else if (hovering) {
+      this.cubeMesh.material = this.model.materials.highlight
+    } else {
+      this.cubeMesh.material = this.model.materials.normal
+    }
   }
 
   pushNameToModel(name = this.name.value) {

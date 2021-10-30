@@ -44,6 +44,7 @@ export const useListenableObjectNullable = <T>(obj: LO<T> | undefined): [T | und
   const [state, setState] = useState<T | undefined>(() => obj?.value)
   useEffect(() => {
     if (obj === undefined) {
+      setState(undefined)
       return
     }
     if (state !== obj.value) {
@@ -135,4 +136,25 @@ export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K): [V | u
     return () => obj.removeListener(key, setState)
   }, [state, setState, obj, key])
   return [state, val => obj.set(key, val)]
+}
+
+export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: K): [V | undefined, (val: V) => void] => {
+  const [state, setState] = useState(obj !== undefined && key !== undefined ? obj.get(key) : undefined)
+  useEffect(() => {
+    if (obj === undefined || key === undefined) {
+      setState(undefined)
+      return
+    }
+    const v = obj.get(key)
+    if (state !== v) {
+      setState(v)
+    }
+    obj.addListener(key, setState)
+    return () => obj.removeListener(key, setState)
+  }, [state, setState, obj, key])
+  return [state, val => {
+    if (obj !== undefined && key !== undefined) {
+      obj.set(key, val)
+    }
+  }]
 }

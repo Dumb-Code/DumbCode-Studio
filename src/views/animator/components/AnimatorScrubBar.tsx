@@ -28,6 +28,13 @@ const AnimatorScrubBar = () => {
 
     const isMoving = isHovering || isDragging
 
+    useEffect(() => {
+        if (animation !== null) {
+            animation.isDraggingTimeline = isDragging
+        }
+    }, [isDragging])
+
+
     const setBarPosition = useCallback(() => {
         if (animation !== null) {
             setValueGiven(mouseHoverXRef.current * max)

@@ -6,7 +6,7 @@ export const useDraggbleRef = <T extends HTMLElement, O>(
 ) => {
   const ref = useRef<T>(null)
 
-  const initialRef = useRef<O>(initialGetter())
+  const initialRef = useRef<O | null>(null)
   const isDragging = useRef(false)
   const xRef = useRef(0)
   const yRef = useRef(0)
@@ -38,7 +38,7 @@ export const useDraggbleRef = <T extends HTMLElement, O>(
 
       onDrag({
         dx, dy,
-        initial: initialRef.current,
+        initial: initialRef.current as O,
         x: e.clientX,
         y: e.clientY,
       })
@@ -52,7 +52,7 @@ export const useDraggbleRef = <T extends HTMLElement, O>(
           max: Math.sqrt(max.current),
           dx: e.clientX - xRef.current,
           dy: e.clientY - yRef.current,
-          initial: initialRef.current,
+          initial: initialRef.current as O,
           x: e.clientX,
           y: e.clientY
         })

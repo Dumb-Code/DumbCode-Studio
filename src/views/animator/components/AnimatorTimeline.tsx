@@ -141,12 +141,16 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     )
 
     const timeMarkerRef = useDraggbleRef<HTMLDivElement, number>(
-        () => animation.time.value,
-        ({ dx, initial }) => animation.time.value = Math.max(dx / (blockPerSecond * width) + initial, 0)
+        () => {
+            animation.isDraggingTimeline = true
+            return animation.time.value
+        },
+        ({ dx, initial }) => animation.time.value = Math.max(dx / (blockPerSecond * width) + initial, 0),
+        () => animation.isDraggingTimeline = false
     )
 
     const timeRef = useRef(animation.time.value)
-    const scrollRef = useRef(0)
+    const scrollRef = useRef(animation.scroll.value)
 
 
     const { addListener, removeListener } = useContext(ScrollZoomContext)

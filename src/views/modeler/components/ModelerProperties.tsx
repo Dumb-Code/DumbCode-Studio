@@ -1,8 +1,8 @@
-import { useState } from "react";
 import CubeInput from "../../../components/CubeInput"
 import CubeRotationInput from "../../../components/CubeRotationInput"
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { useStudio } from "../../../contexts/StudioContext";
+import { usePanelToggle } from "../../../contexts/StudioPanelsContext";
 import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 
 const ModelerProperties = () => {
@@ -14,7 +14,7 @@ const ModelerProperties = () => {
 
     const firstSelected = oneSelected ? model.identifierCubeMap.get(selected[0]) : undefined
 
-    const [propertiesActive, setPropertiesActive] = useState(true);
+    const [propertiesActive, setPropertiesActive] = usePanelToggle("model_cube")
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden">
@@ -47,7 +47,7 @@ const WrappedCubeName = ({ obj }: { obj?: LO<string> }) => {
         <input
             className="border-none dark:text-white text-black dark:bg-gray-700 bg-white pt-1.5 mb-1 text-xs h-7 col-span-2 mx-1 rounded focus:outline-none focus:ring-gray-800"
             type="text"
-            value={value}
+            value={value ?? ""}
             onChange={e => setValue(e.currentTarget.value)}
         />
     )

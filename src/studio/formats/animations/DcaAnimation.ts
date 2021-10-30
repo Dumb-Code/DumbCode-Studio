@@ -8,7 +8,7 @@ export default class DcaAnimation {
 
   name: LO<string>
   readonly keyframes = new LO<readonly DcaKeyframe[]>([])
-  readonly selectedKeyframes = new Set<DcaKeyframe>()
+  readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([])
 
   readonly time = new LO(0)
   readonly displayTime = new LO(0)
@@ -21,6 +21,18 @@ export default class DcaAnimation {
 
   readonly scroll = new LO(0)
   readonly zoom = new LO(1)
+
+  _isDraggingTimeline = false
+  forceAnimationTime: number | null = null
+
+
+  get isDraggingTimeline() {
+    return this._isDraggingTimeline
+  }
+
+  set isDraggingTimeline(v: boolean) {
+    this._isDraggingTimeline = v
+  }
 
   constructor(project: DcProject, name: string) {
     this.name = new LO(name)
@@ -42,19 +54,10 @@ export default class DcaAnimation {
     if (this.playing.value) {
       this.time.value += delta
     }
-    this.keyframes.value.forEach(kf => kf.animate(this.time.value))
+    const time = this.time.value
+    this.keyframes.value.forEach(kf => kf.animate(this.isDraggingTimeline ? time : (this.forceAnimationTime ?? time)))
   }
 
-  // toggleSelected(keyframe: DcaKeyframe) {
-  //   const index = this.selectedKeyframes.value.indexOf(keyframe)
-  //   if (index !== -1) {
-  //     this.selectedKeyframes.value = [...this.selectedKeyframes.value].splice(index, 1)
-  //     keyframe.selected.value = false
-  //   } else {
-  //     this.selectedKeyframes.value = this.selectedKeyframes.value.concat(keyframe)
-  //     keyframe.selected.value = true
-  //   }
-  // }
 }
 
 export type ProgressionPoint = { required?: boolean, x: number, y: number }
@@ -63,6 +66,7 @@ export class DcaKeyframe {
   readonly identifier: string
   layerId: number = 0
   readonly project: DcProject
+  readonly animation: DcaAnimation
 
   readonly startTime = new LO(0)
   readonly duration = new LO(0)
@@ -80,18 +84,23 @@ export class DcaKeyframe {
   constructor(project: DcProject, animation: DcaAnimation) {
     this.identifier = v4()
     this.project = project
+    this.animation = animation
 
     this.progressionPoints.addListener((val, _, naughtyModifyValue) => {
       naughtyModifyValue(Array.from(val).sort((a, b) => a.x - b.x))
     })
 
-    this.selected.addListener(val => {
-      if (val) {
-        animation.selectedKeyframes.add(this)
+    this.selected.addListener(value => {
+      const list = this.animation.selectedKeyframes
+      if (value) {
+        if (!list.value.includes(this)) {
+          list.value = list.value.concat(this)
+        }
       } else {
-        animation.selectedKeyframes.delete(this)
+        list.value = list.value.filter(val => val !== this)
       }
     })
+
   }
 
   animate(time: number) {
@@ -168,6 +177,11 @@ export class DcaKeyframe {
         }
       })
     })
+  }
+
+  delete() {
+    this.selected.value = false
+    this.animation.keyframes.value = this.animation.keyframes.value.filter(kf => kf !== this)
   }
 }
 

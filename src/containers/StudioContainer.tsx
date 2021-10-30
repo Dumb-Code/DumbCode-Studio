@@ -9,6 +9,7 @@ import Options from "../views/options/Options";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
 import DialogBoxes from "../dialogboxes/DialogBoxes";
 import ProjectPageContext from "../contexts/ProjectPageContext";
+import StudioPanelsContextProvider from "../contexts/StudioPanelsContext";
 
 type Tab = {
   name: string;
@@ -27,13 +28,15 @@ const Tabs: Tab[] = [
 const StudioContainer = () => {
   return (
     <StudioContextProvider>
-      <OptionsContextProvider>
-        <ProjectPageContext>
-          <DialogBoxes>
-            <StudioApp />
-          </DialogBoxes>
-        </ProjectPageContext>
-      </OptionsContextProvider>
+      <StudioPanelsContextProvider>
+        <OptionsContextProvider>
+          <ProjectPageContext>
+            <DialogBoxes>
+              <StudioApp />
+            </DialogBoxes>
+          </ProjectPageContext>
+        </OptionsContextProvider>
+      </StudioPanelsContextProvider>
     </StudioContextProvider>
   );
 };

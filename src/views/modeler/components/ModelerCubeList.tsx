@@ -437,15 +437,16 @@ const CubeItemEntry = ({ cube, dragState, isDragging, hasChildren }: { cube: DCM
     const [visible, setVisible] = useState(true);
     const [locked, setLocked] = useState(false);
 
-    const [mouseState, setMouseState] = useListenableObject(cube.mouseState)
+    const [hovering, setHovering] = useListenableObject(cube.mouseHover)
+    const [selected, setSelected] = useListenableObject(cube.selected)
 
     const collapsed = false
 
     if (visible && !locked) {
         itemBackgroundColor = "text-white "
-        if (mouseState === "selected") {
+        if (selected) {
             itemBackgroundColor += "bg-lightBlue-500 hover:bg-lightBlue-400"
-        } else if (mouseState === "hover" && !isDragging) {
+        } else if (hovering && !isDragging) {
             itemBackgroundColor += "bg-red-600"
         } else {
             itemBackgroundColor += "dark:bg-gray-700 bg-gray-400"
@@ -454,17 +455,11 @@ const CubeItemEntry = ({ cube, dragState, isDragging, hasChildren }: { cube: DCM
         itemBackgroundColor = locked ? "dark:bg-gray-100 bg-gray-500 bg-opacity-30 text-gray-400 rounded" : "bg-gray-700 bg-opacity-40 text-gray-500 rounded"
     }
 
-    const setIfNotSelected = (state: "none" | "hover") => {
-        if (mouseState !== "selected") {
-            setMouseState(state)
-        }
-    }
-
     return (
         <div
-            onPointerEnter={() => setIfNotSelected("hover")}
-            onPointerLeave={() => setIfNotSelected("none")}
-            onClick={e => { setMouseState("selected"); e.stopPropagation() }}
+            onPointerEnter={() => setHovering(true)}
+            onPointerLeave={() => setHovering(false)}
+            onClick={e => { setSelected(true); e.stopPropagation() }}
             className={`${itemBackgroundColor} ml-2 my-0.5`}
             style={{
                 borderTop: `2px solid ${dragState === "top" ? "#4287f5" : "transparent"}`,

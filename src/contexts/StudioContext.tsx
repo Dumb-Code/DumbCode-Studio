@@ -57,7 +57,7 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
     getSelectedProject: () => {
       if (selectedProject === null) {
         const project = newProject()
-        console.trace(project)
+        // console.trace(project)
         context.addProject(project)
         return project
       }

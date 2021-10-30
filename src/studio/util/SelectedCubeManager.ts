@@ -5,6 +5,7 @@ import React, { useEffect } from 'react';
 import { Vector2 } from 'three';
 import { useStudio } from '../../contexts/StudioContext';
 import DcProject from '../formats/project/DcProject';
+import { createBuilderStatusReporter } from 'typescript';
 export default class SelectedCubeManager {
   mouseOverDiv = false
   disabled = false
@@ -19,7 +20,6 @@ export default class SelectedCubeManager {
   mouseOverMesh: Mesh | null = null
   mouseOver: LO<string | null> = new LO<string | null>(null)
   selected: LO<readonly string[]> = new LO<readonly string[]>([])
-
 
   onMouseMove(rect: DOMRect, x: number, y: number, fromEvent: boolean) {
     this.mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
@@ -53,15 +53,11 @@ export default class SelectedCubeManager {
       if (!ignore) {
         if (this.mouseOverMesh !== null) {
           const cube = this.getCube(this.mouseOverMesh)
-          if (cube.mouseState.value !== "selected") {
-            cube.mouseState.value = "selected"
-          } else {
-            cube.mouseState.value = this.mouseOver.value === cube.identifier ? "hover" : "none"
-          }
+          cube.selected.value = !cube.selected.value
         } else {
           project.model.identifierCubeMap.forEach(v => {
-            if (v.mouseState.value === "selected") {
-              v.mouseState.value = this.mouseOver.value === v.identifier ? "hover" : "none"
+            if (v.selected.value) {
+              v.selected.value = false
             }
           })
         }
@@ -74,8 +70,8 @@ export default class SelectedCubeManager {
     const keep = false
     if (!keep) {
       cube.model.identifierCubeMap.forEach(v => {
-        if (v.mouseState.value === "selected") {
-          v.mouseState.value = this.mouseOver.value === v.identifier ? "hover" : "none"
+        if (v.selected.value) {
+          v.selected.value = false
         }
       })
       this.selected.value = [cube.identifier]
@@ -86,28 +82,29 @@ export default class SelectedCubeManager {
   }
 
   onCubeUnSelected(cube: DCMCube) {
-    this.selected.value = this.selected.value.filter(l => l !== cube.identifier)
+    if (this.selected.value.includes(cube.identifier)) {
+      this.selected.value = this.selected.value.filter(l => l !== cube.identifier)
+    }
   }
 
   onMouseOffMesh(mesh: Mesh) {
     if (this.mouseOverMesh === mesh) {
       this.mouseOverMesh = null
       this.mouseOver.value = null
+      this.getCube(mesh).mouseHover.value = false
     }
   }
 
   onMouseOverMesh(mesh: Mesh) {
     if (this.mouseOverMesh !== mesh) {
       if (this.mouseOverMesh !== null) {
-        const cube = this.getCube(this.mouseOverMesh)
-        if (cube.mouseState.value !== "selected") {
-          cube.mouseState.value = "none"
-        }
+        this.getCube(this.mouseOverMesh).mouseHover.value = false
       }
       this.mouseOverMesh = mesh
-      this.mouseOver.value = this.getCube(mesh).identifier
+      const cube = this.getCube(mesh)
+      this.mouseOver.value = cube.identifier
+      cube.mouseHover.value = true
     }
-
   }
 
   isSelected(mesh: Mesh) {
@@ -128,19 +125,9 @@ export default class SelectedCubeManager {
       const intersections = this.gatherIntersections(raycaster, camera, model)
       if (intersections.length > 0) {
         const mesh = intersections[0].object as Mesh
-        if (this.mouseOverMesh !== mesh) {
-          const cube = this.getCube(mesh)
-          if (cube.mouseState.value !== "selected") {
-            cube.mouseState.value = "hover"
-          }
-        }
+        this.onMouseOverMesh(mesh)
       } else if (this.mouseOverMesh !== null) {
-        const cube = this.getCube(this.mouseOverMesh)
-        if (cube.mouseState.value !== "selected") {
-          cube.mouseState.value = "none"
-        } else {
-          this.onMouseOffMesh(this.mouseOverMesh)
-        }
+        this.onMouseOffMesh(this.mouseOverMesh)
       }
     }
   }
