@@ -1,5 +1,7 @@
+import { useStudio } from '../contexts/StudioContext';
+import { DCMCube } from '../studio/formats/model/DcmModel';
 import { TextureGroup } from '../studio/formats/textures/TextureManager';
-import { useListenableObject } from '../studio/util/ListenableObject';
+import { useListenableMap, useListenableObject } from '../studio/util/ListenableObject';
 import { useTextureGroupSelect } from '../studio/util/StudioHooks';
 import Dropup, { DropupItem } from './Dropup'
 import { SVGCube, SVGEye, SVGGrid, SVGLocked, SVGRedo, SVGUndo } from './Icons';
@@ -7,21 +9,58 @@ import { ButtonWithTooltip } from './Tooltips';
 
 const InfoBar = () => {
 
+    const { getSelectedProject, toggleGrid, toggleBox } = useStudio()
+    const project = getSelectedProject()
+    const [selectedCubeIdentifs] = useListenableObject(project.selectedCubeManager.selected)
+
+    const totalCubes = useListenableMap(project.model.identifierCubeMap)
+    const selectedCube = selectedCubeIdentifs.map(c => totalCubes.get(c)).filter(cube => cube !== undefined) as DCMCube[]
+
+    const childrenOfSelectedCubes = selectedCube.flatMap(cube => cube.getAllChildrenCubes([]))
+
+    const selectAllCubes = () => {
+        project.selectedCubeManager.keepCurrentCubes = true
+        totalCubes.forEach(cube => cube.selected.value = true)
+        project.selectedCubeManager.keepCurrentCubes = false
+    }
+
+    const toggleSelectedCubesVisability = () => {
+        //Reduce all the cubes, if any of them are visible, allVisible will be visible
+        let allVisible = false
+        selectedCube.forEach(cube => allVisible = allVisible || !cube.visible.value)
+        selectedCube.forEach(cube => cube.visible.value = allVisible)
+    }
+
+    const toggleSelectedCubesLock = () => {
+        //Reduce all the cubes, if any of them are locked, allLocked will be visible
+        let allLock = false
+        selectedCube.forEach(cube => allLock = allLock || cube.locked.value)
+        selectedCube.forEach(cube => cube.locked.value = !allLock)
+    }
+
+    const selectAllChildrenCubes = () => {
+        project.selectedCubeManager.keepCurrentCubes = true
+        childrenOfSelectedCubes.forEach(cube => cube.selected.value = true)
+        project.selectedCubeManager.keepCurrentCubes = false
+    }
+
     return (
         <div className="rounded-sm dark:bg-black bg-white h-full flex flex-row">
             <DisplayModeDropup />
             <RenderModeDropup />
             <TextureGroupDropup />
-            <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black ml-0.5"><SVGGrid className="h-4 w-4 mr-1" /></button>
-            <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black"><SVGCube className="h-4 w-4 mr-1" /></button>
-            <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black text-xs">0 Total Cubes</button>
+            <button onClick={toggleGrid} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black ml-0.5"><SVGGrid className="h-4 w-4 mr-1" /></button>
+            <button onClick={toggleBox} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black"><SVGCube className="h-4 w-4 mr-1" /></button>
+            <button onClick={selectAllCubes} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black text-xs">{totalCubes.size} Total Cubes</button>
 
-            {/*The following elements need to only show up when a cube is selected*/}
-            <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded px-2 my-0.5 mr-1 dark:text-white text-black text-xs">0 Cubes Selected</button>
-            <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black"><SVGEye className="h-4 w-4 mr-1" /></button>
-            <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black"><SVGLocked className="h-4 w-4 mr-1" /></button>
-            <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded px-2 my-0.5 mr-1 dark:text-white text-black text-xs">0 Child Cubes</button>
-
+            {selectedCube.length !== 0 &&
+                <>
+                    <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded px-2 my-0.5 mr-1 dark:text-white text-black text-xs">{selectedCube.length} Cube{selectedCube.length === 1 ? "" : "s"} Selected</button>
+                    <button onClick={toggleSelectedCubesVisability} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black"><SVGEye className="h-4 w-4 mr-1" /></button>
+                    <button onClick={toggleSelectedCubesLock} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black"><SVGLocked className="h-4 w-4 mr-1" /></button>
+                    <button onClick={selectAllChildrenCubes} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded px-2 my-0.5 mr-1 dark:text-white text-black text-xs">{childrenOfSelectedCubes.length} Child Cube{childrenOfSelectedCubes.length === 1 ? "" : "s"}</button>
+                </>
+            }
             <div className="flex-grow"></div>
 
             <ButtonWithTooltip className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black" delay={500} tooltip="Undo the last operation">

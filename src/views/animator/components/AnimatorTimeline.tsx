@@ -188,7 +188,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     return (
         <div className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
-                <input type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 rounded mr-0.5 pt-0.5 h-6 text-s" placeholder="layer name" />
+                <input type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5 pt-0.5 h-6 text-s" placeholder="layer name" />
                 <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGPlus className="h-4 w-4 mr-1" /></button>
                 <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGEye className="h-4 w-4 mr-1" /></button>
                 <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGLocked className="h-4 w-4 mr-1" /></button>

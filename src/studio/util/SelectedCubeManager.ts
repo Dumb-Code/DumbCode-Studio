@@ -20,6 +20,8 @@ export default class SelectedCubeManager {
   mouseOver: LO<string | null> = new LO<string | null>(null)
   selected: LO<readonly string[]> = new LO<readonly string[]>([])
 
+  keepCurrentCubes = false
+
   onMouseMove(rect: DOMRect, x: number, y: number, fromEvent: boolean) {
     this.mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = - ((y - rect.top) / rect.height) * 2 + 1;
@@ -36,7 +38,7 @@ export default class SelectedCubeManager {
     this.mouseDown = true
   }
 
-  onMouseUp(project: DcProject, x: number, y: number) {
+  onMouseUp(project: DcProject, x: number, y: number, ctrlPressed: boolean) {
     if (!this.mouseDown) {
       return
     }
@@ -52,7 +54,9 @@ export default class SelectedCubeManager {
       if (!ignore) {
         if (this.mouseOverMesh !== null) {
           const cube = this.getCube(this.mouseOverMesh)
+          this.keepCurrentCubes = ctrlPressed
           cube.selected.value = !cube.selected.value
+          this.keepCurrentCubes = false
         } else {
           project.model.identifierCubeMap.forEach(v => {
             if (v.selected.value) {
@@ -65,9 +69,7 @@ export default class SelectedCubeManager {
   }
 
   onCubeSelected(cube: DCMCube) {
-    //TODO if ctrl is pressed don't do this:
-    const keep = false
-    if (!keep) {
+    if (!this.keepCurrentCubes) {
       cube.model.identifierCubeMap.forEach(v => {
         if (v.selected.value) {
           v.selected.value = false
@@ -77,7 +79,6 @@ export default class SelectedCubeManager {
     } else {
       this.selected.value = this.selected.value.concat(cube.identifier)
     }
-
   }
 
   onCubeUnSelected(cube: DCMCube) {
@@ -157,7 +158,7 @@ export const useSelectedCubeManagerRef = () => {
       return true
     }
     const mouseUp = (e: MouseEvent) => {
-      cubeManager.onMouseUp(project, e.clientX, e.clientY)
+      cubeManager.onMouseUp(project, e.clientX, e.clientY, e.ctrlKey)
     }
     onFrameListeners.add(callback)
     document.addEventListener("pointermove", mouseMove)

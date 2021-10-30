@@ -1,4 +1,4 @@
-import { LO } from './../../util/ListenableObject';
+import { LO, LOMap } from './../../util/ListenableObject';
 import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, MeshLambertMaterial, DoubleSide, MeshBasicMaterial } from "three";
 import { v4 as uuidv4 } from "uuid"
 import DcProject from '../project/DcProject';
@@ -37,8 +37,8 @@ export class DCMModel implements CubeParent {
   readonly textureHeight = new LO(64)
 
   cubeMap: Map<string, Set<DCMCube>>
-  identifierCubeMap: Map<string, DCMCube>
-  children = new LO<readonly DCMCube[]>([])
+  readonly identifierCubeMap = new LOMap<string, DCMCube>()
+  readonly children = new LO<readonly DCMCube[]>([])
 
   readonly needsSaving = new LO(false)
 
@@ -50,7 +50,6 @@ export class DCMModel implements CubeParent {
 
   constructor() {
     this.cubeMap = new Map()
-    this.identifierCubeMap = new Map()
 
     this.materials = new ProjectMaterials()
 
@@ -135,6 +134,9 @@ export class DCMCube implements CubeParent {
   readonly mouseHover = new LO(false)
   readonly selected = new LO(false)
 
+  readonly visible = new LO(true)
+  readonly locked = new LO(false)
+
   model: DCMModel
   parent: CubeParent
 
@@ -196,6 +198,8 @@ export class DCMCube implements CubeParent {
 
     this.textureOffset.addListener(textureOffset => this.updateTexture({ textureOffset }))
     this.textureMirrored.addListener(textureMirrored => this.updateTexture({ textureMirrored }))
+
+    this.visible.addListener(visible => this.cubeMesh.visible = visible)
 
     this.children.addListener((newChildren, oldChildren) => {
       oldChildren.forEach(child => this.cubeGroup.remove(child.cubeGroup))

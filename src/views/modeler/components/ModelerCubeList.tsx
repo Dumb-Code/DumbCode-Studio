@@ -6,6 +6,7 @@ import { useListenableObject } from '../../../studio/util/ListenableObject';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import { createPortal } from 'react-dom';
 import { useOptions } from '../../../contexts/OptionsContext';
+import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 
 const overlayDiv = document.getElementById("overlay")
 
@@ -27,7 +28,8 @@ const createCube = (model: DCMModel) => {
 const ModelerCubeList = () => {
 
     const { getSelectedProject } = useStudio()
-    const model = getSelectedProject().model
+    const project = getSelectedProject()
+    const model = project.model
 
     const createSiblingCube = () => {
         let cube = createCube(model)
@@ -73,7 +75,7 @@ const ModelerCubeList = () => {
                 </button>
             </div>
             <div className="border-r border-black flex flex-col w-full pr-2 pl-1 overflow-x-hidden overflow-y-scroll flex-grow">
-                <CubeList model={model} />
+                <CubeList model={model} selectedCubeManager={project.selectedCubeManager} />
             </div>
         </div>
     )
@@ -81,10 +83,11 @@ const ModelerCubeList = () => {
 
 type DragState = "bottom" | "on" | "top" | null
 const CubeListItem = ({
-    cube, dragData, setDragData, dragOverRef, dragEndRef, mouseDraggedElementRef,
-    clearPreviousDragState, onDragFinish, parentAnimateChildRemove
+    cube, selectedCubeManager, dragData, setDragData, dragOverRef, dragEndRef,
+    mouseDraggedElementRef, clearPreviousDragState, onDragFinish, parentAnimateChildRemove
 }: {
     cube: DCMCube
+    selectedCubeManager: SelectedCubeManager
     dragData: DragData | null
     setDragData: (val: DragData | null) => void
     dragOverRef: MutableRefObject<boolean>
@@ -338,11 +341,12 @@ const CubeListItem = ({
                 draggable
             >
                 <div ref={draggableRef} className={(isDragging || isAnimating) ? "hidden" : ""}>
-                    <div ref={cubeItemRef}><CubeItemEntry cube={cube} dragState={dragState} isDragging={isDragging} hasChildren={hasAnimationChildrenForce !== null ? hasAnimationChildrenForce : children.length !== 0} /></div>
+                    <div ref={cubeItemRef}><CubeItemEntry cube={cube} selectedCubeManager={selectedCubeManager} dragState={dragState} isDragging={isDragging} hasChildren={hasAnimationChildrenForce !== null ? hasAnimationChildrenForce : children.length !== 0} /></div>
                     <div className="ml-2">{children.map(c =>
                         <CubeListItem
                             key={c.identifier}
                             cube={c}
+                            selectedCubeManager={selectedCubeManager}
                             dragData={dragData}
                             setDragData={setDragData}
                             dragOverRef={dragOverRef}
@@ -366,7 +370,7 @@ type DragData = {
     width: number
     height: number
 }
-const CubeList = ({ model }: { model: DCMModel }) => {
+const CubeList = ({ model, selectedCubeManager }: { model: DCMModel, selectedCubeManager: SelectedCubeManager }) => {
     const { darkMode } = useOptions()
     const [children] = useListenableObject(model.children)
     const [dragData, setDragData] = useState<DragData | null>(null)
@@ -380,7 +384,7 @@ const CubeList = ({ model }: { model: DCMModel }) => {
         const [children] = useListenableObject(cube.children)
         return (
             <>
-                <div style={{ width: dragData?.width + "px" }}><CubeItemEntry cube={cube} dragState={null} isDragging={false} hasChildren={children.length !== 0} /></div>
+                <div style={{ width: dragData?.width + "px" }}><CubeItemEntry cube={cube} selectedCubeManager={selectedCubeManager} dragState={null} isDragging={false} hasChildren={children.length !== 0} /></div>
                 <div className="ml-2">{children.map(c =>
                     <MouseCubeEntry
                         key={c.identifier}
@@ -404,6 +408,7 @@ const CubeList = ({ model }: { model: DCMModel }) => {
                 <CubeListItem
                     key={c.identifier}
                     cube={c}
+                    selectedCubeManager={selectedCubeManager}
                     dragData={dragData}
                     setDragData={setDragData}
                     dragOverRef={dragOverRef}
@@ -431,11 +436,11 @@ const CubeList = ({ model }: { model: DCMModel }) => {
     )
 }
 
-const CubeItemEntry = ({ cube, dragState, isDragging, hasChildren }: { cube: DCMCube, dragState: DragState, isDragging: boolean, hasChildren: boolean }) => {
+const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasChildren }: { cube: DCMCube, selectedCubeManager: SelectedCubeManager, dragState: DragState, isDragging: boolean, hasChildren: boolean }) => {
     let itemBackgroundColor: string
 
-    const [visible, setVisible] = useState(true);
-    const [locked, setLocked] = useState(false);
+    const [visible, setVisible] = useListenableObject(cube.visible);
+    const [locked, setLocked] = useListenableObject(cube.locked);
 
     const [hovering, setHovering] = useListenableObject(cube.mouseHover)
     const [selected, setSelected] = useListenableObject(cube.selected)
@@ -452,14 +457,19 @@ const CubeItemEntry = ({ cube, dragState, isDragging, hasChildren }: { cube: DCM
             itemBackgroundColor += "dark:bg-gray-700 bg-gray-400"
         }
     } else {
-        itemBackgroundColor = locked ? "dark:bg-gray-100 bg-gray-500 bg-opacity-30 text-gray-400 rounded" : "bg-gray-700 bg-opacity-40 text-gray-500 rounded"
+        itemBackgroundColor = locked ? "dark:bg-gray-500 bg-gray-100 bg-opacity-30 text-gray-400 rounded" : "bg-gray-700 bg-opacity-40 text-gray-500 rounded"
     }
 
     return (
         <div
             onPointerEnter={() => setHovering(true)}
             onPointerLeave={() => setHovering(false)}
-            onClick={e => { setSelected(true); e.stopPropagation() }}
+            onClick={e => {
+                selectedCubeManager.keepCurrentCubes = e.ctrlKey
+                setSelected(true)
+                selectedCubeManager.keepCurrentCubes = false
+                e.stopPropagation()
+            }}
             className={`${itemBackgroundColor} ml-2 my-0.5`}
             style={{
                 borderTop: `2px solid ${dragState === "top" ? "#4287f5" : "transparent"}`,

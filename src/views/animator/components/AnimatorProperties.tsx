@@ -7,7 +7,7 @@ import Dropup, { DropupItem } from "../../../components/Dropup";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { usePanelToggle } from "../../../contexts/StudioPanelsContext";
 import { useStudio } from "../../../contexts/StudioContext";
-import { LOMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation";
 
 const AnimatorProperties = () => {
@@ -16,7 +16,8 @@ const AnimatorProperties = () => {
     const project = getSelectedProject()
 
     const [selectedCubes] = useListenableObject(project.selectedCubeManager.selected)
-    const singleSelectedCube = selectedCubes.length === 1 ? project.model.identifierCubeMap.get(selectedCubes[0]) : undefined
+    const cubeMap = useListenableMap(project.model.identifierCubeMap)
+    const singleSelectedCube = selectedCubes.length === 1 ? cubeMap.get(selectedCubes[0]) : undefined
     const [cubeName] = useListenableObjectNullable(singleSelectedCube?.name)
 
     const [animation] = useListenableObject(project.animationTabs.selectedAnimation)

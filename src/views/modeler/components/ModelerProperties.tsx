@@ -3,16 +3,17 @@ import CubeRotationInput from "../../../components/CubeRotationInput"
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { useStudio } from "../../../contexts/StudioContext";
 import { usePanelToggle } from "../../../contexts/StudioPanelsContext";
-import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { LO, useListenableMap, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 
 const ModelerProperties = () => {
     const { getSelectedProject } = useStudio()
     const { model, selectedCubeManager } = getSelectedProject()
 
     const [selected] = useListenableObject<readonly string[]>(selectedCubeManager.selected)
+    const cubeMap = useListenableMap(model.identifierCubeMap)
     const oneSelected = selected.length === 1
 
-    const firstSelected = oneSelected ? model.identifierCubeMap.get(selected[0]) : undefined
+    const firstSelected = oneSelected ? cubeMap.get(selected[0]) : undefined
 
     const [propertiesActive, setPropertiesActive] = usePanelToggle("model_cube")
 

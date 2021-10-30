@@ -74,10 +74,26 @@ export const useListenableObject = <T>(obj: LO<T>): [T, (val: T) => void] => {
 }
 
 
+//Is readonly
+export const useListenableMap = <K, V>(obj: LOMap<K, V>): Map<K, V> => {
+  const [state, setState] = useState<Map<K, V>>(() => new Map(obj))
+  useEffect(() => {
+    if (state !== obj) {
+      setState(obj)
+    }
+    const listener = () => setState(new Map(obj))
+    obj.addGlobalListener(listener)
+    return () => {
+      obj.removeGlobalListener(listener)
+    }
+  }, [state, setState, obj])
+  return state
+}
 
 export class LOMap<K, V> extends Map<K, V> {
   constructor(
-    private listners: Map<K, Set<((newValue: V | undefined, oldValue: V | undefined) => void)>> = new Map()
+    private listners: Map<K, Set<((newValue: V | undefined, oldValue: V | undefined) => void)>> = new Map(),
+    private globalListeners = new Set<() => void>()
   ) {
     super()
   }
@@ -88,6 +104,7 @@ export class LOMap<K, V> extends Map<K, V> {
       if (get !== undefined) {
         get.forEach(l => l(undefined, v))
       }
+      this.globalListeners.forEach(l => l())
     })
     super.clear()
   }
@@ -97,6 +114,7 @@ export class LOMap<K, V> extends Map<K, V> {
     if (get !== undefined) {
       get.forEach(l => l(undefined, this.get(key) ?? undefined))
     }
+    this.globalListeners.forEach(l => l())
     return super.delete(key);
   }
 
@@ -105,10 +123,13 @@ export class LOMap<K, V> extends Map<K, V> {
     if (get !== undefined) {
       get.forEach(l => l(value, this.get(key) ?? undefined))
     }
+    this.globalListeners.forEach(l => l())
     super.set(key, value)
     return this
   }
 
+  addGlobalListener = (func: () => void) => this.globalListeners.add(func)
+  removeGlobalListener = (func: () => void) => this.globalListeners.delete(func)
 
   addListener(key: K, func: (newValue: V | undefined, oldValue: V | undefined) => void) {
     const arr = this.listners.get(key) ?? new Set()
