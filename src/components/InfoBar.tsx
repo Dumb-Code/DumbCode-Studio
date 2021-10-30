@@ -51,7 +51,7 @@ const InfoBar = () => {
             <TextureGroupDropup />
             <button onClick={toggleGrid} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black ml-0.5"><SVGGrid className="h-4 w-4 mr-1" /></button>
             <button onClick={toggleBox} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black"><SVGCube className="h-4 w-4 mr-1" /></button>
-            <button onClick={selectAllCubes} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black text-xs">{totalCubes.size} Total Cubes</button>
+            <button onClick={selectAllCubes} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black text-xs">{totalCubes.size} Total Cube{totalCubes.size === 1 ? "" : "s"}</button>
 
             {selectedCube.length !== 0 &&
                 <>
