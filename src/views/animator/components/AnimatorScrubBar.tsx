@@ -31,8 +31,11 @@ const AnimatorScrubBar = () => {
     useEffect(() => {
         if (animation !== null) {
             animation.isDraggingTimeline = isDragging
+            return () => {
+                animation.isDraggingTimeline = false
+            }
         }
-    }, [isDragging])
+    }, [isDragging, animation])
 
 
     const setBarPosition = useCallback(() => {

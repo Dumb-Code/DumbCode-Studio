@@ -5,7 +5,6 @@ import React, { useEffect } from 'react';
 import { Vector2 } from 'three';
 import { useStudio } from '../../contexts/StudioContext';
 import DcProject from '../formats/project/DcProject';
-import { createBuilderStatusReporter } from 'typescript';
 export default class SelectedCubeManager {
   mouseOverDiv = false
   disabled = false

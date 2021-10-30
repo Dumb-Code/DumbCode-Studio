@@ -22,17 +22,8 @@ export default class DcaAnimation {
   readonly scroll = new LO(0)
   readonly zoom = new LO(1)
 
-  _isDraggingTimeline = false
+  isDraggingTimeline = false
   forceAnimationTime: number | null = null
-
-
-  get isDraggingTimeline() {
-    return this._isDraggingTimeline
-  }
-
-  set isDraggingTimeline(v: boolean) {
-    this._isDraggingTimeline = v
-  }
 
   constructor(project: DcProject, name: string) {
     this.name = new LO(name)
@@ -55,7 +46,8 @@ export default class DcaAnimation {
       this.time.value += delta
     }
     const time = this.time.value
-    this.keyframes.value.forEach(kf => kf.animate(this.isDraggingTimeline ? time : (this.forceAnimationTime ?? time)))
+    const skipForced = this.isDraggingTimeline || this.playing.value
+    this.keyframes.value.forEach(kf => kf.animate(skipForced ? time : (this.forceAnimationTime ?? time)))
   }
 
 }
