@@ -5,10 +5,11 @@ import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
 import Dropup, { DropupItem } from "../../../components/Dropup";
 import { MinimizeButton } from "../../../components/MinimizeButton";
-import { usePanelToggle } from "../../../contexts/StudioPanelsContext";
+import { StudioPanelsContext, usePanelToggle } from "../../../contexts/StudioPanelsContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import { LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation";
+import { FC } from "react";
 
 const AnimatorProperties = () => {
 
@@ -24,6 +25,7 @@ const AnimatorProperties = () => {
     return (
         <div className="overflow-y-scroll h-full dark:bg-gray-800 bg-gray-200">
             <AnimatorCubeProperties animation={animation} cubeName={cubeName} />
+            <AnimatorKeyframeProperties animation={animation} />
             <AnimatorLoopingProperties animation={animation} />
             <AnimatorIKProperties animation={animation} />
             <AnimatorProgressionProperties animation={animation} />
@@ -31,10 +33,24 @@ const AnimatorProperties = () => {
     )
 }
 
+const AnimationPanel: FC<{ panelName: keyof StudioPanelsContext, heightClassname: string, title: string }> = ({ panelName, heightClassname, children, title }) => {
+    const [open, setOpen] = usePanelToggle(panelName)
+
+    return (
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
+                <p className="my-0.5 flex-grow">{title}</p>
+                <MinimizeButton active={open} toggle={() => setOpen(!open)} />
+            </div>
+            <div className={(open ? heightClassname : "h-0") + " transition-height ease-in-out duration-200"}>
+                {children}
+            </div>
+        </div>
+    )
+
+}
+
 const AnimatorCubeProperties = ({ animation, cubeName }: { animation: DcaAnimation | null, cubeName: string | undefined }) => {
-
-    const [propertiesActive, setPropertiesActive] = usePanelToggle("animator_cube")
-
     const [rawKfs] = useListenableObjectNullable(animation?.selectedKeyframes)
     const keyframes = rawKfs ?? []
     const selectedKf = keyframes.length === 1 ? keyframes[0] : null
@@ -49,66 +65,60 @@ const AnimatorCubeProperties = ({ animation, cubeName }: { animation: DcaAnimati
         }
     }
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                <p className="my-0.5 flex-grow">CUBE PROPERTIES</p>
-                <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)} />
+        <AnimationPanel title="CUBE PROPERTIES" heightClassname="h-64" panelName="animator_cube">
+            <div className="w-full grid grid-cols-2 px-2 pt-1">
+                <WrappedCubeInput title="POSITIONS" cubeName={cubeName} obj={selectedKf?.position} />
+                <WrappedCubeInput title="CUBE GROW" cubeName={cubeName} obj={selectedKf?.cubeGrow} />
             </div>
-            <div className={(propertiesActive ? "h-64" : "h-0") + " transition-height ease-in-out duration-200"}>
-                <div className="w-full grid grid-cols-2 px-2 pt-1">
-                    <WrappedCubeInput title="POSITIONS" cubeName={cubeName} obj={selectedKf?.position} />
-                    <WrappedCubeInput title="CUBE GROW" cubeName={cubeName} obj={selectedKf?.cubeGrow} />
-                </div>
-                <div className="px-2">
-                    <WrappedCubeRotationInput title="ROTATION" cubeName={cubeName} obj={selectedKf?.rotation} />
-                </div>
+            <div className="px-2">
+                <WrappedCubeRotationInput title="ROTATION" cubeName={cubeName} obj={selectedKf?.rotation} />
             </div>
-        </div>
+        </AnimationPanel>
+    )
+}
+
+const AnimatorKeyframeProperties = ({ animation }: { animation: DcaAnimation | null }) => {
+
+    return (
+        <AnimationPanel title="KEYFRAME PROPERTIES" heightClassname="h-32" panelName="animator_kf">
+            <div className="w-full flex flex-row px-2 pt-1">
+                <LoopCheck title="LOOP" />
+                <TitledField title="START" />
+                <TitledField title="END" />
+                <TitledField title="TIME" />
+            </div>
+            <div className="w-full grid grid-cols-2 px-2 pt-1">
+                <TitledField title="FRAME START" />
+                <TitledField title="FRAME LENGTH" />
+            </div>
+        </AnimationPanel>
     )
 }
 
 const AnimatorLoopingProperties = ({ animation }: { animation: DcaAnimation | null }) => {
-
-    const [loopingActive, setLoopingActive] = usePanelToggle("animator_looping");
-
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                <p className="my-0.5 flex-grow">LOOPING PROPERTIES</p>
-                <MinimizeButton active={loopingActive} toggle={() => setLoopingActive(!loopingActive)} />
+        <AnimationPanel title="LOOPING PROPERTIES" heightClassname="h-32" panelName="animator_looping">
+            <div className="w-full flex flex-row px-2 pt-1">
+                <LoopCheck title="LOOP" />
+                <TitledField title="START" />
+                <TitledField title="END" />
+                <TitledField title="TIME" />
             </div>
-            <div className={(loopingActive ? "h-32" : "h-0") + " transition-height ease-in-out duration-200"}>
-                <div className="w-full flex flex-row px-2 pt-1">
-                    <LoopCheck title="LOOP" />
-                    <TitledField title="START" />
-                    <TitledField title="END" />
-                    <TitledField title="TIME" />
-                </div>
-                <div className="w-full grid grid-cols-2 px-2 pt-1">
-                    <TitledField title="FRAME START" />
-                    <TitledField title="FRAME LENGTH" />
-                </div>
+            <div className="w-full grid grid-cols-2 px-2 pt-1">
+                <TitledField title="FRAME START" />
+                <TitledField title="FRAME LENGTH" />
             </div>
-        </div>
+        </AnimationPanel>
     )
 }
 
 const AnimatorIKProperties = ({ animation }: { animation: DcaAnimation | null }) => {
-
-    const [ikActive, setIKActive] = usePanelToggle("animator_ik");
-
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                <p className="my-0.5 flex-grow">INVERSE KINEMATICS</p>
-                <MinimizeButton active={ikActive} toggle={() => setIKActive(!ikActive)} />
+        <AnimationPanel title="INVERSE KINEMATICS" heightClassname="h-10" panelName="animator_ik">
+            <div className="w-full flex flex-row px-2 pt-1">
+                <IKCheck title="ANCHOR" />
             </div>
-            <div className={(ikActive ? "h-10" : "h-0") + " transition-height ease-in-out duration-200"}>
-                <div className="w-full flex flex-row px-2 pt-1">
-                    <IKCheck title="ANCHOR" />
-                </div>
-            </div>
-        </div>
+        </AnimationPanel>
     )
 }
 
@@ -117,53 +127,47 @@ const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation 
     const [progressionActive, setProgressionActive] = usePanelToggle("animator_pp");
 
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col pb-1">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                <p className="my-0.5 flex-grow">PROGRESSION POINTS</p>
-                <MinimizeButton active={progressionActive} toggle={() => setProgressionActive(!progressionActive)} />
-            </div>
-            <div className={(progressionActive ? "h-96" : "h-0 overflow-hidden") + " transition-height ease-in-out duration-200"}>
-                <div className="flex flex-col h-full p-2">
-                    <div className="flex-grow dark:bg-gray-900 bg-gray-300 rounded w-full dark:text-gray-400 text-gray-800 pl-4">
-                        graph goes here
+        <AnimationPanel title="PROGRESSION POINTS" heightClassname="h-96" panelName="animator_pp">
+            <div className="flex flex-col h-full p-2">
+                <div className="flex-grow dark:bg-gray-900 bg-gray-300 rounded w-full dark:text-gray-400 text-gray-800 pl-4">
+                    graph goes here
+                </div>
+                <div className="flex flex-row mt-2">
+                    <Checkbox value={true} extraText="START" />
+                    <Checkbox value={true} extraText="END" />
+                    <Dropup title="Default Graph" header="SELECT ONE" right={true} className="h-8 pt-2" >
+                        <DropupItem name="Sin" onSelect={() => console.log("swap graph")} />
+                        <DropupItem name="Quadratic" onSelect={() => console.log("swap graph")} />
+                        <DropupItem name="Cubic" onSelect={() => console.log("swap graph")} />
+                        <DropupItem name="Quartic" onSelect={() => console.log("swap graph")} />
+                        <DropupItem name="Quintic" onSelect={() => console.log("swap graph")} />
+                        <DropupItem name="Exponential" onSelect={() => console.log("swap graph")} />
+                        <DropupItem name="Circular" onSelect={() => console.log("swap graph")} />
+                        <DropupItem name="Back" onSelect={() => console.log("swap graph")} />
+                        <DropupItem name="Elastic" onSelect={() => console.log("swap graph")} />
+                        <DropupItem name="Bounce" onSelect={() => console.log("swap graph")} />
+                    </Dropup>
+                </div>
+                <div className="text-gray-500 font-bold text-xs p-1">
+                    <p className="my-0.5">POINT RESOLUTION</p>
+                </div>
+                <div className="flex flex-row mb-2 h-7 col-span-2">
+                    <div className=" w-20 h-7">
+                        <NumericInput value={0} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
                     </div>
-                    <div className="flex flex-row mt-2">
-                        <Checkbox value={true} extraText="START" />
-                        <Checkbox value={true} extraText="END" />
-                        <Dropup title="Default Graph" header="SELECT ONE" right={true} className="h-8 pt-2" >
-                            <DropupItem name="Sin" onSelect={() => console.log("swap graph")} />
-                            <DropupItem name="Quadratic" onSelect={() => console.log("swap graph")} />
-                            <DropupItem name="Cubic" onSelect={() => console.log("swap graph")} />
-                            <DropupItem name="Quartic" onSelect={() => console.log("swap graph")} />
-                            <DropupItem name="Quintic" onSelect={() => console.log("swap graph")} />
-                            <DropupItem name="Exponential" onSelect={() => console.log("swap graph")} />
-                            <DropupItem name="Circular" onSelect={() => console.log("swap graph")} />
-                            <DropupItem name="Back" onSelect={() => console.log("swap graph")} />
-                            <DropupItem name="Elastic" onSelect={() => console.log("swap graph")} />
-                            <DropupItem name="Bounce" onSelect={() => console.log("swap graph")} />
-                        </Dropup>
-                    </div>
-                    <div className="text-gray-500 font-bold text-xs p-1">
-                        <p className="my-0.5">POINT RESOLUTION</p>
-                    </div>
-                    <div className="flex flex-row mb-2 h-7 col-span-2">
-                        <div className=" w-20 h-7">
-                            <NumericInput value={0} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
-                        </div>
-                        <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
-                            <Slider
-                                xmin={1} xmax={100} axis="x"
-                                styles={{
-                                    track: { height: 6, backgroundColor: '#27272A', width: '100%' },
-                                    active: { backgroundColor: '#0EA5E9' },
-                                    thumb: { width: 15, height: 15 }
-                                }}
-                            />
-                        </div>
+                    <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
+                        <Slider
+                            xmin={1} xmax={100} axis="x"
+                            styles={{
+                                track: { height: 6, backgroundColor: '#27272A', width: '100%' },
+                                active: { backgroundColor: '#0EA5E9' },
+                                thumb: { width: 15, height: 15 }
+                            }}
+                        />
                     </div>
                 </div>
             </div>
-        </div>
+        </AnimationPanel>
     )
 }
 
