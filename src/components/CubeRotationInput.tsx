@@ -56,7 +56,12 @@ const InputField = ({ axis, color, value, setValue }: {
                 {axis.toUpperCase()}
             </div>
             <div className=" w-20 h-7">
-                <NumericInput value={value?.toFixed(2) ?? ""} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
+                <NumericInput
+                    value={value}
+                    format={val => val === undefined ? "" : parseFloat(val).toFixed(2)}
+                    size={2}
+                    mobile={false}
+                    className="focus:outline-none focus:ring-gray-800 border-none" />
             </div>
             <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
                 <Slider

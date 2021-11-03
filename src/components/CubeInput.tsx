@@ -65,7 +65,8 @@ const InputField = ({ axis, color, value, setValue, lockPositive }: {
             </div>
 
             <NumericInput
-                value={value?.toFixed(2) ?? ""}
+                value={value}
+                format={val => val === undefined ? "" : parseFloat(val).toFixed(2)}
                 size={6}
                 mobile={false}
                 className="focus:outline-none focus:ring-gray-800 border-none"

@@ -68,6 +68,11 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
         return () => animation.scroll.removeListener(onScrollChange)
     }, [keyframes, layers, setLayers, animation.scroll, onScrollChange])
 
+    const addLayer = () => {
+        const layerId = layers.reduce((x, y) => Math.max(x, y.layerId + 1), 0)
+        setLayers(layers.concat([{ layerId }]))
+    }
+
     const context = {
         addListener,
         removeListener,
@@ -80,6 +85,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
             {layers.map(l =>
                 <AnimationLayer key={l.layerId} animation={animation} keyframes={keyframes.filter(k => k.layerId === l.layerId)} layer={l} />
             )}
+            <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGPlus className="h-4 w-4 mr-1" /></button>
         </ScrollZoomContext.Provider>
     )
 }
@@ -108,6 +114,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     const { maxLayer, layers } = useMemo(() => {
         let maxLayer = 0
         const sorted = keyframes.sort((a, b) => a.startTime.value - b.startTime.value)
+        console.log(sorted)
         const map = new Map<number, OffsetKeyframeInLayer[]>()
         sorted.forEach(kf => {
             let layer = 0
@@ -125,15 +132,24 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
             data.push(new OffsetKeyframeInLayer(kf, layer))
         })
 
+        let layers = Array.from(map.values()).map(a => a.map(l => l.keyframe))
+
+        //We need to ensure that if there are no keyframe, the backround still shows
+        if (layers.length === 0) {
+            layers = [[]]
+        }
+
         return {
             maxLayer,
-            layers: Array.from(map.values()).map(a => a.map(l => l.keyframe))
+            layers
         }
     }, [keyframes])
 
     const divHeight = maxLayer <= 2 ? 1.5 : 1.5 + ((maxLayer - 2) * .75)
     const colors = ["bg-lightBlue-500", "bg-green-500", "bg-yellow-500", "bg-red-500"]
+    const hoverColors = ["bg-lightBlue-300", "bg-green-300", "bg-yellow-300", "bg-red-300"]
     const color = colors[layer.layerId % colors.length]
+    const hoverColor = hoverColors[layer.layerId % colors.length]
 
     const draggingRef = useDraggbleRef<HTMLDivElement, number>(
         () => animation.scroll.value,
@@ -184,19 +200,23 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
         }
     }, [addListener, removeListener, timeMarkerRef, animation.time])
 
+    const addNewKeyframe = () => {
+        const kf = animation.createKeyframe(layer.layerId)
+        kf.startTime.value = animation.time.value
+    }
 
     return (
         <div className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
                 <input type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5 pt-0.5 h-6 text-s" placeholder="layer name" />
-                <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGPlus className="h-4 w-4 mr-1" /></button>
+                <button onClick={addNewKeyframe} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGPlus className="h-4 w-4 mr-1" /></button>
                 <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGEye className="h-4 w-4 mr-1" /></button>
                 <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGLocked className="h-4 w-4 mr-1" /></button>
                 <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGSettings className="h-4 w-4 mr-1" /></button>
             </div>
             <div className="relative w-full">
                 <div ref={draggingRef} className="flex flex-col w-full h-full overflow-hidden">
-                    <TimelineLayers color={color} animation={animation} layers={layers} />
+                    <TimelineLayers color={color} hoverColor={hoverColor} layers={layers} />
                 </div>
                 <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 h-7 -top-0.5" />
             </div>
@@ -207,15 +227,15 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
 const blockPerSecond = 10
 const width = 24
 
-const TimelineLayers = ({ color, animation, layers }: { color: string, animation: DcaAnimation, layers: DcaKeyframe[][] }) => {
+const TimelineLayers = ({ color, hoverColor, layers }: { color: string, hoverColor: string, layers: DcaKeyframe[][] }) => {
     return (<>
         {layers.map((layer, i) =>
-            <TimelineLayer key={i} keyframes={layer} color={color} animation={animation} />
+            <TimelineLayer key={i} keyframes={layer} color={color} hoverColor={hoverColor} />
         )}
     </>)
 }
 
-const TimelineLayer = ({ color, keyframes, animation }: { color: string, keyframes: DcaKeyframe[], animation: DcaAnimation }) => {
+const TimelineLayer = ({ color, hoverColor, keyframes }: { color: string, hoverColor: string, keyframes: DcaKeyframe[] }) => {
     const ref = useRef<HTMLDivElement>(null)
 
     const { darkMode } = useOptions()
@@ -233,13 +253,13 @@ const TimelineLayer = ({ color, keyframes, animation }: { color: string, keyfram
     return (
         <div ref={ref} className="bg-gray-900 relative h-full " style={{ backgroundPositionX: `${-scroll}px`, backgroundImage: `repeating-linear-gradient(90deg, ${darkMode ? "#363636" : "#D4D4D4"}  0px, ${darkMode ? "#363636" : "#D4D4D4"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width}px)` }}>
             {keyframes.map(kf =>
-                <KeyFrame key={kf.identifier} layerColor={color} animation={animation} keyframe={kf} />
+                <KeyFrame key={kf.identifier} layerColor={color} hoverColor={hoverColor} keyframe={kf} />
             )}
         </div>
     )
 }
 
-const KeyFrame = ({ layerColor, keyframe, animation }: { layerColor: string, animation: DcaAnimation, keyframe: DcaKeyframe }) => {
+const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, hoverColor: string, keyframe: DcaKeyframe }) => {
     const [start] = useListenableObject(keyframe.startTime)
     const [length] = useListenableObject(keyframe.duration)
     const [selected, setSelected] = useListenableObject(keyframe.selected)
@@ -265,9 +285,14 @@ const KeyFrame = ({ layerColor, keyframe, animation }: { layerColor: string, ani
         <div
             ref={ref}
             onClick={() => setSelected(!selected)}
-            className={"h-1 mt-1 mb-1.5 absolute " + (selected ? " bg-red-200" : layerColor)}
+            className="h-3 absolute group"
             style={{ left: `${(start + scroll) * width * blockPerSecond}px`, width: `${(length + scroll) * width * blockPerSecond}px` }}
         >
+            <div
+                className={"h-1 mt-1 mb-1 " + (selected ? " bg-red-200 group-hover:bg-white" : `${layerColor} group-hover:${hoverColor}`)}
+            >
+
+            </div>
         </div>
     )
 }

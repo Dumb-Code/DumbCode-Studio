@@ -7,9 +7,10 @@ import Dropup, { DropupItem } from "../../../components/Dropup";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { StudioPanelsContext, usePanelToggle } from "../../../contexts/StudioPanelsContext";
 import { useStudio } from "../../../contexts/StudioContext";
-import { LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { LO, LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation";
 import { FC } from "react";
+import { SignatureKind } from "typescript";
 
 const AnimatorProperties = () => {
 
@@ -78,18 +79,14 @@ const AnimatorCubeProperties = ({ animation, cubeName }: { animation: DcaAnimati
 }
 
 const AnimatorKeyframeProperties = ({ animation }: { animation: DcaAnimation | null }) => {
-
+    const [selectedKeyframes] = useListenableObjectNullable(animation?.selectedKeyframes)
+    const singleSelectedKeyframe = selectedKeyframes !== undefined && selectedKeyframes.length === 1 ? selectedKeyframes[0] : undefined
+    console.log(singleSelectedKeyframe)
     return (
-        <AnimationPanel title="KEYFRAME PROPERTIES" heightClassname="h-32" panelName="animator_kf">
-            <div className="w-full flex flex-row px-2 pt-1">
-                <LoopCheck title="LOOP" />
-                <TitledField title="START" />
-                <TitledField title="END" />
-                <TitledField title="TIME" />
-            </div>
+        <AnimationPanel title="KEYFRAME PROPERTIES" heightClassname="h-16" panelName="animator_kf">
             <div className="w-full grid grid-cols-2 px-2 pt-1">
-                <TitledField title="FRAME START" />
-                <TitledField title="FRAME LENGTH" />
+                <TitledField title="KEYFRAME START" lo={singleSelectedKeyframe?.startTime} />
+                <TitledField title="KEYFRAME LENGTH" lo={singleSelectedKeyframe?.duration} />
             </div>
         </AnimationPanel>
     )
@@ -97,16 +94,12 @@ const AnimatorKeyframeProperties = ({ animation }: { animation: DcaAnimation | n
 
 const AnimatorLoopingProperties = ({ animation }: { animation: DcaAnimation | null }) => {
     return (
-        <AnimationPanel title="LOOPING PROPERTIES" heightClassname="h-32" panelName="animator_looping">
+        <AnimationPanel title="LOOPING PROPERTIES" heightClassname="h-16" panelName="animator_looping">
             <div className="w-full flex flex-row px-2 pt-1">
                 <LoopCheck title="LOOP" />
                 <TitledField title="START" />
                 <TitledField title="END" />
                 <TitledField title="TIME" />
-            </div>
-            <div className="w-full grid grid-cols-2 px-2 pt-1">
-                <TitledField title="FRAME START" />
-                <TitledField title="FRAME LENGTH" />
             </div>
         </AnimationPanel>
     )
@@ -197,13 +190,24 @@ const IKCheck = ({ title }: { title: string }) => {
     )
 }
 
-const TitledField = ({ title }: { title: string }) => {
+const TitledField = ({ title, lo }: { title: string, lo?: LO<number> }) => {
+    const [value, setValue] = useListenableObjectNullable(lo)
     return (
         <div>
             <p className="ml-1 text-gray-400 text-xs">{title}</p>
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7">
-                    <NumericInput value={0} size={6} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
+                    <NumericInput
+                        value={value}
+                        format={val => val === undefined ? "" : parseFloat(val).toFixed(2)}
+                        onChange={(val: number | null) => {
+                            if (val !== null) {
+                                (val < 0) ? setValue(0) : setValue(val)
+                            }
+                        }}
+                        mobile={false}
+                        className="focus:outline-none focus:ring-gray-800 border-none"
+                    />
                 </div>
             </div>
         </div>

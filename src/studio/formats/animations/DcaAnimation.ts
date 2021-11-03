@@ -50,6 +50,13 @@ export default class DcaAnimation {
     this.keyframes.value.forEach(kf => kf.animate(skipForced ? time : (this.forceAnimationTime ?? time)))
   }
 
+  createKeyframe(layerId = 0) {
+    const kf = new DcaKeyframe(this.project, this)
+    kf.layerId = layerId
+    this.keyframes.value = this.keyframes.value.concat(kf)
+    return kf
+  }
+
 }
 
 export type ProgressionPoint = { required?: boolean, x: number, y: number }
@@ -61,7 +68,7 @@ export class DcaKeyframe {
   readonly animation: DcaAnimation
 
   readonly startTime = new LO(0)
-  readonly duration = new LO(0)
+  readonly duration = new LO(1)
 
   readonly selected = new LO(false)
 
