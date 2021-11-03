@@ -10,7 +10,6 @@ import { useStudio } from "../../../contexts/StudioContext";
 import { LO, LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation";
 import { FC } from "react";
-import { SignatureKind } from "typescript";
 
 const AnimatorProperties = () => {
 
@@ -116,9 +115,6 @@ const AnimatorIKProperties = ({ animation }: { animation: DcaAnimation | null })
 }
 
 const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation | null }) => {
-
-    const [progressionActive, setProgressionActive] = usePanelToggle("animator_pp");
-
     return (
         <AnimationPanel title="PROGRESSION POINTS" heightClassname="h-96" panelName="animator_pp">
             <div className="flex flex-col h-full p-2">
