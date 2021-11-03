@@ -4,7 +4,7 @@ import { Switch } from "@headlessui/react";
 
 const GumballPropertiesBar = () => {
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full">
+        <div onClick={() => alert("Not Yet Implemented")} className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full">
             <GumballToggle />
         </div>
     )

@@ -133,6 +133,7 @@ export class DCMCube implements CubeParent {
 
   readonly mouseHover = new LO(false)
   readonly selected = new LO(false)
+  readonly hideChildren = new LO(false)
 
   readonly visible = new LO(true)
   readonly locked = new LO(false)
@@ -321,7 +322,7 @@ export class DCMCube implements CubeParent {
     this.cubeGroup.updateMatrixWorld(force)
   }
 
-  traverse(callback) {
+  traverse(callback: (cube: DCMCube) => void) {
     callback(this)
     this.children.value.forEach(c => c.traverse(callback))
   }

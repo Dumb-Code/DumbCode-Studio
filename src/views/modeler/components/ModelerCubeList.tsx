@@ -31,15 +31,68 @@ const ModelerCubeList = () => {
     const project = getSelectedProject()
     const model = project.model
 
+    const getFirstSelectedCubeOrUndefined = () => {
+        const selectedCubeIdentifier = project.selectedCubeManager.selected.value
+        return selectedCubeIdentifier.length > 0 ? project.model.identifierCubeMap.get(selectedCubeIdentifier[0]) : undefined
+    }
+
+    //Creates a new cube with the same parent as the first selected cube
     const createSiblingCube = () => {
         let cube = createCube(model)
-        //If a cube is selected, add it as a sibling to that cube, otherwise add it as a root cube
-        // if (studio.raytracer.anySelected()) {
-        // studio.raytracer.firstSelected().tabulaCube.parent.addChild(cube)
-        // } else {
-        model.addChild(cube)
-        // }
+        const selectedCube = getFirstSelectedCubeOrUndefined()
+        if (selectedCube !== undefined) {
+            selectedCube.parent.addChild(cube)
+        } else {
+            model.addChild(cube)
+        }
     }
+
+    //Creates a new cube with the first selected cube being the parent
+    const createChildCube = () => {
+        let cube = createCube(model)
+        const selectedCube = getFirstSelectedCubeOrUndefined()
+        if (selectedCube !== undefined) {
+            selectedCube.addChild(cube)
+        } else {
+            model.addChild(cube)
+        }
+    }
+
+    //Deletes all the selected cubes, but keeps their children. Moves the children to be the siblings of this cube.
+    const deleteCubesKeepChildren = () => {
+        alert("Not Added Yet.")
+    }
+
+    //Deletes all the selected cubes, and all their children.
+    const deleteCubesAndChildren = () => {
+        project.selectedCubeManager.selected.value.forEach(identifier => {
+            const cube = project.model.identifierCubeMap.get(identifier)
+            if (cube !== undefined) {
+                cube.traverse(c => {
+                    c.selected.value = false
+                    c.mouseHover.value = false
+                })
+                cube.parent.deleteChild(cube)
+
+            }
+        })
+    }
+
+    useEffect(() => {
+        const keydownListener = (e: KeyboardEvent) => {
+            if (e.key === "Delete") {
+                // if (e.ctrlKey) {
+                // deleteCubesAndChildren()
+                // } else {
+                deleteCubesKeepChildren()
+                // }
+            }
+        }
+        document.addEventListener('keydown', keydownListener)
+        return () => {
+            document.removeEventListener('keydown', keydownListener)
+        }
+    }, [])
 
 
     return (
@@ -48,30 +101,43 @@ const ModelerCubeList = () => {
                 <p className="flex-grow my-0.5">CUBE LIST</p>
             </div>
             <div className="flex flex-row px-1 dark:bg-gray-900 bg-gray-200 pb-1 pt-0.5">
-                <button onClick={createSiblingCube} className="flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mr-0.5 flex flex-row">
+                <button onClick={createSiblingCube} className="has-tooltip flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mr-0.5 flex flex-row">
                     <b className="flex-grow" />
                     <SVGPlus className="h-6 w-6" />
                     <SVGCube className="h-5 w-5 mt-0.5" />
                     <b className="flex-grow" />
+                    {/* We need a better tooltip system */}
+                    <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
+                        Create Sibling Cube
+                    </div>
                 </button>
-                <button className="flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mx-0.5 flex flex-row">
+                <button onClick={createChildCube} className="has-tooltip flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mx-0.5 flex flex-row">
                     <b className="flex-grow" />
                     <SVGPlus className="h-6 w-6" />
                     <SVGCube className="h-5 w-5 mt-0.5" />
                     <SVGCube className="h-4 w-4 mt-1.5" />
                     <b className="flex-grow" />
+                    <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
+                        Create Child Cube
+                    </div>
                 </button>
-                <button className="flex-grow bg-red-500 hover:bg-red-600 rounded text-white mx-0.5 flex flex-row">
+                <button onClick={deleteCubesKeepChildren} className="has-tooltip flex-grow bg-red-500 hover:bg-red-600 rounded text-white mx-0.5 flex flex-row">
                     <b className="flex-grow" />
                     <SVGTrash className="h-5 w-5 mt-0.5" />
                     <b className="flex-grow" />
+                    <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
+                        Delete Cube
+                    </div>
                 </button>
-                <button className="flex-grow bg-red-500 hover:bg-red-600 rounded text-white ml-0.5 flex flex-row">
+                <button onClick={deleteCubesAndChildren} className="has-tooltip flex-grow bg-red-500 hover:bg-red-600 rounded text-white ml-0.5 flex flex-row">
                     <b className="flex-grow" />
                     <SVGTrash className="h-5 w-5 mt-0.5" />
                     <SVGCube className="h-5 w-5 mt-0.5" />
                     <SVGCube className="h-4 w-4 mt-1.5" />
                     <b className="flex-grow" />
+                    <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
+                        Delete Cube and Children
+                    </div>
                 </button>
             </div>
             <div className="border-r border-black flex flex-col w-full pr-2 pl-1 overflow-x-hidden overflow-y-scroll flex-grow">
@@ -98,6 +164,9 @@ const CubeListItem = ({
     parentAnimateChildRemove?: () => void
 }) => {
     const [children] = useListenableObject(cube.children)
+    const [hideChildren] = useListenableObject(cube.hideChildren)
+
+
     const [dragState, setDragState] = useState<DragState>(null)
     const [isDragging, setIsDragging] = useState(false)
     const [hasAnimationChildrenForce, setHasAnimationChildrenForce] = useState<boolean | null>(null)
@@ -342,21 +411,23 @@ const CubeListItem = ({
             >
                 <div ref={draggableRef} className={(isDragging || isAnimating) ? "hidden" : ""}>
                     <div ref={cubeItemRef}><CubeItemEntry cube={cube} selectedCubeManager={selectedCubeManager} dragState={dragState} isDragging={isDragging} hasChildren={hasAnimationChildrenForce !== null ? hasAnimationChildrenForce : children.length !== 0} /></div>
-                    <div className="ml-2">{children.map(c =>
-                        <CubeListItem
-                            key={c.identifier}
-                            cube={c}
-                            selectedCubeManager={selectedCubeManager}
-                            dragData={dragData}
-                            setDragData={setDragData}
-                            dragOverRef={dragOverRef}
-                            dragEndRef={dragEndRef}
-                            mouseDraggedElementRef={mouseDraggedElementRef}
-                            clearPreviousDragState={clearPreviousDragState}
-                            onDragFinish={onDragFinish}
-                            parentAnimateChildRemove={childAnimateRemove}
-                        />
-                    )}</div>
+                    {!hideChildren &&
+                        <div className="ml-2">{children.map(c =>
+                            <CubeListItem
+                                key={c.identifier}
+                                cube={c}
+                                selectedCubeManager={selectedCubeManager}
+                                dragData={dragData}
+                                setDragData={setDragData}
+                                dragOverRef={dragOverRef}
+                                dragEndRef={dragEndRef}
+                                mouseDraggedElementRef={mouseDraggedElementRef}
+                                clearPreviousDragState={clearPreviousDragState}
+                                onDragFinish={onDragFinish}
+                                parentAnimateChildRemove={childAnimateRemove}
+                            />
+                        )}</div>
+                    }
                 </div>
                 <div ref={remainGhostRef}></div>
             </div>
@@ -444,8 +515,8 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
 
     const [hovering, setHovering] = useListenableObject(cube.mouseHover)
     const [selected, setSelected] = useListenableObject(cube.selected)
+    const [hideChildren, setHideChildren] = useListenableObject(cube.hideChildren)
 
-    const collapsed = false
 
     if (visible && !locked) {
         itemBackgroundColor = "text-white "
@@ -478,7 +549,7 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
             }}
         >
             <div className="flex flex-row py-0.5">
-                <button className={(collapsed ? "transform -rotate-90" : "") + (hasChildren ? " px-1" : " w-0") + " ml-0.5 py-1 transition-all transition-300 dark:bg-gray-800 bg-gray-600 dark:hover:bg-black hover:bg-gray-700 rounded text-white overflow-hidden"}>
+                <button onClick={e => { e.stopPropagation(); setHideChildren(!hideChildren) }} className={(hideChildren ? "transform -rotate-90" : "") + (hasChildren ? " px-1" : " w-0") + " ml-0.5 py-1 transition-all transition-300 dark:bg-gray-800 bg-gray-600 dark:hover:bg-black hover:bg-gray-700 rounded text-white overflow-hidden"}>
                     <SVGChevronDown className="w-4 h-4" />
                 </button>
                 <DblClickEditLO obj={cube.name} className="truncate text-white text-s pl-1 flex-grow cursor-pointer" inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
