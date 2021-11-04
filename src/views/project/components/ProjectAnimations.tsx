@@ -31,7 +31,7 @@ const ProjectAnimations = () => {
             <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">ANIMATIONS</p>
                 <p className="flex flex-row">
-                    <button className="icon-button" onClick={() => addAnimation(new DcaAnimation(getSelectedProject(), "New Animation"))}><SVGPlus className="h-4 w-4 mr-1" /></button>
+                    <button className="icon-button" onClick={() => addAnimation(DcaAnimation.createNew(getSelectedProject()))}><SVGPlus className="h-4 w-4 mr-1" /></button>
                     <ClickableInput
                         onFile={uploadFile}
                         accept={animationExtensions}

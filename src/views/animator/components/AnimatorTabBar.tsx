@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross } from "../../../components/Icons"
+import { SVGCross, SVGPlus } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
@@ -34,12 +34,20 @@ const AnimatorTabBar = () => {
         }
     })
 
+    const createNewAnimation = () => {
+        selectedProject.animationTabs.addAnimation(DcaAnimation.createNew(selectedProject))
+    }
+
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full flex">
             <div ref={ref} className="flex flex-row overflow-auto no-scrollbar">
                 {animations.filter(a => tabs.includes(a.identifier))
                     .map(a => <AnimatorTab key={a.identifier} animation={a} selected={a === selectedTab} onSelect={() => setSelectedTab(a)} />)
                 }
+                <div onClick={e => { e.stopPropagation(); createNewAnimation() }} className="dark:bg-gray-900 bg-gray-300 hover:bg-green-500 dark:hover:bg-green-800 flex-shrink-0 flex flex-row rounded m-1 cursor-pointer group">
+                    <SVGPlus className="text-green-300 group-hover:text-white h-6 w-6" />
+                    <p className="dark:text-gray-400 text-black flex-grow px-2">New</p>
+                </div>
             </div>
         </div>
     )

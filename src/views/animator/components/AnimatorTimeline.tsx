@@ -18,18 +18,18 @@ const AnimatorTimeline = () => {
     )
 }
 
-type ListenerEffect = (func: (scroll: number, zoom: number) => void) => void
+type ListenerEffect = (func: (scroll: number, pixelsPerSecond: number) => void) => void
 
 const ScrollZoomContext = createContext<{
-    readonly addListener: ListenerEffect
+    readonly addAndRunListener: ListenerEffect
     readonly removeListener: ListenerEffect
-    readonly scroll: number
-    readonly zoom: number
+    readonly getPixelsPerSecond: () => number
+    readonly getScroll: () => number
 }>({
-    addListener: () => { throw new Error("Invalid Call") },
+    addAndRunListener: () => { throw new Error("Invalid Call") },
     removeListener: () => { throw new Error("Invalid Call") },
-    scroll: 0,
-    zoom: 1,
+    getPixelsPerSecond: () => 1,
+    getScroll: () => 0,
 })
 
 const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
@@ -37,21 +37,22 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     const [keyframes] = useListenableObject(animation.keyframes)
 
     const listeners = useRef(new Set<(scroll: number, zoom: number) => void>())
-    const scroll = useRef(animation.scroll.value)
-    const zoom = useRef(animation.zoom.value)
-    const addListener: ListenerEffect = useCallback(func => {
-        func(scroll.current, zoom.current)
+    const addAndRunListener: ListenerEffect = useCallback(func => {
+        func(animation.scroll.value, animation.zoom.value * blockPerSecond * width)
         listeners.current.add(func)
-    }, [])
+    }, [animation.scroll.value, animation.zoom.value])
     const removeListener: ListenerEffect = useCallback(func => listeners.current.delete(func), [])
 
 
     const onScrollChange = useCallback((val: number) => {
-        scroll.current = val
-        listeners.current.forEach(l => l(scroll.current, zoom.current))
-    }, [])
+        listeners.current.forEach(l => l(val, animation.zoom.value * blockPerSecond * width))
+    }, [animation.zoom.value])
+    const onZoomChange = useCallback((val: number) => {
+        listeners.current.forEach(l => l(animation.scroll.value, val * blockPerSecond * width))
+    }, [animation.scroll.value])
     useEffect(() => {
         animation.scroll.addListener(onScrollChange)
+        animation.zoom.addListener(onZoomChange)
 
         const toAdd: KeyframeLayerData[] = [...layers]
         let changed = false
@@ -65,19 +66,26 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
             setLayers(toAdd)
         }
 
-        return () => animation.scroll.removeListener(onScrollChange)
-    }, [keyframes, layers, setLayers, animation.scroll, onScrollChange])
+        return () => {
+            animation.scroll.removeListener(onScrollChange)
+            animation.zoom.removeListener(onZoomChange)
+        }
+    }, [keyframes, layers, setLayers, animation.scroll, animation.zoom, onScrollChange, onZoomChange])
 
     const addLayer = () => {
         const layerId = layers.reduce((x, y) => Math.max(x, y.layerId + 1), 0)
         setLayers(layers.concat([{ layerId }]))
     }
 
+    const getPixelsPerSecond = () => {
+        return width * blockPerSecond * animation.zoom.value
+    }
+
     const context = {
-        addListener,
+        addAndRunListener,
         removeListener,
-        zoom: zoom.current,
-        scroll: scroll.current
+        getPixelsPerSecond,
+        getScroll: () => animation.scroll.value,
     }
 
     return (
@@ -111,10 +119,12 @@ const canKeyframeBeInsertedAtTimelinelayer = (keyframe: DcaKeyframe, layerData?:
 }
 
 const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimation, keyframes: DcaKeyframe[], layer: KeyframeLayerData }) => {
+
+    const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll } = useContext(ScrollZoomContext)
+
     const { maxLayer, layers } = useMemo(() => {
         let maxLayer = 0
         const sorted = keyframes.sort((a, b) => a.startTime.value - b.startTime.value)
-        console.log(sorted)
         const map = new Map<number, OffsetKeyframeInLayer[]>()
         sorted.forEach(kf => {
             let layer = 0
@@ -156,37 +166,67 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
         ({ dx, initial }) => animation.scroll.value = Math.max(initial - dx, 0)
     )
 
+    //We need to subscribe to 'wheel' manually, as by default react does it passively.
+    useEffect(() => {
+        const current = draggingRef.current
+        const callback = (e: WheelEvent) => {
+            if (current === null) {
+                return
+            }
+            const modifier = 1.05
+            if (e.deltaY !== 0) {
+                const val = e.deltaY < 0 ? 1 / modifier : modifier
+
+                const newPixelsPerSecond = width * blockPerSecond * animation.zoom.value * val
+
+                //Updates the scroll so that the mouseX position is kept constant.
+                //Essentially zooms into where the mouse is
+                const pixelPoint = animation.scroll.value + e.clientX - current.getBoundingClientRect().left
+                const secondsPoint = pixelPoint / getPixelsPerSecond()
+                const newPixelPoint = secondsPoint * newPixelsPerSecond
+                const changeInPixles = newPixelPoint - pixelPoint
+
+
+                animation.scroll.value = Math.max(animation.scroll.value + changeInPixles, 0)
+
+                animation.zoom.value *= val
+            }
+            e.stopPropagation()
+            e.preventDefault()
+        }
+        if (current !== null) {
+            current.addEventListener('wheel', callback)
+        }
+        return () => {
+            if (current !== null) {
+                current.removeEventListener('wheel', callback)
+            }
+        }
+    }, [animation.zoom, draggingRef, animation.scroll, getPixelsPerSecond])
+
     const timeMarkerRef = useDraggbleRef<HTMLDivElement, number>(
         () => {
             animation.isDraggingTimeline = true
             return animation.time.value
         },
-        ({ dx, initial }) => animation.time.value = Math.max(dx / (blockPerSecond * width) + initial, 0),
+        ({ dx, initial }) => animation.time.value = Math.max(dx / getPixelsPerSecond() + initial, 0),
         () => animation.isDraggingTimeline = false
     )
 
     const timeRef = useRef(animation.time.value)
-    const scrollRef = useRef(animation.scroll.value)
 
 
-    const { addListener, removeListener } = useContext(ScrollZoomContext)
-
-
+    const updateAndSetLeft = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        const ref = timeMarkerRef.current
+        if (ref === null) {
+            return
+        }
+        const amount = timeRef.current * pixelsPerSecond - scroll
+        ref.style.display = amount < 0 ? "none" : "initial"
+        ref.style.left = `${amount}px`
+    }, [getPixelsPerSecond, getScroll, timeMarkerRef])
     useEffect(() => {
-        const updateAndSetLeft = () => {
-            const ref = timeMarkerRef.current
-            if (ref === null) {
-                return
-            }
-            const amount = timeRef.current * width * blockPerSecond - scrollRef.current
-            ref.style.display = amount < 0 ? "none" : "initial"
-            ref.style.left = `${amount}px`
-        }
-        const scrollCallback = (scroll: number) => {
-            scrollRef.current = scroll
-            updateAndSetLeft()
-        }
-        addListener(scrollCallback)
+        addAndRunListener(updateAndSetLeft)
 
         const timeCallback = (time: number) => {
             timeRef.current = time
@@ -195,13 +235,15 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
         animation.time.addListener(timeCallback)
 
         return () => {
-            removeListener(scrollCallback)
+            removeListener(updateAndSetLeft)
             animation.time.removeListener(timeCallback)
         }
-    }, [addListener, removeListener, timeMarkerRef, animation.time])
+    }, [addAndRunListener, removeListener, timeMarkerRef, animation.time, getPixelsPerSecond, getScroll, updateAndSetLeft])
 
     const addNewKeyframe = () => {
         const kf = animation.createKeyframe(layer.layerId)
+
+        kf.selected.value = true
         kf.startTime.value = animation.time.value
     }
 
@@ -246,18 +288,29 @@ const TimelineLayer = ({ color, hoverColor, keyframes }: { color: string, hoverC
 
     const { darkMode } = useOptions()
 
-    const { addListener, removeListener, scroll } = useContext(ScrollZoomContext)
-    useEffect(() => {
-        const callback = (scroll: number) => {
-            if (ref.current !== null) {
-                ref.current.style.backgroundPositionX = `${-scroll}px`
-            }
+    const { addAndRunListener, removeListener, getScroll, getPixelsPerSecond } = useContext(ScrollZoomContext)
+
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (ref.current !== null) {
+            ref.current.style.backgroundPositionX = `${-scroll}px`
+            const bgWidth = pixelsPerSecond / blockPerSecond
+            ref.current.style.backgroundImage =
+                `repeating-linear-gradient(90deg, 
+                    ${darkMode ? "#363636" : "#D4D4D4"} 0px, 
+                    ${darkMode ? "#363636" : "#D4D4D4"}  ${bgWidth - 1}px, 
+                    ${darkMode ? "#4A4A4A" : "#404040"}  ${bgWidth - 1}px, 
+                    ${darkMode ? "#4A4A4A" : "#404040"}  ${bgWidth}px)`
+            ref.current.style.backgroundSize = `${bgWidth}px    `
         }
-        addListener(callback)
-        return () => removeListener(callback)
-    }, [addListener, removeListener])
+    }, [darkMode, getPixelsPerSecond, getScroll])
+
+    //Change the element style when scroll or zoom changes.
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
     return (
-        <div ref={ref} className="bg-gray-900 relative h-full " style={{ backgroundPositionX: `${-scroll}px`, backgroundImage: `repeating-linear-gradient(90deg, ${darkMode ? "#363636" : "#D4D4D4"}  0px, ${darkMode ? "#363636" : "#D4D4D4"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width - 1}px, ${darkMode ? "#4A4A4A" : "#404040"}  ${width}px)` }}>
+        <div ref={ref} className="bg-gray-900 relative h-full">
             {keyframes.map(kf =>
                 <KeyFrame key={kf.identifier} layerColor={color} hoverColor={hoverColor} keyframe={kf} />
             )}
@@ -266,33 +319,48 @@ const TimelineLayer = ({ color, hoverColor, keyframes }: { color: string, hoverC
 }
 
 const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, hoverColor: string, keyframe: DcaKeyframe }) => {
-    const [start] = useListenableObject(keyframe.startTime)
+    // const [start, setStart] = useListenableObject(keyframe.startTime)
     const [length] = useListenableObject(keyframe.duration)
     const [selected, setSelected] = useListenableObject(keyframe.selected)
 
-    const ref = useRef<HTMLDivElement>(null)
+    const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll } = useContext(ScrollZoomContext)
 
-    const { addListener, removeListener, scroll } = useContext(ScrollZoomContext)
-    useEffect(() => {
-        const callback = (scroll: number) => {
-            // if (ref.current === null) {
-            //     throw new Error("Ref not set")
-            // }
-            if (ref.current !== null) {
-                ref.current.style.left = `${start * width * blockPerSecond - scroll}px`
-                ref.current.style.width = `${length * width * blockPerSecond}px`
+    const keyframeHandleRef = useDraggbleRef<HTMLDivElement, number>(
+        () => keyframe.startTime.value,
+        ({ dx, initial }) => {
+            const value = Math.max(initial + dx / getPixelsPerSecond(), 0)
+            keyframe.startTime.value = value
+            if (keyframeHandleRef.current !== null) {
+                keyframeHandleRef.current.style.left = `${value * getPixelsPerSecond() - getScroll()}px`
+            }
+        },
+        ({ max }) => {
+            //If the mouse hasn't moved more than 2px, then we count it as a click and not a drag
+            if (max <= 2) {
+                setSelected(!selected)
             }
         }
-        addListener(callback)
-        return () => removeListener(callback)
-    }, [length, start, addListener, removeListener])
+    )
+
+    //Updates the keyframe left and width
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (keyframeHandleRef.current !== null) {
+            keyframeHandleRef.current.style.left = `${keyframe.startTime.value * pixelsPerSecond - scroll}px`
+            keyframeHandleRef.current.style.width = `${length * pixelsPerSecond}px`
+        }
+    }, [keyframe, length, getPixelsPerSecond, getScroll, keyframeHandleRef])
+
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
+
 
     return (
         <div
-            ref={ref}
-            onClick={() => setSelected(!selected)}
-            className="h-3 absolute group"
-            style={{ left: `${(start + scroll) * width * blockPerSecond}px`, width: `${(length + scroll) * width * blockPerSecond}px` }}
+            ref={keyframeHandleRef}
+            // onClick={() => setSelected(!selected)}
+            className="h-3 absolute group cursor-pointer"
         >
             <div
                 className={"h-1 mt-1 mb-1 " + (selected ? " bg-red-200 group-hover:bg-white" : `${layerColor} group-hover:${hoverColor}`)}

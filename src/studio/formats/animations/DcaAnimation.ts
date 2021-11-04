@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
-import { LO, LOMap } from './../../util/ListenableObject';
 import DcProject from '../project/DcProject';
+import { LO, LOMap } from './../../util/ListenableObject';
 
 export default class DcaAnimation {
   readonly identifier = v4()
@@ -41,6 +41,12 @@ export default class DcaAnimation {
     })
   }
 
+  static createNew(project: DcProject) {
+    const animation = new DcaAnimation(project, "New Animation")
+    animation.keyframeLayers.value = animation.keyframeLayers.value.concat({ layerId: 0 })
+    return animation
+  }
+
   animate(delta: number) {
     if (this.playing.value) {
       this.time.value += delta
@@ -52,6 +58,14 @@ export default class DcaAnimation {
 
   createKeyframe(layerId = 0) {
     const kf = new DcaKeyframe(this.project, this)
+    //When startime changes, update the max time
+    kf.startTime.addListener(value => {
+      this.maxTime.value = Math.max(...this.keyframes.value.map(k => (k === kf ? value : k.startTime.value) + k.duration.value))
+    })
+    //When duration changes, update the max time
+    kf.duration.addListener(value => {
+      this.maxTime.value = Math.max(...this.keyframes.value.map(k => k.startTime.value + (k === kf ? value : k.duration.value)))
+    })
     kf.layerId = layerId
     this.keyframes.value = this.keyframes.value.concat(kf)
     return kf

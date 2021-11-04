@@ -1,9 +1,9 @@
-import { LO } from './../../util/ListenableObject';
-import { DCMModel, DCMCube } from './../model/DcmModel';
-import DcaAnimation, { DcaKeyframe, ProgressionPoint } from './DcaAnimation';
-import { StudioBuffer } from './../../util/StudioBuffer';
-import DcProject from '../project/DcProject';
 import { LOMap } from '../../util/ListenableObject';
+import DcProject from '../project/DcProject';
+import { LO } from './../../util/ListenableObject';
+import { StudioBuffer } from './../../util/StudioBuffer';
+import { DCMCube, DCMModel } from './../model/DcmModel';
+import DcaAnimation, { DcaKeyframe, ProgressionPoint } from './DcaAnimation';
 
 const compilerWarningsRemove = (_: any) => { }
 
@@ -29,7 +29,7 @@ export const loadDCAAnimation = (project: DcProject, name: string, buffer: Studi
   const keyframes: DcaKeyframe[] = []
   let length = buffer.readNumber()
   for (let i = 0; i < length; i++) {
-    let kf = new DcaKeyframe(project, animation)
+    let kf = animation.createKeyframe()
     keyframes.push(kf)
 
     kf.startTime.value = buffer.readNumber()
