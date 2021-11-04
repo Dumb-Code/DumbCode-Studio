@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import { createContext, FC, useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { SVGEye, SVGLocked, SVGPlus, SVGSettings } from "../../../components/Icons";
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
@@ -209,10 +209,10 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
         <div className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
                 <input type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5 pt-0.5 h-6 text-s" placeholder="layer name" />
-                <button onClick={addNewKeyframe} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGPlus className="h-4 w-4 mr-1" /></button>
-                <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGEye className="h-4 w-4 mr-1" /></button>
-                <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGLocked className="h-4 w-4 mr-1" /></button>
-                <button className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGSettings className="h-4 w-4 mr-1" /></button>
+                <AnimationLayerButton onClick={addNewKeyframe} icon={SVGPlus} />
+                <AnimationLayerButton icon={SVGEye} />
+                <AnimationLayerButton icon={SVGLocked} />
+                <AnimationLayerButton icon={SVGSettings} />
             </div>
             <div className="relative w-full">
                 <div ref={draggingRef} className="flex flex-col w-full h-full overflow-hidden">
@@ -221,6 +221,12 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
                 <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 h-7 -top-0.5" />
             </div>
         </div>
+    )
+}
+
+const AnimationLayerButton = ({ onClick, icon: Icon }: { onClick?: () => void, icon: ({ className }: { className: string }) => JSX.Element }) => {
+    return (
+        <button onClick={onClick} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><Icon className="h-4 w-4 mr-1" /></button>
     )
 }
 
