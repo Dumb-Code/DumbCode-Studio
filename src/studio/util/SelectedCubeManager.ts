@@ -138,7 +138,7 @@ export default class SelectedCubeManager {
   }
 }
 
-export const useSelectedCubeManagerRef = () => {
+export const useSelectedCubeManager = () => {
   const { renderer, getSelectedProject, onFrameListeners, raycaster, camera, onMouseDown } = useStudio()
 
   const dom = renderer.domElement

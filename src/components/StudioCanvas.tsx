@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useStudio } from "../contexts/StudioContext";
-import { useSelectedCubeManagerRef as useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
+import { useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
 const StudioCanvas = () => {
     const { renderer, setSize, onMouseDown } = useStudio()
