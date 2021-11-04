@@ -1,4 +1,4 @@
-import { createContext, FC, useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { SVGEye, SVGLocked, SVGPlus, SVGSettings } from "../../../components/Icons";
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
