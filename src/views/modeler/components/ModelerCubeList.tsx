@@ -1,6 +1,6 @@
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
-import { MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
+import { FC, MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
 import { useStudio } from '../../../contexts/StudioContext';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
@@ -101,49 +101,41 @@ const ModelerCubeList = () => {
                 <p className="flex-grow my-0.5">CUBE LIST</p>
             </div>
             <div className="flex flex-row px-1 dark:bg-gray-900 bg-gray-200 pb-1 pt-0.5">
-                <button onClick={createSiblingCube} className="has-tooltip flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mr-0.5 flex flex-row">
-                    <b className="flex-grow" />
+                <CubeListButton onClick={createSiblingCube} className="bg-lightBlue-500 hover:bg-lightBlue-400" hoverText="Create Sibling Cube">
                     <SVGPlus className="h-6 w-6" />
                     <SVGCube className="h-5 w-5 mt-0.5" />
-                    <b className="flex-grow" />
-                    {/* We need a better tooltip system */}
-                    <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
-                        Create Sibling Cube
-                    </div>
-                </button>
-                <button onClick={createChildCube} className="has-tooltip flex-grow bg-lightBlue-500 hover:bg-lightBlue-400 rounded text-white mx-0.5 flex flex-row">
-                    <b className="flex-grow" />
+                </ CubeListButton>
+                <CubeListButton onClick={createChildCube} className="bg-lightBlue-500 hover:bg-lightBlue-400" hoverText="Create Child Cube">
                     <SVGPlus className="h-6 w-6" />
                     <SVGCube className="h-5 w-5 mt-0.5" />
                     <SVGCube className="h-4 w-4 mt-1.5" />
-                    <b className="flex-grow" />
-                    <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
-                        Create Child Cube
-                    </div>
-                </button>
-                <button onClick={deleteCubesKeepChildren} className="has-tooltip flex-grow bg-red-500 hover:bg-red-600 rounded text-white mx-0.5 flex flex-row">
-                    <b className="flex-grow" />
+                </ CubeListButton>
+                <CubeListButton onClick={deleteCubesKeepChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube">
                     <SVGTrash className="h-5 w-5 mt-0.5" />
-                    <b className="flex-grow" />
-                    <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
-                        Delete Cube
-                    </div>
-                </button>
-                <button onClick={deleteCubesAndChildren} className="has-tooltip flex-grow bg-red-500 hover:bg-red-600 rounded text-white ml-0.5 flex flex-row">
-                    <b className="flex-grow" />
+                </ CubeListButton>
+                <CubeListButton onClick={deleteCubesAndChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube And Children">
                     <SVGTrash className="h-5 w-5 mt-0.5" />
                     <SVGCube className="h-5 w-5 mt-0.5" />
                     <SVGCube className="h-4 w-4 mt-1.5" />
-                    <b className="flex-grow" />
-                    <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
-                        Delete Cube and Children
-                    </div>
-                </button>
+                </ CubeListButton>
             </div>
             <div className="border-r border-black flex flex-col w-full pr-2 pl-1 overflow-x-hidden overflow-y-scroll flex-grow">
                 <CubeList model={model} selectedCubeManager={project.selectedCubeManager} />
             </div>
         </div>
+    )
+}
+
+const CubeListButton: FC<{ className: string, hoverText: string, onClick: () => void }> = ({ className, hoverText, children, onClick }) => {
+    return (
+        <button onClick={onClick} className={"has-tooltip flex-grow rounded text-white ml-0.5 flex flex-row " + className}>
+            <b className="flex-grow" />
+            {children}
+            <b className="flex-grow" />
+            <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
+                {hoverText}
+            </div>
+        </button>
     )
 }
 
