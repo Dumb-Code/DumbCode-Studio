@@ -3,7 +3,7 @@ import { DCMCube } from '../studio/formats/model/DcmModel';
 import { TextureGroup } from '../studio/formats/textures/TextureManager';
 import { useListenableMap, useListenableObject } from '../studio/util/ListenableObject';
 import { useTextureGroupSelect } from '../studio/util/StudioHooks';
-import Dropup, { DropupItem } from './Dropup'
+import Dropup, { DropupItem } from './Dropup';
 import { SVGCube, SVGEye, SVGGrid, SVGLocked, SVGRedo, SVGUndo } from './Icons';
 import { ButtonWithTooltip } from './Tooltips';
 
@@ -63,11 +63,11 @@ const InfoBar = () => {
             }
             <div className="flex-grow"></div>
 
-            <ButtonWithTooltip className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black" delay={500} tooltip="Undo the last operation">
+            <ButtonWithTooltip className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black" tooltip="Undo the last operation">
                 <SVGUndo className="h-3 w-3 mr-1" />
             </ButtonWithTooltip>
 
-            <ButtonWithTooltip className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black" delay={500} tooltip="Redo the last undo">
+            <ButtonWithTooltip className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 dark:text-white text-black" tooltip="Redo the last undo">
                 <SVGRedo className="h-3 w-3 mr-1" />
             </ButtonWithTooltip>
         </div>

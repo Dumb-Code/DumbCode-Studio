@@ -1,15 +1,16 @@
 import { FC, useState } from "react";
-import Project from "../views/project/Project"
-import Modeler from "../views/modeler/Modeler"
-import Animator from "../views/animator/Animator"
-import Texturer from "../views/texturer/Texturer"
-import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
 import { SVGSettings } from "../components/Icons";
-import Options from "../views/options/Options";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
-import DialogBoxes from "../dialogboxes/DialogBoxes";
-import ProjectPageContext from "../contexts/ProjectPageContext";
+import ProjectPageContextProvider from "../contexts/ProjectPageContext";
+import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
 import StudioPanelsContextProvider from "../contexts/StudioPanelsContext";
+import TooltipContextProvider from "../contexts/TooltipContext";
+import DialogBoxes from "../dialogboxes/DialogBoxes";
+import Animator from "../views/animator/Animator";
+import Modeler from "../views/modeler/Modeler";
+import Options from "../views/options/Options";
+import Project from "../views/project/Project";
+import Texturer from "../views/texturer/Texturer";
 
 type Tab = {
   name: string;
@@ -30,11 +31,13 @@ const StudioContainer = () => {
     <StudioContextProvider>
       <StudioPanelsContextProvider>
         <OptionsContextProvider>
-          <ProjectPageContext>
-            <DialogBoxes>
-              <StudioApp />
-            </DialogBoxes>
-          </ProjectPageContext>
+          <ProjectPageContextProvider>
+            <TooltipContextProvider>
+              <DialogBoxes>
+                <StudioApp />
+              </DialogBoxes>
+            </TooltipContextProvider>
+          </ProjectPageContextProvider>
         </OptionsContextProvider>
       </StudioPanelsContextProvider>
     </StudioContextProvider>

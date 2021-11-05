@@ -1,18 +1,18 @@
+import { ContextMenu, ContextMenuTrigger, MenuItem } from "react-contextmenu"
+import { Material } from "three"
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter'
+import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter'
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
+import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
-import DcProject, { createProject, getProjectName, newProject } from "../../../studio/formats/project/DcProject"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
-import { FileSystemsAccessApi, defaultWritable } from "../../../studio/util/FileTypes"
+import { DCMCube } from "../../../studio/formats/model/DcmModel"
+import DcProject, { createProject, getProjectName, newProject } from "../../../studio/formats/project/DcProject"
+import { defaultWritable, FileSystemsAccessApi } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
-import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
-import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter';
-import { DCMCube } from "../../../studio/formats/model/DcmModel"
-import { Material } from "three"
-import { ContextMenu, ContextMenuTrigger } from "react-contextmenu"
-import { MenuItem } from "react-contextmenu"
 
 const SAVE_AS_CONTEXT = "studio-project-models-save-as"
 const modelExtensions = [".dcm", ".tbl", ".bbmodel"]
@@ -27,13 +27,14 @@ const ProjectModels = () => {
             <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">MODELS</p>
                 <p className="text-md flex flex-row">
-                    <button className="icon-button" onClick={() => addProject(newProject())}><SVGPlus className="h-4 w-4 mr-1" /></button>
+                    <ButtonWithTooltip className="icon-button" onClick={() => addProject(newProject())} tooltip="New Project"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
                     <ClickableInput
                         onFile={file => createProject(file).then(addProject)}
                         accept={modelExtensions}
                         multiple
                         description="Model Files"
                         className="icon-button"
+                        tooltip="Upload a model file"
                     >
                         <SVGUpload className="h-4 w-4 mr-1" />
                     </ClickableInput>
@@ -119,23 +120,28 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                 <DblClickEditLO obj={project.name} disabled={linkedToFile} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full dark:bg-gray-500 text-black" />
                 <div className="pt-0 mr-2 text-white flex flex-row">
                     {isRemote &&
-                        <button
-                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}>
+                        <ButtonWithTooltip
+                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}
+                            tooltip="Push to Github"
+                        >
                             <SVGPushGithub className="h-4 w-4 mr-1" />
-                        </button>
+                        </ButtonWithTooltip>
                     }
                     {linkedToFile &&
-                        <button
+                        <ButtonWithTooltip
                             onClick={e => { saveModel(); e.stopPropagation() }}
-                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}>
+                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}
+                            tooltip="Save to file"
+                        >
                             <SVGSave className="h-4 w-4 mr-1" />
-                        </button>
+                        </ButtonWithTooltip>
                     }
                     <ContextMenuTrigger id={SAVE_AS_CONTEXT} mouseButton={0}>
-                        <div
+                        <ButtonWithTooltip
+                            tooltip="Download as"
                             className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}>
                             <SVGDownload className="h-6 w-4 mr-1" />
-                        </div>
+                        </ButtonWithTooltip>
                     </ContextMenuTrigger>
                     <ContextMenu id={SAVE_AS_CONTEXT} className="bg-gray-900 rounded">
                         <MenuItem>
@@ -164,11 +170,13 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                             </div>
                         </MenuItem>
                     </ContextMenu>
-                    <button
+                    <ButtonWithTooltip
                         onClick={e => { removeProject(); e.stopPropagation() }}
-                        className={iconButtonClass + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}>
+                        className={iconButtonClass + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}
+                        tooltip="Delete"
+                    >
                         <SVGCross className="h-4 w-4 group-hover:text-red-500" />
-                    </button>
+                    </ButtonWithTooltip>
                 </div>
             </div>
         </div>

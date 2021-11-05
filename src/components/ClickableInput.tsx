@@ -1,4 +1,5 @@
-import { FC, useRef } from "react"
+import { FC } from "react"
+import { useTooltipRef } from "../contexts/TooltipContext"
 import { createReadableFile, createReadableFileExtended, FileSystemsAccessApi, ReadableFile } from "../studio/util/FileTypes"
 
 type Props = {
@@ -8,10 +9,11 @@ type Props = {
   multiple?: boolean
   onFile: (file: ReadableFile) => void
   className?: string
+  tooltip?: string
 }
 
 const ClickableInput: FC<Props> = (props) => {
-  const ref = useRef<HTMLInputElement>(null)
+  const ref = useTooltipRef<HTMLInputElement>(props.tooltip !== undefined ? () => props.tooltip : null)
   return (
     <>
       <input
@@ -39,6 +41,8 @@ const ClickableInput: FC<Props> = (props) => {
 }
 
 const ExtendedFilesClickableInput: FC<Props> = (props) => {
+  const ref = useTooltipRef<HTMLButtonElement>(props.tooltip !== undefined ? () => props.tooltip : null)
+
   const onClick = () => {
     window.showOpenFilePicker({
       multiple: props.multiple ?? false,
@@ -53,7 +57,7 @@ const ExtendedFilesClickableInput: FC<Props> = (props) => {
     }).catch(() => { })
   }
   return (
-    <button disabled={props.disabled} className={props.className} children={props.children} onClick={onClick} />
+    <button ref={ref} disabled={props.disabled} className={props.className} children={props.children} onClick={onClick} />
   )
 }
 

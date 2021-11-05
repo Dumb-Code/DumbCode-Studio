@@ -16,7 +16,7 @@ const Context = createContext<ProjectPageContextType>({
   setSelectedRepo: () => { }
 })
 
-const ProjectPageContext: FC = ({ children }) => {
+const ProjectPageContextProvider: FC = ({ children }) => {
   const [remoteSettingsOpen, setRemoteSettingsOpen] = useState(false)
   const [selectedRepo, setSelectedRepo] = useState<DcRemoteRepo | null>(null)
   return (
@@ -28,4 +28,4 @@ const ProjectPageContext: FC = ({ children }) => {
 
 export const useProjectPageContext = () => useContext(Context)
 
-export default ProjectPageContext
+export default ProjectPageContextProvider

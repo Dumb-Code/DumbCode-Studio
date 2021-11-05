@@ -4,6 +4,7 @@ import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { useOptions } from '../../../contexts/OptionsContext';
 import { useStudio } from '../../../contexts/StudioContext';
+import { useTooltipRef } from '../../../contexts/TooltipContext';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
@@ -127,14 +128,12 @@ const ModelerCubeList = () => {
 }
 
 const CubeListButton: FC<{ className: string, hoverText: string, onClick: () => void }> = ({ className, hoverText, children, onClick }) => {
+    const tooltipRef = useTooltipRef<HTMLButtonElement>(() => hoverText)
     return (
-        <button onClick={onClick} className={"has-tooltip flex-grow rounded text-white ml-0.5 flex flex-row " + className}>
+        <button ref={tooltipRef} onClick={onClick} className={"flex-grow rounded text-white ml-0.5 flex flex-row " + className}>
             <b className="flex-grow" />
             {children}
             <b className="flex-grow" />
-            <div className="tooltip -mt-6 bg-gray-700 rounded border border-black">
-                {hoverText}
-            </div>
         </button>
     )
 }
@@ -484,7 +483,7 @@ const CubeList = ({ model, selectedCubeManager }: { model: DCMModel, selectedCub
             <div ref={dragEndRef} />
             {overlayDiv !== null &&
                 createPortal(
-                    <div className={"relative " + darkMode ? "dark" : ""}>
+                    <div className={"relative " + (darkMode ? "dark" : "")}>
                         <div
                             ref={mouseDraggedElementRef}
                             className="absolute"

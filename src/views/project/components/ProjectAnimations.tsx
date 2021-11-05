@@ -1,6 +1,7 @@
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGPlus, SVGUpload } from "../../../components/Icons"
+import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { loadDCAAnimation } from "../../../studio/formats/animations/DcaLoader"
@@ -31,13 +32,14 @@ const ProjectAnimations = () => {
             <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                 <p className="flex-grow mt-1 ml-1">ANIMATIONS</p>
                 <p className="flex flex-row">
-                    <button className="icon-button" onClick={() => addAnimation(DcaAnimation.createNew(getSelectedProject()))}><SVGPlus className="h-4 w-4 mr-1" /></button>
+                    <ButtonWithTooltip className="icon-button" onClick={() => addAnimation(DcaAnimation.createNew(getSelectedProject()))} tooltip="New Animation"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
                     <ClickableInput
                         onFile={uploadFile}
                         accept={animationExtensions}
                         multiple
-                        description="Texture Files"
+                        description="Animation Files"
                         className="icon-button"
+                        tooltip="Upload Animation(s)"
                     >
                         <SVGUpload className="h-4 w-4 mr-1" />
                     </ClickableInput>
@@ -79,8 +81,8 @@ const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation 
             <div className={(selected ? "bg-yellow-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " flex-shrink-0 rounded-sm h-8 text-left pl-2 mb-2 flex flex-row ml-2"} onClick={toggleAnimation}>
                 <DblClickEditLO obj={animation.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
                 <p className="mr-2 flex flex-row text-white">
-                    <button className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"}><SaveIcon className="h-4 w-4" /></button>
-                    <button onClick={e => { removeAnimation(); e.stopPropagation() }} className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}><SVGCross className="h-4 w-4 group-hover:text-red-500" /></button>
+                    <ButtonWithTooltip className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1"} tooltip="Download"><SaveIcon className="h-4 w-4" /></ButtonWithTooltip>
+                    <ButtonWithTooltip onClick={e => { removeAnimation(); e.stopPropagation() }} className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"} tooltip="Delete"><SVGCross className="h-4 w-4 group-hover:text-red-500" /></ButtonWithTooltip>
                 </p>
             </div>
         </div>
