@@ -529,7 +529,8 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
             onClick={e => {
                 //When selected:
                 //  - if ctrl is pressed, we deselect, keeping the current cubes
-                //  - else, we deselect all OTHER cubes
+                //  - if more than one cube is selected, we deselect all OTHER cubes
+                //  - else, we deslect this cube
                 //
                 //When not selected:
                 //  - if ctrl is pressed, select THIS cube, and keep the other cubes
