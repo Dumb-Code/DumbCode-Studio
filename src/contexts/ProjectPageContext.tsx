@@ -9,12 +9,7 @@ type ProjectPageContextType = {
   setSelectedRepo: (value: DcRemoteRepo) => void
 }
 
-const Context = createContext<ProjectPageContextType>({
-  remoteSettingsOpen: false,
-  setRemoteSettingsOpen: () => { },
-  selectedRepo: null,
-  setSelectedRepo: () => { }
-})
+const Context = createContext<ProjectPageContextType | null>(null)
 
 const ProjectPageContextProvider: FC = ({ children }) => {
   const [remoteSettingsOpen, setRemoteSettingsOpen] = useState(false)
@@ -26,6 +21,12 @@ const ProjectPageContextProvider: FC = ({ children }) => {
   )
 }
 
-export const useProjectPageContext = () => useContext(Context)
+export const useProjectPageContext = () => {
+  const context = useContext(Context)
+  if (context === null) {
+    throw new Error(`useProjectPageContext must be used within a ProjectPageContextProvider`)
+  }
+  return context
+}
 
 export default ProjectPageContextProvider

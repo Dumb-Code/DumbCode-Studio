@@ -27,7 +27,7 @@ const defaultValue: StudioPanelsContext = {
   animator_pp: emptyToggle
 }
 
-const Context = createContext(defaultValue)
+const Context = createContext<StudioPanelsContext | null>(null)
 
 
 const useBooleanGetterSetter = (object: StudioPanelsContext, name: keyof StudioPanelsContext, defaultValue: boolean) => {
@@ -53,7 +53,11 @@ const StudioPanelsContextProvider: FC = ({ children }) => {
 }
 
 export const usePanelToggle: (name: keyof StudioPanelsContext) => [boolean, (val: boolean) => void] = name => {
-  const object = useContext(Context)[name]
+  const context = useContext(Context)
+  if (context === null) {
+    throw new Error(`useProjectPageContext must be used within a ProjectPageContextProvider`)
+  }
+  const object = context[name]
   return [object.get(), value => object.set(value)]
 }
 

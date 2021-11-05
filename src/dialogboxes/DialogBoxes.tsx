@@ -5,9 +5,7 @@ import { useOptions } from "../contexts/OptionsContext"
 type DialogContextType = {
   setDialogBox: (val: () => JSX.Element) => void
 }
-const DialogContext = React.createContext<DialogContextType>({
-  setDialogBox: () => { }
-})
+const DialogContext = React.createContext<DialogContextType | null>(null)
 
 type OpenedDialogContextType = {
   clear: () => void
@@ -78,6 +76,18 @@ export const OpenedDialogBox: FC<{ width?: string, height?: string, title: () =>
   )
 }
 
-export const useDialogBoxes = () => useContext(DialogContext)
-export const useOpenedDialogBoxes = () => useContext(OpenedDialogContext)
+export const useDialogBoxes = () => {
+  const context = useContext(DialogContext)
+  if (context == null) {
+    throw new Error(`useDialogBoxes must be used within a DialogBoxes`)
+  }
+  return context
+}
+export const useOpenedDialogBoxes = () => {
+  const context = useContext(OpenedDialogContext)
+  if (context == null) {
+    throw new Error(`useOpenedDialogBoxes must be used within a DialogBoxes`)
+  }
+  return context
+}
 export default DialogBoxes
