@@ -537,10 +537,12 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
                 if (selected) {
                     if (e.ctrlKey) {
                         setSelected(false)
-                    } else {
+                    } else if (selectedCubeManager.selected.value.length !== 1) { //If other cubes are selected too
                         //Using `setSelected` won't do anything, as it's already selected.
                         //We can call onCubeSelected to essentially deselect the other cubes
                         selectedCubeManager.onCubeSelected(cube)
+                    } else {
+                        setSelected(false)
                     }
                 } else {
                     selectedCubeManager.keepCurrentCubes = e.ctrlKey
