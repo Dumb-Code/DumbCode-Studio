@@ -175,21 +175,25 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
             }
             const modifier = 1.05
             if (e.deltaY !== 0) {
-                const val = e.deltaY < 0 ? 1 / modifier : modifier
+                if (e.ctrlKey) {
+                    animation.scroll.value = Math.max(animation.scroll.value + e.deltaY, 0)
+                } else {
+                    const val = e.deltaY < 0 ? 1 / modifier : modifier
 
-                const newPixelsPerSecond = width * blockPerSecond * animation.zoom.value * val
+                    const newPixelsPerSecond = width * blockPerSecond * animation.zoom.value * val
 
-                //Updates the scroll so that the mouseX position is kept constant.
-                //Essentially zooms into where the mouse is
-                const pixelPoint = animation.scroll.value + e.clientX - current.getBoundingClientRect().left
-                const secondsPoint = pixelPoint / getPixelsPerSecond()
-                const newPixelPoint = secondsPoint * newPixelsPerSecond
-                const changeInPixles = newPixelPoint - pixelPoint
+                    //Updates the scroll so that the mouseX position is kept constant.
+                    //Essentially zooms into where the mouse is
+                    const pixelPoint = animation.scroll.value + e.clientX - current.getBoundingClientRect().left
+                    const secondsPoint = pixelPoint / getPixelsPerSecond()
+                    const newPixelPoint = secondsPoint * newPixelsPerSecond
+                    const changeInPixles = newPixelPoint - pixelPoint
 
 
-                animation.scroll.value = Math.max(animation.scroll.value + changeInPixles, 0)
+                    animation.scroll.value = Math.max(animation.scroll.value + changeInPixles, 0)
 
-                animation.zoom.value *= val
+                    animation.zoom.value *= val
+                }
             }
             e.stopPropagation()
             e.preventDefault()
