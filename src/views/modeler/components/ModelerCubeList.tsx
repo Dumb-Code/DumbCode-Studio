@@ -1,11 +1,11 @@
-import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
-import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
 import { FC, MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
-import { useStudio } from '../../../contexts/StudioContext';
-import { useListenableObject } from '../../../studio/util/ListenableObject';
-import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import { createPortal } from 'react-dom';
+import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
+import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { useOptions } from '../../../contexts/OptionsContext';
+import { useStudio } from '../../../contexts/StudioContext';
+import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
+import { useListenableObject } from '../../../studio/util/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 
 const overlayDiv = document.getElementById("overlay")
@@ -528,9 +528,26 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
             onPointerEnter={() => setHovering(true)}
             onPointerLeave={() => setHovering(false)}
             onClick={e => {
-                selectedCubeManager.keepCurrentCubes = e.ctrlKey
-                setSelected(true)
-                selectedCubeManager.keepCurrentCubes = false
+                //When selected:
+                //  - if ctrl is pressed, we deselect, keeping the current cubes
+                //  - else, we deselect all OTHER cubes
+                //
+                //When not selected:
+                //  - if ctrl is pressed, select THIS cube, and keep the other cubes
+                //  - else, we only select THIS cube
+                if (selected) {
+                    if (e.ctrlKey) {
+                        setSelected(false)
+                    } else {
+                        //Using `setSelected` won't do anything, as it's already selected.
+                        //We can call onCubeSelected to essentially deselect the other cubes
+                        selectedCubeManager.onCubeSelected(cube)
+                    }
+                } else {
+                    selectedCubeManager.keepCurrentCubes = e.ctrlKey
+                    setSelected(true)
+                    selectedCubeManager.keepCurrentCubes = false
+                }
                 e.stopPropagation()
             }}
             className={`${itemBackgroundColor} ml-2 my-0.5`}

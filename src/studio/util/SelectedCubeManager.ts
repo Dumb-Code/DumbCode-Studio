@@ -1,10 +1,9 @@
-import { LO } from './ListenableObject';
-import { DCMModel, DCMCube } from './../formats/model/DcmModel';
-import { Camera, Mesh, Raycaster } from 'three';
 import React, { useEffect } from 'react';
-import { Vector2 } from 'three';
+import { Camera, Mesh, Raycaster, Vector2 } from 'three';
 import { useStudio } from '../../contexts/StudioContext';
 import DcProject from '../formats/project/DcProject';
+import { DCMCube, DCMModel } from './../formats/model/DcmModel';
+import { LO } from './ListenableObject';
 export default class SelectedCubeManager {
   mouseOverDiv = false
   disabled = false
@@ -71,7 +70,7 @@ export default class SelectedCubeManager {
   onCubeSelected(cube: DCMCube) {
     if (!this.keepCurrentCubes) {
       cube.model.identifierCubeMap.forEach(v => {
-        if (v.selected.value) {
+        if (v !== cube && v.selected.value) {
           v.selected.value = false
         }
       })
