@@ -1,6 +1,7 @@
 const colors = require('tailwindcss/colors');
 
 module.exports = {
+  mode: "jit",
   theme: {
     extend: {
       transitionProperty: {
@@ -51,11 +52,6 @@ module.exports = {
         'gumball gumball properties',
         'info info properties'
       ]
-    }
-  },
-  variants: {
-    extend: {
-      borderRadius: ['first', 'last']
     }
   },
   darkMode: 'class', // or 'media' or 'class'
