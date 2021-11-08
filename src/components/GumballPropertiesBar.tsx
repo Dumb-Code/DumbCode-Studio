@@ -1,6 +1,6 @@
-import { useState } from "react";
-import Dropup, { DropupItem } from "./Dropup";
 import { Switch } from "@headlessui/react";
+import { FC, useState } from "react";
+import Dropup, { DropupItem } from "./Dropup";
 
 const GumballPropertiesBar = () => {
     return (
@@ -28,54 +28,59 @@ const GumballToggle = () => {
 }
 
 const TransformationTypeSelect = () => {
-    const [objectMode, setObjectMode] = useState(true);
+    const [objectMode, setObjectMode] = useState(true)
 
     return (
-        <div className="flex flex-row">
-            <div className="flex flex-row p-0.5 mr-2">
-                <button className={(objectMode ? "bg-green-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setObjectMode(true)}>Object</button>
-                <button className={(objectMode ? "dark:bg-gray-700 bg-gray-400 text-black" : "bg-green-500 text-white") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setObjectMode(false)}>Gumball</button>
-            </div>
+        <>
+            <ButtonList>
+                <GumballButton title="Object" selected={objectMode} selectedClassName="bg-green-500" onClick={() => setObjectMode(true)} />
+                <GumballButton title="Gumball" selected={!objectMode} selectedClassName="bg-green-500" onClick={() => setObjectMode(false)} />
+            </ButtonList>
             {objectMode ? <ObjectTransformationModeSelect /> : <GumballTransformationModeSelect />}
-        </div>
+        </>
     )
 }
 
 const ObjectTransformationModeSelect = () => {
 
-    const [transformMode, setTransformMode] = useState("move");
+    const [transformMode, setTransformMode] = useState<"move" | "rotate" | "dimension">("move")
 
     return (
         <div className="flex flex-row transition ease-in-out duration-200">
-            <div className="flex flex-row p-0.5 mr-2">
-                <button className={(transformMode === "move" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setTransformMode("move")}>Move</button>
-                <button className={(transformMode === "rotate" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " py-1 px-2 border-l border-r dark:border-black border-white text-xs"} onClick={() => setTransformMode("rotate")}>Rotate</button>
-                <button className={(transformMode === "dimension" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setTransformMode("dimension")}>Dimension</button>
-            </div>
-            {(transformMode === "move") ? <ObjectMoveOptions /> : (transformMode === "rotate") ? <ObjectRotateOptions /> : (transformMode === "dimension") || <p>You done messed up</p>}
+            <ButtonList>
+                <GumballButton title="Move" selected={transformMode === "move"} onClick={() => setTransformMode("move")} />
+                <GumballButton title="Rotate" selected={transformMode === "rotate"} onClick={() => setTransformMode("rotate")} />
+                <GumballButton title="Dimension" selected={transformMode === "dimension"} onClick={() => setTransformMode("dimension")} />
+            </ButtonList>
+            {(() => {
+                switch (transformMode) {
+                    case 'move': return <ObjectMoveOptions />
+                    case 'rotate': return <ObjectRotateOptions />
+                    case 'dimension': return null
+                }
+            })()}
         </div>
     )
 }
 
+
 const ObjectMoveOptions = () => {
 
     const [isMoveLocal, setScopeLocal] = useState(true);
-    const [moveType, setTransformMode] = useState("position");
+    const [moveType, setMoveType] = useState<"position" | "offset" | "rotationPoint">("position");
 
     return (
-        <div className="flex flex-row">
-            <div className="flex flex-row p-0.5 mr-2">
-                <button className={(isMoveLocal ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setScopeLocal(true)}>Local</button>
-                <button className={(isMoveLocal ? "dark:bg-gray-700 bg-gray-400 text-black" : "bg-lightBlue-500 text-white") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setScopeLocal(false)}>World</button>
-
-            </div>
-            <div className="flex flex-row p-0.5 mr-2">
-                <button className={(moveType === "position" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setTransformMode("position")}>Position</button>
-                <button className={(moveType === "offset" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " py-1 px-2 border-l border-r dark:border-black border-white text-xs"} onClick={() => setTransformMode("offset")}>Offset</button>
-                <button className={(moveType === "rotationPt" ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setTransformMode("rotationPt")}>Rotation Point</button>
-
-            </div>
-        </div>
+        <>
+            <ButtonList>
+                <GumballButton title="Local" selected={isMoveLocal} onClick={() => setScopeLocal(true)} />
+                <GumballButton title="World" selected={!isMoveLocal} onClick={() => setScopeLocal(false)} />
+            </ButtonList>
+            <ButtonList>
+                <GumballButton title="Position" selected={moveType === "position"} onClick={() => setMoveType("position")} />
+                <GumballButton title="Offset" selected={moveType === "offset"} onClick={() => setMoveType("offset")} />
+                <GumballButton title="Rotation Point" selected={moveType === "rotationPoint"} onClick={() => setMoveType("rotationPoint")} />
+            </ButtonList>
+        </>
     )
 }
 
@@ -85,17 +90,16 @@ const ObjectRotateOptions = () => {
     const [isAroundPoint, setAroundPoint] = useState(false);
 
     return (
-        <div className="flex flex-row">
-            <div className="flex flex-row p-0.5 mr-2">
-                <button className={(isRotLocal ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setScopeLocal(true)}>Local</button>
-                <button className={(isRotLocal ? "dark:bg-gray-700 bg-gray-400 text-black" : "bg-lightBlue-500 text-white") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setScopeLocal(false)}>World</button>
-
-            </div>
-            <div className="flex flex-row p-0.5 mr-2">
-                <button className={(isAroundPoint ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setAroundPoint(false)}>Normal</button>
-                <button className={(isAroundPoint ? "dark:bg-gray-700 bg-gray-400 text-black" : "bg-lightBlue-500 text-white") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setAroundPoint(true)}>Around Point</button>
-            </div>
-        </div>
+        <>
+            <ButtonList>
+                <GumballButton title="Local" selected={isRotLocal} onClick={() => setScopeLocal(true)} />
+                <GumballButton title="World" selected={!isRotLocal} onClick={() => setScopeLocal(false)} />
+            </ButtonList>
+            <ButtonList>
+                <GumballButton title="Normal" selected={isAroundPoint} onClick={() => setAroundPoint(true)} />
+                <GumballButton title="Around Point" selected={!isAroundPoint} onClick={() => setAroundPoint(false)} />
+            </ButtonList>
+        </>
     )
 }
 
@@ -104,31 +108,45 @@ const GumballTransformationModeSelect = () => {
     const [isGumballMove, setGumballMove] = useState(true);
 
     return (
-        <div className="flex flex-row">
-            <div className="flex flex-row p-0.5 mr-2">
-                <button className={(isGumballMove ? "bg-lightBlue-500 text-white" : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-l py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={() => setGumballMove(true)}>Position</button>
-                <button className={(isGumballMove ? "dark:bg-gray-700 bg-gray-400 text-black" : "bg-lightBlue-500 text-white") + " rounded-r py-1 px-2 border-l dark:border-black border-white text-xs"} onClick={() => setGumballMove(false)}>Rotation</button>
-            </div>
+        <>
+            <ButtonList>
+                <GumballButton title="Position" selected={isGumballMove} onClick={() => setGumballMove(true)} />
+                <GumballButton title="Rotation" selected={!isGumballMove} onClick={() => setGumballMove(false)} />
+            </ButtonList>
             <RelocateGumballDropup />
-        </div>
+        </>
     )
 }
 
 const RelocateGumballDropup = () => {
-
     return (
-        <div>
-            <Dropup title="Relocate Gumball" header="RELOCATE MODE">
-                <div className="p-0.5">
-                    <DropupItem name="To World Origin" onSelect={() => console.log("set mode")} />
-                    <DropupItem name="Cube Rotation Point (Position)" onSelect={() => console.log("set mode")} />
-                    <DropupItem name="Cube Rotation Point (Rotation)" onSelect={() => console.log("set mode")} />
-                    <DropupItem name="Cube Rotation Point (Both)" onSelect={() => console.log("set mode")} />
-                    <DropupItem name="Custom (Snap Point)" onSelect={() => console.log("set mode")} />
-                </div>
-            </Dropup>
-        </div>
+        <Dropup title="Relocate Gumball" header="RELOCATE MODE">
+            <div className="p-0.5">
+                <DropupItem name="To World Origin" onSelect={() => console.log("set mode")} />
+                <DropupItem name="Cube Rotation Point (Position)" onSelect={() => console.log("set mode")} />
+                <DropupItem name="Cube Rotation Point (Rotation)" onSelect={() => console.log("set mode")} />
+                <DropupItem name="Cube Rotation Point (Both)" onSelect={() => console.log("set mode")} />
+                <DropupItem name="Custom (Snap Point)" onSelect={() => console.log("set mode")} />
+            </div>
+        </Dropup>
     );
+}
+
+const ButtonList: FC = ({ children }) => {
+    return (
+        <div className="flex flex-row p-0.5 mr-2">
+            {children}
+        </div>
+    )
+}
+
+const GumballButton = ({ title, selected, selectedClassName = "bg-lightBlue-500", onClick }: { title: string, selected: boolean, selectedClassName?: string, onClick: () => void }) => {
+    return (
+        <button className={(selected ? `${selectedClassName} text-white` : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-none first:rounded-l last:rounded-r py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={onClick}>
+            {title}
+        </button>
+    )
+
 }
 
 export default GumballPropertiesBar;

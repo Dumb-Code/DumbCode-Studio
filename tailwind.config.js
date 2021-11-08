@@ -53,7 +53,11 @@ module.exports = {
       ]
     }
   },
-  variants: {},
+  variants: {
+    extend: {
+      borderRadius: ['first', 'last']
+    }
+  },
   darkMode: 'class', // or 'media' or 'class'
   purge: [
     './src/**/*.html',
