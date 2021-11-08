@@ -134,7 +134,7 @@ const RelocateGumballDropup = () => {
 
 const ButtonList: FC = ({ children }) => {
     return (
-        <div className="flex flex-row p-0.5 mr-2">
+        <div className="flex flex-row p-0.5 mr-2 w-[55px]">
             {children}
         </div>
     )
