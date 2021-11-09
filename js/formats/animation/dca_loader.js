@@ -114,9 +114,13 @@ DCALoader.repairKeyframes = (handler, version, alreadyFlipped = false) => {
         model.createModel(new MeshLambertMaterial())
         model.modelCache.updateMatrix()
         model.modelCache.updateMatrixWorld(true)
-        runInvertMath(model)
-        runMirrorMath(worldPos, worldY, null, model, false)
-        runMirrorMath(worldPos, worldX, null, model, false)
+        
+        if(!alreadyFlipped) {
+            runInvertMath(model)
+            runMirrorMath(worldPos, worldY, null, model, false)
+            runMirrorMath(worldPos, worldX, null, model, false)
+        
+        }
         
         handler.tbl = model
 
