@@ -10,7 +10,7 @@ const LinksToOurStuff = () => {
 
             <p className="text-gray-900 text-xs font-semibold mt-4">DUMBCODE WEBSITE</p>
             <p className="text-gray-900 text-xs mb-1">Check out DumbCode's other projects.</p>
-            <button className="dark:bg-gray-800 bg-gray-300 rounded w-80 dark:text-white text-black font-semibold p-2 text-left pl-4 my-1 hover:bg-lightBlue-500">Website</button>
+            <button className="dark:bg-gray-800 bg-gray-300 rounded w-80 dark:text-white text-black font-semibold p-2 text-left pl-4 my-1 hover:bg-sky-500">Website</button>
 
             <p className="text-gray-900 text-xs font-semibold mt-4">DUMBCODE STUDIO CHANGELOG</p>
             <p className="text-gray-900 text-xs mb-1">Noticed a change in the app? Check our Changelog to see what all is new in this version.</p>

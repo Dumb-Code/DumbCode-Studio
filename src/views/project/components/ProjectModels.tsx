@@ -112,11 +112,11 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
 
     const isRemote = false
 
-    const iconButtonClass = (selected ? "bg-lightBlue-600 hover:bg-lightBlue-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white")
+    const iconButtonClass = (selected ? "bg-sky-600 hover:bg-sky-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white")
 
     return (
         <div>
-            <div className={(selected ? "bg-lightBlue-500" : "dark:bg-gray-700 bg-gray-200 text-black dark:text-white") + " mb-2 rounded-sm h-8 text-left pl-2 flex flex-row ml-2"} onClick={changeModel}>
+            <div className={(selected ? "bg-sky-500" : "dark:bg-gray-700 bg-gray-200 text-black dark:text-white") + " mb-2 rounded-sm h-8 text-left pl-2 flex flex-row ml-2"} onClick={changeModel}>
                 <DblClickEditLO obj={project.name} disabled={linkedToFile} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full dark:bg-gray-500 text-black" />
                 <div className="pt-0 mr-2 text-white flex flex-row">
                     {isRemote &&
@@ -151,14 +151,14 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                             onClick={e => { saveModel(); e.stopPropagation() }}
                         >
                             <div className="hover:bg-gray-700 cursor-pointer p-1 rounded w-48 m-1 flex flex-row">
-                                <p className="text-gray-300">{project.name.value}</p><p className="text-lightBlue-400 font-bold">.dcm</p>
+                                <p className="text-gray-300">{project.name.value}</p><p className="text-sky-400 font-bold">.dcm</p>
                             </div>
                         </MenuItem>
                         <MenuItem
                             onClick={e => { exportToObj(); e.stopPropagation() }}
                         >
                             <div className="hover:bg-gray-700 cursor-pointer p-1 rounded w-48 m-1 flex flex-row">
-                                <p className="text-gray-300">{project.name.value}</p><p className="text-lightBlue-400 font-bold">.obj</p>
+                                <p className="text-gray-300">{project.name.value}</p><p className="text-sky-400 font-bold">.obj</p>
                             </div>
                         </MenuItem>
                         <MenuItem
@@ -166,7 +166,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
 
                         >
                             <div className="hover:bg-gray-700 cursor-pointer p-1 rounded w-48 m-1 flex flex-row">
-                                <p className="text-gray-300">{project.name.value}</p><p className="text-lightBlue-400 font-bold">.gltf</p>
+                                <p className="text-gray-300">{project.name.value}</p><p className="text-sky-400 font-bold">.gltf</p>
                             </div>
                         </MenuItem>
                     </ContextMenu>

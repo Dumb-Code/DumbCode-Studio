@@ -19,7 +19,7 @@ const AccessibilityOptions = () => {
 const OptionButton = ({ name, selected, setMotion }: { name: string, selected: boolean, setMotion: () => void }) => {
     return (
         <div>
-            <button className={(!selected || "ring-2 ring-lightBlue-500") + " dark:bg-gray-800 bg-gray-300 rounded w-80 dark:text-white text-black font-semibold p-2 text-left pl-4 my-1"} onClick={() => setMotion()}>{name}</button>
+            <button className={(!selected || "ring-2 ring-sky-500") + " dark:bg-gray-800 bg-gray-300 rounded w-80 dark:text-white text-black font-semibold p-2 text-left pl-4 my-1"} onClick={() => setMotion()}>{name}</button>
         </div>
     )
 }

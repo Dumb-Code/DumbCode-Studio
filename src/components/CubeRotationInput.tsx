@@ -4,7 +4,7 @@ import NumericInput from 'react-numeric-input';
 const axis = [
     { axis: "x", color: "bg-red-500" },
     { axis: "y", color: "bg-green-500" },
-    { axis: "z", color: "bg-lightBlue-500" },
+    { axis: "z", color: "bg-sky-500" },
 ] as const
 
 const CubeRotationInput = ({ title, value, setValue }: {

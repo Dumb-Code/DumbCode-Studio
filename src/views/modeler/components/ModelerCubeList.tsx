@@ -102,11 +102,11 @@ const ModelerCubeList = () => {
                 <p className="flex-grow my-0.5">CUBE LIST</p>
             </div>
             <div className="flex flex-row px-1 dark:bg-gray-900 bg-gray-200 pb-1 pt-0.5">
-                <CubeListButton onClick={createSiblingCube} className="bg-lightBlue-500 hover:bg-lightBlue-400" hoverText="Create Sibling Cube">
+                <CubeListButton onClick={createSiblingCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Sibling Cube">
                     <SVGPlus className="h-6 w-6" />
                     <SVGCube className="h-5 w-5 mt-0.5" />
                 </ CubeListButton>
-                <CubeListButton onClick={createChildCube} className="bg-lightBlue-500 hover:bg-lightBlue-400" hoverText="Create Child Cube">
+                <CubeListButton onClick={createChildCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Child Cube">
                     <SVGPlus className="h-6 w-6" />
                     <SVGCube className="h-5 w-5 mt-0.5" />
                     <SVGCube className="h-4 w-4 mt-1.5" />
@@ -512,7 +512,7 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
     if (visible && !locked) {
         itemBackgroundColor = "text-white "
         if (selected) {
-            itemBackgroundColor += "bg-lightBlue-500 hover:bg-lightBlue-400"
+            itemBackgroundColor += "bg-sky-500 hover:bg-sky-400"
         } else if (hovering && !isDragging) {
             itemBackgroundColor += "bg-red-600"
         } else {

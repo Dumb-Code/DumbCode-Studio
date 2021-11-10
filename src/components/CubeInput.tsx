@@ -5,7 +5,7 @@ import { SVGLocked, SVGUnlocked } from './Icons';
 const axis = [
     { axis: "x", color: "bg-red-500" },
     { axis: "y", color: "bg-green-500" },
-    { axis: "z", color: "bg-lightBlue-500" },
+    { axis: "z", color: "bg-sky-500" },
 ] as const
 
 const CubeInput = ({ title, value, setValue, lock, lockPositive }: {

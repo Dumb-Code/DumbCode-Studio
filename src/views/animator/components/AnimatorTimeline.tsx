@@ -156,8 +156,8 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     }, [keyframes])
 
     const divHeight = maxLayer <= 2 ? 1.5 : 1.5 + ((maxLayer - 2) * .75)
-    const colors = ["bg-lightBlue-500", "bg-green-500", "bg-yellow-500", "bg-red-500"]
-    const hoverColors = ["bg-lightBlue-300", "bg-green-300", "bg-yellow-300", "bg-red-300"]
+    const colors = ["bg-sky-500", "bg-green-500", "bg-yellow-500", "bg-red-500"]
+    const hoverColors = ["bg-sky-300", "bg-green-300", "bg-yellow-300", "bg-red-300"]
     const color = colors[layer.layerId % colors.length]
     const hoverColor = hoverColors[layer.layerId % colors.length]
 

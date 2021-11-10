@@ -82,7 +82,7 @@ const AnimatorScrubBar = () => {
                 <button className="dark:bg-gray-900 bg-gray-200 px-1 rounded-tl-md pt-1 dark:text-gray-400 text-black hover:text-red-500 border-l-2 border-t-2 dark:border-black border-white">
                     <SVGStop className="h-6 w-6" />
                 </button>
-                <button className="dark:bg-gray-900 bg-gray-200 px-2 dark:text-white text-gray-900 hover:text-lightBlue-500 border-t-2 dark:border-black border-white" onClick={() => setPlaying(!isPlaying)}>
+                <button className="dark:bg-gray-900 bg-gray-200 px-2 dark:text-white text-gray-900 hover:text-sky-500 border-t-2 dark:border-black border-white" onClick={() => setPlaying(!isPlaying)}>
                     {isPlaying
                         ? <SVGPause className="h-8 w-8" />
                         : <SVGPlay className="h-8 w-8" />
@@ -110,13 +110,13 @@ const AnimatorScrubBar = () => {
                     }}
                 />
                 <div
-                    className="transform -translate-y-4 bg-lightBlue-500 h-2 relative top-7 -mt-1 transition-transform ease-in-out cursor-pointer"
+                    className="transform -translate-y-4 bg-sky-500 h-2 relative top-7 -mt-1 transition-transform ease-in-out cursor-pointer"
                     style={{
                         width: 100 * (isMoving ? (mouseHoverX < position ? mouseHoverX : position) : position) + "%"
                     }}
                 />
             </div>
-            <div className={(isMoving ? "h-4 w-4 opacity-100" : "opacity-0 h-0 w-0") + " cursor-pointer rounded-full bg-lightBlue-400 relative transform -translate-y-1.5 -translate-x-1/2 transition-opacity ease-in-out duration-100"}
+            <div className={(isMoving ? "h-4 w-4 opacity-100" : "opacity-0 h-0 w-0") + " cursor-pointer rounded-full bg-sky-400 relative transform -translate-y-1.5 -translate-x-1/2 transition-opacity ease-in-out duration-100"}
                 style={{ left: 100 * (isMoving ? mouseHoverX : position) + "%" }}
                 onClick={setBarPosition}
                 onPointerDown={() => setIsDragging(true)}
