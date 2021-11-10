@@ -1,13 +1,12 @@
-import { getUndefinedWritable } from '../../util/FileTypes';
-import { DCMModel } from '../model/DcmModel';
-import { Group, Material, MeshBasicMaterial, MeshLambertMaterial, Texture } from "three"
-import { ReadableFile } from '../../util/FileTypes';
-import { v4 as uuidv4 } from "uuid"
-import TextureManager from '../textures/TextureManager';
+import { Group, MeshBasicMaterial, MeshLambertMaterial, Texture } from "three";
+import { v4 as uuidv4 } from "uuid";
+import { getUndefinedWritable, ReadableFile } from '../../util/FileTypes';
 import { LO } from '../../util/ListenableObject';
+import SelectedCubeManager from '../../util/SelectedCubeManager';
 import DcaTabs from '../animations/DcaTabs';
 import { loadDCMModel } from '../model/DCMLoader';
-import SelectedCubeManager from '../../util/SelectedCubeManager';
+import { DCMModel } from '../model/DcmModel';
+import TextureManager from '../textures/TextureManager';
 import { RemoteRepo } from './DcRemoteRepos';
 
 export default class DcProject {

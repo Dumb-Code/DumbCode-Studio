@@ -1,4 +1,4 @@
-import { Material, MeshBasicMaterial, MeshLambertMaterial } from 'three';
+import { MeshBasicMaterial, MeshLambertMaterial } from 'three';
 import { useStudio } from '../contexts/StudioContext';
 import { DCMCube } from '../studio/formats/model/DcmModel';
 import { TextureGroup } from '../studio/formats/textures/TextureManager';
@@ -45,7 +45,7 @@ const InfoBar = () => {
         project.selectedCubeManager.keepCurrentCubes = false
     }
 
-    
+
 
     return (
         <div className="rounded-sm dark:bg-black bg-white h-full flex flex-row">
@@ -101,8 +101,8 @@ const DisplayModeDropup = () => {
             <Dropup title="Display Mode" header="DISPLAY MODE">
                 <div className="px-0.5 py-1">
                     <DropupItem name="Textured" onSelect={() => project.updateTexture(setTextured)} />
-                    <DropupItem name="White" onSelect={() =>  project.updateTexture(setunTextured)} />
-                    <DropupItem name="Outline" onSelect={() =>  project.updateTexture(setOutline)} />
+                    <DropupItem name="White" onSelect={() => project.updateTexture(setunTextured)} />
+                    <DropupItem name="Outline" onSelect={() => project.updateTexture(setOutline)} />
                 </div>
             </Dropup>
         </div>
@@ -110,7 +110,7 @@ const DisplayModeDropup = () => {
 }
 
 const RenderModeDropup = () => {
-    
+
     return (
         <div className="mx-0.5">
             <Dropup title="Set View" header="SET PERSPECTIVE">
