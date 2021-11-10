@@ -1,3 +1,4 @@
+import { Material, MeshBasicMaterial, MeshLambertMaterial } from 'three';
 import { useStudio } from '../contexts/StudioContext';
 import { DCMCube } from '../studio/formats/model/DcmModel';
 import { TextureGroup } from '../studio/formats/textures/TextureManager';
@@ -44,6 +45,8 @@ const InfoBar = () => {
         project.selectedCubeManager.keepCurrentCubes = false
     }
 
+    
+
     return (
         <div className="rounded-sm dark:bg-black bg-white h-full flex flex-row">
             <DisplayModeDropup />
@@ -75,13 +78,31 @@ const InfoBar = () => {
 }
 
 const DisplayModeDropup = () => {
+    const { getSelectedProject } = useStudio()
+    const project = getSelectedProject()
+    type Func = (mat: MeshBasicMaterial | MeshLambertMaterial) => void
+    const setTextured: Func = (mat) => {
+        mat['_mode'] = 0
+        mat.map = project.previousThreeTexture
+        mat.wireframe = false
+    }
+    const setunTextured: Func = (mat) => {
+        mat['_mode'] = 1
+        mat.map = null
+        mat.wireframe = false
+    }
+    const setOutline: Func = (mat) => {
+        mat['_mode'] = 2
+        mat.map = null
+        mat.wireframe = true
+    }
     return (
         <div className="mx-0.5">
             <Dropup title="Display Mode" header="DISPLAY MODE">
                 <div className="px-0.5 py-1">
-                    <DropupItem name="Textured" onSelect={() => console.log("set mode")} />
-                    <DropupItem name="White" onSelect={() => console.log("set mode")} />
-                    <DropupItem name="Outline" onSelect={() => console.log("set mode")} />
+                    <DropupItem name="Textured" onSelect={() => project.updateTexture(setTextured)} />
+                    <DropupItem name="White" onSelect={() =>  project.updateTexture(setunTextured)} />
+                    <DropupItem name="Outline" onSelect={() =>  project.updateTexture(setOutline)} />
                 </div>
             </Dropup>
         </div>
@@ -89,6 +110,7 @@ const DisplayModeDropup = () => {
 }
 
 const RenderModeDropup = () => {
+    
     return (
         <div className="mx-0.5">
             <Dropup title="Set View" header="SET PERSPECTIVE">
