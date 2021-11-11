@@ -1,11 +1,11 @@
-import ModelerCommandInput from "./components/ModelerCommandInput"
-import InfoBar from "../../components/InfoBar"
-import ModelerSidebar from "./components/ModelerSidebar"
-import ModelerShortcuts from "./components/ModelerShortcuts"
-import StudioCanvas from "../../components/StudioCanvas"
-import GumballPropertiesBar from "../../components/GumballPropertiesBar"
 import { useEffect } from "react"
+import InfoBar from "../../components/InfoBar"
+import ModelerGumballPropertiesBar from "../../components/ModelerGumballPropertiesBar"
+import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
+import ModelerCommandInput from "./components/ModelerCommandInput"
+import ModelerShortcuts from "./components/ModelerShortcuts"
+import ModelerSidebar from "./components/ModelerSidebar"
 
 const Modeler = () => {
     const { getSelectedProject, onFrameListeners } = useStudio()
@@ -35,7 +35,7 @@ const Modeler = () => {
             <div className="grid-in-sidebar min-h-0 border dark:border-black border-white"><ModelerSidebar /></div>
             <div className="grid-in-shortcuts border dark:border-black border-white"><ModelerShortcuts /></div>
             <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
-            <div className="grid-in-gumball border dark:border-black border-white"><GumballPropertiesBar /></div>
+            <div className="grid-in-gumball border dark:border-black border-white"><ModelerGumballPropertiesBar /></div>
             <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
         </div>
     )

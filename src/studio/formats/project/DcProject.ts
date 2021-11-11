@@ -7,6 +7,7 @@ import DcaTabs from '../animations/DcaTabs';
 import { loadDCMModel } from '../model/DCMLoader';
 import { DCMModel } from '../model/DcmModel';
 import TextureManager from '../textures/TextureManager';
+import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
 import { RemoteRepo } from './DcRemoteRepos';
 
 export default class DcProject {
@@ -24,6 +25,7 @@ export default class DcProject {
   previousThreeTexture: Texture | null
 
   readonly selectedCubeManager = new SelectedCubeManager()
+  readonly modelerGumball: ModelerGumball
 
   remoteLink?: RemoteRepo
   remoteUUID?: string
@@ -35,6 +37,7 @@ export default class DcProject {
     this.model = model
     model.parentProject = this
     this.textureManager = new TextureManager(this)
+    this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.group)
     this.animationTabs = new DcaTabs()
     this.model.selectedCubeManager = this.selectedCubeManager
     this.group.add(this.model.modelGroup)

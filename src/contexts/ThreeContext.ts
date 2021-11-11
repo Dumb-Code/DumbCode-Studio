@@ -1,5 +1,6 @@
 import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
 
 export type ThreeJsContext = {
@@ -19,6 +20,8 @@ export type ThreeJsContext = {
   toggleBox: () => void
 
   setGridColor: (majorColor: number, minorColor: number, subColor: number) => void
+
+  transformControls: TransformControls
 }
 
 export const createThreeContext: () => ThreeJsContext = () => {
@@ -45,6 +48,13 @@ export const createThreeContext: () => ThreeJsContext = () => {
   controls.update()
 
   const raycaster = new Raycaster()
+
+  const transformControls = new TransformControls(camera, renderer.domElement)
+  transformControls.setSize(1.25)
+  transformControls.addEventListener('dragging-changed', e => {
+    controls.enabled = !e.value
+  })
+  onTopScene.add(transformControls)
 
   const onMouseDown = new IndexedEventHandler<React.MouseEvent>()
 
@@ -77,7 +87,7 @@ export const createThreeContext: () => ThreeJsContext = () => {
 
   return {
     renderer, camera, scene, onTopScene, controls,
-    raycaster, onMouseDown, onFrameListeners,
+    raycaster, onMouseDown, onFrameListeners, transformControls,
 
     setSize: (w, h) => {
       width = w

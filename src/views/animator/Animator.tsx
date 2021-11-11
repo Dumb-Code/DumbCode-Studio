@@ -1,13 +1,13 @@
-import AnimatorTabBar from "./components/AnimatorTabBar"
-import AnimatorShortcuts from "./components/AnimatorShortcuts"
-import AnimatorProperties from "./components/AnimatorProperties"
-import AnimatorTimeline from "./components/AnimatorTimeline"
-import AnimatorScrubBar from "./components/AnimatorScrubBar"
-import StudioCanvas from "../../components/StudioCanvas"
-import GumballPropertiesBar from "../../components/GumballPropertiesBar"
-import InfoBar from "../../components/InfoBar"
-import { useStudio } from "../../contexts/StudioContext"
 import { useEffect } from "react"
+import InfoBar from "../../components/InfoBar"
+import ModelerGumballPropertiesBar from "../../components/ModelerGumballPropertiesBar"
+import StudioCanvas from "../../components/StudioCanvas"
+import { useStudio } from "../../contexts/StudioContext"
+import AnimatorProperties from "./components/AnimatorProperties"
+import AnimatorScrubBar from "./components/AnimatorScrubBar"
+import AnimatorShortcuts from "./components/AnimatorShortcuts"
+import AnimatorTabBar from "./components/AnimatorTabBar"
+import AnimatorTimeline from "./components/AnimatorTimeline"
 
 const Animator = () => {
 
@@ -44,7 +44,7 @@ const Animator = () => {
             <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
             <div className="grid-in-scrub border dark:border-black border-white"><AnimatorScrubBar /></div>
             <div className="grid-in-timeline border dark:border-black border-white"><AnimatorTimeline /></div>
-            <div className="grid-in-gumball border dark:border-black border-white"><GumballPropertiesBar /></div>
+            <div className="grid-in-gumball border dark:border-black border-white"><ModelerGumballPropertiesBar /></div>
             <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
         </div>
     )

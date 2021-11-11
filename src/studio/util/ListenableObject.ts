@@ -35,6 +35,11 @@ export class LO<T> {
     this.listners.add(func)
   }
 
+  addAndRunListener = (func: Listener<T>) => {
+    func(this.value, this.value, () => new Error("Invalid setter called on passive function call"))
+    this.listners.add(func)
+  }
+
   removeListener = (func: Listener<T>) => {
     this.listners.delete(func)
   }

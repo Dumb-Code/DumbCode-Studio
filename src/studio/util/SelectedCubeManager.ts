@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Camera, Mesh, Raycaster, Vector2 } from 'three';
+import { Camera, Event, Mesh, Raycaster, Vector2 } from 'three';
 import { useStudio } from '../../contexts/StudioContext';
 import DcProject from '../formats/project/DcProject';
 import { DCMCube, DCMModel } from './../formats/model/DcmModel';
@@ -13,7 +13,7 @@ export default class SelectedCubeManager {
   mouseDown = false
   mouseClickDown = new Vector2()
 
-  listneres: Set<(project: DcProject) => boolean> = new Set()
+  listeners: Set<(project: DcProject) => boolean> = new Set()
 
   mouseOverMesh: Mesh | null = null
   mouseOver: LO<string | null> = new LO<string | null>(null)
@@ -47,7 +47,7 @@ export default class SelectedCubeManager {
 
     if (xMove < 5 && yMove < 5 && this.mouse.x >= -1 && this.mouse.x <= 1 && this.mouse.y >= -1 && this.mouse.y <= 1) {
       let ignore = false
-      this.listneres.forEach(listener => {
+      this.listeners.forEach(listener => {
         ignore = listener(project) || ignore
       })
       if (!ignore) {
@@ -116,7 +116,7 @@ export default class SelectedCubeManager {
 
 
   update(raycaster: Raycaster, camera: Camera, model: DCMModel) {
-    if (!this.mouseOverDiv) {
+    if (this.disabled || !this.mouseOverDiv) {
       return
     }
 
@@ -138,7 +138,7 @@ export default class SelectedCubeManager {
 }
 
 export const useSelectedCubeManager = () => {
-  const { renderer, getSelectedProject, onFrameListeners, raycaster, camera, onMouseDown } = useStudio()
+  const { renderer, getSelectedProject, onFrameListeners, raycaster, camera, onMouseDown, transformControls } = useStudio()
 
   const dom = renderer.domElement
   const project = getSelectedProject()
@@ -148,6 +148,28 @@ export const useSelectedCubeManager = () => {
     const callback = () => {
       cubeManager.update(raycaster, camera, model)
     }
+
+    //When the transform controls are in use, block this
+    const onMouseDownTransformControlBlocking = () => {
+      return transformControls.dragging && transformControls.axis !== null
+    }
+
+
+    const onTransformControlsAxisHover = (e: Event) => {
+      const value = e.value as string | null
+      if (value === null) {
+        //Also show tooltip
+        cubeManager.disabled = false
+        // callback()
+      } else {
+        //Also hide tooltip
+        cubeManager.disabled = true
+        if (cubeManager.mouseOverMesh !== null) {
+          cubeManager.onMouseOffMesh(cubeManager.mouseOverMesh)
+        }
+      }
+    }
+
     const mouseMove = (e: MouseEvent) => {
       const rect = dom.getBoundingClientRect()
       cubeManager.onMouseMove(rect, e.clientX, e.clientY, true)
@@ -163,11 +185,15 @@ export const useSelectedCubeManager = () => {
     document.addEventListener("pointermove", mouseMove)
     document.addEventListener("pointerup", mouseUp, false)
     onMouseDown.addListener(999, mouseDown)
+    cubeManager.listeners.add(onMouseDownTransformControlBlocking)
+    transformControls.addEventListener("axis-changed", onTransformControlsAxisHover)
     return () => {
       onFrameListeners.delete(callback)
       document.removeEventListener("pointermove", mouseMove)
       document.removeEventListener("pointerup", mouseUp, false)
       onMouseDown.removeListener(mouseDown)
+      cubeManager.listeners.delete(onMouseDownTransformControlBlocking)
+      transformControls.removeEventListener("axis-changed", onTransformControlsAxisHover)
     }
-  }, [cubeManager, dom, raycaster, camera, model, onFrameListeners, project, onMouseDown])
+  }, [cubeManager, dom, raycaster, camera, model, onFrameListeners, project, onMouseDown, transformControls])
 }
