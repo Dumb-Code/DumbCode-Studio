@@ -53,7 +53,7 @@
     "react-sortablejs": "^6.0.0",
     "sortablejs": "^1.13.0",
     "tailwindcss": "^2.2.19",
-    "three": "Dumb-Code/three.js",
+    "three": "./../three.js",
     "typescript": "^4.2.4",
     "uuid": "^8.3.2"
   },

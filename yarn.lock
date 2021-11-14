@@ -12300,9 +12300,8 @@ textextensions@^3.2.0:
   resolved "https://registry.yarnpkg.com/textextensions/-/textextensions-3.3.0.tgz#03530d5287b86773c08b77458589148870cc71d3"
   integrity sha512-mk82dS8eRABNbeVJrEiN5/UMSCliINAuz8mkUwH4SwslkNP//gbEzlWNS5au0z5Dpx40SQxzqZevZkn+WYJ9Dw==
 
-three@Dumb-Code/three.js:
+three@./../three.js:
   version "0.134.0"
-  resolved "https://codeload.github.com/Dumb-Code/three.js/tar.gz/15112d01f9be7582a0beb33d4a1e6af35a30cc12"
 
 throat@^5.0.0:
   version "5.0.0"
