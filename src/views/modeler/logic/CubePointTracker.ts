@@ -124,6 +124,8 @@ export default class CubePointTracker extends EventDispatcher {
         tempPos.set(p.x * (dimension[0] + 2 * cg[0]) / 16, p.y * (dimension[1] + 2 * cg[1]) / 16, p.z * (dimension[2] + 2 * cg[2]) / 16).applyQuaternion(group.getWorldQuaternion(tempQuaterion))
         group.getWorldPosition(p.mesh.position).add(tempPos)
 
+        group.getWorldQuaternion(p.mesh.quaternion)
+
 
         let factor;
 
