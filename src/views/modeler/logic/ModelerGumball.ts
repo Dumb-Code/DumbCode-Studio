@@ -3,8 +3,9 @@ import { Euler, Event, Group, Matrix4, Object3D, Quaternion, Vector3 } from 'thr
 import { LO } from '../../../studio/util/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
-import { DCMCube } from './../../../studio/formats/model/DcmModel';
+import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
 import { LockerType } from './../../../studio/util/CubeLocker';
+import CubePointTracker from './CubePointTracker';
 
 type StartingCacheData = {
   root: boolean,
@@ -43,6 +44,8 @@ const decomposePosition2 = new Vector3()
 const decomposeRotation2 = new Quaternion()
 const decomposeScale2 = new Vector3()
 
+const totalPosition = new Vector3()
+
 const _identityMatrix = new Matrix4()
 
 
@@ -51,39 +54,97 @@ export class ModelerGumball {
   readonly enabled = new LO(true)
 
   readonly mode = new LO<"object" | "gumball">("object")
+  readonly space = new LO<"local" | "world">("local")
+
 
   //Object Properties
   readonly object_transformMode = new LO<"translate" | "rotate" | "dimensions">("translate")
 
   //Object position and rotation spefic properties
   readonly object_position_type = new LO<"position" | "offset" | "rotation_point">("position")
-  readonly object_position_space = new LO<"local" | "world">("local")
-
   readonly object_rotation_type = new LO<"rotation" | "rotation_around_point">("rotation")
-  readonly object_rotation_space = new LO<"local" | "world">("local")
 
 
   //Gumball properties
   readonly gumball_move_mode = new LO<"translate" | "rotate">("translate")
+  readonly gumball_auto_move = new LO(true)
 
   readonly transformAnchor: Object3D
 
+  readonly blockedReasons = new LO<readonly string[]>([])
 
   readonly startingCache = new Map<DCMCube, StartingCacheData>()
 
   constructor(
     public readonly selectedCubeManager: SelectedCubeManager,
-    group: Group
+    private readonly model: DCMModel,
+    group: Group,
+    private readonly cubePointTracker: CubePointTracker,
   ) {
     this.transformAnchor = new Object3D()
     this.transformAnchor.rotation.order = "ZYX"
     group.add(this.transformAnchor)
   }
+
+  //For dimensions and offset translations,
+  //this will return false, otherwise it will return true.
+  shouldTransformGroup() {
+    if (this.object_transformMode.value === "dimensions") {
+      return false
+    }
+    if (this.object_transformMode.value === "translate" && this.object_position_type.value === "offset") {
+      return false
+    }
+    return true
+  }
+
+  //Get the three object to perform on. For dimensions and offset translations,
+  //this will be the cubes mesh, rather than the cubes group
+  getThreeObject(cube: DCMCube): Object3D {
+    return this.shouldTransformGroup() ? cube.cubeGroup : cube.cubeMesh
+  }
+
+  moveToCustomPoint() {
+    this.cubePointTracker.enable(p => this.transformAnchor.position.copy(p))
+  }
+
+  /**
+   * Moves the anchor to the avarage position of the cubes, and the first cubes rotation
+   */
+  moveGumballToSelected({ selected = this.selectedCubeManager.selected.value, position = true, rotation = true }) {
+    if (selected.length === 0) {
+      return
+    }
+
+    totalPosition.set(0, 0, 0)
+    let firstSelected = selected[0]
+
+    //Iterate over the cubes, adding the world position to `totalPostiion`, and setting the rotation if is the first cube.
+    selected.forEach(identifier => {
+      const cube = this.model.identifierCubeMap.get(identifier)
+      if (cube === undefined) {
+        return
+      }
+      const elem = this.getThreeObject(cube)
+      elem.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+
+      totalPosition.add(decomposePosition)
+
+      if (cube.identifier === firstSelected && rotation) {
+        this.transformAnchor.quaternion.copy(decomposeRotation)
+      }
+    })
+
+    //Set the position to the avarage of the totalPosition
+    if (position === true) {
+      this.transformAnchor.position.copy(totalPosition).divideScalar(selected.length)
+    }
+  }
 }
 
 export const useModelerGumball = () => {
   const { getSelectedProject, transformControls } = useStudio()
-  const { selectedCubeManager, modelerGumball: gumball, model } = getSelectedProject()
+  const { selectedCubeManager, modelerGumball: gumball, model, cubePointTracker } = getSelectedProject()
 
   const getCubes = useCallback((selected: readonly string[] = selectedCubeManager.selected.value) => {
     return selected.map(cube => model.identifierCubeMap.get(cube)).filter(c => c !== undefined) as readonly DCMCube[]
@@ -92,17 +153,15 @@ export const useModelerGumball = () => {
   const selectedCubes = useRef<readonly DCMCube[]>([])
 
   useEffect(() => {
+    //TODO: move the callbacks to the ModelerGumball class
     const updateObjectMode = ({
       mode = gumball.object_transformMode.value,
-      posSpace = gumball.object_position_space.value,
-      rotSpace = gumball.object_rotation_space.value,
+      space = gumball.space.value,
     }) => {
       switch (mode) {
         case "translate":
-          transformControls.space = posSpace
-          break
         case "rotate":
-          transformControls.space = rotSpace
+          transformControls.space = space
           break
         case "dimensions":
           transformControls.space = "local"
@@ -111,53 +170,70 @@ export const useModelerGumball = () => {
       transformControls.mode = mode
     }
 
-    const enableDisableCallback = (val = gumball.enabled.value) => {
-      transformControls.visible = transformControls.enabled = (val && selectedCubes.current.length !== 0)
+    const updateTransformControlsVisability = ({ enabled = gumball.enabled.value, blockedReasons = gumball.blockedReasons.value, gumballMode = gumball.mode.value }) => {
+      const visible = enabled && (gumballMode === "gumball" || selectedCubes.current.length !== 0)
+      transformControls.visible = visible
+      transformControls.enabled = visible && blockedReasons.length === 0
+    }
+
+    const enableDisableCallback = (enabled: boolean) => {
+      updateTransformControlsVisability({ enabled })
+    }
+
+    const updateBlockedReasons = (reasons: readonly string[]) => {
+      updateTransformControlsVisability({ blockedReasons: reasons })
     }
 
     const changeModeCallback = (val = gumball.mode.value) => {
       if (val === "object") {
         updateObjectMode({})
       } else { //val === "gumall"
-        transformControls.space = "local"
+        transformControls.space = gumball.space.value
         transformControls.mode = gumball.gumball_move_mode.value
+      }
+      updateTransformControlsVisability({ gumballMode: val })
+    }
+
+    const changeGumballSpace = (val = gumball.space.value) => {
+      if (gumball.mode.value === "object") {
+        updateObjectMode({ space: val })
+      } else {
+        transformControls.space = val
       }
     }
 
+
     const changeObjectTransformMode = (val = gumball.object_transformMode.value) => updateObjectMode({ mode: val })
-    const changeObjectPositionSpace = (val = gumball.object_position_space.value) => updateObjectMode({ posSpace: val })
-    const changeObjectRotationSpace = (val = gumball.object_rotation_space.value) => updateObjectMode({ rotSpace: val })
 
     const updateSelectedCubes = (val: readonly string[]) => {
       selectedCubes.current = getCubes(val)
       gumball.transformAnchor['dcmCube'] = selectedCubes.current.length === 1 ? selectedCubes.current[0] : undefined
-      enableDisableCallback()
+      if (gumball.gumball_auto_move.value) {
+        gumball.moveGumballToSelected({ selected: val })
+      }
+      updateTransformControlsVisability({})
+    }
+    const moveWhenAutomove = (automove: boolean) => {
+      if (automove) {
+        gumball.moveGumballToSelected({})
+      }
     }
 
+    const changeGumballMode = (val = gumball.gumball_move_mode.value) => transformControls.mode = val
 
 
 
 
     //Below are the callbacks for the transform controls
 
-    //Get the three object to perform on. For dimensions and offset translations,
-    //this will be the cubes mesh, rather than the cubes group
-    const getThreeObject = (cube: DCMCube): Object3D => {
-      let translateSelectGroup = true
-      if (gumball.object_transformMode.value === "dimensions") {
-        translateSelectGroup = false
+    const runWhenObjectSelected = <T extends any[]>(func: (...args: T) => void) => (...args: T) => {
+      if (gumball.mode.value === "object") {
+        func(...args)
       }
-      if (gumball.object_transformMode.value === "translate" && gumball.object_position_type.value === "offset") {
-        translateSelectGroup = false
-      }
-
-      return translateSelectGroup ? cube.cubeGroup : cube.cubeMesh
     }
 
-    /**
-     * Runs callback with a transformed axis, the cube and any additional data.
-     * Used for trasnform tools.
-     */
+    //Runs callback with a transformed axis, the cube and any additional data.
+    //Used for trasnform tools.
     const forEachCube = (axisIn: Vector3, applyRoots: boolean, space: "world" | "local", callback: (axis: Vector3, cube: DCMCube, data: StartingCacheData) => void) => {
       //decompose where the gumball is right now
       gumball.transformAnchor.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
@@ -165,7 +241,7 @@ export const useModelerGumball = () => {
         if (applyRoots === true && data.root !== true) {
           return
         }
-        const elem = getThreeObject(cube);
+        const elem = gumball.getThreeObject(cube);
 
         (elem.parent?.matrixWorld ?? _identityMatrix).decompose(decomposePosition2, decomposeRotation2, decomposeScale2)
         const axis = axisIn.clone()
@@ -178,7 +254,7 @@ export const useModelerGumball = () => {
     }
 
     //When the mouse is pressed down on the transform controls
-    const mouseDownTransformControls = () => {
+    const mouseDownTransformControls = runWhenObjectSelected(() => {
       model.lockedCubes.createLockedCubesCache()
       gumball.startingCache.clear()
       getCubes().forEach(cube => {
@@ -188,7 +264,7 @@ export const useModelerGumball = () => {
           cube.children.value.forEach(child => model.lockedCubes.addToLocker(child, LockerType.POSITION))
         }
 
-        const elem = getThreeObject(cube)
+        const elem = gumball.getThreeObject(cube)
 
         let parent = cube.parent
         //Only move the cubes that don't have a parent moving too.
@@ -209,15 +285,15 @@ export const useModelerGumball = () => {
           threeWorldPos: elem.getWorldPosition(elem.position.clone())
         })
       })
-    }
-    const onMouseUpClearCubeLockers = () => model.lockedCubes.clearCubeLockers()
-    const onObjectChangeReconstruct = () => model.lockedCubes.reconstructLockedCubes()
+    })
+    const onMouseUpClearCubeLockers = runWhenObjectSelected(() => model.lockedCubes.clearCubeLockers())
+    const onObjectChangeReconstruct = runWhenObjectSelected(() => model.lockedCubes.reconstructLockedCubes())
 
     //The translate event
     type TranslateEvent = { type: string; length: number; parentQuaternionInv: Quaternion; axis: Vector3; }
-    const translateEventTransformControls = (evt: Event) => {
+    const translateEventTransformControls = runWhenObjectSelected((evt: Event) => {
       const e = evt as TranslateEvent
-      forEachCube(e.axis, true, gumball.object_position_space.value, (axis, cube, data) => {
+      forEachCube(e.axis, true, gumball.space.value, (axis, cube, data) => {
         axis.multiplyScalar(e.length)
         let pos = axis.toArray()
         switch (gumball.object_position_type.value) {
@@ -241,13 +317,13 @@ export const useModelerGumball = () => {
             break
         }
       })
-    }
+    })
 
     //The rotate event
     type RotateEvent = { type: string, rotationAxis: Vector3; rotationAngle: number; parentQuaternionInv: Quaternion; }
-    const rotateEventTransformControls = (evt: Event) => {
+    const rotateEventTransformControls = runWhenObjectSelected((evt: Event) => {
       const e = evt as RotateEvent
-      forEachCube(e.rotationAxis, true, gumball.object_rotation_space.value, (axis, cube, data) => {
+      forEachCube(e.rotationAxis, true, gumball.space.value, (axis, cube, data) => {
         decomposeRotation2.setFromAxisAngle(axis, e.rotationAngle)
         decomposeRotation2.multiply(data.quaternion).normalize()
 
@@ -269,11 +345,11 @@ export const useModelerGumball = () => {
           ]
         }
       })
-    }
+    })
 
     //The dimension event
     type DimensionEvent = { type: string; length: number; axis: Vector3; }
-    const dimensionEventTransformControls = (evt: Event) => {
+    const dimensionEventTransformControls = runWhenObjectSelected((evt: Event) => {
       const e = evt as DimensionEvent
       let length = Math.floor(e.length * 16)
       forEachCube(e.axis, false, "local", (axis, cube, data) => {
@@ -296,7 +372,7 @@ export const useModelerGumball = () => {
           ]
         }
       })
-    }
+    })
 
     //This will cause `visible` to be true, but the `enableDisableCallback` will force it to be the right value
     transformControls.attach(gumball.transformAnchor)
@@ -308,10 +384,12 @@ export const useModelerGumball = () => {
     transformControls.addEventListener("studioDimension", dimensionEventTransformControls)
 
     gumball.enabled.addAndRunListener(enableDisableCallback)
+    gumball.blockedReasons.addAndRunListener(updateBlockedReasons)
     gumball.mode.addAndRunListener(changeModeCallback)
     gumball.object_transformMode.addAndRunListener(changeObjectTransformMode)
-    gumball.object_position_space.addAndRunListener(changeObjectPositionSpace)
-    gumball.object_rotation_space.addAndRunListener(changeObjectRotationSpace)
+    gumball.gumball_move_mode.addAndRunListener(changeGumballMode)
+    gumball.space.addAndRunListener(changeGumballSpace)
+    gumball.gumball_auto_move.addListener(moveWhenAutomove)
     selectedCubeManager.selected.addAndRunListener(updateSelectedCubes)
     return () => {
       transformControls.detach()
@@ -323,12 +401,14 @@ export const useModelerGumball = () => {
       transformControls.removeEventListener("studioDimension", dimensionEventTransformControls)
 
       gumball.enabled.removeListener(enableDisableCallback)
+      gumball.blockedReasons.removeListener(updateBlockedReasons)
       gumball.mode.removeListener(changeModeCallback)
       gumball.object_transformMode.removeListener(changeObjectTransformMode)
-      gumball.object_position_space.removeListener(changeObjectPositionSpace)
-      gumball.object_rotation_space.removeListener(changeObjectRotationSpace)
+      gumball.gumball_move_mode.removeListener(changeGumballMode)
+      gumball.space.removeListener(changeGumballSpace)
       selectedCubeManager.selected.removeListener(updateSelectedCubes)
+      gumball.gumball_auto_move.removeListener(moveWhenAutomove)
     }
-  }, [getCubes, model, gumball, selectedCubeManager.selected, transformControls])
+  }, [getCubes, model, gumball, selectedCubeManager.selected, transformControls, cubePointTracker])
 
 }

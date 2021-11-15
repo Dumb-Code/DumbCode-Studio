@@ -8,7 +8,7 @@ export default class SelectedCubeManager {
   mouseOverDiv = false
   disabled = false
   previousEventMouse = new Vector2()
-  mouse = new Vector2()
+  public readonly mouse = new Vector2()
 
   mouseDown = false
   readonly mouseClickDown = new Vector2()
@@ -135,10 +135,11 @@ export default class SelectedCubeManager {
     raycaster.setFromCamera(this.mouse, camera)
     return raycaster.intersectObjects(model.modelGroup.children, true)
   }
+
 }
 
 export const useSelectedCubeManager = () => {
-  const { renderer, getSelectedProject, onFrameListeners, raycaster, camera, onMouseDown, transformControls } = useStudio()
+  const { renderer, getSelectedProject, onFrameListeners, raycaster, getCamera, onMouseDown, transformControls } = useStudio()
 
   const dom = renderer.domElement
   const project = getSelectedProject()
@@ -146,7 +147,7 @@ export const useSelectedCubeManager = () => {
 
   useEffect(() => {
     const callback = () => {
-      cubeManager.update(raycaster, camera, model)
+      cubeManager.update(raycaster, getCamera(), model)
     }
 
     //When the transform controls are in use, block this
@@ -195,5 +196,5 @@ export const useSelectedCubeManager = () => {
       cubeManager.listeners.delete(onMouseDownTransformControlBlocking)
       transformControls.removeEventListener("axis-changed", onTransformControlsAxisHover)
     }
-  }, [cubeManager, dom, raycaster, camera, model, onFrameListeners, project, onMouseDown, transformControls])
+  }, [cubeManager, dom, raycaster, getCamera, model, onFrameListeners, project, onMouseDown, transformControls])
 }

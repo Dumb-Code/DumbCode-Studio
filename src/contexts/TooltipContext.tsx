@@ -6,7 +6,7 @@ const overlayDiv = document.getElementById("overlay")
 
 type ContextType = {
   clearTooltip: () => void
-  setTooltip: (tooltip: () => ReactNode, x: number, y: number) => void
+  setTooltip: (tooltip: (() => ReactNode) | string, x: number, y: number) => void
 }
 export const TooltipContext = createContext<ContextType>({
   clearTooltip: () => { },
@@ -56,7 +56,13 @@ const TooltipContextProvider: FC = ({ children }) => {
 
   return (
     <TooltipContext.Provider value={{
-      setTooltip: (tooltip, xPos, yPos) => setTooltipData({ tooltip, xPos, yPos }),
+      setTooltip: (tooltip, xPos, yPos) => {
+        if (typeof tooltip === "function") {
+          setTooltipData({ tooltip, xPos, yPos })
+        } else if (typeof tooltip === "string") {
+          setTooltipData({ tooltip: () => tooltip.split("\n").map((s, i) => <p key={i}>{s}</p>), xPos, yPos })
+        }
+      },
       clearTooltip: () => setTooltipData(null)
     }}>
       {children}
@@ -72,7 +78,7 @@ const TooltipContextProvider: FC = ({ children }) => {
   )
 }
 
-export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => ReactNode) | null, delay = 500) => {
+export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => ReactNode) | null | string, delay = 500) => {
   const ref = useRef<T>(null)
 
   const tooltip = useContext(TooltipContext)

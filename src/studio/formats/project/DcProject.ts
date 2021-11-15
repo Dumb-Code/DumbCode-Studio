@@ -1,5 +1,6 @@
 import { Group, MeshBasicMaterial, MeshLambertMaterial, Texture } from "three";
 import { v4 as uuidv4 } from "uuid";
+import CubePointTracker from "../../../views/modeler/logic/CubePointTracker";
 import { getUndefinedWritable, ReadableFile } from '../../util/FileTypes';
 import { LO } from '../../util/ListenableObject';
 import DcaTabs from '../animations/DcaTabs';
@@ -23,6 +24,7 @@ export default class DcProject {
   readonly animationTabs: DcaTabs
   previousThreeTexture: Texture | null
 
+  readonly cubePointTracker: CubePointTracker
   readonly modelerGumball: ModelerGumball
 
   remoteLink?: RemoteRepo
@@ -35,7 +37,8 @@ export default class DcProject {
     this.model = model
     model.parentProject = this
     this.textureManager = new TextureManager(this)
-    this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.group)
+    this.cubePointTracker = new CubePointTracker(this.selectedCubeManager, this.model, this.group)
+    this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.model, this.group, this.cubePointTracker)
     this.animationTabs = new DcaTabs()
     this.group.add(this.model.modelGroup)
     this.previousThreeTexture = null

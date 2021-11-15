@@ -1,4 +1,4 @@
-import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
+import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, OrthographicCamera, PerspectiveCamera, Raycaster, REVISION, Scene, Vector3, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
@@ -7,7 +7,6 @@ export type ThreeJsContext = {
   scene: Scene,
   onTopScene: Scene,
   renderer: WebGLRenderer,
-  camera: Camera,
   controls: OrbitControls,
   raycaster: Raycaster,
   onMouseDown: IndexedEventHandler<React.MouseEvent>
@@ -21,6 +20,9 @@ export type ThreeJsContext = {
 
   setGridColor: (majorColor: number, minorColor: number, subColor: number) => void
 
+  getCamera: () => Camera
+  setCameraType(isPerspective: boolean)
+
   transformControls: TransformControls
 }
 
@@ -31,8 +33,12 @@ export const createThreeContext: () => ThreeJsContext = () => {
   renderer.autoClear = false;
   renderer.setClearColor(0x000000, 0);
 
+  const cameraP = new PerspectiveCamera(65, 1, 0.01, 700)
+  const cameraO = new OrthographicCamera(-1, 1, -1, 1, -700, 700)
+
+
   //Set up the camera
-  const camera: Camera = new PerspectiveCamera(65, 1, 0.1, 700)
+  let camera: Camera = cameraP
   camera.position.set(0.45, 1.5, 4.5)
   camera.lookAt(0.5, 1.5, 0.5)
 
@@ -71,6 +77,20 @@ export const createThreeContext: () => ThreeJsContext = () => {
 
   const onFrameListeners = new Set<(deltaTime: number) => void>()
 
+  const setCameraType = (isPerspective: boolean) => {
+    const currentlyIsPerspective = camera instanceof PerspectiveCamera
+    if (currentlyIsPerspective !== isPerspective) {
+      const newCamera = (currentlyIsPerspective ? convertToOrthographic : convertToPerspective)(cameraP, cameraO)
+      newCamera.position.copy(camera.position)
+      newCamera.rotation.copy(camera.rotation)
+      newCamera.updateProjectionMatrix()
+
+      camera = newCamera
+      controls.object = newCamera
+      transformControls.camera = newCamera
+    }
+  }
+
   const onFrame = () => {
     requestAnimationFrame(onFrame)
 
@@ -86,20 +106,25 @@ export const createThreeContext: () => ThreeJsContext = () => {
   onFrame()
 
   return {
-    renderer, camera, scene, onTopScene, controls,
+    renderer, scene, onTopScene, controls,
     raycaster, onMouseDown, onFrameListeners, transformControls,
+
+    getCamera: () => camera,
+    setCameraType,
 
     setSize: (w, h) => {
       width = w
       height = h
       renderer.setSize(width, height)
 
-      if (camera instanceof PerspectiveCamera) {
-        camera.aspect = width / height
-        camera.updateProjectionMatrix()
-      } else {
-        // (camera as OrthographicCamera) TODO::
-      }
+      cameraP.aspect = width / height
+      cameraP.updateProjectionMatrix()
+
+      cameraO.left = width / -2
+      cameraO.right = width / 2
+      cameraO.top = height / 2
+      cameraO.bottom = height / -2
+      cameraO.updateProjectionMatrix()
     },
 
     getSize: () => {
@@ -218,4 +243,39 @@ const createGrid = () => {
     grid: gridGroup,
     majorGridMaterial, minorGridMaterial, subGridMaterial
   }
+}
+
+const tempVector = new Vector3()
+const tempVector2 = new Vector3()
+
+
+//https://github.com/mrdoob/three.js/blob/7f43f4e6ef087cec168fea25bb53591052d5ff12/examples/js/cameras/CombinedCamera.js#L61-L95
+const convertToOrthographic = (cameraP: PerspectiveCamera, cameraO: OrthographicCamera): OrthographicCamera => {
+  const aspect = cameraP.aspect;
+
+  //Essentially how far away we are from 0,0,0
+  const direction = cameraP.getWorldDirection(tempVector)
+  const depth = tempVector2.copy(cameraP.position).multiplyScalar(-1).dot(direction)
+
+  // var hyperfocus = (cameraP.near + cameraP.far) / 2;
+
+  var halfHeight = Math.tan(cameraP.fov * Math.PI / 180 / 2) * depth
+  var halfWidth = halfHeight * aspect;
+
+  halfHeight /= cameraP.zoom;
+  halfWidth /= cameraP.zoom;
+
+  cameraO.left = - halfWidth;
+  cameraO.right = halfWidth;
+  cameraO.top = halfHeight;
+  cameraO.bottom = - halfHeight;
+
+  return cameraO
+}
+
+//https://github.com/mrdoob/three.js/blob/7f43f4e6ef087cec168fea25bb53591052d5ff12/examples/js/cameras/CombinedCamera.js#L41-L59
+const convertToPerspective = (cameraP: PerspectiveCamera, cameraO: OrthographicCamera): PerspectiveCamera => {
+  // cameraP.fov = cameraP.fov / cameraO.zoom
+  // cameraP.updateProjectionMatrix()
+  return cameraP
 }

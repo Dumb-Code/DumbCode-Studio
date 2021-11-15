@@ -110,13 +110,13 @@ const DisplayModeDropup = () => {
 }
 
 const RenderModeDropup = () => {
-
+    const { setCameraType } = useStudio()
     return (
         <div className="mx-0.5">
             <Dropup title="Set View" header="SET PERSPECTIVE">
                 <div className="px-0.5 py-1">
-                    <DropupItem name="Perspective" onSelect={() => console.log("set perspective")} />
-                    <DropupItem name="Orthographic" onSelect={() => console.log("set perspective")} />
+                    <DropupItem name="Perspective" onSelect={() => setCameraType(true)} />
+                    <DropupItem name="Orthographic" onSelect={() => setCameraType(false)} />
                 </div>
             </Dropup>
         </div>

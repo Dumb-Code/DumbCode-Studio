@@ -1,15 +1,20 @@
 import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
-import ModelerGumballPropertiesBar from "../../components/ModelerGumballPropertiesBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
 import ModelerCommandInput from "./components/ModelerCommandInput"
+import ModelerGumballPropertiesBar from "./components/ModelerGumballPropertiesBar"
 import ModelerShortcuts from "./components/ModelerShortcuts"
 import ModelerSidebar from "./components/ModelerSidebar"
+import { usePointTracking } from "./logic/CubePointTracker"
+import { useModelerGumball } from "./logic/ModelerGumball"
 
 const Modeler = () => {
     const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
+
+    useModelerGumball()
+    usePointTracking()
 
     useEffect(() => {
         const onFrame = () => {
