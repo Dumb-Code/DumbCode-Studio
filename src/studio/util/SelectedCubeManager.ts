@@ -11,13 +11,13 @@ export default class SelectedCubeManager {
   mouse = new Vector2()
 
   mouseDown = false
-  mouseClickDown = new Vector2()
+  readonly mouseClickDown = new Vector2()
 
-  listeners: Set<(project: DcProject) => boolean> = new Set()
+  readonly listeners: Set<(project: DcProject) => boolean> = new Set()
 
   mouseOverMesh: Mesh | null = null
-  mouseOver: LO<string | null> = new LO<string | null>(null)
-  selected: LO<readonly string[]> = new LO<readonly string[]>([])
+  readonly mouseOver: LO<string | null> = new LO<string | null>(null)
+  readonly selected: LO<readonly string[]> = new LO<readonly string[]>([])
 
   keepCurrentCubes = false
 

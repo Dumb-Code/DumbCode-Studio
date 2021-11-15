@@ -1,8 +1,7 @@
 import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { TransformControls as ThreeTransformControls } from 'three/examples/jsm/controls/TransformControls';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
-import { TransformControls } from "./TestTransformControls";
 
 export type ThreeJsContext = {
   scene: Scene,
@@ -22,7 +21,7 @@ export type ThreeJsContext = {
 
   setGridColor: (majorColor: number, minorColor: number, subColor: number) => void
 
-  transformControls: ThreeTransformControls
+  transformControls: TransformControls
 }
 
 export const createThreeContext: () => ThreeJsContext = () => {
@@ -50,7 +49,7 @@ export const createThreeContext: () => ThreeJsContext = () => {
 
   const raycaster = new Raycaster()
 
-  const transformControls = new TransformControls(camera, renderer.domElement) as any as ThreeTransformControls
+  const transformControls = new TransformControls(camera, renderer.domElement)
   transformControls.setSize(1.25)
   transformControls.addEventListener('dragging-changed', e => {
     controls.enabled = !e.value

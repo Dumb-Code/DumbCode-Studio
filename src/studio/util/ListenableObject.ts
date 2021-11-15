@@ -7,6 +7,7 @@ type Listener<T> = (
 ) => void
 
 export class LO<T> {
+  public internalValue: T
   constructor(
     private _value: T,
     defaultCallback?: Listener<T>,
@@ -15,6 +16,7 @@ export class LO<T> {
     if (defaultCallback) {
       this.listners.add(defaultCallback)
     }
+    this.internalValue = _value;
   }
 
   get value() {
@@ -23,6 +25,7 @@ export class LO<T> {
 
   set value(value: T) {
     let newValue = value
+    this.internalValue = value
     if (value !== this._value) {
       //We need to clone the listeners, as they can be changed while being called
       //Otherwise more than one listner will mean a infinate virtually untraceable loop
@@ -46,14 +49,14 @@ export class LO<T> {
 }
 
 export const useListenableObjectNullable = <T>(obj: LO<T> | undefined): [T | undefined, (val: T) => void] => {
-  const [state, setState] = useState<T | undefined>(() => obj?.value)
+  const [state, setState] = useState<T | undefined>(() => obj?.internalValue)
   useEffect(() => {
     if (obj === undefined) {
       setState(undefined)
       return
     }
-    if (state !== obj.value) {
-      setState(obj.value)
+    if (state !== obj.internalValue) {
+      setState(obj.internalValue)
     }
     obj.addListener(setState)
     return () => obj.removeListener(setState)
@@ -66,11 +69,11 @@ export const useListenableObjectNullable = <T>(obj: LO<T> | undefined): [T | und
 }
 
 
-export const useListenableObject = <T>(obj: LO<T>): [T, (val: T) => void] => {
-  const [state, setState] = useState(() => obj.value)
+export const useListenableObject = <T>(obj: LO<T>, debug = false): [T, (val: T) => void] => {
+  const [state, setState] = useState(() => obj.internalValue)
   useEffect(() => {
-    if (state !== obj.value) {
-      setState(obj.value)
+    if (state !== obj.internalValue) {
+      setState(obj.internalValue)
     }
     obj.addListener(setState)
     return () => obj.removeListener(setState)

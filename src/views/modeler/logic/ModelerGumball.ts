@@ -15,6 +15,25 @@ type StartingCacheData = {
   threeWorldPos: Vector3
 }
 
+/**
+ * Aligns an vec3 to the closest axis.
+ */
+function alignAxis(axis: Vector3) {
+  let xn = Math.abs(axis.x);
+  let yn = Math.abs(axis.y);
+  let zn = Math.abs(axis.z);
+
+  if ((xn >= yn) && (xn >= zn)) {
+    axis.set(axis.x > 0 ? 1 : -1, 0, 0)
+  } else if ((yn > xn) && (yn >= zn)) {
+    axis.set(0, axis.y > 0 ? 1 : -1, 0)
+  } else if ((zn > xn) && (zn > yn)) {
+    axis.set(0, 0, axis.z > 0 ? 1 : -1)
+  } else {
+    axis.set(0, 0, 0)
+  }
+}
+
 const decomposePosition = new Vector3()
 const decomposeRotation = new Quaternion()
 const decomposeEuler = new Euler()
@@ -196,8 +215,8 @@ export const useModelerGumball = () => {
 
     //The translate event
     type TranslateEvent = { type: string; length: number; parentQuaternionInv: Quaternion; axis: Vector3; }
-    const translateEventTransformControls = (e: Event) => {
-      e = e as TranslateEvent
+    const translateEventTransformControls = (evt: Event) => {
+      const e = evt as TranslateEvent
       forEachCube(e.axis, true, gumball.object_position_space.value, (axis, cube, data) => {
         axis.multiplyScalar(e.length)
         let pos = axis.toArray()
@@ -224,6 +243,60 @@ export const useModelerGumball = () => {
       })
     }
 
+    //The rotate event
+    type RotateEvent = { type: string, rotationAxis: Vector3; rotationAngle: number; parentQuaternionInv: Quaternion; }
+    const rotateEventTransformControls = (evt: Event) => {
+      const e = evt as RotateEvent
+      forEachCube(e.rotationAxis, true, gumball.object_rotation_space.value, (axis, cube, data) => {
+        decomposeRotation2.setFromAxisAngle(axis, e.rotationAngle)
+        decomposeRotation2.multiply(data.quaternion).normalize()
+
+        decomposeEuler.setFromQuaternion(decomposeRotation2, "ZYX")
+        cube.rotation.value = [
+          decomposeEuler.x * 180 / Math.PI,
+          decomposeEuler.y * 180 / Math.PI,
+          decomposeEuler.z * 180 / Math.PI
+        ]
+
+        if (gumball.object_rotation_type.value === "rotation_around_point") {
+          const diff = decomposePosition.copy(data.threeWorldPos).sub(gumball.transformAnchor.position).multiply(decomposePosition2.set(16, 16, 16))
+          const rotatedPos = decomposePosition2.copy(diff).applyAxisAngle(axis, e.rotationAngle)
+          const rotatedDiff = rotatedPos.sub(diff)
+          cube.position.value = [
+            rotatedDiff.x + data.position[0],
+            rotatedDiff.y + data.position[1],
+            rotatedDiff.z + data.position[2]
+          ]
+        }
+      })
+    }
+
+    //The dimension event
+    type DimensionEvent = { type: string; length: number; axis: Vector3; }
+    const dimensionEventTransformControls = (evt: Event) => {
+      const e = evt as DimensionEvent
+      let length = Math.floor(e.length * 16)
+      forEachCube(e.axis, false, "local", (axis, cube, data) => {
+        let len = [length, length, length]
+        alignAxis(axis)
+        const getDimension = (i: number) => {
+          let ret = Math.abs(axis.getComponent(i)) * length + data.dimension[i]
+          if (ret < 0) {
+            len[i] = -data.dimension[i] / Math.abs(axis.getComponent(i))
+            ret = 0
+          }
+          return ret
+        }
+        cube.dimension.value = [getDimension(0), getDimension(1), getDimension(2)]
+        if (e.axis.x + e.axis.y + e.axis.z < 0) {
+          cube.offset.value = [
+            e.axis.x * len[0] + data.offset[0],
+            e.axis.y * len[1] + data.offset[1],
+            e.axis.z * len[2] + data.offset[2],
+          ]
+        }
+      })
+    }
 
     //This will cause `visible` to be true, but the `enableDisableCallback` will force it to be the right value
     transformControls.attach(gumball.transformAnchor)
@@ -231,6 +304,8 @@ export const useModelerGumball = () => {
     transformControls.addEventListener("mouseUp", onMouseUpClearCubeLockers)
     transformControls.addEventListener("objectChange", onObjectChangeReconstruct)
     transformControls.addEventListener("studioTranslate", translateEventTransformControls)
+    transformControls.addEventListener("studioRotate", rotateEventTransformControls)
+    transformControls.addEventListener("studioDimension", dimensionEventTransformControls)
 
     gumball.enabled.addAndRunListener(enableDisableCallback)
     gumball.mode.addAndRunListener(changeModeCallback)
@@ -244,6 +319,8 @@ export const useModelerGumball = () => {
       transformControls.removeEventListener("mouseUp", onMouseUpClearCubeLockers)
       transformControls.removeEventListener("objectChange", onObjectChangeReconstruct)
       transformControls.removeEventListener("studioTranslate", translateEventTransformControls)
+      transformControls.removeEventListener("studioRotate", rotateEventTransformControls)
+      transformControls.removeEventListener("studioDimension", dimensionEventTransformControls)
 
       gumball.enabled.removeListener(enableDisableCallback)
       gumball.mode.removeListener(changeModeCallback)

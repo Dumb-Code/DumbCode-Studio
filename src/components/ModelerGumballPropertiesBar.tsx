@@ -113,7 +113,7 @@ const ObjectRotateOptions = ({ gumball }: { gumball: ModelerGumball }) => {
             </ButtonList>
             <ButtonList>
                 <GumballButton title="Normal" selected={moveType === "rotation"} onClick={() => setMoveType("rotation")} />
-                <GumballButton title="Around Point" selected={moveType === "rotation_around_point"} onClick={() => setMoveType("rotation")} />
+                <GumballButton title="Around Point" selected={moveType === "rotation_around_point"} onClick={() => setMoveType("rotation_around_point")} />
             </ButtonList>
         </>
     )
