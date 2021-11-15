@@ -70,7 +70,7 @@ export class StudioOptions {
                         halfHeight /= display.camera.zoom;
 	                    halfWidth /= display.camera.zoom;
 
-                        cam = new OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, -5, 700)
+                        cam = new OrthographicCamera(-halfWidth, halfWidth, halfHeight, -halfHeight, -700, 700)
                     } else {
                         cam = display.camera
                     }
