@@ -2,7 +2,6 @@ import { Group, MeshBasicMaterial, MeshLambertMaterial, Texture } from "three";
 import { v4 as uuidv4 } from "uuid";
 import { getUndefinedWritable, ReadableFile } from '../../util/FileTypes';
 import { LO } from '../../util/ListenableObject';
-import SelectedCubeManager from '../../util/SelectedCubeManager';
 import DcaTabs from '../animations/DcaTabs';
 import { loadDCMModel } from '../model/DCMLoader';
 import { DCMModel } from '../model/DcmModel';
@@ -24,7 +23,6 @@ export default class DcProject {
   readonly animationTabs: DcaTabs
   previousThreeTexture: Texture | null
 
-  readonly selectedCubeManager = new SelectedCubeManager()
   readonly modelerGumball: ModelerGumball
 
   remoteLink?: RemoteRepo
@@ -39,9 +37,16 @@ export default class DcProject {
     this.textureManager = new TextureManager(this)
     this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.group)
     this.animationTabs = new DcaTabs()
-    this.model.selectedCubeManager = this.selectedCubeManager
     this.group.add(this.model.modelGroup)
     this.previousThreeTexture = null
+  }
+
+  get selectedCubeManager() {
+    return this.model.selectedCubeManager
+  }
+
+  get lockedCubes() {
+    return this.model.lockedCubes
   }
 
   /**

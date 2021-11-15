@@ -1,8 +1,9 @@
-import { LO, LOMap } from './../../util/ListenableObject';
-import { Group, BoxBufferGeometry, BufferAttribute, Mesh, Vector3, Quaternion, MeshLambertMaterial, DoubleSide, MeshBasicMaterial } from "three";
-import { v4 as uuidv4 } from "uuid"
-import DcProject from '../project/DcProject';
+import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, Quaternion, Vector3 } from "three";
+import { v4 as uuidv4 } from "uuid";
+import LockedCubes from "../../util/LockedCubes";
 import SelectedCubeManager from '../../util/SelectedCubeManager';
+import DcProject from '../project/DcProject';
+import { LO, LOMap } from './../../util/ListenableObject';
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
@@ -46,7 +47,8 @@ export class DCMModel implements CubeParent {
 
   readonly modelGroup: Group
 
-  selectedCubeManager?: SelectedCubeManager
+  readonly selectedCubeManager = new SelectedCubeManager()
+  readonly lockedCubes = new LockedCubes(this)
 
   constructor() {
     this.cubeMap = new Map()
@@ -57,6 +59,7 @@ export class DCMModel implements CubeParent {
       oldChildren.forEach(child => this.modelGroup.remove(child.cubeGroup))
       newChildren.forEach(child => {
         child.parent = this
+        child.updateHirarchy(0)
         this.modelGroup.add(child.cubeGroup)
       })
     })
@@ -147,6 +150,9 @@ export class DCMCube implements CubeParent {
   readonly cubeGrowGroup: Group
   readonly cubeMesh: Mesh
 
+  //0 would be the root, 1 would be the child of the root, 2 would be the child of that ect.
+  hierarchyLevel: number = -1
+
   constructor(
     name: string,
     dimension: readonly [number, number, number],
@@ -206,12 +212,13 @@ export class DCMCube implements CubeParent {
       oldChildren.forEach(child => this.cubeGroup.remove(child.cubeGroup))
       newChildren.forEach(child => {
         child.parent = this
+        child.updateHirarchy(this.hierarchyLevel + 1)
         this.cubeGroup.add(child.cubeGroup)
       })
     })
 
     this.mouseHover.addListener(isHovering => {
-      if (this.model.selectedCubeManager !== undefined && this.model.materials !== undefined && this.cubeMesh !== undefined) {
+      if (this.model.materials !== undefined && this.cubeMesh !== undefined) {
         if (isHovering) {
           this.model.selectedCubeManager.onMouseOverMesh(this.cubeMesh)
         } else {
@@ -222,7 +229,7 @@ export class DCMCube implements CubeParent {
     })
 
     this.selected.addListener(isSelected => {
-      if (this.model.selectedCubeManager !== undefined && this.model.materials !== undefined && this.cubeMesh !== undefined) {
+      if (this.model.materials !== undefined && this.cubeMesh !== undefined) {
         if (isSelected) {
           this.model.selectedCubeManager.onCubeSelected(this)
         } else {
@@ -237,6 +244,13 @@ export class DCMCube implements CubeParent {
     this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.materials.normal)
     children.forEach(child => this.cubeGroup.add(child.cubeGroup))
     this.createGroup()
+  }
+
+  updateHirarchy(level: number) {
+    if (this.hierarchyLevel !== level) {
+      this.hierarchyLevel = level
+      this.children.value.forEach(c => c.updateHirarchy(level + 1))
+    }
   }
 
   updateMaterials({ selected = this.selected.value, hovering = this.mouseHover.value }) {
@@ -292,9 +306,11 @@ export class DCMCube implements CubeParent {
   }
 
   getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3()) {
-    let w = this.dimension[0] + this.cubeGrow[0] * 2 + 0.0001
-    let h = this.dimension[1] + this.cubeGrow[1] * 2 + 0.0001
-    let d = this.dimension[2] + this.cubeGrow[2] * 2 + 0.0001
+    const dims = this.dimension.value
+    const cg = this.cubeGrow.value
+    let w = dims[0] + cg[0] * 2 + 0.0001
+    let h = dims[1] + cg[1] * 2 + 0.0001
+    let d = dims[2] + cg[2] * 2 + 0.0001
     tempVector.set(xDelta * w / 16, yDelta * h / 16, zDelta * d / 16).applyQuaternion(this.cubeMesh.getWorldQuaternion(tempQuaterion))
     this.cubeMesh.getWorldPosition(vector).add(tempVector)
     return vector

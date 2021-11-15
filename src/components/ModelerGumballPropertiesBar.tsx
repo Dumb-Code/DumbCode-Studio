@@ -63,13 +63,13 @@ const ObjectTransformationModeSelect = ({ gumball }: { gumball: ModelerGumball }
                     <ButtonList>
                         <GumballButton title="Move" selected={transformMode === "translate"} onClick={() => setTransformMode("translate")} />
                         <GumballButton title="Rotate" selected={transformMode === "rotate"} onClick={() => setTransformMode("rotate")} />
-                        <GumballButton title="Dimension" selected={transformMode === "dimension"} onClick={() => setTransformMode("dimension")} />
+                        <GumballButton title="Dimension" selected={transformMode === "dimensions"} onClick={() => setTransformMode("dimensions")} />
                     </ButtonList>
                     {(() => {
                         switch (transformMode) {
                             case 'translate': return <ObjectMoveOptions gumball={gumball} />
                             case 'rotate': return <ObjectRotateOptions gumball={gumball} />
-                            case 'dimension': return null
+                            case 'dimensions': return null
                         }
                     })()}
                 </>
