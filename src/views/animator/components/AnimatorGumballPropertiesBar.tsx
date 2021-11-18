@@ -3,9 +3,10 @@ import { ButtonList, GumballButton, GumballToggle, RelocateGumballDropup } from 
 import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
 import { useListenableObject } from "../../../studio/util/ListenableObject";
-import { ModelerGumball } from "../logic/ModelerGumball";
+//TODO replace with animator gumball variant
+import { ModelerGumball } from "../../modeler/logic/ModelerGumball";
 
-const ModelerGumballPropertiesBar = () => {
+const AnimatorGumballPropertiesBar = () => {
 
     const { getSelectedProject } = useStudio()
     const gumball = getSelectedProject().modelerGumball
@@ -13,13 +14,13 @@ const ModelerGumballPropertiesBar = () => {
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full">
             <GumballToggle>
-                <ModelerTransformationTypeSelect gumball={gumball} />
+                <AnimatorTransformationTypeSelect gumball={gumball} />
             </GumballToggle>
         </div>
     )
 }
 
-const ModelerTransformationTypeSelect = ({ gumball }: { gumball: ModelerGumball }) => {
+const AnimatorTransformationTypeSelect = ({ gumball }: { gumball: ModelerGumball }) => {
     const [objectMode, setObjectMode] = useListenableObject(gumball.mode)
 
     return (
@@ -28,12 +29,12 @@ const ModelerTransformationTypeSelect = ({ gumball }: { gumball: ModelerGumball 
                 <GumballButton title="Object" selected={objectMode === "object"} selectedClassName="bg-green-500" onClick={() => setObjectMode("object")} />
                 <GumballButton title="Gumball" selected={objectMode === "gumball"} selectedClassName="bg-green-500" onClick={() => setObjectMode("gumball")} />
             </ButtonList>
-            {objectMode === "object" ? <ModelerObjectTransformationModeSelect gumball={gumball} /> : <ModelerGumballTransformationModeSelect gumball={gumball} />}
+            {objectMode === "object" ? <AnimatorObjectTransformationModeSelect gumball={gumball} /> : <AnimatorGumballTransformationModeSelect gumball={gumball} />}
         </>
     )
 }
 
-const ModelerObjectTransformationModeSelect = ({ gumball }: { gumball: ModelerGumball }) => {
+const AnimatorObjectTransformationModeSelect = ({ gumball }: { gumball: ModelerGumball }) => {
 
     const [selectedList] = useListenableObject(gumball.selectedCubeManager.selected)
     const [transformMode, setTransformMode] = useListenableObject(gumball.object_transformMode)
@@ -49,12 +50,11 @@ const ModelerObjectTransformationModeSelect = ({ gumball }: { gumball: ModelerGu
                     <ButtonList>
                         <GumballButton title="Move" selected={transformMode === "translate"} onClick={() => setTransformMode("translate")} />
                         <GumballButton title="Rotate" selected={transformMode === "rotate"} onClick={() => setTransformMode("rotate")} />
-                        <GumballButton title="Dimension" selected={transformMode === "dimensions"} onClick={() => setTransformMode("dimensions")} />
                     </ButtonList>
                     {(() => {
                         switch (transformMode) {
-                            case 'translate': return <ModelerObjectMoveOptions gumball={gumball} />
-                            case 'rotate': return <ModelerObjectRotateOptions gumball={gumball} />
+                            case 'translate': return <AnimatorObjectMoveOptions gumball={gumball} />
+                            case 'rotate': return <AnimatorObjectRotateOptions gumball={gumball} />
                             case 'dimensions': return null
                         }
                     })()}
@@ -65,7 +65,7 @@ const ModelerObjectTransformationModeSelect = ({ gumball }: { gumball: ModelerGu
 }
 
 
-const ModelerObjectMoveOptions = ({ gumball }: { gumball: ModelerGumball }) => {
+const AnimatorObjectMoveOptions = ({ gumball }: { gumball: ModelerGumball }) => {
 
     const [space, setObjectSpace] = useListenableObject(gumball.space);
     const [moveType, setMoveType] = useListenableObject(gumball.object_position_type);
@@ -79,13 +79,12 @@ const ModelerObjectMoveOptions = ({ gumball }: { gumball: ModelerGumball }) => {
             <ButtonList>
                 <GumballButton title="Position" selected={moveType === "position"} onClick={() => setMoveType("position")} />
                 <GumballButton title="Offset" selected={moveType === "offset"} onClick={() => setMoveType("offset")} />
-                <GumballButton title="Rotation Point" selected={moveType === "rotation_point"} onClick={() => setMoveType("rotation_point")} />
             </ButtonList>
         </>
     )
 }
 
-const ModelerObjectRotateOptions = ({ gumball }: { gumball: ModelerGumball }) => {
+const AnimatorObjectRotateOptions = ({ gumball }: { gumball: ModelerGumball }) => {
 
     const [space, setObjectSpace] = useListenableObject(gumball.space);
     const [moveType, setMoveType] = useListenableObject(gumball.object_rotation_type);
@@ -105,7 +104,7 @@ const ModelerObjectRotateOptions = ({ gumball }: { gumball: ModelerGumball }) =>
     )
 }
 
-const ModelerGumballTransformationModeSelect = ({ gumball }: { gumball: ModelerGumball }) => {
+const AnimatorGumballTransformationModeSelect = ({ gumball }: { gumball: ModelerGumball }) => {
 
     const [space, setObjectSpace] = useListenableObject(gumball.space);
     const [moveMode, setMoveMode] = useListenableObject(gumball.gumball_move_mode);
@@ -134,4 +133,4 @@ const ModelerGumballTransformationModeSelect = ({ gumball }: { gumball: ModelerG
     )
 }
 
-export default ModelerGumballPropertiesBar;
+export default AnimatorGumballPropertiesBar;

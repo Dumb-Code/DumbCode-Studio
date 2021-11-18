@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
-import ModelerGumballPropertiesBar from "../modeler/components/ModelerGumballPropertiesBar"
+import AnimatorGumballPropertiesBar from "./components/AnimatorGumballPropertiesBar"
 import AnimatorProperties from "./components/AnimatorProperties"
 import AnimatorScrubBar from "./components/AnimatorScrubBar"
 import AnimatorShortcuts from "./components/AnimatorShortcuts"
@@ -44,7 +44,7 @@ const Animator = () => {
             <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
             <div className="grid-in-scrub border dark:border-black border-white"><AnimatorScrubBar /></div>
             <div className="grid-in-timeline border dark:border-black border-white"><AnimatorTimeline /></div>
-            <div className="grid-in-gumball border dark:border-black border-white"><ModelerGumballPropertiesBar /></div>
+            <div className="grid-in-gumball border dark:border-black border-white"><AnimatorGumballPropertiesBar /></div>
             <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
         </div>
     )
