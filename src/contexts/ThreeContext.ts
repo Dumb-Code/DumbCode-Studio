@@ -21,7 +21,7 @@ export type ThreeJsContext = {
   setGridColor: (majorColor: number, minorColor: number, subColor: number) => void
 
   getCamera: () => Camera
-  setCameraType(isPerspective: boolean)
+  setCameraType: (isPerspective: boolean) => void
 
   transformControls: TransformControls
 }
