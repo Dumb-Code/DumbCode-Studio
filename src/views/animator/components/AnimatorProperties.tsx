@@ -1,15 +1,18 @@
-import CubeInput from "../../../components/CubeInput"
-import CubeRotationInput from "../../../components/CubeRotationInput"
-import Slider from 'react-input-slider'
+import { FC, useEffect, useState } from "react";
+import Slider from 'react-input-slider';
 import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
+import CubeInput from "../../../components/CubeInput";
+import CubeRotationInput from "../../../components/CubeRotationInput";
 import Dropup, { DropupItem } from "../../../components/Dropup";
 import { MinimizeButton } from "../../../components/MinimizeButton";
-import { StudioPanelsContext, usePanelToggle } from "../../../contexts/StudioPanelsContext";
+import Toggle from "../../../components/Toggle";
 import { useStudio } from "../../../contexts/StudioContext";
+import { StudioPanelsContext, usePanelToggle } from "../../../contexts/StudioPanelsContext";
+import { useTooltipRef } from "../../../contexts/TooltipContext";
+import DcaAnimation, { DcaKeyframe } from "../../../studio/formats/animations/DcaAnimation";
+import { DCMCube } from "../../../studio/formats/model/DcmModel";
 import { LO, LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
-import DcaAnimation from "../../../studio/formats/animations/DcaAnimation";
-import { FC } from "react";
 
 const AnimatorProperties = () => {
 
@@ -24,7 +27,7 @@ const AnimatorProperties = () => {
     const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
     return (
         <div className="overflow-y-scroll h-full dark:bg-gray-800 bg-gray-200">
-            <AnimatorCubeProperties animation={animation} cubeName={cubeName} />
+            <AnimatorCubeProperties animation={animation} cubeName={cubeName} cube={singleSelectedCube} />
             <AnimatorKeyframeProperties animation={animation} />
             <AnimatorLoopingProperties animation={animation} />
             <AnimatorIKProperties animation={animation} />
@@ -50,13 +53,15 @@ const AnimationPanel: FC<{ panelName: keyof StudioPanelsContext, heightClassname
 
 }
 
-const AnimatorCubeProperties = ({ animation, cubeName }: { animation: DcaAnimation | null, cubeName: string | undefined }) => {
+const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaAnimation | null, cubeName: string | undefined, cube: DCMCube | undefined }) => {
     const [rawKfs] = useListenableObjectNullable(animation?.selectedKeyframes)
+    const [mode, setMode] = useListenableObjectNullable(animation?.propertiesMode)
     const keyframes = rawKfs ?? []
-    const selectedKf = keyframes.length === 1 ? keyframes[0] : null
+    const selectedKf = keyframes.length === 1 ? keyframes[0] : undefined
 
     const [startTime] = useListenableObjectNullable(selectedKf?.startTime)
     const [duration] = useListenableObjectNullable(selectedKf?.duration)
+    //TODO: move out
     if (animation !== null) {
         if (startTime !== undefined && duration !== undefined) {
             animation.forceAnimationTime = startTime + duration
@@ -64,14 +69,54 @@ const AnimatorCubeProperties = ({ animation, cubeName }: { animation: DcaAnimati
             animation.forceAnimationTime = null
         }
     }
+
+
+    const sharedProps = {
+        cubeName, cube,
+        keyframe: selectedKf,
+        mode: mode ?? "global"
+    }
+
     return (
         <AnimationPanel title="CUBE PROPERTIES" heightClassname="h-64" panelName="animator_cube">
+            <div
+                className="dark:text-white px-2"
+                ref={useTooltipRef<HTMLDivElement>("Off (Local): Values shown are the changes the cube makes in that keyframe\nOn (Global) Values shown are the cubes actual values at the current time")}
+            >
+                Mode:
+                <Toggle
+                    checked={mode === "global"}
+                    setChecked={c => setMode(c ? "global" : "local")}
+                />
+                {mode === "global" ? "Global" : "Local"}
+            </div>
             <div className="w-full grid grid-cols-2 px-2 pt-1">
-                <WrappedCubeInput title="POSITIONS" cubeName={cubeName} obj={selectedKf?.position} />
-                <WrappedCubeInput title="CUBE GROW" cubeName={cubeName} obj={selectedKf?.cubeGrow} />
+                <WrappedCubeInput
+                    title="POSITIONS"
+                    obj={selectedKf?.position}
+                    keyframeSetFunction="setPositionAbsolute"
+                    vector={() => cube?.cubeGroup?.position}
+                    InputType={CubeInput}
+                    {...sharedProps}
+                />
+                <WrappedCubeInput
+                    title="CUBE GROW"
+                    obj={selectedKf?.cubeGrow}
+                    keyframeSetFunction="setCubeGrowAbsolute"
+                    vector={() => cube?.cubeGrowGroup?.position?.clone()?.multiplyScalar(-1)}
+                    InputType={CubeInput}
+                    {...sharedProps}
+                />
             </div>
             <div className="px-2">
-                <WrappedCubeRotationInput title="ROTATION" cubeName={cubeName} obj={selectedKf?.rotation} />
+                <WrappedCubeInput
+                    title="ROTATION"
+                    obj={selectedKf?.rotation}
+                    keyframeSetFunction="setRotationAbsolute"
+                    vector={() => cube?.cubeGroup?.rotation?.toVector3()?.multiplyScalar(180 / Math.PI)}
+                    InputType={CubeRotationInput}
+                    {...sharedProps}
+                />
             </div>
         </AnimationPanel>
     )
@@ -80,7 +125,6 @@ const AnimatorCubeProperties = ({ animation, cubeName }: { animation: DcaAnimati
 const AnimatorKeyframeProperties = ({ animation }: { animation: DcaAnimation | null }) => {
     const [selectedKeyframes] = useListenableObjectNullable(animation?.selectedKeyframes)
     const singleSelectedKeyframe = selectedKeyframes !== undefined && selectedKeyframes.length === 1 ? selectedKeyframes[0] : undefined
-    console.log(singleSelectedKeyframe)
     return (
         <AnimationPanel title="KEYFRAME PROPERTIES" heightClassname="h-16" panelName="animator_kf">
             <div className="w-full grid grid-cols-2 px-2 pt-1">
@@ -108,7 +152,7 @@ const AnimatorIKProperties = ({ animation }: { animation: DcaAnimation | null })
     return (
         <AnimationPanel title="INVERSE KINEMATICS" heightClassname="h-10" panelName="animator_ik">
             <div className="w-full flex flex-row px-2 pt-1">
-                <IKCheck title="ANCHOR" />
+                <IKCheck title="ANCHOR" animation={animation} />
             </div>
         </AnimationPanel>
     )
@@ -122,8 +166,8 @@ const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation 
                     graph goes here
                 </div>
                 <div className="flex flex-row mt-2">
-                    <Checkbox value={true} extraText="START" />
-                    <Checkbox value={true} extraText="END" />
+                    <Checkbox value={true} extraText="START" setValue={e => console.log("set value" + e)} />
+                    <Checkbox value={true} extraText="END" setValue={e => console.log("set value" + e)} />
                     <Dropup title="Default Graph" header="SELECT ONE" right={true} className="h-8 pt-2" >
                         <DropupItem name="Sin" onSelect={() => console.log("swap graph")} />
                         <DropupItem name="Quadratic" onSelect={() => console.log("swap graph")} />
@@ -166,20 +210,47 @@ const LoopCheck = ({ title }: { title: string }) => {
             <p className="ml-1 text-gray-400 text-xs">{title}</p>
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7 mt-1">
-                    <Checkbox value={false} />
+                    <Checkbox value={false} setValue={e => console.log("set value" + e)} />
                 </div>
             </div>
         </div>
     )
 }
 
-const IKCheck = ({ title }: { title: string }) => {
+const IKCheck = ({ title, animation }: { title: string, animation: DcaAnimation | null }) => {
+    const [selected] = useListenableObjectNullable(animation?.project?.selectedCubeManager?.selected)
+    const [anchors, setAnchors] = useListenableObjectNullable(animation?.ikAnchorCubes)
+    const isAllSelected = selected !== undefined && anchors !== undefined && selected.every(s => anchors.includes(s))
+    const toggleAllSelected = () => {
+        if (selected === undefined || anchors === undefined) {
+            return
+        }
+        if (isAllSelected) {
+            const newArray: string[] = [...anchors]
+            selected.forEach(f => {
+                const idx = newArray.indexOf(f)
+                if (idx !== -1) {
+                    newArray.splice(idx, 1)
+                }
+            })
+            setAnchors(newArray)
+        } else {
+            const newArray: string[] = [...anchors]
+            selected.forEach(f => {
+                const idx = newArray.indexOf(f)
+                if (idx === -1) {
+                    newArray.push(f)
+                }
+            })
+            setAnchors(newArray)
+        }
+    }
     return (
         <div className="flex flex-row">
             <p className="ml-1 dark:text-gray-400 text-black text-xs mr-2 mt-2">{title}</p>
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7">
-                    <Checkbox value={false} />
+                    <Checkbox value={isAllSelected} setValue={toggleAllSelected} />
                 </div>
             </div>
         </div>
@@ -210,16 +281,59 @@ const TitledField = ({ title, lo }: { title: string, lo?: LO<number> }) => {
     )
 }
 
-const WrappedCubeInput = ({ title, cubeName, obj }: { title: string, cubeName: string | undefined, obj?: LOMap<string, readonly [number, number, number]> }) => {
-    const [rawValue, setValue] = useListenableObjectInMapNullable(obj, cubeName)
-    const value = obj !== undefined && cubeName !== undefined && rawValue === undefined ? [0, 0, 0] as const : rawValue
-    return <CubeInput title={title} value={value} setValue={setValue} />
+type InputPropTypes = {
+    title: string;
+    mode: "local" | "global"
+    cubeName: string | undefined;
+    cube: DCMCube | undefined;
+    keyframe: DcaKeyframe | undefined,
+    keyframeSetFunction: "setPositionAbsolute" | "setRotationAbsolute" | "setCubeGrowAbsolute";
+    vector: () => {
+        x: number;
+        y: number;
+        z: number;
+    } | undefined;
+    obj?: LOMap<string, readonly [number, number, number]> | undefined;
+    InputType: typeof CubeInput | typeof CubeRotationInput
+}
+const WrappedCubeInput = (props: InputPropTypes) => {
+    return props.mode === "local" ? <WrappedInputLocal {...props} /> : <WrappedInputGlobal {...props} />
 }
 
-const WrappedCubeRotationInput = ({ title, cubeName, obj }: { title: string, cubeName: string | undefined, obj?: LOMap<string, readonly [number, number, number]> }) => {
+const WrappedInputLocal = ({ title, cubeName, obj, InputType }: InputPropTypes) => {
     const [rawValue, setValue] = useListenableObjectInMapNullable(obj, cubeName)
     const value = obj !== undefined && cubeName !== undefined && rawValue === undefined ? [0, 0, 0] as const : rawValue
-    return <CubeRotationInput title={title} value={value} setValue={setValue} />
+    return <InputType title={title} value={value} setValue={setValue} />
+}
+
+
+const WrappedInputGlobal = ({ title, cube, keyframe, obj, keyframeSetFunction, vector, InputType }: InputPropTypes) => {
+    const { onFrameListeners } = useStudio()
+    const vec = vector()
+    const [x, setX] = useState<number | undefined>(vec?.x)
+    const [y, setY] = useState<number | undefined>(vec?.y)
+    const [z, setZ] = useState<number | undefined>(vec?.z)
+    useEffect(() => {
+        const listner = () => {
+            const vec = vector()
+            setX(vec?.x)
+            setY(vec?.y)
+            setZ(vec?.z)
+        }
+        onFrameListeners.add(listner)
+        return () => {
+            onFrameListeners.delete(listner)
+        }
+    }, [onFrameListeners, vector])
+
+    const setValue = (array: readonly [number, number, number]) => {
+        if (keyframe === undefined) {
+            return
+        }
+        keyframe[keyframeSetFunction](array[0], array[1], array[2], cube)
+    }
+    const value = cube === undefined || keyframe === undefined || x === undefined || y === undefined || z === undefined ? undefined : [x, y, z] as const
+    return <InputType title={title} value={value} setValue={setValue} />
 }
 
 export default AnimatorProperties;

@@ -69,7 +69,7 @@ export class ModelerGumball {
   readonly gumball_move_mode = new LO<"translate" | "rotate">("translate")
   readonly gumball_auto_move = new LO(true)
 
-  readonly transformAnchor: Object3D
+  readonly transformAnchor = new Object3D()
 
   readonly blockedReasons = new LO<readonly string[]>([])
 
@@ -81,7 +81,6 @@ export class ModelerGumball {
     group: Group,
     private readonly cubePointTracker: CubePointTracker,
   ) {
-    this.transformAnchor = new Object3D()
     this.transformAnchor.rotation.order = "ZYX"
     group.add(this.transformAnchor)
   }

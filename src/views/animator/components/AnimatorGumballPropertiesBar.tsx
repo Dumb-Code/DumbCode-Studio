@@ -1,27 +1,33 @@
 import { Switch } from "@headlessui/react";
-import { ButtonList, GumballButton, GumballToggle, RelocateGumballDropup } from "../../../components/GumballComponents";
+import Dropup, { DropupItem } from "../../../components/Dropup";
+import { ButtonList, GumballButton, GumballToggle } from "../../../components/GumballComponents";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
-import { useListenableObject } from "../../../studio/util/ListenableObject";
-//TODO replace with animator gumball variant
-import { ModelerGumball } from "../../modeler/logic/ModelerGumball";
+import { useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { AnimatorGumball, useAnimatorGumball } from "../logic/AnimatorGumball";
 
 const AnimatorGumballPropertiesBar = () => {
+    //We want to force a refresh on useAnimatorGumball as little as possible
+    useAnimatorGumball()
+    return <AnimationGumballPropertiesBarContained />
+}
 
+const AnimationGumballPropertiesBarContained = () => {
     const { getSelectedProject } = useStudio()
-    const gumball = getSelectedProject().modelerGumball
-
+    const [selectedAnimation] = useListenableObject(getSelectedProject().animationTabs.selectedAnimation)
+    const gumball = selectedAnimation?.animatorGumball
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full">
-            <GumballToggle>
+            <GumballToggle toggle={gumball?.enabled}>
                 <AnimatorTransformationTypeSelect gumball={gumball} />
             </GumballToggle>
         </div>
     )
 }
 
-const AnimatorTransformationTypeSelect = ({ gumball }: { gumball: ModelerGumball }) => {
-    const [objectMode, setObjectMode] = useListenableObject(gumball.mode)
+const AnimatorTransformationTypeSelect = ({ gumball }: { gumball: AnimatorGumball | undefined }) => {
+    const [objectMode, setObjectMode] = useListenableObjectNullable(gumball?.mode)
+    const nonNullGumball = gumball as AnimatorGumball //When objectMode!==undefined, gumball!==undefined. Therefore we can pass it in to the select mods
 
     return (
         <>
@@ -29,15 +35,16 @@ const AnimatorTransformationTypeSelect = ({ gumball }: { gumball: ModelerGumball
                 <GumballButton title="Object" selected={objectMode === "object"} selectedClassName="bg-green-500" onClick={() => setObjectMode("object")} />
                 <GumballButton title="Gumball" selected={objectMode === "gumball"} selectedClassName="bg-green-500" onClick={() => setObjectMode("gumball")} />
             </ButtonList>
-            {objectMode === "object" ? <AnimatorObjectTransformationModeSelect gumball={gumball} /> : <AnimatorGumballTransformationModeSelect gumball={gumball} />}
+            {objectMode === "object" && <AnimatorObjectTransformationModeSelect gumball={nonNullGumball} />}
+            {objectMode === "gumball" && <AnimatorGumballTransformationModeSelect gumball={nonNullGumball} />}
         </>
     )
 }
 
-const AnimatorObjectTransformationModeSelect = ({ gumball }: { gumball: ModelerGumball }) => {
-
+const AnimatorObjectTransformationModeSelect = ({ gumball }: { gumball: AnimatorGumball }) => {
     const [selectedList] = useListenableObject(gumball.selectedCubeManager.selected)
     const [transformMode, setTransformMode] = useListenableObject(gumball.object_transformMode)
+    const [space, setObjectSpace] = useListenableObject(gumball.space)
 
     const hasNoCubesSelected = selectedList.length === 0
 
@@ -49,15 +56,13 @@ const AnimatorObjectTransformationModeSelect = ({ gumball }: { gumball: ModelerG
                 <>
                     <ButtonList>
                         <GumballButton title="Move" selected={transformMode === "translate"} onClick={() => setTransformMode("translate")} />
+                        <GumballButton title="MoveIK" selected={transformMode === "translateIK"} onClick={() => setTransformMode("translateIK")} />
                         <GumballButton title="Rotate" selected={transformMode === "rotate"} onClick={() => setTransformMode("rotate")} />
                     </ButtonList>
-                    {(() => {
-                        switch (transformMode) {
-                            case 'translate': return <AnimatorObjectMoveOptions gumball={gumball} />
-                            case 'rotate': return <AnimatorObjectRotateOptions gumball={gumball} />
-                            case 'dimensions': return null
-                        }
-                    })()}
+                    <ButtonList>
+                        <GumballButton title="Local" selected={space === "local"} onClick={() => setObjectSpace("local")} />
+                        <GumballButton title="World" selected={space === "world"} onClick={() => setObjectSpace("world")} />
+                    </ButtonList>
                 </>
             }
         </div>
@@ -65,70 +70,35 @@ const AnimatorObjectTransformationModeSelect = ({ gumball }: { gumball: ModelerG
 }
 
 
-const AnimatorObjectMoveOptions = ({ gumball }: { gumball: ModelerGumball }) => {
+const AnimatorGumballTransformationModeSelect = ({ gumball }: { gumball: AnimatorGumball }) => {
 
     const [space, setObjectSpace] = useListenableObject(gumball.space);
-    const [moveType, setMoveType] = useListenableObject(gumball.object_position_type);
+    const [autoMove, setAutoMove] = useListenableObject(gumball.gumball_autoRotate);
 
     return (
         <>
             <ButtonList>
-                <GumballButton title="Local" selected={space === "local"} onClick={() => setObjectSpace("local")} />
-                <GumballButton title="World" selected={space === "world"} onClick={() => setObjectSpace("world")} />
-            </ButtonList>
-            <ButtonList>
-                <GumballButton title="Position" selected={moveType === "position"} onClick={() => setMoveType("position")} />
-                <GumballButton title="Offset" selected={moveType === "offset"} onClick={() => setMoveType("offset")} />
-            </ButtonList>
-        </>
-    )
-}
-
-const AnimatorObjectRotateOptions = ({ gumball }: { gumball: ModelerGumball }) => {
-
-    const [space, setObjectSpace] = useListenableObject(gumball.space);
-    const [moveType, setMoveType] = useListenableObject(gumball.object_rotation_type);
-
-
-    return (
-        <>
-            <ButtonList>
-                <GumballButton title="Local" selected={space === "local"} onClick={() => setObjectSpace("local")} />
-                <GumballButton title="World" selected={space === "world"} onClick={() => setObjectSpace("world")} />
-            </ButtonList>
-            <ButtonList>
-                <GumballButton title="Normal" selected={moveType === "rotation"} onClick={() => setMoveType("rotation")} />
-                <GumballButton title="Around Point" selected={moveType === "rotation_around_point"} onClick={() => setMoveType("rotation_around_point")} />
-            </ButtonList>
-        </>
-    )
-}
-
-const AnimatorGumballTransformationModeSelect = ({ gumball }: { gumball: ModelerGumball }) => {
-
-    const [space, setObjectSpace] = useListenableObject(gumball.space);
-    const [moveMode, setMoveMode] = useListenableObject(gumball.gumball_move_mode);
-    const [autoMove, setAutoMove] = useListenableObject(gumball.gumball_auto_move);
-
-    return (
-        <>
-            <ButtonList>
-                <span className="dark:text-gray-200 pr-2" ref={useTooltipRef("Automatically move the gumball\nto the selected cube(s)")}>Auto Move</span>
+                <span className="dark:text-gray-200 pr-2" ref={useTooltipRef("Lock the gumball\nto the selected cube(s)")}>Lock to Selected</span>
                 <Switch checked={autoMove} onChange={setAutoMove}
                     className={(autoMove ? "bg-green-500" : "bg-red-900") + " relative inline-flex items-center h-6 mt-0.5 rounded w-11 transition-colors ease-in-out duration-200 mr-2"}>
-                    <span className="sr-only">Auto Move</span>
+                    <span className="sr-only">Lock to Selected</span>
                     <span className={(autoMove ? "translate-x-6 bg-green-400" : "translate-x-1 bg-red-700") + " inline-block w-4 h-4 transform rounded transition ease-in-out duration-200"} />
                 </Switch>
             </ButtonList>
-            <ButtonList>
+            {/* <ButtonList>
                 <GumballButton title="Position" selected={moveMode === "translate"} onClick={() => setMoveMode("translate")} />
                 <GumballButton title="Rotation" selected={moveMode === "rotate"} onClick={() => setMoveMode("rotate")} />
-            </ButtonList>
+            </ButtonList> */}
             <ButtonList>
                 <GumballButton title="Local" selected={space === "local"} onClick={() => setObjectSpace("local")} />
                 <GumballButton title="World" selected={space === "world"} onClick={() => setObjectSpace("world")} />
             </ButtonList>
-            <RelocateGumballDropup gumball={gumball} />
+            <Dropup title="Relocate Gumballaba" header="RELOCATE MODE">
+                <div className="p-0.5">
+                    <DropupItem name="Reset Rotation" onSelect={() => gumball.transformAnchor.rotation.set(0, 0, 0)} />
+                    <DropupItem name="Cube Rotation" onSelect={() => gumball.moveToSelected()} />
+                </div>
+            </Dropup>
         </>
     )
 }

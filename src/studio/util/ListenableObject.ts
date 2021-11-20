@@ -127,12 +127,13 @@ export class LOMap<K, V> extends Map<K, V> {
   }
 
   set(key: K, value: V) {
+    const old = this.get(key)
+    super.set(key, value)
     const get = this.listners.get(key)
     if (get !== undefined) {
-      get.forEach(l => l(value, this.get(key) ?? undefined))
+      get.forEach(l => l(value, old))
     }
     this.globalListeners.forEach(l => l())
-    super.set(key, value)
     return this
   }
 

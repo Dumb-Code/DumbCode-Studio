@@ -68,8 +68,10 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
       if (project !== selectedProject) {
         if (selectedProject !== null) {
           three.scene.remove(selectedProject.group)
+          three.onTopScene.remove(selectedProject.overlayGroup)
         }
         three.scene.add(project.group)
+        three.onTopScene.add(project.overlayGroup)
       }
 
       selectedProject = project

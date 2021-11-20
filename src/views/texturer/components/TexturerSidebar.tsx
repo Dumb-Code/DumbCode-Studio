@@ -1,7 +1,7 @@
-import { SVGEye, SVGLocked } from "../../../components/Icons";
 import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
 import Dropdown, { DropdownItem } from "../../../components/Dropdown";
+import { SVGEye, SVGLocked } from "../../../components/Icons";
 
 const TexturerSidebar = () => {
     return (
@@ -43,7 +43,7 @@ const TextureMapElementProperties = () => {
                 <div className="mx-1">
                     <p className="dark:text-gray-400 text-black  text-xs">MIRROR</p>
                     <div className="px-2">
-                        <Checkbox value={false} />
+                        <Checkbox value={false} setValue={e => console.log("set value" + e)} />
                     </div>
                 </div>
                 <div className="mx-1">

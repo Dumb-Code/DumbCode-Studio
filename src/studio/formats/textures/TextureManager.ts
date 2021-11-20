@@ -1,9 +1,9 @@
-import { LO, useListenableObject } from './../../util/ListenableObject';
+import { NearestFilter, Texture as ThreeTexture } from 'three';
 import { v4 as uuidv4 } from 'uuid';
-import { DCMModel } from './../model/DcmModel';
 import { useDomParent } from '../../util/DomParentRef';
 import DcProject from '../project/DcProject';
-import { CanvasTexture, NearestFilter } from 'three';
+import { LO, useListenableObject } from './../../util/ListenableObject';
+import { DCMModel } from './../model/DcmModel';
 
 export default class TextureManager {
   readonly project: DcProject
@@ -80,7 +80,7 @@ export default class TextureManager {
 
     textures.reverse().forEach(t => this.canvasContext.drawImage(t.canvas, 0, 0, width, height))
 
-    const tex = new CanvasTexture(this.canvas)
+    const tex = new ThreeTexture(this.canvas)
     tex.needsUpdate = true
     tex.flipY = false
     tex.magFilter = NearestFilter;

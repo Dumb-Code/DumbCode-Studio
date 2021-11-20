@@ -14,7 +14,8 @@ export default class DcProject {
   readonly identifier: string
 
   readonly name: LO<string>
-  readonly group: Group
+  readonly group = new Group()
+  readonly overlayGroup = new Group()
 
   readonly model: DCMModel
   readonly saveableFile = new LO(false)
@@ -33,7 +34,6 @@ export default class DcProject {
   constructor(name: string, model: DCMModel) {
     this.identifier = uuidv4()
     this.name = new LO(name)
-    this.group = new Group()
     this.model = model
     model.parentProject = this
     this.textureManager = new TextureManager(this)

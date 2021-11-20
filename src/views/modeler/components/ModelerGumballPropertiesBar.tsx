@@ -1,5 +1,6 @@
 import { Switch } from "@headlessui/react";
-import { ButtonList, GumballButton, GumballToggle, RelocateGumballDropup } from "../../../components/GumballComponents";
+import Dropup, { DropupItem } from "../../../components/Dropup";
+import { ButtonList, GumballButton, GumballToggle } from "../../../components/GumballComponents";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
 import { useListenableObject } from "../../../studio/util/ListenableObject";
@@ -12,7 +13,7 @@ const ModelerGumballPropertiesBar = () => {
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full">
-            <GumballToggle>
+            <GumballToggle toggle={gumball.enabled}>
                 <ModelerTransformationTypeSelect gumball={gumball} />
             </GumballToggle>
         </div>
@@ -129,7 +130,15 @@ const ModelerGumballTransformationModeSelect = ({ gumball }: { gumball: ModelerG
                 <GumballButton title="Local" selected={space === "local"} onClick={() => setObjectSpace("local")} />
                 <GumballButton title="World" selected={space === "world"} onClick={() => setObjectSpace("world")} />
             </ButtonList>
-            <RelocateGumballDropup gumball={gumball} />
+            <Dropup title="Relocate Gumball" header="RELOCATE MODE">
+                <div className="p-0.5">
+                    <DropupItem name="Reset Position" onSelect={() => gumball.transformAnchor.position.set(0, 0, 0)} />
+                    <DropupItem name="Reset Rotation" onSelect={() => gumball.transformAnchor.rotation.set(0, 0, 0)} />
+                    <DropupItem name="Cube Rotation Point (Position)" onSelect={() => gumball.moveGumballToSelected({ position: true })} />
+                    <DropupItem name="Cube Rotation Point (Rotation)" onSelect={() => gumball.moveGumballToSelected({ rotation: true })} />
+                    <DropupItem name="Custom (Snap Point)" onSelect={() => gumball.moveToCustomPoint()} />
+                </div>
+            </Dropup>
         </>
     )
 }

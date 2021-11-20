@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from "react"
 import StudioCanvas from "../../../components/StudioCanvas"
-import { useState } from "react"
+import { useStudio } from "../../../contexts/StudioContext"
 
 export const TexturerViewport = () => {
 
@@ -35,6 +36,21 @@ const TexturerModelWindow = ({ setStateWith }: { setStateWith: any }) => {
 }
 
 const TexturerBothWindows = ({ setStateWith }: { setStateWith: any }) => {
+    const { getSelectedProject } = useStudio()
+
+    const ref = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        if (!ref.current) {
+            return
+        }
+        const current = ref.current
+        const canvas = getSelectedProject().textureManager.canvas
+
+        current.appendChild(canvas)
+        return () => {
+            current.removeChild(canvas)
+        }
+    })
 
     return (
         <div className="flex flex-row h-full">
@@ -45,7 +61,7 @@ const TexturerBothWindows = ({ setStateWith }: { setStateWith: any }) => {
             <div className=" dark:bg-gray-700 bg-gray-200 w-1/2 border-l dark:border-black border-white">
                 <button className="dark:bg-gray-900 bg-gray-300 absolute z-10 w-20 rounded-br dark:text-gray-400 text-black pr-1" onDoubleClick={() => { setStateWith("texture") }}>Texture</button>
                 <br /><br /><br />
-                <p className="ml-16">putTextureMapHere</p>
+                <div ref={ref} className="ml-16">{ }</div>
             </div>
         </div>
     )

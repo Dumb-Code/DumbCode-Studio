@@ -9,7 +9,7 @@ const ModelerProperties = () => {
     const { getSelectedProject } = useStudio()
     const { model, selectedCubeManager } = getSelectedProject()
 
-    const [selected] = useListenableObject(selectedCubeManager.selected, true)
+    const [selected] = useListenableObject(selectedCubeManager.selected)
     const cubeMap = useListenableMap(model.identifierCubeMap)
     const oneSelected = selected.length === 1
 

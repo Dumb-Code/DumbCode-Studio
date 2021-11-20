@@ -6,6 +6,10 @@
       "dom.iterable",
       "esnext"
     ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./typings"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -22,6 +26,10 @@
     "noImplicitAny": false
   },
   "include": [
-    "src"
+    "src",
+  ],
+  "exclude": [
+    "node_modules",
+    "types"
   ]
 }

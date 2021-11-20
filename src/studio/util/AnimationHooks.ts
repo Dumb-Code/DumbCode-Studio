@@ -13,6 +13,9 @@ export const useAnimationHook = (active: boolean, callback: (percent: number) =>
                 timeoutRef.current = undefined
             }
         }
+        if (currentActive.current === undefined) {
+            currentPercentage.current = active ? 1 : 0
+        }
         if (currentActive.current !== active || totalmsRun.current < animationDurationMs) {
             if (currentActive.current !== active) {
                 totalmsRun.current = 0

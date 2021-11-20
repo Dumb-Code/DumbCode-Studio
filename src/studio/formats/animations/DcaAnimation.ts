@@ -1,12 +1,15 @@
 import { v4 } from 'uuid';
 import DcProject from '../project/DcProject';
+import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
 import { LO, LOMap } from './../../util/ListenableObject';
+import { DCMCube } from './../model/DcmModel';
 
 export default class DcaAnimation {
   readonly identifier = v4()
   readonly project: DcProject
 
-  name: LO<string>
+  readonly name: LO<string>
+  readonly propertiesMode = new LO<"local" | "global">("global")
   readonly keyframes = new LO<readonly DcaKeyframe[]>([])
   readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([])
 
@@ -22,14 +25,18 @@ export default class DcaAnimation {
   readonly scroll = new LO(0)
   readonly zoom = new LO(1)
 
+  readonly ikAnchorCubes = new LO<readonly string[]>([])
+
   isDraggingTimeline = false
   forceAnimationTime: number | null = null
+
+  readonly animatorGumball: AnimatorGumball
 
   constructor(project: DcProject, name: string) {
     this.name = new LO(name)
     this.project = project
     this.keyframeData = new KeyframeLoopData()
-
+    this.animatorGumball = new AnimatorGumball(project.selectedCubeManager, project.model, project.group, project.overlayGroup)
     this.time.addListener(value => {
       if (this.displayTimeMatch) {
         this.displayTime.value = value
@@ -94,6 +101,8 @@ export class DcaKeyframe {
 
   skip = false
 
+  _previousForcedValue: number | null = null
+
   constructor(project: DcProject, animation: DcaAnimation) {
     this.identifier = v4()
     this.project = project
@@ -116,7 +125,72 @@ export class DcaKeyframe {
 
   }
 
+  _oneSelectedCube() {
+    const list = this.project.selectedCubeManager.selected.value
+    if (list.length !== 1) {
+      return
+    }
+    const cube = this.project.model.identifierCubeMap.get(list[0])
+    if (!cube) {
+      return
+    }
+    return cube
+  }
+
+  wrapToSetValue(callback: () => void) {
+    this.skip = true
+    this.project.model.resetVisuals()
+    const time = this.startTime.value + this.duration.value
+    this.animation.keyframes.value.forEach(kf => kf.animate(time))
+
+    this.animation.animate(0)
+    callback()
+    this.skip = false
+  }
+
+  setPositionAbsolute(x: number, y: number, z: number, cube = this._oneSelectedCube()) {
+    this.wrapToSetValue(() => this.setPositionAbsoluteAnimated(cube, x, y, z))
+  }
+  setPositionAbsoluteAnimated(cube: DCMCube | undefined, x: number, y: number, z: number) {
+    if (!cube) return
+    const pos = cube.cubeGroup.position
+    this.position.set(cube.name.value, [
+      x - pos.x,
+      y - pos.y,
+      z - pos.z,
+    ])
+  }
+
+  setRotationAbsolute(x: number, y: number, z: number, cube = this._oneSelectedCube()) {
+    this.wrapToSetValue(() => this.setRotationAbsoluteAnimated(cube, x, y, z))
+  }
+  setRotationAbsoluteAnimated(cube: DCMCube | undefined, x: number, y: number, z: number) {
+    if (!cube) return
+    const rotation = cube.cubeGroup.rotation
+    this.rotation.set(cube.name.value, [
+      x - (rotation.x * 180 / Math.PI),
+      y - (rotation.y * 180 / Math.PI),
+      z - (rotation.z * 180 / Math.PI),
+    ])
+  }
+
+  setCubeGrowAbsolute(x: number, y: number, z: number, cube = this._oneSelectedCube()) {
+    this.wrapToSetValue(() => this.setCubeGrowAbsoluteAnimated(cube, x, y, z))
+  }
+  setCubeGrowAbsoluteAnimated(cube: DCMCube | undefined, x: number, y: number, z: number) {
+    if (!cube) return
+    const pos = cube.cubeGrowGroup.position //This is all inversed. We need to do `values - (-pos)`, so `values + pos`
+    this.cubeGrow.set(cube.name.value, [
+      x + pos.x,
+      y + pos.y,
+      z + pos.z,
+    ])
+  }
+
   animate(time: number) {
+    if (this.skip) {
+      return
+    }
     //If below 0, then don't even bother animating
     let ticks = (time - this.startTime.value) / this.duration.value
     if (ticks <= 0 || this.skip) {

@@ -208,15 +208,6 @@ export class DCMCube implements CubeParent {
 
     this.visible.addListener(visible => this.cubeMesh.visible = visible)
 
-    this.children.addListener((newChildren, oldChildren) => {
-      oldChildren.forEach(child => this.cubeGroup.remove(child.cubeGroup))
-      newChildren.forEach(child => {
-        child.parent = this
-        child.updateHirarchy(this.hierarchyLevel + 1)
-        this.cubeGroup.add(child.cubeGroup)
-      })
-    })
-
     this.mouseHover.addListener(isHovering => {
       if (this.model.materials !== undefined && this.cubeMesh !== undefined) {
         if (isHovering) {
@@ -244,6 +235,16 @@ export class DCMCube implements CubeParent {
     this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.materials.normal)
     children.forEach(child => this.cubeGroup.add(child.cubeGroup))
     this.createGroup()
+
+    this.children.addAndRunListener((newChildren, oldChildren) => {
+      oldChildren.forEach(child => this.cubeGroup.remove(child.cubeGroup))
+      newChildren.forEach(child => {
+        child.parent = this
+        child.updateHirarchy(this.hierarchyLevel + 1)
+        this.cubeGroup.add(child.cubeGroup)
+      })
+    })
+
   }
 
   updateHirarchy(level: number) {
