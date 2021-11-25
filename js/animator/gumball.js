@@ -240,7 +240,7 @@ export class Gumball {
             if(isIk) {
                 selected.cubeGroup.matrixWorld.decompose(this.ikAnchor.position, this.ikAnchor.quaternion, tempVec)
             }
-            this.transformControls.attach(isIk ? this.ikAnchor : selected.parent );
+            this.transformControls.attach(isIk ? this.ikAnchor : selected.cubeGroup );
             this.transformControls.mode = mode
         }
     }
