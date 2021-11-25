@@ -31,7 +31,7 @@ const HorizontalDivider = ({ max, min, value, setValue, toggleDragging }: { min:
     document.addEventListener("mouseup", mouseUp)
 
     return clearEvents
-  }, [dragging])
+  }, [dragging, max, min, setValue, toggleDragging])
 
   return (
     <div ref={divRef} className="w-full relative">
