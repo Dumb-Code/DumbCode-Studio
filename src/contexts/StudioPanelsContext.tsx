@@ -1,50 +1,44 @@
 import { createContext, FC, useContext, useState } from "react"
 
-type Togglable = {
-  get: () => boolean
-  set: (val: boolean) => void
-}
-const emptyToggle: Togglable = {
-  get: () => false,
-  set: () => { }
+export type PanelValue<T> = {
+  get: () => T
+  set: (val: T) => void
 }
 export type StudioPanelsContext = {
-  model_cube: Togglable
+  model_cube: PanelValue<boolean>
+  model_cube_size: PanelValue<number>
 
-  animator_cube: Togglable
-  animator_kf: Togglable
-  animator_looping: Togglable
-  animator_ik: Togglable
-  animator_pp: Togglable
-}
-
-const defaultValue: StudioPanelsContext = {
-  model_cube: emptyToggle,
-  animator_cube: emptyToggle,
-  animator_kf: emptyToggle,
-  animator_looping: emptyToggle,
-  animator_ik: emptyToggle,
-  animator_pp: emptyToggle
+  animator_cube: PanelValue<boolean>
+  animator_kf: PanelValue<boolean>
+  animator_looping: PanelValue<boolean>
+  animator_ik: PanelValue<boolean>
+  animator_pp: PanelValue<boolean>
 }
 
 const Context = createContext<StudioPanelsContext | null>(null)
 
 
-const useBooleanGetterSetter = (object: StudioPanelsContext, name: keyof StudioPanelsContext, defaultValue: boolean) => {
+const useValueGetterSetter = <
+  T extends keyof StudioPanelsContext,
+  R = StudioPanelsContext[T] extends PanelValue<infer I> ? I : never
+>(object: StudioPanelsContext, name: T, defaultValue: R) => {
   const [value, setValue] = useState(defaultValue)
-  object[name] = {
+  const val: PanelValue<R> = {
     get: () => value,
     set: value => setValue(value)
   }
+  //@ts-expect-error
+  object[name] = val
 }
 const StudioPanelsContextProvider: FC = ({ children }) => {
-  const context = { ...defaultValue }
-  useBooleanGetterSetter(context, "model_cube", true)
-  useBooleanGetterSetter(context, "animator_cube", true)
-  useBooleanGetterSetter(context, "animator_kf", true)
-  useBooleanGetterSetter(context, "animator_looping", false)
-  useBooleanGetterSetter(context, "animator_ik", false)
-  useBooleanGetterSetter(context, "animator_pp", false)
+  const context: StudioPanelsContext = {} as any //We define the properties in the next lines.
+  useValueGetterSetter(context, "model_cube", true)
+  useValueGetterSetter(context, "model_cube_size", 430)
+  useValueGetterSetter(context, "animator_cube", true)
+  useValueGetterSetter(context, "animator_kf", true)
+  useValueGetterSetter(context, "animator_looping", false)
+  useValueGetterSetter(context, "animator_ik", false)
+  useValueGetterSetter(context, "animator_pp", false)
   return (
     <Context.Provider value={context}>
       {children}
@@ -52,12 +46,18 @@ const StudioPanelsContextProvider: FC = ({ children }) => {
   )
 }
 
-export const usePanelToggle: (name: keyof StudioPanelsContext) => [boolean, (val: boolean) => void] = name => {
+export const usePanelValue = <
+  T extends keyof StudioPanelsContext,
+  R = StudioPanelsContext[T] extends PanelValue<infer I> ? I : never
+>(name: T): [R, (val: R) => void] => {
   const context = useContext(Context)
   if (context === null) {
     throw new Error(`useProjectPageContext must be used within a ProjectPageContextProvider`)
   }
-  const object = context[name]
+  const object = context[name] as unknown as PanelValue<R>
+  if (object === undefined) {
+    throw new Error(`${name} was not set on context`);
+  }
   return [object.get(), value => object.set(value)]
 }
 

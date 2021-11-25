@@ -1,8 +1,10 @@
+import { useRef } from "react";
 import CubeInput from "../../../components/CubeInput";
 import CubeRotationInput from "../../../components/CubeRotationInput";
+import HorizontalDivider from "../../../components/HorizontalDivider";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { useStudio } from "../../../contexts/StudioContext";
-import { usePanelToggle } from "../../../contexts/StudioPanelsContext";
+import { usePanelValue } from "../../../contexts/StudioPanelsContext";
 import { LO, useListenableMap, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 
 const ModelerProperties = () => {
@@ -15,30 +17,44 @@ const ModelerProperties = () => {
 
     const firstSelected = oneSelected ? cubeMap.get(selected[0]) : undefined
 
-    const [propertiesActive, setPropertiesActive] = usePanelToggle("model_cube")
+    const [propertiesActive, setPropertiesActive] = usePanelValue("model_cube")
+    const [propertiesHeight, setPropertiesHeight] = usePanelValue("model_cube_size")
+
+    const toggleRef = useRef<HTMLDivElement>(null)
 
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                <p className="my-0.5 flex-grow">CUBE PROPERTIES</p>
-                <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)} />
+        <>
+            <HorizontalDivider max={430} min={50} value={propertiesHeight} setValue={setPropertiesHeight} toggleDragging={val => {
+                if (toggleRef.current) {
+                    toggleRef.current.className = val ? "" : "transition-height ease-in-out duration-200"
+                }
+            }} />
+            <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden">
+                <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
+                    <p className="my-0.5 flex-grow">CUBE PROPERTIES</p>
+                    <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)} />
+                </div>
+                <div
+                    className="transition-height ease-in-out duration-200"
+                    ref={toggleRef}
+                    style={{ height: propertiesActive ? propertiesHeight : 0 }}
+                >
+                    <div className="pl-3">
+                        <p className="dark:text-gray-400 text-black text-xs mt-1">CUBE NAME</p>
+                    </div>
+                    <div className="w-full grid grid-cols-2 px-2 pt-1">
+                        <WrappedCubeName obj={firstSelected?.name} />
+                        <WrappedCubeInputDimensions title={"DIMENSIONS"} obj={firstSelected?.dimension} />
+                        <WrappedCubeInput title={"POSITIONS"} obj={firstSelected?.position} />
+                        <WrappedCubeInput title={"OFFSET"} obj={firstSelected?.offset} />
+                        <WrappedCubeInput title={"CUBE GROW"} obj={firstSelected?.cubeGrow} />
+                    </div>
+                    <div className="px-2">
+                        <WrappedCubeInputRotation title={"ROTATION"} obj={firstSelected?.rotation} />
+                    </div>
+                </div>
             </div>
-            <div className={(propertiesActive ? "h-104" : "h-0") + " transition-height ease-in-out duration-200"}>
-                <div className="pl-3">
-                    <p className="dark:text-gray-400 text-black text-xs mt-1">CUBE NAME</p>
-                </div>
-                <div className="w-full grid grid-cols-2 px-2 pt-1">
-                    <WrappedCubeName obj={firstSelected?.name} />
-                    <WrappedCubeInputDimensions title={"DIMENSIONS"} obj={firstSelected?.dimension} />
-                    <WrappedCubeInput title={"POSITIONS"} obj={firstSelected?.position} />
-                    <WrappedCubeInput title={"OFFSET"} obj={firstSelected?.offset} />
-                    <WrappedCubeInput title={"CUBE GROW"} obj={firstSelected?.cubeGrow} />
-                </div>
-                <div className="px-2">
-                    <WrappedCubeInputRotation title={"ROTATION"} obj={firstSelected?.rotation} />
-                </div>
-            </div>
-        </div>
+        </>
     )
 }
 

@@ -8,7 +8,7 @@ import Dropup, { DropupItem } from "../../../components/Dropup";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import Toggle from "../../../components/Toggle";
 import { useStudio } from "../../../contexts/StudioContext";
-import { StudioPanelsContext, usePanelToggle } from "../../../contexts/StudioPanelsContext";
+import { PanelValue, StudioPanelsContext, usePanelValue } from "../../../contexts/StudioPanelsContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
 import DcaAnimation, { DcaKeyframe } from "../../../studio/formats/animations/DcaAnimation";
 import { DCMCube } from "../../../studio/formats/model/DcmModel";
@@ -36,8 +36,8 @@ const AnimatorProperties = () => {
     )
 }
 
-const AnimationPanel: FC<{ panelName: keyof StudioPanelsContext, heightClassname: string, title: string }> = ({ panelName, heightClassname, children, title }) => {
-    const [open, setOpen] = usePanelToggle(panelName)
+const AnimationPanel: FC<{ panelName: { [K in keyof StudioPanelsContext]: StudioPanelsContext[K] extends PanelValue<boolean> ? K : never }[keyof StudioPanelsContext], heightClassname: string, title: string }> = ({ panelName, heightClassname, children, title }) => {
+    const [open, setOpen] = usePanelValue(panelName)
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
