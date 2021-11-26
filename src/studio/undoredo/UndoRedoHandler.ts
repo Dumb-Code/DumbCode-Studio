@@ -40,7 +40,7 @@
 // is true
 //
 
-type ADDSectionAction = {
+type AddSectionAction = {
   type: "add"
   section_name: string
   section_data: any
@@ -59,20 +59,22 @@ type ModifySectionAction = {
   old_value: any
 }
 
-type Section = {
+export type UndoRedoSection = {
   section_name: string
   data: any
 }
 
-export type Action = ADDSectionAction | RemoveSectionAction | ModifySectionAction
+export type Action = AddSectionAction | RemoveSectionAction | ModifySectionAction
 
-export default class UndoRedoHandler<S extends Section> {
+export default class UndoRedoHandler<S extends UndoRedoSection> {
   private batchActions = false
   private batchedActions: Action[] = []
 
-  private sections: Section[] = []
+  public ignoreActions = false
 
-  private history: Action[] = []
+  private sections: UndoRedoSection[] = []
+
+  private history: Action[][] = []
   private index = -1
 
   startBatchActions() {
@@ -82,11 +84,16 @@ export default class UndoRedoHandler<S extends Section> {
 
   endBatchActions() {
     this.batchActions = false
+    if (this.batchedActions.length !== 0) {
+      this._PUSH(...this.batchedActions)
+    }
   }
 
   private findSection<K extends string>(section_name: K) {
-    return this.sections.find(s => s.section_name === section_name) as (S & { section_name: K }) ?? null
+    return (this.sections.find(s => s.section_name === section_name) as (S & { section_name: K }) | undefined) ?? null
   }
+
+  pruneHistory() { this.history.length = 0 }
 
   createNewSection<K extends string>(section_name: K): S & { section_name: K } {
     const section = {
@@ -97,41 +104,66 @@ export default class UndoRedoHandler<S extends Section> {
     return section
   }
 
-  //Should only be called when setting initial states.
-  modifySectionDirectly
-    <
-      K extends string,                     //The section name
-      Sec extends S & { section_name: K },  //Internal type, the section type,
-      P extends keyof Sec['data'],          //The keys of the specified section data
-    >
-    (section_name: K, property_name: P, value: Sec['data'][P]) {
+  private findOrCreateSection<K extends string>(section_name: K) {
     const section = this.findSection(section_name)
+    if (section === null) {
+      return this.createNewSection(section_name)
+    }
+    return section
+  }
+
+  //Should only be called when setting initial states.
+  modifySectionDirectly<S extends UndoRedoSection, P extends keyof S['data']>(section: S, property_name: P, value: S['data'][P]) {
     const current = section.data[property_name]
     if (current !== undefined) {
-      console.error(`Directly modified property ${property_name} on section ${section_name} twice. Previous: '${current}', New: '${value}'`)
+      console.error(`Directly modified property ${property_name} on section ${section.section_name} twice. Previous: '${current}', New: '${value}'`)
     }
     section.data[property_name] = value
+  }
+
+  pushSectionCreation(section: S) {
+    const action: AddSectionAction = {
+      type: "add",
+      section_name: section.section_name,
+      section_data: { ...section.data }
+    }
+    this._PUSH(action)
+  }
+
+  _PUSH(...actions: Action[]) {
+    if (this.ignoreActions) {
+      return
+    }
+    if (this.batchActions) {
+      this.batchedActions.push(...actions)
+      return
+    }
+    this.history.push(actions)
+    //@Wyn TODO - modify `this.index` accordintly. Look at previous implimentation.
+    //Also, create LO for `canUndo` and `canRedo`
   }
 
 }
 
 
 //BELOW -- TESTING
-const a = new UndoRedoHandler<{
-  section_name: "root_data",
-  data: {
-    prop1: number
-    prop2: string
-  }
-} | {
-  section_name: `cube_${string}`
-  data: {
-    prop2: number
-  }
-}>()
-const prop1 = a.createNewSection("root_data")
-prop1.data.prop1 = 2
-a.modifySectionDirectly("root_data", "prop1", 5)
+// const a = new UndoRedoHandler<{
+//   section_name: "root_data",
+//   data: {
+//     prop1: number
+//     prop2: string
+//   }
+// } | {
+//   section_name: `cube_${string}`
+//   data: {
+//     prop2: number
+//   }
+// }>()
+// const prop1 = a.createNewSection("root_data")
+// prop1.data.prop1 = 2
+// new LO(2).applyToSection(a, prop1, "prop1")
 
-const prop2 = a.createNewSection("cube_abc")
-prop2.data.prop2 = 2
+// const stringA = Math.random().toString()
+// const prop2 = a.createNewSection(`cube_${stringA}`)
+// prop2.data.prop2 = 2
+// new LO(2).applyToSection(a, prop2, "prop2")

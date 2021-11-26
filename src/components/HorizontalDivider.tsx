@@ -40,6 +40,9 @@ const HorizontalDivider = ({ max, min, value, setValue, toggleDragging }: { min:
         startingDrag.current = e.clientY
         setDragging(true)
         toggleDragging(true)
+
+        e.stopPropagation()
+        e.preventDefault()
       }} style={{ 'cursor': 'n-resize' }} className="absolute left-0 right-0 h-2"></div>
     </div>
   )

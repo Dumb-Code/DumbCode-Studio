@@ -1,5 +1,6 @@
 import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, Quaternion, Vector3 } from "three";
 import { v4 as uuidv4 } from "uuid";
+import UndoRedoHandler from "../../undoredo/UndoRedoHandler";
 import LockedCubes from "../../util/LockedCubes";
 import SelectedCubeManager from '../../util/SelectedCubeManager';
 import DcProject from '../project/DcProject';
@@ -29,17 +30,50 @@ const invalidParent: CubeParent = {
 }
 Object.freeze(invalidParent)
 
+type UndoRedoDataType = {
+  section_name: "root_data",
+  data: {
+    author: string,
+    textureWidth: number,
+    textureHeight: number,
+    root: readonly string[],
+  }
+} | {
+  section_name: `cube_${string}`
+  data: {
+    identifier: string, //Unchaning
+    name: string,
+    dimension: readonly [number, number, number],
+    position: readonly [number, number, number],
+    offset: readonly [number, number, number],
+    rotation: readonly [number, number, number],
+    cubeGrow: readonly [number, number, number],
+    // textureOffset: readonly [number, number],
+    // textureMirrored: boolean,
+    children: readonly string[],
+
+    selected: boolean,
+    hideChildren: boolean,
+
+    visible: boolean,
+    locked: boolean,
+  }
+}
+
 export class DCMModel implements CubeParent {
 
   parentProject?: DcProject
-  readonly author = new LO("???")
+  readonly undoRedoHandler = new UndoRedoHandler<UndoRedoDataType>()
+  readonly _section = this.undoRedoHandler.createNewSection("root_data")
 
-  readonly textureWidth = new LO(64)
-  readonly textureHeight = new LO(64)
+  readonly author = new LO("???").applyToSection(this.undoRedoHandler, this._section, "author")
+
+  readonly textureWidth = new LO(64).applyToSection(this.undoRedoHandler, this._section, "textureWidth")
+  readonly textureHeight = new LO(64).applyToSection(this.undoRedoHandler, this._section, "textureHeight")
 
   cubeMap: Map<string, Set<DCMCube>>
   readonly identifierCubeMap = new LOMap<string, DCMCube>()
-  readonly children = new LO<readonly DCMCube[]>([])
+  readonly children = new LO<readonly DCMCube[]>([]).applyMappedToSection(this.undoRedoHandler, this._section, c => c.map(a => a.identifier) as readonly string[], "root")
 
   readonly needsSaving = new LO(false)
 
@@ -109,21 +143,22 @@ export class DCMModel implements CubeParent {
     this.children.value.forEach(child => child.resetVisuals())
   }
 
-  cloneModel() {
-    let model = new DCMModel()
+  // cloneModel() {
+  //   let model = new DCMModel()
 
-    model.author.value = this.author.value
-    model.textureWidth.value = this.textureWidth.value
-    model.textureHeight.value = this.textureHeight.value
+  //   model.author.value = this.author.value
+  //   model.textureWidth.value = this.textureWidth.value
+  //   model.textureHeight.value = this.textureHeight.value
 
-    model.children.value = this.children.value.map(c => c.cloneCube(model))
+  //   model.children.value = this.children.value.map(c => c.cloneCube(model))
 
-    return model
-  }
+  //   return model
+  // }
 }
 
 export class DCMCube implements CubeParent {
-  identifier: string
+  readonly identifier = uuidv4();
+
   readonly name: LO<string>
   readonly dimension: LO<readonly [number, number, number]>
   readonly position: LO<readonly [number, number, number]>
@@ -166,17 +201,31 @@ export class DCMCube implements CubeParent {
     model: DCMModel) {
 
     const onDirty = () => model.needsSaving.value = true
-    this.identifier = uuidv4()
-    this.name = new LO(name, onDirty)
-    this.dimension = new LO<readonly [number, number, number]>(dimension, onDirty)
-    this.position = new LO<readonly [number, number, number]>(rotationPoint, onDirty)
-    this.offset = new LO<readonly [number, number, number]>(offset, onDirty)
-    this.rotation = new LO<readonly [number, number, number]>(rotation, onDirty)
-    this.textureOffset = new LO<readonly [number, number]>(textureOffset, onDirty)
-    this.textureMirrored = new LO<boolean>(textureMirrored, onDirty)
-    this.cubeGrow = new LO<readonly [number, number, number]>(cubeGrow, onDirty)
-    this.children = new LO<readonly DCMCube[]>(children, onDirty)
+    type SectionType = UndoRedoDataType & { section_name: `cube_${string}` }
+
+    //Typescript compiler throws errors when `as SectionType` isn't there, but vscode intellisense is fine with it.
+    //It complains about the other section names not being assignable, meaning that `cube_${this.identifier}` is
+    //Not extracting the correct section for some reason.
+    const section = model.undoRedoHandler.createNewSection(`cube_${this.identifier}`) as SectionType
+
+    section.data.identifier = this.identifier
+    this.name = new LO(name, onDirty).applyToSection(model.undoRedoHandler, section, "name")
+    this.dimension = new LO<readonly [number, number, number]>(dimension, onDirty).applyToSection(model.undoRedoHandler, section, "dimension")
+    this.position = new LO<readonly [number, number, number]>(rotationPoint, onDirty).applyToSection(model.undoRedoHandler, section, "position")
+    this.offset = new LO<readonly [number, number, number]>(offset, onDirty).applyToSection(model.undoRedoHandler, section, "offset")
+    this.rotation = new LO<readonly [number, number, number]>(rotation, onDirty).applyToSection(model.undoRedoHandler, section, "rotation")
+    this.textureOffset = new LO<readonly [number, number]>(textureOffset, onDirty)//.applyToSection(model.undoRedoHandler, section, "textureOffset")
+    this.textureMirrored = new LO<boolean>(textureMirrored, onDirty)//.applyToSection(model.undoRedoHandler, section, "textureMirrored")
+    this.cubeGrow = new LO<readonly [number, number, number]>(cubeGrow, onDirty).applyToSection(model.undoRedoHandler, section, "cubeGrow")
+    this.children = new LO<readonly DCMCube[]>(children, onDirty).applyMappedToSection(model.undoRedoHandler, section, c => c.map(a => a.identifier) as readonly string[], "children")
     this.model = model
+
+    this.selected.applyToSection(model.undoRedoHandler, section, "selected")
+    this.hideChildren.applyToSection(model.undoRedoHandler, section, "hideChildren")
+    this.visible.applyToSection(model.undoRedoHandler, section, "visible")
+    this.locked.applyToSection(model.undoRedoHandler, section, "locked")
+
+    model.undoRedoHandler.pushSectionCreation(section)
 
     this.parent = invalidParent
 

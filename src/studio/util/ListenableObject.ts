@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react';
+import UndoRedoHandler from '../undoredo/UndoRedoHandler';
+import { UndoRedoSection } from './../undoredo/UndoRedoHandler';
+
+type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
 
 type Listener<T> = (
   newValue: T,
@@ -45,6 +49,32 @@ export class LO<T> {
 
   removeListener = (func: Listener<T>) => {
     this.listners.delete(func)
+  }
+
+  applyToSection
+    <
+      S extends UndoRedoSection,
+      P extends FieldsFor<S['data'], T>
+    >
+    (handler: UndoRedoHandler<any>, section: S, property_name: P) {
+    handler.modifySectionDirectly(section, property_name, this.value)
+    // this.addListener(() => {
+    // handler.p
+    // })
+    //Apply handles
+    return this
+  }
+
+  applyMappedToSection
+    <
+      S extends UndoRedoSection,
+      M,
+      P extends FieldsFor<S['data'], M>
+    >
+    (handler: UndoRedoHandler<any>, section: S, mapper: (val: T) => M, property_name: P) {
+    handler.modifySectionDirectly(section, property_name, mapper(this.value))
+    //Apply handles
+    return this
   }
 }
 
