@@ -118,27 +118,32 @@ const ModelerGumballTransformationModeSelect = ({ gumball }: { gumball: ModelerG
                 <span className="dark:text-gray-200 pr-2" ref={useTooltipRef("Automatically move the gumball\nto the selected cube(s)")}>Auto Move</span>
                 <Switch checked={autoMove} onChange={setAutoMove}
                     className={(autoMove ? "bg-green-500" : "bg-red-900") + " relative inline-flex items-center h-6 mt-0.5 rounded w-11 transition-colors ease-in-out duration-200 mr-2"}>
-                    <span className="sr-only">Auto Move</span>
+                    <span className="sr-only">Lock Gumball</span>
                     <span className={(autoMove ? "translate-x-6 bg-green-400" : "translate-x-1 bg-red-700") + " inline-block w-4 h-4 transform rounded transition ease-in-out duration-200"} />
                 </Switch>
             </ButtonList>
-            <ButtonList>
-                <GumballButton title="Position" selected={moveMode === "translate"} onClick={() => setMoveMode("translate")} />
-                <GumballButton title="Rotation" selected={moveMode === "rotate"} onClick={() => setMoveMode("rotate")} />
-            </ButtonList>
-            <ButtonList>
-                <GumballButton title="Local" selected={space === "local"} onClick={() => setObjectSpace("local")} />
-                <GumballButton title="World" selected={space === "world"} onClick={() => setObjectSpace("world")} />
-            </ButtonList>
-            <Dropup title="Relocate Gumball" header="RELOCATE MODE">
-                <div className="p-0.5">
-                    <DropupItem name="Reset Position" onSelect={() => gumball.transformAnchor.position.set(0, 0, 0)} />
-                    <DropupItem name="Reset Rotation" onSelect={() => gumball.transformAnchor.rotation.set(0, 0, 0)} />
-                    <DropupItem name="Cube Rotation Point (Position)" onSelect={() => gumball.moveGumballToSelected({ position: true })} />
-                    <DropupItem name="Cube Rotation Point (Rotation)" onSelect={() => gumball.moveGumballToSelected({ rotation: true })} />
-                    <DropupItem name="Custom (Snap Point)" onSelect={() => gumball.moveToCustomPoint()} />
-                </div>
-            </Dropup>
+
+            {!autoMove &&
+                <>
+                    <ButtonList>
+                        <GumballButton title="Position" selected={moveMode === "translate"} onClick={() => setMoveMode("translate")} />
+                        <GumballButton title="Rotation" selected={moveMode === "rotate"} onClick={() => setMoveMode("rotate")} />
+                    </ButtonList>
+                    <ButtonList>
+                        <GumballButton title="Local" selected={space === "local"} onClick={() => setObjectSpace("local")} />
+                        <GumballButton title="World" selected={space === "world"} onClick={() => setObjectSpace("world")} />
+                    </ButtonList>
+                    <Dropup title="Relocate Gumball" header="RELOCATE MODE">
+                        <div className="p-0.5">
+                            <DropupItem name="Reset Position" onSelect={() => gumball.transformAnchor.position.set(0, 0, 0)} />
+                            <DropupItem name="Reset Rotation" onSelect={() => gumball.transformAnchor.rotation.set(0, 0, 0)} />
+                            <DropupItem name="Cube Rotation Point (Position)" onSelect={() => gumball.moveGumballToSelected({ position: true })} />
+                            <DropupItem name="Cube Rotation Point (Rotation)" onSelect={() => gumball.moveGumballToSelected({ rotation: true })} />
+                            <DropupItem name="Custom (Snap Point)" onSelect={() => gumball.moveToCustomPoint()} />
+                        </div>
+                    </Dropup>
+                </>
+            }
         </>
     )
 }

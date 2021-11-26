@@ -8,12 +8,14 @@ const axis = [
     { axis: "z", color: "bg-sky-500" },
 ] as const
 
-const CubeInput = ({ title, value, setValue, lock, lockPositive }: {
+const CubeInput = ({ title, value, setValue, lock, lockPositive, onBlur, onFocus }: {
     title: string
     value?: readonly [number, number, number]
     setValue?: (value: readonly [number, number, number]) => void
     lock?: boolean,
-    lockPositive?: boolean
+    lockPositive?: boolean,
+    onFocus?: () => void,
+    onBlur?: () => void
 }) => {
 
     const [isLocked, setLocked] = useState(lock)
@@ -44,6 +46,8 @@ const CubeInput = ({ title, value, setValue, lock, lockPositive }: {
                             }
                         }}
                         lockPositive={lockPositive}
+                        onBlur={onBlur}
+                        onFocus={onFocus}
                     />
                 )}
             </div>
@@ -51,12 +55,14 @@ const CubeInput = ({ title, value, setValue, lock, lockPositive }: {
     )
 }
 
-const InputField = ({ axis, color, value, setValue, lockPositive }: {
+const InputField = ({ axis, color, value, setValue, lockPositive, onFocus, onBlur }: {
     axis: string,
     color: string,
     value: number | null,
     setValue: (val: number) => void,
-    lockPositive: boolean | undefined
+    lockPositive: boolean | undefined,
+    onFocus?: () => void,
+    onBlur?: () => void
 }) => {
     return (
         <div className="flex flex-row mb-1 h-7">
@@ -65,8 +71,8 @@ const InputField = ({ axis, color, value, setValue, lockPositive }: {
             </div>
 
             <NumericInput
-                value={value}
-                format={val => val === undefined ? "" : parseFloat(val).toFixed(2)}
+                value={value ?? undefined}
+                format={val => val === null ? "" : parseFloat(String(val)).toFixed(2)}
                 size={6}
                 mobile={false}
                 className="focus:outline-none focus:ring-gray-800 border-none"
@@ -75,6 +81,9 @@ const InputField = ({ axis, color, value, setValue, lockPositive }: {
                         (val < 0 && (lockPositive !== null && lockPositive === true)) ? setValue(0) : setValue(val)
                     }
                 }}
+                onBlur={onBlur}
+                onFocus={onFocus}
+
             />
         </div>
     )

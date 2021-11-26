@@ -39,6 +39,7 @@ const ModelerCubeList = () => {
 
     //Creates a new cube with the same parent as the first selected cube
     const createSiblingCube = () => {
+        model.undoRedoHandler.startBatchActions()
         let cube = createCube(model)
         const selectedCube = getFirstSelectedCubeOrUndefined()
         if (selectedCube !== undefined) {
@@ -46,10 +47,12 @@ const ModelerCubeList = () => {
         } else {
             model.addChild(cube)
         }
+        model.undoRedoHandler.endBatchActions()
     }
 
     //Creates a new cube with the first selected cube being the parent
     const createChildCube = () => {
+        model.undoRedoHandler.startBatchActions()
         let cube = createCube(model)
         const selectedCube = getFirstSelectedCubeOrUndefined()
         if (selectedCube !== undefined) {
@@ -57,6 +60,7 @@ const ModelerCubeList = () => {
         } else {
             model.addChild(cube)
         }
+        model.undoRedoHandler.endBatchActions()
     }
 
     //Deletes all the selected cubes, but keeps their children. Moves the children to be the siblings of this cube.
@@ -563,7 +567,13 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
                 <button onClick={e => { e.stopPropagation(); setHideChildren(!hideChildren) }} className={(hideChildren ? "transform -rotate-90" : "") + (hasChildren ? " px-1" : " w-0") + " ml-0.5 py-1 transition-all transition-300 dark:bg-gray-800 bg-gray-600 dark:hover:bg-black hover:bg-gray-700 rounded text-white overflow-hidden"}>
                     <SVGChevronDown className="w-4 h-4" />
                 </button>
-                <DblClickEditLO obj={cube.name} className="truncate text-white text-s pl-1 flex-grow cursor-pointer" inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
+                <DblClickEditLO
+                    onStartEditing={() => cube.model.undoRedoHandler.startBatchActions()}
+                    onFinishEditing={() => cube.model.undoRedoHandler.endBatchActions()}
+                    obj={cube.name}
+                    className="truncate text-white text-s pl-1 flex-grow cursor-pointer"
+                    inputClassName="p-0 w-full h-full bg-gray-500 text-black"
+                />
                 <div className="flex flex-row text-white m-0 p-0">
                     {
                         locked ?

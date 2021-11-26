@@ -6,9 +6,11 @@ type DivExtended = {
   disabled?: boolean,
   inputClassName?: string,
   props?: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>
+  onStartEditing?: () => void,
+  onFinishEditing?: () => void,
 }
 
-const DblClickEditInternal = ({ callback, text, className, inputClassName, disabled, props }:
+const DblClickEditInternal = ({ callback, text, className, inputClassName, disabled, props, onStartEditing, onFinishEditing }:
   {
     callback: (str: string) => void,
     text: string,
@@ -18,11 +20,21 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
   const divRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const doStart = () => {
+    setEditing(true)
+    onStartEditing?.()
+  }
+
+  const doStop = () => {
+    setEditing(false)
+    onFinishEditing?.()
+  }
+
   const onDoubleClick = () => {
     if (disabled) {
       return
     }
-    setEditing(true)
+    doStart()
     if (inputRef.current !== null) {
       //For some reason the display can't be NONE to display it.
       //We don't need to worry about state here as it's set to this next frame.
@@ -38,7 +50,7 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
 
   const onEditingKeyUp = (key: string) => {
     if (key === "Enter") {
-      setEditing(false)
+      doStop()
     }
   }
 
@@ -57,7 +69,7 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
         type="text"
         value={text}
         onInput={e => onEditingInput(e.currentTarget.value)}
-        onBlur={() => setEditing(false)}
+        onBlur={doStop}
         onKeyUp={e => onEditingKeyUp(e.key)}
         onClick={e => e.stopPropagation()}
       />
@@ -75,21 +87,21 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
     </div>
   )
 }
-export const DoubleClickToEdit = ({ callback, current, className, inputClassName, disabled, props }:
+export const DoubleClickToEdit = (props:
   {
     callback: (str: string) => void,
     current?: string,
   } & DivExtended
 ) => {
-  const [text, setText] = useState(current ?? '')
-  return <DblClickEditInternal text={text} callback={t => { setText(t); callback(t); }} className={className} inputClassName={inputClassName} disabled={disabled} props={props} />
+  const [text, setText] = useState(props.current ?? '')
+  return <DblClickEditInternal {...props} text={text} callback={t => { setText(t); props.callback(t); }} />
 }
 
-export const DblClickEditLO = ({ obj, className, inputClassName, disabled, props }:
+export const DblClickEditLO = (props:
   {
     obj: LO<string>
   } & DivExtended
 ) => {
-  const [text, setText] = useListenableObject(obj)
-  return <DblClickEditInternal text={text} callback={setText} className={className} inputClassName={inputClassName} disabled={disabled} props={props} />
+  const [text, setText] = useListenableObject(props.obj)
+  return <DblClickEditInternal {...props} text={text} callback={setText} />
 }

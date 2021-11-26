@@ -84,6 +84,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   private sections: UndoRedoSection[] = []
 
   private history: Action<S>[][] = []
+  private silentActions: Action<S>[] = []
   private index = -1
 
   canUndo = new LO(false)
@@ -97,11 +98,13 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   }
 
   startBatchActions() {
+    console.log("start")
     this.batchActions = true
     this.batchedActions = []
   }
 
   endBatchActions() {
+    console.log("end")
     this.batchActions = false
     if (this.batchedActions.length !== 0) {
       this._PUSH(...this.batchedActions)
@@ -141,14 +144,18 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     this._PUSH(action)
   }
 
-  modifySection<P extends keyof S['data'] & string>(section: S, property_name: P, value: S['data'][P], old_value: S['data'][P]) {
+  modifySection<P extends keyof S['data'] & string>(section: S, property_name: P, value: S['data'][P], old_value: S['data'][P], silent: boolean) {
     section[property_name] = value
     const action: ModifySectionAction<S> = {
       type: "modify",
       section_name: section.section_name,
       property_name, value, old_value
     }
-    this._PUSH(action)
+    if (silent) {
+      this.silentActions.push(action)
+    } else {
+      this._PUSH(action)
+    }
   }
 
   removeSection(section: S) {
@@ -164,10 +171,17 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     if (this.ignoreActions) {
       return
     }
+    if (this.silentActions.length !== 0) {
+      actions = [...this.silentActions, ...actions]
+      this.silentActions.length = 0
+    }
     if (this.batchActions) {
       this.batchedActions.push(...actions)
       return
     }
+
+    //Apply some sort of flattening algorithm to actions to merge modifications 
+    //on the same property multiple times
     this.history.length = this.index + 1
     this.history.push(actions)
     this.index++
@@ -178,7 +192,8 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     if (this.canUndo.value) {
       const actions = this.history[this.index--]
       this._updateCanUndoCanRedo()
-      actions.forEach(act => {
+      for (let i = actions.length - 1; i >= 0; i--) {
+        const act = actions[i]
         switch (act.type) {
           case "add":
             this._dispatchRemove(act.section_name)
@@ -190,7 +205,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
             this._dispatchAdd(act.section_name, act.section_snapshot)
             break
         }
-      })
+      }
     }
   }
 
@@ -198,7 +213,8 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     if (this.canRedo.value) {
       const actions = this.history[++this.index]
       this._updateCanUndoCanRedo()
-      actions.forEach(act => {
+      for (let i = 0; i < actions.length; i++) {
+        const act = actions[i]
         switch (act.type) {
           case "add":
             this._dispatchAdd(act.section_name, act.section_data)
@@ -210,7 +226,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
             this._dispatchRemove(act.section_name)
             break
         }
-      })
+      }
     }
   }
 
@@ -219,12 +235,18 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       section_name: section,
       data: { ...data }
     })
+    const ignore = this.ignoreActions
+    this.ignoreActions = true
     this.addSectionCallback(section, data)
+    this.ignoreActions = ignore
   }
 
   private _dispatchRemove(section: string) {
     this.sections.filter(c => c.section_name === section)
+    const ignore = this.ignoreActions
+    this.ignoreActions = true
     this.removeSectionCallback(section)
+    this.ignoreActions = ignore
   }
 
   private _dispatchModify(section_name: string, property_name: string, value: any) {
@@ -233,7 +255,10 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       throw new Error("Unable to find section " + section);
     }
     section.data[property_name] = value
+    const ignore = this.ignoreActions
+    this.ignoreActions = true
     this.modifySectionCallback(section_name, property_name, value)
+    this.ignoreActions = ignore
   }
 
   private _updateCanUndoCanRedo() {
@@ -260,8 +285,8 @@ export class SectionHandle<S extends UndoRedoSection, T extends S> {
     this.callbackMap.set(property_name, onChange)
   }
 
-  modify<P extends keyof T['data'] & string>(property_name: P, value: T['data'][P], oldValue: T['data'][P]) {
-    this.undoRedoHandler.modifySection(this.section, property_name, value, oldValue)
+  modify<P extends keyof T['data'] & string>(property_name: P, value: T['data'][P], oldValue: T['data'][P], silent: boolean) {
+    this.undoRedoHandler.modifySection(this.section, property_name, value, oldValue, silent)
   }
 
   pushCreation() {

@@ -204,8 +204,23 @@ export const useModelerGumball = () => {
 
     const changeObjectTransformMode = (val = gumball.object_transformMode.value) => updateObjectMode({ mode: val })
 
+    const onCubeValuesChange = () => {
+      if (gumball.gumball_auto_move) {
+        getCubes().forEach(c => c.updateMatrixWorld(true))
+        gumball.moveGumballToSelected({})
+      }
+    }
+
     const updateSelectedCubes = (val: readonly string[]) => {
+      selectedCubes.current.forEach(cube => {
+        cube.position.removePostListener(onCubeValuesChange)
+        cube.rotation.removePostListener(onCubeValuesChange)
+      })
       selectedCubes.current = getCubes(val)
+      selectedCubes.current.forEach(cube => {
+        cube.position.addPostListener(onCubeValuesChange)
+        cube.rotation.addPostListener(onCubeValuesChange)
+      })
       gumball.transformAnchor['dcmCube'] = selectedCubes.current.length === 1 ? selectedCubes.current[0] : undefined
       if (gumball.gumball_auto_move.value) {
         gumball.moveGumballToSelected({ selected: val })
@@ -254,6 +269,7 @@ export const useModelerGumball = () => {
 
     //When the mouse is pressed down on the transform controls
     const mouseDownTransformControls = runWhenObjectSelected(() => {
+      model.undoRedoHandler.startBatchActions()
       model.lockedCubes.createLockedCubesCache()
       gumball.startingCache.clear()
       getCubes().forEach(cube => {
@@ -285,7 +301,10 @@ export const useModelerGumball = () => {
         })
       })
     })
-    const onMouseUpClearCubeLockers = runWhenObjectSelected(() => model.lockedCubes.clearCubeLockers())
+    const onMouseUpTransformControls = runWhenObjectSelected(() => {
+      model.lockedCubes.clearCubeLockers()
+      model.undoRedoHandler.endBatchActions()
+    })
     const onObjectChangeReconstruct = runWhenObjectSelected(() => model.lockedCubes.reconstructLockedCubes())
 
     //The translate event
@@ -376,7 +395,7 @@ export const useModelerGumball = () => {
     //This will cause `visible` to be true, but the `enableDisableCallback` will force it to be the right value
     transformControls.attach(gumball.transformAnchor)
     transformControls.addEventListener("mouseDown", mouseDownTransformControls)
-    transformControls.addEventListener("mouseUp", onMouseUpClearCubeLockers)
+    transformControls.addEventListener("mouseUp", onMouseUpTransformControls)
     transformControls.addEventListener("objectChange", onObjectChangeReconstruct)
     transformControls.addEventListener("studioTranslate", translateEventTransformControls)
     transformControls.addEventListener("studioRotate", rotateEventTransformControls)
@@ -393,7 +412,7 @@ export const useModelerGumball = () => {
     return () => {
       transformControls.detach()
       transformControls.removeEventListener("mouseDown", mouseDownTransformControls)
-      transformControls.removeEventListener("mouseUp", onMouseUpClearCubeLockers)
+      transformControls.removeEventListener("mouseUp", onMouseUpTransformControls)
       transformControls.removeEventListener("objectChange", onObjectChangeReconstruct)
       transformControls.removeEventListener("studioTranslate", translateEventTransformControls)
       transformControls.removeEventListener("studioRotate", rotateEventTransformControls)

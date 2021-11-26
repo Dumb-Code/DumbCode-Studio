@@ -266,7 +266,7 @@ const TitledField = ({ title, lo }: { title: string, lo?: LO<number> }) => {
                 <div className="mb-1 h-7">
                     <NumericInput
                         value={value}
-                        format={val => val === undefined ? "" : parseFloat(val).toFixed(2)}
+                        format={val => val === null ? "" : parseFloat(String(val)).toFixed(2)}
                         onChange={(val: number | null) => {
                             if (val !== null) {
                                 (val < 0) ? setValue(0) : setValue(val)

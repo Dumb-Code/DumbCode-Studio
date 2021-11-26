@@ -49,8 +49,8 @@ type UndoRedoDataType = {
     offset: readonly [number, number, number],
     rotation: readonly [number, number, number],
     cubeGrow: readonly [number, number, number],
-    // textureOffset: readonly [number, number],
-    // textureMirrored: boolean,
+    textureOffset: readonly [number, number],
+    textureMirrored: boolean,
     children: readonly string[],
 
     selected: boolean,
@@ -133,11 +133,14 @@ export class DCMModel implements CubeParent {
     const {
       identifier, name, dimension, position,
       rotation, offset, cubeGrow, children,
+      textureMirrored, textureOffset,
       selected, hideChildren, visible, locked
     } = data as (UndoRedoDataType & { section_name: `cube_${string}` })['data']
     const cube = new DCMCube(
-      name, dimension, position, offset, rotation, [0, 0,], false, cubeGrow,
-      this.identifListToCubes(children), this, identifier)
+      name, dimension, position, offset, rotation,
+      textureOffset, textureMirrored, cubeGrow,
+      this.identifListToCubes(children), this, identifier,
+      selected, hideChildren, visible, locked)
     this.identifierCubeMap.set(identifier, cube)
   }
 
@@ -221,11 +224,11 @@ export class DCMCube implements CubeParent {
   readonly children: LO<readonly DCMCube[]>
 
   readonly mouseHover = new LO(false)
-  readonly selected = new LO(false)
-  readonly hideChildren = new LO(false)
+  readonly selected: LO<boolean>
+  readonly hideChildren: LO<boolean>
 
-  readonly visible = new LO(true)
-  readonly locked = new LO(false)
+  readonly visible: LO<boolean>
+  readonly locked: LO<boolean>
 
   model: DCMModel
   parent: CubeParent
@@ -252,7 +255,12 @@ export class DCMCube implements CubeParent {
     cubeGrow: readonly [number, number, number],
     children: readonly DCMCube[],
     model: DCMModel,
-    readonly identifier = uuidv4()) {
+    readonly identifier = uuidv4(),
+    selected = false,
+    hideChildren = false,
+    visible = true,
+    locked = false
+  ) {
 
     const onDirty = () => model.needsSaving.value = true
 
@@ -263,30 +271,25 @@ export class DCMCube implements CubeParent {
 
     this._section.modifyFirst("identifier", this.identifier, () => { throw new Error("Tried to modify identifier") })
     this.name = new LO(name, onDirty).applyToSection(this._section, "name")
-    this.dimension = new LO<readonly [number, number, number]>(dimension, onDirty).applyToSection(this._section, "dimension")
-    this.position = new LO<readonly [number, number, number]>(rotationPoint, onDirty).applyToSection(this._section, "position")
-    this.offset = new LO<readonly [number, number, number]>(offset, onDirty).applyToSection(this._section, "offset")
-    this.rotation = new LO<readonly [number, number, number]>(rotation, onDirty).applyToSection(this._section, "rotation")
-    this.textureOffset = new LO<readonly [number, number]>(textureOffset, onDirty)//.applyToSection(this.section, "textureOffset")
-    this.textureMirrored = new LO<boolean>(textureMirrored, onDirty)//.applyToSection(this.section, "textureMirrored")
-    this.cubeGrow = new LO<readonly [number, number, number]>(cubeGrow, onDirty).applyToSection(this._section, "cubeGrow")
-    this.children = new LO<readonly DCMCube[]>(children, onDirty).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children")
+    this.dimension = new LO(dimension, onDirty).applyToSection(this._section, "dimension")
+    this.position = new LO(rotationPoint, onDirty).applyToSection(this._section, "position")
+    this.offset = new LO(offset, onDirty).applyToSection(this._section, "offset")
+    this.rotation = new LO(rotation, onDirty).applyToSection(this._section, "rotation")
+    this.textureOffset = new LO(textureOffset, onDirty).applyToSection(this._section, "textureOffset", true)
+    this.textureMirrored = new LO(textureMirrored, onDirty).applyToSection(this._section, "textureMirrored", true)
+    this.cubeGrow = new LO(cubeGrow, onDirty).applyToSection(this._section, "cubeGrow")
+    this.children = new LO(children, onDirty).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children")
     this.model = model
 
-    this.selected.applyToSection(this._section, "selected")
-    this.hideChildren.applyToSection(this._section, "hideChildren")
-    this.visible.applyToSection(this._section, "visible")
-    this.locked.applyToSection(this._section, "locked")
+    this.selected = new LO(selected).applyToSection(this._section, "selected")
+    this.hideChildren = new LO(hideChildren).applyToSection(this._section, "hideChildren")
+    this.visible = new LO(visible).applyToSection(this._section, "visible")
+    this.locked = new LO(locked).applyToSection(this._section, "locked")
 
     this._section.pushCreation()
 
     this.parent = invalidParent
 
-    let counter = 0
-    while (model.cubeMap.has(this.name.value)) {
-      this.name.value = name + "~" + counter
-      counter += 1
-    }
     model.identifierCubeMap.set(this.identifier, this)
     this.pushNameToModel()
 
@@ -412,6 +415,8 @@ export class DCMCube implements CubeParent {
     this.parent.deleteChild(this)
     this.cubeGroup.remove()
     this._section.remove()
+    this.model.identifierCubeMap.delete(this.identifier)
+    this.model.cubeMap.get(this.name.value)?.delete(this)
     //TODO: dispose of geometries?
   }
 

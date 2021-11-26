@@ -15,6 +15,7 @@ export class LO<T> {
     private _value: T,
     defaultCallback?: Listener<T>,
     private listners: Set<Listener<T>> = new Set(),
+    private postListeners: Set<Listener<T>> = new Set(),
   ) {
     if (defaultCallback) {
       this.listners.add(defaultCallback)
@@ -35,10 +36,15 @@ export class LO<T> {
       Array.from(this.listners).forEach(l => l(value, this._value, val => newValue = val))
     }
     this._value = newValue
+    Array.from(this.postListeners).forEach(l => l(value, this._value, val => this.value = val))
   }
 
   addListener = (func: Listener<T>) => {
     this.listners.add(func)
+  }
+
+  addPostListener = (func: Listener<T>) => {
+    this.postListeners.add(func)
   }
 
   addAndRunListener = (func: Listener<T>) => {
@@ -49,20 +55,23 @@ export class LO<T> {
   removeListener = (func: Listener<T>) => {
     this.listners.delete(func)
   }
+  removePostListener = (func: Listener<T>) => {
+    this.postListeners.delete(func)
+  }
 
   applyToSection
     <
       S extends UndoRedoSection,
       P extends FieldsFor<S['data'], T> & string
     >
-    (section: SectionHandle<any, S>, property_name: P) {
+    (section: SectionHandle<any, S>, property_name: P, silent = false) {
     let isModifying = false
     section.modifyFirst(property_name, this.value, value => {
       isModifying = true
       this.value = value
       isModifying = false
     })
-    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, value, oldValue))
+    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, value, oldValue, silent))
     return this
   }
 
@@ -72,14 +81,14 @@ export class LO<T> {
       M,
       P extends FieldsFor<S['data'], M> & string
     >
-    (section: SectionHandle<any, S>, mapper: (val: T) => M, reverseMapper: (val: M) => T, property_name: P) {
+    (section: SectionHandle<any, S>, mapper: (val: T) => M, reverseMapper: (val: M) => T, property_name: P, silent = false) {
     let isModifying = false
     section.modifyFirst(property_name, mapper(this.value), value => {
       isModifying = true
       this.value = reverseMapper(value)
       isModifying = false
     })
-    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, mapper(value), mapper(oldValue)))
+    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, mapper(value), mapper(oldValue), silent))
     return this
   }
 }

@@ -1,4 +1,4 @@
-import Slider from 'react-input-slider'
+import Slider from 'react-input-slider';
 import NumericInput from 'react-numeric-input';
 
 const axis = [
@@ -7,10 +7,12 @@ const axis = [
     { axis: "z", color: "bg-sky-500" },
 ] as const
 
-const CubeRotationInput = ({ title, value, setValue }: {
+const CubeRotationInput = ({ title, value, setValue, onFocus, onBlur }: {
     title: string
     value?: readonly [number, number, number]
-    setValue?: (value: readonly [number, number, number]) => void
+    setValue?: (value: readonly [number, number, number]) => void,
+    onFocus?: () => void,
+    onBlur?: () => void
 }) => {
     return (
         <div>
@@ -30,6 +32,8 @@ const CubeRotationInput = ({ title, value, setValue }: {
                                 ])
                             }
                         }}
+                        onBlur={onBlur}
+                        onFocus={onFocus}
                     />
                 )}
             </div>
@@ -41,11 +45,13 @@ const mod = (n: number, m: number) => {
     return ((n % m) + m) % m;
 }
 
-const InputField = ({ axis, color, value, setValue }: {
+const InputField = ({ axis, color, value, setValue, onFocus, onBlur }: {
     axis: string,
     color: string,
     value: number | null,
-    setValue: (val: number) => void
+    setValue: (val: number) => void,
+    onFocus?: () => void,
+    onBlur?: () => void
 }) => {
     if (value !== null && Math.abs(value) > 180) {
         value = (mod(value + 180, 360)) - 180
@@ -57,11 +63,19 @@ const InputField = ({ axis, color, value, setValue }: {
             </div>
             <div className=" w-20 h-7">
                 <NumericInput
-                    value={value}
-                    format={val => val === undefined ? "" : parseFloat(val).toFixed(2)}
+                    value={value ?? undefined}
+                    format={val => val === null ? "" : parseFloat(String(val)).toFixed(2)}
                     size={2}
                     mobile={false}
-                    className="focus:outline-none focus:ring-gray-800 border-none" />
+                    className="focus:outline-none focus:ring-gray-800 border-none"
+                    onChange={val => {
+                        if (val !== null) {
+                            setValue(val)
+                        }
+                    }}
+                    onBlur={onBlur}
+                    onFocus={onFocus}
+                />
             </div>
             <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
                 <Slider
@@ -76,6 +90,9 @@ const InputField = ({ axis, color, value, setValue }: {
                     }}
                     x={value ?? 0}
                     onChange={({ x }) => setValue(x)}
+
+                    onDragStart={onFocus}
+                    onDragEnd={onBlur}
                 />
             </div>
         </div>
