@@ -40,23 +40,27 @@
 // is true
 //
 
-type AddSectionAction = {
+type AddSectionAction<S extends UndoRedoSection> = {
   type: "add"
-  section_name: string
-  section_data: any
+  section_name: S['section_name']
+  section_data: S['data']
 }
 
-type RemoveSectionAction = {
+type RemoveSectionAction<S extends UndoRedoSection> = {
   type: "remove"
-  section_name: string
-  section_snapshot: any
+  section_name: S['section_name']
+  section_snapshot: S['data']
 }
 
-type ModifySectionAction = {
+type ModifySectionAction<S extends UndoRedoSection> = {
   type: "modify"
-  section_name: string
-  value: any
-  old_value: any
+  section_name: S['section_name']
+  property_name: keyof S['data']
+
+  //In the future, try and make these type safe?
+  //This might not be possible, but I would do it with the accessors
+  value: any,
+  old_value: any,
 }
 
 export type UndoRedoSection = {
@@ -64,17 +68,17 @@ export type UndoRedoSection = {
   data: any
 }
 
-export type Action = AddSectionAction | RemoveSectionAction | ModifySectionAction
+export type Action<S extends UndoRedoSection> = AddSectionAction<S> | RemoveSectionAction<S> | ModifySectionAction<S>
 
 export default class UndoRedoHandler<S extends UndoRedoSection> {
   private batchActions = false
-  private batchedActions: Action[] = []
+  private batchedActions: Action<S>[] = []
 
   public ignoreActions = false
 
   private sections: UndoRedoSection[] = []
 
-  private history: Action[][] = []
+  private history: Action<S>[][] = []
   private index = -1
 
   startBatchActions() {
@@ -122,7 +126,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   }
 
   pushSectionCreation(section: S) {
-    const action: AddSectionAction = {
+    const action: AddSectionAction<S> = {
       type: "add",
       section_name: section.section_name,
       section_data: { ...section.data }
@@ -130,7 +134,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     this._PUSH(action)
   }
 
-  _PUSH(...actions: Action[]) {
+  _PUSH(...actions: Action<S>[]) {
     if (this.ignoreActions) {
       return
     }
@@ -147,18 +151,19 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
 
 
 //BELOW -- TESTING
-// const a = new UndoRedoHandler<{
+// type TestType = {
 //   section_name: "root_data",
 //   data: {
-//     prop1: number
-//     prop2: string
+//     name: string
+//     age: number
 //   }
 // } | {
 //   section_name: `cube_${string}`
 //   data: {
-//     prop2: number
+//     idk: number
 //   }
-// }>()
+// }
+// const a = new UndoRedoHandler<TestType>()
 // const prop1 = a.createNewSection("root_data")
 // prop1.data.prop1 = 2
 // new LO(2).applyToSection(a, prop1, "prop1")
