@@ -33,7 +33,7 @@ const Modeler = () => {
                 project.model.undoRedoHandler.undo()
             }
             if ((e.ctrlKey && e.shiftKey && e.key === "z") || (e.ctrlKey && e.key === "y")) {
-                project.model.undoRedoHandler.undo()
+                project.model.undoRedoHandler.redo()
             }
         }
 
