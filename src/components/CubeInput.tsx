@@ -76,7 +76,7 @@ const InputField = ({ axis, color, value, setValue, lockPositive, onFocus, onBlu
                 size={6}
                 mobile={false}
                 className="focus:outline-none focus:ring-gray-800 border-none"
-                onChange={(val: number | null) => {
+                onChange={val => {
                     if (val !== null) {
                         (val < 0 && (lockPositive !== null && lockPositive === true)) ? setValue(0) : setValue(val)
                     }
