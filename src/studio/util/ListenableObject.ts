@@ -62,7 +62,7 @@ export class LO<T> {
       this.value = value
       isModifying = false
     })
-    this.addListener((value, oldValue) => section.modify(property_name, value, oldValue))
+    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, value, oldValue))
     return this
   }
 
@@ -79,7 +79,7 @@ export class LO<T> {
       this.value = reverseMapper(value)
       isModifying = false
     })
-    this.addListener((value, oldValue) => section.modify(property_name, mapper(value), mapper(oldValue)))
+    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, mapper(value), mapper(oldValue)))
     return this
   }
 }
