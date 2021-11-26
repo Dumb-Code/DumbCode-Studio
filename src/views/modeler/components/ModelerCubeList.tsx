@@ -74,7 +74,7 @@ const ModelerCubeList = () => {
                     c.mouseHover.value = false
                 })
                 cube.parent.deleteChild(cube)
-
+                cube.fullyDelete()
             }
         })
     }

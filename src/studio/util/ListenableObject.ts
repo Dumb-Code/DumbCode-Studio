@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import UndoRedoHandler from '../undoredo/UndoRedoHandler';
-import { UndoRedoSection } from './../undoredo/UndoRedoHandler';
+import { SectionHandle, UndoRedoSection } from './../undoredo/UndoRedoHandler';
 
 type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
 
@@ -54,14 +53,16 @@ export class LO<T> {
   applyToSection
     <
       S extends UndoRedoSection,
-      P extends FieldsFor<S['data'], T>
+      P extends FieldsFor<S['data'], T> & string
     >
-    (handler: UndoRedoHandler<any>, section: S, property_name: P) {
-    handler.modifySectionDirectly(section, property_name, this.value)
-    // this.addListener(() => {
-    // handler.p
-    // })
-    //Apply handles
+    (section: SectionHandle<any, S>, property_name: P) {
+    let isModifying = false
+    section.modifyFirst(property_name, this.value, value => {
+      isModifying = true
+      this.value = value
+      isModifying = false
+    })
+    this.addListener((value, oldValue) => section.modify(property_name, value, oldValue))
     return this
   }
 
@@ -69,11 +70,16 @@ export class LO<T> {
     <
       S extends UndoRedoSection,
       M,
-      P extends FieldsFor<S['data'], M>
+      P extends FieldsFor<S['data'], M> & string
     >
-    (handler: UndoRedoHandler<any>, section: S, mapper: (val: T) => M, property_name: P) {
-    handler.modifySectionDirectly(section, property_name, mapper(this.value))
-    //Apply handles
+    (section: SectionHandle<any, S>, mapper: (val: T) => M, reverseMapper: (val: M) => T, property_name: P) {
+    let isModifying = false
+    section.modifyFirst(property_name, mapper(this.value), value => {
+      isModifying = true
+      this.value = reverseMapper(value)
+      isModifying = false
+    })
+    this.addListener((value, oldValue) => section.modify(property_name, mapper(value), mapper(oldValue)))
     return this
   }
 }
