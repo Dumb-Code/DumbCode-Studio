@@ -24,7 +24,22 @@ const Modeler = () => {
         return () => {
             onFrameListeners.delete(onFrame)
         }
-    })
+    }, [project, onFrameListeners])
+
+    useEffect(() => {
+        const listener = (e: KeyboardEvent) => {
+            //TODO: convert to keybinds
+            if (e.ctrlKey && e.key === "z") {
+                project.model.undoRedoHandler.undo()
+            }
+            if ((e.ctrlKey && e.shiftKey && e.key === "z") || (e.ctrlKey && e.key === "y")) {
+                project.model.undoRedoHandler.undo()
+            }
+        }
+
+        document.addEventListener("keydown", listener)
+        return () => document.removeEventListener("keydown", listener)
+    }, [project])
     return (
         <div className="h-full grid grid-areas-modeling"
             key={project.identifier}
