@@ -187,6 +187,9 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   }
 
   undo() {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
     if (this.canUndo.value) {
       const movingFromHead = this.index === this.history.length - 1
       const actions = this.history[this.index--]
