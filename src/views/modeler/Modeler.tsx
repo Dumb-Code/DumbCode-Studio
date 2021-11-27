@@ -31,9 +31,13 @@ const Modeler = () => {
             //TODO: convert to keybinds
             if (e.ctrlKey && e.key === "z") {
                 project.model.undoRedoHandler.undo()
+                e.preventDefault()
+                e.stopPropagation()
             }
             if ((e.ctrlKey && e.shiftKey && e.key === "z") || (e.ctrlKey && e.key === "y")) {
                 project.model.undoRedoHandler.redo()
+                e.preventDefault()
+                e.stopPropagation()
             }
         }
 

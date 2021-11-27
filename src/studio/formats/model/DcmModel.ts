@@ -244,6 +244,8 @@ export class DCMCube implements CubeParent {
 
   readonly _section: CubeSectionType
 
+  destroyed = false
+
   constructor(
     name: string,
     dimension: readonly [number, number, number],
@@ -281,7 +283,7 @@ export class DCMCube implements CubeParent {
     this.children = new LO(children, onDirty).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children")
     this.model = model
 
-    this.selected = new LO(selected).applyToSection(this._section, "selected")
+    this.selected = new LO(selected).applyToSection(this._section, "selected", true)
     this.hideChildren = new LO(hideChildren).applyToSection(this._section, "hideChildren")
     this.visible = new LO(visible).applyToSection(this._section, "visible")
     this.locked = new LO(locked).applyToSection(this._section, "locked")
@@ -289,6 +291,7 @@ export class DCMCube implements CubeParent {
     this._section.pushCreation()
 
     this.parent = invalidParent
+
 
     model.identifierCubeMap.set(this.identifier, this)
     this.pushNameToModel()
@@ -417,6 +420,7 @@ export class DCMCube implements CubeParent {
     this._section.remove()
     this.model.identifierCubeMap.delete(this.identifier)
     this.model.cubeMap.get(this.name.value)?.delete(this)
+    this.destroyed = true
     //TODO: dispose of geometries?
   }
 

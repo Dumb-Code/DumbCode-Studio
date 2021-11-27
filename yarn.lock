@@ -11826,7 +11826,7 @@ text-table@0.2.0, text-table@^0.2.0:
 
 three@Dumb-Code/three.js:
   version "0.134.0"
-  resolved "https://codeload.github.com/Dumb-Code/three.js/tar.gz/69c8ee22603033c16718b8e71b437247f0db82f5"
+  resolved "https://codeload.github.com/Dumb-Code/three.js/tar.gz/b58eb26e372a5894714e9658ad4ff67fc90610e5"
 
 throat@^5.0.0:
   version "5.0.0"

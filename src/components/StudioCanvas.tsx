@@ -29,7 +29,16 @@ const StudioCanvas = () => {
     }, [renderer.domElement, setSize])
 
     return (
-        <div ref={ref} onPointerDown={e => onMouseDown.fireEvent(e)} className="studio-canvas-container rounded-sm bg-gray-800 h-full" />
+        <div
+            ref={ref}
+            onPointerDown={e => {
+                if (document.activeElement instanceof HTMLElement) {
+                    document.activeElement.blur()
+                }
+                onMouseDown.fireEvent(e)
+            }}
+            className="studio-canvas-container rounded-sm bg-gray-800 h-full"
+        />
     )
 }
 

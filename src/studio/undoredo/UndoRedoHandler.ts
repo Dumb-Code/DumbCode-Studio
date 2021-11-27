@@ -84,7 +84,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   private sections: UndoRedoSection[] = []
 
   private history: Action<S>[][] = []
-  private silentActions: Action<S>[] = []
+  private readonly silentActions: Action<S>[] = []
   private index = -1
 
   canUndo = new LO(false)
@@ -98,13 +98,11 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   }
 
   startBatchActions() {
-    console.log("start")
     this.batchActions = true
     this.batchedActions = []
   }
 
   endBatchActions() {
-    console.log("end")
     this.batchActions = false
     if (this.batchedActions.length !== 0) {
       this._PUSH(...this.batchedActions)
@@ -190,43 +188,62 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
 
   undo() {
     if (this.canUndo.value) {
+      const movingFromHead = this.index === this.history.length - 1
       const actions = this.history[this.index--]
       this._updateCanUndoCanRedo()
-      for (let i = actions.length - 1; i >= 0; i--) {
-        const act = actions[i]
-        switch (act.type) {
-          case "add":
-            this._dispatchRemove(act.section_name)
-            break
-          case "modify":
-            this._dispatchModify(act.section_name, act.property_name, act.old_value)
-            break
-          case "remove":
-            this._dispatchAdd(act.section_name, act.section_snapshot)
-            break
+      //We need to undo the current silent actions if we're undoing. 
+      if (movingFromHead) {
+        for (let i = this.silentActions.length - 1; i >= 0; i--) {
+          this.undoAction(this.silentActions[i])
         }
       }
+      for (let i = actions.length - 1; i >= 0; i--) {
+        this.undoAction(actions[i])
+      }
+    }
+  }
+
+  private undoAction(act: Action<S>) {
+    switch (act.type) {
+      case "add":
+        this._dispatchRemove(act.section_name)
+        break
+      case "modify":
+        this._dispatchModify(act.section_name, act.property_name, act.old_value)
+        break
+      case "remove":
+        this._dispatchAdd(act.section_name, act.section_snapshot)
+        break
     }
   }
 
   redo() {
     if (this.canRedo.value) {
       const actions = this.history[++this.index]
+      const movingToHead = this.index === this.history.length - 1
       this._updateCanUndoCanRedo()
       for (let i = 0; i < actions.length; i++) {
-        const act = actions[i]
-        switch (act.type) {
-          case "add":
-            this._dispatchAdd(act.section_name, act.section_data)
-            break
-          case "modify":
-            this._dispatchModify(act.section_name, act.property_name, act.value)
-            break
-          case "remove":
-            this._dispatchRemove(act.section_name)
-            break
+        this.redoAction(actions[i])
+      }
+      if (movingToHead) {
+        for (let i = 0; i < this.silentActions.length; i++) {
+          this.redoAction(this.silentActions[i])
         }
       }
+    }
+  }
+
+  redoAction(act: Action<S>) {
+    switch (act.type) {
+      case "add":
+        this._dispatchAdd(act.section_name, act.section_data)
+        break
+      case "modify":
+        this._dispatchModify(act.section_name, act.property_name, act.value)
+        break
+      case "remove":
+        this._dispatchRemove(act.section_name)
+        break
     }
   }
 

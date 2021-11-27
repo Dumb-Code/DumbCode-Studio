@@ -216,6 +216,7 @@ export const useModelerGumball = () => {
         cube.position.removePostListener(onCubeValuesChange)
         cube.rotation.removePostListener(onCubeValuesChange)
       })
+      onCubeValuesChange()
       selectedCubes.current = getCubes(val)
       selectedCubes.current.forEach(cube => {
         cube.position.addPostListener(onCubeValuesChange)

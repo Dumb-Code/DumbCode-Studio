@@ -126,13 +126,20 @@ export const useListenableObject = <T>(obj: LO<T>, debug = false): [T, (val: T) 
   return [state, val => obj.value = val]
 }
 
-
+const isMapEqual = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
+  if (map1.size !== map2.size) {
+    return
+  }
+  let equal = true
+  map1.forEach((value, key) => equal = equal || (map2.has(key) && map2.get(key) === value))
+  return equal
+}
 //Is readonly
 export const useListenableMap = <K, V>(obj: LOMap<K, V>): Map<K, V> => {
   const [state, setState] = useState<Map<K, V>>(() => new Map(obj))
   useEffect(() => {
-    if (state !== obj) {
-      setState(obj)
+    if (!isMapEqual(state, obj)) {
+      setState(new Map(obj))
     }
     const listener = () => setState(new Map(obj))
     obj.addGlobalListener(listener)
@@ -157,7 +164,7 @@ export class LOMap<K, V> extends Map<K, V> {
       if (get !== undefined) {
         get.forEach(l => l(undefined, v))
       }
-      this.globalListeners.forEach(l => l())
+      Array.from(this.globalListeners).forEach(l => l())
     })
     super.clear()
   }
@@ -167,7 +174,7 @@ export class LOMap<K, V> extends Map<K, V> {
     if (get !== undefined) {
       get.forEach(l => l(undefined, this.get(key) ?? undefined))
     }
-    this.globalListeners.forEach(l => l())
+    Array.from(this.globalListeners).forEach(l => l())
     return super.delete(key);
   }
 
@@ -178,7 +185,7 @@ export class LOMap<K, V> extends Map<K, V> {
     if (get !== undefined) {
       get.forEach(l => l(value, old))
     }
-    this.globalListeners.forEach(l => l())
+    Array.from(this.globalListeners).forEach(l => l())
     return this
   }
 
