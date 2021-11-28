@@ -142,8 +142,6 @@ export class DcaKeyframe {
     this.project.model.resetVisuals()
     const time = this.startTime.value + this.duration.value
     this.animation.keyframes.value.forEach(kf => kf.animate(time))
-
-    this.animation.animate(0)
     callback()
     this.skip = false
   }

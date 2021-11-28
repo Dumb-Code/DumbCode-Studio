@@ -28,6 +28,9 @@ export class AnimatorGumballIK {
 
   readonly startingWorldRot = new Quaternion()
 
+  readonly startingPosOffset = new Vector3()
+  readonly transformAnchor = new Vector3()
+
   readonly anchor = new Object3D()
   readonly helperGroup = new Group()
 
@@ -72,8 +75,11 @@ export class AnimatorGumballIK {
     let previousPosition: number[] | null = null
     let previousCube: DCMCube | null = null
 
+    selected.cubeGroup.getWorldPosition(this.startingPosOffset).sub(selected.getWorldPosition(0.5, 0.5, 0.5, tempVec))
+
+
     allCubes.reverse().forEach(cube => {
-      const position = cube.getWorldPosition(0.5, 0.5, 0.5, tempVec)
+      const position = cube.cubeGroup.getWorldPosition(tempVec)
       if (previousPosition !== null && previousCube !== null) {
         let start = new V3(previousPosition[0], previousPosition[1], previousPosition[2])
         let end = new V3(position.x, position.y, position.z)
@@ -96,7 +102,8 @@ export class AnimatorGumballIK {
     })
 
     if (allCubes.length !== 0) {
-      this.solver.add(chain, this.anchor.position)
+      this.transformAnchor.copy(this.anchor.position).add(this.startingPosOffset)
+      this.solver.add(chain, this.transformAnchor)
       this.solver.update()
       this.updateHelpers()
       selected.cubeGroup.getWorldQuaternion(this.startingWorldRot)
@@ -112,9 +119,11 @@ export class AnimatorGumballIK {
   }
 
   objectChange(animation: DcaAnimation, keyframe: DcaKeyframe, cubes: readonly DCMCube[]) {
-    if (cubes.length !== 1) {
+    if (cubes.length !== 1 || this.solver.chains[0] === undefined) {
       return
     }
+    this.transformAnchor.copy(this.anchor.position).add(this.startingPosOffset)
+
     const selected = cubes[0]
     //We rely on some three.js element math stuff, so we need to make sure the model is animated correctly.
     //TODO: make sure this is actually true
@@ -128,25 +137,41 @@ export class AnimatorGumballIK {
 
     const changedData = this.chainData.map((data, i) => {
       const bone = this.solver.chains[0].bones[i] as Bone3D
+
       //Get the change in rotation that's been done.
       //This way we can preserve the starting rotation. 
       tempVec.set(bone.end.x - bone.start.x, bone.end.y - bone.start.y, bone.end.z - bone.start.z).normalize()
       tempQuat.setFromUnitVectors(data.offset, tempVec)
-      //      parent_world * local = world
-      //  =>  local = 'parent_world * world
+
       const element = data.cube.cubeGroup
       if (!element.parent) {
         console.error(`Cube ${data.cube.name.value} had no parent ?`)
         return null
       }
-      const worldRotation = tempQuat.multiply(data.startingWorldRot)
-      const quat = element.parent.getWorldQuaternion(worldQuat).invert().multiply(worldRotation)
+
+      //      parent_world * local = world
+      //  =>  local = 'parent_world * world
+      const parentInverseMatrix = element.parent.getWorldQuaternion(worldQuat).invert()
+      const worldMatrix = tempQuat.multiply(data.startingWorldRot)
+
+      const quat = parentInverseMatrix.multiply(worldMatrix)
+
+      // const worldRotation = tempQuat.premultiply(data.startingWorldRot)
+      // const quat = element.parent.getWorldQuaternion(worldQuat).invert().multiply(worldRotation)
+
+      //TODO:
+      //Problem currently is that IK only works when theres no change before it
+      //If there's a change before it, then it essentially ignores them. FIgure out why this is.
+      //Look at the varibles here, and look what changes between having and not having a keyframe before
+      //the current. I am sleep
 
       //Get the euler angles and set it to the rotation. Push these changes.
+      // const rot = data.cube.cubeGroup.rotation
+      // rot.setFromQuaternion(quat)
+      // data.cube.cubeGroup.setRotationFromQuaternion(quat)
       const rot = data.cube.cubeGroup.rotation
       rot.setFromQuaternion(quat)
-
-      data.cube.cubeGroup.updateMatrixWorld()
+      data.cube.cubeGroup.updateMatrixWorld(true)
 
       return {
         rotations: [
@@ -158,7 +183,7 @@ export class AnimatorGumballIK {
       }
     })
 
-    const selectParent = selected.cubeGroup.parent
+    const selectParent = selected.cubeGroup.parent as any
     if (!selectParent) {
       throw new Error("Cube had no parent?");
     }
@@ -179,6 +204,25 @@ export class AnimatorGumballIK {
   }
 
   updateHelpers() {
+    // const chain = this.solver.chains[0]
+    // if (chain === undefined) {
+    //   return
+    // }
+    // const bones = this.solver.chains[0].bones as Bone3D[]
+    // if (bones === null) {
+    //   return
+    // }
+
+    // bones.forEach((bone, index) => {
+    //   if (index === 0) {
+    //     this.visualHelpers[0].mesh.position.set(bone.start.x, bone.start.y, bone.start.z)
+    //     this.linePositionBuffer.setXYZ(0, bone.start.x, bone.start.y, bone.start.z)
+    //   }
+    //   this.visualHelpers[index + 1].mesh.position.set(bone.end.x, bone.end.y, bone.end.z)
+    //   this.linePositionBuffer.setXYZ(index + 1, bone.end.x, bone.end.y, bone.end.z)
+    // })
+    // this.linePositionBuffer.needsUpdate = true
+
     this.visualHelpers.forEach(({ cube, mesh }, index) => {
       cube.cubeGroup.getWorldQuaternion(mesh.quaternion)
       cube.getWorldPosition(0.5, 0.5, 0.5, mesh.position)

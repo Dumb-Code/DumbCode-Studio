@@ -177,6 +177,9 @@ export const useAnimatorGumball = () => {
       if (!transformControls.dragging) {
         gumball.moveToSelected()
       }
+      model.resetVisuals()
+      animation.animate(0)
+      gumball.gumballIK.updateHelpers()
     }
 
 
@@ -226,6 +229,8 @@ export const useAnimatorGumball = () => {
       const kf = selectedKfs[0]
       const cubes = selectedCubes.current
       if (gumball.object_transformMode.value === "translateIK") {
+        gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value)
+
         return
       }
 
