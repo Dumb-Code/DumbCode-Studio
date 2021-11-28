@@ -178,12 +178,56 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       return
     }
 
-    //Apply some sort of flattening algorithm to actions to merge modifications 
-    //on the same property multiple times
+    actions = this.flatten(actions)
+
     this.history.length = this.index + 1
     this.history.push(actions)
     this.index++
     this._updateCanUndoCanRedo()
+  }
+
+  flatten(actions: Action<S>[]) {
+    const result: Action<S>[] = []
+
+    let modifySectionName: string | null = null
+    let modifyPropertyName: string | null = null
+    const modifyActionsBuffer: ModifySectionAction<S>[] = []
+
+    const flattenBuffer = () => {
+      if (modifyActionsBuffer.length !== 0) {
+        const first = modifyActionsBuffer[0]
+        const last = modifyActionsBuffer[modifyActionsBuffer.length - 1]
+        const action: ModifySectionAction<S> = {
+          type: 'modify',
+          section_name: first.section_name,
+          property_name: first.property_name,
+          old_value: first.old_value,
+          value: last.value,
+        }
+        result.push(action)
+      }
+
+      modifySectionName = null
+      modifyPropertyName = null
+      modifyActionsBuffer.length = 0
+    }
+    actions.forEach(a => {
+      if (a.type !== "modify") {
+        flattenBuffer()
+        result.push(a)
+        return
+      }
+      const { section_name, property_name } = a
+      if ((modifySectionName !== null && section_name !== modifySectionName) || (modifyPropertyName !== null && property_name !== modifyPropertyName)) {
+        flattenBuffer()
+      }
+
+      modifySectionName = section_name
+      modifyPropertyName = property_name
+      modifyActionsBuffer.push(a)
+    })
+    flattenBuffer()
+    return actions
   }
 
   undo() {
