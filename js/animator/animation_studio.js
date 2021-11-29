@@ -97,7 +97,7 @@ export class AnimationStudio {
             }
 
             let handler = this.pth.animationTabs.active
-            if(e.event.keyCode == 78 && e.event.ctrlKey && handler !== null && handler.selectedKeyFrame !== undefined) {
+            if(e.event.keyCode == 77 && e.event.ctrlKey && handler !== null && handler.selectedKeyFrame !== undefined) {
                 let isDefined = handler.ensureLayer(handler.selectedKeyFrame.layer).definedMode === true
                 let cloned = handler.selectedKeyFrame.cloneKeyframe(!isDefined)
                 handler.keyframes.push(cloned)
