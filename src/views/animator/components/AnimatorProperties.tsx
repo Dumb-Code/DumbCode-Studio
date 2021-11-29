@@ -78,17 +78,19 @@ const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaA
     }
 
     return (
-        <AnimationPanel title="CUBE PROPERTIES" heightClassname="h-64" panelName="animator_cube">
+        <AnimationPanel title="CUBE PROPERTIES" heightClassname="h-76" panelName="animator_cube">
             <div
-                className="dark:text-white px-2"
+                className="dark:text-white px-2 mt-2"
                 ref={useTooltipRef<HTMLDivElement>("Off (Local): Values shown are the changes the cube makes in that keyframe\nOn (Global) Values shown are the cubes actual values at the current time")}
             >
-                Mode:
-                <Toggle
-                    checked={mode === "global"}
-                    setChecked={c => setMode(c ? "global" : "local")}
-                />
-                {mode === "global" ? "Global" : "Local"}
+                <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow mb-2">GLOBAL MODE</p>
+                <div className="flex flex-row">
+                    <Toggle
+                        checked={mode === "global"}
+                        setChecked={c => setMode(c ? "global" : "local")}
+                    />
+                    <p className="text-xs pt-0.5 ml-2 dark:text-gray-400 text-black">{mode === "global" ? "Global" : "Local"}</p>
+                </div>
             </div>
             <div className="w-full grid grid-cols-2 px-2 pt-1">
                 <WrappedCubeInput
@@ -181,7 +183,7 @@ const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation 
                         <DropupItem name="Bounce" onSelect={() => console.log("swap graph")} />
                     </Dropup>
                 </div>
-                <div className="text-gray-500 font-bold text-xs p-1">
+                <div className="text-black dark:text-gray-500 font-bold text-xs p-1">
                     <p className="my-0.5">POINT RESOLUTION</p>
                 </div>
                 <div className="flex flex-row mb-2 h-7 col-span-2">
@@ -207,7 +209,7 @@ const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation 
 const LoopCheck = ({ title }: { title: string }) => {
     return (
         <div>
-            <p className="ml-1 text-gray-400 text-xs">{title}</p>
+            <p className="ml-1 text-black dark:text-gray-400 text-xs">{title}</p>
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7 mt-1">
                     <Checkbox value={false} setValue={e => console.log("set value" + e)} />
@@ -261,7 +263,7 @@ const TitledField = ({ title, lo }: { title: string, lo?: LO<number> }) => {
     const [value, setValue] = useListenableObjectNullable(lo)
     return (
         <div>
-            <p className="ml-1 text-gray-400 text-xs">{title}</p>
+            <p className="ml-1 dark:text-gray-400 text-black text-xs">{title}</p>
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7">
                     <NumericInput
