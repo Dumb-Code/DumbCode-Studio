@@ -1,4 +1,4 @@
-import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, OrthographicCamera, PerspectiveCamera, Raycaster, REVISION, Scene, Vector3, WebGLRenderer } from "three";
+import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, OrthographicCamera, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
@@ -260,10 +260,6 @@ const createGrid = () => {
     majorGridMaterial, minorGridMaterial, subGridMaterial
   }
 }
-
-const tempVector = new Vector3()
-const tempVector2 = new Vector3()
-
 
 //https://github.com/mrdoob/three.js/blob/7f43f4e6ef087cec168fea25bb53591052d5ff12/examples/js/cameras/CombinedCamera.js#L61-L95
 const convertToOrthographic = (cameraP: PerspectiveCamera, cameraO: OrthographicCamera, orbitControls: OrbitControls): OrthographicCamera => {
