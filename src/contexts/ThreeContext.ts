@@ -36,6 +36,18 @@ export const createThreeContext: () => ThreeJsContext = () => {
   const cameraP = new PerspectiveCamera(65, 1, 0.01, 700)
   const cameraO = new OrthographicCamera(-1, 1, -1, 1, -700, 700)
 
+  //We need to override the zoom of the orthographic camera,
+  //As we handle it in a special way for camera conversion.
+  //When updating the projection matrix, we need to return 1, 
+  //otherwise return the zoom
+  const _updateProjectionMatrix = cameraO.updateProjectionMatrix
+  cameraO.updateProjectionMatrix = () => {
+    convertToOrthographic(cameraP, cameraO, controls)
+    const zoom = cameraO.zoom
+    cameraO.zoom = 1
+    _updateProjectionMatrix.call(cameraO)
+    cameraO.zoom = zoom
+  }
 
   //Set up the camera
   let camera: Camera = cameraP
@@ -80,9 +92,13 @@ export const createThreeContext: () => ThreeJsContext = () => {
   const setCameraType = (isPerspective: boolean) => {
     const currentlyIsPerspective = camera instanceof PerspectiveCamera
     if (currentlyIsPerspective !== isPerspective) {
-      const newCamera = (currentlyIsPerspective ? convertToOrthographic : convertToPerspective)(cameraP, cameraO)
-      newCamera.position.copy(camera.position)
-      newCamera.rotation.copy(camera.rotation)
+      const otherCamera = currentlyIsPerspective ? cameraO : cameraP
+      otherCamera.position.copy(camera.position)
+      otherCamera.rotation.copy(camera.rotation)
+
+      const newCamera = currentlyIsPerspective ? cameraO : convertToPerspective(cameraP, cameraO, controls)
+
+      newCamera.zoom = 1
       newCamera.updateProjectionMatrix()
 
       camera = newCamera
@@ -250,20 +266,13 @@ const tempVector2 = new Vector3()
 
 
 //https://github.com/mrdoob/three.js/blob/7f43f4e6ef087cec168fea25bb53591052d5ff12/examples/js/cameras/CombinedCamera.js#L61-L95
-const convertToOrthographic = (cameraP: PerspectiveCamera, cameraO: OrthographicCamera): OrthographicCamera => {
+const convertToOrthographic = (cameraP: PerspectiveCamera, cameraO: OrthographicCamera, orbitControls: OrbitControls): OrthographicCamera => {
   const aspect = cameraP.aspect;
 
-  //Essentially how far away we are from 0,0,0
-  const direction = cameraP.getWorldDirection(tempVector)
-  const depth = tempVector2.copy(cameraP.position).multiplyScalar(-1).dot(direction)
-
-  // var hyperfocus = (cameraP.near + cameraP.far) / 2;
+  const depth = orbitControls.target.distanceTo(orbitControls.object.position) / cameraO.zoom
 
   var halfHeight = Math.tan(cameraP.fov * Math.PI / 180 / 2) * depth
   var halfWidth = halfHeight * aspect;
-
-  halfHeight /= cameraP.zoom;
-  halfWidth /= cameraP.zoom;
 
   cameraO.left = - halfWidth;
   cameraO.right = halfWidth;
@@ -273,9 +282,22 @@ const convertToOrthographic = (cameraP: PerspectiveCamera, cameraO: Orthographic
   return cameraO
 }
 
-//https://github.com/mrdoob/three.js/blob/7f43f4e6ef087cec168fea25bb53591052d5ff12/examples/js/cameras/CombinedCamera.js#L41-L59
-const convertToPerspective = (cameraP: PerspectiveCamera, cameraO: OrthographicCamera): PerspectiveCamera => {
-  // cameraP.fov = cameraP.fov / cameraO.zoom
-  // cameraP.updateProjectionMatrix()
+//https://stackoverflow.com/a/57977155
+const convertToPerspective = (cameraP: PerspectiveCamera, cameraO: OrthographicCamera, orbitControls: OrbitControls): PerspectiveCamera => {
+  const depth = orbitControls.target.distanceTo(orbitControls.object.position)
+  // halfHeight = Math.tan(fov * Math.PI / 180 / 2) * depth
+  // halfHeight / depth = Math.tan(fov * PI/180/2)
+  // fov = Math.atan(halfHeight / depth) / (PI/180/2)
+  const targetFov = Math.atan(cameraO.top / depth) / (Math.PI / 180 / 2)
+
+  //Do a dolly zoom to keep the fov constant
+  let init_depht_s = Math.tan(targetFov / 2.0 * Math.PI / 180.0) * 2.0;
+  let current_depht_s = Math.tan(cameraP.fov / 2.0 * Math.PI / 180.0) * 2.0;
+
+  const distance = orbitControls.target.distanceTo(orbitControls.object.position)
+  const cameraMove = distance * init_depht_s / current_depht_s
+
+  cameraP.getWorldDirection(cameraP.position).multiplyScalar(-cameraMove).add(orbitControls.target)
+
   return cameraP
 }
