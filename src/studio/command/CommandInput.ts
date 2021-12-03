@@ -1,3 +1,4 @@
+import { CommandParseError } from './CommandParseError';
 export class CommandInput {
   constructor(
     readonly array: string[]
@@ -7,10 +8,10 @@ export class CommandInput {
     return this.array.length
   }
 
-  getInput() {
+  getInput(errorData?: any) {
     const value = this.array.shift()
     if (value === undefined) {
-      throw new Error("Tried to get value from empty input");
+      throw new CommandParseError("Tried to get value from empty input", errorData);
     }
     return value
   }

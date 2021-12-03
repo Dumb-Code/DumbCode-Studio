@@ -1,6 +1,7 @@
 import { Group, MeshBasicMaterial, MeshLambertMaterial, Texture } from "three";
 import { v4 as uuidv4 } from "uuid";
 import CubePointTracker from "../../../views/modeler/logic/CubePointTracker";
+import { createModelingCommandRoot } from "../../command/commands/modeling/ModelingCommands";
 import { getUndefinedWritable, ReadableFile } from '../../util/FileTypes';
 import { LO } from '../../util/ListenableObject';
 import DcaTabs from '../animations/DcaTabs';
@@ -24,6 +25,8 @@ export default class DcProject {
   readonly textureManager: TextureManager
   readonly animationTabs: DcaTabs
   previousThreeTexture: Texture | null
+
+  readonly commandRoot = createModelingCommandRoot()
 
   readonly cubePointTracker: CubePointTracker
   readonly modelerGumball: ModelerGumball
