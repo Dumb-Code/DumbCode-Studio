@@ -22,8 +22,8 @@ const Tabs: Tab[] = [
   // { name: "options", titleComponent: () => <SVGSettings className="w-5 h-5 px-0.5" />, color: "bg-red-500", component: () => <Options />, extraClasses: "w-9 transform translate-y-1.5" },
   { name: "Project", color: "bg-purple-600", component: () => <Project /> },
   { name: "Modeler", color: "bg-sky-600", component: () => <Modeler /> },
-  { name: "Animator", color: "bg-yellow-500", component: () => <Animator /> },
   { name: "Texturer", color: "bg-green-500", component: () => <Texturer /> },
+  { name: "Animator", color: "bg-yellow-500", component: () => <Animator /> },
 ]
 
 const StudioContainer = () => {
