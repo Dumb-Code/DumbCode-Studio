@@ -101,10 +101,11 @@ export const useListenableObjectNullable = <T>(obj: LO<T> | undefined): [T | und
       return
     }
     if (state !== obj.internalValue) {
-      setState(obj.internalValue)
+      setState(() => obj.internalValue)
     }
-    obj.addListener(setState)
-    return () => obj.removeListener(setState)
+    const listener = (t: T) => setState(() => t)
+    obj.addListener(listener)
+    return () => obj.removeListener(listener)
   }, [state, setState, obj])
   return [state, val => {
     if (obj !== undefined) {
@@ -118,10 +119,11 @@ export const useListenableObject = <T>(obj: LO<T>, debug = false): [T, (val: T) 
   const [state, setState] = useState(() => obj.internalValue)
   useEffect(() => {
     if (state !== obj.internalValue) {
-      setState(obj.internalValue)
+      setState(() => obj.internalValue)
     }
-    obj.addListener(setState)
-    return () => obj.removeListener(setState)
+    const listener = (t: T) => setState(() => t)
+    obj.addListener(listener)
+    return () => obj.removeListener(listener)
   }, [state, setState, obj])
   return [state, val => obj.value = val]
 }
@@ -212,10 +214,11 @@ export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K): [V | u
   useEffect(() => {
     const v = obj.get(key)
     if (state !== v) {
-      setState(v)
+      setState(() => v)
     }
-    obj.addListener(key, setState)
-    return () => obj.removeListener(key, setState)
+    const listener = (v?: V) => setState(() => v)
+    obj.addListener(key, listener)
+    return () => obj.removeListener(key, listener)
   }, [state, setState, obj, key])
   return [state, val => obj.set(key, val)]
 }
@@ -229,10 +232,11 @@ export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: 
     }
     const v = obj.get(key)
     if (state !== v) {
-      setState(v)
+      setState(() => v)
     }
-    obj.addListener(key, setState)
-    return () => obj.removeListener(key, setState)
+    const listener = (v?: V) => setState(() => v)
+    obj.addListener(key, listener)
+    return () => obj.removeListener(key, listener)
   }, [state, setState, obj, key])
   return [state, val => {
     if (obj !== undefined && key !== undefined) {

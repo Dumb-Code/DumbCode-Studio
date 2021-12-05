@@ -9,6 +9,7 @@ import { loadDCMModel } from '../model/DCMLoader';
 import { DCMModel } from '../model/DcmModel';
 import TextureManager from '../textures/TextureManager';
 import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
+import { CommandRoot } from './../../command/CommandRoot';
 import { RemoteRepo } from './DcRemoteRepos';
 
 export default class DcProject {
@@ -26,7 +27,7 @@ export default class DcProject {
   readonly animationTabs: DcaTabs
   previousThreeTexture: Texture | null
 
-  readonly commandRoot = createModelingCommandRoot()
+  readonly commandRoot: CommandRoot
 
   readonly cubePointTracker: CubePointTracker
   readonly modelerGumball: ModelerGumball
@@ -39,6 +40,7 @@ export default class DcProject {
     this.name = new LO(name)
     this.model = model
     model.parentProject = this
+    this.commandRoot = createModelingCommandRoot(this.model)
     this.textureManager = new TextureManager(this)
     this.cubePointTracker = new CubePointTracker(this.selectedCubeManager, this.model, this.group)
     this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.model, this.group, this.cubePointTracker)
