@@ -86,17 +86,22 @@ export class CommandBuilder<
         }
         throw e
       }
-      try {
-        const result = this.attemptRun(true)
-        this.onFrameCallback.value = result ?? null
-      } catch (e) {
-        this.onFrameCallback.value = null
-        if (!(e instanceof CommandRunError)) {
-          throw e
-        }
-      }
+      this.dummyRun()
       this.commandBuilderError.value = ""
     }
+  }
+
+  dummyRun() {
+    try {
+      const result = this.attemptRun(true)
+      this.onFrameCallback.value = result ?? null
+    } catch (e) {
+      this.onFrameCallback.value = null
+      if (!(e instanceof CommandRunError)) {
+        throw e
+      }
+    }
+
   }
 
   commitTyped() {

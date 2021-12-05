@@ -29,7 +29,16 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
   const parsedArguments = currentArgumentMap ? Object.keys(currentArgumentMap) : []
 
   useEffect(() => {
-    const listener = () => command?.onInputChanged()
+    const listener = () => {
+      if (!command) {
+        return
+      }
+      if (command.commandBuilder.value) {
+        command.commandBuilder.value.dummyRun()
+      } else {
+        command.onInputChanged()
+      }
+    }
     const selected = project.model.selectedCubeManager.selected
     selected.addPostListener(listener)
     return () => selected.removePostListener(listener)
