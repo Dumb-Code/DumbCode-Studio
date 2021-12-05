@@ -1,20 +1,25 @@
 import { ReactNode } from 'react';
+import AxisArgumentFreindlyText from '../../components/AxisArgumentFreindlyText';
 import { CommandInput } from './CommandInput';
 import { CommandParseError } from './CommandParseError';
+
+type BuildCommandCallback<T> = (nextInput: (text: string, onTyped: (value: string) => T) => Promise<void>) => Promise<void>
+
 export class ArgumentHandler<T> {
   private constructor(
-    readonly freindlyText: ReactNode | ((errorData: any, isParsed: boolean) => ReactNode),
+    readonly freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => ReactNode),
     readonly valueFreindlyText: (value: T) => string,
     readonly inputParser: (input: CommandInput) => T,
     readonly toStringFunc: (val: T) => string,
+    readonly buildCommand: BuildCommandCallback<T>,
   ) { }
 
-  public static simpleArgument<T>(freindlyText: ReactNode | ((errorData: any, isParsed: boolean) => ReactNode), func: (input: string) => T, toString = (val: T) => String(val), valueFreindlyText = toString) {
-    return new ArgumentHandler(freindlyText, valueFreindlyText, input => func(input.getInput()), toString)
+  public static simpleArgument<T>(freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => ReactNode), func: (input: string) => T, toString = (val: T) => String(val), valueFreindlyText = toString) {
+    return new ArgumentHandler(freindlyText, valueFreindlyText, input => func(input.getInput()), toString, async (nextInput) => await nextInput("Enter Value", func))
   }
 
-  public static complexArgument<T>(freindlyText: ReactNode | ((errorData: any, isParsed: boolean) => ReactNode), func: (input: CommandInput) => T, toString: (val: T) => string, valueFreindlyText = toString) {
-    return new ArgumentHandler(freindlyText, valueFreindlyText, func, toString)
+  public static complexArgument<T>(freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => ReactNode), func: (input: CommandInput) => T, buildCommand: BuildCommandCallback<T>, toString: (val: T) => string, valueFreindlyText = toString) {
+    return new ArgumentHandler(freindlyText, valueFreindlyText, func, toString, buildCommand)
   }
 }
 
@@ -49,53 +54,12 @@ export const BooleanArgument = () => ArgumentHandler.simpleArgument("boolean", s
 })
 export const NumberArgument = (integer: boolean) => ArgumentHandler.simpleArgument(integer ? "whole number" : "number", s => _parseNum(s, integer))
 
-export const AxisArgument = (axis: string, integer = false) => ArgumentHandler.complexArgument(
-  (data, isParsed) => {
-    let axisArr: number[] | null = null
-    let axisDone: number | null = null
-    if (Array.isArray(data)) {
-      axisArr = data
-    } else {
-      axisArr = data?.axisValues ?? null
-      axisDone = data?.axisDone ?? null
-    }
-
-    let className = ""
-    if (!isParsed && (axisArr === null || axisArr.length === 0)) {
-      className = "font-bold text-red-500"
-    } else if (isParsed || axisDone !== null) {
-      className = "text-green-500"
-    }
-
-    const ax = axisDone ?? 0
-
-    return (
-      <>
-        <span className={className}>{axis}</span>
-        {" "}
-        {axisArr !== null && axisArr.map((a, i) => {
-          let className = ""
-          if (i >= ax) {
-            className = "text-red-500"
-            if (i === ax) {
-              className = className + " font-bold"
-            }
-          } else {
-            className = "text-green-500"
-          }
-          return (
-            <span
-              key={i}
-              className={className}
-            >
-              [{integer ? "whole number" : "number"} {axis[a]}]{" "}
-            </span>
-          )
-        }
-        )}
-      </>
-    )
-  },
+type AxisType = {
+  axis: number;
+  value: number;
+}
+export const AxisArgument = (axis: string, integer = false) => ArgumentHandler.complexArgument<AxisType[]>(
+  AxisArgumentFreindlyText(axis, integer),
   input => {
     const createExtraData = (axisValues: number[], axisDone: number) => ({ axisValues, axisDone })
     const axisValues = Array.from(input.getInput([])).map(s => _indexOf(axis, s, createExtraData([], input.inputsLeft())))
@@ -110,6 +74,22 @@ export const AxisArgument = (axis: string, integer = false) => ArgumentHandler.c
       return value
     })
   },
-  axisValues => axisValues.map(a => axis[a.axis]).join("") + axisValues.map(a => ' ' + a.value).join(""),
-  axisValues => axisValues.map(av => `${axis[av.axis]}=${av.value}`).join(", ")
+  async (nextInput) => {
+    const array: (number | null)[] = Array(axis.length).fill(null)
+    for (let index = 0; index < array.length; index++) {
+      const axisName = axis.charAt(index)
+      await nextInput(`Enter Value for axis: ${axisName}`, value => {
+        if (value === "") {
+          array[index] = null
+        } else {
+          array[index] = _parseNum(value, integer)
+        }
+        return array
+          .map((value, axis) => ({ axis, value }))
+          .filter(({ value }) => value !== null) as AxisType[]
+      })
+    }
+  },
+  axisValues => axisValues.map(a => axis[a.axis]).join("") + axisValues.map(a => ' ' + a.value).join(""), //toString
+  axisValues => axisValues.map(av => `${axis[av.axis]}=${av.value}`).join(", ") //valueFreindly
 )

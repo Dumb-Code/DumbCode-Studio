@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+
+import { DependencyList, useEffect, useState } from 'react';
 import { SectionHandle, UndoRedoSection } from './../undoredo/UndoRedoHandler';
 
 type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
@@ -93,7 +95,7 @@ export class LO<T> {
   }
 }
 
-export const useListenableObjectNullable = <T>(obj: LO<T> | undefined): [T | undefined, (val: T) => void] => {
+export const useListenableObjectNullable = <T>(obj: LO<T> | undefined, deps: DependencyList = []): [T | undefined, (val: T) => void] => {
   const [state, setState] = useState<T | undefined>(() => obj?.internalValue)
   useEffect(() => {
     if (obj === undefined) {
@@ -106,7 +108,7 @@ export const useListenableObjectNullable = <T>(obj: LO<T> | undefined): [T | und
     const listener = (t: T) => setState(() => t)
     obj.addListener(listener)
     return () => obj.removeListener(listener)
-  }, [state, setState, obj])
+  }, [state, setState, obj, ...deps])
   return [state, val => {
     if (obj !== undefined) {
       obj.value = val
@@ -115,7 +117,7 @@ export const useListenableObjectNullable = <T>(obj: LO<T> | undefined): [T | und
 }
 
 
-export const useListenableObject = <T>(obj: LO<T>, debug = false): [T, (val: T) => void] => {
+export const useListenableObject = <T>(obj: LO<T>, deps: DependencyList = []): [T, (val: T) => void] => {
   const [state, setState] = useState(() => obj.internalValue)
   useEffect(() => {
     if (state !== obj.internalValue) {
@@ -124,7 +126,7 @@ export const useListenableObject = <T>(obj: LO<T>, debug = false): [T, (val: T) 
     const listener = (t: T) => setState(() => t)
     obj.addListener(listener)
     return () => obj.removeListener(listener)
-  }, [state, setState, obj])
+  }, [state, setState, obj, ...deps])
   return [state, val => obj.value = val]
 }
 
@@ -137,7 +139,7 @@ const isMapEqual = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
   return equal
 }
 //Is readonly
-export const useListenableMap = <K, V>(obj: LOMap<K, V>): Map<K, V> => {
+export const useListenableMap = <K, V>(obj: LOMap<K, V>, deps: DependencyList = []): Map<K, V> => {
   const [state, setState] = useState<Map<K, V>>(() => new Map(obj))
   useEffect(() => {
     if (!isMapEqual(state, obj)) {
@@ -148,7 +150,7 @@ export const useListenableMap = <K, V>(obj: LOMap<K, V>): Map<K, V> => {
     return () => {
       obj.removeGlobalListener(listener)
     }
-  }, [state, setState, obj])
+  }, [state, setState, obj, ...deps])
   return state
 }
 
@@ -209,7 +211,7 @@ export class LOMap<K, V> extends Map<K, V> {
 }
 
 
-export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K): [V | undefined, (val: V) => void] => {
+export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K, deps: DependencyList = []): [V | undefined, (val: V) => void] => {
   const [state, setState] = useState(obj.get(key))
   useEffect(() => {
     const v = obj.get(key)
@@ -219,11 +221,11 @@ export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K): [V | u
     const listener = (v?: V) => setState(() => v)
     obj.addListener(key, listener)
     return () => obj.removeListener(key, listener)
-  }, [state, setState, obj, key])
+  }, [state, setState, obj, key, ...deps])
   return [state, val => obj.set(key, val)]
 }
 
-export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: K): [V | undefined, (val: V) => void] => {
+export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: K, deps: DependencyList = []): [V | undefined, (val: V) => void] => {
   const [state, setState] = useState(obj !== undefined && key !== undefined ? obj.get(key) : undefined)
   useEffect(() => {
     if (obj === undefined || key === undefined) {
@@ -237,7 +239,7 @@ export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: 
     const listener = (v?: V) => setState(() => v)
     obj.addListener(key, listener)
     return () => obj.removeListener(key, listener)
-  }, [state, setState, obj, key])
+  }, [state, setState, obj, key, ...deps])
   return [state, val => {
     if (obj !== undefined && key !== undefined) {
       obj.set(key, val)

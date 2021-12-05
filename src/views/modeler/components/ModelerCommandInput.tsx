@@ -8,15 +8,23 @@ import { useListenableObjectNullable } from "../../../studio/util/ListenableObje
 const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
   const { getSelectedProject, onFrameListeners } = useStudio()
   const project = getSelectedProject()
-  const [input, setInput] = useListenableObjectNullable(command?.currentInput)
+
+  const [input] = useListenableObjectNullable(command?.currentInput)
   const [activeCommand] = useListenableObjectNullable(command?.activeCommand)
   const [avaliableCommands] = useListenableObjectNullable(command?.avaliableCommands)
   const [currentFlags] = useListenableObjectNullable(command?.currentFlags)
   const [currentArgumentMap] = useListenableObjectNullable(command?.currentArgumentMap)
+  const [logHistory] = useListenableObjectNullable(command?.logHistory)
+
+  const [commandBuilder] = useListenableObjectNullable(command?.commandBuilder)
+  const [commandBuilderError] = useListenableObjectNullable(commandBuilder?.commandBuilderError, [commandBuilder])
+  const [commandBuilderText] = useListenableObjectNullable(commandBuilder?.commandBuilderText, [commandBuilder])
+  const [commandBuilderValueText] = useListenableObjectNullable(commandBuilder?.commandBuilderValueText, [commandBuilder])
 
   const [lastCommandErrorOutput] = useListenableObjectNullable(command?.lastCommandErrorOutput)
 
   const [onFrameCallback] = useListenableObjectNullable(command?.onFrameCallback)
+  const [onBuilderFrameCallback] = useListenableObjectNullable(commandBuilder?.onFrameCallback, [commandBuilder])
 
   const parsedArguments = currentArgumentMap ? Object.keys(currentArgumentMap) : []
 
@@ -28,12 +36,17 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
   }, [project, command])
 
   useEffect(() => {
-    if (!onFrameCallback) {
-      return
+    const listener = () => {
+      if (onFrameCallback) {
+        onFrameCallback()
+      }
+      if (onBuilderFrameCallback) {
+        onBuilderFrameCallback()
+      }
     }
-    onFrameListeners.add(onFrameCallback)
-    return () => { onFrameListeners.delete(onFrameCallback) }
-  }, [onFrameCallback, onFrameListeners])
+    onFrameListeners.add(listener)
+    return () => { onFrameListeners.delete(listener) }
+  }, [onFrameCallback, onBuilderFrameCallback, onFrameListeners])
 
   return (
     <div className="has-tooltip">
@@ -44,7 +57,7 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
         </div>
         <input
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={e => command?.onKeyTyped(e.target.value)}
           onKeyPress={e => e.key === "Enter" && command?.runInput()}
           type="text"
           className="text-xs dark:bg-gray-900 bg-gray-200 dark:text-gray-300 text-black border-none flex-grow focus:outline-none focus:ring-0"
@@ -56,13 +69,12 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
       </div>
       {/* Active command feedback */}
       <div className="relative inline-block z-50 transform translate-x-10 text-xs mt-1 dark:text-white text-black">
-        {/* <p className="underline">command: snap</p>
-    click on first snap point<br /> */}
+
 
         {/* When typing a command, show all the possible options */}
         {!activeCommand && avaliableCommands?.map((com, i) =>
           <p key={i}>
-            {com.formatToString()}
+            {com}
           </p>
         )}
 
@@ -73,18 +85,35 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
             <CommandFlags activeCommand={activeCommand} parsedFlags={currentFlags} />
             <CommandArguments activeCommand={activeCommand} parsedArguments={parsedArguments} currentArgumentMap={currentArgumentMap} />
           </>}
+
+        {/* When a command builder is chosen, show the data for that */}
+        {commandBuilder &&
+          <>
+            <p>{commandBuilderText}</p>
+            <p>{commandBuilderValueText}</p>
+            <p className="text-red-500 font-bold">{commandBuilderError}</p>
+          </>
+        }
+
+        {/* Command feedback history */}
+        {!!!commandBuilder && !!!activeCommand && (!!!avaliableCommands || avaliableCommands.length === 0) && logHistory &&
+          logHistory.map((d, i) => {
+            let className = ""
+            if (d.type === "bold") {
+              className = "underline"
+              if (i !== 0) {
+                className = "underline mt-1"
+              }
+            }
+            if (d.type === "error") {
+              className = "text-red-500"
+            }
+            return (
+              <p key={i} className={className}>{d.message} {d.times !== undefined && ` x ${d.times}`}</p>
+            )
+          })
+        }
       </div>
-      {/* Command feedback history */}
-      {/* <div className="tooltip transform translate-x-10 text-xs mt-1 dark:text-gray-400 text-gray-400">
-    <p className="underline">command: mirror y</p>
-    12 cubes mirrored<br />
-    <p className="underline">command: refImages</p>
-    opening reference images dialogue...<br />
-    <p className="underline">command: snap</p>
-    click on first snap point<br />
-    click on target snap point<br />
-    6 objects moved
-    </div> */}
     </div>
   )
 }
@@ -127,7 +156,12 @@ const CommandArguments = ({ activeCommand, currentArgumentMap, parsedArguments }
 
           return (
             <p key={i}>
-              {arg.name}: {typeof arg.desc === "function" ? arg.desc(parseData?.error?.errorData, parseData !== undefined && parseData.error === undefined && isParsed) : <span className={className}>{arg.desc}</span>}
+              {arg.name}: {
+                typeof arg.desc === "function" ?
+                  <arg.desc
+                    errorData={parseData?.error?.errorData}
+                    isParsed={parseData !== undefined && parseData.error === undefined && isParsed}
+                  /> : <span className={className}>{arg.desc}</span>}
               {" "}{(parseData?.textfreindlyValue ?? undefined) !== undefined && `(${parseData.textfreindlyValue})`}
               {" "}<span className="text-red-500">{parseData?.error !== undefined && String(parseData?.error)}</span>
             </p>

@@ -7,8 +7,8 @@ const xyzAxis = "xyz"
 // const uvAxis = "uv"
 
 const ArrayCommands = (addCommand: (command: Command) => void) => {
-  addCommand(createArrayCommand("pos", "Position", true, c => c.position, xyzAxis, (c, v) => c.updatePositionVisuals(v)))
-  addCommand(createArrayCommand("rot", "Rotation", true, c => c.position, xyzAxis, (c, v) => c.updateRotationVisuals(v)))
+  addCommand(createArrayCommand("pos", "position", true, c => c.position, xyzAxis, (c, v) => c.updatePositionVisuals(v)))
+  addCommand(createArrayCommand("rot", "rotation", true, c => c.position, xyzAxis, (c, v) => c.updateRotationVisuals(v)))
 }
 
 const createArrayCommand = <T extends readonly number[],>(name: string, englishName: string, canUseGlobal: boolean, getter: (cube: DCMCube) => LO<T>, axis: string, preview: (cube: DCMCube, values: T) => void, integer = false) => {
@@ -24,7 +24,7 @@ const createArrayCommand = <T extends readonly number[],>(name: string, englishN
       const lo = getter(cube)
       const valueMut = Array.from(lo.value)
 
-      //@ts-expect-error -- We know that value will be of type T
+      // @ts-expect-error -- We know that value will be of type T
       const value = valueMut as T
       if (mode === "set") {
         axis.forEach(a => valueMut[a.axis] = a.value)
@@ -38,6 +38,8 @@ const createArrayCommand = <T extends readonly number[],>(name: string, englishN
         return undefined
       }
     })
+
+    context.logToConsole(`Changed the ${englishName} on ${cubes.length} cube${cubes.length === 1 ? "" : "s"}`)
 
     if (context.dummy) {
       return () => {
@@ -54,7 +56,7 @@ const createArrayCommand = <T extends readonly number[],>(name: string, englishN
     }
 
 
-  }, "axis", canUseGlobal ? { "g": "Global" } : undefined)
+  }, canUseGlobal ? { "g": "Global" } : undefined)
     .addCommandBuilder(`set${name}`, { mode: "set" })
     .addCommandBuilder(`add${name}`, { mode: "add" })
 }
