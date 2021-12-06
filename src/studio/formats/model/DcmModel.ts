@@ -15,6 +15,7 @@ export interface CubeParent {
   deleteChild(child: DCMCube): void
   children: LO<readonly DCMCube[]>
   getChildren(): readonly DCMCube[]
+  resetVisuals(): void
 }
 
 const invalidParent: CubeParent = {
@@ -26,6 +27,9 @@ const invalidParent: CubeParent = {
   },
   children: new LO<readonly DCMCube[]>([]),
   getChildren() {
+    throw new Error("Invalid Call On Parent")
+  },
+  resetVisuals() {
     throw new Error("Invalid Call On Parent")
   }
 }

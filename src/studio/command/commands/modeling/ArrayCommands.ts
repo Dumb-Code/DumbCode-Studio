@@ -1,3 +1,4 @@
+import { Euler, Matrix4, Quaternion, Vector3 } from 'three';
 import { DCMCube } from '../../../formats/model/DcmModel';
 import { LO } from "../../../util/ListenableObject";
 import { AxisArgument, EnumArgument } from '../../Argument';
@@ -6,12 +7,89 @@ import { Command } from "../../Command";
 const xyzAxis = "xyz"
 // const uvAxis = "uv"
 
+
+const tempVec = new Vector3()
+const tempQuat = new Quaternion()
+const tempEuler = new Euler()
+
+const decomposePosition = new Vector3()
+const decomposeRotation = new Quaternion()
+const decomposeEuler = new Euler()
+const decomposeScale = new Vector3()
+
+const resultMat = new Matrix4()
+const resultMat2 = new Matrix4()
+
 const ArrayCommands = (addCommand: (command: Command) => void) => {
-  addCommand(createArrayCommand("pos", "position", true, c => c.position, xyzAxis, (c, v) => c.updatePositionVisuals(v)))
-  addCommand(createArrayCommand("rot", "rotation", true, c => c.position, xyzAxis, (c, v) => c.updateRotationVisuals(v)))
+
+  addCommand(createArrayCommand("pos", "position", c => c.position, xyzAxis, (c, v) => c.updatePositionVisuals(v), false, (mode, cube, axisValues) => {
+    cube.parent.resetVisuals()
+
+    if (!cube.cubeGroup.parent) {
+      return
+    }
+
+    if (mode === "set") {
+      cube.cubeGroup.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+      axisValues.forEach((e, idx) => e !== undefined && decomposePosition.setComponent(idx, (idx === 1 ? 0 : 0.5) + (e / 16)))
+      resultMat.compose(decomposePosition, decomposeRotation, decomposeScale)
+
+      resultMat2.copy(cube.cubeGroup.parent.matrixWorld).invert().multiply(resultMat)
+      resultMat2.decompose(decomposePosition, decomposeRotation, decomposeScale)
+
+      decomposePosition.toArray(axisValues)
+    } else { //Add
+      tempVec.fromArray(axisValues.map(e => e === undefined ? 0 : e))
+      cube.cubeGroup.parent.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+      tempVec.applyQuaternion(decomposeRotation.inverse()).toArray(axisValues)
+    }
+  }))
+
+  addCommand(createArrayCommand("rot", "rotation", c => c.position, xyzAxis, (c, v) => c.updateRotationVisuals(v), false, (mode, cube, axisValues) => {
+    cube.parent.resetVisuals()
+
+    if (!cube.cubeGroup.parent) {
+      return
+    }
+
+    if (mode === "set") { //Set
+      cube.cubeGroup.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+      decomposeEuler.setFromQuaternion(decomposeRotation, "ZYX").toVector3(tempVec)
+      axisValues.forEach((e, idx) => e === undefined ? null : tempVec.setComponent(idx, e * Math.PI / 180))
+      resultMat.compose(decomposePosition, decomposeRotation.setFromEuler(decomposeEuler.setFromVector3(tempVec, "ZYX")), decomposeScale)
+
+      resultMat2.copy(cube.cubeGroup.parent.matrixWorld).invert().multiply(resultMat)
+      resultMat2.decompose(decomposePosition, decomposeRotation, decomposeScale)
+
+      decomposeEuler.setFromQuaternion(decomposeRotation, "ZYX").toArray(axisValues)
+      axisValues.forEach((v, idx) => axisValues[idx] = v * 180 / Math.PI) // :/
+    } else { //Add
+      let result = [0, 0, 0]
+      for (let i = 0; i < 3; i++) {
+        if (axisValues[i] === undefined) {
+          continue
+        }
+        cube.cubeGroup.parent.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
+        let axis = tempVec.set(i === 0 ? 1 : 0, i === 1 ? 1 : 0, i === 2 ? 1 : 0).applyQuaternion(decomposeRotation.inverse())
+
+        tempQuat.setFromAxisAngle(axis, axisValues[i] * Math.PI / 180)
+        tempQuat.multiply(cube.cubeGroup.quaternion).normalize()
+
+        tempEuler.setFromQuaternion(cube.cubeGroup.quaternion, "ZYX")
+        decomposeEuler.setFromQuaternion(tempQuat, "ZYX")
+
+        result[0] += (decomposeEuler.x - tempEuler.x) * 180 / Math.PI
+        result[1] += (decomposeEuler.y - tempEuler.y) * 180 / Math.PI
+        result[2] += (decomposeEuler.z - tempEuler.z) * 180 / Math.PI
+      }
+
+
+      result.forEach((e, idx) => axisValues[idx] = e)
+    }
+  }))
 }
 
-const createArrayCommand = <T extends readonly number[],>(name: string, englishName: string, canUseGlobal: boolean, getter: (cube: DCMCube) => LO<T>, axis: string, preview: (cube: DCMCube, values: T) => void, integer = false) => {
+const createArrayCommand = <T extends readonly number[],>(name: string, englishName: string, getter: (cube: DCMCube) => LO<T>, axis: string, preview: (cube: DCMCube, values: T) => void, integer = false, globalFunc?: (mode: "set" | "add", cube: DCMCube, axisValues: number[]) => void) => {
   return new Command(name, `Modify ${englishName}`, {
     mode: EnumArgument("set", "add"),
     axis: AxisArgument(axis, integer)
@@ -31,6 +109,11 @@ const createArrayCommand = <T extends readonly number[],>(name: string, englishN
       } else {
         axis.forEach(a => valueMut[a.axis] += a.value)
       }
+
+      if (globalFunc && context.hasFlag("g")) {
+        globalFunc(mode, cube, valueMut)
+      }
+
       if (context.dummy) {
         return { cube, value }
       } else {
@@ -56,7 +139,7 @@ const createArrayCommand = <T extends readonly number[],>(name: string, englishN
     }
 
 
-  }, canUseGlobal ? { "g": "Global" } : undefined)
+  }, globalFunc ? { "g": "Global" } : undefined)
     .addCommandBuilder(`set${name}`, { mode: "set" })
     .addCommandBuilder(`add${name}`, { mode: "add" })
 }
