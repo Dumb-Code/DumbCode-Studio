@@ -19,7 +19,7 @@ type TrackedPoint = {
   mesh: Mesh<BoxBufferGeometry, MeshLambertMaterial>;
 }
 
-type Callback = (position: Vector3, point: TrackedPoint) => void
+type Callback = (position: Vector3, point: TrackedPoint, cube: DCMCube) => void
 
 const tempPos = new Vector3()
 const tempPos2 = new Vector3()
@@ -38,6 +38,7 @@ export default class CubePointTracker extends EventDispatcher {
   private readonly pickerPoints: Mesh<BoxBufferGeometry, MeshLambertMaterial>[] = []
 
   private enabled = false
+  private cubeToPointTo: DCMCube | null = null
   private intersected: Mesh<BoxBufferGeometry, MeshLambertMaterial> | null = null
   private definedCube: DCMCube | null = null //The cube to go to, instead of the first selected one
   private callback: Callback | null = null
@@ -82,12 +83,13 @@ export default class CubePointTracker extends EventDispatcher {
   onMouseDown() {
     if (this.enabled) {
       let intersected = this.intersected
-      if (intersected !== null && this.callback !== null) {
+      const { cubeToPointTo, callback } = this
+      this.disable()
+      if (intersected !== null && cubeToPointTo !== null && callback !== null) {
         if (intersected.parent !== null) {
-          this.callback(intersected.parent.position, intersected.userData._point)
+          callback(intersected.parent.position, intersected.userData._point, cubeToPointTo)
         }
       }
-      this.disable()
       return true
     }
     return false
@@ -99,17 +101,17 @@ export default class CubePointTracker extends EventDispatcher {
     const mouseOverMesh = this.selectedCubeManager.mouseOverMesh
     const mouseOverCube = mouseOverMesh !== null ? this.selectedCubeManager.getCube(mouseOverMesh) : undefined
 
-    let cubeToPointTo: DCMCube | undefined = undefined;
+    this.cubeToPointTo = null;
     if (this.definedCube !== null) {
-      cubeToPointTo = this.definedCube
+      this.cubeToPointTo = this.definedCube
     } else if (mouseOverCube !== undefined) {
-      cubeToPointTo = mouseOverCube
+      this.cubeToPointTo = mouseOverCube
     } else if (selected.length === 1) {
-      cubeToPointTo = this.model.identifierCubeMap.get(selected[0])
+      this.cubeToPointTo = this.model.identifierCubeMap.get(selected[0]) ?? null
     }
 
-    if (this.enabled && cubeToPointTo !== undefined) {
-      const cube = cubeToPointTo
+    if (this.enabled && this.cubeToPointTo !== null) {
+      const cube = this.cubeToPointTo
 
       const group = cube.cubeMesh
 
@@ -196,7 +198,7 @@ export default class CubePointTracker extends EventDispatcher {
 }
 
 export const usePointTracking = () => {
-  const { onMouseDown, onFrameListeners, getSelectedProject, getCamera, raycaster } = useStudio()
+  const { onMouseUp, onFrameListeners, getSelectedProject, getCamera, raycaster } = useStudio()
   const { cubePointTracker, modelerGumball } = getSelectedProject()
 
   useEffect(() => {
@@ -214,15 +216,15 @@ export const usePointTracking = () => {
         modelerGumball.blockedReasons.value = modelerGumball.blockedReasons.value.filter(v => v !== "point_tracker")
       }
     }
-    onMouseDown.addListener(10, onMouseDownlistener)
+    onMouseUp.addListener(10, onMouseDownlistener)
     onFrameListeners.add(onFrameListener)
     cubePointTracker.addEventListener("enable", onEnableEvent)
     cubePointTracker.addEventListener("disable", onDisableEvent)
     return () => {
-      onMouseDown.removeListener(onMouseDownlistener)
+      onMouseUp.removeListener(onMouseDownlistener)
       onFrameListeners.delete(onFrameListener)
       cubePointTracker.removeEventListener("enable", onEnableEvent)
       cubePointTracker.removeEventListener("disable", onDisableEvent)
     }
-  }, [onMouseDown, getCamera, cubePointTracker, onFrameListeners, raycaster, modelerGumball])
+  }, [onMouseUp, getCamera, cubePointTracker, onFrameListeners, raycaster, modelerGumball])
 }

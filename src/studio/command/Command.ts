@@ -45,6 +45,13 @@ export class Command<
     }))
   }
 
+  formatArgumentsDescription() {
+    return Object.keys(this.argumentMap).map(arg => ({
+      name: arg,
+      desc: this.argumentMap[arg].description
+    }))
+  }
+
   formatFlags() {
     return Object.keys(this.flags).map(key => ({
       name: key,

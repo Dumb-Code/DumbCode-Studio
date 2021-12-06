@@ -1,5 +1,6 @@
 import { LO } from '../util/ListenableObject';
 import { DCMCube, DCMModel } from './../formats/model/DcmModel';
+import { EnumOrEmptyArgument } from './Argument';
 import { Command, CommandContext, CommandValues } from './Command';
 import { CommandBuilder } from './CommandBuilder';
 import { CommandInput } from './CommandInput';
@@ -21,6 +22,7 @@ type CommandParsedData = {
     error?: CommandParseError;
   }[];
   flags: string[];
+  unparsed?: string
 }
 
 
@@ -49,10 +51,33 @@ export class CommandRoot {
   readonly onFrameCallback = new LO<null | (() => void)>(null)
 
   readonly previousCommands = new LO<readonly CommandParseHistoryEntry[]>([])
-  readonly logHistory = new LO<readonly { type?: "bold" | "error", message: string, times?: number }[]>([])
+  readonly logHistory = new LO<readonly { type?: "command" | "error", message: string, times?: number }[]>([])
 
   constructor(private readonly model: DCMModel) {
     this.currentInput.addListener(s => this.onInputChanged(s))
+  }
+
+  addHelpCommand() {
+    this._addCommand(new Command("help", "Get help for commands", {
+      "command": EnumOrEmptyArgument("The command to get help on (Optional)", ...this.commands.map(c => c.name), "help")
+    }, context => {
+      if (!context.dummy) {
+        const command = context.getArgument("command")
+        if (command === null) {
+          this.commands.forEach(c => context.logToConsole(`${c.formatToString()}: ${c.description}`))
+        } else {
+          const found = this.commands.find(c => c.name === command)
+          if (!found) {
+            throw new CommandRunError("Unable to find command of type " + command)
+          }
+          context.logToConsole(found.formatToString() + " " + found.description)
+          found.formatFlags().forEach(f => context.logToConsole(`[-${f.name}]: ${f.desc}`))
+          found.formatArgumentsDescription().forEach(a => context.logToConsole(`<${a.name}>: ${a.desc}`))
+
+        }
+      }
+      return undefined
+    }))
   }
 
   onKeyTyped(s: string) {
@@ -111,21 +136,16 @@ export class CommandRoot {
     func(command => this._addCommand(command))
   }
 
+  exitBuilder() {
+    this.commandBuilder.value = null
+  }
+
   runInput() {
     const inputText = this.currentInput.value
     this.currentInput.value = ""
 
     if (this.commandBuilder.value !== null) {
       this.commandBuilder.value.commitTyped()
-      // try {
-      //   this.commandBuilder.value.commitTyped()
-      // } catch (e) {
-      //   if (e instanceof CommandRunError) {
-      //     this.lastCommandErrorOutput.value = e.message
-      //   } else {
-      //     throw e
-      //   }
-      // }
       return
     }
     const split = splitStr(inputText)
@@ -149,6 +169,7 @@ export class CommandRoot {
   }
 
   runCommand(data: CommandParsedData | CommandParseError | string, dummy: boolean) {
+    this.model.undoRedoHandler.startBatchActions()
     try {
       if (typeof data === "string") {
         data = this._findCommandAndArgs(splitStr(data))
@@ -159,11 +180,13 @@ export class CommandRoot {
 
       const pd = data
       if (!dummy) {
-        const unparsed = pd.command.name +
+        const unparsed = data.unparsed ?? (
+          pd.command.name +
           pd.flags.map(f => ` -${f}`).join("") +
           pd.args.map(a => " " + pd.command.unParseArgument(a)).join("")
+        )
         this.previousCommands.value = this.previousCommands.value.concat({ data: pd, unparsed })
-        this.logMessage(unparsed, "bold")
+        this.logMessage(unparsed, "command")
       }
 
       const { command, args, flags } = pd
@@ -203,11 +226,13 @@ export class CommandRoot {
         return null
       }
       throw e
+    } finally {
+      this.model.undoRedoHandler.endBatchActions()
     }
 
   }
 
-  private logMessage(message: string, type?: "bold" | "error", times?: number) {
+  logMessage(message: string, type?: "command" | "error", times?: number) {
     const history = this.logHistory.value
     if (history.length !== 0) {
       const last = history[history.length - 1]

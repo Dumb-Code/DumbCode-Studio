@@ -40,13 +40,15 @@ export default class DcProject {
     this.name = new LO(name)
     this.model = model
     model.parentProject = this
-    this.commandRoot = createModelingCommandRoot(this.model)
     this.textureManager = new TextureManager(this)
     this.cubePointTracker = new CubePointTracker(this.selectedCubeManager, this.model, this.group)
     this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.model, this.group, this.cubePointTracker)
     this.animationTabs = new DcaTabs()
     this.group.add(this.model.modelGroup)
     this.previousThreeTexture = null
+
+    this.commandRoot = createModelingCommandRoot(this)
+    this.commandRoot.addHelpCommand()
   }
 
   get selectedCubeManager() {

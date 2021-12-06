@@ -5,8 +5,7 @@ import { AxisArgument, EnumArgument } from '../../Argument';
 import { Command } from "../../Command";
 
 const xyzAxis = "xyz"
-// const uvAxis = "uv"
-
+const uvAxis = "uv"
 
 const tempVec = new Vector3()
 const tempQuat = new Quaternion()
@@ -87,12 +86,19 @@ const ArrayCommands = (addCommand: (command: Command) => void) => {
       result.forEach((e, idx) => axisValues[idx] = e)
     }
   }))
+
+  addCommand(createArrayCommand("cg", "Cube Grow", cube => cube.cubeGrow, xyzAxis, (c, v) => c.updateCubeGrowVisuals({ value: v })))
+  addCommand(createArrayCommand("dims", "Dimension", cube => cube.dimension, xyzAxis, (c, v) => c.updateGeometry({ dimension: v }), true))
+  addCommand(createArrayCommand("off", "Offset", cube => cube.offset, xyzAxis, (c, v) => c.updateOffset(v)))
+
+
+  addCommand(createArrayCommand("texoff", "Texture Offset", cube => cube.textureOffset, uvAxis, (c, v) => c.updateTexture({ textureOffset: v }), true))
 }
 
 const createArrayCommand = <T extends readonly number[],>(name: string, englishName: string, getter: (cube: DCMCube) => LO<T>, axis: string, preview: (cube: DCMCube, values: T) => void, integer = false, globalFunc?: (mode: "set" | "add", cube: DCMCube, axisValues: number[]) => void) => {
   return new Command(name, `Modify ${englishName}`, {
-    mode: EnumArgument("set", "add"),
-    axis: AxisArgument(axis, integer)
+    mode: EnumArgument(`Whether to add or set the cubes ${englishName}.`, "set", "add"),
+    axis: AxisArgument("The amount of which to change by.", axis, integer)
   }, context => {
     const mode = context.getArgument("mode")
     const axis = context.getArgument("axis")
@@ -139,7 +145,7 @@ const createArrayCommand = <T extends readonly number[],>(name: string, englishN
     }
 
 
-  }, globalFunc ? { "g": "Global" } : undefined)
+  }, globalFunc ? { "g": "Move in global space" } : undefined)
     .addCommandBuilder(`set${name}`, { mode: "set" })
     .addCommandBuilder(`add${name}`, { mode: "add" })
 }

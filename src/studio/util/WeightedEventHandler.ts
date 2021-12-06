@@ -1,9 +1,9 @@
 type Callback<D> = (data: D) => boolean | void
 export default class IndexedEventHandler<D> {
-  listeners: { index: number, callback: Callback<D> }[] = []
+  listeners: { index: number, callback: Callback<D>, alwaysRecieve: boolean }[] = []
 
-  addListener(weight: number, callback: Callback<D>) {
-    this.listeners.push({ index: weight, callback })
+  addListener(weight: number, callback: Callback<D>, alwaysRecieve = false) {
+    this.listeners.push({ index: weight, callback, alwaysRecieve })
     this.listeners.sort((a, b) => a.index - b.index)
   }
 
@@ -12,15 +12,16 @@ export default class IndexedEventHandler<D> {
   }
 
   fireEvent(data: D) {
+    let canceled = false
     for (let listener of this.listeners) {
-      if (listener.callback(data) === true) {
+      if ((!canceled || listener.alwaysRecieve) && listener.callback(data) === true) {
+        canceled = true
         if (data["stopPropagation"] !== undefined) {
           data["stopPropagation"]()
         }
         if (data["preventDefault"] !== undefined) {
           data["preventDefault"]()
         }
-        return
       }
     }
   }

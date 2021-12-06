@@ -11,7 +11,6 @@ export default class SelectedCubeManager {
   public readonly mouse = new Vector2()
 
   mouseDown = false
-  readonly mouseClickDown = new Vector2()
 
   readonly listeners: Set<(project: DcProject) => boolean> = new Set()
 
@@ -31,21 +30,19 @@ export default class SelectedCubeManager {
     }
   }
 
-  onMouseDown(x: number, y: number) {
-    this.mouseClickDown.x = x
-    this.mouseClickDown.y = y
+  onMouseDown() {
     this.mouseDown = true
   }
 
-  onMouseUp(project: DcProject, x: number, y: number, ctrlPressed: boolean) {
+  onMouseReleasedAnywhere() {
     if (!this.mouseDown) {
       return
     }
     this.mouseDown = false
-    let xMove = Math.abs(this.mouseClickDown.x - x)
-    let yMove = Math.abs(this.mouseClickDown.y - y)
+  }
 
-    if (xMove < 5 && yMove < 5 && this.mouse.x >= -1 && this.mouse.x <= 1 && this.mouse.y >= -1 && this.mouse.y <= 1) {
+  onMouseUpOnCanvas(project: DcProject, ctrlPressed: boolean) {
+    if (this.mouse.x >= -1 && this.mouse.x <= 1 && this.mouse.y >= -1 && this.mouse.y <= 1) {
       let ignore = false
       this.listeners.forEach(listener => {
         ignore = listener(project) || ignore
@@ -139,7 +136,7 @@ export default class SelectedCubeManager {
 }
 
 export const useSelectedCubeManager = () => {
-  const { renderer, getSelectedProject, onFrameListeners, raycaster, getCamera, onMouseDown, transformControls } = useStudio()
+  const { renderer, getSelectedProject, onFrameListeners, raycaster, getCamera, onMouseUp, transformControls } = useStudio()
 
   const dom = renderer.domElement
   const project = getSelectedProject()
@@ -171,30 +168,26 @@ export const useSelectedCubeManager = () => {
       }
     }
 
-    const mouseMove = (e: MouseEvent) => {
-      const rect = dom.getBoundingClientRect()
-      cubeManager.onMouseMove(rect, e.clientX, e.clientY, true)
-    }
-    const mouseDown = (e: React.MouseEvent) => {
-      cubeManager.onMouseDown(e.clientX, e.clientY)
-      return true
-    }
-    const mouseUp = (e: MouseEvent) => {
-      cubeManager.onMouseUp(project, e.clientX, e.clientY, e.ctrlKey)
-    }
+    const mouseMove = (e: MouseEvent) => cubeManager.onMouseMove(dom.getBoundingClientRect(), e.clientX, e.clientY, true)
+    const mouseDown = () => cubeManager.onMouseDown()
+    const mouseUpAnywhere = () => cubeManager.onMouseReleasedAnywhere()
+
+    const mouseUpCanvas = (e: React.MouseEvent) => cubeManager.onMouseUpOnCanvas(project, e.ctrlKey)
     onFrameListeners.add(callback)
     document.addEventListener("pointermove", mouseMove)
-    document.addEventListener("pointerup", mouseUp, false)
-    onMouseDown.addListener(999, mouseDown)
+    document.addEventListener("pointerdown", mouseDown)
+    document.addEventListener("pointerup", mouseUpAnywhere, true)
+    onMouseUp.addListener(999, mouseUpCanvas, true)
     cubeManager.listeners.add(onMouseDownTransformControlBlocking)
     transformControls.addEventListener("axis-changed", onTransformControlsAxisHover)
     return () => {
       onFrameListeners.delete(callback)
       document.removeEventListener("pointermove", mouseMove)
-      document.removeEventListener("pointerup", mouseUp, false)
-      onMouseDown.removeListener(mouseDown)
+      document.removeEventListener("pointerdown", mouseDown)
+      document.removeEventListener("pointerup", mouseUpAnywhere, true)
+      onMouseUp.removeListener(mouseUpCanvas)
       cubeManager.listeners.delete(onMouseDownTransformControlBlocking)
       transformControls.removeEventListener("axis-changed", onTransformControlsAxisHover)
     }
-  }, [cubeManager, dom, raycaster, getCamera, model, onFrameListeners, project, onMouseDown, transformControls])
+  }, [cubeManager, dom, raycaster, getCamera, model, onFrameListeners, project, onMouseUp, transformControls])
 }

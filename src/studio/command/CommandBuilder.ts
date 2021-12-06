@@ -40,12 +40,14 @@ export class CommandBuilder<
 
   private nextArgument() {
     const nextArg = this.argumentsLeft.shift()
-
     if (nextArg === undefined) {
       try {
         this.attemptRun(false)
       } catch (e) {
-        if (!(e instanceof CommandRunError)) {
+        if (e instanceof CommandParseError) {
+          this.root.lastCommandErrorOutput.value = e.message
+          this.root.logMessage(e.message, "error")
+        } else if (!(e instanceof CommandRunError)) {
           throw e
         }
       }
@@ -60,7 +62,7 @@ export class CommandBuilder<
     const args = Object.keys(this.argumentMap).map(key => {
       const arg = this.definedArguments[key]
       if (arg === undefined) {
-        throw new Error("Unhandled argument " + key);
+        throw new CommandParseError(`Argument '${key}' was not supplied.`);
       }
       return {
         name: key,
@@ -97,7 +99,7 @@ export class CommandBuilder<
       this.onFrameCallback.value = result ?? null
     } catch (e) {
       this.onFrameCallback.value = null
-      if (!(e instanceof CommandRunError)) {
+      if (!(e instanceof CommandRunError || e instanceof CommandParseError)) {
         throw e
       }
     }
@@ -109,7 +111,6 @@ export class CommandBuilder<
       this.currentNextInputResolver()
       this.currentOnTypeParser = null
       this.currentNextInputResolver = null
-      this.onFrameCallback.value = null
     }
   }
 

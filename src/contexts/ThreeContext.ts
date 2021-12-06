@@ -9,7 +9,7 @@ export type ThreeJsContext = {
   renderer: WebGLRenderer,
   controls: OrbitControls,
   raycaster: Raycaster,
-  onMouseDown: IndexedEventHandler<React.MouseEvent>
+  onMouseUp: IndexedEventHandler<React.MouseEvent>
   onFrameListeners: Set<(deltaTime: number) => void>,
 
   setSize: (width: number, height: number) => void
@@ -74,7 +74,7 @@ export const createThreeContext: () => ThreeJsContext = () => {
   })
   onTopScene.add(transformControls)
 
-  const onMouseDown = new IndexedEventHandler<React.MouseEvent>()
+  const onMouseUp = new IndexedEventHandler<React.MouseEvent>()
 
   const { grid, majorGridMaterial, minorGridMaterial, subGridMaterial } = createGrid()
   scene.add(grid)
@@ -123,7 +123,7 @@ export const createThreeContext: () => ThreeJsContext = () => {
 
   return {
     renderer, scene, onTopScene, controls,
-    raycaster, onMouseDown, onFrameListeners, transformControls,
+    raycaster, onMouseUp, onFrameListeners, transformControls,
 
     getCamera: () => camera,
     setCameraType,

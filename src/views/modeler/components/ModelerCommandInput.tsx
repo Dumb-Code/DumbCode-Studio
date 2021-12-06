@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { MouseEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SVGTerminal } from "../../../components/Icons";
 import { useStudio } from "../../../contexts/StudioContext";
 import { Command } from "../../../studio/command/Command";
@@ -8,6 +8,9 @@ import { useListenableObjectNullable } from "../../../studio/util/ListenableObje
 const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
   const { getSelectedProject, onFrameListeners } = useStudio()
   const project = getSelectedProject()
+
+  const [focused, setFocused] = useState(false)
+  const commandHistoryRef = useRef<HTMLDivElement>(null)
 
   const [input] = useListenableObjectNullable(command?.currentInput)
   const [activeCommand] = useListenableObjectNullable(command?.activeCommand)
@@ -57,6 +60,15 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
     return () => { onFrameListeners.delete(listener) }
   }, [onFrameCallback, onBuilderFrameCallback, onFrameListeners])
 
+  const shouldShowHistory = focused && logHistory && logHistory.length !== 0 && !!!commandBuilder && !!!activeCommand && (!!!avaliableCommands || avaliableCommands.length === 0)
+  useLayoutEffect(() => {
+    if (shouldShowHistory) {
+      commandHistoryRef.current?.scrollBy({
+        top: commandHistoryRef.current?.scrollHeight
+      })
+    }
+  }, [shouldShowHistory, logHistory])
+
   return (
     <div className="has-tooltip">
       {/* Actual Command input region */}
@@ -66,8 +78,17 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
         </div>
         <input
           value={input}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           onChange={e => command?.onKeyTyped(e.target.value)}
-          onKeyPress={e => e.key === "Enter" && command?.runInput()}
+          onKeyDown={e => {
+            if (e.key === "Enter") {
+              command?.runInput()
+            } else if (e.key === "Escape") {
+              command?.exitBuilder()
+            }
+            e.stopPropagation()
+          }}
           type="text"
           className="text-xs dark:bg-gray-900 bg-gray-200 dark:text-gray-300 text-black border-none flex-grow focus:outline-none focus:ring-0"
           placeholder="type your command here"
@@ -76,8 +97,7 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
           {lastCommandErrorOutput}
         </div>
       </div>
-      {/* Active command feedback */}
-      <div className="relative inline-block z-50 transform translate-x-10 text-xs mt-1 dark:text-white text-black">
+      <div className="relative w-full inline-block z-50 transform translate-x-10 text-xs mt-1 dark:text-white text-black">
 
 
         {/* When typing a command, show all the possible options */}
@@ -105,22 +125,32 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
         }
 
         {/* Command feedback history */}
-        {!!!commandBuilder && !!!activeCommand && (!!!avaliableCommands || avaliableCommands.length === 0) && logHistory &&
-          logHistory.map((d, i) => {
-            let className = ""
-            if (d.type === "bold") {
-              className = "underline"
-              if (i !== 0) {
-                className = "underline mt-1"
+        {focused && logHistory && logHistory.length !== 0 && !!!commandBuilder && !!!activeCommand && (!!!avaliableCommands || avaliableCommands.length === 0) &&
+          <div ref={commandHistoryRef} className="max-h-32 p-1 bg-black bg-opacity-25 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 hover:scrollbar-thumb-gray-600 w-[calc(100%-3rem)] overflow-x-hidden overflow-y-auto">
+            {logHistory.map((d, i) => {
+              let className = ""
+              if (d.type === "command") {
+                className = "underline cursor-pointer"
+                if (i !== 0) {
+                  className = "underline cursor-pointer mt-2"
+                }
               }
-            }
-            if (d.type === "error") {
-              className = "text-red-500"
-            }
-            return (
-              <p key={i} className={className}>{d.message} {d.times !== undefined && ` x ${d.times}`}</p>
-            )
-          })
+              if (d.type === "error") {
+                className = "text-red-500"
+              }
+
+              const onClick = (e: MouseEvent) => {
+                if (d.type === "command") {
+                  command?.runCommand(d.message, false)
+                  e.preventDefault()
+                }
+              }
+
+              return (
+                <p key={i} onMouseDown={onClick} className={className}>{d.message} {d.times !== undefined && ` x ${d.times}`}</p>
+              )
+            })}
+          </div>
         }
       </div>
     </div>
