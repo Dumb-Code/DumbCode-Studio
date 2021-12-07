@@ -4,6 +4,7 @@ import CubePointTracker from "../../../views/modeler/logic/CubePointTracker";
 import { createModelingCommandRoot } from "../../command/commands/modeling/ModelingCommands";
 import { getUndefinedWritable, ReadableFile } from '../../util/FileTypes';
 import { LO } from '../../util/ListenableObject';
+import ReferenceImageHandler from "../../util/ReferenceImageHandler";
 import DcaTabs from '../animations/DcaTabs';
 import { loadDCMModel } from '../model/DCMLoader';
 import { DCMModel } from '../model/DcmModel';
@@ -21,7 +22,7 @@ export default class DcProject {
 
   readonly model: DCMModel
   readonly saveableFile = new LO(false)
-  modelWritableFile = getUndefinedWritable("Model File", [".dcm"])
+  modelWritableFile = getUndefinedWritable("Model File", ".dcm")
 
   readonly textureManager: TextureManager
   readonly animationTabs: DcaTabs
@@ -31,6 +32,8 @@ export default class DcProject {
 
   readonly cubePointTracker: CubePointTracker
   readonly modelerGumball: ModelerGumball
+
+  readonly referenceImageHandler = new ReferenceImageHandler(this.group)
 
   remoteLink?: RemoteRepo
   remoteUUID?: string

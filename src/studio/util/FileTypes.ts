@@ -1,4 +1,4 @@
-import { SVGSave, SVGDownload } from './../../components/Icons';
+import { SVGDownload, SVGSave } from './../../components/Icons';
 export const FileSystemsAccessApi = window.showOpenFilePicker !== undefined
 if (FileSystemsAccessApi) {
   console.log("Using FileSystemAccess where available.")
@@ -29,7 +29,7 @@ export const defaultWritable: WritableFile = {
 }
 
 //Gets the writeable file for where nothing has been defined.
-export const getUndefinedWritable = (description: string, accept: string[]): WritableFile => {
+export const getUndefinedWritable = (description: string, ...accept: string[]): WritableFile => {
   if (!FileSystemsAccessApi) {
     return defaultWritable
   }
