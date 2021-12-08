@@ -87,6 +87,10 @@ button {
     scrollbar-width: none;  /* Firefox */
 }
 
+.studio-scrollbar {
+  @apply scrollbar-thin scrollbar-thumb-green-700 scrollbar-track-green-800 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800 hover:scrollbar-thumb-blue-500
+}
+
 /**
   * This injects Tailwind's utility classes and any utility classes registered
   * by plugins.

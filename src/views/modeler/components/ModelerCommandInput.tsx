@@ -126,7 +126,7 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
 
         {/* Command feedback history */}
         {focused && logHistory && logHistory.length !== 0 && !!!commandBuilder && !!!activeCommand && (!!!avaliableCommands || avaliableCommands.length === 0) &&
-          <div ref={commandHistoryRef} className="max-h-32 p-1 bg-black bg-opacity-25 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-500 hover:scrollbar-thumb-gray-600 w-[calc(100%-3rem)] overflow-x-hidden overflow-y-auto">
+          <div ref={commandHistoryRef} className="max-h-32 p-1 bg-black bg-opacity-25 studio-scrollbar w-[calc(100%-3rem)] overflow-x-hidden overflow-y-auto">
             {logHistory.map((d, i) => {
               let className = ""
               if (d.type === "command") {

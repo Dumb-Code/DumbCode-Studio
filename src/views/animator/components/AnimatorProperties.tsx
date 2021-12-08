@@ -26,7 +26,7 @@ const AnimatorProperties = () => {
 
     const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
     return (
-        <div className="overflow-y-scroll h-full dark:bg-gray-800 bg-gray-200 scrollbar scrollbar-thin">
+        <div className="overflow-y-scroll h-full dark:bg-gray-800 bg-gray-200 studio-scrollbar">
             <AnimatorCubeProperties animation={animation} cubeName={cubeName} cube={singleSelectedCube} />
             <AnimatorKeyframeProperties animation={animation} />
             <AnimatorLoopingProperties animation={animation} />

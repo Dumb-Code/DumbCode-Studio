@@ -45,7 +45,7 @@ const ProjectAnimations = () => {
                     </ClickableInput>
                 </p>
             </div>
-            <div className="overflow-y-scroll h-full w-full scrollbar scrollbar-thin">
+            <div className="overflow-y-scroll h-full w-full studio-scrollbar">
                 <div className="h-0 flex flex-col m-1 mt-2">
                     {hasProject && <AnimationEntries project={getSelectedProject()} />}
                 </div>

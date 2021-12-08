@@ -46,7 +46,7 @@ const ProjectTextures = () => {
                         <ButtonWithTooltip className="icon-button" onClick={addGroup} tooltip="New Texture Group"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
                     </p>
                 </div>
-                <div className="flex flex-col overflow-y-scroll overflow-x-hidden h-3/6 w-full pr-6 scrollbar scrollbar-thin">
+                <div className="flex flex-col overflow-y-scroll overflow-x-hidden h-3/6 w-full pr-6 studio-scrollbar">
                     {hasProject && <GroupList project={getSelectedProject()} />}
                 </div>
                 <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
@@ -121,7 +121,7 @@ const TextureLists = ({ project }: { project: DcProject }) => {
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
     if (selectedGroup.isDefault) {
         return (
-            <div className="flex-grow flex-col border-l border-black overflow-y-scroll overflow-x-hidden pr-4 scrollbar scrollbar-thin" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+            <div className="flex-grow flex-col dark:border-l border-black overflow-y-scroll overflow-x-hidden pr-4 studio-scrollbar" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
                 <SelectedTexturesList project={project} />
             </div>
         )
@@ -132,7 +132,7 @@ const TextureLists = ({ project }: { project: DcProject }) => {
                 <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black mb-2">
                     <p className="flex-grow">SELECTED</p>
                 </div>
-                <div className="overflow-y-scroll overflow-x-hidden scrollbar scrollbar-thin h-full">
+                <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full">
                     <SelectedTexturesList project={project} />
                 </div>
             </div>
@@ -140,7 +140,7 @@ const TextureLists = ({ project }: { project: DcProject }) => {
                 <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black mb-2">
                     <p className="flex-grow">AVAILABLE</p>
                 </div>
-                <div className="overflow-y-scroll overflow-x-hidden scrollbar scrollbar-thin h-full">
+                <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full">
                     <NonSelectedTextures project={project} />
                 </div>
             </div>

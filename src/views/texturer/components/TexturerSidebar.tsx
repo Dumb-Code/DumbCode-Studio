@@ -68,7 +68,7 @@ const TexturerLayers = () => {
             <div className="dark:bg-gray-800 bg-gray-200 dark:text-gray-400 text-black font-bold text-xs p-1">
                 <TextureGroupDropdown />
             </div>
-            <div className="h-full overflow-y-scroll pr-2 scrollbar scrollbar-thin">
+            <div className="h-full overflow-y-scroll pr-2 studio-scrollbar">
                 <TexturerLayer name="Some Texture" selected={false} />
                 <TexturerLayer name="Some Texture" selected={false} />
                 <TexturerLayer name="Some Texture" selected={true} />

@@ -40,7 +40,7 @@ const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElemen
                             <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
                         </button>
                     </div>
-                    <div className="dark:border-r border-black flex flex-col overflow-y-scroll flex-grow scrollbar scrollbar-thin">
+                    <div className="dark:border-r border-black flex flex-col overflow-y-scroll flex-grow studio-scrollbar">
                         {projects.map((p, i) =>
                             <RepositoryEntry
                                 key={i}
@@ -61,7 +61,7 @@ const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElemen
                             <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
                         </button>
                     </div>
-                    <div className="flex flex-col overflow-y-scroll pr-2 h-full scrollbar scrollbar-thin">
+                    <div className="flex flex-col overflow-y-scroll pr-2 h-full studio-scrollbar">
                         {loadedRepo !== null && zippedProjects !== false &&
                             zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} />)
                         }
