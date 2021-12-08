@@ -1,5 +1,5 @@
 import { RefObject, useEffect, useMemo, useRef, useState } from "react";
-import { SVGCross, SVGTrash } from "../../../components/Icons"
+import { SVGCross, SVGTrash } from "../../../components/Icons";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { useProjectPageContext } from "../../../contexts/ProjectPageContext";
 import { useStudio } from "../../../contexts/StudioContext";
@@ -40,7 +40,7 @@ const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElemen
                             <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
                         </button>
                     </div>
-                    <div className="dark:border-r border-black flex flex-col overflow-y-scroll flex-grow">
+                    <div className="dark:border-r border-black flex flex-col overflow-y-scroll flex-grow scrollbar scrollbar-thin">
                         {projects.map((p, i) =>
                             <RepositoryEntry
                                 key={i}
@@ -55,13 +55,13 @@ const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElemen
                     </div>
                 </div>
                 <div className="flex flex-col flex-grow">
-                    <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b dark:border-r border-black flex flex-row items-center">
+                    <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b border-black flex flex-row items-center">
                         <p className="flex-grow my-0.5 ml-1">REMOTE PROJECTS</p>
                         <button className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteProjectsDialogBox />)} >
                             <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
                         </button>
                     </div>
-                    <div className="flex flex-col overflow-y-scroll pr-2 h-full">
+                    <div className="flex flex-col overflow-y-scroll pr-2 h-full scrollbar scrollbar-thin">
                         {loadedRepo !== null && zippedProjects !== false &&
                             zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} />)
                         }

@@ -36,7 +36,7 @@ const ModelerProperties = () => {
                     <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)} />
                 </div>
                 <div
-                    className="transition-height ease-in-out duration-200"
+                    className="transition-height ease-in-out duration-200 overflow-y-scroll scrollbar-thin"
                     ref={toggleRef}
                     style={{ height: propertiesActive ? propertiesHeight : 0 }}
                 >

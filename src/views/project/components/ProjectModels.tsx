@@ -40,7 +40,7 @@ const ProjectModels = () => {
                     </ClickableInput>
                 </p>
             </div>
-            <div className="overflow-y-scroll h-full w-full">
+            <div className="overflow-y-scroll h-full w-full scrollbar scrollbar-thin">
                 <div className="h-0 flex flex-col m-1 mt-2">
                     {hasProject && <ModelEntries />}
                 </div>

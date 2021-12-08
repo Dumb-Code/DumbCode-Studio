@@ -12,7 +12,7 @@ const AnimatorTimeline = () => {
 
     const [animation] = useListenableObject(selectedProject.animationTabs.selectedAnimation)
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full pt-2 overflow-x-hidden overflow-y-scroll">
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full pt-2 overflow-x-hidden overflow-y-scroll scrollbar scrollbar-thin">
             {animation !== null && <AnimationLayers animation={animation} />}
         </div>
     )

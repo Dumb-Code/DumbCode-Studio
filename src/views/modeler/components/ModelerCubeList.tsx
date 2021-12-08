@@ -124,7 +124,7 @@ const ModelerCubeList = () => {
                     <SVGCube className="h-4 w-4 mt-1.5" />
                 </ CubeListButton>
             </div>
-            <div className="border-r border-black flex flex-col w-full pr-2 pl-1 overflow-x-hidden overflow-y-scroll flex-grow">
+            <div className="flex flex-col w-full pr-2 pl-1 overflow-x-hidden overflow-y-scroll flex-grow scrollbar scrollbar-thin">
                 <CubeList model={model} selectedCubeManager={project.selectedCubeManager} />
             </div>
         </div>
