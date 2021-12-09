@@ -227,7 +227,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       modifyActionsBuffer.push(a)
     })
     flattenBuffer()
-    return actions
+    return result
   }
 
   undo() {
