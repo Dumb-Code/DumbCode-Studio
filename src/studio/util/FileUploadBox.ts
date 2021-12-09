@@ -1,5 +1,5 @@
-import { RefObject, useRef, useState, useEffect } from 'react';
-import { createReadableFile, FileSystemsAccessApi, createReadableFileExtended, ReadableFile } from './FileTypes';
+import { RefObject, useEffect, useRef, useState } from 'react';
+import { createReadableFile, createReadableFileExtended, FileSystemsAccessApi, ReadableFile } from './FileTypes';
 
 export const useFileUpload = <T extends HTMLElement,>(
   extensions: string[],

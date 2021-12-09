@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react"
-import React, { FC, Fragment, useContext, useState } from "react"
+import React, { FC, Fragment, useContext, useEffect, useState } from "react"
 import { useOptions } from "../contexts/OptionsContext"
 
 type DialogContextType = {
@@ -16,15 +16,29 @@ const OpenedDialogContext = React.createContext<OpenedDialogContextType>({
   showDialogBox: false,
 })
 
+type JSXSetter = (val: () => JSX.Element) => void
+let currentSetter: JSXSetter | null = null
+export const _unsafe_setDialogBox: JSXSetter = val => currentSetter?.(val)
+
 const DialogBoxes: FC = ({ children }) => {
   const [ElementFunc, setElementFunc] = useState<null | (() => JSX.Element)>(null)
   const [showDialogBox, setShowDialogBox] = useState(false)
+
+
+  useEffect(() => {
+    if (currentSetter !== null) {
+      throw new Error("Callback is already set")
+    }
+    currentSetter = val => {
+      setElementFunc(() => val)
+      setShowDialogBox(true)
+    }
+    return () => { currentSetter = null }
+  }, [])
+
   return (
     <DialogContext.Provider value={{
-      setDialogBox: val => {
-        setElementFunc(() => val)
-        setShowDialogBox(true)
-      }
+      setDialogBox: val => currentSetter?.(val)
     }}>
       <OpenedDialogContext.Provider value={{
         clear: () => setShowDialogBox(false),

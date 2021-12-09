@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { BoxBufferGeometry, Camera, EventDispatcher, Group, Mesh, MeshLambertMaterial, OrthographicCamera, Quaternion, Raycaster, Vector3 } from "three";
+import { BoxBufferGeometry, Camera, EventDispatcher, Group, Mesh, MeshLambertMaterial, Object3D, OrthographicCamera, Quaternion, Vector3 } from "three";
+import { setIntersectType } from '../../../studio/util/ObjectClickedHook';
 import SelectedCubeManager from "../../../studio/util/SelectedCubeManager";
 import { useStudio } from './../../../contexts/StudioContext';
 import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
@@ -74,13 +75,14 @@ export default class CubePointTracker extends EventDispatcher {
 
           const point: TrackedPoint = { x, y, z, mesh: visualMesh }
           pickerMesh.userData._point = point
+          setIntersectType(pickerMesh, "pointtracker", () => this.enabled)
           this.points.push(point)
         }
       }
     }
   }
 
-  onMouseDown() {
+  onMouseUp() {
     if (this.enabled) {
       let intersected = this.intersected
       const { cubeToPointTo, callback } = this
@@ -95,7 +97,7 @@ export default class CubePointTracker extends EventDispatcher {
     return false
   }
 
-  update(camera: Camera, raycaster: Raycaster) {
+  update(camera: Camera, intersectedObject?: Object3D) {
     const selected = this.selectedCubeManager.selected.value
 
     const mouseOverMesh = this.selectedCubeManager.mouseOverMesh
@@ -146,15 +148,15 @@ export default class CubePointTracker extends EventDispatcher {
         p.mesh.scale.set(1, 1, 1).multiplyScalar(factor / 7);
       })
 
-      //Raytrace under every helper point
-      this.pickerPoints.forEach(p => p.visible = true)
-      raycaster.setFromCamera(this.selectedCubeManager.mouse, camera)
-      const intersected = raycaster.intersectObjects(this.pickerPoints, false)
-      this.pickerPoints.forEach(p => p.visible = false)
+      // //Raytrace under every helper point
+      // this.pickerPoints.forEach(p => p.visible = true)
+      // raycaster.setFromCamera(this.selectedCubeManager.mouse, camera)
+      // const intersected = raycaster.intersectObjects(this.pickerPoints, false)
+      // this.pickerPoints.forEach(p => p.visible = false)
 
       //If intersects any, get the first intersected point (closes).
-      if (intersected.length > 0) {
-        const closest = intersected[0].object as Mesh<BoxBufferGeometry, MeshLambertMaterial>
+      if (intersectedObject instanceof Mesh) {
+        const closest = intersectedObject as Mesh<BoxBufferGeometry, MeshLambertMaterial>
 
         //If doesn't equal the current intersected, set the current intersected color to normal, and set the color to highligghed
         if (this.intersected !== closest) {
@@ -198,12 +200,10 @@ export default class CubePointTracker extends EventDispatcher {
 }
 
 export const usePointTracking = () => {
-  const { onMouseUp, onFrameListeners, getSelectedProject, getCamera, raycaster } = useStudio()
+  const { onMouseUp, onFrameListeners, getSelectedProject, raycaster } = useStudio()
   const { cubePointTracker, modelerGumball } = getSelectedProject()
 
   useEffect(() => {
-    const onMouseDownlistener = () => cubePointTracker.onMouseDown()
-    const onFrameListener = () => cubePointTracker.update(getCamera(), raycaster)
     const onEnableEvent = () => {
       const reasons = modelerGumball.blockedReasons.value
       if (!reasons.includes("point_tracker")) {
@@ -216,15 +216,11 @@ export const usePointTracking = () => {
         modelerGumball.blockedReasons.value = modelerGumball.blockedReasons.value.filter(v => v !== "point_tracker")
       }
     }
-    onMouseUp.addListener(10, onMouseDownlistener)
-    onFrameListeners.add(onFrameListener)
     cubePointTracker.addEventListener("enable", onEnableEvent)
     cubePointTracker.addEventListener("disable", onDisableEvent)
     return () => {
-      onMouseUp.removeListener(onMouseDownlistener)
-      onFrameListeners.delete(onFrameListener)
       cubePointTracker.removeEventListener("enable", onEnableEvent)
       cubePointTracker.removeEventListener("disable", onDisableEvent)
     }
-  }, [onMouseUp, getCamera, cubePointTracker, onFrameListeners, raycaster, modelerGumball])
+  }, [onMouseUp, cubePointTracker, onFrameListeners, raycaster, modelerGumball])
 }

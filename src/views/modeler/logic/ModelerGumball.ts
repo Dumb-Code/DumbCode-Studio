@@ -5,6 +5,7 @@ import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
 import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
 import { LockerType } from './../../../studio/util/CubeLocker';
+import { useListenableObject } from './../../../studio/util/ListenableObject';
 import CubePointTracker from './CubePointTracker';
 
 type StartingCacheData = {
@@ -143,7 +144,7 @@ export class ModelerGumball {
 
 export const useModelerGumball = () => {
   const { getSelectedProject, transformControls } = useStudio()
-  const { selectedCubeManager, modelerGumball: gumball, model, cubePointTracker } = getSelectedProject()
+  const { selectedCubeManager, modelerGumball: gumball, model, cubePointTracker, referenceImageHandler } = getSelectedProject()
 
   const getCubes = useCallback((selected: readonly string[] = selectedCubeManager.selected.value) => {
     return selected.map(cube => model.identifierCubeMap.get(cube)).filter(c => c !== undefined) as readonly DCMCube[]
@@ -151,7 +152,12 @@ export const useModelerGumball = () => {
 
   const selectedCubes = useRef<readonly DCMCube[]>([])
 
+  const [selectedImage] = useListenableObject(referenceImageHandler.selectedImage)
+
   useEffect(() => {
+    if (selectedImage !== null) {
+      return
+    }
     //TODO: move the callbacks to the ModelerGumball class
     const updateObjectMode = ({
       mode = gumball.object_transformMode.value,
@@ -235,7 +241,6 @@ export const useModelerGumball = () => {
     }
 
     const changeGumballMode = (val = gumball.gumball_move_mode.value) => transformControls.mode = val
-
 
 
 
@@ -428,6 +433,6 @@ export const useModelerGumball = () => {
       selectedCubeManager.selected.removeListener(updateSelectedCubes)
       gumball.gumball_auto_move.removeListener(moveWhenAutomove)
     }
-  }, [getCubes, model, gumball, selectedCubeManager.selected, transformControls, cubePointTracker])
+  }, [getCubes, model, gumball, selectedCubeManager.selected, transformControls, cubePointTracker, selectedImage])
 
 }

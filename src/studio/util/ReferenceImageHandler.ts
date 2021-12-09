@@ -1,17 +1,74 @@
-import { DoubleSide, Group, Mesh, MeshBasicMaterial, NearestFilter, PlaneBufferGeometry, Texture } from 'three';
+import { useEffect } from 'react';
+import { DoubleSide, Group, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneBufferGeometry, Texture } from 'three';
+import { useStudio } from './../../contexts/StudioContext';
+import { ReadableFile } from './FileTypes';
 import { LO } from './ListenableObject';
+import { setIntersectType } from './ObjectClickedHook';
 export default class ReferenceImageHandler {
 
   readonly group: Group
 
   readonly opened = new LO(false)
+
   readonly images = new LO<readonly ReferenceImage[]>([])
+  readonly selectedImage = new LO<ReferenceImage | null>(null)
+
+  private intersected?: ReferenceImage
 
   constructor(
     group: Group,
   ) {
     this.group = new Group()
     group.add(this.group)
+  }
+
+  uploadFile = async (readFile: ReadableFile) => {
+    const file = await readFile.asFile()
+    const reader = new FileReader()
+    reader.onload = () => {
+      const res = reader.result
+      if (typeof res === "string") {
+        const img = document.createElement("img")
+        img.onload = () => {
+          this.images.value = this.images.value.concat(new ReferenceImage(this, img, readFile.name))
+        }
+        img.src = res
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  update = (object?: Object3D) => {
+    const intersected = object?.userData?.['img'] as ReferenceImage | undefined
+
+    if (this.intersected === intersected) {
+      return
+    }
+    if (this.intersected && this.intersected !== this.selectedImage.value) {
+      this.intersected.mesh.material = this.intersected.normal
+      this.intersected.overlayMesh.visible = false
+    }
+    if (intersected && intersected !== this.selectedImage.value) {
+      intersected.mesh.material = intersected.highlight
+      intersected.overlayMesh.visible = true
+      intersected.overlayMesh.material = intersected.overlayHighlight
+    }
+    this.intersected = intersected
+  }
+
+  onMouseUp = () => {
+    if (this.selectedImage.value) {
+      const selected = this.selectedImage.value
+      selected.mesh.material = selected.normal
+      selected.overlayMesh.visible = false
+    }
+    if (this.intersected) {
+      const selected = this.intersected
+      selected.mesh.material = selected.selected
+      selected.overlayMesh.visible = true
+      selected.overlayMesh.material = selected.overlaySelected
+    }
+    this.selectedImage.value = this.intersected ?? null
   }
 
 }
@@ -23,17 +80,45 @@ export class ReferenceImage {
   readonly opacity: LO<number>
   readonly canSelect: LO<boolean>
 
-  private readonly mesh: Mesh<PlaneBufferGeometry, MeshBasicMaterial>
+  readonly position: LO<readonly [number, number, number]>
+  readonly rotation: LO<readonly [number, number, number]>
+
+  readonly scale: LO<number>
+  readonly flipX: LO<boolean>
+  readonly flipY: LO<boolean>
+
+  readonly mesh: Mesh<PlaneBufferGeometry, MeshBasicMaterial>
+  readonly overlayMesh: Mesh<PlaneBufferGeometry, MeshBasicMaterial>
+
+  readonly normal: MeshBasicMaterial
+  readonly highlight: MeshBasicMaterial
+  readonly selected: MeshBasicMaterial
+
+  readonly overlayHighlight: MeshBasicMaterial
+  readonly overlaySelected: MeshBasicMaterial
+
   constructor(
     handler: ReferenceImageHandler,
     readonly img: HTMLImageElement,
-    name = "New Reference Image",
+    name: string,
     opacity = 100,
-    canSelect = true
+    canSelect = true,
+    position: readonly [number, number, number] = [0, 0, 0],
+    rotation: readonly [number, number, number] = [0, 0, 0],
+    scale = 1,
+    flipX = false,
+    flipY = false,
   ) {
     this.name = new LO(name)
     this.opacity = new LO(opacity)
     this.canSelect = new LO(canSelect)
+
+    this.position = new LO(position)
+    this.rotation = new LO(rotation)
+
+    this.scale = new LO(scale)
+    this.flipX = new LO(flipX)
+    this.flipY = new LO(flipY)
 
     this.opacity.addListener(val => this.mesh.material.opacity = val)
 
@@ -49,9 +134,56 @@ export class ReferenceImage {
     const height = aspect > 1 ? startSize / aspect : startSize
 
     //Create the mesh
-    const mat = new MeshBasicMaterial({ map: texture, side: DoubleSide, transparent: true, opacity })
+    this.normal = new MeshBasicMaterial({ map: texture, side: DoubleSide, transparent: true, opacity })
+
+    this.highlight = this.normal.clone()
+    this.highlight.color.setHex(0xFFAAAA)
+    this.overlayHighlight = new MeshBasicMaterial({ side: DoubleSide, transparent: true, opacity: 0.25, color: 0xFFAAAA })
+
+    this.selected = this.normal.clone()
+    this.selected.color.setHex(0xAAAAFF)
+    this.overlaySelected = new MeshBasicMaterial({ side: DoubleSide, transparent: true, opacity: 0.25, color: 0xAAAAFF })
+
     const geometry = new PlaneBufferGeometry(width, height)
-    this.mesh = new Mesh(geometry, mat)
+    this.mesh = new Mesh(geometry, this.normal)
+
+    this.overlayMesh = new Mesh(geometry)
+    this.overlayMesh.visible = false
+    this.mesh.add(this.overlayMesh)
+
+    setIntersectType(this.mesh, "refimg", () => this.canSelect.value)
+    this.mesh.userData['img'] = this
     handler.group.add(this.mesh)
+
+    this.position.addAndRunListener(value => this.mesh.position.fromArray(value))
+    this.rotation.addAndRunListener(value => {
+      this.mesh.rotation.set(
+        value[0] * Math.PI / 180,
+        value[1] * Math.PI / 180,
+        value[2] * Math.PI / 180
+      )
+    })
+
+
+    const updateScale = ({ scale = this.scale.value, flipX = this.flipX.value, flipY = this.flipY.value } = {}) => {
+      this.mesh.scale.set(
+        flipX ? -scale : scale,
+        flipY ? -scale : scale,
+        scale
+      )
+    }
+    this.scale.addAndRunListener(scale => updateScale({ scale }))
+    this.flipX.addListener(flipX => updateScale({ flipX }))
+    this.flipY.addListener(flipY => updateScale({ flipY }))
   }
+}
+
+export const useReferenceImageMangement = () => {
+  const { getSelectedProject, onMouseUp, transformControls } = useStudio()
+  const { referenceImageHandler, selectedCubeManager } = getSelectedProject()
+  useEffect(() => {
+    const onMouseUpListener = (e: MouseEvent) => {
+
+    }
+  }, [onMouseUp, referenceImageHandler, selectedCubeManager, transformControls])
 }

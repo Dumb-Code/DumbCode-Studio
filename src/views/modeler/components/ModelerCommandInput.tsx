@@ -84,6 +84,7 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
           onKeyDown={e => {
             if (e.key === "Enter") {
               command?.runInput()
+              e.preventDefault()
             } else if (e.key === "Escape") {
               command?.exitBuilder()
             }
@@ -97,7 +98,7 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
           {lastCommandErrorOutput}
         </div>
       </div>
-      <div className="relative w-full inline-block z-50 transform translate-x-10 text-xs mt-1 dark:text-white text-black">
+      <div className="relative w-full inline-block z-10 transform translate-x-10 text-xs mt-1 dark:text-white text-black">
 
 
         {/* When typing a command, show all the possible options */}

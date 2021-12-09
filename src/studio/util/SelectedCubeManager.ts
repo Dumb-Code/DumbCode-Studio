@@ -1,16 +1,12 @@
-import React, { useEffect } from 'react';
-import { Camera, Event, Mesh, Raycaster, Vector2 } from 'three';
+import { useEffect } from 'react';
+import { Event, Mesh, Object3D, Vector2 } from 'three';
 import { useStudio } from '../../contexts/StudioContext';
 import DcProject from '../formats/project/DcProject';
-import { DCMCube, DCMModel } from './../formats/model/DcmModel';
+import { DCMCube } from './../formats/model/DcmModel';
 import { LO } from './ListenableObject';
 export default class SelectedCubeManager {
-  mouseOverDiv = false
   disabled = false
-  previousEventMouse = new Vector2()
   public readonly mouse = new Vector2()
-
-  mouseDown = false
 
   readonly listeners: Set<(project: DcProject) => boolean> = new Set()
 
@@ -20,46 +16,23 @@ export default class SelectedCubeManager {
 
   keepCurrentCubes = false
 
-  onMouseMove(rect: DOMRect, x: number, y: number, fromEvent: boolean) {
-    this.mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
-    this.mouse.y = - ((y - rect.top) / rect.height) * 2 + 1;
-
-    if (fromEvent) {
-      this.previousEventMouse.set(x, y)
-      this.mouseOverDiv = x > rect.left && x < rect.right && y > rect.top && y < rect.bottom
-    }
-  }
-
-  onMouseDown() {
-    this.mouseDown = true
-  }
-
-  onMouseReleasedAnywhere() {
-    if (!this.mouseDown) {
-      return
-    }
-    this.mouseDown = false
-  }
-
   onMouseUpOnCanvas(project: DcProject, ctrlPressed: boolean) {
-    if (this.mouse.x >= -1 && this.mouse.x <= 1 && this.mouse.y >= -1 && this.mouse.y <= 1) {
-      let ignore = false
-      this.listeners.forEach(listener => {
-        ignore = listener(project) || ignore
-      })
-      if (!ignore) {
-        if (this.mouseOverMesh !== null) {
-          const cube = this.getCube(this.mouseOverMesh)
-          this.keepCurrentCubes = ctrlPressed
-          cube.selected.value = !cube.selected.value
-          this.keepCurrentCubes = false
-        } else {
-          project.model.identifierCubeMap.forEach(v => {
-            if (v.selected.value) {
-              v.selected.value = false
-            }
-          })
-        }
+    let ignore = false
+    this.listeners.forEach(listener => {
+      ignore = listener(project) || ignore
+    })
+    if (!ignore) {
+      if (this.mouseOverMesh !== null) {
+        const cube = this.getCube(this.mouseOverMesh)
+        this.keepCurrentCubes = ctrlPressed
+        cube.selected.value = !cube.selected.value
+        this.keepCurrentCubes = false
+      } else {
+        project.model.identifierCubeMap.forEach(v => {
+          if (v.selected.value) {
+            v.selected.value = false
+          }
+        })
       }
     }
   }
@@ -112,26 +85,22 @@ export default class SelectedCubeManager {
   }
 
 
-  update(raycaster: Raycaster, camera: Camera, model: DCMModel) {
-    if (this.disabled || !this.mouseOverDiv) {
+  update(intersected?: Object3D) {
+    if (this.disabled) {
       return
     }
 
-    if (!this.mouseDown) {
-      const intersections = this.gatherIntersections(raycaster, camera, model)
-      if (intersections.length > 0) {
-        const mesh = intersections[0].object as Mesh
-        this.onMouseOverMesh(mesh)
-      } else if (this.mouseOverMesh !== null) {
-        this.onMouseOffMesh(this.mouseOverMesh)
-      }
+    if (intersected instanceof Mesh) {
+      this.onMouseOverMesh(intersected as Mesh)
+    } else if (this.mouseOverMesh !== null) {
+      this.onMouseOffMesh(this.mouseOverMesh)
     }
   }
 
-  gatherIntersections(raycaster: Raycaster, camera: Camera, model: DCMModel) {
-    raycaster.setFromCamera(this.mouse, camera)
-    return raycaster.intersectObjects(model.modelGroup.children, true)
-  }
+  // gatherIntersections(raycaster: Raycaster, camera: Camera, model: DCMModel) {
+  //   raycaster.setFromCamera(this.mouse, camera)
+  //   return raycaster.intersectObjects(model.modelGroup.children, true)
+  // }
 
 }
 
@@ -143,10 +112,6 @@ export const useSelectedCubeManager = () => {
   const { selectedCubeManager: cubeManager, model } = project
 
   useEffect(() => {
-    const callback = () => {
-      cubeManager.update(raycaster, getCamera(), model)
-    }
-
     //When the transform controls are in use, block this
     const onMouseDownTransformControlBlocking = () => {
       return transformControls.dragging && transformControls.axis !== null
@@ -168,24 +133,9 @@ export const useSelectedCubeManager = () => {
       }
     }
 
-    const mouseMove = (e: MouseEvent) => cubeManager.onMouseMove(dom.getBoundingClientRect(), e.clientX, e.clientY, true)
-    const mouseDown = () => cubeManager.onMouseDown()
-    const mouseUpAnywhere = () => cubeManager.onMouseReleasedAnywhere()
-
-    const mouseUpCanvas = (e: React.MouseEvent) => cubeManager.onMouseUpOnCanvas(project, e.ctrlKey)
-    onFrameListeners.add(callback)
-    document.addEventListener("pointermove", mouseMove)
-    document.addEventListener("pointerdown", mouseDown)
-    document.addEventListener("pointerup", mouseUpAnywhere, true)
-    onMouseUp.addListener(999, mouseUpCanvas, true)
     cubeManager.listeners.add(onMouseDownTransformControlBlocking)
     transformControls.addEventListener("axis-changed", onTransformControlsAxisHover)
     return () => {
-      onFrameListeners.delete(callback)
-      document.removeEventListener("pointermove", mouseMove)
-      document.removeEventListener("pointerdown", mouseDown)
-      document.removeEventListener("pointerup", mouseUpAnywhere, true)
-      onMouseUp.removeListener(mouseUpCanvas)
       cubeManager.listeners.delete(onMouseDownTransformControlBlocking)
       transformControls.removeEventListener("axis-changed", onTransformControlsAxisHover)
     }

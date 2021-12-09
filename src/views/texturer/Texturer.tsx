@@ -1,14 +1,17 @@
+import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
+import { useStudio } from "../../contexts/StudioContext"
+import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
+import TexturerProperties from "./components/TexturerProperties"
 import TexturerSidebar from "./components/TexturerSidebar"
 import TexturerTools from "./components/TexturerTools"
-import TexturerProperties from "./components/TexturerProperties"
 import { TexturerViewport } from "./components/TexturerViewport"
-import { useStudio } from "../../contexts/StudioContext"
-import { useEffect } from "react"
 
 const Texturer = () => {
     const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
+
+    useObjectUnderMouse()
 
     useEffect(() => {
         const onFrame = () => {

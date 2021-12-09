@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
+import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import AnimatorGumballPropertiesBar from "./components/AnimatorGumballPropertiesBar"
 import AnimatorProperties from "./components/AnimatorProperties"
 import AnimatorScrubBar from "./components/AnimatorScrubBar"
@@ -13,6 +14,8 @@ const Animator = () => {
 
     const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
+
+    useObjectUnderMouse()
 
     useEffect(() => {
         const onFrame = (deltaTime: number) => {

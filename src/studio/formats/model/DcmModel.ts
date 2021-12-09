@@ -6,6 +6,7 @@ import SelectedCubeManager from '../../util/SelectedCubeManager';
 import DcProject from '../project/DcProject';
 import { SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
+import { setIntersectType } from './../../util/ObjectClickedHook';
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
@@ -345,6 +346,7 @@ export class DCMCube implements CubeParent {
     this.cubeGroup = new Group();
     this.cubeGrowGroup = new Group()
     this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.materials.normal)
+    setIntersectType(this.cubeMesh, "cube")
     children.forEach(child => this.cubeGroup.add(child.cubeGroup))
     this.createGroup()
 

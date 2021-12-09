@@ -1,9 +1,9 @@
 import { Matrix4, Quaternion, Vector3 } from 'three';
-import CubePointTracker from "../../../views/modeler/logic/CubePointTracker";
-import CubeLocker from "../../util/CubeLocker";
-import { Command } from "../Command";
-import { DCMCube, DCMModel } from './../../formats/model/DcmModel';
-import { CommandRunError } from './../CommandRunError';
+import CubePointTracker from "../../../../views/modeler/logic/CubePointTracker";
+import { DCMCube, DCMModel } from '../../../formats/model/DcmModel';
+import CubeLocker from "../../../util/CubeLocker";
+import { Command } from "../../Command";
+import { CommandRunError } from '../../CommandRunError';
 
 const worldPosVector = new Vector3()
 const tempCubePos = new Vector3()

@@ -18,6 +18,7 @@ export default class DcProject {
 
   readonly name: LO<string>
   readonly group = new Group()
+  readonly selectionGroup = new Group()
   readonly overlayGroup = new Group()
 
   readonly model: DCMModel
@@ -33,7 +34,7 @@ export default class DcProject {
   readonly cubePointTracker: CubePointTracker
   readonly modelerGumball: ModelerGumball
 
-  readonly referenceImageHandler = new ReferenceImageHandler(this.group)
+  readonly referenceImageHandler = new ReferenceImageHandler(this.selectionGroup)
 
   remoteLink?: RemoteRepo
   remoteUUID?: string
@@ -44,10 +45,11 @@ export default class DcProject {
     this.model = model
     model.parentProject = this
     this.textureManager = new TextureManager(this)
-    this.cubePointTracker = new CubePointTracker(this.selectedCubeManager, this.model, this.group)
+    this.cubePointTracker = new CubePointTracker(this.selectedCubeManager, this.model, this.selectionGroup)
     this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.model, this.group, this.cubePointTracker)
     this.animationTabs = new DcaTabs()
-    this.group.add(this.model.modelGroup)
+    this.group.add(this.selectionGroup)
+    this.selectionGroup.add(this.model.modelGroup)
     this.previousThreeTexture = null
 
     this.commandRoot = createModelingCommandRoot(this)
