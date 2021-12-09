@@ -246,5 +246,5 @@ export const useReferenceImageTransform = (image: ReferenceImage) => {
       referenceImageHandler.mode.removeListener(updateMode)
       referenceImageHandler.space.removeListener(updateSpace)
     }
-  }, [image, onMouseUp, referenceImageHandler, selectedCubeManager, transformControls])
+  }, [image, onMouseUp, referenceImageHandler, selectedCubeManager, transformControls, modelerGumball.blockedReasons])
 }
