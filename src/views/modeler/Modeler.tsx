@@ -3,7 +3,6 @@ import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
-import { useReferenceImageMangement } from "../../studio/util/ReferenceImageHandler"
 import ModelerCommandInput from "./components/ModelerCommandInput"
 import ModelerGumballPropertiesBar from "./components/ModelerGumballPropertiesBar"
 import ModelerShortcuts from "./components/ModelerShortcuts"
@@ -18,7 +17,6 @@ const Modeler = () => {
     useObjectUnderMouse()
     useModelerGumball()
     usePointTracking()
-    useReferenceImageMangement()
 
     useEffect(() => {
         const onFrame = () => {

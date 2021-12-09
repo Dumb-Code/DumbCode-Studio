@@ -1,3 +1,4 @@
+import Checkbox from "../components/Checkbox"
 import ClickableInput from "../components/ClickableInput"
 import { DblClickEditLO } from "../components/DoubleClickToEdit"
 import { useStudio } from "../contexts/StudioContext"
@@ -33,11 +34,16 @@ const ReferenceImageDialogBox = () => {
 }
 
 const ReferenceImageEntry = ({ image }: { image: ReferenceImage }) => {
+  const [canSelect, setCanSelect] = useListenableObject(image.canSelect)
   return (
     <div className="flex flex-row items-center dark:hover:bg-gray-600 hover:bg-gray-400">
       <img className="mr-2 border border-blue-500" width={100} src={image.img.src} alt="Reference" />
       <DblClickEditLO obj={image.name} className="flex-grow" inputClassName="w-full dark:text-black" />
-      <input type="range" />
+      <Checkbox
+        value={canSelect}
+        setValue={setCanSelect}
+        extraText="Can Select"
+      />
     </div>
   )
 }

@@ -4,18 +4,25 @@ import { ButtonList, GumballButton, GumballToggle } from "../../../components/Gu
 import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
 import { useListenableObject } from "../../../studio/util/ListenableObject";
+import ReferenceImageHandler from "../../../studio/util/ReferenceImageHandler";
 import { ModelerGumball } from "../logic/ModelerGumball";
 
 const ModelerGumballPropertiesBar = () => {
 
     const { getSelectedProject } = useStudio()
-    const gumball = getSelectedProject().modelerGumball
+    const { modelerGumball, referenceImageHandler } = getSelectedProject()
+
+    const [selectedImage] = useListenableObject(referenceImageHandler.selectedImage)
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full">
-            <GumballToggle toggle={gumball.enabled}>
-                <ModelerTransformationTypeSelect gumball={gumball} />
-            </GumballToggle>
+            {selectedImage === null ?
+                <GumballToggle toggle={modelerGumball.enabled}>
+                    <ModelerTransformationTypeSelect gumball={modelerGumball} />
+                </GumballToggle>
+                :
+                <ReferenceImageGumball referenceImageHandler={referenceImageHandler} />
+            }
         </div>
     )
 }
@@ -145,6 +152,24 @@ const ModelerGumballTransformationModeSelect = ({ gumball }: { gumball: ModelerG
                 </>
             }
         </>
+    )
+}
+
+const ReferenceImageGumball = ({ referenceImageHandler }: { referenceImageHandler: ReferenceImageHandler }) => {
+    const [space, setObjectSpace] = useListenableObject(referenceImageHandler.space);
+    const [moveMode, setMoveMode] = useListenableObject(referenceImageHandler.mode);
+    return (
+        <div className="flex flex-row">
+            <ButtonList>
+                <GumballButton title="Position" selected={moveMode === "translate"} onClick={() => setMoveMode("translate")} />
+                <GumballButton title="Rotation" selected={moveMode === "rotate"} onClick={() => setMoveMode("rotate")} />
+                <GumballButton title="Scale" selected={moveMode === "scale"} onClick={() => setMoveMode("scale")} />
+            </ButtonList>
+            <ButtonList>
+                <GumballButton title="Local" selected={space === "local"} onClick={() => setObjectSpace("local")} />
+                <GumballButton title="World" selected={space === "world"} onClick={() => setObjectSpace("world")} />
+            </ButtonList>
+        </div>
     )
 }
 
