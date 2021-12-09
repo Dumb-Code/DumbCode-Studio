@@ -45,7 +45,7 @@ const AnimatorTabBar = () => {
                     .map(a => <AnimatorTab key={a.identifier} animation={a} selected={a === selectedTab} onSelect={() => setSelectedTab(a)} />)
                 }
                 <div onClick={e => { e.stopPropagation(); createNewAnimation() }} className="bg-green-500 px-1 hover:bg-green-600 flex-shrink-0 flex flex-row rounded m-1 cursor-pointer group">
-                    <SVGPlus className="text-black dark:text-white group-hover:text-white h-4 w-4 mt-1" />
+                    <SVGPlus className="text-white group-hover:text-white h-4 w-4 mt-1" />
                 </div>
             </div>
         </div>
