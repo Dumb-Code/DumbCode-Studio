@@ -36,9 +36,9 @@ const ModelerProperties = () => {
                     <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)} />
                 </div>
                 <div
-                    className="transition-height ease-in-out duration-200 overflow-y-scroll scrollbar-thin"
                     ref={toggleRef}
-                    style={{ height: propertiesActive ? propertiesHeight : 0 }}
+                    style={{ height: propertiesActive ? propertiesHeight : 0, overflowY: "scroll" }}
+                    className="transition-height ease-in-out duration-200 studio-scrollbar"
                 >
                     <div className="pl-3">
                         <p className="dark:text-gray-400 text-black text-xs mt-1">CUBE NAME</p>
