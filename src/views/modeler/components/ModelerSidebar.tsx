@@ -1,3 +1,4 @@
+import HistoryList from "../../../components/HistoryList";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useListenableObject } from "../../../studio/util/ListenableObject";
 import ModelerCubeList from "./ModelerCubeList";
@@ -18,13 +19,12 @@ const ModelerSidebar = () => {
     }
 
     return (
-        <div className="flex flex-col-reverse h-full">
-            <div>
-                <ModelerProperties />
-            </div>
-            <div className="flex-grow min-h-0">
+        <div className="h-full overflow-y-scroll studio-scrollbar">
+            <div className="min-h-96">
                 <ModelerCubeList />
             </div>
+            <ModelerProperties />
+            <HistoryList />
         </div>
     )
 }

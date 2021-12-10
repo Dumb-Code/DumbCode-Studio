@@ -1,14 +1,14 @@
-import { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Slider from 'react-input-slider';
 import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
+import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import CubeInput from "../../../components/CubeInput";
 import CubeRotationInput from "../../../components/CubeRotationInput";
 import Dropup, { DropupItem } from "../../../components/Dropup";
-import { MinimizeButton } from "../../../components/MinimizeButton";
+import HistoryList from "../../../components/HistoryList";
 import Toggle from "../../../components/Toggle";
 import { useStudio } from "../../../contexts/StudioContext";
-import { PanelValue, StudioPanelsContext, usePanelValue } from "../../../contexts/StudioPanelsContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
 import DcaAnimation, { DcaKeyframe } from "../../../studio/formats/animations/DcaAnimation";
 import { DCMCube } from "../../../studio/formats/model/DcmModel";
@@ -26,31 +26,15 @@ const AnimatorProperties = () => {
 
     const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
     return (
-        <div className="overflow-y-scroll h-full dark:bg-gray-800 bg-gray-200 studio-scrollbar">
+        <div className="overflow-y-scroll h-full dark:bg-gray-800 bg-gray-200 studio-scrollbar pb-1">
             <AnimatorCubeProperties animation={animation} cubeName={cubeName} cube={singleSelectedCube} />
             <AnimatorKeyframeProperties animation={animation} />
             <AnimatorLoopingProperties animation={animation} />
             <AnimatorIKProperties animation={animation} />
             <AnimatorProgressionProperties animation={animation} />
+            <HistoryList />
         </div>
     )
-}
-
-const AnimationPanel: FC<{ panelName: { [K in keyof StudioPanelsContext]: StudioPanelsContext[K] extends PanelValue<boolean> ? K : never }[keyof StudioPanelsContext], heightClassname: string, title: string }> = ({ panelName, heightClassname, children, title }) => {
-    const [open, setOpen] = usePanelValue(panelName)
-
-    return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden pb-1">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                <p className="my-0.5 flex-grow">{title}</p>
-                <MinimizeButton active={open} toggle={() => setOpen(!open)} />
-            </div>
-            <div className={(open ? heightClassname : "h-0") + " transition-height ease-in-out duration-200"}>
-                {children}
-            </div>
-        </div>
-    )
-
 }
 
 const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaAnimation | null, cubeName: string | undefined, cube: DCMCube | undefined }) => {
@@ -78,7 +62,7 @@ const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaA
     }
 
     return (
-        <AnimationPanel title="CUBE PROPERTIES" heightClassname="h-76" panelName="animator_cube">
+        <CollapsableSidebarPannel title="CUBE PROPERTIES" heightClassname="h-76" panelName="animator_cube">
             <div
                 className="dark:text-white px-2 mt-2"
                 ref={useTooltipRef<HTMLDivElement>("Off (Local): Values shown are the changes the cube makes in that keyframe\nOn (Global) Values shown are the cubes actual values at the current time")}
@@ -120,7 +104,7 @@ const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaA
                     {...sharedProps}
                 />
             </div>
-        </AnimationPanel>
+        </CollapsableSidebarPannel>
     )
 }
 
@@ -128,41 +112,41 @@ const AnimatorKeyframeProperties = ({ animation }: { animation: DcaAnimation | n
     const [selectedKeyframes] = useListenableObjectNullable(animation?.selectedKeyframes)
     const singleSelectedKeyframe = selectedKeyframes !== undefined && selectedKeyframes.length === 1 ? selectedKeyframes[0] : undefined
     return (
-        <AnimationPanel title="KEYFRAME PROPERTIES" heightClassname="h-16" panelName="animator_kf">
+        <CollapsableSidebarPannel title="KEYFRAME PROPERTIES" heightClassname="h-16" panelName="animator_kf">
             <div className="w-full grid grid-cols-2 px-2 pt-1">
                 <TitledField title="KEYFRAME START" lo={singleSelectedKeyframe?.startTime} />
                 <TitledField title="KEYFRAME LENGTH" lo={singleSelectedKeyframe?.duration} />
             </div>
-        </AnimationPanel>
+        </CollapsableSidebarPannel>
     )
 }
 
 const AnimatorLoopingProperties = ({ animation }: { animation: DcaAnimation | null }) => {
     return (
-        <AnimationPanel title="LOOPING PROPERTIES" heightClassname="h-16" panelName="animator_looping">
+        <CollapsableSidebarPannel title="LOOPING PROPERTIES" heightClassname="h-16" panelName="animator_looping">
             <div className="w-full flex flex-row px-2 pt-1">
                 <LoopCheck title="LOOP" />
                 <TitledField title="START" />
                 <TitledField title="END" />
                 <TitledField title="TIME" />
             </div>
-        </AnimationPanel>
+        </CollapsableSidebarPannel>
     )
 }
 
 const AnimatorIKProperties = ({ animation }: { animation: DcaAnimation | null }) => {
     return (
-        <AnimationPanel title="INVERSE KINEMATICS" heightClassname="h-10" panelName="animator_ik">
+        <CollapsableSidebarPannel title="INVERSE KINEMATICS" heightClassname="h-10" panelName="animator_ik">
             <div className="w-full flex flex-row px-2 pt-1">
                 <IKCheck title="ANCHOR" animation={animation} />
             </div>
-        </AnimationPanel>
+        </CollapsableSidebarPannel>
     )
 }
 
 const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation | null }) => {
     return (
-        <AnimationPanel title="PROGRESSION POINTS" heightClassname="h-96" panelName="animator_pp">
+        <CollapsableSidebarPannel title="PROGRESSION POINTS" heightClassname="h-96" panelName="animator_pp">
             <div className="flex flex-col h-full p-2">
                 <div className="flex-grow dark:bg-gray-900 bg-gray-300 rounded w-full dark:text-gray-400 text-gray-800 pl-4">
                     graph goes here
@@ -202,7 +186,7 @@ const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation 
                     </div>
                 </div>
             </div>
-        </AnimationPanel>
+        </CollapsableSidebarPannel>
     )
 }
 

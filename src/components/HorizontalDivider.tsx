@@ -13,7 +13,7 @@ const HorizontalDivider = ({ max, min, value, setValue, toggleDragging }: { min:
     }
     const mouseMove = (e: MouseEvent) => {
       const dragged = startingDrag.current - e.clientY
-      setValue(Math.max(Math.min(startingValue.current + dragged, max), min))
+      setValue(Math.max(Math.min(startingValue.current - dragged, max), min))
     }
 
     const mouseUp = () => {

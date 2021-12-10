@@ -1,5 +1,6 @@
 import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
+import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 
 const TexturerSidebar = () => {
     return (
@@ -12,10 +13,7 @@ const TexturerSidebar = () => {
 
 const TextureProperties = () => {
     return (
-        <div className="mb-1">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1">
-                <p className="my-0.5 flex-grow">TEXTURE PROPERTIES</p>
-            </div>
+        <CollapsableSidebarPannel title="TEXTURE PROPERTIES" heightClassname="h-auto" panelName="texture_properties">
             <div className="flex flex-row py-1">
                 <div className="mx-1">
                     <p className="dark:text-gray-400 text-black text-xs">WIDTH</p>
@@ -26,7 +24,7 @@ const TextureProperties = () => {
                     <NumericInput />
                 </div>
             </div>
-        </div>
+        </CollapsableSidebarPannel>
     )
 }
 

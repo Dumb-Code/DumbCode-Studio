@@ -1,10 +1,6 @@
-import { useRef } from "react";
 import CubeInput from "../../../components/CubeInput";
 import CubeRotationInput from "../../../components/CubeRotationInput";
-import HorizontalDivider from "../../../components/HorizontalDivider";
-import { MinimizeButton } from "../../../components/MinimizeButton";
 import { useStudio } from "../../../contexts/StudioContext";
-import { usePanelValue } from "../../../contexts/StudioPanelsContext";
 import { DCMModel } from "../../../studio/formats/model/DcmModel";
 import { LO, useListenableMap, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 
@@ -18,26 +14,14 @@ const ModelerProperties = () => {
 
     const firstSelected = oneSelected ? cubeMap.get(selected[0]) : undefined
 
-    const [propertiesActive, setPropertiesActive] = usePanelValue("model_cube")
-    const [propertiesHeight, setPropertiesHeight] = usePanelValue("model_cube_size")
-
-    const toggleRef = useRef<HTMLDivElement>(null)
-
     return (
         <>
-            <HorizontalDivider max={430} min={50} value={propertiesHeight} setValue={setPropertiesHeight} toggleDragging={val => {
-                if (toggleRef.current) {
-                    toggleRef.current.className = val ? "" : "transition-height ease-in-out duration-200"
-                }
-            }} />
             <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden">
                 <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                     <p className="my-0.5 flex-grow">CUBE PROPERTIES</p>
-                    <MinimizeButton active={propertiesActive} toggle={() => setPropertiesActive(!propertiesActive)} />
                 </div>
                 <div
-                    ref={toggleRef}
-                    style={{ height: propertiesActive ? propertiesHeight : 0, overflowY: "scroll" }}
+                    
                     className="transition-height ease-in-out duration-200 studio-scrollbar"
                 >
                     <div className="pl-3">

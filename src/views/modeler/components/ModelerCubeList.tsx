@@ -1,9 +1,12 @@
 import { FC, MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
+import HorizontalDivider from '../../../components/HorizontalDivider';
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { useOptions } from '../../../contexts/OptionsContext';
 import { useStudio } from '../../../contexts/StudioContext';
+import { usePanelValue } from '../../../contexts/StudioPanelsContext';
 import { useTooltipRef } from '../../../contexts/TooltipContext';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
@@ -99,34 +102,43 @@ const ModelerCubeList = () => {
         }
     }, [])
 
+    const [propertiesHeight, setPropertiesHeight] = usePanelValue("model_cube_size")
 
+    const toggleRef = useRef<HTMLDivElement>(null)
+    const [propertiesActive, setPropertiesActive] = usePanelValue("cube_list")
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col h-full">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 twxt-black font-bold text-xs p-1">
-                <p className="flex-grow my-0.5">CUBE LIST</p>
-            </div>
-            <div className="flex flex-row px-1 dark:bg-gray-900 bg-gray-200 pb-1 pt-0.5">
-                <CubeListButton onClick={createSiblingCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Sibling Cube">
-                    <SVGPlus className="h-6 w-6" />
-                    <SVGCube className="h-5 w-5 mt-0.5" />
-                </ CubeListButton>
-                <CubeListButton onClick={createChildCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Child Cube">
-                    <SVGPlus className="h-6 w-6" />
-                    <SVGCube className="h-5 w-5 mt-0.5" />
-                    <SVGCube className="h-4 w-4 mt-1.5" />
-                </ CubeListButton>
-                <CubeListButton onClick={deleteCubesKeepChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube">
-                    <SVGTrash className="h-5 w-5 mt-0.5" />
-                </ CubeListButton>
-                <CubeListButton onClick={deleteCubesAndChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube And Children">
-                    <SVGTrash className="h-5 w-5 mt-0.5" />
-                    <SVGCube className="h-5 w-5 mt-0.5" />
-                    <SVGCube className="h-4 w-4 mt-1.5" />
-                </ CubeListButton>
-            </div>
-            <div className="flex flex-col w-full pr-2 pl-1 overflow-x-hidden overflow-y-scroll flex-grow studio-scrollbar">
-                <CubeList model={model} selectedCubeManager={project.selectedCubeManager} />
-            </div>
+        <div ref={toggleRef} style={{ height: propertiesActive ? propertiesHeight : 32 }}>
+            <CollapsableSidebarPannel title="CUBE LIST" heightClassname="h-full" panelName="cube_list">
+                <div className="rounded-sm dark:bg-gray-800 bg-gray-200">
+                    <div className="flex flex-row px-1 dark:bg-gray-900 bg-gray-200 pb-1 pt-0.5">
+                        <CubeListButton onClick={createSiblingCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Sibling Cube">
+                            <SVGPlus className="h-6 w-6" />
+                            <SVGCube className="h-5 w-5 mt-0.5" />
+                        </ CubeListButton>
+                        <CubeListButton onClick={createChildCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Child Cube">
+                            <SVGPlus className="h-6 w-6" />
+                            <SVGCube className="h-5 w-5 mt-0.5" />
+                            <SVGCube className="h-4 w-4 mt-1.5" />
+                        </ CubeListButton>
+                        <CubeListButton onClick={deleteCubesKeepChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube">
+                            <SVGTrash className="h-5 w-5 mt-0.5" />
+                        </ CubeListButton>
+                        <CubeListButton onClick={deleteCubesAndChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube And Children">
+                            <SVGTrash className="h-5 w-5 mt-0.5" />
+                            <SVGCube className="h-5 w-5 mt-0.5" />
+                            <SVGCube className="h-4 w-4 mt-1.5" />
+                        </ CubeListButton>
+                    </div>
+                    <div className="w-full pr-2 pl-1 overflow-x-hidden overflow-y-scroll studio-scrollbar">
+                        <CubeList model={model} selectedCubeManager={project.selectedCubeManager} />
+                    </div>
+                </div>
+            </CollapsableSidebarPannel>
+            <HorizontalDivider max={800} min={50} value={propertiesHeight} setValue={setPropertiesHeight} toggleDragging={val => {
+                if (toggleRef.current) {
+                    toggleRef.current.className = val ? "" : "transition-height ease-in-out duration-200"
+                }
+            }} />
         </div>
     )
 }

@@ -5,6 +5,7 @@ export type PanelValue<T> = {
   set: (val: T) => void
 }
 export type StudioPanelsContext = {
+  cube_list: PanelValue<boolean>
   model_cube: PanelValue<boolean>
   model_cube_size: PanelValue<number>
 
@@ -13,6 +14,10 @@ export type StudioPanelsContext = {
   animator_looping: PanelValue<boolean>
   animator_ik: PanelValue<boolean>
   animator_pp: PanelValue<boolean>
+
+  history_list: PanelValue<boolean>
+
+  texture_properties: PanelValue<boolean>
 }
 
 const Context = createContext<StudioPanelsContext | null>(null)
@@ -32,13 +37,16 @@ const useValueGetterSetter = <
 }
 const StudioPanelsContextProvider: FC = ({ children }) => {
   const context: StudioPanelsContext = {} as any //We define the properties in the next lines.
+  useValueGetterSetter(context, "cube_list", true)
   useValueGetterSetter(context, "model_cube", true)
-  useValueGetterSetter(context, "model_cube_size", 430)
+  useValueGetterSetter(context, "model_cube_size", 800)
   useValueGetterSetter(context, "animator_cube", true)
   useValueGetterSetter(context, "animator_kf", true)
   useValueGetterSetter(context, "animator_looping", false)
   useValueGetterSetter(context, "animator_ik", false)
   useValueGetterSetter(context, "animator_pp", false)
+  useValueGetterSetter(context, "history_list", false)
+  useValueGetterSetter(context, "texture_properties", true)
   return (
     <Context.Provider value={context}>
       {children}
