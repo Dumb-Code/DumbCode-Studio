@@ -109,7 +109,7 @@ const ModelerCubeList = () => {
     return (
         <div ref={toggleRef} style={{ height: propertiesActive ? propertiesHeight : 32 }}>
             <CollapsableSidebarPannel title="CUBE LIST" heightClassname="h-full" panelName="cube_list">
-                <div className="rounded-sm dark:bg-gray-800 bg-gray-200">
+                <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full flex flex-col">
                     <div className="flex flex-row px-1 dark:bg-gray-900 bg-gray-200 pb-1 pt-0.5">
                         <CubeListButton onClick={createSiblingCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Sibling Cube">
                             <SVGPlus className="h-6 w-6" />
@@ -129,7 +129,7 @@ const ModelerCubeList = () => {
                             <SVGCube className="h-4 w-4 mt-1.5" />
                         </ CubeListButton>
                     </div>
-                    <div className="w-full pr-2 pl-1 overflow-x-hidden overflow-y-scroll studio-scrollbar">
+                    <div className="w-full flex-grow min-h-0 pr-2 pl-1 overflow-x-hidden overflow-y-scroll studio-scrollbar">
                         <CubeList model={model} selectedCubeManager={project.selectedCubeManager} />
                     </div>
                 </div>
