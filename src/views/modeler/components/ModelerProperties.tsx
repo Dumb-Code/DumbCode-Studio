@@ -1,3 +1,4 @@
+import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import CubeInput from "../../../components/CubeInput";
 import CubeRotationInput from "../../../components/CubeRotationInput";
 import { useStudio } from "../../../contexts/StudioContext";
@@ -15,31 +16,25 @@ const ModelerProperties = () => {
     const firstSelected = oneSelected ? cubeMap.get(selected[0]) : undefined
 
     return (
-        <>
-            <div className="rounded-sm dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden">
-                <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                    <p className="my-0.5 flex-grow">CUBE PROPERTIES</p>
+        <CollapsableSidebarPannel title="CUBE PROPERTIES" heightClassname="h-auto" panelName="model_properties">
+            <div
+                className="transition-height ease-in-out duration-200 studio-scrollbar"
+            >
+                <div className="pl-3">
+                    <p className="dark:text-gray-400 text-black text-xs mt-1">CUBE NAME</p>
                 </div>
-                <div
-                    
-                    className="transition-height ease-in-out duration-200 studio-scrollbar"
-                >
-                    <div className="pl-3">
-                        <p className="dark:text-gray-400 text-black text-xs mt-1">CUBE NAME</p>
-                    </div>
-                    <div className="w-full grid grid-cols-2 px-2 pt-1">
-                        <WrappedCubeName obj={firstSelected?.name} model={model} />
-                        <WrappedCubeInputDimensions title={"DIMENSIONS"} obj={firstSelected?.dimension} model={model} />
-                        <WrappedCubeInput title={"POSITIONS"} obj={firstSelected?.position} model={model} />
-                        <WrappedCubeInput title={"OFFSET"} obj={firstSelected?.offset} model={model} />
-                        <WrappedCubeInput title={"CUBE GROW"} obj={firstSelected?.cubeGrow} model={model} />
-                    </div>
-                    <div className="px-2">
-                        <WrappedCubeInputRotation title={"ROTATION"} obj={firstSelected?.rotation} model={model} />
-                    </div>
+                <div className="w-full grid grid-cols-2 px-2 pt-1">
+                    <WrappedCubeName obj={firstSelected?.name} model={model} />
+                    <WrappedCubeInputDimensions title={"DIMENSIONS"} obj={firstSelected?.dimension} model={model} />
+                    <WrappedCubeInput title={"POSITIONS"} obj={firstSelected?.position} model={model} />
+                    <WrappedCubeInput title={"OFFSET"} obj={firstSelected?.offset} model={model} />
+                    <WrappedCubeInput title={"CUBE GROW"} obj={firstSelected?.cubeGrow} model={model} />
+                </div>
+                <div className="px-2">
+                    <WrappedCubeInputRotation title={"ROTATION"} obj={firstSelected?.rotation} model={model} />
                 </div>
             </div>
-        </>
+        </CollapsableSidebarPannel>
     )
 }
 

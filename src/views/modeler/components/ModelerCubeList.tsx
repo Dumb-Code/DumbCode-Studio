@@ -105,7 +105,7 @@ const ModelerCubeList = () => {
     const [propertiesHeight, setPropertiesHeight] = usePanelValue("model_cube_size")
 
     const toggleRef = useRef<HTMLDivElement>(null)
-    const [propertiesActive, setPropertiesActive] = usePanelValue("cube_list")
+    const [propertiesActive] = usePanelValue("cube_list")
     return (
         <div ref={toggleRef} style={{ height: propertiesActive ? propertiesHeight : 32 }}>
             <CollapsableSidebarPannel title="CUBE LIST" heightClassname="h-full" panelName="cube_list">

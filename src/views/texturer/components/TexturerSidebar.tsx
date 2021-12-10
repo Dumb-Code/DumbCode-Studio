@@ -1,20 +1,20 @@
+import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import Dropdown, { DropdownItem } from "../../../components/Dropdown";
+import HistoryList from "../../../components/HistoryList";
 import { SVGEye, SVGLocked } from "../../../components/Icons";
 
 const TexturerSidebar = () => {
     return (
         <div className="dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden h-full">
             <TexturerLayers />
+            <HistoryList />
         </div>
     )
 }
 
 const TexturerLayers = () => {
     return (
-        <div className="flex-grow">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1">
-                <p className="my-0.5 flex-grow">TEXTURE LAYERS</p>
-            </div>
+        <CollapsableSidebarPannel title="TEXTURE LAYERS" heightClassname="h-auto" panelName="texture_layers">
             <div className="dark:bg-gray-800 bg-gray-200 dark:text-gray-400 text-black font-bold text-xs p-1">
                 <TextureGroupDropdown />
             </div>
@@ -27,7 +27,7 @@ const TexturerLayers = () => {
                 <TexturerLayer name="Some Texture" selected={false} />
                 <TexturerLayer name="Some Texture" selected={false} />
             </div>
-        </div>
+        </CollapsableSidebarPannel>
     )
 }
 
