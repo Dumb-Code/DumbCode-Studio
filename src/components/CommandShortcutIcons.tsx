@@ -1,13 +1,12 @@
-import { SVGCube } from "./Icons"
 import PropTypes from 'prop-types';
 import { useState } from "react";
 
-export const CommandShortcutIcon = ({ command, description }: { command: string, description: string }) => {
+export const CommandShortcutIcon = ({ command, description, icon }: { command: string, description: string, icon: any }) => {
 
     return (
         <div className="has-tooltip">
-            <button className="dark:bg-gray-700 bg-gray-300 rounded p-0.5 dark:text-gray-300 text-black" onClick={() => console.log("run command " + command)}>
-                <SVGCube className="h-5 w-5" />
+            <button className="dark:bg-gray-700 dark:hover:bg-gray-600 bg-gray-300 hover:bg-gray-400 rounded p-1.5 mb-0.5 dark:text-gray-300 text-black" onClick={() => console.log("run command " + command)}>
+                {icon}
             </button>
             <div className="tooltip ml-9 dark:bg-gray-700 bg-gray-200 -mt-6 rounded p-1 dark:text-gray-300 text-black w-48 border border-black">
                 <p className="mb-1">{command}</p>
@@ -17,15 +16,15 @@ export const CommandShortcutIcon = ({ command, description }: { command: string,
     )
 }
 
-export const CommandShortcutIconWithSubCommands = ({ command, description, children }) => {
+export const CommandShortcutIconWithSubCommands = ({ command, description, icon, children }) => {
 
     const [subCommandsVisible, setSubVisible] = useState(false);
 
     return (
         <div className={(subCommandsVisible || "has-tooltip") + " -mb-0.5"} onContextMenu={() => setSubVisible(!subCommandsVisible)} onClick={() => setSubVisible(false)} style={{ marginBottom: '0.5px' }}>
-            <button className="dark:bg-gray-700 bg-gray-300 rounded p-0.5 dark:text-gray-300 text-black" onClick={() => console.log("run command " + command)}>
-                <SVGCube className="h-5 w-5" />
-                <div className="absolute ml-5 -mt-0.5 dark:bg-gray-300 bg-black rounded-br h-1 w-1"></div>
+            <button className="dark:bg-gray-700 dark:hover:bg-gray-600 bg-gray-300 hover:bg-gray-400 rounded p-1.5 dark:text-gray-300 text-black mb-0.5" onClick={() => console.log("run command " + command)}>
+                {icon}
+                <div className="absolute transform translate-x-3.5 translate-y-0.5 dark:bg-gray-300 bg-black rounded-br h-1 w-1"></div>
             </button>
             <div className={subCommandsVisible ? "invisible h-0 " : "tooltip ml-9 dark:bg-gray-700 bg-gray-200 -mt-8 rounded p-1 dark:text-gray-300 text-black w-48 border border-black"}>
                 <p className="mb-1">{command}</p>
