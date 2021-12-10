@@ -39,6 +39,10 @@ module.exports = {
         'gumball gumball sidebar',
         'info info sidebar'
       ],
+      'mapper': [
+        'tools canvas layers',
+        'info info layers'
+      ],
       'texture': [
         'tools canvas layers',
         'properties properties layers',
