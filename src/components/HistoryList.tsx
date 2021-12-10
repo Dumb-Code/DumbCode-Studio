@@ -48,7 +48,7 @@ const HistoryActionTypes: { [key: string]: HistoryActionType } = {
 
 const HistoryItem = ({ type, reason, undone, selected }: {type: HistoryActionType, reason: String, undone: boolean, selected: boolean}) => { 
     return (
-        <div className={(undone ? "text-gray-500 bg-gray-700 bg-opacity-50 hover:bg-opacity-100" : (selected ? "text-white bg-blue-500 hover:bg-blue-600" : "text-white bg-gray-700 hover:bg-opacity-50")) + " flex flex-row h-8 my-0.5 cursor-pointer"}>
+        <div className={(undone ? "dark:text-gray-500 bg-gray-300 dark:bg-gray-700 bg-opacity-50 hover:bg-opacity-100" : (selected ? "text-white bg-blue-500 hover:bg-blue-600" : "dark:text-white bg-white dark:bg-gray-700 hover:bg-opacity-50")) + " flex flex-row h-8 my-0.5 cursor-pointer"}>
             {type.element}
             <p className="">{reason}</p>
         </div>
