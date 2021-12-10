@@ -29,6 +29,7 @@ const AnimatorProperties = () => {
         <div className="overflow-y-scroll h-full dark:bg-gray-800 bg-gray-200 studio-scrollbar pb-1">
             <AnimatorCubeProperties animation={animation} cubeName={cubeName} cube={singleSelectedCube} />
             <AnimatorKeyframeProperties animation={animation} />
+            <AnimatorVisibilityProperties />
             <AnimatorLoopingProperties animation={animation} />
             <AnimatorIKProperties animation={animation} />
             <AnimatorProgressionProperties animation={animation} />
@@ -132,6 +133,30 @@ const AnimatorLoopingProperties = ({ animation }: { animation: DcaAnimation | nu
             </div>
         </CollapsableSidebarPannel>
     )
+}
+
+const AnimatorVisibilityProperties = () => {
+
+    const [mode, setMode] = useState(true);
+    const [isStart, setStart] = useState(true);
+
+    return (
+        <CollapsableSidebarPannel title="VISIBILITY PROPERTIES" heightClassname="h-12" panelName="animator_visibility">
+            <div className="flex flex-row mt-0.5 pl-2">
+                <div>
+                    <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow mb-2">VISIBLE</p>
+                    <Toggle checked={mode} setChecked={c => setMode(!mode)} />
+                </div>
+                <div className="ml-2">
+                    <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow mb-2">WHEN TO TOGGLE</p>
+                    <div className="flex flex-row">
+                        <Toggle checked={isStart} setChecked={c => setStart(!isStart)} />
+                        <p className="text-xs dark:text-gray-300 ml-2">{isStart ? "end of keyframe" : "beginning of keyframe"}</p>
+                    </div>
+                </div>
+            </div>
+        </CollapsableSidebarPannel>
+    );
 }
 
 const AnimatorIKProperties = ({ animation }: { animation: DcaAnimation | null }) => {

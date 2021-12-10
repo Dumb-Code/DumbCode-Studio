@@ -12,6 +12,7 @@ export type StudioPanelsContext = {
   model_properties: PanelValue<boolean>
 
   animator_cube: PanelValue<boolean>
+  animator_visibility: PanelValue<boolean>
   animator_kf: PanelValue<boolean>
   animator_looping: PanelValue<boolean>
   animator_ik: PanelValue<boolean>
@@ -46,6 +47,7 @@ const StudioPanelsContextProvider: FC = ({ children }) => {
   useValueGetterSetter(context, "model_cube_size", 430)
   useValueGetterSetter(context, "model_properties", true)
   useValueGetterSetter(context, "animator_cube", true)
+  useValueGetterSetter(context, "animator_visibility", true)
   useValueGetterSetter(context, "animator_kf", true)
   useValueGetterSetter(context, "animator_looping", false)
   useValueGetterSetter(context, "animator_ik", false)
