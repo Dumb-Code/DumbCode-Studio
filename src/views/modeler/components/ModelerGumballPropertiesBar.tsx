@@ -51,7 +51,7 @@ const ModelerObjectTransformationModeSelect = ({ gumball }: { gumball: ModelerGu
     return (
         <div className="flex flex-row transition ease-in-out duration-200">
             {hasNoCubesSelected ?
-                <span>No Cubes Selected</span>
+                <span className="dark:text-gray-400">No Cubes Selected</span>
                 :
                 <>
                     <ButtonList>

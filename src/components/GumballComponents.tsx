@@ -28,7 +28,7 @@ export const ButtonList: FC = ({ children }) => {
 
 export const GumballButton = ({ title, selected, selectedClassName = "bg-sky-500", onClick }: { title: string, selected: boolean, selectedClassName?: string, onClick: () => void }) => {
     return (
-        <button className={(selected ? `${selectedClassName} text-white` : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-none first:rounded-l last:rounded-r py-1 px-2 border-r dark:border-black border-white text-xs"} onClick={onClick}>
+        <button className={(selected ? `${selectedClassName} text-white` : "dark:bg-gray-700 bg-gray-400 text-black") + " rounded-none first:rounded-l last:rounded-r py-1 px-2 border-r dark:border-black border-white last:border-0 text-xs"} onClick={onClick}>
             {title}
         </button>
     )
