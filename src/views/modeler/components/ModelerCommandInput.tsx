@@ -73,7 +73,7 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
     <div className="has-tooltip">
       {/* Actual Command input region */}
       <div className=" relative rounded-sm dark:bg-gray-800 bg-gray-200 h-full flex flex-row">
-        <div className="w-8 dark:text-white text-black border-r-2 border-b border-black">
+        <div className="w-8 dark:text-white text-black dark:border-r-2 dark:border-b dark:border-black">
           <SVGTerminal className="h-8 w-8 p-1" />
         </div>
         <input
