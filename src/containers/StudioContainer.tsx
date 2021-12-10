@@ -21,11 +21,11 @@ type Tab = {
 
 const Tabs: Tab[] = [
   // { name: "options", titleComponent: () => <SVGSettings className="w-5 h-5 px-0.5" />, color: "bg-red-500", component: () => <Options />, extraClasses: "w-9 transform translate-y-1.5" },
-  { name: "Project", color: "bg-purple-600", component: () => <Project /> },
-  { name: "Modeler", color: "bg-sky-600", component: () => <Modeler /> },
-  { name: "Mapper", color: "bg-teal-500", component: () => <TextureMapper /> },
-  { name: "Texturer", color: "bg-green-500", component: () => <Texturer /> },
-  { name: "Animator", color: "bg-yellow-500", component: () => <Animator /> },
+  { name: "Project", color: "bg-purple-600 hover:bg-purple-700", component: () => <Project /> },
+  { name: "Modeler", color: "bg-sky-600 hover:bg-sky-700", component: () => <Modeler /> },
+  { name: "Mapper", color: "bg-teal-500 hover:bg-teal-600", component: () => <TextureMapper /> },
+  { name: "Texturer", color: "bg-green-500 hover:bg-green-600", component: () => <Texturer /> },
+  { name: "Animator", color: "bg-yellow-500 hover:bg-yellow-600", component: () => <Animator /> },
 ]
 
 const StudioContainer = () => {
@@ -102,7 +102,7 @@ export default StudioContainer;
 export const NavBarButton: FC<{ selected: boolean, color: string, className: string, onClick: () => void }> = ({ selected, color, onClick, className, children }) => {
   return (
     <button
-      className={className + " " + (selected ? color + " text-white" : "dark:bg-gray-900 bg-gray-100 dark:hover:bg-gray-800 hover:bg-gray-100 text-black dark:text-gray-400") + " focus:outline-none mt-0.5 hover:text-black dark:hover:text-white rounded-t py-1 px-2 mr-0.5"}
+      className={className + " " + (selected ? color + " text-white" : "dark:bg-gray-900 bg-gray-100 dark:hover:bg-gray-800 hover:bg-gray-100 text-black dark:text-gray-400") + " focus:outline-none mt-0.5 dark:hover:text-white rounded-t py-1 px-2 mr-0.5"}
       onClick={onClick}
     >
       {children}
