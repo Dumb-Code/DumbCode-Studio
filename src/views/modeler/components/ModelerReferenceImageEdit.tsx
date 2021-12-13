@@ -23,7 +23,10 @@ const ModelerReferenceImageEdit = ({ model, image }: { model: DCMModel, image: R
                     </div>
                     <div className="w-full px-2 pt-1">
                         <WrappedCubeName obj={image.name} model={model} />
-                        <WrappedCubeInput title={"POSITIONS"} obj={image.position} model={model} />
+                        <div className="flex flex-row">
+                            <WrappedCubeInput title={"POSITIONS"} obj={image.position} model={model} />
+                            <WrappedCubeInput title={"SCALE"} obj={image.position} model={model} />
+                        </div>
                         <WrappedCubeInputRotation title={"ROTATION"} obj={image.rotation} model={model} />
 
                         <div className="flex flex-row">

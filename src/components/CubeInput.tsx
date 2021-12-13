@@ -21,7 +21,7 @@ const CubeInput = ({ title, value, setValue, lock, lockPositive, onBlur, onFocus
     const [isLocked, setLocked] = useState(lock)
 
     return (
-        <div>
+        <div className="flex-grow">
             <div className="flex flex-row">
                 <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow">{title}</p>
                 {lock === undefined ||
