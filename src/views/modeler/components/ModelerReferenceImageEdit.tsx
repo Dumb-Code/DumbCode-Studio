@@ -23,11 +23,9 @@ const ModelerReferenceImageEdit = ({ model, image }: { model: DCMModel, image: R
                     </div>
                     <div className="w-full px-2 pt-1">
                         <WrappedCubeName obj={image.name} model={model} />
-                        <div className="flex flex-row">
-                            <WrappedCubeInput title={"POSITIONS"} obj={image.position} model={model} />
-                            <WrappedCubeInput title={"SCALE"} obj={image.position} model={model} />
-                        </div>
+                        <WrappedCubeInput title={"POSITIONS"} obj={image.position} model={model} />
                         <WrappedCubeInputRotation title={"ROTATION"} obj={image.rotation} model={model} />
+                        <WrappedImageScale obj={image.scale} model={model} />
 
                         <div className="flex flex-row">
                             <WrappedCheckbox title="FLIP X" obj={image.flipX} />
@@ -40,6 +38,28 @@ const ModelerReferenceImageEdit = ({ model, image }: { model: DCMModel, image: R
             </div>
         </>
     )
+}
+
+const WrappedImageScale = ({ obj, model }: { obj?: LO<number>, model: DCMModel }) => {
+
+    const [value, setValue] = useListenableObjectNullable(obj)
+    return (
+        <>
+            <p className="dark:text-gray-400 text-black text-xs m-1">SCALE</p>
+            <div className="flex flex-row">
+                <div className="bg-gray-500 rounded-l px-1 text-white font-bold border-gray-900 pt-2 text-xs h-8 ml-1"></div>
+                <div className="h-7">
+                    <NumericInput
+                        value={value}
+                        onChange={value => setValue(value ?? 1)}
+                        step={0.1}
+                        min={0}
+                        max={100}
+                    />
+                </div>
+            </div>
+        </>
+    );
 }
 
 const WrappedCubeName = ({ obj, model }: { obj?: LO<string>, model: DCMModel }) => {
@@ -136,17 +156,6 @@ const WrappedSlider = ({ obj, title, onFocus, onBlur }:
                             onDragEnd={onBlur}
                         />
                     </div>
-                    {/*
-                    <input
-                        value={value}
-                        onChange={e => setValue(e.target.valueAsNumber ?? 100)}
-                        className="flex-grow"
-                        type="range"
-                        step={1}
-                        min={0}
-                        max={100}
-                    />
-                    */}
                 </div>
             </div>
         </>
