@@ -1,5 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react"
 import React, { FC, Fragment, useContext, useEffect, useState } from "react"
+import { SVGCross } from "../components/Icons"
 import { useOptions } from "../contexts/OptionsContext"
 
 type DialogContextType = {
@@ -51,7 +52,7 @@ const DialogBoxes: FC = ({ children }) => {
   )
 }
 
-export const OpenedDialogBox: FC<{ width?: string, height?: string, title: () => JSX.Element }> = ({ title: Title, width = "500px", height = "500px", children }) => {
+export const OpenedDialogBox: FC<{ width?: string, height?: string, title: string }> = ({ title="", width = "500px", height = "500px", children }) => {
   const dialogBox = useOpenedDialogBoxes()
   const { darkMode } = useOptions()
 
@@ -77,10 +78,17 @@ export const OpenedDialogBox: FC<{ width?: string, height?: string, title: () =>
           <div
             style={{ width, height }}
             onClick={e => e.stopPropagation()}
-            className="inline-block w-full h-full max-w-full max-h-full p-6 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-2xl"
+            className="rounded-t-md inline-block w-full h-full max-w-full max-h-full overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl"
           >
             <div className="flex flex-col w-full h-full">
-              <Dialog.Title><Title /></Dialog.Title>
+              <Dialog.Title>
+                <div className="bg-gray-900 py-1 rounded-t-md pl-4 flex flex-row pr-1">
+                  <p className="flex-grow text-gray-400">{title.toUpperCase()}</p>
+                  <div className="rounded-md bg-red-500 hover:bg-red-600 text-white p-1 w-12 text-center cursor-pointer" onClick={() => dialogBox.clear()}>
+                    <SVGCross className="h-4 w-4 ml-3" />
+                  </div>
+                </div>
+              </Dialog.Title>
               <div className="flex-grow">{children}</div>
             </div>
           </div>

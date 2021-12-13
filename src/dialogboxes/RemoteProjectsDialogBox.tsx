@@ -29,7 +29,7 @@ const RemoteProjectsDialogBox = () => {
   const [search, setSearch] = useState("")
 
   return (
-    <OpenedDialogBox width="800px" height="800px" title={Title}>
+    <OpenedDialogBox width="800px" height="800px" title="Load a Repository">
       <div className="flex flex-col h-full">
         <div className="flex flex-row w-full justify-center items-center">
           <TokenSelectionListBox accessTokens={accessTokens} selected={selectedAccount} setSelected={v => {
@@ -47,7 +47,6 @@ const RemoteProjectsDialogBox = () => {
             <RepositoryList search={search.toLowerCase()} tokenUsername={currentSelectUser?.login} username={searchedUsername} token={selectedAccount} close={dialogBox.clear} />
           }
         </div>
-        <button onClick={dialogBox.clear} className="bg-blue-200 rounded border border-black text-black">Close</button>
       </div>
     </OpenedDialogBox>
   )
@@ -160,13 +159,6 @@ const GithubAccount = ({ token }: { token: string }) => {
       <img className="rounded" width={25} src={result?.avatar_url ?? ''} alt="Profile" />
       <div className="pl-2">{result?.name ?? 'Loading...'}</div>
     </div>
-  )
-}
-
-
-const Title = () => {
-  return (
-    <div className="text-2xl mb-5">Load a Repository</div>
   )
 }
 
