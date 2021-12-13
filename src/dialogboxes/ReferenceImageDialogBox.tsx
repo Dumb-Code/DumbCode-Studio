@@ -20,9 +20,9 @@ const ReferenceImageDialogBox = () => {
   return (
     <OpenedDialogBox width="800px" height="800px" title="Reference Images">
       <div className="flex flex-col">
-        <div className="flex flex-row w-full bg-gray-900 bg-opacity-75">
+        <div className="flex flex-row w-full border-b border-gray-300 dark:border-0 bg-white dark:bg-gray-900 dark:bg-opacity-75">
           <ClickableInput
-            className="bg-green-500 hover:bg-green-600 rounded-md w-auto p-1 flex flex-row text-xs m-2 px-2"
+            className="bg-green-500 hover:bg-green-600 rounded-md w-auto p-1 flex flex-row text-xs m-2 px-2 text-white dark:text-black"
             onFile={file => project.referenceImageHandler.uploadFile(file)}
             accept={imageExtensions}
             multiple
@@ -40,7 +40,7 @@ const ReferenceImageEntry = ({ image }: { image: ReferenceImage }) => {
   const [canSelect, setCanSelect] = useListenableObject(image.canSelect)
   const [isHidden, setHidden] = useState(false)
   return (
-    <div className="flex flex-row items-center border-b border-r border-gray-900">
+    <div className="flex flex-row items-center border-b border-r border-gray-300 dark:border-gray-900">
       <img className="mr-2" width={100} src={image.img.src} alt="Reference" />
       <div className="mr-4 mt-2 flex-grow pb-1">
         <p className="ml-1 dark:text-gray-400 text-black text-xs mb-1">IMAGE NAME</p>

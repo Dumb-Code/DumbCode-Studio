@@ -82,8 +82,8 @@ export const OpenedDialogBox: FC<{ width?: string, height?: string, title: strin
           >
             <div className="flex flex-col w-full h-full">
               <Dialog.Title>
-                <div className="bg-gray-900 py-1 rounded-t-md pl-4 flex flex-row pr-1">
-                  <p className="flex-grow text-gray-400">{title.toUpperCase()}</p>
+                <div className="bg-gray-200 dark:bg-gray-900 py-1 rounded-t-md pl-4 flex flex-row pr-1">
+                  <p className="flex-grow text-black dark:text-gray-400">{title.toUpperCase()}</p>
                   <div className="rounded-md bg-red-500 hover:bg-red-600 text-white p-1 w-12 text-center cursor-pointer" onClick={() => dialogBox.clear()}>
                     <SVGCross className="h-4 w-4 ml-3" />
                   </div>
