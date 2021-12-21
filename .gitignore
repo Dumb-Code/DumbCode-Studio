@@ -1,14 +1,22 @@
-# eclipse
-bin
-*.launch
-.settings
-.metadata
-.classpath
-.project
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# idea
-out
-*.ipr
-*.iws
-*.iml
-.idea
+# testing
+/coverage
+*.log
+
+# production
+/build
+
+# misc
+.DS_Store
+npm-debug.log*
+.eslintcache
+
+# editor
+.vscode/*
+
+# devfiles
+src/stylesheets/index.css
