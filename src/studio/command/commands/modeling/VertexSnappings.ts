@@ -62,6 +62,8 @@ const VertexSnapping = (pointTracker: CubePointTracker, model: DCMModel) => (add
         cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
         tempResultMatrix.compose(tempCubePos.add(worldDiff), tempCubeQuat, tempCubeScale)
 
+        model.undoRedoHandler.startBatchActions()
+
         if (rp) {
           //If the rotation point, then reconstruct the matrix to the cube, and reconstruct the lockers.
           CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
@@ -76,6 +78,8 @@ const VertexSnapping = (pointTracker: CubePointTracker, model: DCMModel) => (add
 
         //Deselect everything and click on the original cube.
         cube.selected.value = true
+
+        model.undoRedoHandler.endBatchActions()
       }, 0x662141)
     }
 

@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useStudio } from "../contexts/StudioContext";
+import { useSelectedCubeHighlighter } from "../studio/util/CubeSelectedHighlighter";
 import { useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
 const StudioCanvas = () => {
   const { renderer, setSize, onMouseUp } = useStudio()
   useSelectedCubeManager()
+  useSelectedCubeHighlighter()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

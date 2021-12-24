@@ -11,6 +11,7 @@ import { DCMModel } from '../model/DcmModel';
 import TextureManager from '../textures/TextureManager';
 import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
 import { CommandRoot } from './../../command/CommandRoot';
+import { CubeSelectedHighlighter } from './../../util/CubeSelectedHighlighter';
 import { RemoteRepo } from './DcRemoteRepos';
 
 export default class DcProject {
@@ -34,6 +35,8 @@ export default class DcProject {
   readonly cubePointTracker: CubePointTracker
   readonly modelerGumball: ModelerGumball
 
+  readonly cubeHighlighter: CubeSelectedHighlighter
+
   readonly referenceImageHandler = new ReferenceImageHandler(this.selectionGroup)
 
   remoteLink?: RemoteRepo
@@ -48,6 +51,8 @@ export default class DcProject {
     this.cubePointTracker = new CubePointTracker(this.selectedCubeManager, this.model, this.selectionGroup)
     this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.model, this.group, this.cubePointTracker)
     this.animationTabs = new DcaTabs()
+    this.cubeHighlighter = new CubeSelectedHighlighter(this.overlayGroup, this.model)
+
     this.group.add(this.selectionGroup)
     this.selectionGroup.add(this.model.modelGroup)
     this.previousThreeTexture = null
