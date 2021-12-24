@@ -39,7 +39,7 @@ const ProjectTextures = () => {
 
     return (
         <div className="flex flex-col h-full">
-            <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'dark:bg-gray-800 bg-gray-100'} flex flex-col overflow-hidden flex-grow`}>
+            <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'dark:bg-gray-800 bg-gray-100'} flex flex-col overflow-hidden flex-grow h-0`}>
                 <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
                     <p className="flex-grow mt-1 ml-1">TEXTURE GROUPS</p>
                     <p className="flex flex-row">
@@ -128,7 +128,7 @@ const TextureLists = ({ project }: { project: DcProject }) => {
     }
     return (
         <>
-            <div className="flex-grow flex flex-col border-r border-black" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+            <div className="flex-grow flex flex-col border-r border-black w-1/2">
                 <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black mb-2">
                     <p className="flex-grow">SELECTED</p>
                 </div>
@@ -136,7 +136,7 @@ const TextureLists = ({ project }: { project: DcProject }) => {
                     <SelectedTexturesList project={project} />
                 </div>
             </div>
-            <div className="flex-grow flex flex-col" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+            <div className="flex-grow flex flex-col w-1/2">
                 <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black mb-2">
                     <p className="flex-grow">AVAILABLE</p>
                 </div>
