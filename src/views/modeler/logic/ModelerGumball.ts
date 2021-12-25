@@ -4,6 +4,7 @@ import { LO } from '../../../studio/util/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
 import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
+import { HistoryActionTypes } from './../../../studio/undoredo/UndoRedoHandler';
 import { LockerType } from './../../../studio/util/CubeLocker';
 import { useListenableObject } from './../../../studio/util/ListenableObject';
 import CubePointTracker from './CubePointTracker';
@@ -309,7 +310,7 @@ export const useModelerGumball = () => {
     })
     const onMouseUpTransformControls = runWhenObjectSelected(() => {
       model.lockedCubes.clearCubeLockers()
-      model.undoRedoHandler.endBatchActions()
+      model.undoRedoHandler.endBatchActions("Gumball Move", HistoryActionTypes.Transformation)
     })
     const onObjectChangeReconstruct = runWhenObjectSelected(() => model.lockedCubes.reconstructLockedCubes())
 

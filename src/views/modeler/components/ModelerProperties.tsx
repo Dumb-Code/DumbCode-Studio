@@ -25,13 +25,13 @@ const ModelerProperties = () => {
                 </div>
                 <div className="w-full grid grid-cols-2 px-2 pt-1">
                     <WrappedCubeName obj={firstSelected?.name} model={model} />
-                    <WrappedCubeInputDimensions title={"DIMENSIONS"} obj={firstSelected?.dimension} model={model} />
-                    <WrappedCubeInput title={"POSITIONS"} obj={firstSelected?.position} model={model} />
-                    <WrappedCubeInput title={"OFFSET"} obj={firstSelected?.offset} model={model} />
-                    <WrappedCubeInput title={"CUBE GROW"} obj={firstSelected?.cubeGrow} model={model} />
+                    <WrappedCubeInputDimensions title="Dimensions" obj={firstSelected?.dimension} model={model} />
+                    <WrappedCubeInput title="Positions" obj={firstSelected?.position} model={model} />
+                    <WrappedCubeInput title="Offset" obj={firstSelected?.offset} model={model} />
+                    <WrappedCubeInput title="Cube Grow" obj={firstSelected?.cubeGrow} model={model} />
                 </div>
                 <div className="px-2">
-                    <WrappedCubeInputRotation title={"ROTATION"} obj={firstSelected?.rotation} model={model} />
+                    <WrappedCubeInputRotation title="Rotation" obj={firstSelected?.rotation} model={model} />
                 </div>
             </div>
         </CollapsableSidebarPannel>
@@ -46,7 +46,7 @@ const WrappedCubeName = ({ obj, model }: { obj?: LO<string>, model: DCMModel }) 
             type="text"
             value={value ?? ""}
             onFocus={() => model.undoRedoHandler.startBatchActions()}
-            onBlur={() => model.undoRedoHandler.endBatchActions()}
+            onBlur={() => model.undoRedoHandler.endBatchActions("Cube Name Changed")}
             onChange={e => setValue(e.currentTarget.value)}
         />
     )
@@ -59,30 +59,30 @@ const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<reado
         value={value}
         setValue={setValue}
         onFocus={() => model.undoRedoHandler.startBatchActions()}
-        onBlur={() => model.undoRedoHandler.endBatchActions()}
+        onBlur={() => model.undoRedoHandler.endBatchActions(`Cube ${title.toLowerCase()} edit`)}
     />
 }
 
 const WrappedCubeInputDimensions = ({ title, obj, model }: { title: string, obj?: LO<readonly [number, number, number]>, model: DCMModel }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeInput
-        title={title}
+        title={title.toUpperCase()}
         value={value}
         setValue={setValue}
         lockPositive={true}
         onFocus={() => model.undoRedoHandler.startBatchActions()}
-        onBlur={() => model.undoRedoHandler.endBatchActions()}
+        onBlur={() => model.undoRedoHandler.endBatchActions(`Cube ${title} changed`)}
     />
 }
 
 const WrappedCubeInputRotation = ({ title, obj, model }: { title: string, obj?: LO<readonly [number, number, number]>, model: DCMModel }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeRotationInput
-        title={title}
+        title={title.toUpperCase()}
         value={value}
         setValue={setValue}
         onFocus={() => model.undoRedoHandler.startBatchActions()}
-        onBlur={() => model.undoRedoHandler.endBatchActions()}
+        onBlur={() => model.undoRedoHandler.endBatchActions(`Cube ${title} changed`)}
     />
 }
 

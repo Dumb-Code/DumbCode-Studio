@@ -9,6 +9,7 @@ import { useStudio } from '../../../contexts/StudioContext';
 import { usePanelValue } from '../../../contexts/StudioPanelsContext';
 import { useTooltipRef } from '../../../contexts/TooltipContext';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
+import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 
@@ -50,7 +51,7 @@ const ModelerCubeList = () => {
         } else {
             model.addChild(cube)
         }
-        model.undoRedoHandler.endBatchActions()
+        model.undoRedoHandler.endBatchActions("Cube Created", HistoryActionTypes.Add)
     }
 
     //Creates a new cube with the first selected cube being the parent
@@ -63,7 +64,7 @@ const ModelerCubeList = () => {
         } else {
             model.addChild(cube)
         }
-        model.undoRedoHandler.endBatchActions()
+        model.undoRedoHandler.endBatchActions("Cube Created", HistoryActionTypes.Add)
     }
 
     //Deletes all the selected cubes, but keeps their children. Moves the children to be the siblings of this cube.
@@ -552,18 +553,22 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
                 //  - if ctrl is pressed, select THIS cube, and keep the other cubes
                 //  - else, we only select THIS cube
                 if (selected) {
-                    if (e.ctrlKey) {
+                    cube.model.undoRedoHandler.startBatchActions()
+                    if (e.ctrlKey || selectedCubeManager.selected.value.length === 1) {
                         setSelected(false)
-                    } else if (selectedCubeManager.selected.value.length !== 1) { //If other cubes are selected too
+                        cube.model.undoRedoHandler.endBatchActions(`Cube Deselected`)
+                    } else {
+                        //If other cubes are selected too
                         //Using `setSelected` won't do anything, as it's already selected.
                         //We can call onCubeSelected to essentially deselect the other cubes
                         selectedCubeManager.onCubeSelected(cube)
-                    } else {
-                        setSelected(false)
+                        cube.model.undoRedoHandler.endBatchActions(`Cubes Selected`)
                     }
                 } else {
                     selectedCubeManager.keepCurrentCubes = e.ctrlKey
+                    cube.model.undoRedoHandler.startBatchActions()
                     setSelected(true)
+                    cube.model.undoRedoHandler.endBatchActions(`Cube Selected`)
                     selectedCubeManager.keepCurrentCubes = false
                 }
                 e.stopPropagation()
@@ -581,7 +586,7 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
                 </button>
                 <DblClickEditLO
                     onStartEditing={() => cube.model.undoRedoHandler.startBatchActions()}
-                    onFinishEditing={() => cube.model.undoRedoHandler.endBatchActions()}
+                    onFinishEditing={() => cube.model.undoRedoHandler.endBatchActions("Cube Name Changed")}
                     obj={cube.name}
                     className="truncate text-white text-s pl-1 flex-grow cursor-pointer"
                     inputClassName="p-0 w-full h-full bg-gray-500 text-black"

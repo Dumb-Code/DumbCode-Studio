@@ -4,6 +4,7 @@ import { DCMCube, DCMModel } from '../../../formats/model/DcmModel';
 import CubeLocker from "../../../util/CubeLocker";
 import { Command } from "../../Command";
 import { CommandRunError } from '../../CommandRunError';
+import { HistoryActionTypes } from './../../../undoredo/UndoRedoHandler';
 
 const worldPosVector = new Vector3()
 const tempCubePos = new Vector3()
@@ -62,8 +63,6 @@ const VertexSnapping = (pointTracker: CubePointTracker, model: DCMModel) => (add
         cube.cubeGroup.matrixWorld.decompose(tempCubePos, tempCubeQuat, tempCubeScale)
         tempResultMatrix.compose(tempCubePos.add(worldDiff), tempCubeQuat, tempCubeScale)
 
-        model.undoRedoHandler.startBatchActions()
-
         if (rp) {
           //If the rotation point, then reconstruct the matrix to the cube, and reconstruct the lockers.
           CubeLocker.reconstructLocker(cube, 0, tempResultMatrix)
@@ -78,8 +77,6 @@ const VertexSnapping = (pointTracker: CubePointTracker, model: DCMModel) => (add
 
         //Deselect everything and click on the original cube.
         cube.selected.value = true
-
-        model.undoRedoHandler.endBatchActions()
       }, 0x662141)
     }
 
@@ -99,11 +96,10 @@ const VertexSnapping = (pointTracker: CubePointTracker, model: DCMModel) => (add
 
       cube.model.undoRedoHandler.startBatchActions()
       phase2(cube)
-      cube.model.undoRedoHandler.endBatchActions()
+      model.undoRedoHandler.endBatchActions("Command Vertex", HistoryActionTypes.Command)
     } else {
       //Enable the point tracker to get the source point to move.
       pointTracker.enable((p, _, c) => {
-        console.log(p, _, c)
         c.model.undoRedoHandler.startBatchActions()
 
         model.identifierCubeMap.forEach(v => {
@@ -113,8 +109,7 @@ const VertexSnapping = (pointTracker: CubePointTracker, model: DCMModel) => (add
         })
         worldPosVector.copy(p)
         phase2(c)
-        c.model.undoRedoHandler.endBatchActions()
-
+        model.undoRedoHandler.endBatchActions("Command Vertex", HistoryActionTypes.Command)
       }, undefined, undefined)
     }
 

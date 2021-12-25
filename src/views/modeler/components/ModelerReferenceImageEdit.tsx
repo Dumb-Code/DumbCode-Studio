@@ -23,15 +23,15 @@ const ModelerReferenceImageEdit = ({ model, image }: { model: DCMModel, image: R
                     </div>
                     <div className="w-full px-2 pt-1">
                         <WrappedCubeName obj={image.name} model={model} />
-                        <WrappedCubeInput title={"POSITIONS"} obj={image.position} model={model} />
-                        <WrappedCubeInputRotation title={"ROTATION"} obj={image.rotation} model={model} />
+                        <WrappedCubeInput title="Positions" obj={image.position} model={model} />
+                        <WrappedCubeInputRotation title="Rotation" obj={image.rotation} model={model} />
                         <WrappedImageScale obj={image.scale} model={model} />
 
                         <div className="flex flex-row">
                             <WrappedCheckbox title="FLIP X" obj={image.flipX} />
                             <WrappedCheckbox title="FLIP Y" obj={image.flipY} />
                         </div>
-                        <WrappedSlider title="OPACITY" obj={image.opacity} />
+                        <WrappedSlider title="Opacity" obj={image.opacity} model={model} />
 
                     </div>
                 </div>
@@ -55,6 +55,8 @@ const WrappedImageScale = ({ obj, model }: { obj?: LO<number>, model: DCMModel }
                         step={0.1}
                         min={0}
                         max={100}
+                        onFocus={() => model.undoRedoHandler.startBatchActions()}
+                        onBlur={() => model.undoRedoHandler.endBatchActions(`Reference Image Scale Changed`)}
                     />
                 </div>
             </div>
@@ -70,7 +72,7 @@ const WrappedCubeName = ({ obj, model }: { obj?: LO<string>, model: DCMModel }) 
             type="text"
             value={value ?? ""}
             onFocus={() => model.undoRedoHandler.startBatchActions()}
-            onBlur={() => model.undoRedoHandler.endBatchActions()}
+            onBlur={() => model.undoRedoHandler.endBatchActions(`Reference Image Name Changed`)}
             onChange={e => setValue(e.currentTarget.value)}
         />
     )
@@ -79,22 +81,22 @@ const WrappedCubeName = ({ obj, model }: { obj?: LO<string>, model: DCMModel }) 
 const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<readonly [number, number, number]>, model: DCMModel }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeInput
-        title={title}
+        title={title.toUpperCase()}
         value={value}
         setValue={setValue}
         onFocus={() => model.undoRedoHandler.startBatchActions()}
-        onBlur={() => model.undoRedoHandler.endBatchActions()}
+        onBlur={() => model.undoRedoHandler.endBatchActions(`Reference Image ${title} Changed`)}
     />
 }
 
 const WrappedCubeInputRotation = ({ title, obj, model }: { title: string, obj?: LO<readonly [number, number, number]>, model: DCMModel }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeRotationInput
-        title={title}
+        title={title.toUpperCase()}
         value={value}
         setValue={setValue}
         onFocus={() => model.undoRedoHandler.startBatchActions()}
-        onBlur={() => model.undoRedoHandler.endBatchActions()}
+        onBlur={() => model.undoRedoHandler.endBatchActions(`Reference Image ${title} Changed`)}
     />
 }
 
@@ -115,13 +117,15 @@ const WrappedCheckbox = ({ obj, title }: { obj: LO<boolean>, title: string }) =>
     )
 }
 
-const WrappedSlider = ({ obj, title, onFocus, onBlur }:
+const WrappedSlider = ({ obj, title, model }:
     {
         obj: LO<number>,
         title: string,
-        onFocus?: () => void,
-        onBlur?: () => void
+        model: DCMModel
     }) => {
+    const onFocus = () => model.undoRedoHandler.startBatchActions()
+    const onBlur = () => model.undoRedoHandler.endBatchActions(`Reference Image ${title} Changed`)
+
     const [value, setValue] = useListenableObject(obj)
     return (
         <>
@@ -136,6 +140,8 @@ const WrappedSlider = ({ obj, title, onFocus, onBlur }:
                             step={1}
                             min={0}
                             max={100}
+                            onFocus={onFocus}
+                            onBlur={onBlur}
                         />
                     </div>
                     <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">

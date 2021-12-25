@@ -1,5 +1,6 @@
 import { LO } from '../util/ListenableObject';
 import { DCMCube, DCMModel } from './../formats/model/DcmModel';
+import { HistoryActionTypes } from './../undoredo/UndoRedoHandler';
 import { EnumOrEmptyArgument } from './Argument';
 import { Command, CommandContext, CommandValues } from './Command';
 import { CommandBuilder } from './CommandBuilder';
@@ -170,6 +171,7 @@ export class CommandRoot {
 
   runCommand(data: CommandParsedData | CommandParseError | string, dummy: boolean) {
     this.model.undoRedoHandler.startBatchActions()
+    let commandForOutput: string | null = null
     try {
       if (typeof data === "string") {
         data = this._findCommandAndArgs(splitStr(data))
@@ -190,6 +192,9 @@ export class CommandRoot {
       }
 
       const { command, args, flags } = pd
+
+      commandForOutput = command.name
+
       const context: CommandContext<CommandValues<any>> = {
         hasFlag: f => flags.includes(f),
         getArgument: arg => {
@@ -227,7 +232,7 @@ export class CommandRoot {
       }
       throw e
     } finally {
-      this.model.undoRedoHandler.endBatchActions()
+      this.model.undoRedoHandler.endBatchActions("Command " + (commandForOutput ?? "???"), HistoryActionTypes.Command)
     }
 
   }

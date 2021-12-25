@@ -24,7 +24,7 @@ const ModelerSidebar = () => {
                 <ModelerCubeList />
             </div>
             <ModelerProperties />
-            <HistoryList />
+            <HistoryList undoRedoHandler={project.model.undoRedoHandler} />
         </div>
     )
 }

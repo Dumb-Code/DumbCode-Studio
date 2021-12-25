@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-
 import { DependencyList, useEffect, useState } from 'react';
-import { SectionHandle, UndoRedoSection } from './../undoredo/UndoRedoHandler';
+import { HistoryActionType, SectionHandle, UndoRedoSection } from './../undoredo/UndoRedoHandler';
 
 type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
 
@@ -61,19 +60,27 @@ export class LO<T> {
     this.postListeners.delete(func)
   }
 
+  private _getOrRun<R>(value: T, data: R | ((val: T) => R)): R {
+    if (typeof data === "function") {
+      const fn = data as (val: T) => R
+      return fn(value)
+    }
+    return data
+  }
+
   applyToSection
     <
       S extends UndoRedoSection,
       P extends FieldsFor<S['data'], T> & string
     >
-    (section: SectionHandle<any, S>, property_name: P, silent = false) {
+    (section: SectionHandle<any, S>, property_name: P, silent = false, reason?: string | ((val: T) => string), action?: HistoryActionType | ((val: T) => HistoryActionType)) {
     let isModifying = false
     section.modifyFirst(property_name, this.value, value => {
       isModifying = true
       this.value = value
       isModifying = false
     })
-    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, value, oldValue, silent))
+    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, value, oldValue, silent, this._getOrRun(value, reason), this._getOrRun(value, action)))
     return this
   }
 
@@ -83,14 +90,14 @@ export class LO<T> {
       M,
       P extends FieldsFor<S['data'], M> & string
     >
-    (section: SectionHandle<any, S>, mapper: (val: T) => M, reverseMapper: (val: M) => T, property_name: P, silent = false) {
+    (section: SectionHandle<any, S>, mapper: (val: T) => M, reverseMapper: (val: M) => T, property_name: P, silent = false, reason?: string | ((val: T) => string), action?: HistoryActionType | ((val: T) => HistoryActionType)) {
     let isModifying = false
     section.modifyFirst(property_name, mapper(this.value), value => {
       isModifying = true
       this.value = reverseMapper(value)
       isModifying = false
     })
-    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, mapper(value), mapper(oldValue), silent))
+    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, mapper(value), mapper(oldValue), silent, this._getOrRun(value, reason), this._getOrRun(value, action)))
     return this
   }
 }

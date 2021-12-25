@@ -28,11 +28,13 @@ export default class SelectedCubeManager {
         cube.selected.value = !cube.selected.value
         this.keepCurrentCubes = false
       } else {
+        project.model.undoRedoHandler.startBatchActions()
         project.model.identifierCubeMap.forEach(v => {
           if (v.selected.value) {
             v.selected.value = false
           }
         })
+        project.model.undoRedoHandler.endBatchActions(`Cubes Deselected`)
       }
     }
   }

@@ -4,7 +4,7 @@ import UndoRedoHandler from "../../undoredo/UndoRedoHandler";
 import LockedCubes from "../../util/LockedCubes";
 import SelectedCubeManager from '../../util/SelectedCubeManager';
 import DcProject from '../project/DcProject';
-import { SectionHandle } from './../../undoredo/UndoRedoHandler';
+import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
 import { setIntersectType } from './../../util/ObjectClickedHook';
 
@@ -274,26 +274,26 @@ export class DCMCube implements CubeParent {
     //Typescript compiler throws errors when `as SectionType` isn't there, but vscode intellisense is fine with it.
     //It complains about the other section names not being assignable, meaning that `cube_${this.identifier}` is
     //Not extracting the correct section for some reason.
-    this._section = model.undoRedoHandler.createNewSection(`cube_${this.identifier}`) as CubeSectionType
+    this._section = model.undoRedoHandler.createNewSection(`cube_${this.identifier}`, "Cube Properties Edit") as CubeSectionType
 
     this._section.modifyFirst("identifier", this.identifier, () => { throw new Error("Tried to modify identifier") })
-    this.name = new LO(name, onDirty).applyToSection(this._section, "name")
-    this.dimension = new LO(dimension, onDirty).applyToSection(this._section, "dimension")
-    this.position = new LO(rotationPoint, onDirty).applyToSection(this._section, "position")
-    this.offset = new LO(offset, onDirty).applyToSection(this._section, "offset")
-    this.rotation = new LO(rotation, onDirty).applyToSection(this._section, "rotation")
+    this.name = new LO(name, onDirty).applyToSection(this._section, "name", false, "Cube Name Changed")
+    this.dimension = new LO(dimension, onDirty).applyToSection(this._section, "dimension", false, "Cube Dimensions Edit")
+    this.position = new LO(rotationPoint, onDirty).applyToSection(this._section, "position", false, "Cube Position Edit")
+    this.offset = new LO(offset, onDirty).applyToSection(this._section, "offset", false, "Cube Offset Edit")
+    this.rotation = new LO(rotation, onDirty).applyToSection(this._section, "rotation", false, "Cube Rotation Edit")
     this.textureOffset = new LO(textureOffset, onDirty).applyToSection(this._section, "textureOffset", true)
     this.textureMirrored = new LO(textureMirrored, onDirty).applyToSection(this._section, "textureMirrored", true)
-    this.cubeGrow = new LO(cubeGrow, onDirty).applyToSection(this._section, "cubeGrow")
-    this.children = new LO(children, onDirty).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children")
+    this.cubeGrow = new LO(cubeGrow, onDirty).applyToSection(this._section, "cubeGrow", false, "Cube Grow Edit")
+    this.children = new LO(children, onDirty).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children", false, "Cube Children Edit")
     this.model = model
 
-    this.selected = new LO(selected).applyToSection(this._section, "selected", true)
-    this.hideChildren = new LO(hideChildren).applyToSection(this._section, "hideChildren")
-    this.visible = new LO(visible).applyToSection(this._section, "visible")
-    this.locked = new LO(locked).applyToSection(this._section, "locked")
+    this.selected = new LO(selected).applyToSection(this._section, "selected", false, value => value ? "Cube Selected" : "Cube Deselected")
+    this.hideChildren = new LO(hideChildren).applyToSection(this._section, "hideChildren", true)
+    this.visible = new LO(visible).applyToSection(this._section, "visible", false, value => value ? "Cube Shown" : "Cube Visible", HistoryActionTypes.ToggleVisibility)
+    this.locked = new LO(locked).applyToSection(this._section, "locked", false, value => value ? "Cube Locked" : "Cube Unlocked", HistoryActionTypes.LockUnlock)
 
-    this._section.pushCreation()
+    this._section.pushCreation("Cube Created")
 
     this.parent = invalidParent
 
@@ -423,7 +423,7 @@ export class DCMCube implements CubeParent {
   fullyDelete() {
     this.parent.deleteChild(this)
     this.cubeGroup.remove()
-    this._section.remove()
+    this._section.remove("Cube Deleted")
     this.model.identifierCubeMap.delete(this.identifier)
     this.model.cubeMap.get(this.name.value)?.delete(this)
     this.destroyed = true
