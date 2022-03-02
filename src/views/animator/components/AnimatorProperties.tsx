@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Slider from 'react-input-slider';
 import NumericInput from 'react-numeric-input';
+import { Quaternion, Vector3 } from "three";
 import Checkbox from "../../../components/Checkbox";
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import CubeInput from "../../../components/CubeInput";
@@ -22,6 +23,7 @@ const AnimatorProperties = () => {
     const [selectedCubes] = useListenableObject(project.selectedCubeManager.selected)
     const cubeMap = useListenableMap(project.model.identifierCubeMap)
     const singleSelectedCube = selectedCubes.length === 1 ? cubeMap.get(selectedCubes[0]) : undefined
+    const dcmSelectedCubes = selectedCubes.map(name => cubeMap.get(name)).filter((cube): cube is DCMCube => cube !== undefined)
     const [cubeName] = useListenableObjectNullable(singleSelectedCube?.name)
 
     const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
@@ -33,6 +35,7 @@ const AnimatorProperties = () => {
             <AnimatorLoopingProperties animation={animation} />
             <AnimatorIKProperties animation={animation} />
             <AnimatorProgressionProperties animation={animation} />
+            <AnimatorAutoGravity animation={animation} selectedCubes={dcmSelectedCubes} />
             <HistoryList />
         </div>
     )
@@ -210,6 +213,66 @@ const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation 
                         />
                     </div>
                 </div>
+            </div>
+        </CollapsableSidebarPannel>
+    )
+}
+
+const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnimation | null, selectedCubes: readonly DCMCube[] }) => {
+    const applyAutoGravity = () => {
+        if (!animation) {
+            return
+        }
+        const keyframes = animation.selectedKeyframes.value
+        if (keyframes.length !== 1) {
+            return
+        }
+        const keyframe = keyframes[0]
+        animation.project.model.resetVisuals()
+        animation.animate(0)
+
+        const computeVec = new Vector3()
+        const computeQuat = new Quaternion()
+
+        selectedCubes.forEach(cube => {
+            let minimumY = Infinity
+            for (let x = 0; x <= 1; x++) {
+                for (let y = 0; y <= 1; y++) {
+                    for (let z = 0; z <= 1; z++) {
+                        minimumY = Math.min(minimumY, cube.getWorldPosition(x, y, z, computeVec).y)
+                    }
+                }
+            }
+
+            computeVec.set(0, -minimumY * 16, 0)
+
+            cube.cubeGroup.parent?.getWorldQuaternion(computeQuat)
+            computeQuat.invert()
+            computeVec.applyQuaternion(computeQuat)
+
+            //Start batch undo redo
+
+            //https://playcode.io/868357/
+            keyframe.progressionPoints.value = [
+                { required: true, x: 0.00, y: 1.00 },
+                { x: 0.07, y: 0.99 }, { x: 0.14, y: 0.98 },
+                { x: 0.21, y: 0.95 }, { x: 0.29, y: 0.92 },
+                { x: 0.36, y: 0.87 }, { x: 0.43, y: 0.82 },
+                { x: 0.50, y: 0.75 }, { x: 0.57, y: 0.67 },
+                { x: 0.64, y: 0.59 }, { x: 0.71, y: 0.49 },
+                { x: 0.79, y: 0.38 }, { x: 0.86, y: 0.27 },
+                { x: 0.93, y: 0.14 },
+                { required: true, x: 1.00, y: 0.00 }
+            ]
+            keyframe.position.set(cube.name.value, [computeVec.x, computeVec.y, computeVec.z])
+        })
+
+
+    }
+    return (
+        <CollapsableSidebarPannel title="AUTO GRAVITY" heightClassname="h-96" panelName="animator_ag">
+            <div className="flex flex-col h-full p-2">
+                <button onClick={applyAutoGravity} className="bg-blue-500 rounded">Apply to selected</button>
             </div>
         </CollapsableSidebarPannel>
     )
