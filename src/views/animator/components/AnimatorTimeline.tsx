@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { SVGEye, SVGLocked, SVGPlus, SVGSettings } from "../../../components/Icons";
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
@@ -105,7 +105,7 @@ class OffsetKeyframeInLayer {
     ) { }
 }
 
-const isInbetween = (min: number, delta: number, test: number) => test > min && test < min + delta
+const isInbetween = (min: number, delta: number, test: number) => test >= min && test <= min + delta
 
 const canKeyframeBeInsertedAtTimelinelayer = (keyframe: DcaKeyframe, layerData?: OffsetKeyframeInLayer[]) => {
     if (layerData === undefined) {
@@ -122,42 +122,48 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
 
     const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll } = useContext(ScrollZoomContext)
 
-    const { maxLayer, layers } = useMemo(() => {
-        let maxLayer = 0
-        const sorted = keyframes.sort((a, b) => a.startTime.value - b.startTime.value)
-        const map = new Map<number, OffsetKeyframeInLayer[]>()
-        sorted.forEach(kf => {
-            let layer = 0
-            while (!canKeyframeBeInsertedAtTimelinelayer(kf, map.get(layer))) {
-                layer++
-            }
+    //Hacky stuff, but essentially I need this to re-render whenever a keyframe "moves" (start time changes or duration changes)
+    const [, hackyRerender] = useState(0)
+    useEffect(() => {
+        const listener = () => {
+            hackyRerender(v => v + 1)
+        }
+        animation.keyframeStartOrDurationChanges.add(listener)
+        return () => {
+            animation.keyframeStartOrDurationChanges.delete(listener)
+        }
+    })
 
-            maxLayer = Math.max(maxLayer, layer)
-            let data = map.get(layer)
-            if (data === undefined) {
-                data = []
-                map.set(layer, data)
-            }
-
-            data.push(new OffsetKeyframeInLayer(kf, layer))
-        })
-
-        let layers = Array.from(map.values()).map(a => a.map(l => l.keyframe))
-
-        //We need to ensure that if there are no keyframe, the backround still shows
-        if (layers.length === 0) {
-            layers = [[]]
+    let maxLayer = 0
+    const sorted = keyframes.sort((a, b) => a.startTime.value - b.startTime.value)
+    const map = new Map<number, OffsetKeyframeInLayer[]>()
+    sorted.forEach(kf => {
+        let layer = 0
+        while (!canKeyframeBeInsertedAtTimelinelayer(kf, map.get(layer))) {
+            layer++
         }
 
-        return {
-            maxLayer,
-            layers
+        maxLayer = Math.max(maxLayer, layer)
+        let data = map.get(layer)
+        if (data === undefined) {
+            data = []
+            map.set(layer, data)
         }
-    }, [keyframes])
+
+        data.push(new OffsetKeyframeInLayer(kf, layer))
+    })
+
+    let layers = Array.from(map.values()).map(a => a.map(l => l.keyframe))
+
+    //We need to ensure that if there are no keyframe, the backround still shows
+    if (layers.length === 0) {
+        layers = [[]]
+    }
+
 
     const divHeight = maxLayer <= 2 ? 1.5 : 1.5 + ((maxLayer - 2) * .75)
     const colors = ["bg-sky-500", "bg-green-500", "bg-yellow-500", "bg-red-500"]
-    const hoverColors = ["bg-sky-300", "bg-green-300", "bg-yellow-300", "bg-red-300"]
+    const hoverColors = ["group-hover:bg-sky-300", "group-hover:bg-green-300", "group-hover:bg-yellow-300", "group-hover:bg-red-300"]
     const color = colors[layer.layerId % colors.length]
     const hoverColor = hoverColors[layer.layerId % colors.length]
 
@@ -247,6 +253,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     const addNewKeyframe = () => {
         const kf = animation.createKeyframe(layer.layerId)
 
+        animation.selectedKeyframes.value.forEach(kf => kf.selected.value = false)
         kf.selected.value = true
         kf.startTime.value = animation.time.value
     }
@@ -323,7 +330,7 @@ const TimelineLayer = ({ color, hoverColor, keyframes }: { color: string, hoverC
 }
 
 const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, hoverColor: string, keyframe: DcaKeyframe }) => {
-    // const [start, setStart] = useListenableObject(keyframe.startTime)
+    const [start, setStart] = useListenableObject(keyframe.startTime)
     const [length] = useListenableObject(keyframe.duration)
     const [selected, setSelected] = useListenableObject(keyframe.selected)
 
@@ -333,17 +340,16 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
         () => keyframe.startTime.value,
         ({ dx, initial }) => {
             const value = Math.max(initial + dx / getPixelsPerSecond(), 0)
-            keyframe.startTime.value = value
-            if (keyframeHandleRef.current !== null) {
-                keyframeHandleRef.current.style.left = `${value * getPixelsPerSecond() - getScroll()}px`
-            }
+            //Validate that this animation/project/tab is open?
+            setStart(value)
         },
         ({ max }) => {
             //If the mouse hasn't moved more than 2px, then we count it as a click and not a drag
             if (max <= 2) {
                 setSelected(!selected)
             }
-        }
+        },
+        true
     )
 
     //Updates the keyframe left and width
@@ -359,15 +365,18 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
         return () => removeListener(updateRefStyle)
     }, [addAndRunListener, removeListener, updateRefStyle])
 
-
     return (
         <div
             ref={keyframeHandleRef}
+            style={{
+                left: `${start * getPixelsPerSecond() - getScroll()}px`,
+                width: `${length * getPixelsPerSecond()}px`
+            }}
             // onClick={() => setSelected(!selected)}
             className="h-3 absolute group cursor-pointer"
         >
             <div
-                className={"h-1 mt-1 mb-1 " + (selected ? " bg-red-200 group-hover:bg-white" : `${layerColor} group-hover:${hoverColor}`)}
+                className={"h-1 mt-1 mb-1 " + (selected ? " bg-red-200 group-hover:bg-white" : `${layerColor} ${hoverColor}`)}
             >
 
             </div>

@@ -27,6 +27,8 @@ export default class DcaAnimation {
 
   readonly ikAnchorCubes = new LO<readonly string[]>([])
 
+  readonly keyframeStartOrDurationChanges = new Set<() => void>()
+
   isDraggingTimeline = false
   forceAnimationTime: number | null = null
 
@@ -46,6 +48,10 @@ export default class DcaAnimation {
     this.keyframes.addListener(value => {
       this.maxTime.value = Math.max(...value.map(k => k.startTime.value + k.duration.value))
     })
+  }
+
+  callKeyframePositionsChanged() {
+    this.keyframeStartOrDurationChanges.forEach(f => f())
   }
 
   static createNew(project: DcProject) {
@@ -107,6 +113,10 @@ export class DcaKeyframe {
     this.identifier = v4()
     this.project = project
     this.animation = animation
+
+
+    this.startTime.addListener(() => this.animation.callKeyframePositionsChanged())
+    this.duration.addListener(() => this.animation.callKeyframePositionsChanged())
 
     this.progressionPoints.addListener((val, _, naughtyModifyValue) => {
       naughtyModifyValue(Array.from(val).sort((a, b) => a.x - b.x))
