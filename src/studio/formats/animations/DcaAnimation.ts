@@ -51,7 +51,7 @@ export default class DcaAnimation {
   }
 
   callKeyframePositionsChanged() {
-    this.keyframeStartOrDurationChanges.forEach(f => f())
+    Array.from(this.keyframeStartOrDurationChanges).forEach(f => f())
   }
 
   static createNew(project: DcProject) {

@@ -137,50 +137,7 @@ export class AnimatorGumballIK {
 
     const changedData = this.chainData.map((data, i) => {
       const bone = this.solver.chains[0].bones[i] as Bone3D
-
-      //Get the change in rotation that's been done.
-      //This way we can preserve the starting rotation. 
-      tempVec.set(bone.end.x - bone.start.x, bone.end.y - bone.start.y, bone.end.z - bone.start.z).normalize()
-      tempQuat.setFromUnitVectors(data.offset, tempVec)
-
-      const element = data.cube.cubeGroup
-      if (!element.parent) {
-        console.error(`Cube ${data.cube.name.value} had no parent ?`)
-        return null
-      }
-
-      //      parent_world * local = world
-      //  =>  local = 'parent_world * world
-      const parentInverseMatrix = element.parent.getWorldQuaternion(worldQuat).invert()
-      const worldMatrix = tempQuat.multiply(data.startingWorldRot)
-
-      const quat = parentInverseMatrix.multiply(worldMatrix)
-
-      // const worldRotation = tempQuat.premultiply(data.startingWorldRot)
-      // const quat = element.parent.getWorldQuaternion(worldQuat).invert().multiply(worldRotation)
-
-      //TODO:
-      //Problem currently is that IK only works when theres no change before it
-      //If there's a change before it, then it essentially ignores them. FIgure out why this is.
-      //Look at the varibles here, and look what changes between having and not having a keyframe before
-      //the current. I am sleep
-
-      //Get the euler angles and set it to the rotation. Push these changes.
-      // const rot = data.cube.cubeGroup.rotation
-      // rot.setFromQuaternion(quat)
-      // data.cube.cubeGroup.setRotationFromQuaternion(quat)
-      const rot = data.cube.cubeGroup.rotation
-      rot.setFromQuaternion(quat)
-      data.cube.cubeGroup.updateMatrixWorld(true)
-
-      return {
-        rotations: [
-          rot.x * 180 / Math.PI,
-          rot.y * 180 / Math.PI,
-          rot.z * 180 / Math.PI,
-        ] as const,
-        cube: data.cube
-      }
+      return AnimatorGumballIK.applyBoneToCube(bone, data)
     })
 
     const selectParent = selected.cubeGroup.parent as any
@@ -201,6 +158,53 @@ export class AnimatorGumballIK {
       )
       changedData.forEach(data => data !== null && keyframe.setRotationAbsoluteAnimated(data.cube, ...data.rotations))
     })
+  }
+
+  static applyBoneToCube(bone: Bone3D, data: { offset: Vector3, cube: DCMCube, startingWorldRot: Quaternion }) {
+    //Get the change in rotation that's been done.
+    //This way we can preserve the starting rotation. 
+    tempVec.set(bone.end.x - bone.start.x, bone.end.y - bone.start.y, bone.end.z - bone.start.z).normalize()
+    tempQuat.setFromUnitVectors(data.offset, tempVec)
+
+    const element = data.cube.cubeGroup
+    if (!element.parent) {
+      console.error(`Cube ${data.cube.name.value} had no parent ?`)
+      return null
+    }
+
+    //      parent_world * local = world
+    //  =>  local = 'parent_world * world
+    const parentInverseMatrix = element.parent.getWorldQuaternion(worldQuat).invert()
+    const worldMatrix = tempQuat.multiply(data.startingWorldRot)
+
+    const quat = parentInverseMatrix.multiply(worldMatrix)
+
+    // const worldRotation = tempQuat.premultiply(data.startingWorldRot)
+    // const quat = element.parent.getWorldQuaternion(worldQuat).invert().multiply(worldRotation)
+
+    //TODO:
+    //Problem currently is that IK only works when theres no change before it
+    //If there's a change before it, then it essentially ignores them. FIgure out why this is.
+    //Look at the varibles here, and look what changes between having and not having a keyframe before
+    //the current. I am sleep
+    //Might be due to the fact we use the world matrix ?
+
+    //Get the euler angles and set it to the rotation. Push these changes.
+    // const rot = data.cube.cubeGroup.rotation
+    // rot.setFromQuaternion(quat)
+    // data.cube.cubeGroup.setRotationFromQuaternion(quat)
+    const rot = data.cube.cubeGroup.rotation
+    rot.setFromQuaternion(quat)
+    data.cube.cubeGroup.updateMatrixWorld(true)
+
+    return {
+      rotations: [
+        rot.x * 180 / Math.PI,
+        rot.y * 180 / Math.PI,
+        rot.z * 180 / Math.PI,
+      ] as const,
+      cube: data.cube
+    }
   }
 
   updateHelpers() {
