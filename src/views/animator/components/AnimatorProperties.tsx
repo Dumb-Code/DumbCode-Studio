@@ -239,6 +239,36 @@ const progressionPoints = [
 ]
 
 
+const getTimeAndDistanceToGround = (cube: DCMCube) => {
+    let minimumY = Infinity
+    for (let x = 0; x <= 1; x++) {
+        for (let y = 0; y <= 1; y++) {
+            for (let z = 0; z <= 1; z++) {
+                minimumY = Math.min(minimumY, cube.getWorldPosition(x, y, z, computeVec).y)
+            }
+        }
+    }
+
+    computeVec.set(0, -minimumY * 16, 0)
+
+    cube.cubeGroup.parent?.getWorldQuaternion(computeQuat)
+    computeQuat.invert()
+    computeVec.applyQuaternion(computeQuat)
+
+    //Cube is at y=y
+    //-9.81t^2 + y = 0
+    //-9.81t^2 = -y
+    //t^2 = y / 9.81
+    //t = sqrt(y / 9.81)
+
+    const time = Math.sqrt(minimumY / 9.81)
+    return {
+        time,
+        direction: [computeVec.x, computeVec.y, computeVec.z] as const
+    }
+}
+
+
 const tempVec = new Vector3()
 const tempQuat = new Quaternion()
 const worldQuat = new Quaternion()
@@ -258,40 +288,28 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
         animation.project.model.resetVisuals()
         animation.animate(0)
 
-        const computeCache: { cube: DCMCube, values: [number, number, number], time: number }[] = []
+        const computeCache: { cube: DCMCube, values: readonly [number, number, number], time: number }[] = []
+        const rootComputeCache = new Map<DCMCube, number>()
 
         const selectedRef = gravityRef.current.getSelectedCubes()
         const selected = selectedRef.length === 0 ? selectedCubes : selectedRef
 
         selected.forEach(cube => {
-            let minimumY = Infinity
-            for (let x = 0; x <= 1; x++) {
-                for (let y = 0; y <= 1; y++) {
-                    for (let z = 0; z <= 1; z++) {
-                        minimumY = Math.min(minimumY, cube.getWorldPosition(x, y, z, computeVec).y)
-                    }
-                }
-            }
-
-            computeVec.set(0, -minimumY * 16, 0)
-
-            cube.cubeGroup.parent?.getWorldQuaternion(computeQuat)
-            computeQuat.invert()
-            computeVec.applyQuaternion(computeQuat)
-
-            //Cube is at y=y
-            //-9.81t^2 + y = 0
-            //-9.81t^2 = -y
-            //t^2 = y / 9.81
-            //t = sqrt(y / 9.81)
-
-            const time = Math.sqrt(minimumY / 9.81)
-
+            const gravData = getTimeAndDistanceToGround(cube)
             computeCache.push({
                 cube,
-                values: [computeVec.x, computeVec.y, computeVec.z],
-                time
+                values: gravData.direction,
+                time: gravData.time
             })
+
+            let root = cube;
+            while (root.parent instanceof DCMCube) {
+                root = root.parent
+            }
+
+            if (!rootComputeCache.has(root)) {
+                rootComputeCache.set(root, getTimeAndDistanceToGround(root).time)
+            }
         })
 
         //Reduce the array to a map of Map<time, cubes[]>,
@@ -649,7 +667,7 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
             //Go from the selected node, to the root, setting the selected node as the to, and the 
             //parent node as the from. We then insert the bone into position 0 of the bone array.
             const position = selectedCube.cubeGroup.getWorldPosition(vector3)
-            for (let cube = selectedCube; cube.parent instanceof DCMCube; cube = cube.parent) {
+            for (let cube = selectedCube; cube.parent instanceof DCMCube && cube.parent.hierarchyLevel !== 0; cube = cube.parent) {
                 const to = new V3(position.x, position.y, position.z)
                 cube.parent.cubeGroup.getWorldPosition(vector3)
                 const from = new V3(position.x, position.y, position.z)
@@ -693,17 +711,25 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
 
             //If there are no cubes, we should add a "dummy" bone
             if (newChain.bones.length === 0) {
-                newChain.bones.push({
-                    bone: new Bone3D(
-                        new V3(position.x, position.y, position.z),
-                        new V3(position.x, position.y + 0.1, position.z)
-                    ),
-                    boneIndex: 0,
+                //We've selected a root, which we can basically ignore here
+                if (!(selectedCube.parent instanceof DCMCube)) {
+                    return
+                }
+
+                const from = new V3(position.x, position.y, position.z)
+                selectedCube.getWorldPosition(0.5, 0.5, 0.5, position)
+                const to = new V3(position.x, position.y, position.z)
+                const bone = new Bone3D(from, to)
+
+                newChain.bones.unshift({
+                    boneIndex: newChain.bones.length,
                     from: selectedCube,
                     to: selectedCube,
-                    startingWorldRot: selectedCube.cubeGroup.parent?.getWorldQuaternion(new Quaternion()) ?? new Quaternion(),
-                    offset: new Vector3(0, 1, 0),
+                    bone,
+                    startingWorldRot: selectedCube.cubeGroup.getWorldQuaternion(new Quaternion()),
+                    offset: new Vector3(to.x - from.x, to.y - from.y, to.z - from.z).normalize(),
                 })
+
             }
 
             newChain.bones.forEach(bone => newChain.chain.addBone(bone.bone))
@@ -742,7 +768,7 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
 
         const totalTime = computeCache.reduce((max, cube) => Math.max(max, cube.time), -Infinity)
         const resolution = 0.2
-        let time = resolution;
+        let time = 0;
         const keyframes: DcaKeyframe[] = []
         for (; time < totalTime + resolution; time += resolution) {
             animation.project.model.resetVisuals()
@@ -751,7 +777,7 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
 
             //Update the targets
             cubeTargets.forEach(({ cache, target }) => {
-                const percentage = time / cache.time
+                const percentage = (time + resolution) / cache.time
 
                 if (percentage > 1) {
                     return
@@ -763,6 +789,14 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
                     z + cache.values[2] * percentage
                 ])
                 cache.cube.cubeGroup.getWorldPosition(target)
+
+
+                //TODO: get rootCube, and if it's in the set of moved roots, make sure it's been moved
+                //Don't clip through the floor :)
+                if (target.y < 0) {
+                    target.y = 0
+                }
+
                 cache.cube.updatePositionVisuals()
             })
 
@@ -807,28 +841,27 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
 
             kf.wrapToSetValue(() =>
                 resultMap.forEach((values, cube) => {
-                    // if (cube.name.value === "hips")
                     kf.setRotationAbsoluteAnimated(cube, ...values)
                 })
             )
+
+            solverPasses.forEach(pass => pass.chains.forEach(chain => {
+                const root = chain.bones[0].from.parent
+                if (root instanceof DCMCube) {
+                    const data = rootComputeCache.get(root)
+                    if (data !== undefined) {
+                        const t = (time + resolution) / data
+                        console.log(t)
+                        kf.setPositionAbsolute(root.position[0], root.position[1] - t, root.position[2], root)
+
+                    }
+                }
+            }))
 
 
             keyframes.push(kf)
 
             onTopScene.add(object.clone(true))
-            if (time === resolution) {
-                const model = animation.project.model
-                model.undoRedoHandler.startBatchActions()
-
-                // resultMap.forEach((values, cube) => {
-                //     cube.rotation.value = values
-                // })
-
-                model.undoRedoHandler.endBatchActions("debug")
-            }
-
-            // break
-
         }
 
 
