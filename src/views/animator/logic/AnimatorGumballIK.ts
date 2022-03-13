@@ -197,6 +197,8 @@ export class AnimatorGumballIK {
     rot.setFromQuaternion(quat)
     data.cube.cubeGroup.updateMatrixWorld(true)
 
+    console.log(data.cube.name.value, bone.start, bone.end)
+
     return {
       rotations: [
         rot.x * 180 / Math.PI,

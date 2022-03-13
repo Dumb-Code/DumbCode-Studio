@@ -631,7 +631,7 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
         //     - if from, connect to start
 
         const vector3 = new Vector3()
-        computeCache.forEach(cache => {
+        Array.from(computeCache.values()).sort((a, b) => a.cube.hierarchyLevel - b.cube.hierarchyLevel).forEach(cache => {
             const selectedCube = cache.cube
             //From selected to root will always be in the solver pass of 0
             const newChain: Chain = {
@@ -689,18 +689,20 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
                 }
             }
 
+            newChain.bones.forEach(b => b.boneIndex = newChain.bones.length - b.boneIndex - 1)
+
             //If there are no cubes, we should add a "dummy" bone
             if (newChain.bones.length === 0) {
                 newChain.bones.push({
                     bone: new Bone3D(
                         new V3(position.x, position.y, position.z),
-                        new V3(position.x, position.y, position.z)
+                        new V3(position.x, position.y + 0.1, position.z)
                     ),
                     boneIndex: 0,
                     from: selectedCube,
                     to: selectedCube,
                     startingWorldRot: selectedCube.cubeGroup.parent?.getWorldQuaternion(new Quaternion()) ?? new Quaternion(),
-                    offset: new Vector3(),
+                    offset: new Vector3(0, 1, 0),
                 })
             }
 
@@ -709,9 +711,10 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
             const end = newChain.bones[newChain.bones.length - 1].bone.end
             newChain.target.set(end.x, end.y, end.z)
 
+
             if (newChain.connect) {
                 solverPasses[0].solver.connectChain(
-                    newChain, newChain.connect.chainIndex, newChain.connect.boneIndex,
+                    newChain.chain, newChain.connect.chainIndex, newChain.connect.boneIndex,
                     newChain.connect.mode === "from" ? "start" : "end",
                     newChain.target,
                     true, //Debug to make it render
@@ -739,7 +742,7 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
 
         const totalTime = computeCache.reduce((max, cube) => Math.max(max, cube.time), -Infinity)
         const resolution = 0.2
-        let time = 0;
+        let time = resolution;
         const keyframes: DcaKeyframe[] = []
         for (; time < totalTime + resolution; time += resolution) {
             animation.project.model.resetVisuals()
@@ -763,6 +766,10 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
                 cache.cube.updatePositionVisuals()
             })
 
+            //TODO:
+            //For some reason, the IK chain doesn't seem to be going back to the animation keyframes correctly
+            //Perhaps try setting the actual rotations as being the values (instead of animation values), and seeing what that look like
+
             const kf = animation.createKeyframe()
             kf.startTime.value = animation.time.value + time
             kf.duration.value = resolution
@@ -785,11 +792,10 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
                 const chain = solver.chains[data.chain.chainIndex]
                 const bone = chain.bones[data.bone.boneIndex]
                 const result = AnimatorGumballIK.applyBoneToCube(bone, {
-                    cube: boneData.to,
+                    cube: boneData.from,
                     ...boneData
                 })
                 if (result) {
-
                     resultMap.set(result.cube, [
                         result.rotations[0],
                         result.rotations[1],
@@ -810,6 +816,18 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
             keyframes.push(kf)
 
             onTopScene.add(object.clone(true))
+            if (time === resolution) {
+                const model = animation.project.model
+                model.undoRedoHandler.startBatchActions()
+
+                // resultMap.forEach((values, cube) => {
+                //     cube.rotation.value = values
+                // })
+
+                model.undoRedoHandler.endBatchActions("debug")
+            }
+
+            // break
 
         }
 
