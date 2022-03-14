@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, MouseEvent, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { SVGEye, SVGLocked, SVGPlus, SVGSettings } from "../../../components/Icons";
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
@@ -11,8 +11,14 @@ const AnimatorTimeline = () => {
     const selectedProject = getSelectedProject()
 
     const [animation] = useListenableObject(selectedProject.animationTabs.selectedAnimation)
+    const onBackgroundClicked = () => {
+        if (!animation) {
+            return
+        }
+        animation.selectedKeyframes.value.forEach(kf => kf.selected.value = false)
+    }
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full pt-2 overflow-x-hidden overflow-y-scroll studio-scrollbar">
+        <div onClick={onBackgroundClicked} className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full pt-2 overflow-x-hidden overflow-y-scroll studio-scrollbar">
             {animation !== null && <AnimationLayers animation={animation} />}
         </div>
     )
@@ -72,9 +78,10 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
         }
     }, [keyframes, layers, setLayers, animation.scroll, animation.zoom, onScrollChange, onZoomChange])
 
-    const addLayer = () => {
+    const addLayer = (e: MouseEvent) => {
         const layerId = layers.reduce((x, y) => Math.max(x, y.layerId + 1), 0)
         setLayers(layers.concat([{ layerId }]))
+        e.stopPropagation()
     }
 
     const getPixelsPerSecond = () => {
@@ -169,7 +176,13 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
 
     const draggingRef = useDraggbleRef<HTMLDivElement, number>(
         () => animation.scroll.value,
-        ({ dx, initial }) => animation.scroll.value = Math.max(initial - dx, 0)
+        ({ dx, initial }) => animation.scroll.value = Math.max(initial - dx, 0),
+        ({ max }, event) => {
+            if (max < 2) {
+                animation.selectedKeyframes.value.forEach(kf => kf.selected.value = false)
+                event.stopPropagation()
+            }
+        }
     )
 
     //We need to subscribe to 'wheel' manually, as by default react does it passively.
@@ -259,7 +272,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     }
 
     return (
-        <div className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
+        <div onClick={e => e.stopPropagation()} className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
                 <input type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5 pt-0.5 h-6 text-s" placeholder="layer name" />
                 <AnimationLayerButton onClick={addNewKeyframe} icon={SVGPlus} />
@@ -343,10 +356,31 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
             //Validate that this animation/project/tab is open?
             setStart(value)
         },
-        ({ max }) => {
+        ({ max }, event) => {
             //If the mouse hasn't moved more than 2px, then we count it as a click and not a drag
             if (max <= 2) {
-                setSelected(!selected)
+                if (event.ctrlKey) {
+                    setSelected(!selected)
+                } else {
+                    const selectedKeyframes = keyframe.animation.selectedKeyframes.value
+
+                    if (selectedKeyframes.length === 1) {
+                        //One keyframe selected. If it's this, then deselect,
+                        //Otherwise, select
+                        const selectedKf = selectedKeyframes[0]
+                        if (selectedKf === keyframe) {
+                            setSelected(false)
+                        } else {
+                            selectedKf.selected.value = false
+                            setSelected(true)
+                        }
+                    } else {
+                        //More than one keyframe selected.
+                        //We need to deselect all keyframes that aren't this
+                        selectedKeyframes.forEach(kf => kf.selected.value = (kf === keyframe))
+                        setSelected(true)
+                    }
+                }
             }
         },
         true
