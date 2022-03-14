@@ -71,7 +71,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
     const [isSaveable] = useListenableObject(project.saveableFile)
     const saveModel = async () => {
         try {
-            const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeModel(project.model).getAsBlob())
+            const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeModel(project.model))
             project.name.value = getProjectName(name)
             project.saveableFile.value = true
             project.model.needsSaving.value = false

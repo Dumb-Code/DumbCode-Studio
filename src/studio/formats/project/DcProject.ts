@@ -6,7 +6,7 @@ import { getUndefinedWritable, ReadableFile } from '../../util/FileTypes';
 import { LO } from '../../util/ListenableObject';
 import ReferenceImageHandler from "../../util/ReferenceImageHandler";
 import DcaTabs from '../animations/DcaTabs';
-import { loadDCMModel } from '../model/DCMLoader';
+import { loadModelUnknown } from "../model/DCMLoader";
 import { DCMModel } from '../model/DcmModel';
 import TextureManager from '../textures/TextureManager';
 import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
@@ -115,7 +115,7 @@ export const newProject = () => {
 
 export const createProject = async (read: ReadableFile) => {
   const file = await read.asFile()
-  const model = await loadDCMModel(file.arrayBuffer(), file.name)
+  const model = await loadModelUnknown(file.arrayBuffer(), file.name)
   const project = new DcProject(getProjectName(file.name), model)
 
   project.saveableFile.value = true

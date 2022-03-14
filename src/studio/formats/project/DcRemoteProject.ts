@@ -1,7 +1,7 @@
-import { StudioBuffer } from './../../util/StudioBuffer';
 import { loadDCAAnimation } from '../animations/DcaLoader';
-import { loadDCMModel } from '../model/DCMLoader';
 import { TextureGroup } from '../textures/TextureManager';
+import { StudioBuffer } from './../../util/StudioBuffer';
+import { loadModelUnknown } from './../model/DCMLoader';
 import DcProject from './DcProject';
 import { DcRemoteRepoContentGetterCounter, RemoteProjectEntry } from './DcRemoteRepos';
 
@@ -42,7 +42,7 @@ const loadRemoteModel = async (repo: DcRemoteRepoContentGetterCounter, entry: Re
   const model = await repo.getContent(entry.model)
   if (model.type === "file") {
     const arraybuffer = Uint8Array.from(model.content, c => c.charCodeAt(0)).buffer
-    return await loadDCMModel(arraybuffer, model.name)
+    return await loadModelUnknown(arraybuffer, model.name)
   }
   return null
 }

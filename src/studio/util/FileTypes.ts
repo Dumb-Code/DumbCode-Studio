@@ -11,14 +11,14 @@ export type ReadableFile = {
 }
 
 export type WritableFile = {
-  write: (name: string, blob: Blob) => Promise<any>
+  write: (name: string, blob: Blob | PromiseLike<Blob>) => Promise<any>
 }
 
 // const WritableFileRefreshLoop
 
 export const defaultWritable: WritableFile = {
   write: async (name, blob) => {
-    const url = window.URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(await blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = name;
@@ -72,7 +72,7 @@ export const createReadableFileExtended = (handle: FileSystemFileHandle): Readab
       return {
         write: async (_, blob) => {
           const writable = await handle.createWritable()
-          await writable.write(blob)
+          await writable.write(await blob)
           await writable.close()
           return handle.name
         }
