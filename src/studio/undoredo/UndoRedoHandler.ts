@@ -259,7 +259,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     }
     if (this.canUndo.value) {
       const movingFromHead = this.index.value === this.history.value.length - 1
-      const actions = this.history[this.index.value--]
+      const actions = this.history.value[this.index.value--]
       this._updateCanUndoCanRedo()
       //We need to undo the current silent actions if we're undoing. 
       if (movingFromHead) {
@@ -268,7 +268,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
         }
       }
       for (let i = actions.actions.length - 1; i >= 0; i--) {
-        this.undoAction(actions[i])
+        this.undoAction(actions.actions[i])
       }
     }
   }
@@ -289,11 +289,11 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
 
   redo() {
     if (this.canRedo.value) {
-      const actions = this.history[++this.index.value]
+      const actions = this.history.value[++this.index.value]
       const movingToHead = this.index.value === this.history.value.length - 1
       this._updateCanUndoCanRedo()
       for (let i = 0; i < actions.actions.length; i++) {
-        this.redoAction(actions[i])
+        this.redoAction(actions.actions[i])
       }
       if (movingToHead) {
         for (let i = 0; i < this.silentActions.length; i++) {
