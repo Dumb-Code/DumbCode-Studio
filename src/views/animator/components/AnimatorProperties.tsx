@@ -1,19 +1,18 @@
 import { Bone3D, Chain3D, Structure3D, V3 } from "@aminere/fullik";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Slider from 'react-input-slider';
 import NumericInput from 'react-numeric-input';
-import { Euler, Mesh, Object3D, Quaternion, Vector3 } from "three";
+import { Euler, Quaternion, Vector3 } from "three";
 import Checkbox from "../../../components/Checkbox";
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import CubeInput from "../../../components/CubeInput";
 import CubeRotationInput from "../../../components/CubeRotationInput";
 import Dropup, { DropupItem } from "../../../components/Dropup";
 import HistoryList from "../../../components/HistoryList";
-import SelectedCubesButton, { SelectedCubesRef } from "../../../components/SelectedCubesButton";
 import Toggle from "../../../components/Toggle";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
-import DcaAnimation, { DcaKeyframe } from "../../../studio/formats/animations/DcaAnimation";
+import DcaAnimation, { DcaKeyframe, ProgressionPoint } from "../../../studio/formats/animations/DcaAnimation";
 import { DCMCube } from "../../../studio/formats/model/DcmModel";
 import { LO, LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import { AnimatorGumballIK } from "../logic/AnimatorGumballIK";
@@ -275,13 +274,13 @@ const worldQuat = new Quaternion()
 const tempEuler = new Euler()
 tempEuler.order = "ZYX"
 const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnimation | null, selectedCubes: readonly DCMCube[] }) => {
-    const { onTopScene, scene } = useStudio()
-
-    const gravityRef = useRef<SelectedCubesRef>(null)
-    const forcedLeafRef = useRef<SelectedCubesRef>(null)
+    // const { onTopScene, scene } = useStudio()
+    //
+    // const gravityRef = useRef<SelectedCubesRef>(null)
+    // const forcedLeafRef = useRef<SelectedCubesRef>(null)
 
     const applyAutoGravity = () => {
-        if (!animation || !gravityRef.current || !forcedLeafRef.current) {
+        if (!animation) {
             return
         }
 
@@ -289,10 +288,11 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
         animation.animate(0)
 
         const computeCache: { cube: DCMCube, values: readonly [number, number, number], time: number }[] = []
-        const rootComputeCache = new Map<DCMCube, number>()
+        const rootGroundSpeed = new Map<DCMCube, { distance: number, time: number }>()
 
-        const selectedRef = gravityRef.current.getSelectedCubes()
-        const selected = selectedRef.length === 0 ? selectedCubes : selectedRef
+        // const selectedRef = gravityRef.current.getSelectedCubes()
+        // const selected = selectedRef.length === 0 ? selectedCubes : selectedRef
+        const selected = selectedCubes
 
         selected.forEach(cube => {
             const gravData = getTimeAndDistanceToGround(cube)
@@ -307,258 +307,12 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
                 root = root.parent
             }
 
-            if (!rootComputeCache.has(root)) {
-                rootComputeCache.set(root, getTimeAndDistanceToGround(root).time)
+            if (!rootGroundSpeed.has(root)) {
+                const { time, direction } = getTimeAndDistanceToGround(root)
+                rootGroundSpeed.set(root, { time, distance: -direction[1] })
             }
         })
 
-        //Reduce the array to a map of Map<time, cubes[]>,
-        //Essentially grouping the cubes by distance from the ground,
-        //As to limit the number of keyframes created.
-        // const reducedTimeMap = computeCache.reduce((map, value) => {
-        //     let closeTimeKey: number | undefined;
-        //     map.forEach((_, key) => {
-        //         //If the time it takes for this to hit the ground, and the other to hit the ground
-        //         //Is difference by 0.2, then use the other one's keyframe
-        //         if (Math.abs(key - value.time) < 0.2) {
-        //             closeTimeKey = key
-        //         }
-        //     })
-        //     if (closeTimeKey !== undefined) {
-        //         const arr = map.get(closeTimeKey) ?? []
-        //         arr.push(value)
-        //         map.set(closeTimeKey, arr)
-        //     } else {
-        //         map.set(value.time, [value])
-        //     }
-        //     return map
-        // }, new Map<number, typeof computeCache>())
-
-        // //Start batch undo redo
-
-
-        // const keyframes: DcaKeyframe[] = []
-        // reducedTimeMap.forEach((values, time) => {
-        //     const kf = animation.createKeyframe()
-        //     kf.startTime.value = animation.time.value
-        //     kf.duration.value = time
-        //     kf.progressionPoints.value = progressionPoints
-        //     values.forEach(v => kf.position.set(v.cube.name.value, v.values))
-        //     keyframes.push(kf)
-        // })
-
-        // type PreChainData = Omit<typeof chainData[number], "start" | "end"> & {
-        //     alreadyAdd?: {
-        //         chain: number,
-        //         bone: number
-        //     }
-        // }
-
-        //02/03 - 
-        //I need the chains from the leaf nodes to be reversed (double reversed as they're already reversed)
-        //They need to go from the leaf -> the root, then have the root be the target
-        //This is the opposite way around to the selected cubes, which should be the target.
-        //I think that I need to create the chain in a better way
-        //First, go from all the selected nodes, and go to the parent's root, like normal
-        //This would be target-first parent-first
-        //Do this for all selected nodes
-        //Then, go through all selected nodes and go to all their children, linking up chains if needed.
-        //This would be target-first children-first
-        // - alternativly, we could *maybe* skip this step?
-        //has to done in hirarchl order - parents first
-        //
-        //The target of this would be the selected cube. This is the opposite of what is currently done,
-        //As currently the IK chain looks to the parent to start, meaning the current node is the target. 
-        //Once done, go to all leaf nodes and move up to link it with the root/chain.
-        //This would be target-last parent-first
-        //
-        //So essentially, I should come up with a way to navigate parent-first or children-first,
-        //And a way to have the target be either the first or last.
-
-        //03/03
-        //Okay a new day, and a new way of thinking.
-        //The best way to join everything up would be:
-        //In hirarchal order (root cubes first), go through each cube and create a chain,
-        // - Where the parent is first, and the target is the cube (*cube -> root)
-        //Then, go through each leaf node, and create a chain,
-        // - Where the parent is last, and the target is the leaf node (*root -> leaf)
-
-        // const previousPositionVector = new Vector3()
-        //reversed: false = *cube -> root
-        //reversed: true = *root -> cube
-        //In the cubes: parent -> self -> *child,
-        //  - !reversed: parent, self, child* 
-        //  -  reversed: child, self, parent*
-        // const addToChain = (cube: DCMCube, chain: PreChainData, reversed: boolean) => {
-        //     const position = cube.cubeGroup.getWorldPosition(previousPositionVector)
-        //     const returnValue = [position.x, position.y, position.z] as const
-
-        //     //If this cube is already in the chain, then we don't look it's parent
-        //     const processed = chainData.flatMap(chain => chain.bones.map(bone => ({ chain, bone }))).find(data => data.bone.cube === cube)
-        //     if (processed) {
-        //         chain.alreadyAdd = {
-        //             chain: processed.chain.chainIndex,
-        //             bone: processed.bone.boneIndex
-        //         }
-        //         return returnValue
-        //     }
-        //     if (cube.parent instanceof DCMCube) {
-        //         let end = new V3(returnValue[0], returnValue[1], returnValue[2])
-
-        //         const [x, y, z] = addToChain(cube.parent, chain, reversed)
-
-        //         let start = new V3(x, y, z)
-
-        //         if (reversed) {
-        //             let temp = start
-        //             start = end
-        //             end = temp
-        //         }
-
-
-        //         let bone = new Bone3D(start, end)
-
-        //         const boneData = {
-        //             cube: cube.parent,
-        //             position: reversed ? [x, y, z] as const : returnValue,
-        //             startingWorldRot: cube.parent.cubeGroup.getWorldQuaternion(new Quaternion()),
-        //             offset: new Vector3(end.x - start.x, end.y - start.y, end.z - start.z).normalize(),
-        //             bone,
-        //             boneIndex: chain.bones.length
-        //         }
-
-        //         chain.bones.push(boneData)
-        //     }
-        //     return returnValue
-        // // }
-
-
-        // const [x, y, z] = addToChain(cube, data, reversed)
-
-        // //For if it's a root node
-        // if (data.bones.length === 0) {
-        //     if (cube.cubeGroup.parent === null) {
-        //         return
-        //     }
-        //     data.bones.push({
-        //         cube: cube,
-        //         position: [x, y, z],
-        //         startingWorldRot: cube.cubeGroup.parent.getWorldQuaternion(new Quaternion()),
-        //         bone: new Bone3D(new V3(x, y, z), new V3(x, y, z)),
-        //         boneIndex: 0,
-        //         offset: new Vector3()
-        //     })
-        // }
-
-        // if (reversed) {
-        //     data.bones.reverse()
-        // }
-
-        // console.log(data.bones)
-
-        // const bone = data.bones[data.bones.length - 1]
-        // target.fromArray(bone.position)
-        // data.bones.forEach(bone => {
-        //     bone.boneIndex = chain.bones.length;
-        //     chain.addBone(bone.bone)
-        // })
-
-        // console.log(cube.name.value, target)
-
-        // if (data.alreadyAdd) {
-        //     solver.connectChain(chain, data.alreadyAdd.chain, data.alreadyAdd.bone, 'end', target, true, Math.random() * 0xFFFFFF)
-        // } else {
-        //     solver.add(chain, target, true)
-        // }
-        // cubeTargetMap.set(cube, target)
-        // chainData.push({
-        //     // start: data.bones[data.bones.length - 1].cube,
-        //     // end: cube,
-        //     ...data
-        // })
-        // return data
-
-
-        // const chainData: {
-        //     chain: Chain3D
-        //     target: Vector3
-        //     // start: DCMCube,
-        //     // end: DCMCube,
-        //     chainIndex: number,
-        //     bones: {
-        //         from: DCMCube,
-        //         to: DCMCube,
-        //         position: readonly [number, number, number],
-        //         offset: Vector3,
-        //         startingWorldRot: Quaternion,
-        //         bone: Bone3D,
-        //         boneIndex: number
-        //     }[]
-        // }[] = []
-
-
-
-        // let chainIndex = 0
-        // //reversed: false = *cube -> root
-        // //reversed: true = *root -> cube
-        // const createChainFrom = (cube: DCMCube, reversed: boolean) => {
-        //     const target = new Vector3()
-        //     const chain = new Chain3D(Math.random() * 0xFFFFFF)
-
-        //     const array: {
-        //         cube: DCMCube,
-        //         position: Vector3
-        //     }[] = []
-
-        //     const getIfProcessed = (cube: DCMCube) => {
-        //         const mapped = chainData
-        //             .flatMap(chain => chain.bones.map(bone => ({ chain, bone })))
-
-
-        //         if (!processed) {
-        //             return null
-        //         }
-        //         return {
-        //             bone: processed.bone.boneIndex,
-        //             chain: processed.chain.chainIndex
-        //         }
-        //     }
-
-
-        //     let headProcess = getIfProcessed(cube)
-
-        //     for (let c: CubeParent = cube; c instanceof DCMCube; c = c.parent) {
-        //         const processed = getIfProcessed(c)
-        //         if (processed) {
-
-        //             break
-        //         }
-        //         array.push({
-        //             cube: c,
-        //             position: c.cubeGroup.getWorldPosition(new Vector3())
-        //         })
-        //     }
-
-        //     if (reversed) {
-        //         array.reverse()
-        //     }
-
-        // }
-        //Create chains from the moving cubes to their roots.
-        // computeCache.forEach(cache => createChainFrom(cache.cube, false))
-
-        // animation.project.model.identifierCubeMap.forEach(cube => {
-        //     //Create a chain from all "leaf" nodes
-        //     if (cube.children.value.length === 0) {
-        //         // createChainFrom(cube, true)
-        //     }
-        // })
-
-        // solver.update()
-
-
-
-        //Idea 2
         // Essentially, we need to connect the entire thing up, so every cubes bones lead back to 
         // a control point.
         // Go from each selected node to the root like normal.
@@ -574,9 +328,10 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
         //     - store the solver index, bone index (where to = processed node), chain index, position on the bone
         //     - the solver index should be + 1 of the processed nodes solver index
         //     - then when updating, after the solver is done, update the target to be the position of the bone
-        //
-        const object = new Object3D()
-        onTopScene.add(object)
+
+
+        // const object = new Object3D()
+        // onTopScene.add(object)
 
         const cubeTargets: {
             cache: typeof computeCache[number]
@@ -619,7 +374,7 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
         const newSolverPass = () => {
             const pass = {
                 solverIndex: solverPasses.length,
-                solver: new Structure3D(object),
+                solver: new Structure3D(),
                 chains: []
             }
             solverPasses.push(pass)
@@ -742,23 +497,22 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
                 solverPasses[0].solver.connectChain(
                     newChain.chain, newChain.connect.chainIndex, newChain.connect.boneIndex,
                     newChain.connect.mode === "from" ? "start" : "end",
-                    newChain.target,
-                    true, //Debug to make it render
+                    newChain.target
                 )
             } else {
-                solverPasses[0].solver.add(newChain.chain, newChain.target, true)
+                solverPasses[0].solver.add(newChain.chain, newChain.target)
             }
             solverPasses[0].chains.push(newChain)
         })
 
         //The normal threejs stuff is too big, so just scale it down by 1/16 on the non important axis
-        const forEvery = (object: Object3D) => {
-            if (object instanceof Mesh) {
-                object.scale.y = object.scale.x = 1 / 32
-            }
-            object.children.forEach(forEvery)
-        }
-        forEvery(object)
+        // const forEvery = (object: Object3D) => {
+        //     if (object instanceof Mesh) {
+        //         object.scale.y = object.scale.x = 1 / 32
+        //     }
+        //     object.children.forEach(forEvery)
+        // }
+        // forEvery(object)
 
         const update = () => {
             solverPasses.forEach(s => s.solver.update())
@@ -766,21 +520,26 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
         update()
 
 
-        const totalTime = computeCache.reduce((max, cube) => Math.max(max, cube.time), -Infinity)
+        const totalTime = Math.max(
+            computeCache.reduce((max, cube) => Math.max(max, cube.time), -Infinity),
+            Array.from(rootGroundSpeed.values()).reduce((max, data) => Math.max(max, data.time), -Infinity)
+        )
         const resolution = 0.2
-        let time = 0;
+        let linTime = 0;
         const keyframes: DcaKeyframe[] = []
-        for (; time < totalTime + resolution; time += resolution) {
+        for (; linTime < totalTime + resolution; linTime += resolution) {
+            const timeDone = (linTime / (totalTime + resolution))
+            const time = timeDone * timeDone
             animation.project.model.resetVisuals()
             animation.animate(0)
             animation.project.model.updateMatrixWorld(true)
 
             //Update the targets
             cubeTargets.forEach(({ cache, target }) => {
-                const percentage = (time + resolution) / cache.time
+                let percentage = (time + resolution) / cache.time
 
                 if (percentage > 1) {
-                    return
+                    percentage = 1
                 }
                 const [x, y, z] = cache.cube.position.value
                 cache.cube.updatePositionVisuals([
@@ -793,6 +552,22 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
 
                 //TODO: get rootCube, and if it's in the set of moved roots, make sure it's been moved
                 //Don't clip through the floor :)
+
+                let root = cache.cube
+                while (root.parent instanceof DCMCube) {
+                    root = root.parent
+                }
+
+                const rootSpeed = rootGroundSpeed.get(root)
+                if (rootSpeed !== undefined) {
+                    let rootPercentge = (time + resolution) / rootSpeed.time
+                    if (rootPercentge > 1) {
+                        rootPercentge = 1
+                    }
+                    const rootDistance = rootPercentge * rootSpeed.distance / 16
+                    target.y += rootDistance
+                }
+
                 if (target.y < 0) {
                     target.y = 0
                 }
@@ -800,13 +575,24 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
                 cache.cube.updatePositionVisuals()
             })
 
-            //TODO:
-            //For some reason, the IK chain doesn't seem to be going back to the animation keyframes correctly
-            //Perhaps try setting the actual rotations as being the values (instead of animation values), and seeing what that look like
-
             const kf = animation.createKeyframe()
-            kf.startTime.value = animation.time.value + time
+            kf.startTime.value = animation.time.value + linTime
             kf.duration.value = resolution
+
+            const progressionPointSplit = 10
+            const progressionPoints: ProgressionPoint[] = [
+                { required: true, x: 0.00, y: 1.00 },
+                { required: true, x: 1.00, y: 0.00 }
+            ]
+
+            for (let i = 1; i < progressionPointSplit; i++) {
+                const ppDone = i / progressionPointSplit
+                const pptd = timeDone + ppDone * ppDone * resolution
+                progressionPoints.push({
+                    x: ppDone,
+                    y: pptd
+                })
+            }
 
             const resultMap = new Map<DCMCube, readonly [number, number, number]>()
 
@@ -848,12 +634,14 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
             solverPasses.forEach(pass => pass.chains.forEach(chain => {
                 const root = chain.bones[0].from.parent
                 if (root instanceof DCMCube) {
-                    const data = rootComputeCache.get(root)
-                    if (data !== undefined) {
-                        const t = (time + resolution) / data
-                        console.log(t)
-                        kf.setPositionAbsolute(root.position[0], root.position[1] - t, root.position[2], root)
+                    const speed = rootGroundSpeed.get(root)
+                    if (speed !== undefined) {
+                        let percentage = (time + resolution) / speed.time
 
+                        if (percentage > 1) {
+                            percentage = 1
+                        }
+                        kf.setPositionAbsolute(root.position.value[0], root.position.value[1] - percentage * speed.distance, root.position.value[2], root)
                     }
                 }
             }))
@@ -861,7 +649,7 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
 
             keyframes.push(kf)
 
-            onTopScene.add(object.clone(true))
+            // onTopScene.add(object.clone(true))
         }
 
 
@@ -871,8 +659,8 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
     return (
         <CollapsableSidebarPannel title="AUTO GRAVITY" heightClassname="h-96" panelName="animator_ag">
             <div className="flex flex-col h-full p-2">
-                <SelectedCubesButton className="bg-blue-400" butonClassName="bg-blue-800" title="Gravity Cubes" ref={gravityRef} />
-                <SelectedCubesButton className="bg-green-400" butonClassName="bg-green-800" title="IK Chain End Cubes" ref={forcedLeafRef} />
+                {/* <SelectedCubesButton className="bg-blue-400" butonClassName="bg-blue-800" title="Gravity Cubes" ref={gravityRef} /> */}
+                {/* <SelectedCubesButton className="bg-green-400" butonClassName="bg-green-800" title="IK Chain End Cubes" ref={forcedLeafRef} /> */}
                 <button onClick={applyAutoGravity} className="bg-blue-500 rounded">Apply to selected</button>
             </div>
         </CollapsableSidebarPannel>
