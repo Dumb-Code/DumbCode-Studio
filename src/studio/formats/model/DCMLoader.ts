@@ -16,28 +16,8 @@ export const loadModelUnknown = async (arrayBuffer: ArrayBuffer | PromiseLike<Ar
 }
 
 export const loadModel = async (arrayBuffer: ArrayBuffer) => {
-  let zip: JSZip
-  try {
-    zip = await JSZip.loadAsync(arrayBuffer)
-  } catch (e) {
-    throw new ParseError(`Unable to read zip ${e}`)
-  }
-  const file = zip.file("dcm_model")
-  if (!file) {
-    throw new ParseError("dcm_model was not defined")
-  }
 
-  let dataString: string;
-  try {
-    dataString = await file.async("string")
-  } catch (e) {
-    throw new ParseError(`Unable to read dcm_model, ${e}`)
-  }
-
-  let data: ParseModelType = JSON.parse(dataString)
-  if (!data) {
-    throw new ParseError("Unable to parse")
-  }
+  const data = await getZippedFile<ParseModelType>(arrayBuffer, "dcm_model")
 
   const model = new DCMModel()
   model.undoRedoHandler.ignoreActions = true
@@ -74,6 +54,7 @@ export const writeModel = async (model: DCMModel) => {
   })
 
   const data: ParseModelType = {
+    version: 1,
     author: model.author.value,
     textureWidth: model.textureWidth.value,
     textureHeight: model.textureHeight.value,
@@ -91,6 +72,7 @@ export const writeModel = async (model: DCMModel) => {
 type TriVec = readonly [number, number, number]
 
 type ParseModelType = {
+  version: number,
   author: string,
   textureWidth: number,
   textureHeight: number,
@@ -109,6 +91,33 @@ type ParseCubeType = {
   textureMirrored: boolean,
 
   children: readonly ParseCubeType[]
+}
+
+
+export const getZippedFile = async <T>(arrayBuffer: ArrayBuffer, fileName: string) => {
+  let zip: JSZip
+  try {
+    zip = await JSZip.loadAsync(arrayBuffer)
+  } catch (e) {
+    throw new ParseError(`Unable to read zip ${e}`)
+  }
+  const file = zip.file(fileName)
+  if (!file) {
+    throw new ParseError(fileName + " was not defined")
+  }
+
+  let dataString: string;
+  try {
+    dataString = await file.async("string")
+  } catch (e) {
+    throw new ParseError(`Unable to read ${fileName}, ${e}`)
+  }
+
+  let data: T = JSON.parse(dataString)
+  if (!data) {
+    throw new ParseError("Unable to parse")
+  }
+  return data
 }
 
 export class ParseError extends Error { }

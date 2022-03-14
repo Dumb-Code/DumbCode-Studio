@@ -65,6 +65,7 @@ export const loadDCMModel = async (arrayBuffer: ArrayBuffer | PromiseLike<ArrayB
  * @param {DCMModel} model the model
  * @returns a ByteBuffer with the model written to it 
  */
+// eslint-disable-next-line
 const writeModel = (model: DCMModel) => {
     let buffer = new StudioBuffer()
 

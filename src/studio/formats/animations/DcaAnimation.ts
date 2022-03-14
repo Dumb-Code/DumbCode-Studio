@@ -1,4 +1,5 @@
 import { v4 } from 'uuid';
+import { getUndefinedWritable } from '../../util/FileTypes';
 import DcProject from '../project/DcProject';
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
 import { LO, LOMap } from './../../util/ListenableObject';
@@ -8,34 +9,41 @@ export default class DcaAnimation {
   readonly identifier = v4()
   readonly project: DcProject
 
-  readonly name: LO<string>
-  readonly propertiesMode = new LO<"local" | "global">("global")
-  readonly keyframes = new LO<readonly DcaKeyframe[]>([])
-  readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([])
+  private readonly onDirty = () => this.needsSaving.value = true
 
-  readonly time = new LO(0)
-  readonly displayTime = new LO(0)
-  readonly maxTime = new LO(1)
-  readonly playing = new LO(false)
+  readonly name: LO<string>
+  readonly propertiesMode = new LO<"local" | "global">("global", this.onDirty)
+  readonly keyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty)
+  readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty)
+
+  readonly time = new LO(0, this.onDirty)
+  readonly displayTime = new LO(0, this.onDirty)
+  readonly maxTime = new LO(1, this.onDirty)
+  readonly playing = new LO(false, this.onDirty)
   displayTimeMatch: boolean = true
 
   readonly keyframeData: KeyframeLoopData
-  readonly keyframeLayers = new LO<readonly KeyframeLayerData[]>([])
+  readonly keyframeLayers = new LO<readonly KeyframeLayerData[]>([], this.onDirty)
 
-  readonly scroll = new LO(0)
-  readonly zoom = new LO(1)
+  readonly scroll = new LO(0, this.onDirty)
+  readonly zoom = new LO(1, this.onDirty)
 
-  readonly ikAnchorCubes = new LO<readonly string[]>([])
+  readonly ikAnchorCubes = new LO<readonly string[]>([], this.onDirty)
 
   readonly keyframeStartOrDurationChanges = new Set<() => void>()
 
   isDraggingTimeline = false
   forceAnimationTime: number | null = null
 
+  readonly saveableFile = new LO(false)
+  readonly needsSaving = new LO(false)
+  animationWritableFile = getUndefinedWritable("Animation File", ".dca")
+
   readonly animatorGumball: AnimatorGumball
 
   constructor(project: DcProject, name: string) {
-    this.name = new LO(name)
+
+    this.name = new LO(name, this.onDirty)
     this.project = project
     this.keyframeData = new KeyframeLoopData()
     this.animatorGumball = new AnimatorGumball(project.selectedCubeManager, project.model, project.group, project.overlayGroup)
@@ -94,16 +102,18 @@ export class DcaKeyframe {
   readonly project: DcProject
   readonly animation: DcaAnimation
 
-  readonly startTime = new LO(0)
-  readonly duration = new LO(1)
+  private readonly onDirty = () => this.animation.needsSaving.value = true
 
-  readonly selected = new LO(false)
+  readonly startTime = new LO(0, this.onDirty)
+  readonly duration = new LO(1, this.onDirty)
 
-  readonly rotation = new LOMap<string, readonly [number, number, number]>()
-  readonly position = new LOMap<string, readonly [number, number, number]>()
-  readonly cubeGrow = new LOMap<string, readonly [number, number, number]>()
+  readonly selected = new LO(false, this.onDirty)
 
-  readonly progressionPoints = new LO<readonly ProgressionPoint[]>([])
+  readonly rotation = new LOMap<string, readonly [number, number, number]>(this.onDirty)
+  readonly position = new LOMap<string, readonly [number, number, number]>(this.onDirty)
+  readonly cubeGrow = new LOMap<string, readonly [number, number, number]>(this.onDirty)
+
+  readonly progressionPoints = new LO<readonly ProgressionPoint[]>([], this.onDirty)
 
   skip = false
 

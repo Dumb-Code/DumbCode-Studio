@@ -163,10 +163,14 @@ export const useListenableMap = <K, V>(obj: LOMap<K, V>, deps: DependencyList = 
 
 export class LOMap<K, V> extends Map<K, V> {
   constructor(
-    private listners: Map<K, Set<((newValue: V | undefined, oldValue: V | undefined) => void)>> = new Map(),
+    defaultCallback?: () => void,
+    private listners: Map<K, Set<(newValue: V | undefined, oldValue: V | undefined) => void>> = new Map(),
     private globalListeners = new Set<() => void>()
   ) {
     super()
+    if (defaultCallback) {
+      this.globalListeners.add(defaultCallback)
+    }
   }
 
   clear() {

@@ -1,6 +1,5 @@
-import { loadDCAAnimation } from '../animations/DcaLoader';
 import { TextureGroup } from '../textures/TextureManager';
-import { StudioBuffer } from './../../util/StudioBuffer';
+import { loadUnknownAnimation } from './../animations/DCALoader';
 import { loadModelUnknown } from './../model/DCMLoader';
 import DcProject from './DcProject';
 import { DcRemoteRepoContentGetterCounter, RemoteProjectEntry } from './DcRemoteRepos';
@@ -108,7 +107,7 @@ const loadAllAnimations = async (repo: DcRemoteRepoContentGetterCounter, animati
     const content = await repo.getContent(animation.path)
     if (content.type === "file") {
       const arraybuffer = Uint8Array.from(content.content, c => c.charCodeAt(0)).buffer
-      return loadDCAAnimation(project, content.name, new StudioBuffer(arraybuffer))
+      return loadUnknownAnimation(project, content.name, arraybuffer)
     }
     return null
   }))
