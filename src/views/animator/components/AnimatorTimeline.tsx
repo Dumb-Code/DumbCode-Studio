@@ -349,12 +349,24 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
 
     const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll } = useContext(ScrollZoomContext)
 
-    const keyframeHandleRef = useDraggbleRef<HTMLDivElement, number>(
-        () => keyframe.startTime.value,
+    const keyframeHandleRef = useDraggbleRef<HTMLDivElement, Map<DcaKeyframe, number>>(
+        (event) => {
+            const keyframesToUse = [keyframe]
+            if (!event.ctrlKey) {
+                keyframesToUse.push(...keyframe.animation.selectedKeyframes.value)
+            }
+
+            return keyframesToUse.reduce((map, kf) => {
+                map.set(kf, kf.startTime.value)
+                return map
+            }, new Map<DcaKeyframe, number>())
+        },
         ({ dx, initial }) => {
-            const value = Math.max(initial + dx / getPixelsPerSecond(), 0)
-            //Validate that this animation/project/tab is open?
-            setStart(value)
+            initial.forEach((time, kf) => {
+                //Validate that this animation/project/tab is open?
+                kf.startTime.value = Math.max(time + dx / getPixelsPerSecond(), 0)
+            })
+
         },
         ({ max }, event) => {
             //If the mouse hasn't moved more than 2px, then we count it as a click and not a drag

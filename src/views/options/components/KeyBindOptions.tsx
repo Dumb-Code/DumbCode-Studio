@@ -43,6 +43,12 @@ const KeyBindOptions = () => {
             <KeyBindOption name="Delete + Children" selected={"Ctrl + Del"} moreInfo="Deletes the selected object and it's children." />
             <KeyBindOption name="Copy Cube(s)" selected={"Ctrl + C"} moreInfo="Copies the selected cube" />
             <KeyBindOption name="Paste Cube(s)" selected={"Ctrl + V"} moreInfo="Pastes the copied cubes in place" />
+
+
+            <p className="text-gray-900 text-xs font-semibold mt-4">ANIMATOR BINDINGS</p>
+            <p className="text-gray-900 text-xs mb-2">Key bindings that apply to the animator.</p>
+            <KeyBindOption name="Delete" selected={"Del"} moreInfo="Deletes the selected keyframe." />
+            <KeyBindOption name="Individually Select" selected={"Ctrl"} moreInfo="Invividually select the keyframe" />
         </div>
     )
 }
