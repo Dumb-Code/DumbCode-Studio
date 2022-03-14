@@ -40,6 +40,7 @@ type UndoRedoDataType = {
   section_name: "root_data",
   data: {
     author: string,
+    metadata: Readonly<Record<string, string>>,
     textureWidth: number,
     textureHeight: number,
     root: readonly string[],
@@ -48,6 +49,7 @@ type UndoRedoDataType = {
   section_name: `cube_${string}`
   data: {
     identifier: string, //Unchaning
+    metadata: Readonly<Record<string, string>>,
     name: string,
     dimension: readonly [number, number, number],
     position: readonly [number, number, number],
@@ -81,7 +83,7 @@ export class DCMModel implements CubeParent {
   readonly textureWidth = new LO(64).applyToSection(this._section, "textureWidth")
   readonly textureHeight = new LO(64).applyToSection(this._section, "textureHeight")
 
-  cubeMap: Map<string, Set<DCMCube>>
+  readonly cubeMap: Map<string, Set<DCMCube>> = new Map()
   readonly identifierCubeMap = new LOMap<string, DCMCube>()
   readonly children = new LO<readonly DCMCube[]>([]).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.identifListToCubes(s), "root")
 
@@ -94,10 +96,12 @@ export class DCMModel implements CubeParent {
   readonly selectedCubeManager = new SelectedCubeManager()
   readonly lockedCubes = new LockedCubes(this)
 
-  constructor() {
-    this.cubeMap = new Map()
+  readonly metadata: Readonly<Record<string, string>> = {}
 
+  constructor() {
     this.materials = new ProjectMaterials()
+
+    this._section.modifyFirst("metadata", this.metadata, () => { throw new Error("Tried to modify metadata") })
 
     this.children.addListener((newChildren, oldChildren) => {
       oldChildren.forEach(child => this.modelGroup.remove(child.cubeGroup))
@@ -251,6 +255,8 @@ export class DCMCube implements CubeParent {
 
   destroyed = false
 
+  readonly metadata: Readonly<Record<string, string>> = {}
+
   constructor(
     name: string,
     dimension: readonly [number, number, number],
@@ -277,6 +283,8 @@ export class DCMCube implements CubeParent {
     this._section = model.undoRedoHandler.createNewSection(`cube_${this.identifier}`, "Cube Properties Edit") as CubeSectionType
 
     this._section.modifyFirst("identifier", this.identifier, () => { throw new Error("Tried to modify identifier") })
+    this._section.modifyFirst("metadata", this.metadata, () => { throw new Error("Tried to modify metadata") })
+
     this.name = new LO(name, onDirty).applyToSection(this._section, "name", false, "Cube Name Changed")
     this.dimension = new LO(dimension, onDirty).applyToSection(this._section, "dimension", false, "Cube Dimensions Edit")
     this.position = new LO(rotationPoint, onDirty).applyToSection(this._section, "position", false, "Cube Position Edit")
@@ -454,9 +462,11 @@ export class DCMCube implements CubeParent {
   }
 
   cloneCube(model = this.model) {
-    return new DCMCube(this.name.value.replace(/~\d+$/, ""), this.dimension.value, this.position.value, this.offset.value,
+    const cube = new DCMCube(this.name.value.replace(/~\d+$/, ""), this.dimension.value, this.position.value, this.offset.value,
       this.rotation.value, this.textureOffset.value, this.textureMirrored.value, this.cubeGrow.value,
       this.children.value.map(c => c.cloneCube(model)), model)
+    cube.metadata = this.metadata
+    return cube
   }
 
   updateMatrixWorld(force = true) {

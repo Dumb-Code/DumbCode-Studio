@@ -15,6 +15,14 @@ export const loadModelUnknown = async (arrayBuffer: ArrayBuffer | PromiseLike<Ar
   }
 }
 
+const applyMetadata = (src: Record<string, string> | undefined, dst: Readonly<Record<string, string>>) => {
+  if (src === undefined) {
+    return
+  }
+  const dstModifiable = dst as Record<string, string>
+  Object.assign(dstModifiable, src)
+}
+
 export const loadModel = async (arrayBuffer: ArrayBuffer) => {
 
   const data = await getZippedFile<ParseModelType>(arrayBuffer, "dcm_model")
@@ -23,18 +31,24 @@ export const loadModel = async (arrayBuffer: ArrayBuffer) => {
   model.undoRedoHandler.ignoreActions = true
 
   const cubeMapper = (cube: ParseCubeType): DCMCube => {
-    return new DCMCube(cube.name,
+    const dcm = new DCMCube(cube.name,
       cube.dimension, cube.position, cube.offset,
       cube.rotation, cube.textureOffset, cube.textureMirrored,
       cube.cubeGrow, cube.children.map(c => cubeMapper(c)), model,
       cube.identifier
     )
+
+    applyMetadata(cube.metadata, dcm.metadata)
+
+    return dcm
   }
 
   model.author.value = data.author
   model.textureWidth.value = data.textureWidth
   model.textureHeight.value = data.textureHeight
   model.children.value = data.rootCubes.map(c => cubeMapper(c))
+
+  applyMetadata(data.metadata, model.metadata)
 
   model.undoRedoHandler.ignoreActions = false
 
@@ -50,7 +64,8 @@ export const writeModel = async (model: DCMModel) => {
     textureOffset: cube.textureOffset.value,
     textureMirrored: cube.textureMirrored.value,
     identifier: cube.identifier,
-    children: cube.children.value.map(c => cubeMapper(c))
+    children: cube.children.value.map(c => cubeMapper(c)),
+    metadata: cube.metadata
   })
 
   const data: ParseModelType = {
@@ -58,7 +73,8 @@ export const writeModel = async (model: DCMModel) => {
     author: model.author.value,
     textureWidth: model.textureWidth.value,
     textureHeight: model.textureHeight.value,
-    rootCubes: model.children.value.map(c => cubeMapper(c))
+    rootCubes: model.children.value.map(c => cubeMapper(c)),
+    metadata: model.metadata
   }
 
   const stringData = JSON.stringify(data)
@@ -76,7 +92,8 @@ type ParseModelType = {
   author: string,
   textureWidth: number,
   textureHeight: number,
-  rootCubes: ParseCubeType[]
+  rootCubes: ParseCubeType[],
+  metadata?: Record<string, string>
 }
 
 type ParseCubeType = {
@@ -89,8 +106,8 @@ type ParseCubeType = {
   cubeGrow: TriVec,
   textureOffset: readonly [number, number],
   textureMirrored: boolean,
-
-  children: readonly ParseCubeType[]
+  children: readonly ParseCubeType[],
+  metadata?: Record<string, string>
 }
 
 
