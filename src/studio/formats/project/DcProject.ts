@@ -96,6 +96,9 @@ export default class DcProject {
 
   renameCube(oldName: string, newName: string) {
     for (let animaion of this.animationTabs.animations.value) {
+      if (animaion.isSkeleton.value) {
+        continue
+      }
       for (let keyframe of animaion.keyframes.value) {
         for (let map of [keyframe.position, keyframe.rotation, keyframe.cubeGrow]) {
           const value = map.get(oldName)

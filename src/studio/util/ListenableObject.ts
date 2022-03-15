@@ -173,6 +173,10 @@ export class LOMap<K, V> extends Map<K, V> {
     }
   }
 
+  putAllSilently(map: Map<K, V>) {
+    map.forEach((value, key) => super.set(key, value))
+  }
+
   clear() {
     this.forEach((v, k) => {
       const get = this.listners.get(k)
@@ -222,7 +226,7 @@ export class LOMap<K, V> extends Map<K, V> {
 }
 
 
-export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K, deps: DependencyList = []): [V | undefined, (val: V) => void] => {
+export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K, deps: DependencyList = []): [V | undefined, (val: V) => void, () => void] => {
   const [state, setState] = useState(obj.get(key))
   useEffect(() => {
     const v = obj.get(key)
@@ -233,10 +237,10 @@ export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K, deps: D
     obj.addListener(key, listener)
     return () => obj.removeListener(key, listener)
   }, [state, setState, obj, key, ...deps])
-  return [state, val => obj.set(key, val)]
+  return [state, val => obj.set(key, val), () => obj.delete(key)]
 }
 
-export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: K, deps: DependencyList = []): [V | undefined, (val: V) => void] => {
+export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: K, deps: DependencyList = []): [V | undefined, (val: V) => void, () => void] => {
   const [state, setState] = useState(obj !== undefined && key !== undefined ? obj.get(key) : undefined)
   useEffect(() => {
     if (obj === undefined || key === undefined) {
@@ -251,9 +255,17 @@ export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: 
     obj.addListener(key, listener)
     return () => obj.removeListener(key, listener)
   }, [state, setState, obj, key, ...deps])
-  return [state, val => {
-    if (obj !== undefined && key !== undefined) {
-      obj.set(key, val)
+  return [
+    state,
+    val => {
+      if (obj !== undefined && key !== undefined) {
+        obj.set(key, val)
+      }
+    },
+    () => {
+      if (obj !== undefined && key !== undefined) {
+        obj.delete(key)
+      }
     }
-  }]
+  ]
 }

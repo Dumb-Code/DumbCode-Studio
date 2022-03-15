@@ -128,6 +128,11 @@ export class DCMModel implements CubeParent {
     this.modelGroup.position.set(0.5, 0, 0.5)
   }
 
+  modifyMetadata(data: Record<string, string>) {
+    Object.assign(this.metadata, data)
+    this._section.modifyDirectly("metadata", this.metadata, true)
+  }
+
   identifListToCubes(cubes: readonly string[]): readonly DCMCube[] {
     return cubes.map(c => this.identifierCubeMap.get(c)).map((c, i) => {
       if (!c) throw new Error("Cube Was not found. " + cubes[i])
@@ -367,6 +372,11 @@ export class DCMCube implements CubeParent {
       })
     })
 
+  }
+
+  modifyMetadata(data: Record<string, string>) {
+    Object.assign(this.metadata, data)
+    this._section.modifyDirectly("metadata", this.metadata, true)
   }
 
   updateHirarchy(level: number) {

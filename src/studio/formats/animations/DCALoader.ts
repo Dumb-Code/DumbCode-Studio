@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import { StudioBuffer } from "../../util/StudioBuffer";
+import { convertMapToRecord, convertRecordToMap } from "../../util/Utils";
 import { getZippedFile, ParseError } from "../model/DCMLoader";
 import DcProject from "../project/DcProject";
 import { LOMap } from './../../util/ListenableObject';
@@ -62,6 +63,10 @@ const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayB
   animation.keyframeData.end.value = data.loopData.end
   animation.keyframeData.duration.value = data.loopData.duration
 
+  convertRecordToMap(data.cubeNameOverrides ?? {}, animation.keyframeNameOverrides)
+
+  animation.isSkeleton.value = data.isSkeleton ?? false
+
   return animation
 }
 
@@ -76,7 +81,7 @@ export const writeDCAAnimation = async (animation: DcaAnimation) => {
     rotation: writeFromMap(kf.rotation),
     cubeGrow: writeFromMap(kf.cubeGrow),
 
-    progressionPoints: kf.progressionPoints.value
+    progressionPoints: kf.progressionPoints.value,
   })
 
   const data: ParsedAnimationType = {
@@ -88,7 +93,9 @@ export const writeDCAAnimation = async (animation: DcaAnimation) => {
       start: animation.keyframeData.start.value,
       end: animation.keyframeData.end.value,
       duration: animation.keyframeData.duration.value,
-    }
+    },
+    cubeNameOverrides: convertMapToRecord(animation.keyframeNameOverrides),
+    isSkeleton: animation.isSkeleton.value,
   }
 
   const stringData = JSON.stringify(data)
@@ -103,7 +110,9 @@ type ParsedAnimationType = {
   version: number,
   name: string,
   keyframes: ParsedKeyframeType[]
-  loopData: ParsedLoopdataType
+  loopData: ParsedLoopdataType,
+  cubeNameOverrides?: Record<string, string>
+  isSkeleton?: boolean
 }
 
 type ParsedKfMap = Record<string, readonly [number, number, number]>

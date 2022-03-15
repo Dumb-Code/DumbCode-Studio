@@ -14,6 +14,7 @@ import DcaAnimation, { DcaKeyframe } from "../../../studio/formats/animations/Dc
 import { DCMCube } from "../../../studio/formats/model/DcmModel";
 import { LO, LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import AnimatorAutoGravity from "./AnimatorAutoGravity";
+import AnimatorSkeletalExport from "./AnimatorSkeletalExport";
 
 const AnimatorProperties = () => {
 
@@ -36,6 +37,7 @@ const AnimatorProperties = () => {
             <AnimatorIKProperties animation={animation} />
             <AnimatorProgressionProperties animation={animation} />
             <AnimatorAutoGravity animation={animation} selectedCubes={dcmSelectedCubes} />
+            <AnimatorSkeletalExport animation={animation} cube={singleSelectedCube} />
             <HistoryList />
         </div>
     )

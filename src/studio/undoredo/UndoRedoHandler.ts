@@ -13,6 +13,7 @@ import { LO } from './../util/ListenableObject';
 //
 //   - Properties: Changable properties within a section. These are handeled by the sections "handler".
 //                 All properties must be JSON desializable, ie works with JSON.stringify and JSON.parse
+//                 All properties should also be constant, and unchanging (readonly)
 //
 //   - Actions: A change on a section. Each action has it's own type of data. The three main sections are listed below.
 //
@@ -148,9 +149,9 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   }
 
   //Should only be called when setting initial states.
-  modifySectionDirectly<S extends UndoRedoSection, P extends keyof S['data'] & string>(section: S, property_name: P, value: S['data'][P]) {
+  modifySectionDirectly<S extends UndoRedoSection, P extends keyof S['data'] & string>(section: S, property_name: P, value: S['data'][P], allowPreviousValue = false) {
     const current = section.data[property_name]
-    if (current !== undefined) {
+    if (!allowPreviousValue && current !== undefined) {
       console.error(`Directly modified property ${property_name} on section ${section.section_name} twice. Previous: '${current}', New: '${value}'`)
     }
     section.data[property_name] = value
@@ -367,6 +368,10 @@ export class SectionHandle<S extends UndoRedoSection, T extends S> {
     private readonly defaultAction: HistoryActionType = HistoryActionTypes.Edit
   ) {
 
+  }
+
+  modifyDirectly<P extends keyof T['data'] & string>(property_name: P, value: T['data'][P], allowPreviousValue = false) {
+    this.undoRedoHandler.modifySectionDirectly(this.section, property_name, value, allowPreviousValue)
   }
 
   modifyFirst<P extends keyof T['data'] & string>(property_name: P, value: T['data'][P], onChange: (value: T['data'][P]) => void) {

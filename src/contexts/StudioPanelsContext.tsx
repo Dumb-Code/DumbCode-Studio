@@ -18,6 +18,7 @@ export type StudioPanelsContext = {
   animator_ik: PanelValue<boolean>
   animator_pp: PanelValue<boolean>
   animator_ag: PanelValue<boolean>
+  animator_se: PanelValue<boolean>
 
   history_list: PanelValue<boolean>
 
@@ -54,6 +55,7 @@ const StudioPanelsContextProvider: FC = ({ children }) => {
   useValueGetterSetter(context, "animator_ik", false)
   useValueGetterSetter(context, "animator_pp", false)
   useValueGetterSetter(context, "animator_ag", false)
+  useValueGetterSetter(context, "animator_se", false)
   useValueGetterSetter(context, "history_list", false)
   useValueGetterSetter(context, "texture_properties", true)
   useValueGetterSetter(context, "texture_element_properties", true)

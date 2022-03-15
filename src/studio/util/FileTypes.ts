@@ -16,16 +16,18 @@ export type WritableFile = {
 
 // const WritableFileRefreshLoop
 
+export const downloadBlob: WritableFile['write'] = async (name, blob) => {
+  const url = window.URL.createObjectURL(await blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  window.URL.revokeObjectURL(url);
+  return name
+}
+
 export const defaultWritable: WritableFile = {
-  write: async (name, blob) => {
-    const url = window.URL.createObjectURL(await blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    return name
-  }
+  write: async (name, blob) => downloadBlob(name, await blob)
 }
 
 //Gets the writeable file for where nothing has been defined.

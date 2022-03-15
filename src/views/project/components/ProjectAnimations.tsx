@@ -10,7 +10,7 @@ import { FileSystemsAccessApi, ReadableFile, readFileArrayBuffer } from "../../.
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
-const animationExtensions = [".dca"]
+const animationExtensions = [".dca", ".dcsa"]
 
 const ProjectAnimations = () => {
     const { hasProject, getSelectedProject } = useStudio()
@@ -22,8 +22,10 @@ const ProjectAnimations = () => {
         readFileArrayBuffer(file)
             .then(buff => loadUnknownAnimation(project, file.name.substring(0, file.name.lastIndexOf(".")), buff))
             .then(animation => {
-                animation.saveableFile.value = true
-                animation.animationWritableFile = file.asWritable()
+                if (!animation.isSkeleton.value) {
+                    animation.saveableFile.value = true
+                    animation.animationWritableFile = file.asWritable()
+                }
                 addAnimation(animation)
             })
     }
