@@ -55,6 +55,11 @@ module.exports = {
         'timeline timeline properties',
         'gumball gumball properties',
         'info info properties'
+      ],
+      "animator-skeleton": [
+        "tabs properties",
+        "canvas properties",
+        "scrub properties"
       ]
     }
   },

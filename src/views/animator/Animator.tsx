@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
+import { useListenableObject, useListenableObjectNullable } from "../../studio/util/ListenableObject"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import AnimatorGumballPropertiesBar from "./components/AnimatorGumballPropertiesBar"
 import AnimatorProperties from "./components/AnimatorProperties"
@@ -30,6 +31,25 @@ const Animator = () => {
             onFrameListeners.delete(onFrame)
         }
     })
+
+    const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
+    const [skeletonMode] = useListenableObjectNullable(animation?.isSkeleton)
+    if (skeletonMode) {
+        return (
+            <div
+                className="grid grid-areas-animator-skeleton h-full overflow-hidden"
+                style={{
+                    gridTemplateColumns: "auto 300px",
+                    gridTemplateRows: "32px auto 32px"
+                }}
+            >
+                <div className="grid-in-tabs border dark:border-black border-white overflow-hidden"><AnimatorTabBar /></div>
+                <div className="grid-in-properties border dark:border-black h-full border-white">Props</div>
+                <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
+                <div className="grid-in-scrub border dark:border-black border-white"><AnimatorScrubBar /></div>
+            </div>
+        )
+    }
 
     return (
         <div className="grid grid-areas-animator h-full"
