@@ -103,7 +103,7 @@ export class RotationPointMarkers {
      * Creates a rotation point object
      */
     createRotationPointObject() {
-        let geometry = new SphereGeometry(0/32, 0, 0);
+        let geometry = new SphereGeometry(0.00001/32, 1, 1);
         let material = new MeshBasicMaterial({ color: 0x0624cf});
         return new Mesh(geometry, material);
     }
