@@ -68,13 +68,13 @@ export const useObjectUnderMouse = () => {
     }
 
     onFrameListeners.add(onFrame)
-    onMouseUp.addListener(999, mouseUpCanvas, true)
+    onMouseUp.addListener(999, mouseUpCanvas)
     document.addEventListener("pointermove", onMouseMove)
     document.addEventListener("pointerdown", mouseDown)
     document.addEventListener("pointerup", mouseUpAnywhere, true)
     return () => {
       onFrameListeners.delete(onFrame)
-      onMouseUp.addListener(999, mouseUpCanvas, true)
+      onMouseUp.addListener(999, mouseUpCanvas)
       document.removeEventListener("pointermove", onMouseMove)
       document.removeEventListener("pointerdown", mouseDown)
       document.removeEventListener("pointerup", mouseUpAnywhere, true)

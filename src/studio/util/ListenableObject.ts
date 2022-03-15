@@ -183,9 +183,9 @@ export class LOMap<K, V> extends Map<K, V> {
       if (get !== undefined) {
         get.forEach(l => l(undefined, v))
       }
-      Array.from(this.globalListeners).forEach(l => l())
     })
     super.clear()
+    Array.from(this.globalListeners).forEach(l => l())
   }
 
   delete(key: K) {
@@ -193,8 +193,9 @@ export class LOMap<K, V> extends Map<K, V> {
     if (get !== undefined) {
       get.forEach(l => l(undefined, this.get(key) ?? undefined))
     }
+    const ret = super.delete(key);
     Array.from(this.globalListeners).forEach(l => l())
-    return super.delete(key);
+    return ret
   }
 
   set(key: K, value: V) {

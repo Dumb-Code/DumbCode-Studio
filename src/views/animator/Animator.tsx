@@ -8,6 +8,7 @@ import AnimatorGumballPropertiesBar from "./components/AnimatorGumballProperties
 import AnimatorProperties from "./components/AnimatorProperties"
 import AnimatorScrubBar from "./components/AnimatorScrubBar"
 import AnimatorShortcuts from "./components/AnimatorShortcuts"
+import AnimatorSkeletonProperties from "./components/AnimatorSkeletonProperties"
 import AnimatorTabBar from "./components/AnimatorTabBar"
 import AnimatorTimeline from "./components/AnimatorTimeline"
 
@@ -37,6 +38,7 @@ const Animator = () => {
     if (skeletonMode) {
         return (
             <div
+                key={project.identifier}
                 className="grid grid-areas-animator-skeleton h-full overflow-hidden"
                 style={{
                     gridTemplateColumns: "auto 300px",
@@ -44,7 +46,7 @@ const Animator = () => {
                 }}
             >
                 <div className="grid-in-tabs border dark:border-black border-white overflow-hidden"><AnimatorTabBar /></div>
-                <div className="grid-in-properties border dark:border-black h-full border-white">Props</div>
+                <div className="grid-in-properties border dark:border-black h-full border-white"><AnimatorSkeletonProperties /></div>
                 <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
                 <div className="grid-in-scrub border dark:border-black border-white"><AnimatorScrubBar /></div>
             </div>

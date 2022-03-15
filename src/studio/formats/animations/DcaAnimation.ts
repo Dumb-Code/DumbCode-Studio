@@ -46,7 +46,7 @@ export default class DcaAnimation {
 
   readonly animatorGumball: AnimatorGumball
 
-  readonly keyframeNameOverrides = new LOMap<string, string>() //identifier, name
+  readonly keyframeNameOverrides = new LOMap<string, string>() //isSkeleton ? {identifier, name} : {name, identifier}
   readonly reverseKeyframeNameOverrides = new Map<string, string[]>() //name, [identifier]
 
   constructor(project: DcProject, name: string) {

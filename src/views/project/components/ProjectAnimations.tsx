@@ -6,7 +6,7 @@ import { useStudio } from "../../../contexts/StudioContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { loadUnknownAnimation, writeDCAAnimation } from "../../../studio/formats/animations/DCALoader"
 import DcProject, { getProjectName } from "../../../studio/formats/project/DcProject"
-import { FileSystemsAccessApi, ReadableFile, readFileArrayBuffer } from "../../../studio/util/FileTypes"
+import { downloadBlob, FileSystemsAccessApi, ReadableFile, readFileArrayBuffer } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
@@ -83,6 +83,10 @@ const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation 
     const [isAnimationDirty] = useListenableObject(animation.needsSaving)
     const [isSaveable] = useListenableObject(animation.saveableFile)
     const saveAnimation = async () => {
+        if (animation.isSkeleton.value) {
+            downloadBlob(animation.name.value + "_skeleton.dcsa", writeDCAAnimation(animation))
+            return
+        }
         try {
             const name = await animation.animationWritableFile.write(animation.name.value + ".dca", writeDCAAnimation(animation))
             animation.name.value = getProjectName(name)
