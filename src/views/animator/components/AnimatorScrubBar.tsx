@@ -76,54 +76,51 @@ const AnimatorScrubBar = () => {
     const position = Math.min(value / max, 1)
 
     return (
-        <div className="h-full dark:bg-gray-800 bg-white pt-2">
-            <div className="absolute flex flex-row w-4/5 transform -translate-y-3.5 ml-14">
-                <div className="flex-grow"></div>
-                <button className="dark:bg-gray-900 bg-gray-200 px-1 rounded-tl-md pt-1 dark:text-gray-400 text-black hover:text-red-500 border-l-2 border-t-2 dark:border-black border-white">
-                    <SVGStop className="h-6 w-6" />
-                </button>
-                <button className="dark:bg-gray-900 bg-gray-200 px-2 dark:text-white text-gray-900 hover:text-sky-500 border-t-2 dark:border-black border-white" onClick={() => setPlaying(!isPlaying)}>
-                    {isPlaying
-                        ? <SVGPause className="h-8 w-8" />
-                        : <SVGPlay className="h-8 w-8" />
-                    }
-                </button>
-                <button className="dark:bg-gray-900 bg-gray-200 px-1 rounded-tr-md pt-1 dark:text-gray-400 text-black hover:text-yellow-400 border-r-2 border-t-2 dark:border-black border-white">
-                    <SVGRestart className="h-6 w-6" />
-                </button>
-                <div className="flex-grow"></div>
+        <div className="flex flex-col items-center justify-end h-full dark:bg-gray-800 bg-white pt-2">
+            <div className="flex-grow relative w-full">
+                <div className="absolute bottom-0 left-0 right-0 flex flex-row w-full">
+                    <div className="flex-grow"></div>
+                    <button className="dark:bg-gray-900 bg-gray-200 px-1 rounded-tl-md pt-1 dark:text-gray-400 text-black hover:text-red-500 border-l-2 border-t-2 dark:border-black border-white">
+                        <SVGStop className="h-6 w-6" />
+                    </button>
+                    <button className="dark:bg-gray-900 bg-gray-200 px-2 dark:text-white text-gray-900 hover:text-sky-500 border-t-2 dark:border-black border-white" onClick={() => setPlaying(!isPlaying)}>
+                        {isPlaying
+                            ? <SVGPause className="h-8 w-8" />
+                            : <SVGPlay className="h-8 w-8" />
+                        }
+                    </button>
+                    <button className="dark:bg-gray-900 bg-gray-200 px-1 rounded-tr-md pt-1 dark:text-gray-400 text-black hover:text-yellow-400 border-r-2 border-t-2 dark:border-black border-white">
+                        <SVGRestart className="h-6 w-6" />
+                    </button>
+                    <div className="flex-grow"></div>
+                </div>
             </div>
-            <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full"
+            <div className="rounded-sm dark:bg-gray-800 bg-gray-200 w-full h-2 relative"
                 onPointerDown={() => setIsDragging(true)}
                 onPointerEnter={() => setIsHovering(true)}
                 onPointerLeave={() => setIsHovering(false)}
                 onClick={setBarPosition}
                 ref={ref}
             >
+                <div className="absolute bg-gray-500 w-full h-full" />
                 <div
-                    className="transform -translate-y-2 bg-gray-500 w-full h-2 relative top-7 transition-transform ease-in-out cursor-pointer"
-                />
-                <div
-                    className="transform -translate-y-3 dark:bg-white bg-gray-600 h-2 relative top-7 -mt-1 transition-transform ease-in-out cursor-pointer"
+                    className="absolute dark:bg-white bg-gray-600 w-full h-full transition-transform ease-in-out cursor-pointer"
                     style={{
                         width: 100 * (isMoving ? (mouseHoverX < position ? position : mouseHoverX) : 0) + "%"
                     }}
                 />
                 <div
-                    className="transform -translate-y-4 bg-sky-500 h-2 relative top-7 -mt-1 transition-transform ease-in-out cursor-pointer"
+                    className="absolute bg-sky-500 w-full h-full transition-transform ease-in-out cursor-pointer"
                     style={{
                         width: 100 * (isMoving ? (mouseHoverX < position ? mouseHoverX : position) : position) + "%"
                     }}
                 />
+                <div
+                    className={(isMoving ? "h-4 w-4 opacity-100" : "opacity-0 h-0 w-0") + " cursor-pointer rounded-full bg-sky-400 relative transform -translate-y-1/4 -translate-x-1/2 transition-opacity ease-in-out duration-100"}
+                    style={{ left: 100 * (isMoving ? mouseHoverX : position) + "%" }}
+                />
             </div>
-            <div className={(isMoving ? "h-4 w-4 opacity-100" : "opacity-0 h-0 w-0") + " cursor-pointer rounded-full bg-sky-400 relative transform -translate-y-1.5 -translate-x-1/2 transition-opacity ease-in-out duration-100"}
-                style={{ left: 100 * (isMoving ? mouseHoverX : position) + "%" }}
-                onClick={setBarPosition}
-                onPointerDown={() => setIsDragging(true)}
-                onPointerEnter={() => setIsHovering(true)}
-                onPointerLeave={() => setIsHovering(false)}
-            >
-            </div>
+
         </div>
     )
 }
