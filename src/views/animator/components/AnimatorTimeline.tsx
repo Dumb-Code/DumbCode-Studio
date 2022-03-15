@@ -343,7 +343,7 @@ const TimelineLayer = ({ color, hoverColor, keyframes }: { color: string, hoverC
 }
 
 const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, hoverColor: string, keyframe: DcaKeyframe }) => {
-    const [start, setStart] = useListenableObject(keyframe.startTime)
+    const [start] = useListenableObject(keyframe.startTime)
     const [length] = useListenableObject(keyframe.duration)
     const [selected, setSelected] = useListenableObject(keyframe.selected)
 

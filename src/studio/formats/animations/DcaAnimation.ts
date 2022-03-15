@@ -5,8 +5,6 @@ import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball
 import { LO, LOMap } from './../../util/ListenableObject';
 import { DCMCube } from './../model/DcmModel';
 
-const cubeMetadataAnimationNameOverrideKey = "animation_name"
-
 export default class DcaAnimation {
   readonly identifier = v4()
   readonly project: DcProject

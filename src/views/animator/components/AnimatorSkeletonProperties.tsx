@@ -35,7 +35,7 @@ const AnimatorSkeletonProperties = () => {
     return () => {
       animation.keyframeNameOverrides.removeGlobalListener(listener)
     }
-  }, [animation])
+  }, [animation, allNames])
 
   const doneButtonClicked = () => {
     if (isDone && animation) {
@@ -113,7 +113,7 @@ const SkeletonEntry = ({ animation, name }: { animation: DcaAnimation, name: str
     }
     onMouseUp.addListener(900, mouseUpListener)
     return () => onMouseUp.removeListener(mouseUpListener)
-  }, [manager, isAwaitingClick, onMouseUp])
+  }, [manager, isAwaitingClick, onMouseUp, setFoundCube])
 
   const cubeButtonClicked = () => {
     if (isAwaitingClick) {

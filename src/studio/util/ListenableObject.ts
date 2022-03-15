@@ -1,5 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { DependencyList, useEffect, useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */ // -- we want to use exhaustive deps (or do we)
+
+import { DependencyList, useCallback, useEffect, useState } from 'react';
 import { HistoryActionType, SectionHandle, UndoRedoSection } from './../undoredo/UndoRedoHandler';
 
 type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
@@ -116,11 +117,14 @@ export const useListenableObjectNullable = <T>(obj: LO<T> | undefined, deps: Dep
     obj.addListener(listener)
     return () => obj.removeListener(listener)
   }, [state, setState, obj, ...deps])
-  return [state, val => {
-    if (obj !== undefined) {
-      obj.value = val
-    }
-  }]
+  return [
+    state,
+    useCallback(val => {
+      if (obj !== undefined) {
+        obj.value = val
+      }
+    }, [obj, ...deps])
+  ]
 }
 
 
@@ -134,7 +138,7 @@ export const useListenableObject = <T>(obj: LO<T>, deps: DependencyList = []): [
     obj.addListener(listener)
     return () => obj.removeListener(listener)
   }, [state, setState, obj, ...deps])
-  return [state, val => obj.value = val]
+  return [state, useCallback(val => obj.value = val, [obj, ...deps])]
 }
 
 const isMapEqual = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
@@ -238,7 +242,11 @@ export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K, deps: D
     obj.addListener(key, listener)
     return () => obj.removeListener(key, listener)
   }, [state, setState, obj, key, ...deps])
-  return [state, val => obj.set(key, val), () => obj.delete(key)]
+  return [
+    state,
+    useCallback(val => obj.set(key, val), [obj, key, ...deps]),
+    useCallback(() => obj.delete(key), [obj, key, ...deps])
+  ]
 }
 
 export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: K, deps: DependencyList = []): [V | undefined, (val: V) => void, () => void] => {
@@ -258,15 +266,15 @@ export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: 
   }, [state, setState, obj, key, ...deps])
   return [
     state,
-    val => {
+    useCallback(val => {
       if (obj !== undefined && key !== undefined) {
         obj.set(key, val)
       }
-    },
-    () => {
+    }, [obj, key, ...deps]),
+    useCallback(() => {
       if (obj !== undefined && key !== undefined) {
         obj.delete(key)
       }
-    }
+    }, [obj, key, ...deps])
   ]
 }
