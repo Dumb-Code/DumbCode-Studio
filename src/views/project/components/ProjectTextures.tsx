@@ -207,7 +207,7 @@ const SelectableTextureList = ({ project, isSelected }: { project: DcProject, is
         texturesToUse
             .map(id => textures.find(t => t.identifier === id))
             .filter((texture): texture is Texture => texture !== undefined),
-        [texturesToUse])
+        [texturesToUse, textures])
 
     const onDragOnto = (texture?: Texture) => {
         if (!context) {
