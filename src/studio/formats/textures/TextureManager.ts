@@ -43,6 +43,7 @@ export default class TextureManager {
     texture.element.addListener(() => this.refresh())
     this.textures.value = this.textures.value.concat([texture])
     this.defaultGroup.textures.value = [texture.identifier].concat(this.defaultGroup.textures.value)
+    this.groups.value.forEach(g => g.unselectedTextures.value = g.unselectedTextures.value.concat(texture.identifier))
     return texture
   }
 
@@ -55,7 +56,10 @@ export default class TextureManager {
   }
 
   addGroup(...groups: TextureGroup[]) {
-    groups.forEach(group => group.textures.addListener(() => this.refresh()))
+    groups.forEach(group => {
+      group.textures.addListener(() => this.refresh())
+      group.unselectedTextures.value = this.defaultGroup.textures.value
+    })
     this.groups.value = this.groups.value.concat(...groups)
   }
 
@@ -105,14 +109,14 @@ export default class TextureManager {
 export class TextureGroup {
   readonly identifier: string;
   readonly name: LO<string>
-  readonly textures: LO<readonly string[]>
+  readonly textures = new LO<readonly string[]>([])
+  readonly unselectedTextures = new LO<readonly string[]>([])
   isDefault: boolean
 
   constructor(name: string, isDefault: boolean) {
     this.identifier = uuidv4()
     this.isDefault = isDefault
     this.name = new LO(name)
-    this.textures = new LO([] as const as readonly string[])
   }
 }
 
@@ -175,13 +179,16 @@ export class Texture {
   }
 }
 
-export const useTextureDomRef = <T extends HTMLElement>(texture: Texture, className?: string) => {
+export const useTextureDomRef = <T extends HTMLElement>(texture: Texture, className?: string, modify?: (img: HTMLImageElement) => void) => {
   const [img] = useListenableObject(texture.element)
   const ref = useDomParent<T>(() => {
     //TODO: reuse img cloned?
-    const cloned = img.cloneNode() as HTMLElement
+    const cloned = img.cloneNode() as HTMLImageElement
     if (className !== undefined) {
       cloned.className = className
+    }
+    if (modify) {
+      modify(cloned)
     }
     return cloned
   })

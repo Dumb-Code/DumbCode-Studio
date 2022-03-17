@@ -1,8 +1,10 @@
-import { ItemInterface, ReactSortable } from "react-sortablejs"
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
+import { useOptions } from "../../../contexts/OptionsContext"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcProject from "../../../studio/formats/project/DcProject"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
@@ -74,16 +76,6 @@ const ProjectTextures = () => {
     )
 }
 
-class WrappedTexture implements ItemInterface {
-    id: string;
-    texture: Texture
-
-    constructor(tex: Texture) {
-        this.id = tex.identifier
-        this.texture = tex
-    }
-}
-
 const GroupList = ({ project }: { project: DcProject }) => {
     const [selectedGroup, setSelectedGroup] = useListenableObject(project.textureManager.selectedGroup)
     const [groups, setGroups] = useListenableObject(project.textureManager.groups)
@@ -117,114 +109,291 @@ const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureG
     )
 }
 
+type DraggableContextType = {
+    startDragging: (texture: Texture) => void
+    currentlyDragging: Texture | null,
+    droppedOntoLocation?: { x: number, y: number, width?: number }
+    setDroppedOntoLocation: ({ x, y, width }?: { x: number, y: number, width?: number }) => void
+    dropTextureAt: (texture: Texture | undefined, isSelected: boolean) => void
+}
+const DraggableContext = createContext<DraggableContextType | null>(null)
+
+const emptySpan = document.createElement("span")
+const overlayDiv = document.getElementById("overlay")
+
 const TextureLists = ({ project }: { project: DcProject }) => {
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
+
+    const [draggingTexture, setDraggingTexture] = useState<Texture | null>(null)
+
+    const droppedOntoLocationRef = useRef<{ x: number, y: number, width?: number }>()
+    // const [droppedOntoLocation, setDroppedOntoLocation] = useState<{ x: number, y: number }>()
+
+    //I need to refresh the entire thing at the moment when 
+    //A texture is placed, so the animation looks nice.
+    //Currently, when a texture is placed, it performs the actual change then
+    //animates the movement.
+    //A better way would be to perform the movement, then apply the actual change.
+    const [numTimesRefresh, setNumTimesRefreshed] = useState(0)
+
     if (selectedGroup.isDefault) {
         return (
             <div className="flex-grow flex-col dark:border-l border-black overflow-y-scroll overflow-x-hidden pr-4 studio-scrollbar" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
-                <SelectedTexturesList project={project} />
+                <SelectableTextureList project={project} isSelected />
             </div>
         )
     }
+
+    const dropTextureAt = (texture: Texture | undefined, isSelected: boolean) => {
+        if (draggingTexture === null) {
+            return
+        }
+        const isDraggingSelected = selectedGroup.textures.value.includes(draggingTexture.identifier)
+
+        const from = isDraggingSelected ? selectedGroup.textures : selectedGroup.unselectedTextures
+        const to = isSelected ? selectedGroup.textures : selectedGroup.unselectedTextures
+
+
+        from.value = from.value.filter(f => f !== draggingTexture.identifier)
+        const newVal = [...to.value]
+        newVal.splice(texture === undefined ? to.value.length : to.value.indexOf(texture.identifier), 0, draggingTexture.identifier)
+        to.value = newVal
+
+        setNumTimesRefreshed(numTimesRefresh + 1)
+    }
+
+
     return (
         <>
-            <div className="flex-grow flex flex-col border-r border-black w-1/2">
-                <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black mb-2">
-                    <p className="flex-grow">SELECTED</p>
+            <DraggableContext.Provider
+                key={numTimesRefresh}
+                value={{
+                    startDragging: setDraggingTexture,
+                    currentlyDragging: draggingTexture,
+                    dropTextureAt,
+                    droppedOntoLocation: droppedOntoLocationRef.current,
+                    setDroppedOntoLocation: val => droppedOntoLocationRef.current = val,
+                }}
+            >
+                <div className="flex-grow flex flex-col border-r border-black w-1/2">
+                    <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black">
+                        <p className="flex-grow">SELECTED</p>
+                    </div>
+                    <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full w-full">
+                        <SelectableTextureList project={project} isSelected={true} />
+                    </div>
                 </div>
-                <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full">
-                    <SelectedTexturesList project={project} />
+                <div className="flex-grow flex flex-col w-1/2">
+                    <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black">
+                        <p className="flex-grow">AVAILABLE</p>
+                    </div>
+                    <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full w-full">
+                        <SelectableTextureList project={project} isSelected={false} />
+                    </div>
                 </div>
-            </div>
-            <div className="flex-grow flex flex-col w-1/2">
-                <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black mb-2">
-                    <p className="flex-grow">AVAILABLE</p>
-                </div>
-                <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full">
-                    <NonSelectedTextures project={project} />
-                </div>
-            </div>
+            </DraggableContext.Provider>
         </>
     )
 }
 
-const SelectedTexturesList = ({ project }: { project: DcProject }) => {
-
+const SelectableTextureList = ({ project, isSelected }: { project: DcProject, isSelected: boolean }) => {
+    const context = useContext(DraggableContext)
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
-    const [selectedGroupTextures, setSelectedGroupTextures] = useListenableObject(selectedGroup.textures)
+    const [texturesToUse] = useListenableObject(isSelected ? selectedGroup.textures : selectedGroup.unselectedTextures)
 
     const [textures] = useListenableObject(project.textureManager.textures)
 
-    const selectedTextures = selectedGroupTextures
-        .map(g => textures.find(t => t.identifier === g))
-        .filter((g): g is Texture => g !== undefined)
-        .map(g => new WrappedTexture(g))
+    const selectedTextures = useMemo(() =>
+        texturesToUse
+            .map(id => textures.find(t => t.identifier === id))
+            .filter((texture): texture is Texture => texture !== undefined),
+        [texturesToUse])
+
+    const onDragOnto = (texture?: Texture) => {
+        if (!context) {
+            return
+        }
+        context.dropTextureAt(texture, isSelected)
+    }
 
     return (
-        <ReactSortable
-            // Again, sortable.js is kinda wack, and we need to cause a complete remount of the list to have the changed props in effect
-            key={`group.sortable.1.${selectedGroup.isDefault}`}
-            list={selectedTextures}
-            setList={list => {
-                const list1 = list.map(l => l.id)
-                const list2 = selectedGroupTextures
-                if (list1.length !== list2.length || list1.some((l, i) => l !== list2[i])) {
-                    //Fuck sortable js and it's DOM changing shit
-                    //Might be fixed by moving to onMove
-                    setTimeout(() => setSelectedGroupTextures(list1), 1)
+        <div className="h-full"
+            onDragOver={e => {
+                //A texture is dragged over this
+                if (!context || !context.currentlyDragging) {
+                    return
                 }
+                // setIsDraggedOver(true)
+                e.stopPropagation()
+                e.preventDefault()
             }}
-            animation={150}
-            fallbackOnBody
-            className="flex-grow pr-4 h-full"
-            group={{ name: 'textures-on-group', pull: true, put: true }}
+            onDragLeave={e => {
+                //We don't want to listen to events from children
+                if (e.currentTarget.contains(e.nativeEvent.relatedTarget as any)) {
+                    return
+                }
+                // setIsDraggedOver(false)
+                e.preventDefault()
+                e.stopPropagation()
+            }}
+
+            onDropCapture={() => {
+                if (!context) {
+                    return
+                }
+                // setIsDraggedOver(false)
+                onDragOnto()
+            }}
         >
             {selectedTextures
-                .map(t =>
-                    <GroupTextureSwitchEntry key={t.id} texture={t.texture} selected={true} />
-                )
-            }
-        </ReactSortable>
-
+                .map((t, i) =>
+                    <GroupTextureSwitchEntryContainer key={t.identifier} texture={t} selected={isSelected} droppedOnto={() => onDragOnto(t)} />
+                )}
+        </div>
     )
+
 }
 
-const NonSelectedTextures = ({ project }: { project: DcProject }) => {
-    const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
-    const [selectedGroupTextures] = useListenableObject(selectedGroup.textures)
+const heightClass = "h-[50px]"
+const maxWHeightClass = "max-w-[50px]"
 
-    const [textures] = useListenableObject(project.textureManager.textures)
+const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { texture: Texture, selected: boolean, droppedOnto: () => void }) => {
+    const context = useContext(DraggableContext)
 
-    const notSelectedTextures = textures
-        .filter(t => !selectedGroupTextures.includes(t.identifier))
-        .map(t => new WrappedTexture(t))
+    const [isBeingDragged, setIsDragging] = useState(false)
+    const [isDraggedOver, setIsDraggedOver] = useState(false)
+
+    const draggingRef = useRef<HTMLDivElement>(null)
+    const draggingOffsetRef = useRef<{ x: number, y: number }>({ x: 0, y: 0 })
+    const dragStartWidth = useRef<number>()
+
+
+    const [isAnimatingToPlace, setIsAnimatingToPlace] = useState(context && context.currentlyDragging !== null && context.droppedOntoLocation !== null && context.currentlyDragging === texture)
+    const animationTarget = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (isAnimatingToPlace) {
+            const current = draggingRef.current
+            if (current && animationTarget.current && context && context.droppedOntoLocation) {
+                const location = context.droppedOntoLocation
+
+                current.style.left = location.x + "px"
+                current.style.top = location.y + "px"
+                current.style.transition = "all 300ms"
+
+                const rect = animationTarget.current.getBoundingClientRect()
+                current.style.left = rect.left + "px"
+                current.style.top = rect.top + "px"
+            }
+
+            setTimeout(() => {
+                if (current) {
+                    current.style.animation = ""
+                }
+                setIsAnimatingToPlace(false)
+            }, 300)
+        }
+    }, [isAnimatingToPlace, context])
+
+    const { darkMode } = useOptions()
 
     return (
-        <ReactSortable
-            key={`group.sortable.2.${selectedGroup.isDefault}`}
-            list={notSelectedTextures}
-            setList={() => { }}
-            animation={150}
-            fallbackOnBody
-            className="flex-grow pr-4 h-0"
-            group={{ name: 'textures-on-group', pull: true, put: true }}
+        <div
+            className={"transition-all duration-300 pr-2 " + (isBeingDragged ? "h-0" : isDraggedOver ? "pt-20" : "pt-2")}
+            onDragOver={e => {
+                //A texture is dragged over this
+                if (!context || !context.currentlyDragging) {
+                    return
+                }
+                setIsDraggedOver(true)
+                e.stopPropagation()
+                e.preventDefault()
+            }}
+            onDragLeave={e => {
+                //We don't want to listen to events from children
+                if (e.currentTarget.contains(e.nativeEvent.relatedTarget as any)) {
+                    return
+                }
+                setIsDraggedOver(false)
+                e.preventDefault()
+                e.stopPropagation()
+            }}
+
+            onDropCapture={() => {
+                if (!context) {
+                    return
+                }
+                setIsDraggedOver(false)
+                droppedOnto()
+            }}
+
         >
-            {notSelectedTextures.map((t) =>
-                <GroupTextureSwitchEntry key={t.id} texture={t.texture} selected={false} />
-            )}
-        </ReactSortable>
+            <div
+                className="cursor-pointer"
+                onDragStart={e => {
+                    if (!context) {
+                        return
+                    }
+                    dragStartWidth.current = animationTarget.current?.clientWidth
+                    draggingOffsetRef.current.x = e.nativeEvent.offsetX
+                    draggingOffsetRef.current.y = e.nativeEvent.offsetY
+                    e.dataTransfer.setDragImage(emptySpan, 0, 0)
+
+                    //Bug in chrome with modifying the mod on drag start: https://stackoverflow.com/a/36617714
+                    setTimeout(() => {
+                        setIsDragging(true)
+                        context.startDragging(texture)
+                    }, 1)
+                    e.stopPropagation()
+                }}
+                onDrag={e => {
+                    if (!context) {
+                        return
+                    }
+                    if (draggingRef.current && (e.clientX !== 0 || e.clientY !== 0)) {
+                        const x = (e.clientX - draggingOffsetRef.current.x)
+                        const y = (e.clientY - draggingOffsetRef.current.y)
+                        const width = draggingRef.current?.clientWidth
+
+                        context.setDroppedOntoLocation({ x, y, width })
+
+                        draggingRef.current.style.left = x + "px"
+                        draggingRef.current.style.top = y + "px"
+                    }
+                    e.preventDefault()
+                }}
+                onDragEnd={e => {
+                    if (!context) {
+                        return
+                    }
+                    setIsDragging(false)
+                    e.preventDefault()
+                    e.stopPropagation()
+                }}
+
+                draggable
+            >
+                <div ref={animationTarget} className={(isAnimatingToPlace ? heightClass : "") + (isBeingDragged ? " hidden" : "")}>
+                    {!isAnimatingToPlace && <GroupTextureSwitchEntry texture={texture} selected={selected} />}
+                </div>
+            </div>
+            {overlayDiv !== null && (isBeingDragged || isAnimatingToPlace) && createPortal(
+                <div ref={draggingRef} className={"absolute " + (darkMode ? "dark" : "")} style={{
+                    width: isAnimatingToPlace ? context?.droppedOntoLocation?.width : dragStartWidth.current
+                }}>
+                    <GroupTextureSwitchEntry texture={texture} selected={selected} />
+                </div>, overlayDiv)}
+        </div>
     )
 }
 
 const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, selected: boolean }) => {
-
-    const ref = useTextureDomRef<HTMLDivElement>(texture)
-
-    const height = 50
+    const ref = useTextureDomRef<HTMLDivElement>(texture, undefined, img => img.draggable = false)
     return (
-        <div className={(selected ? "bg-green-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " my-2 ml-2 rounded-sm text-left pl-2 w-full flex flex-row pr-0.5"}>
-            <div className="table" style={{ height: `${height}px`, maxWidth: `${height}px` }}>
-                <div ref={ref} className="table-cell align-middle p-1 pl-0">
+        <div className={(selected ? "bg-green-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " ml-2 rounded-sm text-left pl-2 w-full h-[50px] flex flex-row pr-0.5"}
+        >
+            <div className={"table p-1 " + heightClass + " " + maxWHeightClass}>
+                <div ref={ref} className="table-cell align-middle pl-0">
                 </div>
             </div>
             <DblClickEditLO obj={texture.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
