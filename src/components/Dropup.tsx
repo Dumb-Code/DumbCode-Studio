@@ -1,7 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
+import PropTypes from 'prop-types';
 import { Fragment } from "react";
 import { SVGChevronDown } from "./Icons";
-import PropTypes from 'prop-types';
 
 export default function Dropup({ title, header, children, right, className }) {
     return (

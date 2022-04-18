@@ -1,5 +1,5 @@
 import { createContext, MouseEvent, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { SVGEye, SVGLocked, SVGPlus, SVGSettings } from "../../../components/Icons";
+import { SvgArrows, SVGEye, SVGLocked, SVGPlus, SVGSettings, SVGTrash } from "../../../components/Icons";
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
@@ -100,7 +100,11 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
             {layers.map(l =>
                 <AnimationLayer key={l.layerId} animation={animation} keyframes={keyframes.filter(k => k.layerId === l.layerId)} layer={l} />
             )}
-            <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6"><SVGPlus className="h-4 w-4 mr-1" /></button>
+            <div className="flex flex-row">
+                <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Transformation Layer</p></button>
+                <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Sound Layer</p></button>
+                <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Event Layer</p></button>
+            </div>
         </ScrollZoomContext.Provider>
     )
 }
@@ -274,6 +278,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     return (
         <div onClick={e => e.stopPropagation()} className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
+                <AnimationLayerHandle color="bg-blue-500" type="Transform"/>
                 <input type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5 pt-0.5 h-6 text-s" placeholder="layer name" />
                 <AnimationLayerButton onClick={addNewKeyframe} icon={SVGPlus} />
                 <AnimationLayerButton icon={SVGEye} />
@@ -286,8 +291,20 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
                 </div>
                 <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 h-7 -top-0.5" />
             </div>
+            <div className="flex flex-row ml-1">
+                <AnimationLayerButton icon={SVGTrash} />
+            </div>
         </div>
     )
+}
+
+const AnimationLayerHandle = ({type, color}: {type: string, color:string}) => { 
+    return (
+        <div className={ color + " rounded-full w-6 h-6 mr-1 p-1 text-white hover:cursor-move"}>
+            <SvgArrows />
+            { /* TODO Add icons for event and sound layer types*/}
+        </div>
+    );
 }
 
 const AnimationLayerButton = ({ onClick, icon: Icon }: { onClick?: () => void, icon: ({ className }: { className: string }) => JSX.Element }) => {
