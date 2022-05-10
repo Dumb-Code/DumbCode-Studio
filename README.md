@@ -42,10 +42,19 @@ More news to come and make sure to keep up with us on [Discord](https://www.dumb
 
 ### Contributing
 
-`yarn run start` Runs the app in the development mode.
-Open `http://localhost:3000` to view.
+## Getting Started
 
-`yarn run build` Builds the React app for production to the `build` folder. 
-This is optimized for production with minified css. Our actions do this automatically when a commit is made to this branch.
+First, run the development server:
 
-`yarn run inline` Use `Gulp` to inline all the JavaScript and CSS files from the production build into a single minified file.
+```bash
+yarn dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
