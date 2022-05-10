@@ -1,8 +1,8 @@
 import { Switch } from "@headlessui/react";
-import { FC } from "react";
+import { PropsWithChildren } from "react";
 import { LO, useListenableObjectNullable } from "../studio/util/ListenableObject";
 
-export const GumballToggle: FC<{ toggle: LO<boolean> | undefined }> = ({ children, toggle }) => {
+export const GumballToggle = ({ children, toggle }: PropsWithChildren<{ toggle?: LO<boolean> }>) => {
     const [gumballEnabled, enableGumball] = useListenableObjectNullable(toggle)
 
     return (
@@ -18,7 +18,7 @@ export const GumballToggle: FC<{ toggle: LO<boolean> | undefined }> = ({ childre
     );
 }
 
-export const ButtonList: FC = ({ children }) => {
+export const ButtonList = ({ children }: PropsWithChildren<{}>) => {
     return (
         <div className="flex flex-row p-0.5 mr-2">
             {children}

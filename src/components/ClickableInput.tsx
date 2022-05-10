@@ -1,8 +1,8 @@
-import { FC } from "react"
+import { PropsWithChildren } from "react"
 import { useTooltipRef } from "../contexts/TooltipContext"
 import { createReadableFile, createReadableFileExtended, FileSystemsAccessApi, ReadableFile } from "../studio/util/FileTypes"
 
-type Props = {
+type Props = PropsWithChildren<{
   description: string
   accept: string[]
   disabled?: boolean
@@ -10,9 +10,9 @@ type Props = {
   onFile: (file: ReadableFile) => void
   className?: string
   tooltip?: string
-}
+}>
 
-const ClickableInput: FC<Props> = (props) => {
+const ClickableInput = (props: Props) => {
   const ref = useTooltipRef<HTMLInputElement>(props.tooltip !== undefined ? () => props.tooltip : null)
   return (
     <>
@@ -40,7 +40,7 @@ const ClickableInput: FC<Props> = (props) => {
   )
 }
 
-const ExtendedFilesClickableInput: FC<Props> = (props) => {
+const ExtendedFilesClickableInput = (props: Props) => {
   const ref = useTooltipRef<HTMLButtonElement>(props.tooltip !== undefined ? () => props.tooltip : null)
 
   const onClick = () => {

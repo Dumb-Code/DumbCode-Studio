@@ -1,4 +1,4 @@
-import { FC, MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, PropsWithChildren, RefObject, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
@@ -144,7 +144,7 @@ const ModelerCubeList = () => {
     )
 }
 
-const CubeListButton: FC<{ className: string, hoverText: string, onClick: () => void }> = ({ className, hoverText, children, onClick }) => {
+const CubeListButton = ({ className, hoverText, children, onClick }: PropsWithChildren<{ className: string, hoverText: string, onClick: () => void }>) => {
     const tooltipRef = useTooltipRef<HTMLButtonElement>(() => hoverText)
     return (
         <button ref={tooltipRef} onClick={onClick} className={"flex-grow rounded text-white ml-0.5 flex flex-row " + className}>

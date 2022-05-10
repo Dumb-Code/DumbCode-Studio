@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import { SVGSettings } from "../components/Icons";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
 import ProjectPageContextProvider from "../contexts/ProjectPageContext";
@@ -99,7 +99,7 @@ const StudioApp = () => {
 
 export default StudioContainer;
 
-export const NavBarButton: FC<{ selected: boolean, color: string, className: string, onClick: () => void }> = ({ selected, color, onClick, className, children }) => {
+export const NavBarButton = ({ selected, color, onClick, className, children }: PropsWithChildren<{ selected: boolean, color: string, className: string, onClick: () => void }>) => {
   return (
     <button
       className={className + " " + (selected ? color + " text-white" : "dark:bg-gray-900 bg-gray-100 dark:hover:bg-gray-800 hover:bg-gray-100 text-black dark:text-gray-400") + " focus:outline-none mt-0.5 dark:hover:text-white rounded-t py-1 px-2 mr-0.5"}

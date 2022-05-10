@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react"
-import React, { FC, Fragment, useContext, useEffect, useState } from "react"
+import React, { Fragment, PropsWithChildren, useContext, useEffect, useState } from "react"
 import { SVGCross } from "../components/Icons"
 import { useOptions } from "../contexts/OptionsContext"
 
@@ -21,7 +21,7 @@ type JSXSetter = (val: () => JSX.Element) => void
 let currentSetter: JSXSetter | null = null
 export const _unsafe_setDialogBox: JSXSetter = val => currentSetter?.(val)
 
-const DialogBoxes: FC = ({ children }) => {
+const DialogBoxes = ({ children }: PropsWithChildren<{}>) => {
   const [ElementFunc, setElementFunc] = useState<null | (() => JSX.Element)>(null)
   const [showDialogBox, setShowDialogBox] = useState(false)
 
@@ -52,7 +52,7 @@ const DialogBoxes: FC = ({ children }) => {
   )
 }
 
-export const OpenedDialogBox: FC<{ width?: string, height?: string, title: string }> = ({ title="", width = "500px", height = "500px", children }) => {
+export const OpenedDialogBox = ({ title = "", width = "500px", height = "500px", children }: PropsWithChildren<{ width?: string, height?: string, title: string }>) => {
   const dialogBox = useOpenedDialogBoxes()
   const { darkMode } = useOptions()
 

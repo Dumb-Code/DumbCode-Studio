@@ -1,4 +1,4 @@
-import { createContext, FC, ReactNode, useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { createContext, PropsWithChildren, ReactNode, useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { useOptions } from "./OptionsContext"
 
@@ -33,7 +33,7 @@ function clampWithPadding(value: number, width: number, max: number) {
 }
 
 
-const TooltipContextProvider: FC = ({ children }) => {
+const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null)
 
   const { darkMode } = useOptions()

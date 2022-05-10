@@ -1,8 +1,10 @@
-import { FC } from "react";
+import { PropsWithChildren } from "react";
 import { PanelValue, StudioPanelsContext, usePanelValue } from "../contexts/StudioPanelsContext";
 import { MinimizeButton } from "./MinimizeButton";
 
-const CollapsableSidebarPannel: FC<{ panelName: { [K in keyof StudioPanelsContext]: StudioPanelsContext[K] extends PanelValue<boolean> ? K : never }[keyof StudioPanelsContext], heightClassname: string, title: string }> = ({ panelName, heightClassname, children, title }) => {
+type PanelName = { [K in keyof StudioPanelsContext]: StudioPanelsContext[K] extends PanelValue<boolean> ? K : never }[keyof StudioPanelsContext]
+
+const CollapsableSidebarPannel = ({ panelName, heightClassname, children, title }: PropsWithChildren<{ panelName: PanelName, heightClassname: string, title: string }>) => {
     const [open, setOpen] = usePanelValue(panelName)
 
     return (

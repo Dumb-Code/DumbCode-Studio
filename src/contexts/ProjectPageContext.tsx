@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useState } from "react";
+import { createContext, PropsWithChildren, useContext, useState } from "react";
 import DcRemoteRepo from "../studio/formats/project/DcRemoteRepos";
 
 type ProjectPageContextType = {
@@ -11,7 +11,7 @@ type ProjectPageContextType = {
 
 const Context = createContext<ProjectPageContextType | null>(null)
 
-const ProjectPageContextProvider: FC = ({ children }) => {
+const ProjectPageContextProvider = ({ children }: PropsWithChildren<{}>) => {
   const [remoteSettingsOpen, setRemoteSettingsOpen] = useState(false)
   const [selectedRepo, setSelectedRepo] = useState<DcRemoteRepo | null>(null)
   return (

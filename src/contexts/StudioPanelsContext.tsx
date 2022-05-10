@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useState } from "react"
+import { createContext, PropsWithChildren, useContext, useState } from "react"
 
 export type PanelValue<T> = {
   get: () => T
@@ -42,7 +42,7 @@ const useValueGetterSetter = <
   //@ts-expect-error
   object[name] = val
 }
-const StudioPanelsContextProvider: FC = ({ children }) => {
+const StudioPanelsContextProvider = ({ children }: PropsWithChildren<{}>) => {
   const context: StudioPanelsContext = {} as any //We define the properties in the next lines.
   useValueGetterSetter(context, "cube_list", true)
   useValueGetterSetter(context, "model_cube", true)
