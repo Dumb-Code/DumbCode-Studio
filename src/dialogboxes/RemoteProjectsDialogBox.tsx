@@ -1,106 +1,13 @@
-import { useEffect, useState } from "react"
-import { SVGOpenLink, SVGSearch } from "../components/Icons"
-import PagedFetchResult from "../components/PagedFetchResult"
-import { useFetchGithubUserDetails } from "../studio/util/FetchHooks"
-import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
-import { addRecentGithubRemoteProject } from "../studio/util/RemoteProjectsManager"
-import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes"
+import { OpenedDialogBox } from "./DialogBoxes";
 
+//::TODO
 const RemoteProjectsDialogBox = () => {
-  const [accessToken] = useGithubAccessToken()
-
-  const dialogBox = useOpenedDialogBoxes()
-
-  const currentSelectUser = useFetchGithubUserDetails(accessToken)
-  const [username, setUsername] = useState<string | null>(null)
-  const [searchedUsername, setSearchedUsername] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (username === null && currentSelectUser !== null) {
-      const login = currentSelectUser.login
-      setUsername(login)
-      setSearchedUsername(login)
-    }
-  }, [username, currentSelectUser])
-
-  const [search, setSearch] = useState("")
-
   return (
     <OpenedDialogBox width="800px" height="800px" title="Load a Repository">
       <div className="flex flex-col h-full">
-        <div className="flex flex-row w-full justify-center items-center">
-
-          <input onKeyPress={e => e.key === "Enter" && setSearchedUsername(username)} value={username ?? ""} onChange={e => setUsername(e.target.value)} className="ml-4 w-32 text-black p-0 m-0 rounded-none rounded-l pl-1 h-8 dark:bg-gray-500 dark:placeholder-gray-800 " type="text" placeholder="Username" />
-          <button onClick={() => setSearchedUsername(username)} className="h-8 rounded-none rounded-r p-1 ml-0 flex items-center justify-center dark:text-gray-700 bg-blue-500">
-            <SVGSearch width={16} />
-          </button>
-          <input value={search} onChange={e => setSearch(e.target.value)} className="flex flex-grow ml-4 w-full text-black p-0 pl-1 h-8 dark:bg-gray-500 rounded dark:placeholder-gray-800" type="text" placeholder="Search Repositories" />
-        </div>
-        <div className="flex-grow overflow-y-auto h-0 mt-2 mb-2 bg-gray-300 dark:bg-gray-700">
-          {searchedUsername !== null &&
-            <RepositoryList search={search.toLowerCase()} tokenUsername={currentSelectUser?.login} username={searchedUsername} token={accessToken} close={dialogBox.clear} />
-          }
-        </div>
+        Here We Add a way to projects to the .studio_remote.json
       </div>
     </OpenedDialogBox>
-  )
-}
-
-const RepositoryList = ({ token, tokenUsername, username, search, close }: { token: string | null, tokenUsername?: string, username: string, search: string, close: () => void }) => {
-  if (token === null) {
-    return <></>
-  }
-  const setRepo = (owner: string, repo: string, branch: string) => {
-    addRecentGithubRemoteProject({ owner, repo, token, branch })
-    close()
-  }
-  return (
-    <PagedFetchResult
-      key={`${token}#${search}~${username}`}
-      baseUrl={username === tokenUsername ? 'https://api.github.com/user/repos' : `https://api.github.com/users/${username}/repos`}
-      token={token}
-      predicate={r => search.split(" ").every(s => r.owner.login.toLowerCase().replaceAll("-", "").includes(s) || r.name.toLowerCase().replaceAll("-", "").includes(s))}
-      loading={() => <div className="h-full flex flex-col justify-center items-center text-gray-500">Loading...</div>}
-      error={status => <div className="h-full flex flex-col justify-center items-center text-gray-500">{status === 404 ? `User '${username}' Not Found` : <span className="text-lg text-red-700">Error {status}</span>}</div>}
-      empty={() => <div className="h-full flex flex-col justify-center items-center text-gray-500">User has no Repositories</div>}
-    >
-      {({ value }) => <RepositoryEntry value={value} token={token} setRepo={setRepo} />}
-    </PagedFetchResult>
-  )
-}
-
-const RepositoryEntry = ({ value, token, setRepo }: { value: any, token: string, setRepo: (owner: string, repo: string, branch: string) => void }) => {
-  const [branch, setBranch] = useState(value.default_branch)
-  return (
-    <div onClick={() => setRepo(value.owner.login, value.name, branch)} className="group border-t border-b border-black flex flex-row p-2 items-center hover:bg-gray-500">
-      <img className="rounded" width={40} src={value.owner.avatar_url ?? ''} alt="Profile" />
-      <div className="pl-3 flex-grow group-hover:text-gray-300 dark:group-hover:text-gray-800">
-        {value.owner.login} / {value.name}
-      </div>
-      <select onClick={e => e.stopPropagation()} className="dark:bg-gray-600 p-1 pr-8" value={branch} onChange={e => setBranch(e.target.value)}>
-        <PagedFetchResult
-          baseUrl={value.url + "/branches"}
-          token={token}
-        >
-          {({ value: branchValue }) => <option value={branchValue.name}>{branchValue.name}</option>}
-        </PagedFetchResult>
-      </select>
-      <a className="ml-3" target="_blank" rel="noreferrer" href={value.html_url} onClick={e => e.stopPropagation()}>
-        <SVGOpenLink className="text-gray-400 hover:text-gray-200" width={16} />
-      </a>
-    </div>
-  )
-}
-
-
-const GithubAccount = ({ token }: { token: string }) => {
-  const result = useFetchGithubUserDetails(token)
-
-  return (
-    <div className="flex flex-row items-center">
-      <img className="rounded" width={25} src={result?.avatar_url ?? ''} alt="Profile" />
-      <div className="pl-2">{result?.name ?? 'Loading...'}</div>
-    </div>
   )
 }
 

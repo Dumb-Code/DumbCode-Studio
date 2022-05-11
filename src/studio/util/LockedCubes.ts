@@ -60,7 +60,7 @@ export default class LockedCubes {
     this.model.modelGroup.updateMatrixWorld(true) //Is this needed
 
     //Moving cubes are cubes that SHOULD move but at some point a parent is locked preventing them from moving
-    let movingCubesCache = new Map()
+    let movingCubesCache = new Map<number, CubeLocker[]>()
     if (movingCubes === true) {
       this.movingChildrenCache.forEach(cube => this.addToHierarchyMap(movingCubesCache, cube.hierarchyLevel, new CubeLocker(cube)))
     }

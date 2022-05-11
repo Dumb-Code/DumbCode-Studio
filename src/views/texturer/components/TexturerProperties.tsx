@@ -77,11 +77,11 @@ const SwatchesPannel = ({ swatches, setHue, removeSw }: { swatches: readonly Swa
 
 const HueSelector = ({ hue, setHue }: { hue: number, setHue: any }) => {
 
-    const [sliderHue, setSLiderHue] = useState(hue)
+    const [sliderHue, setSliderHue] = useState(hue)
     const { darkMode } = useOptions()
 
-    function changeHue(newHue) {
-        setSLiderHue(newHue);
+    function changeHue(newHue: number) {
+        setSliderHue(newHue);
         setHue(newHue * 3.6)
     }
 

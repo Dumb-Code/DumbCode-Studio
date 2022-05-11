@@ -8,22 +8,22 @@ type BuildCommandCallback<T> = (nextInput: (text: string, onTyped: (value: strin
 export class ArgumentHandler<T> {
   private constructor(
     readonly description: string,
-    readonly freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => ReactNode),
+    readonly freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => JSX.Element),
     readonly valueFreindlyText: (value: T) => string,
     readonly inputParser: (input: CommandInput) => T,
     readonly toStringFunc: (val: T) => string,
     readonly buildCommand: BuildCommandCallback<T>,
   ) { }
 
-  public static simpleArgument<T>(description: string, freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => ReactNode), func: (input: string) => T, toString = (val: T) => String(val), valueFreindlyText = toString) {
+  public static simpleArgument<T>(description: string, freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => JSX.Element), func: (input: string) => T, toString = (val: T) => String(val), valueFreindlyText = toString) {
     return new ArgumentHandler(description, freindlyText, valueFreindlyText, input => func(input.getInput()), toString, async (nextInput) => await nextInput("Enter Value", func))
   }
 
-  public static simpleEmptyArgument<T>(description: string, freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => ReactNode), func: (input: string) => T, toString = (val: T | null) => String(val ?? ""), valueFreindlyText = toString) {
+  public static simpleEmptyArgument<T>(description: string, freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => JSX.Element), func: (input: string) => T, toString = (val: T | null) => String(val ?? ""), valueFreindlyText = toString) {
     return new ArgumentHandler<T | null>(description, freindlyText, valueFreindlyText, input => input.inputsLeft() > 0 ? func(input.getInput()) : null, toString, async (nextInput) => await nextInput("Enter Value", func))
   }
 
-  public static complexArgument<T>(description: string, freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => ReactNode), func: (input: CommandInput) => T, buildCommand: BuildCommandCallback<T>, toString: (val: T) => string, valueFreindlyText = toString) {
+  public static complexArgument<T>(description: string, freindlyText: ReactNode | ((val: { errorData: any, isParsed: boolean }) => JSX.Element), func: (input: CommandInput) => T, buildCommand: BuildCommandCallback<T>, toString: (val: T) => string, valueFreindlyText = toString) {
     return new ArgumentHandler(description, freindlyText, valueFreindlyText, func, toString, buildCommand)
   }
 }

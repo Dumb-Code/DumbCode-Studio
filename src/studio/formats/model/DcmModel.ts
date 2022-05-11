@@ -448,7 +448,7 @@ export class DCMCube implements CubeParent {
     //TODO: dispose of geometries?
   }
 
-  getWorldPosition(xDelta, yDelta, zDelta, vector = new Vector3()) {
+  getWorldPosition(xDelta: number, yDelta: number, zDelta: number, vector = new Vector3()) {
     const dims = this.dimension.value
     const cg = this.cubeGrow.value
     let w = dims[0] + cg[0] * 2 + 0.0001
@@ -472,10 +472,10 @@ export class DCMCube implements CubeParent {
   }
 
   cloneCube(model = this.model) {
-    const cube = new DCMCube(this.name.value.replace(/~\d+$/, ""), this.dimension.value, this.position.value, this.offset.value,
+    const cube: DCMCube = new DCMCube(this.name.value.replace(/~\d+$/, ""), this.dimension.value, this.position.value, this.offset.value,
       this.rotation.value, this.textureOffset.value, this.textureMirrored.value, this.cubeGrow.value,
       this.children.value.map(c => c.cloneCube(model)), model)
-    cube.metadata = this.metadata
+    Object.assign(cube.metadata, this.metadata)
     return cube
   }
 

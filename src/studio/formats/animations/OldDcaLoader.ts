@@ -70,11 +70,10 @@ export const loadDCAAnimationOLD = (project: DcProject, name: string, buffer: St
     let eventSize = buffer.readNumber()
     for (let e = 0; e < eventSize; e++) {
       let time = buffer.readNumber()
-      let data = []
+      let data: { type: string, data: string }[] = []
       let dataSize = buffer.readNumber()
       for (let d = 0; d < dataSize; d++) {
-        const event = { type: buffer.readString(), data: buffer.readString() } //TODO
-        compilerWarningsRemove(event)
+        data.push({ type: buffer.readString(), data: buffer.readString() })
       }
       compilerWarningsRemove([time, data])
       // handler.events.push({ time, data })

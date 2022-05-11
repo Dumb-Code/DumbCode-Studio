@@ -16,11 +16,12 @@ export default class IndexedEventHandler<D> {
     for (let listener of this.listeners) {
       if ((!canceled || listener.alwaysRecieve) && listener.callback(data) === true) {
         canceled = true
-        if (data["stopPropagation"] !== undefined) {
-          data["stopPropagation"]()
+        const dataAny = data as any
+        if (dataAny["stopPropagation"] !== undefined) {
+          dataAny["stopPropagation"]()
         }
-        if (data["preventDefault"] !== undefined) {
-          data["preventDefault"]()
+        if (dataAny["preventDefault"] !== undefined) {
+          dataAny["preventDefault"]()
         }
       }
     }

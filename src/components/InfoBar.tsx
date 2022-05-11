@@ -90,17 +90,17 @@ const DisplayModeDropup = () => {
     const project = getSelectedProject()
     type Func = (mat: MeshBasicMaterial | MeshLambertMaterial) => void
     const setTextured: Func = (mat) => {
-        mat['_mode'] = 0
+        mat.userData._mode = 0
         mat.map = project.previousThreeTexture
         mat.wireframe = false
     }
     const setunTextured: Func = (mat) => {
-        mat['_mode'] = 1
+        mat.userData._mode = 1
         mat.map = null
         mat.wireframe = false
     }
     const setOutline: Func = (mat) => {
-        mat['_mode'] = 2
+        mat.userData._mode = 2
         mat.map = null
         mat.wireframe = true
     }

@@ -1,9 +1,10 @@
 import { Menu, Transition } from "@headlessui/react";
-import PropTypes from 'prop-types';
-import { Fragment } from "react";
+import { Fragment, PropsWithChildren } from "react";
 import { SVGChevronDown } from "./Icons";
 
-export default function Dropdown({ title, header, children, right, className }) {
+export default function Dropdown({ title, header, children, right = false, className = "" }:
+    PropsWithChildren<{ title: string, header: string, right?: boolean, className?: string }>
+) {
     return (
         <div>
             <Menu as="div" className="relative inline-block text-left">
@@ -35,21 +36,6 @@ export default function Dropdown({ title, header, children, right, className }) 
             </Menu>
         </div>
     )
-}
-
-Dropdown.propTypes = {
-    children: PropTypes.oneOfType([
-        PropTypes.arrayOf(PropTypes.element),
-        PropTypes.element.isRequired
-    ]),
-    header: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    right: PropTypes.bool,
-    className: PropTypes.string
-}
-
-Dropdown.defaultProps = {
-    details: null,
 }
 
 export const DropdownItem = ({ name, onSelect }: { name: string, onSelect: () => void }) => {

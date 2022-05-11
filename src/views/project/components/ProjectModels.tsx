@@ -91,7 +91,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
         })
         exporter.parse(project.model.modelGroup, value => {
             defaultWritable.write(project.name.value + ".gltf", new Blob([JSON.stringify(value)]))
-        }, { includeCustomExtensions: false })
+        }, er => console.warn("Error Parsing: " + er), { includeCustomExtensions: false })
         project.model.traverseAll(cube => {
             cube.setUserData()
             const mats = oldCubeMaterials.get(cube)

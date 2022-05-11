@@ -157,7 +157,7 @@ export const useAnimatorGumball = () => {
 
     const updateSelectedCubes = (val: readonly string[]) => {
       selectedCubes.current = getCubes(val)
-      gumball.transformAnchor['dcmCube'] = selectedCubes.current.length === 1 ? selectedCubes.current[0] : undefined
+      gumball.transformAnchor.userData.dcmCube = selectedCubes.current.length === 1 ? selectedCubes.current[0] : undefined
       if (gumball.gumball_autoRotate.value) {
         gumball.moveToSelected(val)
       }

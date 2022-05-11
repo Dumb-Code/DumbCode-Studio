@@ -53,7 +53,7 @@ const ArrayCommands = (addCommand: (command: Command) => void) => {
 
     if (mode === "set") { //Set
       cube.cubeGroup.matrixWorld.decompose(decomposePosition, decomposeRotation, decomposeScale)
-      decomposeEuler.setFromQuaternion(decomposeRotation, "ZYX").toVector3(tempVec)
+      tempVec.setFromEuler(decomposeEuler.setFromQuaternion(decomposeRotation, "ZYX"))
       axisValues.forEach((e, idx) => e === undefined ? null : tempVec.setComponent(idx, e * Math.PI / 180))
       resultMat.compose(decomposePosition, decomposeRotation.setFromEuler(decomposeEuler.setFromVector3(tempVec, "ZYX")), decomposeScale)
 

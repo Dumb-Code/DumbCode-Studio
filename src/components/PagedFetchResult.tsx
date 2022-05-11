@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useFetchRequest } from "../studio/util/FetchHooks"
 
-type PagedProps = {
+type PagedProps<V> = {
   baseUrl: string,
   token: string | null,
   connector?: string,
-  children: ({ value }) => JSX.Element,
+  children: ({ value }: { value: V }) => JSX.Element,
   loading?: () => JSX.Element,
   error?: (status: number) => JSX.Element,
-  predicate?: (val: any) => boolean,
+  predicate?: (val: V) => boolean,
   empty?: () => JSX.Element
 }
 
-const PagedFetchResult = (props: PagedProps) => {
+const PagedFetchResult = <V,>(props: PagedProps<V>) => {
   const [requestedPages, setRequestedPages] = useState([1])
   const requestNext = useCallback((id: number) => {
     if (id === requestedPages.length) {
@@ -23,7 +23,7 @@ const PagedFetchResult = (props: PagedProps) => {
   return (
     <>
       {requestedPages.map(p =>
-        <Page
+        <Page<V>
           key={p}
           page={p}
           requestNext={() => requestNext(p)}
@@ -34,7 +34,7 @@ const PagedFetchResult = (props: PagedProps) => {
   )
 }
 
-const Page = ({ baseUrl, token, connector = "?", page, children: Renderer, requestNext, loading, predicate, error, empty }: PagedProps & { page: number, requestNext: () => void }) => {
+const Page = <V,>({ baseUrl, token, connector = "?", page, children: Renderer, requestNext, loading, predicate, error, empty }: PagedProps<V> & { page: number, requestNext: () => void }) => {
   const result = useFetchRequest(`${baseUrl}${connector}page=${page}&per_page=30`, token)
   const hasRequested = useRef(false)
   useEffect(() => {
@@ -52,14 +52,21 @@ const Page = ({ baseUrl, token, connector = "?", page, children: Renderer, reque
     return error ? error(result.status) : <></>
   }
 
-  if (page === 1 && result.result.length === 0) {
+  const resultArr = result.result
+  if (!Array.isArray(resultArr)) {
+    return error ? error(-1) : <></>
+  }
+
+  const array = resultArr as V[]
+
+
+  if (page === 1 && array.length === 0) {
     return empty ? empty() : <></>
   }
 
   return (
     <>
-      {result
-        .result
+      {array
         .filter(r => !predicate || predicate(r))
         .map((r, i) => <Renderer key={i} value={r} />)
       }

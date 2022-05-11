@@ -105,7 +105,17 @@ const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaA
                     title="ROTATION"
                     obj={selectedKf?.rotation}
                     keyframeSetFunction="setRotationAbsolute"
-                    vector={() => cube?.cubeGroup?.rotation?.toVector3()?.multiplyScalar(180 / Math.PI)}
+                    vector={() => {
+                        const rot = cube?.cubeGroup?.rotation
+                        if (rot === undefined) {
+                            return rot
+                        }
+                        return {
+                            x: rot.x * 180 / Math.PI,
+                            y: rot.y * 180 / Math.PI,
+                            z: rot.z * 180 / Math.PI,
+                        }
+                    }}
                     InputType={CubeRotationInput}
                     {...sharedProps}
                 />

@@ -35,7 +35,9 @@ const ClickableInput = (props: Props) => {
         type="file"
         multiple={props.multiple ?? false}
       />
-      <button className={props.className} children={props.children} onClick={() => ref.current?.click()} />
+      <button className={props.className} onClick={() => ref.current?.click()}>
+        {props.children}
+      </button>
     </>
   )
 }
@@ -57,7 +59,9 @@ const ExtendedFilesClickableInput = (props: Props) => {
     }).catch(() => { })
   }
   return (
-    <button ref={ref} disabled={props.disabled} className={props.className} children={props.children} onClick={onClick} />
+    <button ref={ref} disabled={props.disabled} className={props.className} onClick={onClick}>
+      {props.children}
+    </button>
   )
 }
 

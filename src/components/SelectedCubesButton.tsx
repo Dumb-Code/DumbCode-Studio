@@ -34,5 +34,6 @@ const SelectedCubesButton = forwardRef<SelectedCubesRef, { className?: string, b
     </div>
   )
 })
+SelectedCubesButton.displayName = "SelectedCubesButton"
 
 export default SelectedCubesButton

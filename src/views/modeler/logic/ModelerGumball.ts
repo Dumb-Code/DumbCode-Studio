@@ -172,8 +172,10 @@ export const useModelerGumball = () => {
         case "dimensions":
           transformControls.space = "local"
           break
+        default:
+          return
       }
-      transformControls.mode = mode
+      transformControls.mode = mode as any
     }
 
     const updateTransformControlsVisability = ({ enabled = gumball.enabled.value, blockedReasons = gumball.blockedReasons.value, gumballMode = gumball.mode.value }) => {
@@ -229,7 +231,7 @@ export const useModelerGumball = () => {
         cube.position.addPostListener(onCubeValuesChange)
         cube.rotation.addPostListener(onCubeValuesChange)
       })
-      gumball.transformAnchor['dcmCube'] = selectedCubes.current.length === 1 ? selectedCubes.current[0] : undefined
+      gumball.transformAnchor.userData.dcmCube = selectedCubes.current.length === 1 ? selectedCubes.current[0] : undefined
       if (gumball.gumball_auto_move.value) {
         gumball.moveGumballToSelected({ selected: val })
       }

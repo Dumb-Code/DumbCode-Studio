@@ -1,7 +1,20 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "typeRoots": [
+      "./typings",
+      "./node_modules/@types",
+    ],
+    "paths": {
+      "react-contextmenu": [
+        "./typings/react-contextmenu/index.d.ts"
+      ]
+    },
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -15,6 +28,13 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "typings"
+  ],
 }

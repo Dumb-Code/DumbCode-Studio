@@ -41,7 +41,7 @@ export const useFileUpload = <T extends HTMLElement,>(
 
           const validName = (name: string) => extensions.includes(name.substring(name.lastIndexOf(".")))
 
-          const cast = function (handle) {
+          const cast = function (handle: FileSystemHandle | null) {
             if (handle instanceof FileSystemFileHandle && validName(handle.name)) {
               onChange(createReadableFileExtended(handle as FileSystemFileHandle))
             }

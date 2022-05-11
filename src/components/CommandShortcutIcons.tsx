@@ -1,5 +1,4 @@
-import PropTypes from 'prop-types';
-import { useState } from "react";
+import { PropsWithChildren, ReactNode, useState } from "react";
 
 export const CommandShortcutIcon = ({ command, description, icon }: { command: string, description: string, icon: any }) => {
 
@@ -16,7 +15,7 @@ export const CommandShortcutIcon = ({ command, description, icon }: { command: s
     )
 }
 
-export const CommandShortcutIconWithSubCommands = ({ command, description, icon, children }) => {
+export const CommandShortcutIconWithSubCommands = ({ command, description, icon, children }: PropsWithChildren<{ command: string, description: string, icon: ReactNode }>) => {
 
     const [subCommandsVisible, setSubVisible] = useState(false);
 
@@ -38,13 +37,4 @@ export const CommandShortcutIconWithSubCommands = ({ command, description, icon,
             </div>
         </div>
     )
-}
-
-CommandShortcutIconWithSubCommands.propTypes = {
-    children: PropTypes.oneOfType([
-        PropTypes.arrayOf(PropTypes.element),
-        PropTypes.element.isRequired
-    ]),
-    command: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired
 }

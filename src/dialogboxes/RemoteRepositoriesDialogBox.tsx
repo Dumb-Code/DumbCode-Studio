@@ -7,7 +7,17 @@ import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
 import { addRecentGithubRemoteProject } from "../studio/util/RemoteProjectsManager"
 import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes"
 
-//TODO:::
+type PagedFetchType = {
+  default_branch: string
+  owner: {
+    login: string
+    avatar_url: string
+  }
+  name: string
+  url: string
+  html_url: string
+}
+
 const RemoteRepositoriesDialogBox = () => {
   const [accessToken] = useGithubAccessToken()
 
@@ -53,7 +63,7 @@ const RepositoryList = ({ token, tokenUsername, username, search, close }: { tok
     close()
   }
   return (
-    <PagedFetchResult
+    <PagedFetchResult<PagedFetchType>
       key={`${token}#${search}~${username}`}
       baseUrl={username === tokenUsername ? 'https://api.github.com/user/repos' : `https://api.github.com/users/${username}/repos`}
       token={token}
@@ -67,7 +77,7 @@ const RepositoryList = ({ token, tokenUsername, username, search, close }: { tok
   )
 }
 
-const RepositoryEntry = ({ value, token, setRepo }: { value: any, token: string, setRepo: (owner: string, repo: string, branch: string) => void }) => {
+const RepositoryEntry = ({ value, token, setRepo }: { value: PagedFetchType, token: string, setRepo: (owner: string, repo: string, branch: string) => void }) => {
   const [branch, setBranch] = useState(value.default_branch)
   return (
     <div onClick={() => setRepo(value.owner.login, value.name, branch)} className="group border-t border-b border-black flex flex-row p-2 items-center hover:bg-gray-500">
@@ -76,7 +86,7 @@ const RepositoryEntry = ({ value, token, setRepo }: { value: any, token: string,
         {value.owner.login} / {value.name}
       </div>
       <select onClick={e => e.stopPropagation()} className="dark:bg-gray-600 p-1 pr-8" value={branch} onChange={e => setBranch(e.target.value)}>
-        <PagedFetchResult
+        <PagedFetchResult<{ name: string }>
           baseUrl={value.url + "/branches"}
           token={token}
         >

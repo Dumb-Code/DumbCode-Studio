@@ -96,7 +96,7 @@ export default class TextureManager {
   /**
     * Greatest common dividor
     */
-  _gcd(a: number, b: number) {
+  _gcd(a: number, b: number): number {
     if (!b) {
       return Math.abs(a);
     }
