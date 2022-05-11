@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const responseCache = new Map<string, FetchResponse>()
 
@@ -47,7 +46,10 @@ export const useFetchRequest = (url: string, token: string | null) => {
   return result
 }
 
-export const useFetchGithubUserDetails = (token: string) => {
+export const useFetchGithubUserDetails = (token: string | null) => {
+  if (token === null) {
+    return null
+  }
   const val = useFetchRequest("https://api.github.com/user", token)
   return val.result ?? null
 }

@@ -1,20 +1,17 @@
-import { Listbox, Transition } from "@headlessui/react"
-import { Fragment, useEffect, useState } from "react"
-import { SVGChevronDown, SVGOpenLink, SVGSearch, SVGTick } from "../components/Icons"
+import { useEffect, useState } from "react"
+import { SVGOpenLink, SVGSearch } from "../components/Icons"
 import PagedFetchResult from "../components/PagedFetchResult"
 import { useFetchGithubUserDetails } from "../studio/util/FetchHooks"
-import { useGithubAccessTokens } from "../studio/util/LocalStorageHook"
+import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
 import { addRecentGithubRemoteProject } from "../studio/util/RemoteProjectsManager"
 import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes"
 
 const RemoteProjectsDialogBox = () => {
-  const [accessTokens] = useGithubAccessTokens()
+  const [accessToken] = useGithubAccessToken()
 
   const dialogBox = useOpenedDialogBoxes()
 
-  const [selectedAccount, setSelectedAccount] = useState(accessTokens.length === 0 ? '' : accessTokens[0]);
-
-  const currentSelectUser = useFetchGithubUserDetails(selectedAccount)
+  const currentSelectUser = useFetchGithubUserDetails(accessToken)
   const [username, setUsername] = useState<string | null>(null)
   const [searchedUsername, setSearchedUsername] = useState<string | null>(null)
 
@@ -32,10 +29,7 @@ const RemoteProjectsDialogBox = () => {
     <OpenedDialogBox width="800px" height="800px" title="Load a Repository">
       <div className="flex flex-col h-full">
         <div className="flex flex-row w-full justify-center items-center">
-          <TokenSelectionListBox accessTokens={accessTokens} selected={selectedAccount} setSelected={v => {
-            setSelectedAccount(v)
-            setUsername(null)
-          }} />
+
           <input onKeyPress={e => e.key === "Enter" && setSearchedUsername(username)} value={username ?? ""} onChange={e => setUsername(e.target.value)} className="ml-4 w-32 text-black p-0 m-0 rounded-none rounded-l pl-1 h-8 dark:bg-gray-500 dark:placeholder-gray-800 " type="text" placeholder="Username" />
           <button onClick={() => setSearchedUsername(username)} className="h-8 rounded-none rounded-r p-1 ml-0 flex items-center justify-center dark:text-gray-700 bg-blue-500">
             <SVGSearch width={16} />
@@ -44,7 +38,7 @@ const RemoteProjectsDialogBox = () => {
         </div>
         <div className="flex-grow overflow-y-auto h-0 mt-2 mb-2 bg-gray-300 dark:bg-gray-700">
           {searchedUsername !== null &&
-            <RepositoryList search={search.toLowerCase()} tokenUsername={currentSelectUser?.login} username={searchedUsername} token={selectedAccount} close={dialogBox.clear} />
+            <RepositoryList search={search.toLowerCase()} tokenUsername={currentSelectUser?.login} username={searchedUsername} token={accessToken} close={dialogBox.clear} />
           }
         </div>
       </div>
@@ -52,7 +46,10 @@ const RemoteProjectsDialogBox = () => {
   )
 }
 
-const RepositoryList = ({ token, tokenUsername, username, search, close }: { token: string, tokenUsername?: string, username: string, search: string, close: () => void }) => {
+const RepositoryList = ({ token, tokenUsername, username, search, close }: { token: string | null, tokenUsername?: string, username: string, search: string, close: () => void }) => {
+  if (token === null) {
+    return <></>
+  }
   const setRepo = (owner: string, repo: string, branch: string) => {
     addRecentGithubRemoteProject({ owner, repo, token, branch })
     close()
@@ -91,61 +88,6 @@ const RepositoryEntry = ({ value, token, setRepo }: { value: any, token: string,
       <a className="ml-3" target="_blank" rel="noreferrer" href={value.html_url} onClick={e => e.stopPropagation()}>
         <SVGOpenLink className="text-gray-400 hover:text-gray-200" width={16} />
       </a>
-    </div>
-  )
-}
-
-
-//Abstract to a seperate component
-const TokenSelectionListBox = ({ accessTokens, selected, setSelected }: { accessTokens: string[], selected: string, setSelected: (token: string) => void }) => {
-  return (
-    <div className="w-48" >
-      <Listbox value={selected} onChange={setSelected}>
-        <div className="relative mt-1 h-8">
-          <Listbox.Button className="relative w-48 h-8 pl-3 pr-10 text-left bg-white dark:bg-gray-600 rounded-lg shadow-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-opacity-75 focus-visible:ring-white focus-visible:ring-offset-orange-300 focus-visible:ring-offset-2 focus-visible:border-indigo-500 sm:text-sm">
-            <span className="block truncate"><GithubAccount token={selected} /></span>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-              <SVGChevronDown
-                className="w-5 h-5 text-gray-400"
-                aria-hidden="true"
-              />
-            </span>
-          </Listbox.Button>
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options className="absolute w-48 py-1 mt-1 overflow-auto text-base bg-white dark:bg-gray-600 rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {accessTokens.map(at => (
-                <Listbox.Option
-                  key={at}
-                  className={({ active }) =>
-                    `${active ? 'text-blue-900 bg-blue-100' : 'text-gray-900'} cursor-default select-none relative py-2 pl-4 pr-4`
-                  }
-                  value={at}
-                >
-                  {({ selected, active }) => (
-                    <>
-                      <span className={`${selected ? 'font-medium' : 'font-normal'} block truncate pl-4`}>
-                        <GithubAccount token={at} />
-                      </span>
-                      {selected ? (
-                        <span
-                          className={`${active ? 'text-green-400' : 'text-green-600'} absolute inset-y-0 left-0 flex items-center pl-2`}
-                        >
-                          <SVGTick className="w-4 h-4" aria-hidden="true" />
-                        </span>
-                      ) : null}
-                    </>
-                  )}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Transition>
-        </div>
-      </Listbox>
     </div>
   )
 }

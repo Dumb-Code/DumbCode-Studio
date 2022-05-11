@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export const useLocalStorage = (key: string) => {
-  const [storage, setStorage] = useState(localStorage.getItem(key))
+  const [storage, _setStorage] = useState(localStorage.getItem(key))
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -14,22 +13,25 @@ export const useLocalStorage = (key: string) => {
     return () => clearInterval(interval)
   })
 
-  return [storage, (value: string) => { localStorage.setItem(key, value); setStorage(value) }] as [string, (val: string) => void]
+  const setStorage = useCallback((value: string | null) => {
+    if (value === null) {
+      localStorage.removeItem(key)
+    } else {
+      localStorage.setItem(key, value)
+    }
+    _setStorage(value)
+  }, [])
+
+  return [storage, setStorage] as const
 }
 
-export const useGithubAccessTokens = () => {
-  const [tokenString, setTokenString] = useLocalStorage("github-access-tokens")
-  let accessTokens: string[] = []
+export const useGithubAccessToken = () => {
+  const [github, setGithub] = useLocalStorage("github-access-token")
+  const [dumbcode, setDumbcode] = useLocalStorage("dumbcode-access-token")
 
-  if (tokenString !== null) {
-    try {
-      const arr = JSON.parse(tokenString) as string[]
-      arr.forEach(a => accessTokens.push(a))
-    }
-    catch {
-      console.warn("Unable to parse " + tokenString + " as json array.")
-    }
-  }
-
-  return [accessTokens, (val: string[]) => setTokenString(JSON.stringify(val))] as [string[], (val: string[]) => void]
+  const removeAll = useCallback(() => {
+    setGithub(null)
+    setDumbcode(null)
+  }, [])
+  return [github, dumbcode, removeAll] as const
 }

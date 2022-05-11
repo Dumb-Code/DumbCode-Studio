@@ -1,4 +1,5 @@
 import { PropsWithChildren, useState } from "react";
+import GithubAccountButton from "../components/GithubAccountButton";
 import { SVGSettings } from "../components/Icons";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
 import ProjectPageContextProvider from "../contexts/ProjectPageContext";
@@ -85,6 +86,7 @@ const StudioApp = () => {
               </NavBarButton>
             )}
           </div>
+          <GithubAccountButton />
           <div className="dark:text-gray-200 text-black mt-1 mr-2">
             v1.0.0
           </div>

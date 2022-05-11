@@ -3,19 +3,17 @@ import { Fragment, useEffect, useState } from "react"
 import { SVGChevronDown, SVGOpenLink, SVGSearch, SVGTick } from "../components/Icons"
 import PagedFetchResult from "../components/PagedFetchResult"
 import { useFetchGithubUserDetails } from "../studio/util/FetchHooks"
-import { useGithubAccessTokens } from "../studio/util/LocalStorageHook"
+import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
 import { addRecentGithubRemoteProject } from "../studio/util/RemoteProjectsManager"
 import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes"
 
 //TODO:::
 const RemoteRepositoriesDialogBox = () => {
-  const [accessTokens] = useGithubAccessTokens()
+  const [accessToken] = useGithubAccessToken()
 
   const dialogBox = useOpenedDialogBoxes()
 
-  const [selectedAccount, setSelectedAccount] = useState(accessTokens.length === 0 ? '' : accessTokens[0]);
-
-  const currentSelectUser = useFetchGithubUserDetails(selectedAccount)
+  const currentSelectUser = useFetchGithubUserDetails(accessToken)
   const [username, setUsername] = useState<string | null>(null)
   const [searchedUsername, setSearchedUsername] = useState<string | null>(null)
 
@@ -33,10 +31,6 @@ const RemoteRepositoriesDialogBox = () => {
     <OpenedDialogBox width="800px" height="800px" title="Load a Repository">
       <div className="flex flex-col h-full">
         <div className="flex flex-row w-full justify-center items-center">
-          <TokenSelectionListBox accessTokens={accessTokens} selected={selectedAccount} setSelected={v => {
-            setSelectedAccount(v)
-            setUsername(null)
-          }} />
           <input onKeyPress={e => e.key === "Enter" && setSearchedUsername(username)} value={username ?? ""} onChange={e => setUsername(e.target.value)} className="ml-4 w-32 text-black p-0 m-0 rounded-none rounded-l pl-1 h-8 dark:bg-gray-500 dark:placeholder-gray-800 " type="text" placeholder="Username" />
           <button onClick={() => setSearchedUsername(username)} className="h-8 rounded-none rounded-r p-1 ml-0 flex items-center justify-center dark:text-gray-700 bg-blue-500">
             <SVGSearch width={16} />
@@ -44,8 +38,8 @@ const RemoteRepositoriesDialogBox = () => {
           <input value={search} onChange={e => setSearch(e.target.value)} className="flex flex-grow ml-4 w-full text-black p-0 pl-1 h-8 dark:bg-gray-500 rounded dark:placeholder-gray-800" type="text" placeholder="Search Repositories" />
         </div>
         <div className="flex-grow overflow-y-auto h-0 mt-2 mb-2 bg-gray-300 dark:bg-gray-700">
-          {searchedUsername !== null &&
-            <RepositoryList search={search.toLowerCase()} tokenUsername={currentSelectUser?.login} username={searchedUsername} token={selectedAccount} close={dialogBox.clear} />
+          {searchedUsername !== null && accessToken !== null &&
+            <RepositoryList search={search.toLowerCase()} tokenUsername={currentSelectUser?.login} username={searchedUsername} token={accessToken} close={dialogBox.clear} />
           }
         </div>
       </div>

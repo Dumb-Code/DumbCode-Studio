@@ -1,3 +1,4 @@
+import { sign } from "jsonwebtoken"
 import { NextApiRequest, NextApiResponse } from "next"
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -18,12 +19,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(400).json({ error: "Missing Access Token" })
   }
 
-  // const authUser = await fetch(`https://api.github.com/user`, { headers: { "Authorization": `token ${accessToken}` } })
-  //   .then(r => r.json())
-  // console.log(`'${authUser.login}' just logged in, id:${authUser.id}`)
+  const authUser = await fetch(`https://api.github.com/user`, { headers: { "Authorization": `token ${accessToken}` } })
+    .then(r => r.json())
+  if (authUser.id === undefined) {
+    return res.status(500).json({ error: "Error Authenticating User" })
+  }
 
+  if (process.env.TOKEN_KEY === undefined) {
+    return res.status(500).json({ error: "No Token Key" })
+  }
 
-  res.status(200).json({ github_token: accessToken })
+  const token = sign(String(authUser.id), process.env.TOKEN_KEY)
+
+  res.status(200).json({ github_token: accessToken, dumbcode_token: token })
 }
 
 export default handler
