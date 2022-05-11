@@ -14,6 +14,14 @@ import Project from "../views/project/Project";
 import TextureMapper from "../views/texturemapper/Texturemapper";
 import Texturer from "../views/texturer/Texturer";
 
+
+//Fix an issue with FIK
+if (typeof window !== undefined) {
+  //@ts-expect-error
+  window['FIK'] = require('@aminere/fullik')
+  window['THREE'] = require('three')
+}
+
 type Tab = {
   name: string;
   color: string;
