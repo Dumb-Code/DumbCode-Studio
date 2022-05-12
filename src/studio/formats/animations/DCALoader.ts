@@ -22,7 +22,7 @@ export const loadUnknownAnimation = async (project: DcProject, name: string, buf
 
 const loadToMap = (map: LOMap<string, readonly [number, number, number]>, data: ParsedKfMap) => {
   Object.keys(data).forEach(key => {
-    map.set(key, data[key])
+    map.setSilently(key, data[key])
   })
 }
 

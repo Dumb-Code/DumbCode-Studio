@@ -1,9 +1,45 @@
 import { v4 } from 'uuid';
+import UndoRedoHandler from '../../undoredo/UndoRedoHandler';
 import { getUndefinedWritable } from '../../util/FileTypes';
 import DcProject from '../project/DcProject';
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
+import { SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
 import { DCMCube } from './../model/DcmModel';
+
+const skeletal_export_named = "skeletal_export_named_"
+const kfmap_position = "pos_"
+const kfmap_rotation = "rot_"
+const kfmap_cubegrow = "cg_"
+
+type UndoRedoDataType = {
+  section_name: "root_data",
+  data: {
+    name: string,
+    keyframes: readonly string[],
+    ikAnchorCubes: readonly string[],
+    keyframe_layers: readonly { layerId: number }[],
+    propertiesMode: "local" | "global",
+    time: number,
+    [k: `${typeof skeletal_export_named}_${string}`]: string
+  }
+} | {
+  section_name: `keyframe_${string}`
+  data: {
+    identifier: string, //Unchanging
+    selected: boolean,
+    startTime: number,
+    duration: number,
+    layerId: number,
+    progressionPoints: readonly ProgressionPoint[]
+
+    //Maps:
+    [k: `${typeof kfmap_position}${string}`]: readonly [number, number, number]
+    [k: `${typeof kfmap_rotation}${string}`]: readonly [number, number, number]
+    [k: `${typeof kfmap_cubegrow}${string}`]: readonly [number, number, number]
+  }
+}
+
 
 export default class DcaAnimation {
   readonly identifier = v4()
@@ -11,15 +47,27 @@ export default class DcaAnimation {
 
   private readonly onDirty = () => this.needsSaving.value = true
 
+  readonly undoRedoHandler = new UndoRedoHandler<UndoRedoDataType>(
+    (s, d) => this.onAddSection(s, d),
+    s => this.onRemoveSection(s),
+    (s, p, v) => this.onModifySection(s, p, v),
+  )
+  readonly _section = this.undoRedoHandler.createNewSection("root_data")
+
+
   readonly isSkeleton = new LO(false)
   readonly nameOverridesOnly = new LO(false)
 
   readonly name: LO<string>
-  readonly propertiesMode = new LO<"local" | "global">("global", this.onDirty)
-  readonly keyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty)
+  readonly propertiesMode = new LO<"local" | "global">("global", this.onDirty).applyToSection(this._section, "propertiesMode")
+  readonly keyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty).applyMappedToSection(this._section,
+    kfs => kfs.map(kf => kf.identifier) as readonly string[],
+    strs => strs.map(str => this.keyframes.value.find(kf => kf.identifier === str)).filter((k): k is DcaKeyframe => k !== undefined),
+    "keyframes"
+  ) as LO<readonly DcaKeyframe[]>
   readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty)
 
-  readonly time = new LO(0, this.onDirty)
+  readonly time = new LO(0, this.onDirty).applyToSection(this._section, "time")
   readonly displayTime = new LO(0, this.onDirty)
   readonly maxTime = new LO(1, this.onDirty)
   readonly playing = new LO(false, this.onDirty)
@@ -31,7 +79,7 @@ export default class DcaAnimation {
   readonly scroll = new LO(0, this.onDirty)
   readonly zoom = new LO(1, this.onDirty)
 
-  readonly ikAnchorCubes = new LO<readonly string[]>([], this.onDirty)
+  readonly ikAnchorCubes = new LO<readonly string[]>([], this.onDirty).applyToSection(this._section, "ikAnchorCubes")
 
   readonly keyframeStartOrDurationChanges = new Set<() => void>()
 
@@ -44,11 +92,11 @@ export default class DcaAnimation {
 
   readonly animatorGumball: AnimatorGumball
 
-  readonly keyframeNameOverrides = new LOMap<string, string>() //isSkeleton ? {identifier, name} : {name, identifier}
+  readonly keyframeNameOverrides = LOMap.applyToSectionStringKey(new LOMap<string, string>(), this._section, skeletal_export_named, false, "Keyframe Skeletal Override Change") //isSkeleton ? {identifier, name} : {name, identifier}
   readonly reverseKeyframeNameOverrides = new Map<string, string[]>() //name, [identifier]
 
   constructor(project: DcProject, name: string) {
-    this.name = new LO(name, this.onDirty)
+    this.name = new LO(name, this.onDirty).applyToSection(this._section, "name")
     this.project = project
     this.keyframeData = new KeyframeLoopData()
     this.animatorGumball = new AnimatorGumball(project.selectedCubeManager, project.model, project.group, project.overlayGroup)
@@ -72,6 +120,51 @@ export default class DcaAnimation {
     })
   }
 
+  onAddSection<K extends UndoRedoDataType['section_name'], S extends UndoRedoDataType & { section_name: K }>(section: K, dataIn: S['data']) {
+    if (section === "root_data") {
+      return
+    }
+    const data = dataIn as (UndoRedoDataType & { section_name: `keyframe_${string}` })['data']
+    const {
+      identifier, startTime, duration,
+      progressionPoints, layerId, selected
+    } = data
+    const keyframe = this.createKeyframe(
+      layerId, identifier, startTime, duration, selected,
+      LOMap.extractSectionDataToMap(data, kfmap_rotation, s => s),
+      LOMap.extractSectionDataToMap(data, kfmap_position, s => s),
+      LOMap.extractSectionDataToMap(data, kfmap_cubegrow, s => s),
+      progressionPoints
+    )
+    //Create new keyframe, and add it to to this.keyframes
+
+  }
+
+  onRemoveSection(section: string) {
+    if (section === "root_data") {
+      return
+    }
+    const identif = section.substring("keyframe_".length, section.length)
+    const kf = this.keyframes.value.find(kf => kf.identifier === identif)
+    if (!kf) {
+      throw new Error("Tried to remove keyframe that could not be found " + identif);
+    }
+    kf.delete()
+  }
+
+  onModifySection(section_name: string, property_name: string, value: any) {
+    if (section_name === "root_data") {
+      this._section.applyModification(property_name, value)
+    } else {
+      const identif = section_name.substring("cube_".length, section_name.length)
+      const kf = this.keyframes.value.find(kf => kf.identifier === identif)
+      if (!kf) {
+        throw new Error("Tried to modify keyframe that could not be found " + identif);
+      }
+      kf._section.applyModification(property_name, value)
+    }
+  }
+
   callKeyframePositionsChanged() {
     Array.from(this.keyframeStartOrDurationChanges).forEach(f => f())
   }
@@ -91,8 +184,14 @@ export default class DcaAnimation {
     this.keyframes.value.forEach(kf => kf.animate(skipForced ? time : (this.forceAnimationTime ?? time)))
   }
 
-  createKeyframe(layerId = 0) {
-    const kf = new DcaKeyframe(this.project, this)
+  createKeyframe(
+    layerId = 0, identifier?: string, startTime?: number, duration?: number, selected?: boolean,
+    rotation?: Map<string, readonly [number, number, number]>,
+    position?: Map<string, readonly [number, number, number]>,
+    cubeGrow?: Map<string, readonly [number, number, number]>,
+    progressionPoints?: readonly ProgressionPoint[],
+  ) {
+    const kf = new DcaKeyframe(this.project, this, identifier)
     //When startime changes, update the max time
     kf.startTime.addListener(value => {
       this.maxTime.value = Math.max(...this.keyframes.value.map(k => (k === kf ? value : k.startTime.value) + k.duration.value))
@@ -123,33 +222,62 @@ export default class DcaAnimation {
 
 export type ProgressionPoint = { required?: boolean, x: number, y: number }
 
+type KeyframeSectionType = SectionHandle<UndoRedoDataType, UndoRedoDataType & { section_name: `keyframe_${string}` }>
 export class DcaKeyframe {
-  readonly identifier: string
   layerId: number = 0
   readonly project: DcProject
   readonly animation: DcaAnimation
+  readonly _section: KeyframeSectionType
 
   private readonly onDirty = () => this.animation.needsSaving.value = true
 
-  readonly startTime = new LO(0, this.onDirty)
-  readonly duration = new LO(1, this.onDirty)
+  readonly startTime: LO<number>
+  readonly duration: LO<number>
 
-  readonly selected = new LO(false, this.onDirty)
+  readonly selected: LO<boolean>
 
-  readonly rotation = new LOMap<string, readonly [number, number, number]>(this.onDirty)
-  readonly position = new LOMap<string, readonly [number, number, number]>(this.onDirty)
-  readonly cubeGrow = new LOMap<string, readonly [number, number, number]>(this.onDirty)
+  readonly rotation: LOMap<string, readonly [number, number, number]>
+  readonly position: LOMap<string, readonly [number, number, number]>
+  readonly cubeGrow: LOMap<string, readonly [number, number, number]>
 
-  readonly progressionPoints = new LO<readonly ProgressionPoint[]>([], this.onDirty)
+  readonly progressionPoints: LO<readonly ProgressionPoint[]>
 
   skip = false
 
   _previousForcedValue: number | null = null
 
-  constructor(project: DcProject, animation: DcaAnimation) {
-    this.identifier = v4()
+  constructor(
+    project: DcProject, animation: DcaAnimation,
+    readonly identifier = v4(),
+    layerId = 0,
+    startTime = 0,
+    duration = 1,
+    selected = false,
+    progressionPoints: readonly ProgressionPoint[] = [],
+    rotation?: Map<string, readonly [number, number, number]>,
+    position?: Map<string, readonly [number, number, number]>,
+    cubeGrow?: Map<string, readonly [number, number, number]>,
+  ) {
+    this.layerId = layerId
     this.project = project
     this.animation = animation
+
+
+    //Typescript compiler throws errors when `as SectionType` isn't there, but vscode intellisense is fine with it.
+    //It complains about the other section names not being assignable, meaning that `cube_${this.identifier}` is
+    //Not extracting the correct section for some reason.
+    this._section = animation.undoRedoHandler.createNewSection(`keyframe_${this.identifier}`, "Keyframe Properties Edit") as KeyframeSectionType
+    this._section.modifyFirst("identifier", this.identifier, () => { throw new Error("Tried to modify identifier") })
+
+    this.startTime = new LO(startTime, this.onDirty).applyToSection(this._section, "startTime")
+    this.duration = new LO(duration, this.onDirty).applyToSection(this._section, "duration")
+    this.selected = new LO(selected, this.onDirty).applyToSection(this._section, "selected")
+
+    this.rotation = LOMap.applyToSectionStringKey(new LOMap(rotation, this.onDirty), this._section, kfmap_rotation, false, "Rotations Changed")
+    this.position = LOMap.applyToSectionStringKey(new LOMap(position, this.onDirty), this._section, kfmap_position, false, "Positions Changed")
+    this.cubeGrow = LOMap.applyToSectionStringKey(new LOMap(cubeGrow, this.onDirty), this._section, kfmap_cubegrow, false, "Cube Grow Changed")
+
+    this.progressionPoints = new LO(progressionPoints, this.onDirty).applyToSection(this._section, "progressionPoints")
 
 
     this.startTime.addListener(() => this.animation.callKeyframePositionsChanged())
@@ -338,6 +466,7 @@ export class DcaKeyframe {
   delete() {
     this.selected.value = false
     this.animation.keyframes.value = this.animation.keyframes.value.filter(kf => kf !== this)
+    this._section.remove("Keyframe Deleted")
   }
 
   cloneBasics(animation: DcaAnimation) {

@@ -173,11 +173,12 @@ type MapChangedKeys<K, V> = {
 
 export class LOMap<K, V> extends Map<K, V> {
   constructor(
+    defaultMap?: Map<K, V>,
     defaultCallback?: () => void,
     private listners: Map<K, Set<(newValue: V | undefined, oldValue: V | undefined) => void>> = new Map(),
     private globalListeners = new Set<(changedKeys: MapChangedKeys<K, V>[]) => void>()
   ) {
-    super()
+    super(defaultMap ?? null)
     if (defaultCallback) {
       this.globalListeners.add(defaultCallback)
     }
@@ -225,6 +226,10 @@ export class LOMap<K, V> extends Map<K, V> {
     return this
   }
 
+  setSilently(key: K, value: V) {
+    super.set(key, value)
+  }
+
   addGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.globalListeners.add(func)
   removeGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.globalListeners.delete(func)
 
@@ -246,15 +251,14 @@ export class LOMap<K, V> extends Map<K, V> {
     keyMapper: (key: K) => string, reverseKeyMapper: (str: string) => K | null,
     reason?: string | ((val: V | undefined) => string), action?: HistoryActionType | ((val: V | undefined) => HistoryActionType)
   ) {
-    const prefix = propertyPrefix + "_"
     let isModifying = false
 
     this.forEach((value, key) => {
-      const stringKey = prefix + keyMapper(key)
+      const stringKey = propertyPrefix + keyMapper(key)
       section.modifyDirectly(stringKey, value)
     })
 
-    section.addPrefixCallback(prefix, (property, value) => {
+    section.addPrefixCallback(propertyPrefix, (property, value) => {
       const key = reverseKeyMapper(property)
       if (key === null) {
         return
@@ -269,7 +273,7 @@ export class LOMap<K, V> extends Map<K, V> {
         return
       }
       changed.forEach(({ key, oldValue, value }) => {
-        const stringKey = prefix + keyMapper(key)
+        const stringKey = propertyPrefix + keyMapper(key)
         section.modify(stringKey, value, oldValue, silent, _getOrRun(value, reason), _getOrRun(value, action))
       })
     })
@@ -282,6 +286,18 @@ export class LOMap<K, V> extends Map<K, V> {
     reason?: string | ((val: V | undefined) => string), action?: HistoryActionType | ((val: V | undefined) => HistoryActionType)
   ) {
     return map.applyToSection(section, propertyPrefix, silent, s => s, s => s, reason, action)
+  }
+
+  static extractSectionDataToMap<D, SK extends keyof D & string, MK>(data: D, key: SK, keyMapper: (key: SK) => MK) {
+    const map = new Map<MK, D[SK]>()
+    Object.keys(data)
+      .filter((d): d is SK => d.startsWith(key))
+      .forEach(k => {
+        const key = keyMapper(k)
+        const value = data[k]
+        map.set(key, value)
+      })
+    return map
   }
 }
 
