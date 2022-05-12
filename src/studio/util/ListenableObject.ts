@@ -1,9 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */ // -- we want to use exhaustive deps (or do we)
-
 import { DependencyList, useCallback, useEffect, useState } from 'react';
 import { HistoryActionType, SectionHandle, UndoRedoSection } from './../undoredo/UndoRedoHandler';
 
 type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
+
+function _getOrRun<T, R>(value: T | undefined, data: R | ((val: T | undefined) => R)): R {
+  if (typeof data === "function") {
+    const fn = data as (val: T | undefined) => R
+    return fn(value)
+  }
+  return data
+}
+
 
 type Listener<T> = (
   newValue: T,
@@ -61,27 +69,19 @@ export class LO<T> {
     this.postListeners.delete(func)
   }
 
-  private _getOrRun<R>(value: T, data: R | ((val: T) => R)): R {
-    if (typeof data === "function") {
-      const fn = data as (val: T) => R
-      return fn(value)
-    }
-    return data
-  }
-
   applyToSection
     <
       S extends UndoRedoSection,
       P extends FieldsFor<S['data'], T> & string
     >
-    (section: SectionHandle<any, S>, property_name: P, silent = false, reason?: string | ((val: T) => string), action?: HistoryActionType | ((val: T) => HistoryActionType)) {
+    (section: SectionHandle<any, S>, property_name: P, silent = false, reason?: string | ((val: T | undefined) => string), action?: HistoryActionType | ((val: T | undefined) => HistoryActionType)) {
     let isModifying = false
     section.modifyFirst(property_name, this.value, value => {
       isModifying = true
       this.value = value
       isModifying = false
     })
-    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, value, oldValue, silent, this._getOrRun(value, reason), this._getOrRun(value, action)))
+    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, value, oldValue, silent, _getOrRun(value, reason), _getOrRun(value, action)))
     return this
   }
 
@@ -91,14 +91,14 @@ export class LO<T> {
       M,
       P extends FieldsFor<S['data'], M> & string
     >
-    (section: SectionHandle<any, S>, mapper: (val: T) => M, reverseMapper: (val: M) => T, property_name: P, silent = false, reason?: string | ((val: T) => string), action?: HistoryActionType | ((val: T) => HistoryActionType)) {
+    (section: SectionHandle<any, S>, mapper: (val: T) => M, reverseMapper: (val: M) => T, property_name: P, silent = false, reason?: string | ((val: T | undefined) => string), action?: HistoryActionType | ((val: T | undefined) => HistoryActionType)) {
     let isModifying = false
     section.modifyFirst(property_name, mapper(this.value), value => {
       isModifying = true
       this.value = reverseMapper(value)
       isModifying = false
     })
-    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, mapper(value), mapper(oldValue), silent, this._getOrRun(value, reason), this._getOrRun(value, action)))
+    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, mapper(value), mapper(oldValue), silent, _getOrRun(value, reason), _getOrRun(value, action)))
     return this
   }
 }
@@ -165,11 +165,17 @@ export const useListenableMap = <K, V>(obj: LOMap<K, V>, deps: DependencyList = 
   return state
 }
 
+type MapChangedKeys<K, V> = {
+  key: K
+  value: V | undefined
+  oldValue: V | undefined
+}
+
 export class LOMap<K, V> extends Map<K, V> {
   constructor(
     defaultCallback?: () => void,
     private listners: Map<K, Set<(newValue: V | undefined, oldValue: V | undefined) => void>> = new Map(),
-    private globalListeners = new Set<() => void>()
+    private globalListeners = new Set<(changedKeys: MapChangedKeys<K, V>[]) => void>()
   ) {
     super()
     if (defaultCallback) {
@@ -182,6 +188,11 @@ export class LOMap<K, V> extends Map<K, V> {
   }
 
   clear() {
+    const changedKeys: MapChangedKeys<K, V>[] = []
+    this.forEach((oldValue, key) => {
+      changedKeys.push({ key, oldValue, value: undefined })
+    })
+
     this.forEach((v, k) => {
       const get = this.listners.get(k)
       if (get !== undefined) {
@@ -189,32 +200,33 @@ export class LOMap<K, V> extends Map<K, V> {
       }
     })
     super.clear()
-    Array.from(this.globalListeners).forEach(l => l())
+    Array.from(this.globalListeners).forEach(l => l(changedKeys))
   }
 
   delete(key: K) {
-    const get = this.listners.get(key)
-    if (get !== undefined) {
-      get.forEach(l => l(undefined, this.get(key) ?? undefined))
+    const oldValues = this.get(key) ?? undefined
+    const listeners = this.listners.get(key)
+    if (listeners !== undefined) {
+      listeners.forEach(l => l(undefined, oldValues))
     }
     const ret = super.delete(key);
-    Array.from(this.globalListeners).forEach(l => l())
+    Array.from(this.globalListeners).forEach(l => l([{ key, oldValue: oldValues, value: undefined }]))
     return ret
   }
 
   set(key: K, value: V) {
-    const old = this.get(key)
+    const oldValue = this.get(key) ?? undefined
     super.set(key, value)
     const get = this.listners.get(key)
     if (get !== undefined) {
-      get.forEach(l => l(value, old))
+      get.forEach(l => l(value, oldValue))
     }
-    Array.from(this.globalListeners).forEach(l => l())
+    Array.from(this.globalListeners).forEach(l => l([{ key, oldValue, value }]))
     return this
   }
 
-  addGlobalListener = (func: () => void) => this.globalListeners.add(func)
-  removeGlobalListener = (func: () => void) => this.globalListeners.delete(func)
+  addGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.globalListeners.add(func)
+  removeGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.globalListeners.delete(func)
 
   addListener(key: K, func: (newValue: V | undefined, oldValue: V | undefined) => void) {
     const arr = this.listners.get(key) ?? new Set()
@@ -227,6 +239,49 @@ export class LOMap<K, V> extends Map<K, V> {
     if (arr !== undefined) {
       arr.delete(func)
     }
+  }
+
+  applyToSection<S extends UndoRedoSection>(
+    section: SectionHandle<any, S>, propertyPrefix: string, silent = false,
+    keyMapper: (key: K) => string, reverseKeyMapper: (str: string) => K | null,
+    reason?: string | ((val: V | undefined) => string), action?: HistoryActionType | ((val: V | undefined) => HistoryActionType)
+  ) {
+    const prefix = propertyPrefix + "_"
+    let isModifying = false
+
+    this.forEach((value, key) => {
+      const stringKey = prefix + keyMapper(key)
+      section.modifyDirectly(stringKey, value)
+    })
+
+    section.addPrefixCallback(prefix, (property, value) => {
+      const key = reverseKeyMapper(property)
+      if (key === null) {
+        return
+      }
+      isModifying = true
+      this.set(key, value)
+      isModifying = false
+    })
+
+    this.addGlobalListener(changed => {
+      if (isModifying) {
+        return
+      }
+      changed.forEach(({ key, oldValue, value }) => {
+        const stringKey = prefix + keyMapper(key)
+        section.modify(stringKey, value, oldValue, silent, _getOrRun(value, reason), _getOrRun(value, action))
+      })
+    })
+    return this
+  }
+
+  static applyToSectionStringKey<S extends UndoRedoSection, V>(
+    map: LOMap<string, V>,
+    section: SectionHandle<any, S>, propertyPrefix: string, silent = false,
+    reason?: string | ((val: V | undefined) => string), action?: HistoryActionType | ((val: V | undefined) => HistoryActionType)
+  ) {
+    return map.applyToSection(section, propertyPrefix, silent, s => s, s => s, reason, action)
   }
 }
 

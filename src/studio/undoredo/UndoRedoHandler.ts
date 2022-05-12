@@ -343,6 +343,9 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       throw new Error("Unable to find section " + section);
     }
     section.data[property_name] = value
+    if (value === undefined) {
+      delete section.data[property_name]
+    }
     const ignore = this.ignoreActions
     this.ignoreActions = true
     this.modifySectionCallback(section_name, property_name, value)
@@ -360,6 +363,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
 export class SectionHandle<S extends UndoRedoSection, T extends S> {
 
   private callbackMap = new Map<string, (val: any) => void>()
+  private prefixCallbackMap = new Map<string, (name: string, val: any) => void>()
 
   constructor(
     private readonly undoRedoHandler: UndoRedoHandler<S>,
@@ -379,6 +383,10 @@ export class SectionHandle<S extends UndoRedoSection, T extends S> {
     this.callbackMap.set(property_name, onChange)
   }
 
+  addPrefixCallback(prefix: string, callback: (name: string, val: any) => void) {
+    this.prefixCallbackMap.set(prefix, callback)
+  }
+
   modify<P extends keyof T['data'] & string>(property_name: P, value: T['data'][P], oldValue: T['data'][P], silent: boolean, reason = this.defaultReason, actionType = this.defaultAction) {
     this.undoRedoHandler.modifySection(this.section, property_name, value, oldValue, silent, reason, actionType)
   }
@@ -395,7 +403,12 @@ export class SectionHandle<S extends UndoRedoSection, T extends S> {
     const callback = this.callbackMap.get(property_name)
     if (callback) {
       callback(value)
+      return
     }
+
+    Array.from(this.prefixCallbackMap.entries())
+      .filter(([prefix]) => property_name.startsWith(prefix))
+      .forEach(([prefix, callback]) => callback(property_name.substring(prefix.length, property_name.length - 1), value))
   }
 }
 
