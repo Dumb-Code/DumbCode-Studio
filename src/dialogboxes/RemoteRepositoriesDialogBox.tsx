@@ -59,7 +59,7 @@ const RemoteRepositoriesDialogBox = () => {
 
 const RepositoryList = ({ token, tokenUsername, username, search, close }: { token: string, tokenUsername?: string, username: string, search: string, close: () => void }) => {
   const setRepo = (owner: string, repo: string, branch: string) => {
-    addRecentGithubRemoteProject({ owner, repo, token, branch })
+    addRecentGithubRemoteProject({ owner, repo, branch })
     close()
   }
   return (

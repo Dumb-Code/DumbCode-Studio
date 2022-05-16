@@ -1,10 +1,10 @@
+import { useRef } from 'react'
+import { useProjectPageContext } from '../../contexts/ProjectPageContext'
+import { useAnimationHook } from '../../studio/util/AnimationHooks'
+import ProjectAnimations from './components/ProjectAnimations'
 import ProjectModels from './components/ProjectModels'
 import ProjectRemote from './components/ProjectRemote'
-import ProjectAnimations from './components/ProjectAnimations'
 import ProjectTextures from './components/ProjectTextures'
-import { useRef } from 'react'
-import { useAnimationHook } from '../../studio/util/AnimationHooks'
-import { useProjectPageContext } from '../../contexts/ProjectPageContext'
 
 function easeInOutCubic(x: number): number {
     return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;

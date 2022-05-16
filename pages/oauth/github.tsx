@@ -12,16 +12,16 @@ const GithubAuthPage: NextPage = () => {
     const state = localStorage.getItem("github-state")
     localStorage.removeItem("github-state")
     if (state === null) {
-      // setError("No Internal State. Invalid Call.")
+      setError("No Internal State. Invalid Call.")
       return
     }
     const stateIn = urlParams.get("state")
     if (stateIn === null) {
-      // setError("No External State. Invalid Call.")
+      setError("No External State. Invalid Call.")
       return
     }
     if (stateIn !== state) {
-      // setError("Unequal State. Invalid Call. ")
+      setError("Unequal State. Invalid Call. ")
       setErrorDesc(`${stateIn}--${state}`)
       return
     }

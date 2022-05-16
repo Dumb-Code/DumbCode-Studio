@@ -7,9 +7,9 @@ const GithubAccountButton = () => {
   const [accessToken, _, removeToken] = useGithubAccessToken()
 
   return (
-    <div className="w-48 h-7 dark:bg-gray-800 bg-gray-300 rounded overflow-hidden text-white text-left mr-2 mt-1 mb-1">
+    <>
       {accessToken === null ? <LinkGithubButton /> : <SignedInToGithub accessToken={accessToken} removeToken={removeToken} />}
-    </div>
+    </>
   )
 }
 

@@ -1,4 +1,5 @@
 import { RefObject, useEffect, useMemo, useRef, useState } from "react";
+import GithubAccountButton from "../../../components/GithubAccountButton";
 import { SVGCross, SVGTrash } from "../../../components/Icons";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { useProjectPageContext } from "../../../contexts/ProjectPageContext";
@@ -9,10 +10,45 @@ import RemoteRepositoriesDialogBox from "../../../dialogboxes/RemoteRepositories
 import DcProject from "../../../studio/formats/project/DcProject";
 import { countTotalRequests, loadRemoteProject } from "../../../studio/formats/project/DcRemoteProject";
 import DcRemoteRepo, { DcRemoteRepoContentGetterCounter, loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual } from "../../../studio/formats/project/DcRemoteRepos";
+import { useGithubAccessToken } from "../../../studio/util/LocalStorageHook";
 import { removeRecentGithubRemoteProject, useRecentGithubRemoteProjects } from "../../../studio/util/RemoteProjectsManager";
 
 const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElement> }) => {
-    const { remoteSettingsOpen, setRemoteSettingsOpen, selectedRepo: loadedRepo, setSelectedRepo: loadRepo } = useProjectPageContext()
+    const { remoteSettingsOpen, setRemoteSettingsOpen } = useProjectPageContext()
+    const [githubToken] = useGithubAccessToken()
+
+    return (
+        <div className="rounded-sm dark:bg-gray-800 bg-gray-100 flex flex-col overflow-hidden">
+            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row dark:border-b border-black">
+                <p className="flex-grow mt-1 ml-1">REMOTE SETTINGS</p>
+                <MinimizeButton active={remoteSettingsOpen} toggle={() => setRemoteSettingsOpen(!remoteSettingsOpen)} />
+            </div>
+            <div ref={divHeightRef} className={"h-0 flex flex-row overflow-y-hidden"}>
+
+                {githubToken === null ?
+                    <ProjectRemoteRequiresAuthentication /> :
+                    <ProjectRemoteIsAuthenticated githubToken={githubToken} />
+                }
+            </div>
+        </div>
+    )
+}
+
+const ProjectRemoteRequiresAuthentication = () => {
+    return (
+        <div className="w-full flex flex-col items-center">
+            <div className="flex flex-col items-center">
+                <span className="text-2xl dark:text-white mt-2">Requires Authentication:</span>
+                <div className="w-full dark:text-white bg-gray-500 rounded h-10">
+                    <GithubAccountButton />
+                </div>
+            </div>
+        </div>
+    )
+}
+const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) => {
+    const { selectedRepo: loadedRepo, setSelectedRepo: loadRepo } = useProjectPageContext()
+
     const dialogBoxes = useDialogBoxes()
     const projects = useRecentGithubRemoteProjects()
     const [selectedRepo, setSelectedRepo] = useState<RemoteRepo | null>(loadedRepo?.repo ?? null)
@@ -27,48 +63,42 @@ const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElemen
     }), [loadedRepo, openedProjects])
 
     return (
-        <div className="rounded-sm dark:bg-gray-800 bg-gray-100 flex flex-col overflow-hidden">
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row dark:border-b border-black">
-                <p className="flex-grow mt-1 ml-1">REMOTE SETTINGS</p>
-                <MinimizeButton active={remoteSettingsOpen} toggle={() => setRemoteSettingsOpen(!remoteSettingsOpen)} />
-            </div>
-            <div ref={divHeightRef} className={"h-0 flex flex-row overflow-y-hidden"}>
-                <div className="w-4/12 flex flex-col">
-                    <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b dark:border-r border-black flex flex-row items-center">
-                        <p className="flex-grow my-0.5 ml-1">REMOTE REPOSITORIES</p>
-                        <button className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteRepositoriesDialogBox />)} >
-                            <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
-                        </button>
-                    </div>
-                    <div className="dark:border-r border-black flex flex-col overflow-y-scroll flex-grow studio-scrollbar">
-                        {projects.map((p, i) =>
-                            <RepositoryEntry
-                                key={i}
-                                repo={p}
-                                selected={selectedRepo !== null && remoteRepoEqual(p, selectedRepo)}
-                                // contentLoaded={selectedRemote !== null && remoteRepoEqual(selectedRemote.repo, p)}
-                                setRemote={() => {
-                                    loadDcRemoteRepo(p).then(p => loadRepo(p))
-                                    setSelectedRepo(p)
-                                }}
-                            />)}
-                    </div>
+        <>
+            <div className="w-4/12 flex flex-col">
+                <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b dark:border-r border-black flex flex-row items-center">
+                    <p className="flex-grow my-0.5 ml-1">REMOTE REPOSITORIES</p>
+                    <button className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteRepositoriesDialogBox />)} >
+                        <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
+                    </button>
                 </div>
-                <div className="flex flex-col flex-grow">
-                    <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b border-black flex flex-row items-center">
-                        <p className="flex-grow my-0.5 ml-1">REMOTE PROJECTS</p>
-                        <button className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteProjectsDialogBox />)} >
-                            <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
-                        </button>
-                    </div>
-                    <div className="flex flex-col overflow-y-scroll pr-2 h-full studio-scrollbar">
-                        {loadedRepo !== null && zippedProjects !== false &&
-                            zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} />)
-                        }
-                    </div>
+                <div className="dark:border-r border-black flex flex-col overflow-y-scroll flex-grow studio-scrollbar">
+                    {projects.map((p, i) =>
+                        <RepositoryEntry
+                            key={i}
+                            repo={p}
+                            selected={selectedRepo !== null && remoteRepoEqual(p, selectedRepo)}
+                            // contentLoaded={selectedRemote !== null && remoteRepoEqual(selectedRemote.repo, p)}
+                            setRemote={() => {
+                                loadDcRemoteRepo(githubToken, p).then(p => loadRepo(p))
+                                setSelectedRepo(p)
+                            }}
+                        />)}
                 </div>
             </div>
-        </div>
+            <div className="flex flex-col flex-grow">
+                <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b border-black flex flex-row items-center">
+                    <p className="flex-grow my-0.5 ml-1">REMOTE PROJECTS</p>
+                    <button className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteProjectsDialogBox />)} >
+                        <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
+                    </button>
+                </div>
+                <div className="flex flex-col overflow-y-scroll pr-2 h-full studio-scrollbar">
+                    {loadedRepo !== null && zippedProjects !== false &&
+                        zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} />)
+                    }
+                </div>
+            </div>
+        </>
     )
 }
 

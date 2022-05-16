@@ -36,9 +36,9 @@ const tryParseArray = (item: string | null) => {
   return []
 }
 
-export const loadDcRemoteRepo = async (repo: RemoteRepo): Promise<DcRemoteRepo> => {
+export const loadDcRemoteRepo = async (token: string, repo: RemoteRepo): Promise<DcRemoteRepo> => {
   const octokit = new Octokit({
-    auth: repo.token
+    auth: token
   })
   const getContent = (path: string) => octokit.rest.repos.getContent({
     owner: repo.owner,
@@ -109,14 +109,12 @@ const getCountedContentGetter: (total: number, repo: DcRemoteRepo) => DcRemoteRe
 export type RemoteRepo = {
   owner: string,
   repo: string,
-  token: string,
   branch: string,
 }
 
 export const remoteRepoEqual = (repo1: RemoteRepo, repo2: RemoteRepo) =>
   repo1.owner === repo2.owner &&
   repo1.repo === repo2.repo &&
-  repo1.token === repo2.token &&
   repo1.branch === repo2.branch
 
 export type RemoteProjectEntry = {

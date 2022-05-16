@@ -19,6 +19,7 @@ import Texturer from "../views/texturer/Texturer";
 if (typeof window !== undefined) {
   //@ts-expect-error
   window['FIK'] = require('@aminere/fullik')
+  //@ts-expect-error
   window['THREE'] = require('three')
 }
 
@@ -94,7 +95,9 @@ const StudioApp = () => {
               </NavBarButton>
             )}
           </div>
-          <GithubAccountButton />
+          <div className="w-48 h-7 dark:bg-gray-800 bg-gray-300 rounded overflow-hidden dark:text-white text-left mr-2 mt-1 mb-1">
+            <GithubAccountButton />
+          </div>
           <div className="dark:text-gray-200 text-black mt-1 mr-2">
             v1.0.0
           </div>
