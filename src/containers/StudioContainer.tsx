@@ -19,7 +19,6 @@ import Texturer from "../views/texturer/Texturer";
 if (typeof window !== undefined) {
   //@ts-expect-error
   window['FIK'] = require('@aminere/fullik')
-  //@ts-expect-error
   window['THREE'] = require('three')
 }
 
