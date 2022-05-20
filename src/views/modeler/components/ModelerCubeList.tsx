@@ -1,10 +1,9 @@
 import { MutableRefObject, PropsWithChildren, RefObject, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import HorizontalDivider from '../../../components/HorizontalDivider';
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
-import { useOptions } from '../../../contexts/OptionsContext';
+import { useCreatePortal } from '../../../contexts/CreatePortalContext';
 import { useStudio } from '../../../contexts/StudioContext';
 import { usePanelValue } from '../../../contexts/StudioPanelsContext';
 import { useTooltipRef } from '../../../contexts/TooltipContext';
@@ -12,8 +11,6 @@ import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
 import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
-
-const overlayDiv = document.getElementById("overlay")
 
 const emptySpan = document.createElement("span")
 
@@ -450,7 +447,7 @@ type DragData = {
     height: number
 }
 const CubeList = ({ model, selectedCubeManager }: { model: DCMModel, selectedCubeManager: SelectedCubeManager }) => {
-    const { darkMode } = useOptions()
+    const createPortal = useCreatePortal()
     const [children] = useListenableObject(model.children)
     const [dragData, setDragData] = useState<DragData | null>(null)
     const dragOverRef = useRef(false)
@@ -498,19 +495,16 @@ const CubeList = ({ model, selectedCubeManager }: { model: DCMModel, selectedCub
                 />
             )}
             <div ref={dragEndRef} />
-            {overlayDiv !== null &&
-                createPortal(
-                    <div className={"relative " + (darkMode ? "dark" : "")}>
-                        <div
-                            ref={mouseDraggedElementRef}
-                            className="absolute"
-                        >
-                            {dragData !== null && <MouseCubeEntry cube={dragData.cube} />}
-                        </div>
-                    </div>,
-                    overlayDiv
-                )
-            }
+            {createPortal(
+                <div className="relative">
+                    <div
+                        ref={mouseDraggedElementRef}
+                        className="absolute"
+                    >
+                        {dragData !== null && <MouseCubeEntry cube={dragData.cube} />}
+                    </div>
+                </div>,
+            )}
         </div>
     )
 }

@@ -1,6 +1,7 @@
 import { PropsWithChildren, useState } from "react";
 import GithubAccountButton from "../components/GithubAccountButton";
 import { SVGSettings } from "../components/Icons";
+import CreatePortalContext from "../contexts/CreatePortalContext";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
 import ProjectPageContextProvider from "../contexts/ProjectPageContext";
 import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
@@ -43,11 +44,13 @@ const StudioContainer = () => {
       <StudioPanelsContextProvider>
         <OptionsContextProvider>
           <ProjectPageContextProvider>
-            <TooltipContextProvider>
-              <DialogBoxes>
-                <StudioApp />
-              </DialogBoxes>
-            </TooltipContextProvider>
+            <CreatePortalContext>
+              <TooltipContextProvider>
+                <DialogBoxes>
+                  <StudioApp />
+                </DialogBoxes>
+              </TooltipContextProvider>
+            </CreatePortalContext>
           </ProjectPageContextProvider>
         </OptionsContextProvider>
       </StudioPanelsContextProvider>

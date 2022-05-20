@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
-import { createPortal } from "react-dom"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
+import { useCreatePortal } from "../../../contexts/CreatePortalContext"
 import { useOptions } from "../../../contexts/OptionsContext"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcProject from "../../../studio/formats/project/DcProject"
@@ -119,7 +119,6 @@ type DraggableContextType = {
 const DraggableContext = createContext<DraggableContextType | null>(null)
 
 const emptySpan = document.createElement("span")
-const overlayDiv = document.getElementById("overlay")
 
 const TextureLists = ({ project }: { project: DcProject }) => {
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
@@ -259,6 +258,7 @@ const maxWHeightClass = "max-w-[50px]"
 
 const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { texture: Texture, selected: boolean, droppedOnto: () => void }) => {
     const context = useContext(DraggableContext)
+    const createPortal = useCreatePortal()
 
     const [isBeingDragged, setIsDragging] = useState(false)
     const [isDraggedOver, setIsDraggedOver] = useState(false)
@@ -377,12 +377,13 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { 
                     {!isAnimatingToPlace && <GroupTextureSwitchEntry texture={texture} selected={selected} />}
                 </div>
             </div>
-            {overlayDiv !== null && (isBeingDragged || isAnimatingToPlace) && createPortal(
+            {(isBeingDragged || isAnimatingToPlace) && createPortal(
                 <div ref={draggingRef} className={"absolute " + (darkMode ? "dark" : "")} style={{
                     width: isAnimatingToPlace ? context?.droppedOntoLocation?.width : dragStartWidth.current
                 }}>
                     <GroupTextureSwitchEntry texture={texture} selected={selected} />
-                </div>, overlayDiv)}
+                </div>
+            )}
         </div>
     )
 }

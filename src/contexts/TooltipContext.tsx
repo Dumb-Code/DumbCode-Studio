@@ -1,8 +1,6 @@
 import { createContext, PropsWithChildren, ReactNode, useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
-import { createPortal } from "react-dom"
+import { useCreatePortal } from "./CreatePortalContext"
 import { useOptions } from "./OptionsContext"
-
-const overlayDiv = document.getElementById("overlay")
 
 type ContextType = {
   clearTooltip: () => void
@@ -35,6 +33,7 @@ function clampWithPadding(value: number, width: number, max: number) {
 
 const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null)
+  const createPortal = useCreatePortal()
 
   const { darkMode } = useOptions()
 
@@ -66,13 +65,13 @@ const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
       clearTooltip: () => setTooltipData(null)
     }}>
       {children}
-      {overlayDiv !== null && tooltipData !== null && createPortal(
+      {tooltipData !== null && createPortal(
         <div
           ref={containerRef}
           className={"absolute text-center border border-black p-0.5 " + (darkMode ? "dark text-gray-300 bg-gray-800 " : "bg-gray-300")}
         >
           {tooltipData.tooltip()}
-        </div>, overlayDiv
+        </div>
       )}
     </TooltipContext.Provider>
   )
