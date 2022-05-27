@@ -147,17 +147,7 @@ const TextureLists = ({ project }: { project: DcProject }) => {
         if (draggingTexture === null) {
             return
         }
-        const isDraggingSelected = selectedGroup.textures.value.includes(draggingTexture.identifier)
-
-        const from = isDraggingSelected ? selectedGroup.textures : selectedGroup.unselectedTextures
-        const to = isSelected ? selectedGroup.textures : selectedGroup.unselectedTextures
-
-
-        from.value = from.value.filter(f => f !== draggingTexture.identifier)
-        const newVal = [...to.value]
-        newVal.splice(texture === undefined ? to.value.length : to.value.indexOf(texture.identifier), 0, draggingTexture.identifier)
-        to.value = newVal
-
+        selectedGroup.toggleTexture(draggingTexture, isSelected, texture?.identifier)
         setNumTimesRefreshed(numTimesRefresh + 1)
     }
 

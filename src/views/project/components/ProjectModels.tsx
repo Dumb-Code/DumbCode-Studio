@@ -15,7 +15,7 @@ import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
 const SAVE_AS_CONTEXT = "studio-project-models-save-as"
-const modelExtensions = [".dcm", ".tbl", ".bbmodel"]
+const modelExtensions = [".dcm", ".tbl", ".bbmodel", ".dcproj"]
 
 const ProjectModels = () => {
     const { hasProject, addProject } = useStudio()
@@ -32,9 +32,9 @@ const ProjectModels = () => {
                         onFile={file => createProject(file).then(addProject)}
                         accept={modelExtensions}
                         multiple
-                        description="Model Files"
+                        description="Model/Project File"
                         className="icon-button"
-                        tooltip="Upload a model file"
+                        tooltip="Upload a model or project file"
                     >
                         <SVGUpload className="h-4 w-4 mr-1" />
                     </ClickableInput>

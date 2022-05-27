@@ -118,6 +118,22 @@ export class TextureGroup {
     this.isDefault = isDefault
     this.name = new LO(name)
   }
+
+  toggleTexture(texture: Texture, isInGroup: boolean, after?: string) {
+    const isDraggingSelected = this.textures.value.includes(texture.identifier)
+
+    const from = isDraggingSelected ? this.textures : this.unselectedTextures
+    const to = isInGroup ? this.textures : this.unselectedTextures
+
+    if (from === to) {
+      return
+    }
+
+    from.value = from.value.filter(f => f !== texture.identifier)
+    const newVal = [...to.value]
+    newVal.splice(after === undefined ? to.value.length : to.value.indexOf(after), 0, texture.identifier)
+    to.value = newVal
+  }
 }
 
 export class Texture {

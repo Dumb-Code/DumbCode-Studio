@@ -1,6 +1,7 @@
 import JSZip, { JSZipObject } from "jszip";
 import { imgSourceToElement } from "../../util/Utils";
 import { loadDCMModel } from "../model/OldDCMLoader";
+import { TextureGroup } from "../textures/TextureManager";
 import DcProject from "./DcProject";
 
 export const loadDcProj = async (name: string, buffer: ArrayBuffer) => {
@@ -9,6 +10,12 @@ export const loadDcProj = async (name: string, buffer: ArrayBuffer) => {
   const model = await loadDcProjModel(zip)
   const project = new DcProject(name, model)
 
+  const textures = zip.folder("textures")
+  if (textures != null) {
+    loadTextures(textures, project)
+  }
+
+  return project
 }
 
 const loadDcProjModel = async (zip: JSZip) => loadDCMModel(file(zip, 'model.dcm').async('arraybuffer'))
@@ -26,7 +33,7 @@ const loadDcProjModel = async (zip: JSZip) => loadDCMModel(file(zip, 'model.dcm'
 // *groups.json holds an array of elements of the following format:
 // {
 //   name -> a string of the group name
-//   layerIds -> a list of integers pertaining to the layer texture indexes.
+//   layerIDs -> a list of integers pertaining to the layer texture indexes.
 // }
 //
 //Now, it's:
@@ -42,24 +49,31 @@ const loadDcProjModel = async (zip: JSZip) => loadDCMModel(file(zip, 'model.dcm'
 //   texture_names: [string],
 //   groups: [{
 //     name: string,
-//     layerIds: [number]
+//     layerIDs: [number]
 //   }]
 // }
 
-type TextureData = { texture_names: string[], groups: TextureGroupData[] }
-type TextureGroupData = { name: string, layerIds: number[] }
+type TextureData = { texture_names: string[], groups: TextureGroupData[], textures_need_flipping?: true }
+type TextureGroupData = { name: string, layerIDs: number[] }
 
 const loadTextures = async (folder: JSZip, project: DcProject) => {
-  const [textures, datas] = await Promise.all([
+  const [imgs, datas] = await Promise.all([
     getTexturesArray(folder),
     getTexturesData(folder)
   ])
 
-  textures.forEach((img, index) => {
-    const texture = project.textureManager.addTexture(datas.texture_names[index], img)
-    //TODO: groups
-  })
+  const textures = imgs.map((img, index) => project.textureManager.addTexture(datas.texture_names[index], img))
 
+  //For some reason, the legacy code reverses the array list here?
+  if (datas.textures_need_flipping === true) {
+    textures.reverse()
+  }
+
+  datas.groups.forEach(groupData => {
+    const group = new TextureGroup(groupData.name, false);
+    groupData.layerIDs.forEach(id => group.toggleTexture(textures[id], true))
+    project.textureManager.addGroup(group)
+  })
 }
 
 const getTexturesArray = (folder: JSZip) => {
@@ -86,7 +100,8 @@ const getLegacyTexturesData = async (folder: JSZip): Promise<TextureData> => {
   ])
   return {
     texture_names: textureNames,
-    groups
+    groups,
+    textures_need_flipping: true,
   }
 }
 

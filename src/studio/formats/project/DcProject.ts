@@ -12,6 +12,7 @@ import TextureManager from '../textures/TextureManager';
 import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
 import { CommandRoot } from './../../command/CommandRoot';
 import { CubeSelectedHighlighter } from './../../util/CubeSelectedHighlighter';
+import { loadDcProj } from "./DcProjectLoader";
 import { RemoteRepo } from './DcRemoteRepos';
 
 export default class DcProject {
@@ -118,6 +119,9 @@ export const newProject = () => {
 
 export const createProject = async (read: ReadableFile) => {
   const file = await read.asFile()
+  if (file.name.endsWith(".dcproj")) {
+    return await loadDcProj(file.name, await file.arrayBuffer())
+  }
   const model = await loadModelUnknown(file.arrayBuffer(), file.name)
   const project = new DcProject(getProjectName(file.name), model)
 
