@@ -81,6 +81,7 @@ export class ReferenceImage {
   readonly name: LO<string>;
   readonly opacity: LO<number>
   readonly canSelect: LO<boolean>
+  readonly hidden: LO<boolean>
 
   readonly position: LO<readonly [number, number, number]>
   readonly rotation: LO<readonly [number, number, number]>
@@ -100,11 +101,12 @@ export class ReferenceImage {
   readonly overlaySelected: MeshBasicMaterial
 
   constructor(
-    handler: ReferenceImageHandler,
+    private readonly handler: ReferenceImageHandler,
     readonly img: HTMLImageElement,
     name: string,
     opacity = 100,
     canSelect = true,
+    hidden = false,
     position: readonly [number, number, number] = [0, 0, 0],
     rotation: readonly [number, number, number] = [0, 0, 0],
     scale = 1,
@@ -114,6 +116,7 @@ export class ReferenceImage {
     this.name = new LO(name)
     this.opacity = new LO(opacity)
     this.canSelect = new LO(canSelect)
+    this.hidden = new LO(hidden)
 
     this.position = new LO(position)
     this.rotation = new LO(rotation)
@@ -153,7 +156,7 @@ export class ReferenceImage {
 
     setIntersectType(this.mesh, "refimg", () => this.canSelect.value)
     this.mesh.userData['img'] = this
-    handler.group.add(this.mesh)
+    this.handler.group.add(this.mesh)
 
     this.opacity.addListener(v => {
       const val = v / 100
@@ -182,6 +185,16 @@ export class ReferenceImage {
     this.scale.addAndRunListener(scale => updateScale({ scale }))
     this.flipX.addListener(flipX => updateScale({ flipX }))
     this.flipY.addListener(flipY => updateScale({ flipY }))
+
+    this.hidden.addAndRunListener(hidden => this.mesh.visible = hidden)
+  }
+
+  delete() {
+    this.handler.group.remove(this.mesh)
+    if (this.handler.selectedImage.value === this) {
+      this.handler.selectedImage.value = null;
+    }
+    this.handler.images.value = this.handler.images.value.filter(img => img !== this)
   }
 }
 

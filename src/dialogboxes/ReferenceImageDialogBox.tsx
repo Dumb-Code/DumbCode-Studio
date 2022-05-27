@@ -1,4 +1,3 @@
-import { useState } from "react"
 import ClickableInput from "../components/ClickableInput"
 import { DblClickEditLO } from "../components/DoubleClickToEdit"
 import { SVGTrash, SVGUpload } from "../components/Icons"
@@ -38,7 +37,7 @@ const ReferenceImageDialogBox = () => {
 
 const ReferenceImageEntry = ({ image }: { image: ReferenceImage }) => {
   const [canSelect, setCanSelect] = useListenableObject(image.canSelect)
-  const [isHidden, setHidden] = useState(false)
+  const [isHidden, setHidden] = useListenableObject(image.hidden)
   return (
     <div className="flex flex-row items-center border-b border-r border-gray-300 dark:border-gray-900">
       <img className="mr-2" width={100} src={image.img.src} alt="Reference" />
@@ -62,7 +61,7 @@ const ReferenceImageEntry = ({ image }: { image: ReferenceImage }) => {
       </div>
       <div className="mr-4 mt-2 mb-2 ml-4">
         <p className="ml-1 dark:text-gray-400 text-black text-xs mb-1">DELETE</p>
-        <div className="bg-red-500 hover:bg-red-600 text-white p-1 rounded-md">
+        <div className="bg-red-500 hover:bg-red-600 text-white p-1 rounded-md" onClick={() => image.delete()}>
           <SVGTrash className="w-4 h-4 ml-2" />
         </div>
       </div>
