@@ -1,4 +1,4 @@
-import { sign } from "jsonwebtoken"
+import { AES } from "crypto-js"
 import { NextApiRequest, NextApiResponse } from "next"
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -29,7 +29,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(500).json({ error: "No Token Key" })
   }
 
-  const token = sign(String(authUser.id), process.env.TOKEN_KEY)
+  const data = {
+    github_id: authUser.id,
+    time_created: Date.now(),
+  }
+  const token = AES.encrypt(JSON.stringify(data), process.env.TOKEN_KEY).toString()
+  //AES.decrypt(ciphertext, process.env.TOKEN_KEY).toString(enc.Utf8);
 
   res.status(200).json({ github_token: accessToken, dumbcode_token: token })
 }
