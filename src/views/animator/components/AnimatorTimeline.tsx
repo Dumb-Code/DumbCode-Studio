@@ -80,7 +80,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
 
     const addLayer = (e: MouseEvent) => {
         const layerId = layers.reduce((x, y) => Math.max(x, y.layerId + 1), 0)
-        setLayers(layers.concat([{ layerId }]))
+        setLayers(layers.concat(new KeyframeLayerData(layerId)))
         e.stopPropagation()
     }
 
@@ -278,7 +278,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     return (
         <div onClick={e => e.stopPropagation()} className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
-                <AnimationLayerHandle color="bg-blue-500" type="Transform"/>
+                <AnimationLayerHandle color="bg-blue-500" type="Transform" />
                 <input type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5 pt-0.5 h-6 text-s" placeholder="layer name" />
                 <AnimationLayerButton onClick={addNewKeyframe} icon={SVGPlus} />
                 <AnimationLayerButton icon={SVGEye} />
@@ -298,9 +298,9 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     )
 }
 
-const AnimationLayerHandle = ({type, color}: {type: string, color:string}) => { 
+const AnimationLayerHandle = ({ type, color }: { type: string, color: string }) => {
     return (
-        <div className={ color + " rounded-full w-6 h-6 mr-1 p-1 text-white hover:cursor-move"}>
+        <div className={color + " rounded-full w-6 h-6 mr-1 p-1 text-white hover:cursor-move"}>
             <SvgArrows />
             { /* TODO Add icons for event and sound layer types*/}
         </div>

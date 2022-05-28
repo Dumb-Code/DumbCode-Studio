@@ -171,7 +171,7 @@ export default class DcaAnimation {
 
   static createNew(project: DcProject) {
     const animation = new DcaAnimation(project, "New Animation")
-    animation.keyframeLayers.value = animation.keyframeLayers.value.concat({ layerId: 0 })
+    animation.keyframeLayers.value = animation.keyframeLayers.value.concat(new KeyframeLayerData(0))
     return animation
   }
 
@@ -487,7 +487,11 @@ export class KeyframeLayerData {
 
   //TODO: more stuff
   constructor(
-    public readonly layerId: number
+    public readonly layerId: number,
+    public readonly name = `Layer ${layerId} `, //TODO: convert these to be LOs
+    public readonly visible = true,
+    public readonly locked = false,
+    public readonly definedMode = false
   ) { }
 }
 
