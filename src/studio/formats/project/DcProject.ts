@@ -120,7 +120,7 @@ export const newProject = () => {
 export const createProject = async (read: ReadableFile) => {
   const file = await read.asFile()
   if (file.name.endsWith(".dcproj")) {
-    return await loadDcProj(file.name, await file.arrayBuffer())
+    return await loadDcProj(getProjectName(file.name), await file.arrayBuffer())
   }
   const model = await loadModelUnknown(file.arrayBuffer(), file.name)
   const project = new DcProject(getProjectName(file.name), model)
