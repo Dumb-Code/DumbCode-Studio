@@ -1,4 +1,5 @@
 import JSZip, { JSZipObject } from "jszip";
+import { ReferenceImage } from "../../util/ReferenceImageHandler";
 import { imgSourceToElement } from "../../util/Utils";
 import { loadUnknownAnimation } from "../animations/DCALoader";
 import { loadModelUnknown } from "../model/DCMLoader";
@@ -13,15 +14,24 @@ export const loadDcProj = async (name: string, buffer: ArrayBuffer) => {
   const model = await loadDcProjModel(zip)
   const project = new DcProject(name, model)
 
+  const awaiters: Promise<void>[] = []
+
   const textures = zip.folder("textures")
   if (textures != null) {
-    loadTextures(textures, project)
+    awaiters.push(loadTextures(textures, project))
   }
 
   const animations = zip.folder("animations")
   if (animations != null) {
-    loadAnimations(animations, project)
+    awaiters.push(loadAnimations(animations, project))
   }
+
+  const refImges = zip.folder("ref_images")
+  if (refImges != null) {
+    awaiters.push(loadRefImages(refImges, project))
+  }
+
+  await Promise.all(awaiters)
 
   return project
 }
@@ -229,11 +239,86 @@ const getLegacyTexturesData = async (folder: JSZip): Promise<TextureData> => {
   }
 }
 
+
+//Load the reference image data. Old Format is:
+//ref_images        
+// ├─ data.json
+// ├─ MyFirstReferenceImage.png
+// └─ MostIncredibleSideProfile.png
+//data.json is a json list of the type `LegacyRefImgData` (See below)
+//
+//New format is:
+//ref_images        
+// ├─ data.json
+// ├─ 0.png
+// └─ 1.png
+//data.json is of the type `RefImgData` (See below)
+
+type LegacyRefImgData = {
+  name: string,
+  pos: [number, number, number],
+  rot: [number, number, number],
+  scale: number | [number, number, number],
+  opacity: number,
+  canSelect: boolean,
+
+  //New values:
+  hidden?: boolean,
+  flipX: boolean,
+  flipY: boolean,
+}[]
+
+type RefImgData = {
+  new_format: boolean, //False on old versions, true on new versions
+  entries: LegacyRefImgData
+}
+const loadRefImages = async (folder: JSZip, project: DcProject) => {
+  const data = await getRefImagesData(folder)
+  const images = await getRefImages(folder, data.new_format ? null : data.entries.map(e => e.name))
+
+  console.log(data, images)
+  project.referenceImageHandler.images.value = images.map((img, i) => {
+    const d = data.entries[i];
+
+    const scale = Array.isArray(d.scale) ? d.scale[2] : d.scale
+    const flipX = Array.isArray(d.scale) ? d.scale[0] !== d.scale[2] : d.flipX
+    const flipY = Array.isArray(d.scale) ? d.scale[1] !== d.scale[2] : d.flipY
+
+    return new ReferenceImage(
+      project.referenceImageHandler, img, d.name,
+      d.opacity, d.canSelect, d.hidden ?? false,
+      d.pos, d.rot, scale, flipX, flipY
+    )
+  })
+}
+
+const getRefImagesData = async (folder: JSZip): Promise<RefImgData> => {
+  const dataFile = await file(folder, "data.json").async('text').then(g => JSON.parse(g) as RefImgData | LegacyRefImgData)
+  if (Array.isArray(dataFile)) {
+    return {
+      new_format: false,
+      entries: dataFile
+    }
+  }
+  return {
+    ...dataFile,
+    new_format: true
+  }
+}
+
+const getRefImages = async (folder: JSZip, legacyImgNames: string[] | null): Promise<HTMLImageElement[]> => {
+  return Promise.all(getFileArrayIndex(folder, index => (legacyImgNames !== null ? legacyImgNames[index] : index) + ".png")
+    .map(file => file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))))
+  )
+}
+
 // --- Utils
 
-const getFileArray = (folder: JSZip, extension: string) => {
+const getFileArray = (folder: JSZip, extension: string) => getFileArrayIndex(folder, index => `${index}.${extension}`)
+
+const getFileArrayIndex = (folder: JSZip, applier: (index: number) => string) => {
   const files: JSZipObject[] = []
-  for (let index = 0, file: JSZipObject | null = null; (file = folder.file(`${index}.${extension}`)) !== null; index++) {
+  for (let index = 0, file: JSZipObject | null = null; (file = folder.file(applier(index))) !== null; index++) {
     files.push(file)
   }
   return files
