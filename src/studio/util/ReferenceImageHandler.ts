@@ -154,7 +154,7 @@ export class ReferenceImage {
     this.overlayMesh.visible = false
     this.mesh.add(this.overlayMesh)
 
-    setIntersectType(this.mesh, "refimg", () => this.canSelect.value)
+    setIntersectType(this.mesh, "refimg", () => this.canSelect.value && !this.hidden.value)
     this.mesh.userData['img'] = this
     this.handler.group.add(this.mesh)
 
@@ -186,7 +186,7 @@ export class ReferenceImage {
     this.flipX.addListener(flipX => updateScale({ flipX }))
     this.flipY.addListener(flipY => updateScale({ flipY }))
 
-    this.hidden.addAndRunListener(hidden => this.mesh.visible = hidden)
+    this.hidden.addAndRunListener(hidden => this.mesh.visible = !hidden)
   }
 
   delete() {
