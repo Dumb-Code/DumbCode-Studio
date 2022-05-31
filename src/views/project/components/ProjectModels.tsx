@@ -1,4 +1,3 @@
-import { ContextMenu, ContextMenuTrigger, MenuItem } from "react-contextmenu"
 import { Material } from "three"
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter'
 import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter'
@@ -10,9 +9,11 @@ import { useStudio } from "../../../contexts/StudioContext"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import DcProject, { createProject, getProjectName, newProject } from "../../../studio/formats/project/DcProject"
+import { writeDcProj } from "../../../studio/formats/project/DcProjectLoader"
 import { defaultWritable, FileSystemsAccessApi } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
+import DownloadAsButton, { DownloadOption } from "./DownloadAsButton"
 
 const SAVE_AS_CONTEXT = "studio-project-models-save-as"
 const modelExtensions = [".dcm", ".tbl", ".bbmodel", ".dcproj"]
@@ -108,6 +109,11 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
         defaultWritable.write(project.name.value + ".obj", new Blob([value]))
     }
 
+    const exportToDcProj = async () => {
+        const blob = await writeDcProj(project)
+        defaultWritable.write(project.name.value + ".dcproj", blob)
+    }
+
     const linkedToFile = isSaveable && FileSystemsAccessApi
 
     const isRemote = false
@@ -136,40 +142,17 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                             <SVGSave className="h-4 w-4 mr-1" />
                         </ButtonWithTooltip>
                     }
-                    <ContextMenuTrigger id={SAVE_AS_CONTEXT} mouseButton={0}>
-                        <ButtonWithTooltip
-                            tooltip="Download as"
-                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}>
-                            <SVGDownload className="h-6 w-4 mr-1" />
-                        </ButtonWithTooltip>
-                    </ContextMenuTrigger>
-                    <ContextMenu id={SAVE_AS_CONTEXT} className="bg-gray-900 rounded">
-                        <MenuItem>
-                            <div className="p-1 rounded-t w-full bg-gray-700">Download As</div>
-                        </MenuItem>
-                        <MenuItem
-                            onClick={e => { saveModel(); e.stopPropagation() }}
-                        >
-                            <div className="hover:bg-gray-700 cursor-pointer p-1 rounded w-48 m-1 flex flex-row">
-                                <p className="text-gray-300">{project.name.value}</p><p className="text-sky-400 font-bold">.dcm</p>
-                            </div>
-                        </MenuItem>
-                        <MenuItem
-                            onClick={e => { exportToObj(); e.stopPropagation() }}
-                        >
-                            <div className="hover:bg-gray-700 cursor-pointer p-1 rounded w-48 m-1 flex flex-row">
-                                <p className="text-gray-300">{project.name.value}</p><p className="text-sky-400 font-bold">.obj</p>
-                            </div>
-                        </MenuItem>
-                        <MenuItem
-                            onClick={e => { exportToGLTF(); e.stopPropagation() }}
-
-                        >
-                            <div className="hover:bg-gray-700 cursor-pointer p-1 rounded w-48 m-1 flex flex-row">
-                                <p className="text-gray-300">{project.name.value}</p><p className="text-sky-400 font-bold">.gltf</p>
-                            </div>
-                        </MenuItem>
-                    </ContextMenu>
+                    <DownloadAsButton
+                        Icon={SVGDownload}
+                        tooltip="Download As"
+                        iconButtonClass={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}
+                        menuId={SAVE_AS_CONTEXT}
+                        name={project.name.value}
+                    >
+                        <DownloadOption exportFunction={saveModel} extension="dcm" />
+                        <DownloadOption exportFunction={exportToObj} extension="obj" />
+                        <DownloadOption exportFunction={exportToGLTF} extension="gltf" />
+                    </DownloadAsButton>
                     <ButtonWithTooltip
                         onClick={e => { removeProject(); e.stopPropagation() }}
                         className={iconButtonClass + " rounded pr-2 pl-2 py-0.5 my-0.5 group"}
@@ -179,7 +162,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                     </ButtonWithTooltip>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 
