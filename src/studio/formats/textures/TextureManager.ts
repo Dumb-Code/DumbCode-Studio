@@ -15,8 +15,8 @@ export default class TextureManager {
   readonly selectedGroup: LO<TextureGroup>
   readonly groups: LO<readonly TextureGroup[]>
 
-  activeTexture = new LO<Texture | null>(null)
-  textures = new LO<readonly Texture[]>([])
+  readonly activeTexture = new LO<Texture | null>(null)
+  readonly textures = new LO<readonly Texture[]>([])
 
   constructor(project: DcProject) {
     this.project = project

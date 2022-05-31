@@ -152,6 +152,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         <DownloadOption exportFunction={saveModel} extension="dcm" />
                         <DownloadOption exportFunction={exportToObj} extension="obj" />
                         <DownloadOption exportFunction={exportToGLTF} extension="gltf" />
+                        <DownloadOption exportFunction={exportToDcProj} extension="dcproj" />
                     </DownloadAsButton>
                     <ButtonWithTooltip
                         onClick={e => { removeProject(); e.stopPropagation() }}
