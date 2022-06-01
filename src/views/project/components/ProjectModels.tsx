@@ -8,6 +8,7 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
+import { exportAsBBModel } from "../../../studio/formats/project/BBModelExporter"
 import DcProject, { createProject, getProjectName, newProject } from "../../../studio/formats/project/DcProject"
 import { writeDcProj } from "../../../studio/formats/project/DcProjectLoader"
 import { defaultWritable, FileSystemsAccessApi } from "../../../studio/util/FileTypes"
@@ -114,6 +115,11 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
         defaultWritable.write(project.name.value + ".dcproj", blob)
     }
 
+    const exportToBBModel = async () => {
+        const blob = exportAsBBModel(project)
+        defaultWritable.write(project.name.value + ".bbmodel", blob)
+    }
+
     const linkedToFile = isSaveable && FileSystemsAccessApi
 
     const isRemote = false
@@ -153,6 +159,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         <DownloadOption exportFunction={exportToObj} extension="obj" />
                         <DownloadOption exportFunction={exportToGLTF} extension="gltf" />
                         <DownloadOption exportFunction={exportToDcProj} extension="dcproj" />
+                        <DownloadOption exportFunction={exportToBBModel} extension="bbmodel" />
                     </DownloadAsButton>
                     <ButtonWithTooltip
                         onClick={e => { removeProject(); e.stopPropagation() }}
