@@ -382,7 +382,7 @@ export class DcaKeyframe {
       let point = progressionPoints[i]
       let next = progressionPoints[i + 1]
 
-      if (basePercentage > point.x && basePercentage < next.x) {
+      if (basePercentage >= point.x && basePercentage < next.x) {
         let interpolateBetweenAmount = (basePercentage - point.x) / (next.x - point.x)
         return 1 - (point.y + (next.y - point.y) * interpolateBetweenAmount)
       }
