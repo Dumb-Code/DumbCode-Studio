@@ -4,6 +4,7 @@ import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import HorizontalDivider from '../../../components/HorizontalDivider';
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { useCreatePortal } from '../../../contexts/CreatePortalContext';
+import { useKeyCombos } from '../../../contexts/OptionsContext';
 import { useStudio } from '../../../contexts/StudioContext';
 import { usePanelValue } from '../../../contexts/StudioPanelsContext';
 import { useTooltipRef } from '../../../contexts/TooltipContext';
@@ -84,14 +85,15 @@ const ModelerCubeList = () => {
         })
     }
 
+    const { modeler_delete_and_children: deleteAll, modeler_delete: deleteOnlyCube } = useKeyCombos()
+
     useEffect(() => {
         const keydownListener = (e: KeyboardEvent) => {
-            if (e.key === "Delete") {
-                // if (e.ctrlKey) {
-                // deleteCubesAndChildren()
-                // } else {
+            if (deleteAll.matches(e)) {
+                deleteCubesAndChildren()
+            }
+            if (deleteOnlyCube.matches(e)) {
                 deleteCubesKeepChildren()
-                // }
             }
         }
         document.addEventListener('keydown', keydownListener)

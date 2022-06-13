@@ -29,9 +29,9 @@ export const useOptions = () => {
   return context
 }
 
-export const useKeyCombos = (...combos: KeyComboKey[]) => {
+export const useKeyCombos = () => {
   const options = useOptions()
-  return combos.map(key => options.keyCombos[key])
+  return options.keyCombos
 }
 
 export const OptionsContextProvider = ({ children }: { children?: ReactNode }) => {

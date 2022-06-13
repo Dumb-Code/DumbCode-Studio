@@ -15,7 +15,7 @@ const Modeler = () => {
     const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
 
-    const [undoKeybind, redoKeybind] = useKeyCombos("common_undo", "common_redo")
+    const { common_undo: undoKey, common_redo: redoKey } = useKeyCombos()
 
     useObjectUnderMouse()
     useModelerGumball()
@@ -33,12 +33,12 @@ const Modeler = () => {
 
     useEffect(() => {
         const listener = (e: KeyboardEvent) => {
-            if (undoKeybind.matches(e)) {
+            if (undoKey.matches(e)) {
                 project.model.undoRedoHandler.undo()
                 e.preventDefault()
                 e.stopPropagation()
             }
-            if (redoKeybind.matches(e)) {
+            if (redoKey.matches(e)) {
                 project.model.undoRedoHandler.redo()
                 e.preventDefault()
                 e.stopPropagation()
