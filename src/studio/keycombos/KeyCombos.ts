@@ -15,10 +15,10 @@ const keyCombos = {
   camera_rotation_rotate_view_right: new KeyCombo('Rotate View Right', "Rotates the camera slightly Right", 'Numpad6', false),
   camera_rotation_rotate_view_up: new KeyCombo('Rotate View Up', "Rotates the camera slightly Up", 'Numpad8', false),
   camera_rotation_rotate_view_down: new KeyCombo('Rotate View Down', "Rotates the camera slightly Down", 'Numpad2', false),
-  modeler_delete: new KeyCombo('Delete', "Deletes the selected object.", 'Delete', false),
-  modeler_delete_and_children: new KeyCombo('Delete + Children', "Deletes the selected object and it's children.", 'Delete'),
-  animator_delete: new KeyCombo('Delete', "Deletes the selected keyframe.", 'Delete', false),
-  animator_individually_select: new KeyCombo('Individually Select', "Invividually select the keyframe", null), //Only Ctrl
+  modeler_delete: new KeyCombo('Delete', "Deletes the selected object.", 'Delete', false).withScope("modeler"),
+  modeler_delete_and_children: new KeyCombo('Delete + Children', "Deletes the selected object and it's children.", 'Delete').withScope("modeler"),
+  animator_delete: new KeyCombo('Delete', "Deletes the selected keyframe.", 'Delete', false).withScope("animator"),
+  animator_individually_select: new KeyCombo('Individually Select', "Invividually select the keyframe", null).withScope("animator"), //Only Ctrl
 }
 
 export const loadOrCreateKeyCombos = (savedCombos: SavedKeyComboMap | undefined): KeyComboMap => {
@@ -30,7 +30,17 @@ export const loadOrCreateKeyCombos = (savedCombos: SavedKeyComboMap | undefined)
       }
     })
   }
+  updateClashes(keyCombos)
   return keyCombos
+}
+
+export const updateClashes = (map: KeyComboMap) => {
+  const allCombos = Object.keys(map).map(k => map[k as KeyComboKey])
+  allCombos.forEach(combo => updateToAllClashes(combo, allCombos))
+}
+
+const updateToAllClashes = (keyCombo: KeyCombo, combokeys: KeyCombo[]) => {
+  keyCombo.clashedWith.value = combokeys.filter(other => keyCombo.sharesScope(other) && (keyCombo.equals(other) || other.equals(keyCombo)))
 }
 
 export type KeyComboMap = typeof keyCombos

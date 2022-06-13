@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from "react";
 import { Color } from "three";
-import { KeyComboKey, KeyComboMap, loadOrCreateKeyCombos, SavedKeyComboMap } from "../studio/keycombos/KeyCombos";
+import { KeyComboKey, KeyComboMap, loadOrCreateKeyCombos, SavedKeyComboMap, updateClashes } from "../studio/keycombos/KeyCombos";
 import { useStudio } from "./StudioContext";
 
 const Context = createContext<OptionsContext | null>(null)
@@ -12,8 +12,7 @@ export type OptionsContext = {
   setCompactMode: (val: boolean) => void
 
   keyCombos: KeyComboMap,
-
-  saveOptions: () => void,
+  keyCombosChanged: () => void, //TODO: remove this anti-pattern
 }
 
 type SavedOptions = {
@@ -73,6 +72,11 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
     }
   }
 
+  const keyCombosChanged = () => {
+    updateClashes(keyCombos)
+    saveOptions()
+  }
+
   if (darkMode) {
     setGridColor(0x121212, 0x1c1c1c, 0x292929)
   } else {
@@ -80,7 +84,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
   }
 
   return (
-    <Context.Provider value={{ darkMode, setDarkMode, compactMode, setCompactMode, keyCombos, saveOptions }}>
+    <Context.Provider value={{ darkMode, setDarkMode: wrapThenSave(setDarkMode), compactMode, setCompactMode: wrapThenSave(setCompactMode), keyCombos, keyCombosChanged }}>
       {children}
     </Context.Provider>
   )

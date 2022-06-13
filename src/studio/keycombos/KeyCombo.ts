@@ -1,6 +1,6 @@
 import { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { LO } from "../util/ListenableObject";
-import { KeyComboKey, SavedKeyCombo } from './KeyCombos';
+import { SavedKeyCombo } from './KeyCombos';
 
 const forbiddenKeys = ["ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight", "ContextMenu"]
 
@@ -13,12 +13,14 @@ export default class KeyCombo {
 
   public readonly displayName: LO<string>
 
-  public readonly clashedWith = new LO<KeyComboKey[]>([])
+  public readonly clashedWith = new LO<readonly KeyCombo[]>([])
 
   private readonly defaultCode: string | null
   private readonly defaultCtrl: boolean
   private readonly defaultShift: boolean
   private readonly deafultAlt: boolean
+
+  public localScope: "global" | "modeler" | "mapper" | "texturer" | "animator" = "global"
 
   constructor(
     public readonly name: string,
@@ -41,21 +43,12 @@ export default class KeyCombo {
     this.displayName = new LO(this.computeDisplayValue())
   }
 
-  withCtrl(ctrl = true) {
-    this.ctrl.value = ctrl
-    return this
-  }
-
-  withShift(shift = true) {
-    this.shift.value = shift
+  withScope(scope: typeof this['localScope']) {
+    this.localScope = scope
     return this
   }
 
 
-  withAlt(alt = true) {
-    this.alt.value = alt
-    return this
-  }
 
   private computeDisplayValue() {
     const combos: string[] = []
@@ -114,16 +107,40 @@ export default class KeyCombo {
     if (this.code.value !== null && this.code.value !== event.code) {
       return false
     }
-    if (this.ctrl.value && !event.ctrlKey) {
+    if (this.ctrl.value !== event.ctrlKey) {
       return false
     }
-    if (this.shift.value && !event.shiftKey) {
+    if (this.shift.value !== event.shiftKey) {
       return false
     }
-    if (this.alt.value && !event.altKey) {
+    if (this.alt.value !== event.altKey) {
       return false
     }
 
+    return true
+  }
+
+  sharesScope(other: KeyCombo) {
+    return this.localScope === "global" || other.localScope === "global" || this.localScope === other.localScope
+  }
+
+  //Whether this keycombo "contains" the other keycombo
+  equals(other: KeyCombo) {
+    if (other === this) {
+      return false
+    }
+    if (other.code.value !== this.code.value) {
+      return false
+    }
+    if (other.ctrl.value !== this.ctrl.value) {
+      return false
+    }
+    if (other.shift.value !== this.shift.value) {
+      return false
+    }
+    if (other.alt.value !== this.alt.value) {
+      return false
+    }
     return true
   }
 

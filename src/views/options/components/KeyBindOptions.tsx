@@ -7,13 +7,14 @@ import { KeyComboKey } from "../../../studio/keycombos/KeyCombos"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
 const KeyBindOptions = () => {
-    const { keyCombos } = useOptions()
+    const { keyCombos, keyCombosChanged } = useOptions()
 
     const resetAll = useCallback(() => {
         Object.keys(keyCombos).forEach(k => {
             const key = k as KeyComboKey
             keyCombos[key].reset()
         })
+        keyCombosChanged()
     }, [])
 
     return (
@@ -70,9 +71,11 @@ const KeyBindSection = ({ name, desc, keybinds }: { name: string, desc: string, 
 }
 
 const KeyBindOption = ({ keyCombo }: { keyCombo: KeyCombo }) => {
-    const { saveOptions } = useOptions()
+    const { keyCombosChanged } = useOptions()
     const [listening, setIsListening] = useState(false)
     const [displayName] = useListenableObject(keyCombo.displayName)
+
+    const [clashes] = useListenableObject(keyCombo.clashedWith)
 
     return (
         <div className="flex flex-row ">
@@ -82,22 +85,26 @@ const KeyBindOption = ({ keyCombo }: { keyCombo: KeyCombo }) => {
                     <InfoBubble className="w-4 h-4 mt-1 ml-2" />
                 </ButtonWithTooltip>
             </div>
-            <button
-                className={(listening ? "dark:bg-purple-800 bg-purple-300 dark:hover:bg-purple-600 hover:bg-purple-200" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-600 hover:bg-gray-200") + " w-40 m-0.5 rounded-r p-1 text-black dark:text-gray-400 pl-2 "}
+            <ButtonWithTooltip
+                tooltip={clashes.length === 0 ? null : `Clashes with ${clashes.map(c => c.name).join(", ")}`}
+                className={(listening ? "dark:bg-purple-800 bg-purple-300 dark:hover:bg-purple-600 hover:bg-purple-200" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-600 hover:bg-gray-200") + (clashes.length !== 0 ? "text-red-700 dark:text-red-400" : "text-black dark:text-gray-400") + " w-40 m-0.5 rounded-r p-1  pl-2 "}
                 onClick={() => setIsListening(true)}
                 onBlur={() => setIsListening(false)}
                 onKeyDown={e => {
                     keyCombo.fromEvent(e)
-                    saveOptions()
+                    keyCombosChanged()
                     e.preventDefault()
                     e.stopPropagation()
                 }}
             >
                 {displayName}
-            </button>
+            </ButtonWithTooltip>
             {keyCombo.hasChangedFromDefault() &&
                 <>
-                    <ButtonWithTooltip className="w-5 -mt-1" tooltip="Reset" onClick={() => keyCombo.reset()}>
+                    <ButtonWithTooltip className="w-5 -mt-1" tooltip="Reset" onClick={() => {
+                        keyCombo.reset()
+                        keyCombosChanged()
+                    }}>
                         <SVGCross className="text-red-500 hover:text-red-200" />
                     </ButtonWithTooltip>
                 </>
