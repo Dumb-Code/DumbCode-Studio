@@ -23,12 +23,12 @@ const Options = () => {
     const [optionsTab, setOptionsTab] = useState(OptionsTabs[0])
 
     return (
-        <div className="flex flex-row h-full overflow-y-hidden">
+        <div className="flex flex-row h-full">
             <div className="flex flex-col w-1/4 dark:bg-gray-800 bg-gray-200 pt-8 items-end">
                 <p className="dark:text-black text-gray-600 font-semibold text-xs w-44 pl-2 mb-1">APP SETTINGS</p>
                 {OptionsTabs.map(tab => <OptionsPageButton key={tab.name} tab={tab} selected={tab === optionsTab} setTab={() => setOptionsTab(tab)} />)}
             </div>
-            <div className="w-3/4 h-full dark:bg-gray-700 bg-gray-100 p-6">
+            <div className="w-3/4 h-full overflow-auto studio-scrollbar dark:bg-gray-700 bg-gray-100 p-6">
                 {optionsTab.component()}
             </div>
         </div>

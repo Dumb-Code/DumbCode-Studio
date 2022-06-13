@@ -1,5 +1,6 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from "react";
 import { Color } from "three";
+import { KeyComboKey, KeyComboMap, loadOrCreateKeyCombos, SavedKeyComboMap } from "../studio/keycombos/KeyCombos";
 import { useStudio } from "./StudioContext";
 
 const Context = createContext<OptionsContext | null>(null)
@@ -9,6 +10,16 @@ export type OptionsContext = {
 
   compactMode: boolean
   setCompactMode: (val: boolean) => void
+
+  keyCombos: KeyComboMap,
+
+  saveOptions: () => void,
+}
+
+type SavedOptions = {
+  darkMode: boolean,
+  compactMode: boolean,
+  keyCombos: SavedKeyComboMap
 }
 
 export const useOptions = () => {
@@ -19,12 +30,48 @@ export const useOptions = () => {
   return context
 }
 
+export const useKeyCombos = (...combos: KeyComboKey[]) => {
+  const options = useOptions()
+  return combos.map(key => options.keyCombos[key])
+}
+
 export const OptionsContextProvider = ({ children }: { children?: ReactNode }) => {
   const { scene, setGridColor } = useStudio()
-  const [darkMode, setDarkMode] = useState(true)
-  const [compactMode, setCompactMode] = useState(false)
+
+  const loadedOptions: SavedOptions | null = useMemo(() => {
+    const json = localStorage.getItem("studio_options")
+    if (json === null) {
+      return null
+    }
+    return JSON.parse(json) as SavedOptions
+  }, [])
+
+  const [darkMode, setDarkMode] = useState(loadedOptions?.darkMode ?? true)
+  const [compactMode, setCompactMode] = useState(loadedOptions?.compactMode ?? false)
+  const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [])
+
+  const saveOptions = useCallback(() => {
+    const data: SavedOptions = {
+      darkMode: darkMode,
+      compactMode: compactMode,
+      keyCombos: Object.keys(keyCombos).reduce((obj, k) => {
+        const key = k as KeyComboKey
+        obj[key] = keyCombos[key].writeSaved()
+        return obj
+      }, {} as SavedKeyComboMap)
+    }
+    localStorage.setItem("studio_options", JSON.stringify(data))
+  }, [])
+
 
   scene.background = new Color(darkMode ? 0x363636 : 0xF3F4F6)
+
+  const wrapThenSave = (fn: (val: boolean) => void) => {
+    return (val: boolean) => {
+      fn(val)
+      saveOptions()
+    }
+  }
 
   if (darkMode) {
     setGridColor(0x121212, 0x1c1c1c, 0x292929)
@@ -33,7 +80,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
   }
 
   return (
-    <Context.Provider value={{ darkMode, setDarkMode, compactMode, setCompactMode }}>
+    <Context.Provider value={{ darkMode, setDarkMode, compactMode, setCompactMode, keyCombos, saveOptions }}>
       {children}
     </Context.Provider>
   )

@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
+import { useKeyCombos } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import ModelerCommandInput from "./components/ModelerCommandInput"
@@ -13,6 +14,8 @@ import { useModelerGumball } from "./logic/ModelerGumball"
 const Modeler = () => {
     const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
+
+    const [undoKeybind, redoKeybind] = useKeyCombos("common_undo", "common_redo")
 
     useObjectUnderMouse()
     useModelerGumball()
@@ -30,13 +33,12 @@ const Modeler = () => {
 
     useEffect(() => {
         const listener = (e: KeyboardEvent) => {
-            //TODO: convert to keybinds
-            if (e.ctrlKey && e.key === "z") {
+            if (undoKeybind.matches(e)) {
                 project.model.undoRedoHandler.undo()
                 e.preventDefault()
                 e.stopPropagation()
             }
-            if ((e.ctrlKey && e.shiftKey && e.key === "z") || (e.ctrlKey && e.key === "y")) {
+            if (redoKeybind.matches(e)) {
                 project.model.undoRedoHandler.redo()
                 e.preventDefault()
                 e.stopPropagation()
