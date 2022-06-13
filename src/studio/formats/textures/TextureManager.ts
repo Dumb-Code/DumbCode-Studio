@@ -9,7 +9,6 @@ export default class TextureManager {
   readonly project: DcProject
 
   readonly canvas: HTMLCanvasElement
-  readonly canvasContext: CanvasRenderingContext2D
 
   readonly defaultGroup: TextureGroup
   readonly selectedGroup: LO<TextureGroup>
@@ -30,12 +29,6 @@ export default class TextureManager {
     this.textures.addListener(() => this.refresh())
 
     this.canvas = document.createElement("canvas")
-    const ctx = this.canvas.getContext("2d")
-    if (ctx === null) {
-      throw new Error("Unable to get canvas context")
-    }
-    this.canvasContext = ctx
-    this.canvasContext.imageSmoothingEnabled = false
   }
 
   addTexture(name?: string, element?: HTMLImageElement) {
@@ -68,21 +61,7 @@ export default class TextureManager {
       .map(t => this.findTexture(t))
       .filter(t => !t.hidden.value)
 
-
-    //Get the width/height to render. Gets the width/height needed for all textures to render fully
-    const width = this.canvas.width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
-    const height = this.canvas.height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
-    this.canvasContext.imageSmoothingEnabled = false
-
-    //Draw white if no textures
-    if (this.textures.value.length === 0) {
-      this.canvasContext.fillStyle = `rgba(255, 255, 255, 1)`
-      this.canvasContext.fillRect(0, 0, width, height)
-    } else {
-      this.canvasContext.clearRect(0, 0, width, height)
-    }
-
-    textures.reverse().forEach(t => this.canvasContext.drawImage(t.canvas, 0, 0, width, height))
+    TextureManager.writeToCanvas(textures, this.canvas)
 
     const tex = new ThreeTexture(this.canvas)
     tex.needsUpdate = true
@@ -93,10 +72,32 @@ export default class TextureManager {
     this.project.setTexture(tex)
   }
 
+  static writeToCanvas(textures: Texture[], canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext("2d")
+    if (ctx === null) {
+      throw new Error("Unable to get canvas context")
+    }
+
+    //Get the width/height to render. Gets the width/height needed for all textures to render fully
+    const width = canvas.width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
+    const height = canvas.height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
+    ctx.imageSmoothingEnabled = false
+
+    //Draw white if no textures
+    if (textures.length === 0) {
+      ctx.fillStyle = `rgba(255, 255, 255, 1)`
+      ctx.fillRect(0, 0, width, height)
+    } else {
+      ctx.clearRect(0, 0, width, height)
+    }
+
+    textures.reverse().forEach(t => ctx.drawImage(t.canvas, 0, 0, width, height))
+  }
+
   /**
     * Greatest common dividor
     */
-  _gcd(a: number, b: number): number {
+  static _gcd(a: number, b: number): number {
     if (!b) {
       return Math.abs(a);
     }
