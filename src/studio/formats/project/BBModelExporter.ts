@@ -242,8 +242,9 @@ const createAllTimePositions = (aniamtion: DcaAnimation) => {
   aniamtion.keyframes.value.forEach(kf => {
     const positionCubes = Array.from(kf.position.keys())
     const rotationCubes = Array.from(kf.rotation.keys())
-    set.add(createTimePosition(kf.startTime.value, aniamtion, positionCubes, rotationCubes))
-    set.add(createTimePosition(kf.startTime.value + kf.duration.value, aniamtion, positionCubes, rotationCubes))
+    kf.progressionPoints.value.forEach(pp => {
+      set.add(createTimePosition(kf.startTime.value + pp.x * kf.duration.value, aniamtion, positionCubes, rotationCubes))
+    })
   })
 
 
