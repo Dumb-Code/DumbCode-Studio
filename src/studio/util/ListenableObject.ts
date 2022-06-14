@@ -15,6 +15,11 @@ function _getOrRun<T, R>(value: T | undefined, data: R | ((val: T | undefined) =
 
 type Listener<T> = (
   newValue: T,
+  oldValue: T
+) => void
+
+type ModifiableListener<T> = (
+  newValue: T,
   oldValue: T,
   naughtyModifyValue: (t: T) => void
 ) => void
@@ -24,6 +29,7 @@ export class LO<T> {
   constructor(
     private _value: T,
     defaultCallback?: Listener<T>,
+    private preModifyListener: Set<ModifiableListener<T>> = new Set(),
     private listners: Set<Listener<T>> = new Set(),
     private postListeners: Set<Listener<T>> = new Set(),
   ) {
@@ -39,15 +45,21 @@ export class LO<T> {
 
   set value(value: T) {
     let newValue = value
-    this.internalValue = value
+    Array.from(this.preModifyListener).forEach(l => l(value, this._value, val => newValue = val))
+    this.internalValue = newValue
     if (value !== this._value) {
       //We need to clone the listeners, as they can be changed while being called
       //Otherwise more than one listner will mean a infinate virtually untraceable loop
-      Array.from(this.listners).forEach(l => l(value, this._value, val => newValue = val))
+      Array.from(this.listners).forEach(l => l(value, this._value))
     }
     this._value = newValue
-    Array.from(this.postListeners).forEach(l => l(value, this._value, val => this.value = val))
+    Array.from(this.postListeners).forEach(l => l(value, this._value))
   }
+
+  addPreModifyListener = (func: ModifiableListener<T>) => {
+    this.preModifyListener.add(func)
+  }
+
 
   addListener = (func: Listener<T>) => {
     this.listners.add(func)
@@ -58,7 +70,7 @@ export class LO<T> {
   }
 
   addAndRunListener = (func: Listener<T>) => {
-    func(this.value, this.value, () => new Error("Invalid setter called on passive function call"))
+    func(this.value, this.value)
     this.listners.add(func)
   }
 

@@ -1,4 +1,5 @@
 import { v4 } from 'uuid';
+import { drawProgressionPointGraph, GraphType } from '../../../views/animator/logic/ProgressionPointGraph';
 import UndoRedoHandler from '../../undoredo/UndoRedoHandler';
 import { getUndefinedWritable } from '../../util/FileTypes';
 import DcProject from '../project/DcProject';
@@ -236,6 +237,12 @@ export class DcaKeyframe {
 
   readonly selected: LO<boolean>
 
+  isSettingGraph = false
+  readonly graphType = new LO<GraphType>("None")
+  readonly isGraphIn = new LO(true)
+  readonly isGraphOut = new LO(true)
+  readonly graphResolution = new LO(10)
+
   readonly rotation: LOMap<string, readonly [number, number, number]>
   readonly position: LOMap<string, readonly [number, number, number]>
   readonly cubeGrow: LOMap<string, readonly [number, number, number]>
@@ -253,7 +260,7 @@ export class DcaKeyframe {
     startTime = 0,
     duration = 1,
     selected = false,
-    progressionPoints: readonly ProgressionPoint[] = [],
+    progressionPoints: readonly ProgressionPoint[] = [{ x: 0, y: 1, required: true }, { x: 1, y: 0, required: true }],
     rotation?: Map<string, readonly [number, number, number]>,
     position?: Map<string, readonly [number, number, number]>,
     cubeGrow?: Map<string, readonly [number, number, number]>,
@@ -279,11 +286,25 @@ export class DcaKeyframe {
 
     this.progressionPoints = new LO(progressionPoints, this.onDirty).applyToSection(this._section, "progressionPoints")
 
+    this.progressionPoints.addListener(pp => {
+      if (!this.isSettingGraph) {
+        this.graphType.value = pp.length === 2 ? "None" : "Custom"
+      }
+    })
+
+    this.graphType.addListener(type => {
+      if (type !== "None" && type !== "Custom")
+        this.createProgressionPointsGraph({ type })
+    })
+    this.isGraphIn.addListener(isIn => this.createProgressionPointsGraph({ isIn }))
+    this.isGraphOut.addListener(isOut => this.createProgressionPointsGraph({ isOut }))
+    this.graphResolution.addListener(resolution => this.createProgressionPointsGraph({ resolution }))
+
 
     this.startTime.addListener(() => this.animation.callKeyframePositionsChanged())
     this.duration.addListener(() => this.animation.callKeyframePositionsChanged())
 
-    this.progressionPoints.addListener((val, _, naughtyModifyValue) => {
+    this.progressionPoints.addPreModifyListener((val, _, naughtyModifyValue) => {
       naughtyModifyValue(Array.from(val).sort((a, b) => a.x - b.x))
     })
 
@@ -297,7 +318,13 @@ export class DcaKeyframe {
         list.value = list.value.filter(val => val !== this)
       }
     })
+  }
 
+  createProgressionPointsGraph({ type = this.graphType.value, resolution = this.graphResolution.value, isIn = this.isGraphIn.value, isOut = this.isGraphOut.value }) {
+    const points = drawProgressionPointGraph(type, resolution, isIn, isOut)
+    this.isSettingGraph = true
+    this.progressionPoints.value = points
+    this.isSettingGraph = false
   }
 
   _oneSelectedCube() {

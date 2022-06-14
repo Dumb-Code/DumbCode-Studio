@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Slider from 'react-input-slider';
 import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
@@ -15,6 +15,7 @@ import { DCMCube } from "../../../studio/formats/model/DcmModel";
 import { LO, LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import AnimatorAutoGravity from "./AnimatorAutoGravity";
 import AnimatorSkeletalExport from "./AnimatorSkeletalExport";
+import { ProgressionPointsCanvas } from "./ProgressionPointsCanvas";
 
 const AnimatorProperties = () => {
 
@@ -184,39 +185,53 @@ const AnimatorIKProperties = ({ animation }: { animation: DcaAnimation | null })
     )
 }
 
+
 const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation | null }) => {
+    const [selectedKeyframes] = useListenableObjectNullable(animation?.selectedKeyframes)
+    const singleSelected = useMemo(() => selectedKeyframes === undefined || selectedKeyframes.length !== 1 ? null : selectedKeyframes[0], [selectedKeyframes])
+
+    const [selectedGraphType, setSelectedGraphType] = useListenableObjectNullable(singleSelected?.graphType)
+    const [isIn, setIsIn] = useListenableObjectNullable(singleSelected?.isGraphIn)
+    const [isOut, setIsOut] = useListenableObjectNullable(singleSelected?.isGraphOut)
+    const [resolution, setResolution] = useListenableObjectNullable(singleSelected?.graphResolution)
+
     return (
         <CollapsableSidebarPannel title="PROGRESSION POINTS" heightClassname="h-96" panelName="animator_pp">
             <div className="flex flex-col h-full p-2">
-                <div className="flex-grow dark:bg-gray-900 bg-gray-300 rounded w-full dark:text-gray-400 text-gray-800 pl-4">
-                    graph goes here
+                <div className="flex-grow rounded overflow-hidden w-full">
+                    <ProgressionPointsCanvas keyframe={singleSelected} />
                 </div>
-                <div className="flex flex-row mt-2">
-                    <Checkbox value={true} extraText="START" setValue={e => console.log("set value" + e)} />
-                    <Checkbox value={true} extraText="END" setValue={e => console.log("set value" + e)} />
-                    <Dropup title="Default Graph" header="SELECT ONE" right={true} className="h-8 pt-2" >
-                        <DropupItem name="Sin" onSelect={() => console.log("swap graph")} />
-                        <DropupItem name="Quadratic" onSelect={() => console.log("swap graph")} />
-                        <DropupItem name="Cubic" onSelect={() => console.log("swap graph")} />
-                        <DropupItem name="Quartic" onSelect={() => console.log("swap graph")} />
-                        <DropupItem name="Quintic" onSelect={() => console.log("swap graph")} />
-                        <DropupItem name="Exponential" onSelect={() => console.log("swap graph")} />
-                        <DropupItem name="Circular" onSelect={() => console.log("swap graph")} />
-                        <DropupItem name="Back" onSelect={() => console.log("swap graph")} />
-                        <DropupItem name="Elastic" onSelect={() => console.log("swap graph")} />
-                        <DropupItem name="Bounce" onSelect={() => console.log("swap graph")} />
-                    </Dropup>
+                <div className="flex flex-row mt-2 w-full">
+                    <Checkbox value={isIn} extraText="IN" setValue={setIsIn} />
+                    <Checkbox value={isOut} extraText="OUT" setValue={setIsOut} />
+                    <div className="flex-grow">
+                        <Dropup title={selectedGraphType ?? ""} header="SELECT ONE" className="h-8 pt-2 w-full" headerClassName="w-full" >
+                            <DropupItem name="Sin" onSelect={() => setSelectedGraphType("Sin")} />
+                            <DropupItem name="Quadratic" onSelect={() => setSelectedGraphType("Quadratic")} />
+                            <DropupItem name="Cubic" onSelect={() => setSelectedGraphType("Cubic")} />
+                            <DropupItem name="Quartic" onSelect={() => setSelectedGraphType("Quartic")} />
+                            <DropupItem name="Quintic" onSelect={() => setSelectedGraphType("Quintic")} />
+                            <DropupItem name="Exponential" onSelect={() => setSelectedGraphType("Exponential")} />
+                            <DropupItem name="Circular" onSelect={() => setSelectedGraphType("Circular")} />
+                            <DropupItem name="Back" onSelect={() => setSelectedGraphType("Back")} />
+                            <DropupItem name="Elastic" onSelect={() => setSelectedGraphType("Elastic")} />
+                            <DropupItem name="Bounce" onSelect={() => setSelectedGraphType("Bounce")} />
+                        </Dropup>
+                    </div>
                 </div>
                 <div className="text-black dark:text-gray-500 font-bold text-xs p-1">
                     <p className="my-0.5">POINT RESOLUTION</p>
                 </div>
                 <div className="flex flex-row mb-2 h-7 col-span-2">
                     <div className=" w-20 h-7">
-                        <NumericInput value={0} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
+                        <NumericInput disabled={singleSelected === null} value={resolution} onChange={e => setResolution(e ?? 0)} min={5} max={50} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
                     </div>
                     <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
                         <Slider
-                            xmin={1} xmax={100} axis="x"
+                            disabled={singleSelected === null}
+                            x={resolution}
+                            onChange={e => setResolution(e.x)}
+                            xmin={5} xmax={50} axis="x"
                             styles={{
                                 track: { height: 6, backgroundColor: '#27272A', width: '100%' },
                                 active: { backgroundColor: '#0EA5E9' },

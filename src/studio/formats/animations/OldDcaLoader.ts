@@ -58,7 +58,7 @@ export const loadDCAAnimationOLD = (project: DcProject, name: string, buffer: St
       let ppSize = buffer.readNumber()
       const arr: ProgressionPoint[] = []
       for (let p = 0; p < ppSize; p++) {
-        arr.push({ required: p < 2, x: buffer.readNumber(), y: buffer.readNumber() })
+        arr.push({ required: p === 0 || p === ppSize - 1, x: buffer.readNumber(), y: buffer.readNumber() })
       }
       kf.progressionPoints.value = arr
       // kf.resortPointsDirty()

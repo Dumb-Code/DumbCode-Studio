@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, ReactNode, useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { createContext, PropsWithChildren, ReactNode, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useCreatePortal } from "./CreatePortalContext"
 import { useOptions } from "./OptionsContext"
 
@@ -53,17 +53,19 @@ const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
     current.style.top = `${top}px`
   }, [tooltipData])
 
+  const tooltip = useMemo<ContextType>(() => ({
+    setTooltip: (tooltip, xPos, yPos) => {
+      if (typeof tooltip === "function") {
+        setTooltipData({ tooltip, xPos, yPos })
+      } else if (typeof tooltip === "string") {
+        setTooltipData({ tooltip: () => tooltip.split("\n").map((s, i) => <p key={i}>{s}</p>), xPos, yPos })
+      }
+    },
+    clearTooltip: () => setTooltipData(null)
+  }), [])
+
   return (
-    <TooltipContext.Provider value={{
-      setTooltip: (tooltip, xPos, yPos) => {
-        if (typeof tooltip === "function") {
-          setTooltipData({ tooltip, xPos, yPos })
-        } else if (typeof tooltip === "string") {
-          setTooltipData({ tooltip: () => tooltip.split("\n").map((s, i) => <p key={i}>{s}</p>), xPos, yPos })
-        }
-      },
-      clearTooltip: () => setTooltipData(null)
-    }}>
+    <TooltipContext.Provider value={tooltip}>
       {children}
       {tooltipData !== null && createPortal(
         <div
@@ -105,6 +107,7 @@ export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => Rea
       tooltip.clearTooltip()
       if (timeoutRef.current !== undefined) {
         clearTimeout(timeoutRef.current)
+        timeoutRef.current = undefined
       }
       e.preventDefault()
       e.stopPropagation()
@@ -130,6 +133,7 @@ export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => Rea
       }
       if (timeoutRef.current !== undefined) {
         clearTimeout(timeoutRef.current)
+        timeoutRef.current = undefined
       }
     }
   }, [TooltipElement, delay, tooltip])
