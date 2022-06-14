@@ -41,8 +41,8 @@ const TransformCanvas = ({
 
   const draggingPoints = useRef<CanvasPoint>()
 
-  const [width, setWidth] = useState(-1)
-  const [height, setHeight] = useState(-1)
+  const [width, setWidth] = useState(0)
+  const [height, setHeight] = useState(0)
 
   const [matrix, setMatrix] = useState(new DOMMatrixReadOnly())
   const [draggingMatrix, setDraggingMatrix] = useState(new DOMMatrixReadOnly())
@@ -75,7 +75,7 @@ const TransformCanvas = ({
     canvas.width = width
     canvas.height = height
 
-    if (!hasDefaultZoomedOut.current && width !== -1 && height !== -1) {
+    if (!hasDefaultZoomedOut.current && width !== 0 && height !== 0) {
       hasDefaultZoomedOut.current = true
       mulMatrix(defaultMatrix)
     }
