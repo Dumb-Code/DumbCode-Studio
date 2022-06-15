@@ -33,6 +33,22 @@ const writeFromMap = (map: LOMap<string, readonly [number, number, number]>): Pa
   }, {} as ParsedKfMap)
 }
 
+export const readKeyframe = (animation: DcaAnimation, kfData: ParsedKeyframeType): DcaKeyframe => {
+  const kf = new DcaKeyframe(animation.project, animation)
+
+  kf.startTime.value = kfData.start
+  kf.duration.value = kfData.duration
+  kf.layerId.value = kfData.layerId
+
+  loadToMap(kf.position, kfData.position)
+  loadToMap(kf.rotation, kfData.rotation)
+  loadToMap(kf.cubeGrow, kfData.cubeGrow)
+
+  kf.progressionPoints.value = kf.progressionPoints.value.concat(kfData.progressionPoints)
+
+  return kf
+}
+
 const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayBuffer) => {
   const animation = new DcaAnimation(project, name)
 
@@ -40,23 +56,7 @@ const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayB
 
   animation.name.value = data.name
 
-  const mapKeyframe = (kfData: ParsedKeyframeType): DcaKeyframe => {
-    const kf = new DcaKeyframe(project, animation)
-
-    kf.startTime.value = kfData.start
-    kf.duration.value = kfData.duration
-    kf.layerId.value = kfData.layerId
-
-    loadToMap(kf.position, kfData.position)
-    loadToMap(kf.rotation, kfData.rotation)
-    loadToMap(kf.cubeGrow, kfData.cubeGrow)
-
-    kf.progressionPoints.value = kf.progressionPoints.value.concat(kfData.progressionPoints)
-
-    return kf
-  }
-
-  animation.keyframes.value = data.keyframes.map(kf => mapKeyframe(kf))
+  animation.keyframes.value = data.keyframes.map(kf => readKeyframe(animation, kf))
 
   animation.keyframeData.exits.value = data.loopData.exists
   animation.keyframeData.start.value = data.loopData.start
@@ -70,24 +70,23 @@ const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayB
   return animation
 }
 
+export const writeKeyframe = (kf: DcaKeyframe): ParsedKeyframeType => ({
+  start: kf.startTime.value,
+  duration: kf.duration.value,
+  layerId: kf.layerId.value,
+
+  position: writeFromMap(kf.position),
+  rotation: writeFromMap(kf.rotation),
+  cubeGrow: writeFromMap(kf.cubeGrow),
+
+  progressionPoints: kf.progressionPoints.value,
+})
+
 export const writeDCAAnimation = async (animation: DcaAnimation) => {
-
-  const mapKeyframe = (kf: DcaKeyframe): ParsedKeyframeType => ({
-    start: kf.startTime.value,
-    duration: kf.duration.value,
-    layerId: kf.layerId.value,
-
-    position: writeFromMap(kf.position),
-    rotation: writeFromMap(kf.rotation),
-    cubeGrow: writeFromMap(kf.cubeGrow),
-
-    progressionPoints: kf.progressionPoints.value,
-  })
-
   const data: ParsedAnimationType = {
     version: 1,
     name: animation.name.value,
-    keyframes: animation.keyframes.value.map(kf => mapKeyframe(kf)),
+    keyframes: animation.keyframes.value.map(kf => writeKeyframe(kf)),
     loopData: {
       exists: animation.keyframeData.exits.value,
       start: animation.keyframeData.start.value,
@@ -116,7 +115,7 @@ type ParsedAnimationType = {
 }
 
 type ParsedKfMap = Record<string, readonly [number, number, number]>
-type ParsedKeyframeType = {
+export type ParsedKeyframeType = {
   layerId: number,
   start: number,
   duration: number
