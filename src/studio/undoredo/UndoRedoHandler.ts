@@ -209,8 +209,6 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     newArr.push({ actionType, reason, actions, time: Date.now() })
     this.history.value = newArr
     this.index.value++
-
-    console.log(this.history)
   }
 
   flatten(actions: Action<S>[]) {
@@ -267,8 +265,9 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       this._updateCanUndoCanRedo()
       //We need to undo the current silent actions if we're undoing. 
       if (movingFromHead) {
-        for (let i = this.silentActions.length - 1; i >= 0; i--) {
-          this.undoAction(this.silentActions[i])
+        const flattenedSilent = this.flatten(this.silentActions)
+        for (let i = flattenedSilent.length - 1; i >= 0; i--) {
+          this.undoAction(flattenedSilent[i])
         }
       }
       for (let i = actions.actions.length - 1; i >= 0; i--) {
@@ -310,8 +309,9 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
         this.redoAction(actions.actions[i])
       }
       if (movingToHead) {
-        for (let i = 0; i < this.silentActions.length; i++) {
-          this.redoAction(this.silentActions[i])
+        const flattenedSilent = this.flatten(this.silentActions)
+        for (let i = 0; i < flattenedSilent.length; i++) {
+          this.redoAction(flattenedSilent[i])
         }
       }
     }
