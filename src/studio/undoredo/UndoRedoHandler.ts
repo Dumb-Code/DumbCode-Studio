@@ -92,6 +92,7 @@ export const HistoryActionTypes = {
 }
 
 export type ActionBatch<S extends UndoRedoSection> = {
+  time: number,
   actionType: HistoryActionType
   reason: string
   actions: Action<S>[]
@@ -205,9 +206,11 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     actions = this.flatten(actions)
 
     const newArr = this.history.value.slice(0, this.index.value + 1)
-    newArr.push({ actionType, reason, actions })
+    newArr.push({ actionType, reason, actions, time: Date.now() })
     this.history.value = newArr
     this.index.value++
+
+    console.log(this.history)
   }
 
   flatten(actions: Action<S>[]) {
@@ -408,7 +411,7 @@ export class SectionHandle<S extends UndoRedoSection, T extends S> {
 
     Array.from(this.prefixCallbackMap.entries())
       .filter(([prefix]) => property_name.startsWith(prefix))
-      .forEach(([prefix, callback]) => callback(property_name.substring(prefix.length, property_name.length - 1), value))
+      .forEach(([prefix, callback]) => callback(property_name.substring(prefix.length, property_name.length), value))
   }
 }
 

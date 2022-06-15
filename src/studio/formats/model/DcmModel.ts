@@ -103,6 +103,7 @@ export class DCMModel implements CubeParent {
 
     this._section.modifyFirst("metadata", this.metadata, () => { throw new Error("Tried to modify metadata") })
 
+
     this.children.addListener((newChildren, oldChildren) => {
       oldChildren.forEach(child => this.modelGroup.remove(child.cubeGroup))
       newChildren.forEach(child => {

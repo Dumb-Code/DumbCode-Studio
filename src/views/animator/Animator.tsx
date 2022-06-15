@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
+import { useKeyCombos } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
 import { useListenableObject, useListenableObjectNullable } from "../../studio/util/ListenableObject"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
@@ -16,6 +17,7 @@ const Animator = () => {
 
     const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
+    const { common_undo: undoKey, common_redo: redoKey } = useKeyCombos()
 
     useObjectUnderMouse()
 
@@ -31,7 +33,28 @@ const Animator = () => {
         return () => {
             onFrameListeners.delete(onFrame)
         }
-    })
+    }, [project, onFrameListeners])
+
+    useEffect(() => {
+        const listener = (e: KeyboardEvent) => {
+            const selected = project.animationTabs.selectedAnimation.value
+            if (selected !== null) {
+                if (undoKey.matches(e)) {
+                    selected.undoRedoHandler.undo()
+                    e.preventDefault()
+                    e.stopPropagation()
+                }
+                if (redoKey.matches(e)) {
+                    selected.undoRedoHandler.redo()
+                    e.preventDefault()
+                    e.stopPropagation()
+                }
+            }
+        }
+
+        document.addEventListener("keydown", listener)
+        return () => document.removeEventListener("keydown", listener)
+    }, [project])
 
     const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
     const [skeletonMode] = useListenableObjectNullable(animation?.isSkeleton)

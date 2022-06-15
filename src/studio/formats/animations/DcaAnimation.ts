@@ -4,7 +4,7 @@ import UndoRedoHandler from '../../undoredo/UndoRedoHandler';
 import { getUndefinedWritable } from '../../util/FileTypes';
 import DcProject from '../project/DcProject';
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
-import { SectionHandle } from './../../undoredo/UndoRedoHandler';
+import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
 import { DCMCube } from './../model/DcmModel';
 
@@ -61,14 +61,10 @@ export default class DcaAnimation {
 
   readonly name: LO<string>
   readonly propertiesMode = new LO<"local" | "global">("global", this.onDirty).applyToSection(this._section, "propertiesMode")
-  readonly keyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty).applyMappedToSection(this._section,
-    kfs => kfs.map(kf => kf.identifier) as readonly string[],
-    strs => strs.map(str => this.keyframes.value.find(kf => kf.identifier === str)).filter((k): k is DcaKeyframe => k !== undefined),
-    "keyframes"
-  ) as LO<readonly DcaKeyframe[]>
+  readonly keyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty) //We don't apply this to undo/redo, as keyframes are sections and therefore handled with onAddSection/onRemoveSection
   readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty)
 
-  readonly time = new LO(0, this.onDirty).applyToSection(this._section, "time")
+  readonly time = new LO(0, this.onDirty).applyToSection(this._section, "time", true)
   readonly displayTime = new LO(0, this.onDirty)
   readonly maxTime = new LO(1, this.onDirty)
   readonly playing = new LO(false, this.onDirty)
@@ -130,15 +126,13 @@ export default class DcaAnimation {
       identifier, startTime, duration,
       progressionPoints, layerId, selected
     } = data
-    const keyframe = this.createKeyframe(
+    this.createKeyframe(
       layerId, identifier, startTime, duration, selected,
       LOMap.extractSectionDataToMap(data, kfmap_rotation, s => s),
       LOMap.extractSectionDataToMap(data, kfmap_position, s => s),
       LOMap.extractSectionDataToMap(data, kfmap_cubegrow, s => s),
       progressionPoints
     )
-    //Create new keyframe, and add it to to this.keyframes
-
   }
 
   onRemoveSection(section: string) {
@@ -157,7 +151,7 @@ export default class DcaAnimation {
     if (section_name === "root_data") {
       this._section.applyModification(property_name, value)
     } else {
-      const identif = section_name.substring("cube_".length, section_name.length)
+      const identif = section_name.substring("keyframe_".length, section_name.length)
       const kf = this.keyframes.value.find(kf => kf.identifier === identif)
       if (!kf) {
         throw new Error("Tried to modify keyframe that could not be found " + identif);
@@ -192,7 +186,7 @@ export default class DcaAnimation {
     cubeGrow?: Map<string, readonly [number, number, number]>,
     progressionPoints?: readonly ProgressionPoint[],
   ) {
-    const kf = new DcaKeyframe(this.project, this, identifier)
+    const kf = new DcaKeyframe(this.project, this, identifier, layerId, startTime, duration, selected, progressionPoints, rotation, position, cubeGrow)
     //When startime changes, update the max time
     kf.startTime.addListener(value => {
       this.maxTime.value = Math.max(...this.keyframes.value.map(k => (k === kf ? value : k.startTime.value) + k.duration.value))
@@ -201,6 +195,7 @@ export default class DcaAnimation {
     kf.duration.addListener(value => {
       this.maxTime.value = Math.max(...this.keyframes.value.map(k => k.startTime.value + (k === kf ? value : k.duration.value)))
     })
+
     kf.layerId = layerId
     this.keyframes.value = this.keyframes.value.concat(kf)
     return kf
@@ -271,7 +266,7 @@ export class DcaKeyframe {
 
 
     //Typescript compiler throws errors when `as SectionType` isn't there, but vscode intellisense is fine with it.
-    //It complains about the other section names not being assignable, meaning that `cube_${this.identifier}` is
+    //It complains about the other section names not being assignable, meaning that `keyframe_${this.identifier}` is
     //Not extracting the correct section for some reason.
     this._section = animation.undoRedoHandler.createNewSection(`keyframe_${this.identifier}`, "Keyframe Properties Edit") as KeyframeSectionType
     this._section.modifyFirst("identifier", this.identifier, () => { throw new Error("Tried to modify identifier") })
@@ -285,6 +280,8 @@ export class DcaKeyframe {
     this.cubeGrow = LOMap.applyToSectionStringKey(new LOMap(cubeGrow, this.onDirty), this._section, kfmap_cubegrow, false, "Cube Grow Changed")
 
     this.progressionPoints = new LO(progressionPoints, this.onDirty).applyToSection(this._section, "progressionPoints")
+
+    this._section.pushCreation("Keyframe Created", HistoryActionTypes.Add)
 
     this.progressionPoints.addListener(pp => {
       if (!this.isSettingGraph) {

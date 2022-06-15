@@ -3,6 +3,7 @@ import { SvgArrows, SVGEye, SVGLocked, SVGPlus, SVGSettings, SVGTrash } from "..
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
+import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef";
 import { useListenableObject } from "../../../studio/util/ListenableObject";
 
@@ -268,11 +269,13 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     }, [addAndRunListener, removeListener, timeMarkerRef, animation.time, getPixelsPerSecond, getScroll, updateAndSetLeft])
 
     const addNewKeyframe = () => {
+        animation.undoRedoHandler.startBatchActions()
         const kf = animation.createKeyframe(layer.layerId)
 
         animation.selectedKeyframes.value.forEach(kf => kf.selected.value = false)
         kf.selected.value = true
         kf.startTime.value = animation.time.value
+        animation.undoRedoHandler.endBatchActions("Created Keyframe", HistoryActionTypes.Add)
     }
 
     return (

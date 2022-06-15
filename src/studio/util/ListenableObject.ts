@@ -229,7 +229,11 @@ export class LOMap<K, V> extends Map<K, V> {
 
   set(key: K, value: V) {
     const oldValue = this.get(key) ?? undefined
-    super.set(key, value)
+    if (value === undefined) {
+      super.delete(key)
+    } else {
+      super.set(key, value)
+    }
     const get = this.listners.get(key)
     if (get !== undefined) {
       get.forEach(l => l(value, oldValue))
@@ -300,14 +304,15 @@ export class LOMap<K, V> extends Map<K, V> {
     return map.applyToSection(section, propertyPrefix, silent, s => s, s => s, reason, action)
   }
 
-  static extractSectionDataToMap<D, SK extends keyof D & string, MK>(data: D, key: SK, keyMapper: (key: SK) => MK) {
+  static extractSectionDataToMap<D, SK_PREFIX extends string, MK>(data: D, key: SK_PREFIX, keyMapper: (key: string) => MK) {
+    type SK = `${SK_PREFIX}${string}` & keyof D
     const map = new Map<MK, D[SK]>()
     Object.keys(data)
       .filter((d): d is SK => d.startsWith(key))
       .forEach(k => {
-        const key = keyMapper(k)
+        const mapped = keyMapper(k.substring(key.length))
         const value = data[k]
-        map.set(key, value)
+        map.set(mapped, value)
       })
     return map
   }
