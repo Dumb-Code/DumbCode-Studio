@@ -387,7 +387,7 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
         useCallback((event) => {
             keyframe.animation.undoRedoHandler.startBatchActions()
             const keyframesToUse = [keyframe]
-            if (!event.ctrlKey) {
+            if (!event.ctrlKey && keyframe.selected.value) {
                 keyframesToUse.push(...keyframe.animation.selectedKeyframes.value)
             }
 
