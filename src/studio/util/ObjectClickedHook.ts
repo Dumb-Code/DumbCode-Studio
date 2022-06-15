@@ -21,7 +21,8 @@ export const useObjectUnderMouse = () => {
   const mouse = useRef({ x: 0, y: 0 })
   useEffect(() => {
     const onFrame = () => {
-      if (mouseDownRef.current) {
+      //If the mouse is down, or the mouse is outside the canvas viewspace, then ignore
+      if (mouseDownRef.current || Math.abs(mouse.current.x) > 1 || Math.abs(mouse.current.y) > 1) {
         return
       }
       const objects: Object3D[] = []
@@ -55,6 +56,12 @@ export const useObjectUnderMouse = () => {
 
       mouse.current.x = ((x - rect.left) / rect.width) * 2 - 1;
       mouse.current.y = - ((y - rect.top) / rect.height) * 2 + 1;
+
+
+      //Mouse is up, ensure that the mouseDownRef is false
+      if ((e.buttons & 1) === 0) {
+        mouseUpAnywhere()
+      }
     }
 
     const mouseDown = () => mouseDownRef.current = true
