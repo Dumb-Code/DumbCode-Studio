@@ -5,6 +5,7 @@ import { createModelingCommandRoot } from "../../command/commands/modeling/Model
 import { getUndefinedWritable, ReadableFile } from '../../util/FileTypes';
 import { LO } from '../../util/ListenableObject';
 import ReferenceImageHandler from "../../util/ReferenceImageHandler";
+import SelectedCubeManager from "../../util/SelectedCubeManager";
 import DcaTabs from '../animations/DcaTabs';
 import { loadModelUnknown } from "../model/DCMLoader";
 import { DCMModel } from '../model/DcmModel';
@@ -37,6 +38,7 @@ export default class DcProject {
   readonly modelerGumball: ModelerGumball
 
   readonly cubeHighlighter: CubeSelectedHighlighter
+  readonly selectedCubeManager = new SelectedCubeManager()
 
   readonly referenceImageHandler = new ReferenceImageHandler(this.selectionGroup)
 
@@ -60,10 +62,6 @@ export default class DcProject {
 
     this.commandRoot = createModelingCommandRoot(this)
     this.commandRoot.addHelpCommand()
-  }
-
-  get selectedCubeManager() {
-    return this.model.selectedCubeManager
   }
 
   get lockedCubes() {

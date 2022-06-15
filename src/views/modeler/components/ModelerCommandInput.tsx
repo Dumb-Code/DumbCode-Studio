@@ -42,7 +42,7 @@ const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
         command.onInputChanged()
       }
     }
-    const selected = project.model.selectedCubeManager.selected
+    const selected = project.selectedCubeManager.selected
     selected.addPostListener(listener)
     return () => selected.removePostListener(listener)
   }, [project, command])

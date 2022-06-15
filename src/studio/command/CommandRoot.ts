@@ -1,5 +1,6 @@
+import DcProject from '../formats/project/DcProject';
 import { LO } from '../util/ListenableObject';
-import { DCMCube, DCMModel } from './../formats/model/DcmModel';
+import { DCMCube } from './../formats/model/DcmModel';
 import { HistoryActionTypes } from './../undoredo/UndoRedoHandler';
 import { EnumOrEmptyArgument } from './Argument';
 import { Command, CommandContext, CommandValues } from './Command';
@@ -54,7 +55,7 @@ export class CommandRoot {
   readonly previousCommands = new LO<readonly CommandParseHistoryEntry[]>([])
   readonly logHistory = new LO<readonly { type?: "command" | "error", message: string, times?: number }[]>([])
 
-  constructor(private readonly model: DCMModel) {
+  constructor(private readonly project: DcProject) {
     this.currentInput.addListener(s => this.onInputChanged(s))
   }
 
@@ -170,7 +171,7 @@ export class CommandRoot {
   }
 
   runCommand(data: CommandParsedData | CommandParseError | string, dummy: boolean) {
-    this.model.undoRedoHandler.startBatchActions()
+    this.project.model.undoRedoHandler.startBatchActions()
     let commandForOutput: string | null = null
     try {
       if (typeof data === "string") {
@@ -200,17 +201,17 @@ export class CommandRoot {
         getArgument: arg => {
           const found = args.find(a => a.name === arg)
           if (!found) {
-            throw new CommandRunError("Unable to find argument '" + arg + "'")
+            throw new CommandRunError("Unable to find argument '" + String(arg) + "'")
           }
           if (found.error) {
-            throw new CommandRunError("Error in parsing argument '" + arg + "': '" + found.error.message + "'")
+            throw new CommandRunError("Error in parsing argument '" + String(arg) + "': '" + found.error.message + "'")
           }
           return found.value
         },
-        getModel: () => this.model,
+        getModel: () => this.project.model,
         getCubes: (allowEmpty = false) => {
-          const cubes = this.model.selectedCubeManager.selected.value
-            .map(c => this.model.identifierCubeMap.get(c))
+          const cubes = this.project.selectedCubeManager.selected.value
+            .map(c => this.project.model.identifierCubeMap.get(c))
             .filter((t): t is DCMCube => t !== undefined)
           if (!allowEmpty && cubes.length === 0) {
             throw new CommandRunError("No cubes were selected")
@@ -232,7 +233,7 @@ export class CommandRoot {
       }
       throw e
     } finally {
-      this.model.undoRedoHandler.endBatchActions("Command " + (commandForOutput ?? "???"), HistoryActionTypes.Command)
+      this.project.model.undoRedoHandler.endBatchActions("Command " + (commandForOutput ?? "???"), HistoryActionTypes.Command)
     }
 
   }

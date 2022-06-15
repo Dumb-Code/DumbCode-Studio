@@ -1,6 +1,6 @@
 import { Matrix4, Quaternion, Vector3 } from 'three';
-import CubePointTracker from "../../../../views/modeler/logic/CubePointTracker";
-import { DCMCube, DCMModel } from '../../../formats/model/DcmModel';
+import { DCMCube } from '../../../formats/model/DcmModel';
+import DcProject from '../../../formats/project/DcProject';
 import CubeLocker from "../../../util/CubeLocker";
 import { Command } from "../../Command";
 import { CommandRunError } from '../../CommandRunError';
@@ -12,11 +12,12 @@ const tempCubeQuat = new Quaternion()
 const tempCubeScale = new Vector3()
 const tempResultMatrix = new Matrix4()
 
-const VertexSnapping = (pointTracker: CubePointTracker, model: DCMModel) => (addCommand: (command: Command) => void) => {
+const VertexSnapping = (project: DcProject) => (addCommand: (command: Command) => void) => {
   let active = false
 
-  const cubeManager = model.selectedCubeManager
-  const lockedCubes = model.lockedCubes
+  const pointTracker = project.cubePointTracker
+  const cubeManager = project.selectedCubeManager
+  const lockedCubes = project.lockedCubes
 
   //When the raytracer is clicked, if command is active and nothing is clicked, disable it and consume the event.
   //This occurs when you click on nothing while the vertex snapping is enabled.
@@ -96,20 +97,20 @@ const VertexSnapping = (pointTracker: CubePointTracker, model: DCMModel) => (add
 
       cube.model.undoRedoHandler.startBatchActions()
       phase2(cube)
-      model.undoRedoHandler.endBatchActions("Command Vertex", HistoryActionTypes.Command)
+      project.model.undoRedoHandler.endBatchActions("Command Vertex", HistoryActionTypes.Command)
     } else {
       //Enable the point tracker to get the source point to move.
       pointTracker.enable((p, _, c) => {
         c.model.undoRedoHandler.startBatchActions()
 
-        model.identifierCubeMap.forEach(v => {
+        project.model.identifierCubeMap.forEach(v => {
           if (v.selected.value) {
             v.selected.value = false
           }
         })
         worldPosVector.copy(p)
         phase2(c)
-        model.undoRedoHandler.endBatchActions("Command Vertex", HistoryActionTypes.Command)
+        project.model.undoRedoHandler.endBatchActions("Command Vertex", HistoryActionTypes.Command)
       }, undefined, undefined)
     }
 

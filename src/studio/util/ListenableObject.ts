@@ -113,6 +113,35 @@ export class LO<T> {
     this.addListener((value, oldValue) => !isModifying && section.modify(property_name, mapper(value), mapper(oldValue), silent, _getOrRun(value, reason), _getOrRun(value, action)))
     return this
   }
+
+  static createDelegateListener<T, R>(
+    root: LO<R>,
+    mapperFromThisToRoot: (val: T, root: R) => R,
+    mapperFromRootToThis: (val: R) => T,
+    defaultCallback?: Listener<T>,
+    preModifyListener?: Set<ModifiableListener<T>>,
+    listners?: Set<Listener<T>>,
+    postListeners?: Set<Listener<T>>,
+  ) {
+    const lo = new LO(mapperFromRootToThis(root.value), defaultCallback, preModifyListener, listners, postListeners)
+    root.addListener(newVal => lo.value = mapperFromRootToThis(newVal))
+    lo.addListener(newValue => root.value = mapperFromThisToRoot(newValue, root.value))
+    return lo
+  }
+
+  static createOneWayDelegateListener<T, R>(
+    root: LO<R>,
+    mapperFromRootToThis: (val: R) => T,
+    defaultCallback?: Listener<T>,
+    preModifyListener?: Set<ModifiableListener<T>>,
+    listners?: Set<Listener<T>>,
+    postListeners?: Set<Listener<T>>,
+  ) {
+    const lo = new LO(mapperFromRootToThis(root.value), defaultCallback, preModifyListener, listners, postListeners)
+    root.addPostListener(newVal => lo.value = mapperFromRootToThis(newVal))
+    return lo
+  }
+
 }
 
 export const useListenableObjectNullable = <T>(obj: LO<T> | undefined, deps: DependencyList = []): [T | undefined, (val: T) => void] => {

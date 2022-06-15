@@ -1,10 +1,8 @@
 import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, Quaternion, Vector3 } from "three";
 import { v4 as uuidv4 } from "uuid";
-import UndoRedoHandler from "../../undoredo/UndoRedoHandler";
 import LockedCubes from "../../util/LockedCubes";
-import SelectedCubeManager from '../../util/SelectedCubeManager';
 import DcProject from '../project/DcProject';
-import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
+import UndoRedoHandler, { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
 import { setIntersectType } from './../../util/ObjectClickedHook';
 
@@ -60,7 +58,6 @@ type UndoRedoDataType = {
     textureMirrored: boolean,
     children: readonly string[],
 
-    selected: boolean,
     hideChildren: boolean,
 
     visible: boolean,
@@ -70,7 +67,7 @@ type UndoRedoDataType = {
 
 export class DCMModel implements CubeParent {
 
-  parentProject?: DcProject
+  parentProject: DcProject = null as any //Cheap hack to remove null errors
   readonly undoRedoHandler = new UndoRedoHandler<UndoRedoDataType>(
     (s, d) => this.onAddSection(s, d),
     s => this.onRemoveSection(s),
@@ -93,7 +90,6 @@ export class DCMModel implements CubeParent {
 
   readonly modelGroup: Group
 
-  readonly selectedCubeManager = new SelectedCubeManager()
   readonly lockedCubes = new LockedCubes(this)
 
   readonly metadata: Readonly<Record<string, string>> = {}
@@ -149,13 +145,13 @@ export class DCMModel implements CubeParent {
       identifier, name, dimension, position,
       rotation, offset, cubeGrow, children,
       textureMirrored, textureOffset,
-      selected, hideChildren, visible, locked
+      hideChildren, visible, locked
     } = data as (UndoRedoDataType & { section_name: `cube_${string}` })['data']
     const cube = new DCMCube(
       name, dimension, position, offset, rotation,
       textureOffset, textureMirrored, cubeGrow,
       this.identifListToCubes(children), this, identifier,
-      selected, hideChildren, visible, locked)
+      hideChildren, visible, locked)
     this.identifierCubeMap.set(identifier, cube)
   }
 
@@ -275,7 +271,6 @@ export class DCMCube implements CubeParent {
     children: readonly DCMCube[],
     model: DCMModel,
     readonly identifier = uuidv4(),
-    selected = false,
     hideChildren = false,
     visible = true,
     locked = false
@@ -302,7 +297,7 @@ export class DCMCube implements CubeParent {
     this.children = new LO(children, onDirty).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children", false, "Cube Children Edit")
     this.model = model
 
-    this.selected = new LO(selected).applyToSection(this._section, "selected", false, value => value ? "Cube Selected" : "Cube Deselected")
+    this.selected = LO.createOneWayDelegateListener(model.parentProject.selectedCubeManager.selected, selected => selected.includes(this.identifier))//.applyToSection(this._section, "selected", false, value => value ? "Cube Selected" : "Cube Deselected")
     this.hideChildren = new LO(hideChildren).applyToSection(this._section, "hideChildren", true)
     this.visible = new LO(visible).applyToSection(this._section, "visible", false, value => value ? "Cube Shown" : "Cube Visible", HistoryActionTypes.ToggleVisibility)
     this.locked = new LO(locked).applyToSection(this._section, "locked", false, value => value ? "Cube Locked" : "Cube Unlocked", HistoryActionTypes.LockUnlock)
@@ -336,22 +331,22 @@ export class DCMCube implements CubeParent {
     this.visible.addListener(visible => this.cubeMesh.visible = visible)
 
     this.mouseHover.addListener(isHovering => {
-      if (this.model.materials !== undefined && this.cubeMesh !== undefined) {
+      if (this.model.materials !== undefined && this.cubeMesh !== undefined && this.model.parentProject !== undefined) {
         if (isHovering) {
-          this.model.selectedCubeManager.onMouseOverMesh(this.cubeMesh)
+          this.model.parentProject.selectedCubeManager.onMouseOverMesh(this.cubeMesh)
         } else {
-          this.model.selectedCubeManager.onMouseOffMesh(this.cubeMesh)
+          this.model.parentProject.selectedCubeManager.onMouseOffMesh(this.cubeMesh)
         }
         this.updateMaterials({ hovering: isHovering })
       }
     })
 
     this.selected.addListener(isSelected => {
-      if (this.model.materials !== undefined && this.cubeMesh !== undefined) {
+      if (this.model.materials !== undefined && this.cubeMesh !== undefined && this.model.parentProject !== undefined) {
         if (isSelected) {
-          this.model.selectedCubeManager.onCubeSelected(this)
+          this.model.parentProject.selectedCubeManager.onCubeSelected(this)
         } else {
-          this.model.selectedCubeManager.onCubeUnSelected(this)
+          this.model.parentProject.selectedCubeManager.onCubeUnSelected(this)
         }
         this.updateMaterials({ selected: isSelected })
       }

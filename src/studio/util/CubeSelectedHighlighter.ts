@@ -32,7 +32,10 @@ export class CubeSelectedHighlighter {
   ) { }
 
   onFrame(camera: Camera) {
-    const selected = this.model.selectedCubeManager.selected.value
+    if (this.model.parentProject === undefined) {
+      return
+    }
+    const selected = this.model.parentProject.selectedCubeManager.selected.value
     //As selected *should* be immutable, we can do a check here to see if it's changed.
     if (selected !== this.previouslySelected) {
       this.addAndRemoveData(selected)

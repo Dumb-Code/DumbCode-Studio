@@ -16,6 +16,8 @@ export default class SelectedCubeManager {
 
   keepCurrentCubes = false
 
+  isSettingCubeSelected = false
+
   onMouseUpOnCanvas(project: DcProject, ctrlPressed: boolean) {
     let ignore = false
     this.listeners.forEach(listener => {
@@ -40,6 +42,10 @@ export default class SelectedCubeManager {
   }
 
   onCubeSelected(cube: DCMCube) {
+    if (this.isSettingCubeSelected) {
+      return
+    }
+    this.isSettingCubeSelected = true
     if (!this.keepCurrentCubes) {
       cube.model.identifierCubeMap.forEach(v => {
         if (v !== cube && v.selected.value) {
@@ -50,12 +56,18 @@ export default class SelectedCubeManager {
     } else {
       this.selected.value = this.selected.value.concat(cube.identifier)
     }
+    this.isSettingCubeSelected = false
   }
 
   onCubeUnSelected(cube: DCMCube) {
+    if (this.isSettingCubeSelected) {
+      return
+    }
+    this.isSettingCubeSelected = true
     if (this.selected.value.includes(cube.identifier)) {
       this.selected.value = this.selected.value.filter(l => l !== cube.identifier)
     }
+    this.isSettingCubeSelected = false
   }
 
   onMouseOffMesh(mesh: Mesh) {

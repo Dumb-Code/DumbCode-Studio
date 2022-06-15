@@ -5,10 +5,10 @@ import ReferenceImageCommand from './ReferenceImageCommand';
 import VertexSnapping from './VertexSnappings';
 
 export const createModelingCommandRoot = (project: DcProject) => {
-  const root = new CommandRoot(project.model)
+  const root = new CommandRoot(project)
 
   root.addCommand(ArrayCommands)
-  root.addCommand(VertexSnapping(project.cubePointTracker, project.model))
+  root.addCommand(VertexSnapping(project))
   root.addCommand(ReferenceImageCommand)
 
   return root
