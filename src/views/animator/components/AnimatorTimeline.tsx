@@ -7,6 +7,10 @@ import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef";
 import { useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/util/ListenableObject";
 
+//This whole thing is gross, messy and complicated.
+//A lot of it is old staticfile code that's been chopped up into react code
+//Not happy with this file, lots of gross stuff happeneing
+//TODO: fix this file lol
 const AnimatorTimeline = () => {
     const { getSelectedProject } = useStudio()
     const selectedProject = getSelectedProject()
