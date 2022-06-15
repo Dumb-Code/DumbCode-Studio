@@ -168,6 +168,11 @@ export const useListenableObjectNullable = <T>(obj: LO<T> | undefined, deps: Dep
   ]
 }
 
+export const useListenableObjectToggle = (obj: LO<boolean>, deps: DependencyList = []): [boolean, (val?: boolean) => void] => {
+  const [value, setValue] = useListenableObject(obj, deps)
+  const toggle = useCallback(() => setValue(!value), [value])
+  return [value, toggle]
+}
 
 export const useListenableObject = <T>(obj: LO<T>, deps: DependencyList = []): [T, (val: T) => void] => {
   const [state, setState] = useState(() => obj.internalValue)

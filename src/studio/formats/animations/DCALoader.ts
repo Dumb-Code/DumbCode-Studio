@@ -45,7 +45,7 @@ const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayB
 
     kf.startTime.value = kfData.start
     kf.duration.value = kfData.duration
-    kf.layerId = kfData.layerId
+    kf.layerId.value = kfData.layerId
 
     loadToMap(kf.position, kfData.position)
     loadToMap(kf.rotation, kfData.rotation)
@@ -75,7 +75,7 @@ export const writeDCAAnimation = async (animation: DcaAnimation) => {
   const mapKeyframe = (kf: DcaKeyframe): ParsedKeyframeType => ({
     start: kf.startTime.value,
     duration: kf.duration.value,
-    layerId: kf.layerId,
+    layerId: kf.layerId.value,
 
     position: writeFromMap(kf.position),
     rotation: writeFromMap(kf.rotation),

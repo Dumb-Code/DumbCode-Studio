@@ -13,7 +13,7 @@ const kfmap_position = "pos_"
 const kfmap_rotation = "rot_"
 const kfmap_cubegrow = "cg_"
 
-type UndoRedoDataType = {
+type RootDataSectionType = {
   section_name: "root_data",
   data: {
     name: string,
@@ -24,7 +24,9 @@ type UndoRedoDataType = {
     time: number,
     [k: `${typeof skeletal_export_named}_${string}`]: string
   }
-} | {
+}
+
+type KeyframeSectionType = {
   section_name: `keyframe_${string}`
   data: {
     identifier: string, //Unchanging
@@ -41,6 +43,18 @@ type UndoRedoDataType = {
   }
 }
 
+type KeyframeLayerSectionType = {
+  section_name: `layer_${number}`
+  data: {
+    layerId: number,
+    name: string
+    visible: boolean
+    locked: boolean
+    definedMode: boolean
+  }
+}
+
+type UndoRedoDataType = RootDataSectionType | KeyframeSectionType | KeyframeLayerSectionType
 
 export default class DcaAnimation {
   readonly identifier = v4()
@@ -120,43 +134,63 @@ export default class DcaAnimation {
   onAddSection<K extends UndoRedoDataType['section_name'], S extends UndoRedoDataType & { section_name: K }>(section: K, dataIn: S['data']) {
     if (section === "root_data") {
       return
+    } else if (section.startsWith("keyframe_")) {
+      const data = dataIn as KeyframeSectionType['data']
+      const {
+        identifier, startTime, duration,
+        progressionPoints, layerId, selected
+      } = data
+      this.createKeyframe(
+        layerId, identifier, startTime, duration, selected,
+        LOMap.extractSectionDataToMap(data, kfmap_rotation, s => s),
+        LOMap.extractSectionDataToMap(data, kfmap_position, s => s),
+        LOMap.extractSectionDataToMap(data, kfmap_cubegrow, s => s),
+        progressionPoints
+      )
+    } else if (section.startsWith("layer_")) {
+      const data = dataIn as KeyframeLayerSectionType['data']
+      const { layerId, name, visible, locked, definedMode } = data
+      this.keyframeLayers.value = this.keyframeLayers.value.concat(new KeyframeLayerData(this, layerId, name, visible, locked, definedMode))
     }
-    const data = dataIn as (UndoRedoDataType & { section_name: `keyframe_${string}` })['data']
-    const {
-      identifier, startTime, duration,
-      progressionPoints, layerId, selected
-    } = data
-    this.createKeyframe(
-      layerId, identifier, startTime, duration, selected,
-      LOMap.extractSectionDataToMap(data, kfmap_rotation, s => s),
-      LOMap.extractSectionDataToMap(data, kfmap_position, s => s),
-      LOMap.extractSectionDataToMap(data, kfmap_cubegrow, s => s),
-      progressionPoints
-    )
   }
 
   onRemoveSection(section: string) {
     if (section === "root_data") {
       return
+    } else if (section.startsWith("keyframe_")) {
+      const identif = section.substring("keyframe_".length, section.length)
+      const kf = this.keyframes.value.find(kf => kf.identifier === identif)
+      if (!kf) {
+        throw new Error("Tried to remove keyframe that could not be found " + identif);
+      }
+      kf.delete()
+    } else if (section.startsWith("layer_")) {
+      const id = parseInt(section.substring("layer_".length, section.length))
+      const layer = this.keyframeLayers.value.find(layer => layer.layerId === id)
+      if (!layer) {
+        throw new Error("Tried to remove keyframe layer that could not be found " + id);
+      }
+      this.keyframeLayers.value = this.keyframeLayers.value.filter(l => l !== layer)
     }
-    const identif = section.substring("keyframe_".length, section.length)
-    const kf = this.keyframes.value.find(kf => kf.identifier === identif)
-    if (!kf) {
-      throw new Error("Tried to remove keyframe that could not be found " + identif);
-    }
-    kf.delete()
   }
 
   onModifySection(section_name: string, property_name: string, value: any) {
     if (section_name === "root_data") {
       this._section.applyModification(property_name, value)
-    } else {
+    } else if (section_name.startsWith("keyframe_")) {
       const identif = section_name.substring("keyframe_".length, section_name.length)
       const kf = this.keyframes.value.find(kf => kf.identifier === identif)
       if (!kf) {
         throw new Error("Tried to modify keyframe that could not be found " + identif);
       }
       kf._section.applyModification(property_name, value)
+    } else if (section_name.startsWith("layer_")) {
+      const id = parseInt(section_name.substring("layer_".length, section_name.length))
+      const layer = this.keyframeLayers.value.find(layer => layer.layerId === id)
+      if (!layer) {
+        throw new Error("Tried to modify keyframe layer that could not be found " + id);
+      }
+      layer._section.applyModification(property_name, value)
     }
   }
 
@@ -166,7 +200,7 @@ export default class DcaAnimation {
 
   static createNew(project: DcProject) {
     const animation = new DcaAnimation(project, "New Animation")
-    animation.keyframeLayers.value = animation.keyframeLayers.value.concat(new KeyframeLayerData(0))
+    animation.keyframeLayers.value = animation.keyframeLayers.value.concat(new KeyframeLayerData(animation, 0))
     return animation
   }
 
@@ -176,7 +210,11 @@ export default class DcaAnimation {
     }
     const time = this.time.value
     const skipForced = this.isDraggingTimeline || this.playing.value
-    this.keyframes.value.forEach(kf => kf.animate(skipForced ? time : (this.forceAnimationTime ?? time)))
+    const playTime = skipForced ? time : (this.forceAnimationTime ?? time)
+
+    const visibleLayers = this.keyframeLayers.value.filter(kfl => kfl.visible.value).map(kfl => kfl.layerId)
+
+    this.keyframes.value.filter(kf => visibleLayers.includes(kf.layerId.value)).forEach(kf => kf.animate(playTime))
   }
 
   createKeyframe(
@@ -196,7 +234,7 @@ export default class DcaAnimation {
       this.maxTime.value = Math.max(...this.keyframes.value.map(k => k.startTime.value + (k === kf ? value : k.duration.value)))
     })
 
-    kf.layerId = layerId
+    kf.layerId.value = layerId
     this.keyframes.value = this.keyframes.value.concat(kf)
     return kf
   }
@@ -217,13 +255,11 @@ export default class DcaAnimation {
 }
 
 export type ProgressionPoint = { required?: boolean, x: number, y: number }
-
-type KeyframeSectionType = SectionHandle<UndoRedoDataType, UndoRedoDataType & { section_name: `keyframe_${string}` }>
 export class DcaKeyframe {
-  layerId: number = 0
+  readonly layerId: LO<number>
   readonly project: DcProject
   readonly animation: DcaAnimation
-  readonly _section: KeyframeSectionType
+  readonly _section: SectionHandle<UndoRedoDataType, KeyframeSectionType>
 
   private readonly onDirty = () => this.animation.needsSaving.value = true
 
@@ -260,17 +296,14 @@ export class DcaKeyframe {
     position?: Map<string, readonly [number, number, number]>,
     cubeGrow?: Map<string, readonly [number, number, number]>,
   ) {
-    this.layerId = layerId
     this.project = project
     this.animation = animation
 
 
-    //Typescript compiler throws errors when `as SectionType` isn't there, but vscode intellisense is fine with it.
-    //It complains about the other section names not being assignable, meaning that `keyframe_${this.identifier}` is
-    //Not extracting the correct section for some reason.
-    this._section = animation.undoRedoHandler.createNewSection(`keyframe_${this.identifier}`, "Keyframe Properties Edit") as KeyframeSectionType
+    //Typescript compiler throws errors when `keyframe_a` isn't there. We can trick it to know that `keyframe_{identifier}` is of type `keyframe_{string}`
+    this._section = animation.undoRedoHandler.createNewSection(`keyframe_${this.identifier}` as `keyframe_a`, "Keyframe Properties Edit")
     this._section.modifyFirst("identifier", this.identifier, () => { throw new Error("Tried to modify identifier") })
-
+    this.layerId = new LO(layerId, this.onDirty).applyToSection(this._section, "layerId")
     this.startTime = new LO(startTime, this.onDirty).applyToSection(this._section, "startTime")
     this.duration = new LO(duration, this.onDirty).applyToSection(this._section, "duration")
     this.selected = new LO(selected, this.onDirty).applyToSection(this._section, "selected")
@@ -494,7 +527,7 @@ export class DcaKeyframe {
   }
 
   cloneBasics(animation: DcaAnimation) {
-    const keyframe = animation.createKeyframe(this.layerId)
+    const keyframe = animation.createKeyframe(this.layerId.value)
 
     keyframe.startTime.value = this.startTime.value
     keyframe.duration.value = this.duration.value
@@ -506,17 +539,43 @@ export class DcaKeyframe {
     return keyframe
   }
 }
-
 export class KeyframeLayerData {
 
-  //TODO: more stuff
+  readonly _section: SectionHandle<UndoRedoDataType, KeyframeLayerSectionType>
+
+  readonly name: LO<string>
+  readonly visible: LO<boolean>
+  readonly locked: LO<boolean>
+  readonly definedMode: LO<boolean>
+
   constructor(
-    public readonly layerId: number,
-    public readonly name = `Layer ${layerId} `, //TODO: convert these to be LOs
-    public readonly visible = true,
-    public readonly locked = false,
-    public readonly definedMode = false
-  ) { }
+    parentAnimation: DcaAnimation,
+    readonly layerId: number,
+    name = `Layer ${layerId}`,
+    visible = true,
+    locked = false,
+    definedMode = false
+  ) {
+    const onDirty = () => parentAnimation.needsSaving.value = true
+    this._section = parentAnimation.undoRedoHandler.createNewSection(`layer_${this.layerId}` as `layer_0`) //layer_0 is to trick the compiler to knowing that layer_{layerid} a number 
+    this._section.modifyFirst("layerId", this.layerId, () => { throw new Error("Tried to modify layerId") })
+
+    this.name = new LO(name, onDirty).applyToSection(this._section, "name")
+    this.visible = new LO(visible, onDirty).applyToSection(this._section, "visible")
+    this.locked = new LO(locked, onDirty).applyToSection(this._section, "locked")
+    this.definedMode = new LO(definedMode, onDirty).applyToSection(this._section, "definedMode")
+
+    //When locked, we need to deselect these keyframes
+    this.locked.addListener(newValue => {
+      if (newValue) {
+        parentAnimation.selectedKeyframes.value = parentAnimation.selectedKeyframes.value.filter(kf => kf.layerId.value !== this.layerId)
+      }
+    })
+
+    if (this.layerId !== 0) {
+      this._section.pushCreation("Layer Created")
+    }
+  }
 }
 
 export class KeyframeLoopData {

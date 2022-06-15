@@ -97,7 +97,6 @@ export type ActionBatch<S extends UndoRedoSection> = {
   reason: string
   actions: Action<S>[]
 }
-
 export default class UndoRedoHandler<S extends UndoRedoSection> {
   private batchActions = false
   private batchedActions: Action<S>[] = []

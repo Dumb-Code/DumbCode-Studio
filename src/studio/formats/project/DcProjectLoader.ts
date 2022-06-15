@@ -119,7 +119,7 @@ const loadAnimations = async (folder: JSZip, project: DcProject) => {
       .filter((set): set is DCMCube[] => set !== null)
       .flatMap(cubes => cubes.map(cube => cube.name.value))
 
-    animation.keyframeLayers.value = data.layers.map(layer => new KeyframeLayerData(layer.id, layer.name, layer.visible, layer.locked, layer.definedMode))
+    animation.keyframeLayers.value = data.layers.map(layer => new KeyframeLayerData(animation, layer.id, layer.name, layer.visible, layer.locked, layer.definedMode))
 
     project.animationTabs.addAnimation(animation)
   })
@@ -339,10 +339,10 @@ const writeAnimations = async (project: DcProject, folder: JSZip) => {
       ikAnchorCubes: [...anim.ikAnchorCubes.value],
       layers: anim.keyframeLayers.value.map(layer => ({
         id: layer.layerId,
-        name: layer.name,
-        locked: layer.locked,
-        visible: layer.visible,
-        definedMode: layer.definedMode,
+        name: layer.name.value,
+        locked: layer.locked.value,
+        visible: layer.visible.value,
+        definedMode: layer.definedMode.value,
       }))
     }))
   }

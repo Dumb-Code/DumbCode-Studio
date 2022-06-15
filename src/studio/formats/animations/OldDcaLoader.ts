@@ -34,7 +34,7 @@ export const loadDCAAnimationOLD = (project: DcProject, name: string, buffer: St
     kf.startTime.value = buffer.readNumber()
     kf.duration.value = buffer.readNumber()
     if (version >= 4) {
-      kf.layerId = buffer.readInteger()
+      kf.layerId.value = buffer.readInteger()
     }
 
     let rotSize = buffer.readNumber()
