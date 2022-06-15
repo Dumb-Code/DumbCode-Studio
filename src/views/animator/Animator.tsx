@@ -3,6 +3,7 @@ import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyCombos } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
+import UndoRedoHandler from "../../studio/undoredo/UndoRedoHandler"
 import { useListenableObject, useListenableObjectNullable } from "../../studio/util/ListenableObject"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import AnimatorGumballPropertiesBar from "./components/AnimatorGumballPropertiesBar"
@@ -40,12 +41,12 @@ const Animator = () => {
             const selected = project.animationTabs.selectedAnimation.value
             if (selected !== null) {
                 if (undoKey.matches(e)) {
-                    selected.undoRedoHandler.undo()
+                    UndoRedoHandler.undo(selected.undoRedoHandler, project.undoRedoHandler)
                     e.preventDefault()
                     e.stopPropagation()
                 }
                 if (redoKey.matches(e)) {
-                    selected.undoRedoHandler.redo()
+                    UndoRedoHandler.redo(selected.undoRedoHandler, project.undoRedoHandler)
                     e.preventDefault()
                     e.stopPropagation()
                 }

@@ -3,6 +3,7 @@ import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyCombos } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
+import UndoRedoHandler from "../../studio/undoredo/UndoRedoHandler"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import ModelerCommandInput from "./components/ModelerCommandInput"
 import ModelerGumballPropertiesBar from "./components/ModelerGumballPropertiesBar"
@@ -34,12 +35,12 @@ const Modeler = () => {
     useEffect(() => {
         const listener = (e: KeyboardEvent) => {
             if (undoKey.matches(e)) {
-                project.model.undoRedoHandler.undo()
+                UndoRedoHandler.undo(project.model.undoRedoHandler, project.undoRedoHandler)
                 e.preventDefault()
                 e.stopPropagation()
             }
             if (redoKey.matches(e)) {
-                project.model.undoRedoHandler.redo()
+                UndoRedoHandler.redo(project.model.undoRedoHandler, project.undoRedoHandler)
                 e.preventDefault()
                 e.stopPropagation()
             }

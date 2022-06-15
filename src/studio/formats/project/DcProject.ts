@@ -12,12 +12,28 @@ import { DCMModel } from '../model/DcmModel';
 import TextureManager from '../textures/TextureManager';
 import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
 import { CommandRoot } from './../../command/CommandRoot';
+import UndoRedoHandler from './../../undoredo/UndoRedoHandler';
 import { CubeSelectedHighlighter } from './../../util/CubeSelectedHighlighter';
 import { loadDcProj } from "./DcProjectLoader";
 import { RemoteRepo } from './DcRemoteRepos';
 
+type UndoRedoDataType = {
+  section_name: "root_name",
+  data: {
+    selected_cubes: string[]
+  }
+}
+
 export default class DcProject {
   readonly identifier: string
+
+  readonly undoRedoHandler: UndoRedoHandler<UndoRedoDataType> = new UndoRedoHandler(
+    () => { throw new Error("Tried to add root section") },
+    () => { throw new Error("Tried to remove root section") },
+    (_section, property, value) => this._section.applyModification(property, value)
+  )
+
+  readonly _section = this.undoRedoHandler.createNewSection("root_name")
 
   readonly name: LO<string>
   readonly group = new Group()
@@ -62,6 +78,8 @@ export default class DcProject {
 
     this.commandRoot = createModelingCommandRoot(this)
     this.commandRoot.addHelpCommand()
+
+    this.selectedCubeManager.selected.applyToSection(this._section, "selected_cubes")
   }
 
   get lockedCubes() {

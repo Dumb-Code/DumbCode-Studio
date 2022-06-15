@@ -140,7 +140,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
 
   pruneHistory() { this.history.value = [] }
 
-  createNewSection<K extends string>(section_name: K, defaultReason?: string, defaultAction?: HistoryActionType): SectionHandle<S, S & { section_name: K }> {
+  createNewSection<K extends S['section_name']>(section_name: K, defaultReason?: string, defaultAction?: HistoryActionType): SectionHandle<S, S & { section_name: K }> {
     const section = {
       section_name,
       data: {}
@@ -277,6 +277,16 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     }
   }
 
+  static undo(...handlers: (UndoRedoHandler<any> | undefined)[]) {
+    const mappedHandlers = handlers
+      .filter((handler): handler is UndoRedoHandler<any> => handler !== undefined && handler.canUndo.value)
+      .map(handler => ({ handler, time: handler.history.value[handler.index.value].time }))
+    if (mappedHandlers.length === 0) {
+      return
+    }
+    mappedHandlers.reduce((current, handler) => handler.time > current.time ? handler : current).handler.undo()
+  }
+
   private undoAction(act: Action<S>) {
     switch (act.type) {
       case "add":
@@ -305,6 +315,16 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
         }
       }
     }
+  }
+
+  static redo(...handlers: (UndoRedoHandler<any> | undefined)[]) {
+    const mappedHandlers = handlers
+      .filter((handler): handler is UndoRedoHandler<any> => handler !== undefined && handler.canRedo.value)
+      .map(handler => ({ handler, time: handler.history.value[handler.index.value + 1].time }))
+    if (mappedHandlers.length === 0) {
+      return
+    }
+    mappedHandlers.reduce((current, handler) => handler.time < current.time ? handler : current).handler.redo()
   }
 
   redoAction(act: Action<S>) {
