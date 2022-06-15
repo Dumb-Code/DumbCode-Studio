@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Euler, Event, Group, Matrix4, Object3D, Quaternion, Vector3 } from 'three';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
+import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
 import { DcaKeyframe } from './../../../studio/formats/animations/DcaAnimation';
@@ -222,6 +223,7 @@ export const useAnimatorGumball = () => {
       }
     })
     const mouseDownTransformControls = runWhenObjectSelected(() => {
+      animation.undoRedoHandler.startBatchActions()
       const selectedKfs = animation.selectedKeyframes.value
       if (selectedKfs.length !== 1) {
         return
@@ -257,6 +259,9 @@ export const useAnimatorGumball = () => {
           quaternion: elem.quaternion.clone()
         })
       })
+    })
+    const onMouseUpTransformControls = runWhenObjectSelected(() => {
+      animation.undoRedoHandler.endBatchActions("Gumball Move", HistoryActionTypes.Transformation)
     })
 
     //The translate event
@@ -316,6 +321,7 @@ export const useAnimatorGumball = () => {
     //This will cause `visible` to be true, but the `enableDisableCallback` will force it to be the right value
     transformControls.attach(gumball.transformAnchor)
     transformControls.addEventListener("mouseDown", mouseDownTransformControls)
+    transformControls.addEventListener("mouseUp", onMouseUpTransformControls)
     transformControls.addEventListener("objectChange", objectChangeReconstructIK)
     transformControls.addEventListener("studioTranslate", translateEventTransformControls)
     transformControls.addEventListener("studioRotate", rotateEventTransformControls)
@@ -334,6 +340,7 @@ export const useAnimatorGumball = () => {
     return () => {
       transformControls.detach()
       transformControls.removeEventListener("mouseDown", mouseDownTransformControls)
+      transformControls.removeEventListener("mouseUp", onMouseUpTransformControls)
       transformControls.removeEventListener("objectChange", objectChangeReconstructIK)
       transformControls.removeEventListener("studioTranslate", translateEventTransformControls)
       transformControls.removeEventListener("studioRotate", rotateEventTransformControls)
