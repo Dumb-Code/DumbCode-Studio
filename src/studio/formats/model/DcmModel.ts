@@ -1,6 +1,7 @@
 import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, Quaternion, Vector3 } from "three";
 import { v4 as uuidv4 } from "uuid";
 import LockedCubes from "../../util/LockedCubes";
+import SelectedCubeManager from "../../util/SelectedCubeManager";
 import DcProject from '../project/DcProject';
 import UndoRedoHandler, { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
@@ -67,7 +68,7 @@ type UndoRedoDataType = {
 
 export class DCMModel implements CubeParent {
 
-  parentProject: DcProject = null as any //Cheap hack to remove null errors
+  parentProject?: DcProject
   readonly undoRedoHandler = new UndoRedoHandler<UndoRedoDataType>(
     (s, d) => this.onAddSection(s, d),
     s => this.onRemoveSection(s),
@@ -91,6 +92,7 @@ export class DCMModel implements CubeParent {
   readonly modelGroup: Group
 
   readonly lockedCubes = new LockedCubes(this)
+  readonly selectedCubeManager = new SelectedCubeManager()
 
   readonly metadata: Readonly<Record<string, string>> = {}
 
@@ -297,7 +299,7 @@ export class DCMCube implements CubeParent {
     this.children = new LO(children, onDirty).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children", false, "Cube Children Edit")
     this.model = model
 
-    this.selected = LO.createOneWayDelegateListener(model.parentProject.selectedCubeManager.selected, selected => selected.includes(this.identifier))//.applyToSection(this._section, "selected", false, value => value ? "Cube Selected" : "Cube Deselected")
+    this.selected = LO.createOneWayDelegateListener(model.selectedCubeManager.selected, selected => selected.includes(this.identifier))//.applyToSection(this._section, "selected", false, value => value ? "Cube Selected" : "Cube Deselected")
     this.hideChildren = new LO(hideChildren).applyToSection(this._section, "hideChildren", true)
     this.visible = new LO(visible).applyToSection(this._section, "visible", false, value => value ? "Cube Shown" : "Cube Visible", HistoryActionTypes.ToggleVisibility)
     this.locked = new LO(locked).applyToSection(this._section, "locked", false, value => value ? "Cube Locked" : "Cube Unlocked", HistoryActionTypes.LockUnlock)
