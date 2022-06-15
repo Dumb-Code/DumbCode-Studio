@@ -139,7 +139,7 @@ export class DCMModel implements CubeParent {
     })
   }
 
-  onAddSection<K extends UndoRedoDataType['section_name'], S extends UndoRedoDataType & { section_name: K }>(section: K, data: S['data']) {
+  onAddSection<K extends UndoRedoDataType['section_name']>(section: K, data: any) {
     if (section === "root_data") {
       return
     }

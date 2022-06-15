@@ -131,7 +131,7 @@ export default class DcaAnimation {
     })
   }
 
-  onAddSection<K extends UndoRedoDataType['section_name'], S extends UndoRedoDataType & { section_name: K }>(section: K, dataIn: S['data']) {
+  onAddSection<K extends UndoRedoDataType['section_name']>(section: K, dataIn: any) {
     if (section === "root_data") {
       return
     } else if (section.startsWith("keyframe_")) {
