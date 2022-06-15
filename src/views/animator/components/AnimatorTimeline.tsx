@@ -1,4 +1,4 @@
-import { createContext, MouseEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, MouseEvent, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { SvgArrows, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGSettings, SVGTrash, SVGUnlocked } from "../../../components/Icons";
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
@@ -32,11 +32,13 @@ const ScrollZoomContext = createContext<{
     readonly removeListener: ListenerEffect
     readonly getPixelsPerSecond: () => number
     readonly getScroll: () => number
+    readonly getDraggingKeyframeRef: () => MutableRefObject<DcaKeyframe | null>
 }>({
     addAndRunListener: () => { throw new Error("Invalid Call") },
     removeListener: () => { throw new Error("Invalid Call") },
     getPixelsPerSecond: () => 1,
     getScroll: () => 0,
+    getDraggingKeyframeRef: () => { throw new Error("Invalid Call") },
 })
 
 const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
@@ -79,6 +81,31 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
         }
     }, [keyframes, layers, setLayers, animation.scroll, animation.zoom, onScrollChange, onZoomChange])
 
+    const [keyframesByLayers, setKeyframesByLayers] = useState<{ layer: KeyframeLayerData, keyframes: DcaKeyframe[] }[]>([])
+    useEffect(() => {
+        const onChange = () => {
+            const result: typeof keyframesByLayers = []
+            layers.forEach(layer => {
+                result.push({
+                    layer,
+                    keyframes: keyframes.filter(k => k.layerId.value === layer.layerId)
+                })
+            })
+            setKeyframesByLayers(result)
+        }
+
+        const keyframesClone = [...keyframes]
+        for (const kf of keyframesClone) {
+            kf.layerId.addPostListener(onChange)
+        }
+        onChange()
+        return () => {
+            for (const kf of keyframesClone) {
+                kf.layerId.removePostListener(onChange)
+            }
+        }
+    }, [layers, keyframes])
+
     const addLayer = useCallback((e: MouseEvent) => {
         const layerId = layers.reduce((x, y) => Math.max(x, y.layerId + 1), 0)
         setLayers(layers.concat(new KeyframeLayerData(animation, layerId)))
@@ -89,23 +116,28 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
         return width * blockPerSecond * animation.zoom.value
     }, [width, blockPerSecond, animation])
     const getScroll = useCallback(() => animation.scroll.value, [animation])
+
+    const draggingKeyframeRef = useRef<DcaKeyframe | null>(null)
+    const getDraggingKeyframeRef = useCallback(() => draggingKeyframeRef, [])
+
     const context = useMemo(() => ({
         addAndRunListener,
         removeListener,
         getPixelsPerSecond,
-        getScroll
-    }), [addAndRunListener, removeListener, getPixelsPerSecond, getScroll])
+        getScroll,
+        getDraggingKeyframeRef
+    }), [addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef])
 
     return (
         <ScrollZoomContext.Provider value={context}>
-            {layers.map(l =>
-                <AnimationLayer key={l.layerId} animation={animation} keyframes={keyframes.filter(k => k.layerId.value === l.layerId)} layer={l} />
-            )}
-            <div className="flex flex-row">
-                <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Transformation Layer</p></button>
-                <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Sound Layer</p></button>
-                <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Event Layer</p></button>
-            </div>
+            <>
+                {keyframesByLayers.map(({ layer, keyframes }) => <AnimationLayer key={layer.layerId} animation={animation} keyframes={keyframes} layer={layer} />)}
+                <div className="flex flex-row">
+                    <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Transformation Layer</p></button>
+                    <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Sound Layer</p></button>
+                    <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Event Layer</p></button>
+                </div>
+            </>
         </ScrollZoomContext.Provider>
     )
 }
@@ -135,7 +167,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     const [visible, toggleVisible] = useListenableObjectToggle(layer.visible)
     const [locked, toggleLocked] = useListenableObjectToggle(layer.locked)
 
-    const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll } = useContext(ScrollZoomContext)
+    const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef } = useContext(ScrollZoomContext)
 
     //Hacky stuff, but essentially I need this to re-render whenever a keyframe "moves" (start time changes or duration changes)
     const [, hackyRerender] = useState(0)
@@ -284,8 +316,6 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
         animation.undoRedoHandler.endBatchActions("Created Keyframe", HistoryActionTypes.Add)
     }
 
-
-
     return (
         <div onClick={e => e.stopPropagation()} className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
@@ -297,7 +327,14 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
                 <AnimationLayerButton icon={SVGSettings} />
             </div>
             <div className="relative w-full">
-                <div ref={draggingRef} className="flex flex-col w-full h-full overflow-hidden">
+                <div
+                    ref={draggingRef}
+                    onMouseMoveCapture={() => { //We need to listen on capture, as we need to capture the event BEFORE it reaches the keyframe and is cancled.
+                        const kf = getDraggingKeyframeRef().current
+                        if (!layer.locked.value && kf !== null) {
+                            kf.layerId.value = layer.layerId
+                        }
+                    }} className="flex flex-col w-full h-full overflow-hidden">
                     <TimelineLayers color={color} hoverColor={hoverColor} layers={layers} />
                 </div>
                 <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 h-7 -top-0.5" />
@@ -381,10 +418,11 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
     const isLockedLO = useMemo(() => layers.find(kfl => kfl.layerId === layerId), [keyframe])
     const [isLocked] = useListenableObjectNullable(isLockedLO?.locked)
 
-    const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll } = useContext(ScrollZoomContext)
+    const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef } = useContext(ScrollZoomContext)
 
     const keyframeHandleRef = useDraggbleRef<HTMLDivElement, Map<DcaKeyframe, number>>(
         useCallback((event) => {
+            getDraggingKeyframeRef().current = keyframe
             keyframe.animation.undoRedoHandler.startBatchActions()
             const keyframesToUse = [keyframe]
             if (!event.ctrlKey && keyframe.selected.value) {
@@ -404,6 +442,7 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
 
         }, []),
         useCallback(({ max }, event) => {
+            getDraggingKeyframeRef().current = null
             keyframe.animation.undoRedoHandler.endBatchActions("Keyframe Dragged", HistoryActionTypes.Transformation)
             //If the mouse hasn't move then we count it as a click and not a drag
             if (max === 0) {
