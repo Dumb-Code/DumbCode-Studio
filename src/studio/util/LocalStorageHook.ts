@@ -3,6 +3,15 @@ import { useCallback, useEffect, useState } from 'react';
 export const useLocalStorage = (key: string) => {
   const [storage, _setStorage] = useState(localStorage.getItem(key))
 
+  const setStorage = useCallback((value: string | null) => {
+    if (value === null) {
+      localStorage.removeItem(key)
+    } else {
+      localStorage.setItem(key, value)
+    }
+    _setStorage(value)
+  }, [key])
+
   useEffect(() => {
     const interval = setInterval(() => {
       const current = localStorage.getItem(key)
@@ -11,16 +20,7 @@ export const useLocalStorage = (key: string) => {
       }
     }, 100)
     return () => clearInterval(interval)
-  })
-
-  const setStorage = useCallback((value: string | null) => {
-    if (value === null) {
-      localStorage.removeItem(key)
-    } else {
-      localStorage.setItem(key, value)
-    }
-    _setStorage(value)
-  }, [])
+  }, [key, storage, setStorage])
 
   return [storage, setStorage] as const
 }
@@ -32,6 +32,6 @@ export const useGithubAccessToken = () => {
   const removeAll = useCallback(() => {
     setGithub(null)
     setDumbcode(null)
-  }, [])
+  }, [setGithub, setDumbcode])
   return [github, dumbcode, removeAll] as const
 }

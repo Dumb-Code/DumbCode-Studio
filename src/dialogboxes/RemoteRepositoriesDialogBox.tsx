@@ -1,4 +1,5 @@
 import { Listbox, Transition } from "@headlessui/react"
+import Image from "next/image"
 import { Fragment, useEffect, useState } from "react"
 import { SVGChevronDown, SVGOpenLink, SVGSearch, SVGTick } from "../components/Icons"
 import PagedFetchResult from "../components/PagedFetchResult"
@@ -81,7 +82,9 @@ const RepositoryEntry = ({ value, token, setRepo }: { value: PagedFetchType, tok
   const [branch, setBranch] = useState(value.default_branch)
   return (
     <div onClick={() => setRepo(value.owner.login, value.name, branch)} className="group border-t border-b border-black flex flex-row p-2 items-center hover:bg-gray-500">
-      <img className="rounded" width={40} src={value.owner.avatar_url ?? ''} alt="Profile" />
+      <div className="relative w-[40px]  rounded overflow-hidden">
+        <Image className="w-full h-full" src={value.owner.avatar_url ?? ''} alt="Profile" width="100%" height="100%" layout="responsive" objectFit="contain" />
+      </div>
       <div className="pl-3 flex-grow group-hover:text-gray-300 dark:group-hover:text-gray-800">
         {value.owner.login} / {value.name}
       </div>
@@ -161,7 +164,9 @@ const GithubAccount = ({ token }: { token: string }) => {
 
   return (
     <div className="flex flex-row items-center">
-      <img className="rounded" width={25} src={result?.avatar_url ?? ''} alt="Profile" />
+      <div className="relative w-[25px] rounded overflow-hidden">
+        <Image className="w-full h-full" src={result?.avatar_url ?? ''} alt="Profile" width="100%" height="100%" layout="responsive" objectFit="contain" />
+      </div>
       <div className="pl-2">{result?.name ?? 'Loading...'}</div>
     </div>
   )

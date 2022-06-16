@@ -9,11 +9,14 @@ type FetchResponse = {
 
 const emptyResponse: FetchResponse = { status: -1 }
 
-export const useFetchRequest = (url: string, token: string | null) => {
+export const useFetchRequest = (url: string, token: string | null, shouldRun = true) => {
   const cacheKey = url + "#" + token
   const cachedResult = responseCache.get(cacheKey) ?? emptyResponse
   const [result, setResult] = useState<FetchResponse>(cachedResult)
   useEffect(() => {
+    if (!shouldRun) {
+      return
+    }
     if (cachedResult.status !== -1) {
       return
     }
@@ -42,14 +45,11 @@ export const useFetchRequest = (url: string, token: string | null) => {
       })
       .catch(() => { })
     return () => controller.abort()
-  }, [url, token, cacheKey, cachedResult])
+  }, [url, token, cacheKey, cachedResult, shouldRun])
   return result
 }
 
 export const useFetchGithubUserDetails = (token: string | null) => {
-  if (token === null) {
-    return null
-  }
-  const val = useFetchRequest("https://api.github.com/user", token)
+  const val = useFetchRequest("https://api.github.com/user", token, token !== null)
   return val.result ?? null
 }

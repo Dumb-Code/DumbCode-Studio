@@ -9,7 +9,7 @@ const LinksToOurStuff = () => {
             <button className="dark:bg-gray-800 bg-gray-300 rounded w-80 dark:text-white text-black font-semibold p-2 text-left pl-4 my-1 hover:bg-purple-600">Discord</button>
 
             <p className="text-gray-900 text-xs font-semibold mt-4">DUMBCODE WEBSITE</p>
-            <p className="text-gray-900 text-xs mb-1">Check out DumbCode's other projects.</p>
+            <p className="text-gray-900 text-xs mb-1">Check out DumbCode&apos;s other projects.</p>
             <button className="dark:bg-gray-800 bg-gray-300 rounded w-80 dark:text-white text-black font-semibold p-2 text-left pl-4 my-1 hover:bg-sky-500">Website</button>
 
             <p className="text-gray-900 text-xs font-semibold mt-4">DUMBCODE STUDIO CHANGELOG</p>
@@ -17,7 +17,7 @@ const LinksToOurStuff = () => {
             <button className="dark:bg-gray-800 bg-gray-300 rounded w-80 dark:text-white text-black font-semibold p-2 text-left pl-4 my-1 hover:bg-yellow-500">Changelog</button>
 
             <p className="text-gray-900 text-xs font-semibold mt-4">DUMBCODE STUDIO ISSUE TRACKER</p>
-            <p className="text-gray-900 text-xs mb-1">Found a bug? Well, add it to the list, we'll fix it right up!</p>
+            <p className="text-gray-900 text-xs mb-1">Found a bug? Well, add it to the list, we&apos;ll fix it right up!</p>
             <button className="dark:bg-gray-800 bg-gray-300 rounded w-80 dark:text-white text-black font-semibold p-2 text-left pl-4 my-1 hover:bg-red-600">Issue Tracker</button>
 
             <p className="text-gray-900 text-xs font-semibold mt-4">DUMBCODE STUDIO GITHUB</p>

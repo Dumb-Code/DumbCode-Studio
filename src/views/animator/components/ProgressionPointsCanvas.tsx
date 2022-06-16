@@ -95,7 +95,7 @@ export const ProgressionPointsCanvas = ({ keyframe }: { keyframe: DcaKeyframe | 
       setPoints([...points]);
       setHandled();
     }
-  }, [points]);
+  }, [points, setPoints]);
 
   const onMouseMove = useCallback<CanvasMouseCallbackEvent>(({ transformedMouse, width, height }) => setHoveredPoint(findPoint(transformedMouse, width, height) ?? null), [findPoint]);
 
@@ -113,7 +113,7 @@ export const ProgressionPointsCanvas = ({ keyframe }: { keyframe: DcaKeyframe | 
       return true;
     }
     return false;
-  }, [points]);
+  }, [points, setPoints]);
 
   const onMouseUpGlobally = useCallback<CanvasMouseCallbackEvent<MouseEvent>>(({ setHandled }) => {
     if (onMouseUpGeneral()) {
@@ -132,7 +132,7 @@ export const ProgressionPointsCanvas = ({ keyframe }: { keyframe: DcaKeyframe | 
     } else if (onMouseUpGeneral()) {
       setHandled();
     }
-  }, [points]);
+  }, [points, setPoints, onMouseUpGeneral]);
 
   const onMouseLeave = useCallback<CanvasMouseCallbackEvent>(({ setHandled }) => {
     setHoveredPoint(null);

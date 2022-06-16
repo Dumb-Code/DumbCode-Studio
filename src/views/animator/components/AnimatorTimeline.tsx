@@ -91,7 +91,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
             animation.scroll.removeListener(onScrollChange)
             animation.zoom.removeListener(onZoomChange)
         }
-    }, [keyframes, layers, setLayers, animation.scroll, animation.zoom, onScrollChange, onZoomChange])
+    }, [keyframes, layers, setLayers, animation.scroll, animation.zoom, onScrollChange, onZoomChange, animation])
 
     const [keyframesByLayers, setKeyframesByLayers] = useState<{ layer: KeyframeLayerData, keyframes: (DcaKeyframe | KeyframeClipboardType)[] }[]>([])
     useEffect(() => {
@@ -123,6 +123,35 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
         }
     }, [layers, keyframes, pastedKeyframes, hoveredLayer])
 
+
+    const addLayer = useCallback((e: ReactMouseEvent) => {
+        const layerId = layers.reduce((x, y) => Math.max(x, y.layerId + 1), 0)
+        setLayers(layers.concat(new KeyframeLayerData(animation, layerId)))
+        e.stopPropagation()
+    }, [layers, animation, setLayers])
+
+    const getPixelsPerSecond = useCallback(() => {
+        return width * blockPerSecond * animation.zoom.value
+    }, [animation])
+    const getScroll = useCallback(() => animation.scroll.value, [animation])
+
+    const draggingKeyframeRef = useRef<DcaKeyframe | KeyframeClipboardType[] | null>(null)
+    const getDraggingKeyframeRef = useCallback(() => draggingKeyframeRef, [])
+
+    const setHoveredLayerAndPosition = useCallback((layer: number | null, clientX: number | null) => {
+        setHoveredLayer(layer)
+        setHoveredLayerClientX(clientX)
+    }, [])
+
+    const context = useMemo(() => ({
+        addAndRunListener,
+        removeListener,
+        getPixelsPerSecond,
+        getScroll,
+        getDraggingKeyframeRef,
+        setHoveredLayerAndPosition,
+    }), [addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef, setHoveredLayerAndPosition])
+
     useEffect(() => {
         if (pastedKeyframes !== null && pastedKeyframes.length !== 0 && hoveredLayer !== null && hoveredLayerClientX !== null) {
             const first = pastedKeyframes.reduce((prev, cur) => prev.start < cur.start ? prev : cur)
@@ -145,35 +174,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
                 setPastedKeyframes(newValue)
             }
         }
-    }, [pastedKeyframes, hoveredLayer, hoveredLayerClientX])
-
-    const addLayer = useCallback((e: ReactMouseEvent) => {
-        const layerId = layers.reduce((x, y) => Math.max(x, y.layerId + 1), 0)
-        setLayers(layers.concat(new KeyframeLayerData(animation, layerId)))
-        e.stopPropagation()
-    }, [layers])
-
-    const getPixelsPerSecond = useCallback(() => {
-        return width * blockPerSecond * animation.zoom.value
-    }, [width, blockPerSecond, animation])
-    const getScroll = useCallback(() => animation.scroll.value, [animation])
-
-    const draggingKeyframeRef = useRef<DcaKeyframe | KeyframeClipboardType[] | null>(null)
-    const getDraggingKeyframeRef = useCallback(() => draggingKeyframeRef, [])
-
-    const setHoveredLayerAndPosition = useCallback((layer: number | null, clientX: number | null) => {
-        setHoveredLayer(layer)
-        setHoveredLayerClientX(clientX)
-    }, [])
-
-    const context = useMemo(() => ({
-        addAndRunListener,
-        removeListener,
-        getPixelsPerSecond,
-        getScroll,
-        getDraggingKeyframeRef,
-        setHoveredLayerAndPosition,
-    }), [addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef, setHoveredLayerAndPosition])
+    }, [pastedKeyframes, hoveredLayer, hoveredLayerClientX, getPixelsPerSecond, getScroll, layers, setPastedKeyframes])
 
     return (
         <ScrollZoomContext.Provider value={context}>
@@ -218,7 +219,7 @@ const PastedKeyframePortal = ({ animation, pastedKeyframes, hoveredLayer }: { an
             document.removeEventListener("mousedown", clearPasted)
             document.removeEventListener("keydown", keyPressed)
         }
-    }, [])
+    }, [animation])
 
     const movedKeyframes = useMemo(() => {
         if (pastedKeyframes === null || pastedKeyframes.length === 0) {
@@ -568,7 +569,7 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
     const [layerId] = useListenableObject(keyframe.layerId)
     const [layers] = useListenableObject(keyframe.animation.keyframeLayers)
 
-    const isLockedLO = useMemo(() => layers.find(kfl => kfl.layerId === layerId), [keyframe])
+    const isLockedLO = useMemo(() => layers.find(kfl => kfl.layerId === layerId), [layers, layerId])
     const [isLocked] = useListenableObjectNullable(isLockedLO?.locked)
 
     const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef } = useContext(ScrollZoomContext)
@@ -586,14 +587,13 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
                 map.set(kf, kf.startTime.value)
                 return map
             }, new Map<DcaKeyframe, number>())
-        }, [keyframe]),
+        }, [keyframe, getDraggingKeyframeRef]),
         useCallback(({ dx, initial }) => {
             initial.forEach((time, kf) => {
                 //Validate that this animation/project/tab is open?
                 kf.startTime.value = Math.max(time + dx / getPixelsPerSecond(), 0)
             })
-
-        }, []),
+        }, [getPixelsPerSecond]),
         useCallback(({ max }, event) => {
             getDraggingKeyframeRef().current = null
             keyframe.animation.undoRedoHandler.endBatchActions("Keyframe Dragged", HistoryActionTypes.Transformation)
@@ -622,7 +622,7 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
                     }
                 }
             }
-        }, [keyframe, selected]),
+        }, [keyframe, selected, getDraggingKeyframeRef, setSelected]),
         true
     )
 

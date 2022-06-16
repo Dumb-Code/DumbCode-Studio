@@ -11,14 +11,14 @@ export type OptionsContext = {
   compactMode: boolean
   setCompactMode: (val: boolean) => void
 
-  keyCombos: KeyComboMap,
+  readonly keyCombos: KeyComboMap,
   keyCombosChanged: () => void, //TODO: remove this anti-pattern
 }
 
 type SavedOptions = {
-  darkMode: boolean,
-  compactMode: boolean,
-  keyCombos: SavedKeyComboMap
+  readonly darkMode: boolean,
+  readonly compactMode: boolean,
+  readonly keyCombos: SavedKeyComboMap
 }
 
 export const useOptions = () => {
@@ -51,7 +51,7 @@ export const useKeyComboPressed = (handlers: {
 
     document.addEventListener("keydown", listener)
     return () => document.removeEventListener("keydown", listener)
-  }, [handlers])
+  }, [handlers, options.keyCombos])
 }
 
 export const OptionsContextProvider = ({ children }: { children?: ReactNode }) => {
@@ -67,7 +67,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
 
   const [darkMode, setDarkMode] = useState(loadedOptions?.darkMode ?? true)
   const [compactMode, setCompactMode] = useState(loadedOptions?.compactMode ?? false)
-  const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [])
+  const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [loadedOptions?.keyCombos])
 
   const saveOptions = useCallback(() => {
     const data: SavedOptions = {
@@ -80,7 +80,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       }, {} as SavedKeyComboMap)
     }
     localStorage.setItem("studio_options", JSON.stringify(data))
-  }, [])
+  }, [darkMode, compactMode, keyCombos])
 
 
   scene.background = new Color(darkMode ? 0x363636 : 0xF3F4F6)
@@ -92,11 +92,10 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
     }
   }
 
-  const keyCombosChanged = () => {
+  const keyCombosChanged = useCallback(() => {
     updateClashes(keyCombos)
     saveOptions()
-  }
-
+  }, [keyCombos, saveOptions])
   if (darkMode) {
     setGridColor(0x121212, 0x1c1c1c, 0x292929)
   } else {

@@ -15,7 +15,7 @@ const KeyBindOptions = () => {
             keyCombos[key].reset()
         })
         keyCombosChanged()
-    }, [])
+    }, [keyCombos, keyCombosChanged])
 
     return (
         <div className="pb-8">

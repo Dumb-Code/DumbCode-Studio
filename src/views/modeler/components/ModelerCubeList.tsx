@@ -317,7 +317,7 @@ const CubeListItem = ({
 
 
         setIsDragging(true)
-    }, [setDragData, setIsDragging, parentAnimateChildRemove, animateRef])
+    }, [setDragData, setIsDragging, parentAnimateChildRemove, animateRef, cube, mouseDraggedElementRef])
 
     const updateDrag = useCallback((x: number, y: number) => {
         if (mouseDraggedElementRef.current !== null) {
@@ -367,7 +367,7 @@ const CubeListItem = ({
             //Cause a re-render
             onDragFinish()
         }, 300)
-    }, [cleanupRef, setIsDragging, setIsAnimating, dragData, setDragData, onDragFinish])
+    }, [cleanupRef, setIsDragging, setIsAnimating, dragData, setDragData, onDragFinish, cube.model, dragEndRef, dragOverRef, mouseDraggedElementRef])
 
     const onDragOver = useCallback((y: number) => {
         if (dragData?.cubes?.includes(cube) || cubeItemRef.current === null) {
@@ -393,7 +393,7 @@ const CubeListItem = ({
                 setDragState(null)
             }
         })
-    }, [dragData, setDragState])
+    }, [dragData, setDragState, clearPreviousDragState, cube, dragOverRef])
 
     useEffect(() => {
         if (cube.hasBeenPastedNeedsPlacement) {
@@ -419,7 +419,7 @@ const CubeListItem = ({
                 document.removeEventListener("click", mousedown, true)
             }
         }
-    }, [beginDrag, updateDrag, finishDrag])
+    }, [beginDrag, updateDrag, finishDrag, cube, dragData?.cubes, mousePositionRef])
 
 
     return (
