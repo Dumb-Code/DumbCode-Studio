@@ -1,7 +1,8 @@
 import { useStudio } from "../contexts/StudioContext";
-import UndoRedoHandler, { HistoryActionType } from "../studio/undoredo/UndoRedoHandler";
+import UndoRedoHandler, { ActionBatch, HistoryActionType } from "../studio/undoredo/UndoRedoHandler";
 import { useListenableObject, useListenableObjectNullable } from "../studio/util/ListenableObject";
 import CollapsableSidebarPannel from "./CollapsableSidebarPannel";
+
 
 const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<any> }) => {
     const { getSelectedProject } = useStudio()
@@ -10,12 +11,23 @@ const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<an
     const [projectHistory] = useListenableObject(project.undoRedoHandler.history)
     const [history] = useListenableObjectNullable(undoRedoHandler?.history)
 
-    const joined = (history ?? []).concat(projectHistory).sort((a, b) => a.time - b.time)
+    const [projectIndex] = useListenableObject(project.undoRedoHandler.index)
+    const [index] = useListenableObjectNullable(undoRedoHandler?.index)
+
+    const mapToMeta = (index: number, batchs: readonly ActionBatch<any>[]) => batchs.map((batch, i) => ({
+        batch,
+        undone: index < i,
+        selected: i === index
+    }))
+    const historyWithMeta = mapToMeta(index ?? 0, history ?? [])
+    const projectHistoryWithMeta = mapToMeta(projectIndex, projectHistory)
+
+    const joined = historyWithMeta.concat(projectHistoryWithMeta).sort((a, b) => a.batch.time - b.batch.time)
 
     return (
         <CollapsableSidebarPannel title="HISTORY LIST" heightClassname="h-96" panelName="history_list">
             <div className="overflow-y-scroll h-96 studio-scrollbar px-1 mr-0.5 mt-1 flex flex-col-reverse">
-                {joined.map((item, i) => <HistoryItem key={i} type={item.actionType} reason={item.reason} undone={false} selected={false} />)}
+                {joined.map((item, i) => <HistoryItem key={i} type={item.batch.actionType} reason={item.batch.reason} undone={item.undone} selected={item.selected} />)}
             </div>
         </CollapsableSidebarPannel>
     )

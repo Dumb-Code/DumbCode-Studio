@@ -39,7 +39,7 @@ const AnimatorProperties = () => {
             <AnimatorProgressionProperties animation={animation} />
             <AnimatorAutoGravity animation={animation} selectedCubes={dcmSelectedCubes} />
             <AnimatorSkeletalExport animation={animation} cube={singleSelectedCube} />
-            <HistoryList />
+            <HistoryList undoRedoHandler={animation?.undoRedoHandler} />
         </div>
     )
 }

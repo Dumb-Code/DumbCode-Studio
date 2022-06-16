@@ -247,7 +247,8 @@ const CubeListItem = ({
                 }
             })
             const pasted = cube.model.finishPaste()
-            cube.model.undoRedoHandler.endBatchActions(pasted ? "Cubes Pasted" : "Cubes Dragged", pasted ? HistoryActionTypes.Command : HistoryActionTypes.Transformation)
+            const num = cubeDragged.cubes.length
+            cube.model.undoRedoHandler.endBatchActions(pasted ? `${num} Cube${num === 1 ? "" : "s"} Pasted` : `${num} Cube${num === 1 ? "" : "s"} Dragged`, pasted ? HistoryActionTypes.Command : HistoryActionTypes.Transformation)
         }, 300)
     }
 
@@ -354,7 +355,8 @@ const CubeListItem = ({
                         cube.model.addChild(cube)
                     })
                     const pasted = cube.model.finishPaste()
-                    cube.model.undoRedoHandler.endBatchActions(pasted ? "Cubes Pasted" : "Cubes Dragged", pasted ? HistoryActionTypes.Command : HistoryActionTypes.Transformation)
+                    const num = dragData.cubes.length
+                    cube.model.undoRedoHandler.endBatchActions(pasted ? `${num} Cube${num === 1 ? "" : "s"} Pasted` : `${num} Cube${num === 1 ? "" : "s"} Dragged`, pasted ? HistoryActionTypes.Command : HistoryActionTypes.Transformation)
                 }
             }
 
