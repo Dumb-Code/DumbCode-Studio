@@ -27,7 +27,8 @@ const Animator = () => {
         common_redo: () => animation !== null && UndoRedoHandler.redo(animation.undoRedoHandler, project.undoRedoHandler),
 
         common_copy: () => animation !== null && animation.copyKeyframes(),
-        common_paste: () => animation !== null && animation.pasteKeyframes(),
+        common_paste: () => animation !== null && animation.pasteKeyframes(false),
+        animator_paste_keyframes_defined: () => animation !== null && animation.pasteKeyframes(true),
 
     }), [animation, project]))
 

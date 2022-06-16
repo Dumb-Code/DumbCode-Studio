@@ -268,6 +268,9 @@ export class LOMap<K, V> extends Map<K, V> {
     } else {
       super.set(key, value)
     }
+    if (this.listners === undefined) {
+      return this
+    }
     const get = this.listners.get(key)
     if (get !== undefined) {
       get.forEach(l => l(value, oldValue))

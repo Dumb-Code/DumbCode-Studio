@@ -1,7 +1,7 @@
 import { v4 } from 'uuid';
 import { drawProgressionPointGraph, GraphType } from '../../../views/animator/logic/ProgressionPointGraph';
 import { readFromClipboard, writeToClipboard } from '../../clipboard/Clipboard';
-import { KeyframeClipboardType, writeKeyframeForClipboard } from '../../clipboard/KeyframeClipboardType';
+import { convertClipboardToKeyframe, KeyframeClipboardType, writeKeyframeForClipboard } from '../../clipboard/KeyframeClipboardType';
 import UndoRedoHandler from '../../undoredo/UndoRedoHandler';
 import { getUndefinedWritable } from '../../util/FileTypes';
 import DcProject from '../project/DcProject';
@@ -252,10 +252,20 @@ export default class DcaAnimation {
     writeToClipboard("keyframe", kfData)
   }
 
-  pasteKeyframes() {
+  pasteKeyframes(defined: boolean) {
     const clipBoard = readFromClipboard("keyframe")
     if (clipBoard !== null) {
+      clipBoard.forEach(item => item.pasteAsDefined = defined)
       this.pastedKeyframes.value = clipBoard
+    }
+  }
+
+  finishPaste() {
+    if (this.pastedKeyframes.value !== null) {
+      this.undoRedoHandler.startBatchActions()
+      this.keyframes.value = this.keyframes.value.concat(this.pastedKeyframes.value.map(pkf => convertClipboardToKeyframe(this, pkf)))
+      this.undoRedoHandler.endBatchActions("Pasted Keyframes")
+      this.pastedKeyframes.value = null
     }
   }
 

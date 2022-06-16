@@ -18,6 +18,7 @@ const keyCombos = {
   modeler_delete: new KeyCombo('Delete', "Deletes the selected object.", 'Delete', false).withScope("modeler"),
   modeler_delete_and_children: new KeyCombo('Delete + Children', "Deletes the selected object and it's children.", 'Delete').withScope("modeler"),
   animator_delete: new KeyCombo('Delete', "Deletes the selected keyframe.", 'Delete', false).withScope("animator"),
+  animator_paste_keyframes_defined: new KeyCombo('Paste as defined', "Pasted the keyframes in defined mode", "KeyV", true, true),
   animator_individually_select: new KeyCombo('Individually Select', "Invividually select the keyframe", null).withScope("animator"), //Only Ctrl
 }
 

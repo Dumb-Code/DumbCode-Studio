@@ -1,7 +1,9 @@
-import { createContext, MouseEvent, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, MouseEvent as ReactMouseEvent, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { SvgArrows, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGSettings, SVGTrash, SVGUnlocked } from "../../../components/Icons";
+import { useCreatePortal } from "../../../contexts/CreatePortalContext";
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
+import { KeyframeClipboardType } from "../../../studio/clipboard/KeyframeClipboardType";
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
 import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef";
@@ -36,18 +38,24 @@ const ScrollZoomContext = createContext<{
     readonly removeListener: ListenerEffect
     readonly getPixelsPerSecond: () => number
     readonly getScroll: () => number
-    readonly getDraggingKeyframeRef: () => MutableRefObject<DcaKeyframe | null>
+    readonly getDraggingKeyframeRef: () => MutableRefObject<DcaKeyframe | KeyframeClipboardType[] | null>
+    readonly setHoveredLayerAndPosition: (value: number | null, clientX: number | null) => void
 }>({
     addAndRunListener: () => { throw new Error("Invalid Call") },
     removeListener: () => { throw new Error("Invalid Call") },
     getPixelsPerSecond: () => 1,
     getScroll: () => 0,
     getDraggingKeyframeRef: () => { throw new Error("Invalid Call") },
+    setHoveredLayerAndPosition: () => { },
 })
 
 const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     const [layers, setLayers] = useListenableObject(animation.keyframeLayers)
     const [keyframes] = useListenableObject(animation.keyframes)
+    const [pastedKeyframes, setPastedKeyframes] = useListenableObject(animation.pastedKeyframes)
+
+    const [hoveredLayer, setHoveredLayer] = useState<number | null>(null)
+    const [hoveredLayerClientX, setHoveredLayerClientX] = useState<number | null>(null)
 
     const listeners = useRef(new Set<(scroll: number, zoom: number) => void>())
     const addAndRunListener: ListenerEffect = useCallback(func => {
@@ -85,14 +93,19 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
         }
     }, [keyframes, layers, setLayers, animation.scroll, animation.zoom, onScrollChange, onZoomChange])
 
-    const [keyframesByLayers, setKeyframesByLayers] = useState<{ layer: KeyframeLayerData, keyframes: DcaKeyframe[] }[]>([])
+    const [keyframesByLayers, setKeyframesByLayers] = useState<{ layer: KeyframeLayerData, keyframes: (DcaKeyframe | KeyframeClipboardType)[] }[]>([])
     useEffect(() => {
         const onChange = () => {
             const result: typeof keyframesByLayers = []
+
             layers.forEach(layer => {
+                const filtered: (DcaKeyframe | KeyframeClipboardType)[] = keyframes.filter(k => k.layerId.value === layer.layerId)
+                if (pastedKeyframes !== null && hoveredLayer !== null) {
+                    pastedKeyframes.filter(kf => kf.layerId === layer.layerId).forEach(kf => filtered.push(kf))
+                }
                 result.push({
                     layer,
-                    keyframes: keyframes.filter(k => k.layerId.value === layer.layerId)
+                    keyframes: filtered
                 })
             })
             setKeyframesByLayers(result)
@@ -108,9 +121,33 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
                 kf.layerId.removePostListener(onChange)
             }
         }
-    }, [layers, keyframes])
+    }, [layers, keyframes, pastedKeyframes, hoveredLayer])
 
-    const addLayer = useCallback((e: MouseEvent) => {
+    useEffect(() => {
+        if (pastedKeyframes !== null && pastedKeyframes.length !== 0 && hoveredLayer !== null && hoveredLayerClientX !== null) {
+            const first = pastedKeyframes.reduce((prev, cur) => prev.start < cur.start ? prev : cur)
+            const firstId = first.originalLayerId
+            const firstStart = first.originalStart
+
+            const maxLayer = Math.max(...layers.map(layer => layer.layerId))
+
+            const hoveredLayerStart = (hoveredLayerClientX - getScroll()) / getPixelsPerSecond()
+
+            const newValue = pastedKeyframes.map(kft => ({
+                ...kft,
+                layerId: Math.min(Math.max(hoveredLayer + (kft.originalLayerId - firstId), 0), maxLayer),
+                start: hoveredLayerStart + (kft.originalStart - firstStart)
+            }))
+
+            const changed = newValue.some((kft, index) => kft.layerId !== pastedKeyframes[index].layerId || kft.start !== pastedKeyframes[index].start)
+
+            if (changed) {
+                setPastedKeyframes(newValue)
+            }
+        }
+    }, [pastedKeyframes, hoveredLayer, hoveredLayerClientX])
+
+    const addLayer = useCallback((e: ReactMouseEvent) => {
         const layerId = layers.reduce((x, y) => Math.max(x, y.layerId + 1), 0)
         setLayers(layers.concat(new KeyframeLayerData(animation, layerId)))
         e.stopPropagation()
@@ -121,16 +158,22 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     }, [width, blockPerSecond, animation])
     const getScroll = useCallback(() => animation.scroll.value, [animation])
 
-    const draggingKeyframeRef = useRef<DcaKeyframe | null>(null)
+    const draggingKeyframeRef = useRef<DcaKeyframe | KeyframeClipboardType[] | null>(null)
     const getDraggingKeyframeRef = useCallback(() => draggingKeyframeRef, [])
+
+    const setHoveredLayerAndPosition = useCallback((layer: number | null, clientX: number | null) => {
+        setHoveredLayer(layer)
+        setHoveredLayerClientX(clientX)
+    }, [])
 
     const context = useMemo(() => ({
         addAndRunListener,
         removeListener,
         getPixelsPerSecond,
         getScroll,
-        getDraggingKeyframeRef
-    }), [addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef])
+        getDraggingKeyframeRef,
+        setHoveredLayerAndPosition,
+    }), [addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef, setHoveredLayerAndPosition])
 
     return (
         <ScrollZoomContext.Provider value={context}>
@@ -141,37 +184,106 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
                     <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Sound Layer</p></button>
                     <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Event Layer</p></button>
                 </div>
+                <PastedKeyframePortal animation={animation} pastedKeyframes={pastedKeyframes} hoveredLayer={hoveredLayer} />
             </>
         </ScrollZoomContext.Provider>
     )
 }
 
+const PastedKeyframePortal = ({ animation, pastedKeyframes, hoveredLayer }: { animation: DcaAnimation, pastedKeyframes: KeyframeClipboardType[] | null, hoveredLayer: number | null }) => {
+    const [mouseX, setMouseX] = useState(0)
+    const [mouseY, setMouseY] = useState(0)
+    const createPortal = useCreatePortal()
+
+
+    useEffect(() => {
+        const mouseMove = (e: MouseEvent) => {
+            setMouseX(e.clientX)
+            setMouseY(e.clientY)
+        }
+        const clearPasted = () => {
+            animation.pastedKeyframes.value = null
+        }
+
+        const keyPressed = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                clearPasted()
+            }
+        }
+        document.addEventListener("mousemove", mouseMove)
+        document.addEventListener("mousedown", clearPasted)
+        document.addEventListener("keydown", keyPressed)
+        return () => {
+            document.removeEventListener("mousemove", mouseMove)
+            document.removeEventListener("mousedown", clearPasted)
+            document.removeEventListener("keydown", keyPressed)
+        }
+    }, [])
+
+    const movedKeyframes = useMemo(() => {
+        if (pastedKeyframes === null || pastedKeyframes.length === 0) {
+            return []
+        }
+        const first = pastedKeyframes.reduce((prev, cur) => prev.start < cur.start ? prev : cur)
+        const firstId = first.originalLayerId
+        const firstStart = first.originalStart
+
+        return pastedKeyframes.map(kf => ({
+            ...kf,
+            layerId: kf.originalLayerId - firstId,
+            start: kf.originalStart - firstStart,
+        }))
+    }, [pastedKeyframes])
+
+
+    if (pastedKeyframes === null || hoveredLayer !== null || pastedKeyframes.length === 0) {
+        return <></>
+    }
+
+    return createPortal(
+        <>
+            <div
+                className="absolute"
+                style={{
+                    left: `${mouseX}px`,
+                    top: `${mouseY}px`
+                }}
+            >
+                {movedKeyframes.map(kf => <KeyframeFromClipboard key={kf.identifier} layerColor="bg-sky-500" hoverColor="group-hover:bg-sky-300" keyframe={kf} />)}
+            </div>
+        </>
+    )
+}
+
 class OffsetKeyframeInLayer {
     constructor(
-        public keyframe: DcaKeyframe,
+        public keyframe: DcaKeyframe | KeyframeClipboardType,
         public offsetLevel: number
     ) { }
 }
 
 const isInbetween = (min: number, delta: number, test: number) => test >= min && test <= min + delta
 
-const canKeyframeBeInsertedAtTimelinelayer = (keyframe: DcaKeyframe, layerData?: OffsetKeyframeInLayer[]) => {
+//Grim
+const getStartTime = (kf: DcaKeyframe | KeyframeClipboardType) => kf instanceof DcaKeyframe ? kf.startTime.value : kf.start
+const getDuration = (kf: DcaKeyframe | KeyframeClipboardType) => kf instanceof DcaKeyframe ? kf.duration.value : kf.duration
+const canKeyframeBeInsertedAtTimelinelayer = (keyframe: DcaKeyframe | KeyframeClipboardType, layerData?: OffsetKeyframeInLayer[]) => {
     if (layerData === undefined) {
         return true
     }
 
     return !layerData.some(d =>
-        isInbetween(d.keyframe.startTime.value, d.keyframe.duration.value, keyframe.startTime.value) ||
-        isInbetween(keyframe.startTime.value, keyframe.duration.value, d.keyframe.startTime.value)
+        isInbetween(getStartTime(d.keyframe), getDuration(d.keyframe), getStartTime(keyframe)) ||
+        isInbetween(getStartTime(keyframe), getDuration(keyframe), getStartTime(d.keyframe))
     )
 }
 
-const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimation, keyframes: DcaKeyframe[], layer: KeyframeLayerData }) => {
+const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimation, keyframes: (DcaKeyframe | KeyframeClipboardType)[], layer: KeyframeLayerData }) => {
     const [name, setName] = useListenableObject(layer.name)
     const [visible, toggleVisible] = useListenableObjectToggle(layer.visible)
     const [locked, toggleLocked] = useListenableObjectToggle(layer.locked)
 
-    const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef } = useContext(ScrollZoomContext)
+    const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef, setHoveredLayerAndPosition } = useContext(ScrollZoomContext)
 
     //Hacky stuff, but essentially I need this to re-render whenever a keyframe "moves" (start time changes or duration changes)
     const [, hackyRerender] = useState(0)
@@ -186,7 +298,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     })
 
     let maxLayer = 0
-    const sorted = keyframes.sort((a, b) => a.startTime.value - b.startTime.value)
+    const sorted = keyframes.sort((a, b) => getStartTime(a) - getStartTime(b))
     const map = new Map<number, OffsetKeyframeInLayer[]>()
     sorted.forEach(kf => {
         let layer = 0
@@ -333,12 +445,28 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
             <div className="relative w-full">
                 <div
                     ref={draggingRef}
-                    onMouseMoveCapture={() => { //We need to listen on capture, as we need to capture the event BEFORE it reaches the keyframe and is cancled.
+                    onMouseMoveCapture={e => { //We need to listen on capture, as we need to capture the event BEFORE it reaches the keyframe and is cancled.
+                        if (draggingRef.current !== null) {
+                            const rects = draggingRef.current.getBoundingClientRect()
+                            setHoveredLayerAndPosition(layer.layerId, e.clientX - rects.left)
+                        } else {
+                            setHoveredLayerAndPosition(null, null)
+                        }
                         const kf = getDraggingKeyframeRef().current
-                        if (!layer.locked.value && kf !== null) {
+                        if (!layer.locked.value && kf !== null && kf instanceof DcaKeyframe) {
                             kf.layerId.value = layer.layerId
                         }
-                    }} className="flex flex-col w-full h-full overflow-hidden">
+                    }}
+                    onMouseLeave={() => {
+                        setHoveredLayerAndPosition(null, null)
+                    }}
+                    onClick={e => {
+                        animation.finishPaste()
+                        e.preventDefault()
+                        e.stopPropagation()
+                    }}
+                    className="flex flex-col w-full h-full overflow-hidden"
+                >
                     <TimelineLayers color={color} hoverColor={hoverColor} layers={layers} />
                 </div>
                 <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 h-7 -top-0.5" />
@@ -368,7 +496,7 @@ const AnimationLayerButton = ({ onClick, icon: Icon, disabled, highlighted }: { 
 const blockPerSecond = 10
 const width = 24
 
-const TimelineLayers = ({ color, hoverColor, layers }: { color: string, hoverColor: string, layers: DcaKeyframe[][] }) => {
+const TimelineLayers = ({ color, hoverColor, layers }: { color: string, hoverColor: string, layers: (DcaKeyframe | KeyframeClipboardType)[][] }) => {
     return (<>
         {layers.map((layer, i) =>
             <TimelineLayer key={i} keyframes={layer} color={color} hoverColor={hoverColor} />
@@ -376,7 +504,7 @@ const TimelineLayers = ({ color, hoverColor, layers }: { color: string, hoverCol
     </>)
 }
 
-const TimelineLayer = ({ color, hoverColor, keyframes }: { color: string, hoverColor: string, keyframes: DcaKeyframe[] }) => {
+const TimelineLayer = ({ color, hoverColor, keyframes }: { color: string, hoverColor: string, keyframes: (DcaKeyframe | KeyframeClipboardType)[] }) => {
     const ref = useRef<HTMLDivElement>(null)
 
     const { darkMode } = useOptions()
@@ -404,9 +532,30 @@ const TimelineLayer = ({ color, hoverColor, keyframes }: { color: string, hoverC
     }, [addAndRunListener, removeListener, updateRefStyle])
     return (
         <div ref={ref} className="bg-gray-900 relative h-full">
-            {keyframes.map(kf =>
-                <KeyFrame key={kf.identifier} layerColor={color} hoverColor={hoverColor} keyframe={kf} />
+            {keyframes.map(kf => kf instanceof DcaKeyframe ?
+                <KeyFrame key={kf.identifier} layerColor={color} hoverColor={hoverColor} keyframe={kf} /> :
+                <KeyframeFromClipboard key={kf.identifier} layerColor={color} hoverColor={hoverColor} keyframe={kf} />
             )}
+        </div>
+    )
+}
+
+const KeyframeFromClipboard = ({ layerColor, hoverColor, keyframe }: { layerColor: string, hoverColor: string, keyframe: KeyframeClipboardType }) => {
+    const { getPixelsPerSecond, getScroll } = useContext(ScrollZoomContext)
+
+    return (
+        <div
+            style={{
+                left: `${keyframe.start * getPixelsPerSecond() - getScroll()}px`,
+                width: `${keyframe.duration * getPixelsPerSecond()}px`
+            }}
+            className="h-3 absolute group cursor-pointer"
+        >
+            <div
+                className={`h-1 mt-1 mb-1 ${layerColor} ${hoverColor}`}
+            >
+
+            </div>
         </div>
     )
 }
