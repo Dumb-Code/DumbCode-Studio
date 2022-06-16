@@ -1,9 +1,9 @@
 import JSZip from "jszip";
+import { v4 } from "uuid";
 import { StudioBuffer } from "../../util/StudioBuffer";
 import { convertMapToRecord, convertRecordToMap } from "../../util/Utils";
 import { getZippedFile, ParseError } from "../model/DCMLoader";
 import DcProject from "../project/DcProject";
-import { LOMap } from './../../util/ListenableObject';
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from "./DcaAnimation";
 import { loadDCAAnimationOLD } from "./OldDcaLoader";
 
@@ -20,32 +20,26 @@ export const loadUnknownAnimation = async (project: DcProject, name: string, buf
   }
 }
 
-const loadToMap = (map: LOMap<string, readonly [number, number, number]>, data: ParsedKfMap) => {
+export const loadToMap = (data: ParsedKfMap) => {
+  const map = new Map<string, readonly [number, number, number]>()
   Object.keys(data).forEach(key => {
-    map.setSilently(key, data[key])
+    map.set(key, data[key])
   })
+  return map
 }
 
-const writeFromMap = (map: LOMap<string, readonly [number, number, number]>): ParsedKfMap => {
+export const writeFromMap = (map: Map<string, readonly [number, number, number]>): ParsedKfMap => {
   return Array.from(map.entries()).reduce((map, data) => {
     map[data[0]] = data[1]
     return map
   }, {} as ParsedKfMap)
 }
 
-export const readKeyframe = (animation: DcaAnimation, kfData: ParsedKeyframeType): DcaKeyframe => {
-  const kf = new DcaKeyframe(animation.project, animation)
-
-  kf.startTime.value = kfData.start
-  kf.duration.value = kfData.duration
-  kf.layerId.value = kfData.layerId
-
-  loadToMap(kf.position, kfData.position)
-  loadToMap(kf.rotation, kfData.rotation)
-  loadToMap(kf.cubeGrow, kfData.cubeGrow)
-
-  kf.progressionPoints.value = kf.progressionPoints.value.concat(kfData.progressionPoints)
-
+const readKeyframe = (animation: DcaAnimation, kfData: ParsedKeyframeType): DcaKeyframe => {
+  const kf = new DcaKeyframe(
+    animation.project, animation, v4(), kfData.layerId, kfData.start, kfData.duration, false, kfData.progressionPoints,
+    loadToMap(kfData.rotation), loadToMap(kfData.position), loadToMap(kfData.cubeGrow)
+  )
   return kf
 }
 
@@ -70,7 +64,7 @@ const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayB
   return animation
 }
 
-export const writeKeyframe = (kf: DcaKeyframe): ParsedKeyframeType => ({
+const writeKeyframe = (kf: DcaKeyframe): ParsedKeyframeType => ({
   start: kf.startTime.value,
   duration: kf.duration.value,
   layerId: kf.layerId.value,
@@ -115,7 +109,7 @@ type ParsedAnimationType = {
 }
 
 type ParsedKfMap = Record<string, readonly [number, number, number]>
-export type ParsedKeyframeType = {
+type ParsedKeyframeType = {
   layerId: number,
   start: number,
   duration: number

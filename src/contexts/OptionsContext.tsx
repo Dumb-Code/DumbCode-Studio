@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Color } from "three";
 import { KeyComboKey, KeyComboMap, loadOrCreateKeyCombos, SavedKeyComboMap, updateClashes } from "../studio/keycombos/KeyCombos";
 import { useStudio } from "./StudioContext";
@@ -29,9 +29,29 @@ export const useOptions = () => {
   return context
 }
 
-export const useKeyCombos = () => {
+export const useKeyComboPressed = (handlers: {
+  [key in KeyComboKey]?: () => void
+}) => {
   const options = useOptions()
-  return options.keyCombos
+  useEffect(() => {
+    const handlerPairs = Object.keys(handlers)
+      .filter((key): key is KeyComboKey => true) //Trick ts compiler
+      .map(key => ({ combo: options.keyCombos[key], handler: handlers[key] }))
+
+    const listener = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName !== "INPUT") {
+        const found = handlerPairs.find(pair => pair.combo.matches(e))
+        if (found !== undefined && found.handler !== undefined) {
+          found.handler()
+          e.preventDefault()
+          e.stopPropagation()
+        }
+      }
+    }
+
+    document.addEventListener("keydown", listener)
+    return () => document.removeEventListener("keydown", listener)
+  }, [handlers])
 }
 
 export const OptionsContextProvider = ({ children }: { children?: ReactNode }) => {

@@ -1,10 +1,10 @@
-import { MutableRefObject, PropsWithChildren, RefObject, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, PropsWithChildren, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import HorizontalDivider from '../../../components/HorizontalDivider';
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { useCreatePortal } from '../../../contexts/CreatePortalContext';
-import { useKeyCombos } from '../../../contexts/OptionsContext';
+import { useKeyComboPressed } from '../../../contexts/OptionsContext';
 import { useStudio } from '../../../contexts/StudioContext';
 import { usePanelValue } from '../../../contexts/StudioPanelsContext';
 import { useTooltipRef } from '../../../contexts/TooltipContext';
@@ -66,12 +66,12 @@ const ModelerCubeList = () => {
     }
 
     //Deletes all the selected cubes, but keeps their children. Moves the children to be the siblings of this cube.
-    const deleteCubesKeepChildren = () => {
+    const deleteCubesKeepChildren = useCallback(() => {
         alert("Not Added Yet.")
-    }
+    }, [])
 
     //Deletes all the selected cubes, and all their children.
-    const deleteCubesAndChildren = () => {
+    const deleteCubesAndChildren = useCallback(() => {
         project.selectedCubeManager.selected.value.forEach(identifier => {
             const cube = project.model.identifierCubeMap.get(identifier)
             if (cube !== undefined) {
@@ -83,24 +83,12 @@ const ModelerCubeList = () => {
                 cube.fullyDelete()
             }
         })
-    }
+    }, [project])
 
-    const { modeler_delete_and_children: deleteAll, modeler_delete: deleteOnlyCube } = useKeyCombos()
-
-    useEffect(() => {
-        const keydownListener = (e: KeyboardEvent) => {
-            if (deleteAll.matches(e)) {
-                deleteCubesAndChildren()
-            }
-            if (deleteOnlyCube.matches(e)) {
-                deleteCubesKeepChildren()
-            }
-        }
-        document.addEventListener('keydown', keydownListener)
-        return () => {
-            document.removeEventListener('keydown', keydownListener)
-        }
-    }, [])
+    useKeyComboPressed(useMemo(() => ({
+        modeler_delete_and_children: deleteCubesAndChildren,
+        modeler_delete: deleteCubesKeepChildren,
+    }), [deleteCubesKeepChildren, deleteCubesAndChildren]))
 
     const [propertiesHeight, setPropertiesHeight] = usePanelValue("model_cube_size")
 

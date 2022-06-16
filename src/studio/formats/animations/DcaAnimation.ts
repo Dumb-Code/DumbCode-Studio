@@ -1,5 +1,7 @@
 import { v4 } from 'uuid';
 import { drawProgressionPointGraph, GraphType } from '../../../views/animator/logic/ProgressionPointGraph';
+import { readFromClipboard, writeToClipboard } from '../../clipboard/Clipboard';
+import { KeyframeClipboardType, writeKeyframeForClipboard } from '../../clipboard/KeyframeClipboardType';
 import UndoRedoHandler from '../../undoredo/UndoRedoHandler';
 import { getUndefinedWritable } from '../../util/FileTypes';
 import DcProject from '../project/DcProject';
@@ -77,6 +79,7 @@ export default class DcaAnimation {
   readonly propertiesMode = new LO<"local" | "global">("global", this.onDirty).applyToSection(this._section, "propertiesMode")
   readonly keyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty) //We don't apply this to undo/redo, as keyframes are sections and therefore handled with onAddSection/onRemoveSection
   readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty)
+  readonly pastedKeyframes = new LO<KeyframeClipboardType[] | null>(null)
 
   readonly time = new LO(0, this.onDirty).applyToSection(this._section, "time", true)
   readonly displayTime = new LO(0, this.onDirty)
@@ -210,11 +213,13 @@ export default class DcaAnimation {
     }
     const time = this.time.value
     const skipForced = this.isDraggingTimeline || this.playing.value
-    const playTime = skipForced ? time : (this.forceAnimationTime ?? time)
+    this.animateAt(skipForced ? time : (this.forceAnimationTime ?? time))
+  }
 
+  animateAt(time: number) {
     const visibleLayers = this.keyframeLayers.value.filter(kfl => kfl.visible.value).map(kfl => kfl.layerId)
+    this.keyframes.value.filter(kf => visibleLayers.includes(kf.layerId.value)).forEach(kf => kf.animate(time))
 
-    this.keyframes.value.filter(kf => visibleLayers.includes(kf.layerId.value)).forEach(kf => kf.animate(playTime))
   }
 
   createKeyframe(
@@ -237,6 +242,21 @@ export default class DcaAnimation {
     kf.layerId.value = layerId
     this.keyframes.value = this.keyframes.value.concat(kf)
     return kf
+  }
+
+  copyKeyframes() {
+    if (this.selectedKeyframes.value.length === 0) {
+      return
+    }
+    const kfData = this.selectedKeyframes.value.map(kf => writeKeyframeForClipboard(kf))
+    writeToClipboard("keyframe", kfData)
+  }
+
+  pasteKeyframes() {
+    const clipBoard = readFromClipboard("keyframe")
+    if (clipBoard !== null) {
+      this.pastedKeyframes.value = clipBoard
+    }
   }
 
   cloneAnimation() {

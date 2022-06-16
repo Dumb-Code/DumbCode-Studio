@@ -273,11 +273,8 @@ const createAllTimePositions = (aniamtion: DcaAnimation) => {
 }
 
 const createTimePosition = (time: number, animation: DcaAnimation, positionCubesIdentifiers: string[], rotationCubesIdentifiers: string[]): TimeSnapshot => {
-  const oldForcedTime = animation.forceAnimationTime
-  animation.forceAnimationTime = time
-
   animation.project.model.resetVisuals()
-  animation.animate(0)
+  animation.animate(time)
 
   const positionCubes = positionCubesIdentifiers.reduce((map, name) => {
     const cubes = animation.project.model.cubeMap.get(name)
@@ -306,8 +303,6 @@ const createTimePosition = (time: number, animation: DcaAnimation, positionCubes
     }
     return map
   }, new Map<string, readonly [number, number, number]>());
-
-  animation.forceAnimationTime = oldForcedTime
 
   return {
     time, positionCubes, rotationCubes

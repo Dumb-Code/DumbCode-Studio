@@ -1,7 +1,7 @@
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
-import { useKeyCombos } from "../../contexts/OptionsContext"
+import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
 import UndoRedoHandler from "../../studio/undoredo/UndoRedoHandler"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
@@ -16,7 +16,10 @@ const Modeler = () => {
     const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
 
-    const { common_undo: undoKey, common_redo: redoKey } = useKeyCombos()
+    useKeyComboPressed(useMemo(() => ({
+        common_undo: () => UndoRedoHandler.undo(project.model.undoRedoHandler, project.undoRedoHandler),
+        common_redo: () => UndoRedoHandler.redo(project.model.undoRedoHandler, project.undoRedoHandler)
+    }), [project]))
 
     useObjectUnderMouse()
     useModelerGumball()
@@ -32,23 +35,6 @@ const Modeler = () => {
         }
     }, [project, onFrameListeners])
 
-    useEffect(() => {
-        const listener = (e: KeyboardEvent) => {
-            if (undoKey.matches(e)) {
-                UndoRedoHandler.undo(project.model.undoRedoHandler, project.undoRedoHandler)
-                e.preventDefault()
-                e.stopPropagation()
-            }
-            if (redoKey.matches(e)) {
-                UndoRedoHandler.redo(project.model.undoRedoHandler, project.undoRedoHandler)
-                e.preventDefault()
-                e.stopPropagation()
-            }
-        }
-
-        document.addEventListener("keydown", listener)
-        return () => document.removeEventListener("keydown", listener)
-    }, [project])
     return (
         <div className="h-full grid grid-areas-modeling"
             key={project.identifier}

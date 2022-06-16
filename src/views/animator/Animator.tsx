@@ -1,7 +1,7 @@
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
-import { useKeyCombos } from "../../contexts/OptionsContext"
+import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
 import UndoRedoHandler from "../../studio/undoredo/UndoRedoHandler"
 import { useListenableObject, useListenableObjectNullable } from "../../studio/util/ListenableObject"
@@ -18,7 +18,18 @@ const Animator = () => {
 
     const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
-    const { common_undo: undoKey, common_redo: redoKey } = useKeyCombos()
+
+    const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
+    const [skeletonMode] = useListenableObjectNullable(animation?.isSkeleton)
+
+    useKeyComboPressed(useMemo(() => ({
+        common_undo: () => animation !== null && UndoRedoHandler.undo(animation.undoRedoHandler, project.undoRedoHandler),
+        common_redo: () => animation !== null && UndoRedoHandler.redo(animation.undoRedoHandler, project.undoRedoHandler),
+
+        common_copy: () => animation !== null && animation.copyKeyframes(),
+        common_paste: () => animation !== null && animation.pasteKeyframes(),
+
+    }), [animation, project]))
 
     useObjectUnderMouse()
 
@@ -36,29 +47,6 @@ const Animator = () => {
         }
     }, [project, onFrameListeners])
 
-    useEffect(() => {
-        const listener = (e: KeyboardEvent) => {
-            const selected = project.animationTabs.selectedAnimation.value
-            if (selected !== null) {
-                if (undoKey.matches(e)) {
-                    UndoRedoHandler.undo(selected.undoRedoHandler, project.undoRedoHandler)
-                    e.preventDefault()
-                    e.stopPropagation()
-                }
-                if (redoKey.matches(e)) {
-                    UndoRedoHandler.redo(selected.undoRedoHandler, project.undoRedoHandler)
-                    e.preventDefault()
-                    e.stopPropagation()
-                }
-            }
-        }
-
-        document.addEventListener("keydown", listener)
-        return () => document.removeEventListener("keydown", listener)
-    }, [project])
-
-    const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
-    const [skeletonMode] = useListenableObjectNullable(animation?.isSkeleton)
     if (skeletonMode) {
         return (
             <div

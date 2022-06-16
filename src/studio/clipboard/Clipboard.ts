@@ -1,8 +1,8 @@
-import { ParsedKeyframeType } from './../formats/animations/DCALoader';
+import { KeyframeClipboardType } from './KeyframeClipboardType';
 
 type ClipboardType = "keyframe"
 type ClipboardDataTypes<T extends ClipboardType> =
-  T extends "keyframe" ? ParsedKeyframeType :
+  T extends "keyframe" ? KeyframeClipboardType :
   never
 
 type LocalStorageClipboardType<T extends ClipboardType> = {
@@ -23,7 +23,7 @@ export const readFromClipboard = <T extends ClipboardType>(type: T): ClipboardDa
     return null
   }
   const parsed = JSON.parse(item) as LocalStorageClipboardType<T>
-  if (parsed.type === type) {
+  if (parsed.type === type && parsed.objects.length !== 0) {
     return parsed.objects
   }
   return null
