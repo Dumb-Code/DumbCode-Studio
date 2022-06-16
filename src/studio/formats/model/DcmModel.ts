@@ -1,14 +1,19 @@
-import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, Quaternion, Vector3 } from "three";
+import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Matrix4, Matrix4Tuple, Mesh, MeshBasicMaterial, MeshLambertMaterial, Quaternion, Vector3 } from "three";
 import { v4 as uuidv4 } from "uuid";
+import { readFromClipboard, writeToClipboard } from "../../clipboard/Clipboard";
+import { writeCubesForClipboard } from "../../clipboard/CubeClipboardType";
+import CubeLocker, { LockerType } from "../../util/CubeLocker";
 import LockedCubes from "../../util/LockedCubes";
 import SelectedCubeManager from "../../util/SelectedCubeManager";
 import DcProject from '../project/DcProject';
+import { readCubesForClipboard } from './../../clipboard/CubeClipboardType';
 import UndoRedoHandler, { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
 import { setIntersectType } from './../../util/ObjectClickedHook';
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
+const tempMatrix = new Matrix4()
 
 export interface CubeParent {
   addChild(child: DCMCube): void
@@ -85,6 +90,8 @@ export class DCMModel implements CubeParent {
   readonly identifierCubeMap = new LOMap<string, DCMCube>()
   readonly children = new LO<readonly DCMCube[]>([]).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.identifListToCubes(s), "root")
 
+  pastedInWorld: boolean | null = null
+
   readonly needsSaving = new LO(false)
 
   readonly materials: ProjectMaterials
@@ -153,7 +160,7 @@ export class DCMModel implements CubeParent {
       name, dimension, position, offset, rotation,
       textureOffset, textureMirrored, cubeGrow,
       this.identifListToCubes(children), this, identifier,
-      hideChildren, visible, locked)
+      true, hideChildren, visible, locked)
     this.identifierCubeMap.set(identifier, cube)
   }
 
@@ -178,8 +185,58 @@ export class DCMModel implements CubeParent {
       if (!cube) {
         throw new Error("Tried to modify a cube that could not be found " + identif);
       }
-      cube._section.applyModification(property_name, value)
+      cube._section?.applyModification(property_name, value)
     }
+  }
+
+  copyCubes(copyAllChildren: boolean) {
+    const selected = this.selectedCubeManager.selected.value
+    if (selected.length !== 0) {
+      writeToClipboard("cube", writeCubesForClipboard(this, this.identifListToCubes(selected), copyAllChildren))
+    }
+  }
+
+  pasteCubes(worldPosition: boolean) {
+    const cubes = readFromClipboard("cube")
+    if (cubes !== null) {
+      this.children.dontUpdateSection = true
+      this.children.value = this.children.value.concat(readCubesForClipboard(this, cubes))
+      this.children.dontUpdateSection = false
+      this.pastedInWorld = worldPosition
+    }
+  }
+
+  startPaste() {
+    this.children.dontUpdateSection = true
+    this.children.value = this.children.value.filter(cube => {
+      if (cube.hasBeenPastedNeedsPlacement) {
+        return false
+      }
+      return true
+    })
+    this.children.dontUpdateSection = false
+  }
+
+  finishPaste(): boolean {
+    this.resetVisuals()
+
+    let pasted = false
+    this.traverseAll(cube => {
+      if (cube.hasBeenPastedNeedsPlacement) {
+        pasted = true
+        if (this.pastedInWorld && cube.pastedWorldMatrix !== undefined && cube.cubeGroup.parent !== null) {
+          CubeLocker.reconstructLocker(cube, LockerType.POSITION_ROTATION, tempMatrix.fromArray(cube.pastedWorldMatrix))
+        }
+        cube.hasBeenPastedNeedsPlacement = false
+        cube.pastedWorldMatrix = undefined
+        cube.cubeMesh.visible = cube.visible.value
+      }
+    })
+
+    this.pastedInWorld = null
+
+
+    return pasted
   }
 
   traverseAll(func: (cube: DCMCube) => void) {
@@ -243,7 +300,7 @@ export class DCMCube implements CubeParent {
   readonly visible: LO<boolean>
   readonly locked: LO<boolean>
 
-  model: DCMModel
+  readonly model: DCMModel
   parent: CubeParent
 
   readonly uvBuffer: BufferAttribute
@@ -255,7 +312,10 @@ export class DCMCube implements CubeParent {
   //0 would be the root, 1 would be the child of the root, 2 would be the child of that ect.
   hierarchyLevel: number = -1
 
-  readonly _section: CubeSectionType
+  pastedWorldMatrix?: Readonly<Matrix4Tuple>
+  hasBeenPastedNeedsPlacement = false
+
+  _section?: CubeSectionType
 
   destroyed = false
 
@@ -273,6 +333,7 @@ export class DCMCube implements CubeParent {
     children: readonly DCMCube[],
     model: DCMModel,
     readonly identifier = uuidv4(),
+    applyToSectionNow = true,
     hideChildren = false,
     visible = true,
     locked = false
@@ -280,31 +341,26 @@ export class DCMCube implements CubeParent {
 
     const onDirty = () => model.needsSaving.value = true
 
-    //Typescript compiler throws errors when `as SectionType` isn't there, but vscode intellisense is fine with it.
-    //It complains about the other section names not being assignable, meaning that `cube_${this.identifier}` is
-    //Not extracting the correct section for some reason.
-    this._section = model.undoRedoHandler.createNewSection(`cube_${this.identifier}`, "Cube Properties Edit") as CubeSectionType
 
-    this._section.modifyFirst("identifier", this.identifier, () => { throw new Error("Tried to modify identifier") })
-    this._section.modifyFirst("metadata", this.metadata, () => { throw new Error("Tried to modify metadata") })
-
-    this.name = new LO(name, onDirty).applyToSection(this._section, "name", false, "Cube Name Changed")
-    this.dimension = new LO(dimension, onDirty).applyToSection(this._section, "dimension", false, "Cube Dimensions Edit")
-    this.position = new LO(rotationPoint, onDirty).applyToSection(this._section, "position", false, "Cube Position Edit")
-    this.offset = new LO(offset, onDirty).applyToSection(this._section, "offset", false, "Cube Offset Edit")
-    this.rotation = new LO(rotation, onDirty).applyToSection(this._section, "rotation", false, "Cube Rotation Edit")
-    this.textureOffset = new LO(textureOffset, onDirty).applyToSection(this._section, "textureOffset", true)
-    this.textureMirrored = new LO(textureMirrored, onDirty).applyToSection(this._section, "textureMirrored", true)
-    this.cubeGrow = new LO(cubeGrow, onDirty).applyToSection(this._section, "cubeGrow", false, "Cube Grow Edit")
-    this.children = new LO(children, onDirty).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children", false, "Cube Children Edit")
+    this.name = new LO(name, onDirty)
+    this.dimension = new LO(dimension, onDirty)
+    this.position = new LO(rotationPoint, onDirty)
+    this.offset = new LO(offset, onDirty)
+    this.rotation = new LO(rotation, onDirty)
+    this.textureOffset = new LO(textureOffset, onDirty)
+    this.textureMirrored = new LO(textureMirrored, onDirty)
+    this.cubeGrow = new LO(cubeGrow, onDirty)
+    this.children = new LO(children, onDirty)
     this.model = model
 
     this.selected = LO.createOneWayDelegateListener(model.selectedCubeManager.selected, selected => selected.includes(this.identifier))//.applyToSection(this._section, "selected", false, value => value ? "Cube Selected" : "Cube Deselected")
-    this.hideChildren = new LO(hideChildren).applyToSection(this._section, "hideChildren", true)
-    this.visible = new LO(visible).applyToSection(this._section, "visible", false, value => value ? "Cube Shown" : "Cube Visible", HistoryActionTypes.ToggleVisibility)
-    this.locked = new LO(locked).applyToSection(this._section, "locked", false, value => value ? "Cube Locked" : "Cube Unlocked", HistoryActionTypes.LockUnlock)
+    this.hideChildren = new LO(hideChildren, onDirty)
+    this.visible = new LO(visible, onDirty)
+    this.locked = new LO(locked, onDirty)
 
-    this._section.pushCreation("Cube Created")
+    if (applyToSectionNow) {
+      this.applyToSection()
+    }
 
     this.parent = invalidParent
 
@@ -372,9 +428,36 @@ export class DCMCube implements CubeParent {
 
   }
 
+  applyToSection() {
+    //Typescript compiler throws errors when `as SectionType` isn't there, but vscode intellisense is fine with it.
+    //It complains about the other section names not being assignable, meaning that `cube_${this.identifier}` is
+    //Not extracting the correct section for some reason.
+    this._section = this.model.undoRedoHandler.createNewSection(`cube_${this.identifier}`, "Cube Properties Edit") as CubeSectionType
+
+    this._section.modifyFirst("identifier", this.identifier, () => { throw new Error("Tried to modify identifier") })
+    this._section.modifyFirst("metadata", this.metadata, () => { throw new Error("Tried to modify metadata") })
+
+    this.name.applyToSection(this._section, "name", false, "Cube Name Changed")
+    this.dimension.applyToSection(this._section, "dimension", false, "Cube Dimensions Edit")
+    this.position.applyToSection(this._section, "position", false, "Cube Position Edit")
+    this.offset.applyToSection(this._section, "offset", false, "Cube Offset Edit")
+    this.rotation.applyToSection(this._section, "rotation", false, "Cube Rotation Edit")
+    this.textureOffset.applyToSection(this._section, "textureOffset", true)
+    this.textureMirrored.applyToSection(this._section, "textureMirrored", true)
+    this.cubeGrow.applyToSection(this._section, "cubeGrow", false, "Cube Grow Edit")
+    this.children.applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children", false, "Cube Children Edit")
+
+    this.hideChildren.applyToSection(this._section, "hideChildren", true)
+    this.visible.applyToSection(this._section, "visible", false, value => value ? "Cube Shown" : "Cube Visible", HistoryActionTypes.ToggleVisibility)
+    this.locked.applyToSection(this._section, "locked", false, value => value ? "Cube Locked" : "Cube Unlocked", HistoryActionTypes.LockUnlock)
+
+    this._section.pushCreation("Cube Created")
+
+  }
+
   modifyMetadata(data: Record<string, string>) {
     Object.assign(this.metadata, data)
-    this._section.modifyDirectly("metadata", this.metadata, true)
+    this._section?.modifyDirectly("metadata", this.metadata, true)
   }
 
   updateHirarchy(level: number) {
@@ -439,7 +522,7 @@ export class DCMCube implements CubeParent {
   fullyDelete() {
     this.parent.deleteChild(this)
     this.cubeGroup.remove()
-    this._section.remove("Cube Deleted")
+    this._section?.remove("Cube Deleted")
     this.model.identifierCubeMap.delete(this.identifier)
     this.model.cubeMap.get(this.name.value)?.delete(this)
     this.destroyed = true

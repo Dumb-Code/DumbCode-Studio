@@ -1,23 +1,25 @@
+import { CubeClipboardType } from './CubeClipboardType';
 import { KeyframeClipboardType } from './KeyframeClipboardType';
 
-type ClipboardType = "keyframe"
+type ClipboardType = "keyframe" | "cube"
 type ClipboardDataTypes<T extends ClipboardType> =
   T extends "keyframe" ? KeyframeClipboardType :
+  T extends "cube" ? CubeClipboardType :
   never
 
 type LocalStorageClipboardType<T extends ClipboardType> = {
-  type: T;
-  objects: ClipboardDataTypes<T>[];
+  readonly type: T;
+  readonly objects: readonly ClipboardDataTypes<T>[];
 }
 
 const storageKey = "faux_clipboard"
 
-export const writeToClipboard = <T extends ClipboardType>(type: T, objects: ClipboardDataTypes<T>[]) => {
+export const writeToClipboard = <T extends ClipboardType>(type: T, objects: readonly ClipboardDataTypes<T>[]) => {
   const stored: LocalStorageClipboardType<T> = { type, objects }
   localStorage.setItem(storageKey, JSON.stringify(stored))
 }
 
-export const readFromClipboard = <T extends ClipboardType>(type: T): ClipboardDataTypes<T>[] | null => {
+export const readFromClipboard = <T extends ClipboardType>(type: T): readonly ClipboardDataTypes<T>[] | null => {
   const item = localStorage.getItem(storageKey)
   if (item === null) {
     return null

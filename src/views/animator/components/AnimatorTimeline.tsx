@@ -190,7 +190,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     )
 }
 
-const PastedKeyframePortal = ({ animation, pastedKeyframes, hoveredLayer }: { animation: DcaAnimation, pastedKeyframes: KeyframeClipboardType[] | null, hoveredLayer: number | null }) => {
+const PastedKeyframePortal = ({ animation, pastedKeyframes, hoveredLayer }: { animation: DcaAnimation, pastedKeyframes: readonly KeyframeClipboardType[] | null, hoveredLayer: number | null }) => {
     const [mouseX, setMouseX] = useState(0)
     const [mouseY, setMouseY] = useState(0)
     const createPortal = useCreatePortal()

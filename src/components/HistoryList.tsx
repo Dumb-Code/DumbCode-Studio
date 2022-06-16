@@ -1,14 +1,21 @@
-import React from "react";
+import { useStudio } from "../contexts/StudioContext";
 import UndoRedoHandler, { HistoryActionType } from "../studio/undoredo/UndoRedoHandler";
-import { useListenableObjectNullable } from "../studio/util/ListenableObject";
+import { useListenableObject, useListenableObjectNullable } from "../studio/util/ListenableObject";
 import CollapsableSidebarPannel from "./CollapsableSidebarPannel";
 
 const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<any> }) => {
+    const { getSelectedProject } = useStudio()
+    const project = getSelectedProject()
+
+    const [projectHistory] = useListenableObject(project.undoRedoHandler.history)
     const [history] = useListenableObjectNullable(undoRedoHandler?.history)
+
+    const joined = (history ?? []).concat(projectHistory).sort((a, b) => a.time - b.time)
+
     return (
         <CollapsableSidebarPannel title="HISTORY LIST" heightClassname="h-96" panelName="history_list">
             <div className="overflow-y-scroll h-96 studio-scrollbar px-1 mr-0.5 mt-1 flex flex-col-reverse">
-                {history && history.map((item, i) => <HistoryItem key={i} type={item.actionType} reason={item.reason} undone={false} selected={false} />)}
+                {joined.map((item, i) => <HistoryItem key={i} type={item.actionType} reason={item.reason} undone={false} selected={false} />)}
             </div>
         </CollapsableSidebarPannel>
     )

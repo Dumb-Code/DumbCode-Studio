@@ -79,7 +79,7 @@ export default class DcaAnimation {
   readonly propertiesMode = new LO<"local" | "global">("global", this.onDirty).applyToSection(this._section, "propertiesMode")
   readonly keyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty) //We don't apply this to undo/redo, as keyframes are sections and therefore handled with onAddSection/onRemoveSection
   readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty)
-  readonly pastedKeyframes = new LO<KeyframeClipboardType[] | null>(null)
+  readonly pastedKeyframes = new LO<readonly KeyframeClipboardType[] | null>(null)
 
   readonly time = new LO(0, this.onDirty).applyToSection(this._section, "time", true)
   readonly displayTime = new LO(0, this.onDirty)

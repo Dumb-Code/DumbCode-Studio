@@ -50,6 +50,8 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
         project.selectedCubeManager.keepCurrentCubes = false
     }
 
+    const [canProjectUndo] = useListenableObject(project.undoRedoHandler.canUndo)
+    const [canProjectRedo] = useListenableObject(project.undoRedoHandler.canRedo)
 
     const [canUndo] = useListenableObjectNullable(undoRedo?.canUndo)
     const [canRedo] = useListenableObjectNullable(undoRedo?.canRedo)
@@ -74,11 +76,11 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
             }
             <div className="flex-grow"></div>
 
-            <ButtonWithTooltip onClick={() => UndoRedoHandler.undo(undoRedo, project.undoRedoHandler)} className={"dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 " + (canUndo ? "dark:text-white text-black" : "text-gray-500")} tooltip="Undo the last operation">
+            <ButtonWithTooltip onClick={() => UndoRedoHandler.undo(undoRedo, project.undoRedoHandler)} className={"dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 " + ((canUndo || canProjectUndo) ? "dark:text-white text-black" : "text-gray-500")} tooltip="Undo the last operation">
                 <SVGUndo className="h-3 w-3 mr-1" />
             </ButtonWithTooltip>
 
-            <ButtonWithTooltip onClick={() => UndoRedoHandler.redo(undoRedo, project.undoRedoHandler)} className={"dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 " + (canRedo ? "dark:text-white text-black" : "text-gray-500")} tooltip="Redo the last undo">
+            <ButtonWithTooltip onClick={() => UndoRedoHandler.redo(undoRedo, project.undoRedoHandler)} className={"dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 " + ((canRedo || canProjectRedo) ? "dark:text-white text-black" : "text-gray-500")} tooltip="Redo the last undo">
                 <SVGRedo className="h-3 w-3 mr-1" />
             </ButtonWithTooltip>
         </div>

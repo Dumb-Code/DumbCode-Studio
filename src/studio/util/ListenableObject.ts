@@ -25,6 +25,7 @@ type ModifiableListener<T> = (
 ) => void
 
 export class LO<T> {
+  public dontUpdateSection = false
   public internalValue: T
   constructor(
     private _value: T,
@@ -93,7 +94,7 @@ export class LO<T> {
       this.value = value
       isModifying = false
     })
-    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, value, oldValue, silent, _getOrRun(value, reason), _getOrRun(value, action)))
+    this.addListener((value, oldValue) => !isModifying && !this.dontUpdateSection && section.modify(property_name, value, oldValue, silent, _getOrRun(value, reason), _getOrRun(value, action)))
     return this
   }
 
@@ -110,7 +111,7 @@ export class LO<T> {
       this.value = reverseMapper(value)
       isModifying = false
     })
-    this.addListener((value, oldValue) => !isModifying && section.modify(property_name, mapper(value), mapper(oldValue), silent, _getOrRun(value, reason), _getOrRun(value, action)))
+    this.addListener((value, oldValue) => !isModifying && !this.dontUpdateSection && section.modify(property_name, mapper(value), mapper(oldValue), silent, _getOrRun(value, reason), _getOrRun(value, action)))
     return this
   }
 
