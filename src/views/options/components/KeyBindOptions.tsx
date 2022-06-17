@@ -43,7 +43,7 @@ const KeyBindOptions = () => {
 const KeyBindSection = ({ category }: { category: KeyComboCategory }) => {
     const { keyCombos } = useOptions()
     const cat = keyCombos[category]
-    const combos = useMemo<Record<string, KeyCombo>>(() => cat.combos, [category])
+    const combos = useMemo<Record<string, KeyCombo>>(() => cat.combos, [cat.combos])
     return (
         <>
             <p className="text-gray-900 text-xs font-semibold first:mt-0 mt-4">{cat.name}</p>
