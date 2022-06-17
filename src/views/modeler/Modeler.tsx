@@ -17,14 +17,18 @@ const Modeler = () => {
     const project = getSelectedProject()
 
     useKeyComboPressed(useMemo(() => ({
-        common_undo: () => UndoRedoHandler.undo(project.model.undoRedoHandler, project.undoRedoHandler),
-        common_redo: () => UndoRedoHandler.redo(project.model.undoRedoHandler, project.undoRedoHandler),
+        common: {
+            undo: () => UndoRedoHandler.undo(project.model.undoRedoHandler, project.undoRedoHandler),
+            redo: () => UndoRedoHandler.redo(project.model.undoRedoHandler, project.undoRedoHandler),
 
-        common_copy: () => project.model.copyCubes(true),
-        modeler_copy_only_selected: () => project.model.copyCubes(false),
+            copy: () => project.model.copyCubes(true),
+            paste: () => project.model.pasteCubes(false),
+        },
 
-        common_paste: () => project.model.pasteCubes(false),
-        modeler_paste_world_position: () => project.model.pasteCubes(true),
+        modeler: {
+            copy_only_selected: () => project.model.copyCubes(false),
+            paste_world_position: () => project.model.pasteCubes(true),
+        }
     }), [project]))
 
     useObjectUnderMouse()

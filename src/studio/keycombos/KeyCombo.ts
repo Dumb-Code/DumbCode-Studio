@@ -20,7 +20,7 @@ export default class KeyCombo {
   private readonly defaultShift: boolean
   private readonly deafultAlt: boolean
 
-  public localScope: "global" | "modeler" | "mapper" | "texturer" | "animator" = "global"
+  public localScope: string = "global"
 
   constructor(
     public readonly name: string,
@@ -43,7 +43,7 @@ export default class KeyCombo {
     this.displayName = new LO(this.computeDisplayValue())
   }
 
-  withScope(scope: typeof this['localScope']) {
+  withScope(scope: string) {
     this.localScope = scope
     return this
   }

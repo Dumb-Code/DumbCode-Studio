@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Color } from "three";
-import { KeyComboKey, KeyComboMap, loadOrCreateKeyCombos, SavedKeyComboMap, updateClashes } from "../studio/keycombos/KeyCombos";
+import KeyCombo from "../studio/keycombos/KeyCombo";
+import { KeyComboCategory, KeyComboKey, KeyComboMap, loadOrCreateKeyCombos, SavedKeyComboMap, updateClashes } from "../studio/keycombos/KeyCombos";
 import { useStudio } from "./StudioContext";
 
 const Context = createContext<OptionsContext | null>(null)
@@ -30,13 +31,23 @@ export const useOptions = () => {
 }
 
 export const useKeyComboPressed = (handlers: {
-  [key in KeyComboKey]?: () => void
+  [category in KeyComboCategory]?: {
+    [combo in KeyComboKey<category>]?: () => void
+  }
 }) => {
   const options = useOptions()
   useEffect(() => {
     const handlerPairs = Object.keys(handlers)
-      .filter((key): key is KeyComboKey => true) //Trick ts compiler
-      .map(key => ({ combo: options.keyCombos[key], handler: handlers[key] }))
+      .flatMap(c => {
+        const category = c as KeyComboCategory
+        const keyCat = options.keyCombos[category].combos as Record<string, KeyCombo>
+        const handlerCat = handlers[category] as Record<string, () => void>
+        if (handlerCat === undefined) {
+          return []
+        }
+        return Object.keys(handlerCat)
+          .map(k => ({ combo: keyCat[k], handler: handlerCat[k] }))
+      })
 
     const listener = (e: KeyboardEvent) => {
       if (document.activeElement?.tagName !== "INPUT") {
@@ -73,9 +84,15 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
     const data: SavedOptions = {
       darkMode: darkMode,
       compactMode: compactMode,
-      keyCombos: Object.keys(keyCombos).reduce((obj, k) => {
-        const key = k as KeyComboKey
-        obj[key] = keyCombos[key].writeSaved()
+      keyCombos: Object.keys(keyCombos).reduce((obj, c) => {
+        const category = c as KeyComboCategory
+        const keyCat = keyCombos[category].combos as Record<string, KeyCombo>
+
+        obj[category] = Object.keys(keyCombos[category].combos).reduce((obj, key) => {
+          obj[key] = keyCat[key].writeSaved()
+          return obj
+        }, {} as SavedKeyComboMap[typeof category])
+
         return obj
       }, {} as SavedKeyComboMap)
     }

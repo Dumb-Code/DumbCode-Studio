@@ -86,8 +86,10 @@ const ModelerCubeList = () => {
     }, [project])
 
     useKeyComboPressed(useMemo(() => ({
-        modeler_delete_and_children: deleteCubesAndChildren,
-        modeler_delete: deleteCubesKeepChildren,
+        modeler: {
+            delete_and_children: deleteCubesAndChildren,
+            delete: deleteCubesKeepChildren,
+        }
     }), [deleteCubesKeepChildren, deleteCubesAndChildren]))
 
     const [propertiesHeight, setPropertiesHeight] = usePanelValue("model_cube_size")

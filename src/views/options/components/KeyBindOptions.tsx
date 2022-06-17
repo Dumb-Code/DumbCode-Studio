@@ -1,9 +1,9 @@
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { InfoBubble, SVGCross, SVGTrash } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useOptions } from "../../../contexts/OptionsContext"
 import KeyCombo from "../../../studio/keycombos/KeyCombo"
-import { KeyComboKey } from "../../../studio/keycombos/KeyCombos"
+import { KeyComboCategory } from "../../../studio/keycombos/KeyCombos"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
 const KeyBindOptions = () => {
@@ -11,11 +11,14 @@ const KeyBindOptions = () => {
 
     const resetAll = useCallback(() => {
         Object.keys(keyCombos).forEach(k => {
-            const key = k as KeyComboKey
-            keyCombos[key].reset()
+            const key = k as KeyComboCategory
+            const combos = keyCombos[key].combos as Record<string, KeyCombo>
+            Object.keys(combos).forEach(key => combos[key].reset())
         })
         keyCombosChanged()
     }, [keyCombos, keyCombosChanged])
+
+    const categories = useMemo(() => Object.keys(keyCombos), [keyCombos])
 
     return (
         <div className="pb-8">
@@ -26,46 +29,26 @@ const KeyBindOptions = () => {
                 </ButtonWithTooltip>
             </div>
 
-            <KeyBindSection
-                name="COMMON SHORTCUT BINDINGS"
-                desc="Key bindings that apply all across the studio."
-                keybinds={["common_copy", "common_paste", "common_undo", "common_redo", "common_repeat_previous_command"]}
-            />
+            {categories.map(category => (
+                <KeyBindSection
+                    key={category}
+                    category={category as KeyComboCategory}
+                />
+            ))}
 
-            <KeyBindSection
-                name="CAMERA VIEW BINDINGS"
-                desc="Key bindings that apply all across the studio."
-                keybinds={["camera_view_front_view", "camera_view_back_view", "camera_view_left_view", "camera_view_right_view", "camera_view_top_view", "camera_view_bottom_view"]}
-            />
-
-            <KeyBindSection
-                name="CAMERA ROTATION BINDINGS"
-                desc="Key bindings that apply all across the studio."
-                keybinds={["camera_rotation_rotate_view_left", "camera_rotation_rotate_view_right", "camera_rotation_rotate_view_up", "camera_rotation_rotate_view_down"]}
-            />
-
-            <KeyBindSection
-                name="MODELER BINDINGS"
-                desc="Key bindings that apply to the modeler."
-                keybinds={["modeler_delete", "modeler_delete_and_children"]}
-            />
-
-            <KeyBindSection
-                name="ANIMATOR BINDINGS"
-                desc="Key bindings that apply to the animator."
-                keybinds={["animator_delete", "animator_individually_select"]}
-            />
         </div>
     )
 }
 
-const KeyBindSection = ({ name, desc, keybinds }: { name: string, desc: string, keybinds: KeyComboKey[] }) => {
+const KeyBindSection = ({ category }: { category: KeyComboCategory }) => {
     const { keyCombos } = useOptions()
+    const cat = keyCombos[category]
+    const combos = useMemo<Record<string, KeyCombo>>(() => cat.combos, [category])
     return (
         <>
-            <p className="text-gray-900 text-xs font-semibold first:mt-0 mt-4">{name}</p>
-            <p className="text-gray-900 text-xs mb-2">{desc}</p>
-            {keybinds.map(kb => <KeyBindOption key={kb} keyCombo={keyCombos[kb]} />)}
+            <p className="text-gray-900 text-xs font-semibold first:mt-0 mt-4">{cat.name}</p>
+            <p className="text-gray-900 text-xs mb-2">{cat.desc}</p>
+            {Object.keys(combos).map(kb => <KeyBindOption key={kb} keyCombo={combos[kb]} />)}
         </>
     )
 }

@@ -23,13 +23,17 @@ const Animator = () => {
     const [skeletonMode] = useListenableObjectNullable(animation?.isSkeleton)
 
     useKeyComboPressed(useMemo(() => ({
-        common_undo: () => animation !== null && UndoRedoHandler.undo(animation.undoRedoHandler, project.undoRedoHandler),
-        common_redo: () => animation !== null && UndoRedoHandler.redo(animation.undoRedoHandler, project.undoRedoHandler),
+        common: {
+            undo: () => animation !== null && UndoRedoHandler.undo(animation.undoRedoHandler, project.undoRedoHandler),
+            redo: () => animation !== null && UndoRedoHandler.redo(animation.undoRedoHandler, project.undoRedoHandler),
 
-        common_copy: () => animation !== null && animation.copyKeyframes(),
-        common_paste: () => animation !== null && animation.pasteKeyframes(false),
-        animator_paste_keyframes_defined: () => animation !== null && animation.pasteKeyframes(true),
+            copy: () => animation !== null && animation.copyKeyframes(),
+            paste: () => animation !== null && animation.pasteKeyframes(false),
+        },
 
+        animator: {
+            paste_keyframes_defined: () => animation !== null && animation.pasteKeyframes(true),
+        }
     }), [animation, project]))
 
     useObjectUnderMouse()
