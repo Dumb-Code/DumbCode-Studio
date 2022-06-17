@@ -17,7 +17,7 @@ const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<an
 
     const head = UndoRedoHandler.getHead(undoRedoHandler, project.undoRedoHandler)
 
-    const mapToMeta = (index: number, batchs: readonly ActionBatch<any>[]) => batchs.map((batch, i) => ({
+    const mapToMeta = (index: number, batchs: readonly ActionBatch<any>[]) => batchs.filter(batch => batch.chainState !== "chainFirst").map((batch, i) => ({
         batch,
         undone: index < i,
         selected: batch === head

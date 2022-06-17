@@ -81,6 +81,13 @@ export type Action<S extends UndoRedoSection> = AddSectionAction<S> | RemoveSect
 
 export type HistoryActionType = { Icon: (props: SVGProps<SVGSVGElement>) => JSX.Element }
 
+//Used to chain actions from different undohandlers together.
+//When deleting a cube, you first have to deselect, then delete. This is two different handlers
+type ActionChainState =
+  "chainFirst" | //The first action in a chain
+  "chainLast" |  //The last action in a chain
+  "none"         //There is no chain
+
 export const HistoryActionTypes = {
   Command: { Icon: SVGTerminal },
   Transformation: { Icon: SvgArrows },
@@ -95,6 +102,7 @@ export type ActionBatch<S extends UndoRedoSection> = {
   time: number,
   actionType: HistoryActionType
   reason: string
+  chainState: ActionChainState
   actions: Action<S>[]
 }
 export default class UndoRedoHandler<S extends UndoRedoSection> {
@@ -126,10 +134,10 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     this.batchedActions = []
   }
 
-  endBatchActions(reason: string, actionType = HistoryActionTypes.Edit) {
+  endBatchActions(reason: string, actionType = HistoryActionTypes.Edit, chainState?: ActionChainState) {
     this.batchActions = false
     if (this.batchedActions.length !== 0) {
-      this._PUSH(actionType, reason, ...this.batchedActions)
+      this._PUSH(actionType, reason, this.batchedActions, chainState)
     }
   }
 
@@ -163,7 +171,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       section_name: section.section_name,
       section_data: { ...section.data }
     }
-    this._PUSH(actionType, reason, action)
+    this._PUSH(actionType, reason, [action])
   }
 
   modifySection<P extends keyof S['data'] & string>(section: S, property_name: P, value: S['data'][P], old_value: S['data'][P], silent: boolean, reason: string, actionType: HistoryActionType) {
@@ -176,7 +184,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     if (silent) {
       this.silentActions.push(action)
     } else {
-      this._PUSH(actionType, reason, action)
+      this._PUSH(actionType, reason, [action])
     }
   }
 
@@ -186,10 +194,10 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       section_name: section.section_name,
       section_snapshot: { ...section.data },
     }
-    this._PUSH(actionType, reason, action)
+    this._PUSH(actionType, reason, [action])
   }
 
-  private _PUSH(actionType: HistoryActionType, reason: string, ...actions: Action<S>[]) {
+  private _PUSH(actionType: HistoryActionType, reason: string, actions: Action<S>[], chainState: ActionChainState = "none") {
     if (this.ignoreActions) {
       return
     }
@@ -205,7 +213,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     actions = this.flatten(actions)
 
     const newArr = this.history.value.slice(0, this.index.value + 1)
-    newArr.push({ actionType, reason, actions, time: Date.now() })
+    newArr.push({ actionType, reason, actions, chainState, time: Date.now() + (chainState === "chainLast" ? 0.5 : 0) })
     this.history.value = newArr
     this.index.value++
   }
@@ -272,17 +280,32 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       for (let i = actions.actions.length - 1; i >= 0; i--) {
         this.undoAction(actions.actions[i])
       }
+      return actions
     }
+    return null
   }
 
   static undo(...handlers: (UndoRedoHandler<any> | undefined)[]) {
     const mappedHandlers = handlers
       .filter((handler): handler is UndoRedoHandler<any> => handler !== undefined && handler.canUndo.value)
-      .map(handler => ({ handler, time: handler.history.value[handler.index.value].time }))
+      .map(handler => {
+        const batch = handler.history.value[handler.index.value]
+        return {
+          handler,
+          time: batch.time
+        }
+      })
     if (mappedHandlers.length === 0) {
       return
     }
-    mappedHandlers.reduce((current, handler) => handler.time > current.time ? handler : current).handler.undo()
+    const sorted = mappedHandlers.sort((a, b) => b.time - a.time) //Reverse
+    const action = sorted[0].handler.undo()
+    if (action?.chainState === "chainLast") {
+      const nextAction = UndoRedoHandler.getHead(...handlers)
+      if (nextAction?.chainState === "chainFirst") {
+        sorted[1].handler.undo()
+      }
+    }
   }
 
   private undoAction(act: Action<S>) {
@@ -313,7 +336,9 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
           this.redoAction(flattenedSilent[i])
         }
       }
+      return actions
     }
+    return null
   }
 
   static redo(...handlers: (UndoRedoHandler<any> | undefined)[]) {
@@ -323,7 +348,14 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     if (mappedHandlers.length === 0) {
       return
     }
-    mappedHandlers.reduce((current, handler) => handler.time < current.time ? handler : current).handler.redo()
+    const sorted = mappedHandlers.sort((a, b) => a.time - b.time)
+    const action = sorted[0].handler.redo()
+    if (action?.chainState === "chainFirst") {
+      const nextAction = UndoRedoHandler.getHeadOffset(1, ...handlers)
+      if (nextAction?.chainState === "chainLast") {
+        sorted[1].handler.redo()
+      }
+    }
   }
 
   redoAction(act: Action<S>) {
@@ -341,9 +373,13 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   }
 
   static getHead(...handlers: (UndoRedoHandler<any> | undefined)[]) {
+    return this.getHeadOffset(0, ...handlers)
+  }
+
+  static getHeadOffset(offset: number, ...handlers: (UndoRedoHandler<any> | undefined)[]) {
     const heads = handlers
       .filter((handler): handler is UndoRedoHandler<any> => handler !== undefined)
-      .map(handler => handler.getHead())
+      .map(handler => handler.getHead(offset))
       .filter(head => head !== undefined)
     if (heads.length === 0) {
       return null
@@ -351,8 +387,8 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     return heads.reduce((prev, curr) => prev.time < curr.time ? curr : prev)
   }
 
-  getHead() {
-    return this.history.value[this.index.value]
+  getHead(offset: number) {
+    return this.history.value[this.index.value + offset]
   }
 
   private _dispatchAdd<K extends string, Sec extends S & { section_name: K }>(section: K, data: Sec['data']) {

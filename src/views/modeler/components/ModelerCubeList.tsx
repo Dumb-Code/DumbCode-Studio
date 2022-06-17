@@ -72,6 +72,23 @@ const ModelerCubeList = () => {
 
     //Deletes all the selected cubes, and all their children.
     const deleteCubesAndChildren = useCallback(() => {
+        const cubes = project.model.identifListToCubes(project.selectedCubeManager.selected.value)
+
+        project.undoRedoHandler.startBatchActions()
+        project.model.undoRedoHandler.startBatchActions()
+        let amount = 0;
+        cubes.forEach(cube => {
+            cube.traverse(c => {
+                c.selected.value = false
+                c.mouseHover.value = false
+                amount++
+            })
+            cube.parent.deleteChild(cube)
+            cube.fullyDelete()
+        })
+        project.undoRedoHandler.endBatchActions("_WEAK", HistoryActionTypes.Edit, "chainFirst")
+        project.model.undoRedoHandler.endBatchActions(`${amount} Cube${amount === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove, "chainLast")
+
         project.selectedCubeManager.selected.value.forEach(identifier => {
             const cube = project.model.identifierCubeMap.get(identifier)
             if (cube !== undefined) {
@@ -688,6 +705,9 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
             onPointerEnter={() => setHovering(true)}
             onPointerLeave={() => setHovering(false)}
             onClick={e => {
+                if (cube.model.parentProject === undefined) {
+                    return
+                }
                 //When selected:
                 //  - if ctrl is pressed, we deselect, keeping the current cubes
                 //  - if more than one cube is selected, we deselect all OTHER cubes
@@ -697,10 +717,10 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
                 //  - if ctrl is pressed, select THIS cube, and keep the other cubes
                 //  - else, we only select THIS cube
                 if (selected) {
-                    cube.model.undoRedoHandler.startBatchActions()
+                    cube.model.parentProject.undoRedoHandler.startBatchActions()
                     if (e.ctrlKey || selectedCubeManager.selected.value.length === 1) {
                         setSelected(false)
-                        cube.model.undoRedoHandler.endBatchActions(`Cube Deselected`)
+                        cube.model.parentProject.undoRedoHandler.endBatchActions(`Cube Deselected`)
                     } else {
                         //If other cubes are selected too
                         //Using `setSelected` won't do anything, as it's already selected.
@@ -710,9 +730,9 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
                     }
                 } else {
                     selectedCubeManager.keepCurrentCubes = e.ctrlKey
-                    cube.model.undoRedoHandler.startBatchActions()
+                    cube.model.parentProject.undoRedoHandler.startBatchActions()
                     setSelected(true)
-                    cube.model.undoRedoHandler.endBatchActions(`Cube Selected`)
+                    cube.model.parentProject.undoRedoHandler.endBatchActions(`Cube Selected`)
                     selectedCubeManager.keepCurrentCubes = false
                 }
                 e.stopPropagation()

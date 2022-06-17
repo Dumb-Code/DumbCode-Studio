@@ -22,9 +22,9 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
 
     const selectAllCubes = () => {
         project.selectedCubeManager.keepCurrentCubes = true
-        project.model.undoRedoHandler.startBatchActions()
-        project
-        project.model.undoRedoHandler.endBatchActions(`Cubes Selected`)
+        project.undoRedoHandler.startBatchActions()
+        project.selectedCubeManager.selected.value = selectedCubeIdentifs
+        project.undoRedoHandler.endBatchActions(`Cubes Selected`)
         project.selectedCubeManager.keepCurrentCubes = false
     }
 
@@ -44,9 +44,9 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
 
     const selectAllChildrenCubes = () => {
         project.selectedCubeManager.keepCurrentCubes = true
-        project.model.undoRedoHandler.startBatchActions()
+        project.undoRedoHandler.startBatchActions()
         childrenOfSelectedCubes.forEach(cube => cube.selected.value = true)
-        project.model.undoRedoHandler.endBatchActions(`Cubes Selected`)
+        project.undoRedoHandler.endBatchActions(`Cubes Selected`)
         project.selectedCubeManager.keepCurrentCubes = false
     }
 
