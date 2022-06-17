@@ -42,10 +42,10 @@ const keyCombos = {
     desc: "Key bindings that apply to the modeler.",
     scoped: true,
     combos: {
-      copy_only_selected: new KeyCombo('Copy No Children', "Copy only the selected cubes (no children)", "KeyC", true, true),
-      paste_world_position: new KeyCombo('Paste as World', "Paste the cubes in the world position they were copied from", "KeyV", true, true),
       delete: new KeyCombo('Delete', "Deletes the selected object.", 'Delete', false),
       delete_and_children: new KeyCombo('Delete + Children', "Deletes the selected object and it's children.", 'Delete'),
+      copy_only_selected: new KeyCombo('Copy No Children', "Copy only the selected cubes (no children)", "KeyC", true, true),
+      paste_world_position: new KeyCombo('Paste as World', "Paste the cubes in the world position they were copied from", "KeyV", true, true),
     }
   },
 
@@ -54,7 +54,8 @@ const keyCombos = {
     desc: "Key bindings that apply to the animator.",
     scoped: true,
     combos: {
-      delete: new KeyCombo('Delete', "Deletes the selected keyframe.", 'Delete', false),
+      delete: new KeyCombo('Delete', "Deletes the selected keyframes.", 'Delete', false),
+      delete_layer: new KeyCombo('Delete layer', "Deletes the selected keyframe(s) layer(s).", 'Delete'),
       paste_keyframes_defined: new KeyCombo('Paste as defined', "Pasted the keyframes in defined mode", "KeyV", true, true),
       individually_select: new KeyCombo('Individually Select', "Invividually select the keyframe", null),
     }

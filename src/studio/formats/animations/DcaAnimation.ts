@@ -19,7 +19,6 @@ type RootDataSectionType = {
   section_name: "root_data",
   data: {
     name: string,
-    keyframes: readonly string[],
     ikAnchorCubes: readonly string[],
     keyframe_layers: readonly { layerId: number }[],
     propertiesMode: "local" | "global",
@@ -131,6 +130,20 @@ export default class DcaAnimation {
         array.push(identifier)
         this.reverseKeyframeNameOverrides.set(nameOverride, array)
       })
+    })
+
+    this.keyframeLayers.addPreModifyListener((newValue, _, naughtyModifyValue) => {
+      if (newValue.length === 0) {
+        naughtyModifyValue(newValue = [new KeyframeLayerData(this, 0)])
+      }
+
+      //Make sure there are enough layers for all the keyframes
+      this.keyframes.value.forEach(kf => {
+        if (!newValue.some(l => l.layerId === kf.layerId.value)) {
+          newValue = newValue.concat(new KeyframeLayerData(this, kf.layerId.value))
+        }
+      })
+      naughtyModifyValue(newValue)
     })
   }
 
@@ -267,6 +280,24 @@ export default class DcaAnimation {
       this.undoRedoHandler.endBatchActions("Pasted Keyframes")
       this.pastedKeyframes.value = null
     }
+  }
+
+  deleteSelectedKeyframes() {
+    const selected = this.selectedKeyframes.value
+    this.undoRedoHandler.startBatchActions()
+    selected.forEach(kf => kf.delete())
+    this.undoRedoHandler.endBatchActions(`${selected.length} Keyframe${selected.length === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove)
+  }
+
+  deleteSelectedKeyframesLayers() {
+    const selectedLayers = new Set(this.selectedKeyframes.value.map(kf => kf.layerId.value))
+    const selected = this.keyframes.value.filter(kf => selectedLayers.has(kf.layerId.value))
+    this.undoRedoHandler.startBatchActions()
+    selected.forEach(kf => kf.delete())
+    this.keyframeLayers.value
+      .filter(layer => selectedLayers.has(layer.layerId))
+      .map(layer => layer.delete())
+    this.undoRedoHandler.endBatchActions(`${selectedLayers} Keyframe Layer${selected.length === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove)
   }
 
   cloneAnimation() {
@@ -579,7 +610,7 @@ export class KeyframeLayerData {
   readonly definedMode: LO<boolean>
 
   constructor(
-    parentAnimation: DcaAnimation,
+    private parentAnimation: DcaAnimation,
     readonly layerId: number,
     name = `Layer ${layerId}`,
     visible = true,
@@ -605,6 +636,11 @@ export class KeyframeLayerData {
     if (this.layerId !== 0) {
       this._section.pushCreation("Layer Created")
     }
+  }
+
+  delete() {
+    this.parentAnimation.keyframeLayers.value = this.parentAnimation.keyframeLayers.value.filter(kf => kf !== this)
+    this._section.remove("Keyframe Layer Deleted")
   }
 }
 

@@ -169,7 +169,10 @@ export default class KeyCombo {
     this.displayName.value = this.computeDisplayValue()
   }
 
-  copyFrom(saved: SavedKeyCombo) {
+  copyFrom(saved?: SavedKeyCombo) {
+    if (saved === undefined) {
+      return
+    }
     this.code.value = saved.code
     this.ctrl.value = saved.ctrl
     this.shift.value = saved.shift

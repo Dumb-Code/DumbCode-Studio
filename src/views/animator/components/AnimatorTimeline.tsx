@@ -74,24 +74,11 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     useEffect(() => {
         animation.scroll.addListener(onScrollChange)
         animation.zoom.addListener(onZoomChange)
-
-        const toAdd: KeyframeLayerData[] = [...layers]
-        let changed = false
-        keyframes.forEach(kf => {
-            if (!toAdd.some(l => l.layerId === kf.layerId.value)) {
-                toAdd.push(new KeyframeLayerData(animation, kf.layerId.value))
-                changed = true
-            }
-        })
-        if (changed) {
-            setLayers(toAdd)
-        }
-
         return () => {
             animation.scroll.removeListener(onScrollChange)
             animation.zoom.removeListener(onZoomChange)
         }
-    }, [keyframes, layers, setLayers, animation.scroll, animation.zoom, onScrollChange, onZoomChange, animation])
+    }, [animation.scroll, animation.zoom, onScrollChange, onZoomChange, animation])
 
     const [keyframesByLayers, setKeyframesByLayers] = useState<{ layer: KeyframeLayerData, keyframes: (DcaKeyframe | KeyframeClipboardType)[] }[]>([])
     useEffect(() => {
@@ -437,7 +424,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
         <div onClick={e => e.stopPropagation()} className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
                 <AnimationLayerHandle color="bg-blue-500" type="Transform" />
-                <input value={name} onChange={e => setName(e.target.value)} type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5  h-6 text-s" placeholder="layer name" />
+                <input value={layer.layerId} onChange={e => setName(e.target.value)} type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5  h-6 text-s" placeholder="layer name" />
                 <AnimationLayerButton disabled={locked} onClick={addNewKeyframe} icon={SVGPlus} />
                 <AnimationLayerButton onClick={toggleVisible} icon={visible ? SVGEye : SVGEyeOff} />
                 <AnimationLayerButton highlighted={locked} onClick={toggleLocked} icon={locked ? SVGLocked : SVGUnlocked} />

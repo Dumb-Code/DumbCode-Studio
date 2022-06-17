@@ -32,6 +32,8 @@ const Animator = () => {
         },
 
         animator: {
+            delete: () => animation !== null && animation.deleteSelectedKeyframes(),
+            delete_layer: () => animation !== null && animation.deleteSelectedKeyframesLayers(),
             paste_keyframes_defined: () => animation !== null && animation.pasteKeyframes(true),
         }
     }), [animation, project]))
