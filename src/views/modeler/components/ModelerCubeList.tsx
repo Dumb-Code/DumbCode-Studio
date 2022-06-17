@@ -146,8 +146,8 @@ const CubeListButton = ({ className, hoverText, children, onClick }: PropsWithCh
 
 type DragState = "bottom" | "on" | "top" | null
 const CubeListItem = ({
-    cube, selectedCubeManager, dragData, setDragData, dragOverRef, dragEndRef, mousePositionRef,
-    mouseDraggedElementRef, clearPreviousDragState, onDragFinish, parentAnimateChildRemove
+    cube, selectedCubeManager, dragData, setDragData, dragOverRef, dragEndRef, mousePositionRef, isDraggingRef,
+    mouseDraggedElementRef, clearPreviousDragState, onDragFinish, parentAnimateChildRemove, updateDrag
 }: {
     cube: DCMCube
     selectedCubeManager: SelectedCubeManager
@@ -156,9 +156,11 @@ const CubeListItem = ({
     dragOverRef: MutableRefObject<boolean>
     dragEndRef: RefObject<HTMLDivElement>
     mousePositionRef: MutableRefObject<{ x: number, y: number }>
+    isDraggingRef: MutableRefObject<boolean>
     mouseDraggedElementRef: RefObject<HTMLDivElement>
     clearPreviousDragState: MutableRefObject<(cube: DCMCube) => void>
     onDragFinish: () => void
+    updateDrag: (x: number, y: number) => void
     parentAnimateChildRemove?: () => void
 }) => {
     const [children] = useListenableObject(cube.children)
@@ -283,6 +285,8 @@ const CubeListItem = ({
             return
         }
 
+        isDraggingRef.current = true
+
         if (parentAnimateChildRemove) {
             parentAnimateChildRemove()
         }
@@ -328,16 +332,8 @@ const CubeListItem = ({
         setIsDragging(true)
     }, [setDragData, setIsDragging, parentAnimateChildRemove, animateRef, cube, mouseDraggedElementRef])
 
-
-    const updateDrag = useCallback((x: number, y: number) => {
-        if (mouseDraggedElementRef.current !== null) {
-            const style = mouseDraggedElementRef.current.style
-            style.left = x + "px"
-            style.top = y + "px"
-        }
-    }, [mouseDraggedElementRef])
-
     const finishDrag = useCallback(() => {
+        isDraggingRef.current = false
         //Un-animate the remain ref
         cleanupRef(remainGhostRef)
         setIsDragging(false)
@@ -349,7 +345,8 @@ const CubeListItem = ({
             const rect = dragEndRef.current.getBoundingClientRect()
             style.transition = "all 0.3s"
             style.left = rect.x + "px"
-            style.top = rect.y + "px"
+            style.top = rect.y + 5 + "px"
+
         }
 
         //After .3 seconds, do the actual cube movements
@@ -418,11 +415,6 @@ const CubeListItem = ({
             beginDrag("add")
             updateDrag(mousePositionRef.current.x, mousePositionRef.current.y)
 
-            const mouseMove = (e: MouseEvent) => {
-                if (cube.hasBeenPastedNeedsPlacement) {
-                    updateDrag(e.clientX, e.clientY)
-                }
-            }
             const mousedown = (e: MouseEvent) => {
                 if (cube.hasBeenPastedNeedsPlacement && cube === dragData?.cubes?.[0]) {
                     finishDrag()
@@ -430,15 +422,12 @@ const CubeListItem = ({
                     e.stopPropagation()
                 }
             }
-            document.addEventListener("mousemove", mouseMove)
             document.addEventListener("click", mousedown, true)
             return () => {
-                document.removeEventListener("mousemove", mouseMove)
                 document.removeEventListener("click", mousedown, true)
             }
         }
-    }, [beginDrag, updateDrag, finishDrag, cube, dragData?.cubes, mousePositionRef])
-
+    }, [beginDrag, finishDrag, cube, dragData?.cubes, mousePositionRef])
 
     return (
 
@@ -449,12 +438,8 @@ const CubeListItem = ({
             <div
                 // Per frame, when this cube is dragged, set the mouse dragged element to be the position
                 onDrag={useCallback((e: DragEvent) => {
-                    //Note that at the end of a drag, clientXY is 0, we don't want this
-                    if (e.clientX !== 0 || e.clientY !== 0) {
-                        updateDrag(e.clientX, e.clientY)
-                    }
                     e.preventDefault()
-                }, [updateDrag])}
+                }, [])}
 
                 //Called when the cube is started to drag.
                 onDragStart={useCallback((e: DragEvent) => {
@@ -549,9 +534,11 @@ const CubeListItem = ({
                                 setDragData={setDragData}
                                 dragOverRef={dragOverRef}
                                 dragEndRef={dragEndRef}
+                                isDraggingRef={isDraggingRef}
                                 mouseDraggedElementRef={mouseDraggedElementRef}
                                 clearPreviousDragState={clearPreviousDragState}
                                 onDragFinish={onDragFinish}
+                                updateDrag={updateDrag}
                                 parentAnimateChildRemove={childAnimateRemove}
                                 mousePositionRef={mousePositionRef}
                             />
@@ -578,6 +565,8 @@ const CubeList = ({ model, selectedCubeManager }: { model: DCMModel, selectedCub
     const dragEndRef = useRef<HTMLDivElement>(null)
     const mouseDraggedElementRef = useRef<HTMLDivElement>(null)
     const clearPreviousDragState = useRef(() => { })
+
+    const isDraggingRef = useRef(false)
 
     const mousePositionRef = useRef<{ x: number, y: number }>({ x: 0, y: 0 })
 
@@ -610,6 +599,25 @@ const CubeList = ({ model, selectedCubeManager }: { model: DCMModel, selectedCub
     }, [])
 
 
+    const updateDrag = useCallback((x: number, y: number) => {
+        if (mouseDraggedElementRef.current !== null && isDraggingRef.current) {
+            const style = mouseDraggedElementRef.current.style
+            style.left = x + "px"
+            style.top = y + "px"
+        }
+    }, [])
+
+    useEffect(() => {
+        const mouseMove = (e: MouseEvent) => {
+            if (dragData !== null) {
+                updateDrag(e.clientX, e.clientY)
+            }
+        }
+        document.addEventListener("dragover", mouseMove, true)
+        return () => document.removeEventListener("dragover", mouseMove, true)
+    }, [updateDrag, dragData])
+
+
     //Key is used to make sure that no cubes can be stuck "animating"
     //Meaning they never show. TODO, in the future remote this
     const [key, setKey] = useState(0)
@@ -628,7 +636,9 @@ const CubeList = ({ model, selectedCubeManager }: { model: DCMModel, selectedCub
                     setDragData={setDragData}
                     dragOverRef={dragOverRef}
                     dragEndRef={dragEndRef}
+                    isDraggingRef={isDraggingRef}
                     onDragFinish={onDragFinish}
+                    updateDrag={updateDrag}
                     mouseDraggedElementRef={mouseDraggedElementRef}
                     clearPreviousDragState={clearPreviousDragState}
                     mousePositionRef={mousePositionRef}
