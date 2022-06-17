@@ -276,7 +276,7 @@ const CubeListItem = ({
             const num = cubeDragged.cubes.length
             cube.model.undoRedoHandler.endBatchActions(pasted ? `${num} Cube${num === 1 ? "" : "s"} Pasted` : `${num} Cube${num === 1 ? "" : "s"} Dragged`, pasted ? HistoryActionTypes.Command : HistoryActionTypes.Transformation)
         }, 300)
-    }, [dragData, animateRef, mouseDraggedElementRef, setHasAnimationChildrenForce, cleanupRef, setHasAnimationChildrenForce, cube])
+    }, [dragData, animateRef, mouseDraggedElementRef, setHasAnimationChildrenForce, cleanupRef, setHasAnimationChildrenForce, cube, dragState])
 
     const beginDrag = useCallback((mode: "add" | "takeover") => {
         if (draggableRef.current === null || cubeItemRef.current === null) {
