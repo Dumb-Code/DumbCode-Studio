@@ -87,7 +87,7 @@ export const loadOrCreateKeyCombos = (savedCombos: SavedKeyComboMap | undefined)
     Object.keys(keyCombos).forEach(k => {
       const key = k as KeyComboCategory
       if (savedCombos[key] !== undefined) {
-        for (const kck of Object.keys(keyCombos[key])) {
+        for (const kck of Object.keys(keyCombos[key].combos)) {
           stronglyTypedKeyCombo[key].combos[kck].copyFrom(savedCombos[key][kck as KeyComboKey<typeof key>])
         }
       }
