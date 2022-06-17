@@ -62,7 +62,8 @@ export const ProgressionPointsCanvas = ({ keyframe }: { keyframe: DcaKeyframe | 
   const onMouseDown: CanvasMouseCallbackEvent = useCallback<CanvasMouseCallbackEvent>(({ transformedMouse, width, height, setHandled }) => {
     const clickedOn = findPoint(transformedMouse, width, height);
 
-    if (clickedOn !== undefined) {
+    if (clickedOn !== undefined && keyframe !== null) {
+      keyframe.animation.undoRedoHandler.startBatchActions()
       draggedPoint.current = {
         point: clickedOn,
         x: clickedOn.x,
@@ -70,29 +71,32 @@ export const ProgressionPointsCanvas = ({ keyframe }: { keyframe: DcaKeyframe | 
       };
       setHandled();
     }
-  }, [findPoint]);
+  }, [findPoint, keyframe]);
 
   const onMouseMoveGlobally = useCallback<CanvasMouseCallbackEvent<MouseEvent>>(({ transformedMouse, width, height, setHandled }) => {
     if (draggedPoint.current !== undefined && points !== undefined) {
       draggedPoint.current.hasMoved = true;
       const currentPoint = draggedPoint.current.point;
-      if (!currentPoint.required) {
-        currentPoint.x = transformedMouse.x / width;
-      }
-      currentPoint.y = transformedMouse.y / height;
+
+      let x = currentPoint.required ? currentPoint.x : transformedMouse.x / width
+      let y = transformedMouse.y / height
 
       if (currentPoint.required) {
-        currentPoint.x = Math.min(Math.max(currentPoint.x, 0), 1);
-        currentPoint.y = Math.min(Math.max(currentPoint.y, 0), 1);
+        x = Math.min(Math.max(x, 0), 1);
+        y = Math.min(Math.max(y, 0), 1);
       }
 
+      const newPoint: ProgressionPoint = {
+        x, y,
+        required: currentPoint.required
+      }
 
-      //TODO: this is gross, I need a better way of handling the state. Either:
-      //  - Progression points are immutable, and create a new list every time (I like this, but it would require me to somehow keep track of the point being moved)
-      //  - Progression points use LO, but it would mean I need to listen on every single progression point
-      //  - Do somthing similar to threejs fiber, and have components for the progression points that "draw" onto the parent canvas somehow. 
-      //For now, we just refresh the array.
-      setPoints([...points]);
+      draggedPoint.current.point = newPoint
+
+      const newArr = points.filter(p => p !== currentPoint)
+      newArr.push(newPoint)
+
+      setPoints(newArr);
       setHandled();
     }
   }, [points, setPoints]);
@@ -105,15 +109,17 @@ export const ProgressionPointsCanvas = ({ keyframe }: { keyframe: DcaKeyframe | 
       return false;
     }
     const current = draggedPoint.current;
-    if (current !== undefined) {
+    if (current !== undefined && keyframe !== null) {
       if (current.hasMoved !== true && !current.point.required) {
         setPoints(points.filter(p => p !== current.point));
       }
       draggedPoint.current = undefined;
+
+      keyframe.animation.undoRedoHandler.endBatchActions("Progression Point Moved")
       return true;
     }
     return false;
-  }, [points, setPoints]);
+  }, [points, setPoints, keyframe]);
 
   const onMouseUpGlobally = useCallback<CanvasMouseCallbackEvent<MouseEvent>>(({ setHandled }) => {
     if (onMouseUpGeneral()) {

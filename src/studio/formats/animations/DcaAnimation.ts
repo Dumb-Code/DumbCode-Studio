@@ -284,7 +284,7 @@ export default class DcaAnimation {
 
 }
 
-export type ProgressionPoint = { required?: boolean, x: number, y: number }
+export type ProgressionPoint = Readonly<{ required?: boolean, x: number, y: number }>
 export class DcaKeyframe {
   readonly layerId: LO<number>
   readonly project: DcProject
