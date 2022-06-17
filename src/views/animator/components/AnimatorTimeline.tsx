@@ -647,7 +647,7 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
                 width: `${length * getPixelsPerSecond()}px`
             }}
             // onClick={() => setSelected(!selected)}
-            className={"h-3 absolute group " + (isLocked ? "pointer-events-none" : "cursor-pointer")}
+            className={"h-3 absolute group select-none " + (isLocked ? "pointer-events-none" : "cursor-pointer")}
         >
             <div
                 className={"h-1 mt-1 mb-1 " + (isLocked ? "bg-gray-500" : (selected ? " bg-red-200 group-hover:bg-white" : `${layerColor} ${hoverColor}`))}
