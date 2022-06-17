@@ -340,6 +340,21 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     }
   }
 
+  static getHead(...handlers: (UndoRedoHandler<any> | undefined)[]) {
+    const heads = handlers
+      .filter((handler): handler is UndoRedoHandler<any> => handler !== undefined)
+      .map(handler => handler.getHead())
+      .filter(head => head !== undefined)
+    if (heads.length === 0) {
+      return null
+    }
+    return heads.reduce((prev, curr) => prev.time < curr.time ? curr : prev)
+  }
+
+  getHead() {
+    return this.history.value[this.index.value]
+  }
+
   private _dispatchAdd<K extends string, Sec extends S & { section_name: K }>(section: K, data: Sec['data']) {
     this.sections.push({
       section_name: section,
