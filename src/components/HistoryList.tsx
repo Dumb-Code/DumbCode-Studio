@@ -14,15 +14,24 @@ const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<an
     const [projectIndex] = useListenableObject(project.undoRedoHandler.index)
     const [index] = useListenableObjectNullable(undoRedoHandler?.index)
 
-    const mapToMeta = (index: number, batchs: readonly ActionBatch<any>[]) => batchs.map((batch, i) => ({
+    const mapToMeta = (index: number, batchs: readonly ActionBatch<any>[], otherBatches: readonly ActionBatch<any>[] | undefined) => batchs.map((batch, i) => ({
         batch,
         undone: index < i,
-        selected: i === index
+        isSelectedInHandler: i === index,
+        selected: false
     }))
-    const historyWithMeta = mapToMeta(index ?? 0, history ?? [])
-    const projectHistoryWithMeta = mapToMeta(projectIndex, projectHistory)
+    const historyWithMeta = mapToMeta(index ?? 0, history ?? [], projectHistory)
+    const projectHistoryWithMeta = mapToMeta(projectIndex, projectHistory, history)
 
     const joined = historyWithMeta.concat(projectHistoryWithMeta).sort((a, b) => a.batch.time - b.batch.time)
+
+    for (let r = joined.length - 1; r >= 0; r--) {
+        if (joined[r].isSelectedInHandler) {
+            joined[r].selected = true
+            break
+        }
+    }
+
 
     return (
         <CollapsableSidebarPannel title="HISTORY LIST" heightClassname="h-96" panelName="history_list">
