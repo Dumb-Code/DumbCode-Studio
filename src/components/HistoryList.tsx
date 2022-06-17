@@ -38,7 +38,7 @@ const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<an
         while (UndoRedoHandler.getHead(undoRedoHandler, project.undoRedoHandler) !== batch) {
             (isUndo ? UndoRedoHandler.undo : UndoRedoHandler.redo)(undoRedoHandler, project.undoRedoHandler)
         }
-    }, [head])
+    }, [head, undoRedoHandler, project.undoRedoHandler])
 
     return (
         <CollapsableSidebarPannel title="HISTORY LIST" heightClassname="h-96" panelName="history_list">

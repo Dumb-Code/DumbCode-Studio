@@ -295,7 +295,7 @@ const CubeListItem = ({
             const num = cubeDragged.cubes.length
             cube.model.undoRedoHandler.endBatchActions(pasted ? `${num} Cube${num === 1 ? "" : "s"} Pasted` : `${num} Cube${num === 1 ? "" : "s"} Dragged`, pasted ? HistoryActionTypes.Command : HistoryActionTypes.Transformation)
         }, 300)
-    }, [dragData, animateRef, mouseDraggedElementRef, setHasAnimationChildrenForce, cleanupRef, setHasAnimationChildrenForce, cube, dragState])
+    }, [dragData, animateRef, mouseDraggedElementRef, cleanupRef, setHasAnimationChildrenForce, cube, dragState])
 
     const beginDrag = useCallback((mode: "add" | "takeover") => {
         if (draggableRef.current === null || cubeItemRef.current === null) {
@@ -347,7 +347,7 @@ const CubeListItem = ({
             })
         }
         setIsDragging(true)
-    }, [setDragData, setIsDragging, parentAnimateChildRemove, animateRef, cube, mouseDraggedElementRef])
+    }, [setDragData, setIsDragging, parentAnimateChildRemove, animateRef, cube, mouseDraggedElementRef, isDraggingRef])
 
     const finishDrag = useCallback(() => {
         isDraggingRef.current = false
@@ -392,7 +392,7 @@ const CubeListItem = ({
             //Cause a re-render
             onDragFinish()
         }, 300)
-    }, [cleanupRef, setIsDragging, setIsAnimating, dragData, setDragData, onDragFinish, cube.model, dragEndRef, dragOverRef, mouseDraggedElementRef])
+    }, [cleanupRef, setIsDragging, setIsAnimating, dragData, setDragData, onDragFinish, cube.model, dragEndRef, dragOverRef, mouseDraggedElementRef, isDraggingRef])
 
     const onDragOver = useCallback((y: number) => {
         if (dragData?.cubes?.includes(cube) || cubeItemRef.current === null) {
@@ -444,7 +444,7 @@ const CubeListItem = ({
                 document.removeEventListener("click", mousedown, true)
             }
         }
-    }, [beginDrag, finishDrag, cube, dragData?.cubes, mousePositionRef])
+    }, [beginDrag, finishDrag, cube, dragData?.cubes, mousePositionRef, updateDrag])
 
     return (
 
