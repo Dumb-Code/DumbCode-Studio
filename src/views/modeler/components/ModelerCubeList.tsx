@@ -1,4 +1,4 @@
-import { Dispatch, MutableRefObject, PropsWithChildren, RefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Dispatch, DragEvent, MouseEvent as ReactMouseEvent, MutableRefObject, PropsWithChildren, RefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import HorizontalDivider from '../../../components/HorizontalDivider';
@@ -163,6 +163,7 @@ const CubeListItem = ({
 }) => {
     const [children] = useListenableObject(cube.children)
     const [hideChildren] = useListenableObject(cube.hideChildren)
+    const [needsDraggingStart, setNeedsDraggingStart] = useListenableObject(cube.needsDraggingStart)
 
 
     const [dragState, setDragState] = useState<DragState>(null)
@@ -192,8 +193,31 @@ const CubeListItem = ({
         }
     }, [hasAnimationChildrenForce, children.length])
 
+
+    //Animate the ref
+    const animateRef = useCallback((ref: RefObject<HTMLDivElement>, reverse: boolean, height: number | undefined) => {
+        if (ref.current !== null && height !== undefined && draggableRef.current !== null) {
+            const rect = draggableRef.current.getBoundingClientRect()
+            const style = ref.current.style
+            style.height = reverse ? "0" : (height + "px")
+            style.width = rect.width + "px"
+            style.transition = "height 0.3s"
+            setTimeout(() => style.height = reverse ? (height + "px") : "0", 1) //Need to call next frame
+        }
+    }, [])
+
+    //Clear the animation from the ref
+    const cleanupRef = useCallback((ref: RefObject<HTMLDivElement>) => {
+        if (ref.current !== null) {
+            const style = ref.current.style
+            style.transition = ""
+            style.height = ""
+            style.width = ""
+        }
+    }, [])
+
     //Called when a cube is dropped onto this element
-    const onCubeDroppedOntoThis = () => {
+    const onCubeDroppedOntoThis = useCallback(() => {
         const cubeDragged = dragData
         if (cubeDragged === null) {
             return
@@ -252,31 +276,9 @@ const CubeListItem = ({
             const num = cubeDragged.cubes.length
             cube.model.undoRedoHandler.endBatchActions(pasted ? `${num} Cube${num === 1 ? "" : "s"} Pasted` : `${num} Cube${num === 1 ? "" : "s"} Dragged`, pasted ? HistoryActionTypes.Command : HistoryActionTypes.Transformation)
         }, 300)
-    }
+    }, [dragData, animateRef, mouseDraggedElementRef, setHasAnimationChildrenForce, cleanupRef, setHasAnimationChildrenForce, cube])
 
-    //Animate the ref
-    const animateRef = useCallback((ref: RefObject<HTMLDivElement>, reverse: boolean, height: number | undefined) => {
-        if (ref.current !== null && height !== undefined && draggableRef.current !== null) {
-            const rect = draggableRef.current.getBoundingClientRect()
-            const style = ref.current.style
-            style.height = reverse ? "0" : (height + "px")
-            style.width = rect.width + "px"
-            style.transition = "height 0.3s"
-            setTimeout(() => style.height = reverse ? (height + "px") : "0", 1) //Need to call next frame
-        }
-    }, [])
-
-    //Clear the animation from the ref
-    const cleanupRef = useCallback((ref: RefObject<HTMLDivElement>) => {
-        if (ref.current !== null) {
-            const style = ref.current.style
-            style.transition = ""
-            style.height = ""
-            style.width = ""
-        }
-    }, [])
-
-    const beginDrag = useCallback(() => {
+    const beginDrag = useCallback((mode: "add" | "takeover") => {
         if (draggableRef.current === null || cubeItemRef.current === null) {
             return
         }
@@ -288,7 +290,14 @@ const CubeListItem = ({
         const rect = draggableRef.current.getBoundingClientRect()
 
         //animate the remain ghost, as to make it not jump
-        animateRef(remainGhostRef, false, rect.height)
+        //When mode=add, and we don't use this timeout, it breaks???? 
+        //I hate this shitty ass code wtf 
+        const animateRemain = () => animateRef(remainGhostRef, false, rect.height)
+        if (mode === "add") {
+            setTimeout(animateRemain, 1)
+        } else {
+            animateRemain()
+        }
 
         //Set the mouse dragged element to be at the current mouse
         if (mouseDraggedElementRef.current !== null) {
@@ -298,7 +307,7 @@ const CubeListItem = ({
         }
 
         //Update the props
-        if (cube.hasBeenPastedNeedsPlacement) {
+        if (mode === "add") {
             setDragData(drag => {
                 if (drag !== null && drag.cubes.includes(cube)) {
                     return drag
@@ -316,10 +325,9 @@ const CubeListItem = ({
                 height: rect.height,
             })
         }
-
-
         setIsDragging(true)
     }, [setDragData, setIsDragging, parentAnimateChildRemove, animateRef, cube, mouseDraggedElementRef])
+
 
     const updateDrag = useCallback((x: number, y: number) => {
         if (mouseDraggedElementRef.current !== null) {
@@ -343,6 +351,7 @@ const CubeListItem = ({
             style.left = rect.x + "px"
             style.top = rect.y + "px"
         }
+
         //After .3 seconds, do the actual cube movements
         setTimeout(() => {
             if (!dragOverRef.current) {
@@ -398,8 +407,15 @@ const CubeListItem = ({
     }, [dragData, setDragState, clearPreviousDragState, cube, dragOverRef])
 
     useEffect(() => {
+        if (needsDraggingStart) {
+            beginDrag("add")
+            setNeedsDraggingStart(false)
+        }
+    }, [beginDrag, needsDraggingStart, setNeedsDraggingStart])
+
+    useEffect(() => {
         if (cube.hasBeenPastedNeedsPlacement) {
-            beginDrag()
+            beginDrag("add")
             updateDrag(mousePositionRef.current.x, mousePositionRef.current.y)
 
             const mouseMove = (e: MouseEvent) => {
@@ -432,74 +448,93 @@ const CubeListItem = ({
             <div ref={topGhostRef} />
             <div
                 // Per frame, when this cube is dragged, set the mouse dragged element to be the position
-                onDrag={e => {
+                onDrag={useCallback((e: DragEvent) => {
                     //Note that at the end of a drag, clientXY is 0, we don't want this
                     if (e.clientX !== 0 || e.clientY !== 0) {
                         updateDrag(e.clientX, e.clientY)
                     }
                     e.preventDefault()
-                }}
+                }, [updateDrag])}
 
                 //Called when the cube is started to drag.
-                onDragStart={e => {
+                onDragStart={useCallback((e: DragEvent) => {
                     //set the drag image to be empty
                     e.dataTransfer.setDragImage(emptySpan, 0, 0)
 
-                    beginDrag()
-
+                    if (cube.selected.value) {
+                        //We only want to drag cubes who don't share a common parent
+                        const cubesToDrag = cube.model.identifListToCubes(cube.model.selectedCubeManager.selected.value)
+                        cubesToDrag.forEach(cube => {
+                            for (let parent = cube.parent; parent instanceof DCMCube; parent = parent.parent) {
+                                if (cubesToDrag.includes(parent)) {
+                                    return
+                                }
+                            }
+                            cube.needsDraggingStart.value = true
+                        })
+                        setDragData({
+                            cubes: [],
+                            width: 0,
+                            height: 0
+                        })
+                    } else {
+                        beginDrag("takeover")
+                    }
                     e.stopPropagation()
-                }}
+                }, [cube, setDragData, beginDrag])}
 
                 //Called when the element is stopped dragging
-                onDragEnd={e => {
+                onDragEnd={useCallback((e: DragEvent) => {
                     finishDrag()
                     e.preventDefault()
                     e.stopPropagation()
-                }}
+                }, [finishDrag])}
 
                 //Called when a cube is dragged over this
-                onDragOver={e => {
+                onDragOver={useCallback((e: DragEvent) => {
                     onDragOver(e.clientY)
                     e.preventDefault()
                     e.stopPropagation()
-                }}
-                onMouseMoveCapture={e => {
+                }, [onDragOver])}
+
+                onMouseMoveCapture={useCallback((e: ReactMouseEvent) => {
                     if (dragData !== null && dragData.cubes.some(cube => cube.hasBeenPastedNeedsPlacement)) {
                         onDragOver(e.clientY)
                     }
-                }}
+                }, [dragData, onDragOver])}
 
                 //Called when a cube exits being dragged over this
-                onDragLeave={e => {
+                onDragLeave={useCallback((e: DragEvent) => {
                     dragOverRef.current = false
                     setDragState(null)
                     e.preventDefault()
                     e.stopPropagation()
-                }}
-                onMouseLeave={e => {
+                }, [dragOverRef, setDragState])}
+
+                onMouseLeave={useCallback((e: ReactMouseEvent) => {
                     if (dragData !== null && dragData.cubes.some(cube => cube.hasBeenPastedNeedsPlacement)) {
                         dragOverRef.current = false
                         setDragState(null)
                         e.preventDefault()
                         e.stopPropagation()
                     }
-                }}
+                }, [dragData, dragOverRef, setDragState])}
 
                 //Called when a cube is dropped on this
-                onDrop={e => {
+                onDrop={useCallback((e: DragEvent) => {
                     setDragState(null)
                     e.preventDefault()
                     e.stopPropagation()
                     onCubeDroppedOntoThis()
-                }}
-                onMouseDown={e => {
+                }, [setDragState, onCubeDroppedOntoThis])}
+                onMouseDown={useCallback((e: ReactMouseEvent) => {
                     if (dragData !== null && dragData.cubes.some(cube => cube.hasBeenPastedNeedsPlacement)) {
                         setDragState(null)
                         e.preventDefault()
                         e.stopPropagation()
                         onCubeDroppedOntoThis()
                     }
-                }}
+                }, [dragData, setDragState, onCubeDroppedOntoThis])}
                 draggable
             >
                 <div ref={draggableRef} className={(isDragging || isAnimating) ? "hidden" : ""}>

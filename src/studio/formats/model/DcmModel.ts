@@ -314,6 +314,7 @@ export class DCMCube implements CubeParent {
 
   pastedWorldMatrix?: Readonly<Matrix4Tuple>
   hasBeenPastedNeedsPlacement = false
+  readonly needsDraggingStart = new LO(false)
 
   _section?: CubeSectionType
 
