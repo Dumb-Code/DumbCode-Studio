@@ -1,5 +1,6 @@
-import { KeyboardEvent, useCallback } from "react";
+import { KeyboardEvent, useCallback, useState } from "react";
 import { v4 } from "uuid";
+import Checkbox from "../components/Checkbox";
 import GithubCommitBox from "../components/GithubCommitBox";
 import ValidatedInput, { useValidatedInput, ValidatedInputType } from "../components/ValidatedInput";
 import { RemoteProjectEntry, RemoteRepo } from "../studio/formats/project/DcRemoteRepos";
@@ -8,7 +9,7 @@ import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes";
 
 const RemoteProjectsDialogBox = ({ repo, editingRemote, onCommit, }: {
   repo: RemoteRepo | null, editingRemote?: RemoteProjectEntry,
-  onCommit: (commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry) => void
+  onCommit: (commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry | undefined) => void
 }) => {
   const moreThanThree = useCallback((value: string) => value.length >= 3, [])
   const emptyOrMoreThanThree = useCallback((value: string) => value.length === 0 || value.length >= 3, [])
@@ -17,6 +18,8 @@ const RemoteProjectsDialogBox = ({ repo, editingRemote, onCommit, }: {
   const model = useValidatedInput(moreThanThree, editingRemote?.model)
   const animationFolder = useValidatedInput(moreThanThree, editingRemote?.animationFolder)
   const textureFolder = useValidatedInput(emptyOrMoreThanThree, editingRemote?.texture?.baseFolder)
+
+  const [deleteRemote, setDeleteRemote] = useState(false)
 
   const isValid = name.valid && model.valid && animationFolder.valid && textureFolder.valid
 
@@ -45,8 +48,8 @@ const RemoteProjectsDialogBox = ({ repo, editingRemote, onCommit, }: {
         texture: textureFolder.value.length === 0 ? undefined : { baseFolder: textureFolder.value, groups: remote.texture?.groups ?? [] }
       }
     }
-    onCommit(commiter, editingRemote, remote)
-  }, [editingRemote, isValid, name.value, model.value, animationFolder.value, textureFolder.value, onCommit])
+    onCommit(commiter, editingRemote, deleteRemote ? undefined : remote)
+  }, [editingRemote, isValid, name.value, model.value, animationFolder.value, textureFolder.value, onCommit, deleteRemote])
 
   return (
     <OpenedDialogBox width="800px" height="800px" title="Load a Repository">
@@ -56,6 +59,7 @@ const RemoteProjectsDialogBox = ({ repo, editingRemote, onCommit, }: {
         <EditingEntry name="Model" input={model} placeholder={`assets/models/entities/${name.value.toLowerCase()}/${name.value.toLowerCase()}.dcm`} />
         <EditingEntry name="Animation Folder" input={animationFolder} placeholder={`assets/Animations/entities/${name.value.toLowerCase()}/.dca`} />
         <EditingEntry name="Texture Folder" input={textureFolder} placeholder={`assets/textures/entities/${name.value.toLowerCase()}`} />
+        <Checkbox value={deleteRemote} setValue={setDeleteRemote} extraText="Mark Deleted" />
         <GithubCommitBox repo={repo} processCommit={processCommit} onCommitFinished={clear} />
       </div>
     </OpenedDialogBox>

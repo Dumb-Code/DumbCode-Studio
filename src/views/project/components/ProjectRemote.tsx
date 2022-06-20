@@ -66,12 +66,14 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
         }
     }), [openedProjects, projects])
 
-    const onRemoteProjectChanged = useCallback((commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry) => {
+    const onRemoteProjectChanged = useCallback((commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry | undefined) => {
         if (projects === undefined || loadedRepo === null) {
             return
         }
         const newProjects = projects.filter(project => project !== oldEntry)
-        newProjects.push(newEntry)
+        if (newEntry !== undefined) {
+            newProjects.push()
+        }
         setProjects(newProjects)
 
         commiter.pushChange(".studio_remote.json", JSON.stringify(newProjects, null, 4))
@@ -140,7 +142,7 @@ const RepositoryEntry = ({ repo, selected, setRemote }: { repo: RemoteRepo, sele
 
 const ProjectEntry = ({ project, repo, onRemoteProjectChanged, linked }: {
     project: RemoteProjectEntry, repo: DcRemoteRepo, linked: DcProject | null,
-    onRemoteProjectChanged: (commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry) => void,
+    onRemoteProjectChanged: (commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry | undefined) => void,
 }) => {
     const { selectProject, addProject } = useStudio()
 
