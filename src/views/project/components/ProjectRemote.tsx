@@ -75,7 +75,7 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
         setProjects(newProjects)
 
         commiter.pushChange(".studio_remote.json", JSON.stringify(newProjects, null, 4))
-    }, [projects, loadedRepo])
+    }, [projects, loadedRepo, setProjects])
 
     return (
         <>

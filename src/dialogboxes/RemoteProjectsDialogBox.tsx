@@ -46,12 +46,12 @@ const RemoteProjectsDialogBox = ({ token, repo, editingRemote, onCommit, }: {
       }
     }
     onCommit(commiter, editingRemote, remote)
-  }, [editingRemote, isValid, name.value, model.value, animationFolder.value, textureFolder.value])
+  }, [editingRemote, isValid, name.value, model.value, animationFolder.value, textureFolder.value, onCommit])
 
   return (
     <OpenedDialogBox width="800px" height="800px" title="Load a Repository">
       <div className="flex flex-col h-full">
-        This going to be eventually better. It'll show the repository as a file structure and allow you to select the folder/file you want, isntead of typing it out.
+        This going to be eventually better. It&apos;ll show the repository as a file structure and allow you to select the folder/file you want, isntead of typing it out.
         <EditingEntry name="Name" input={name} />
         <EditingEntry name="Model" input={model} placeholder={`assets/models/entities/${name.value.toLowerCase()}/${name.value.toLowerCase()}.dcm`} />
         <EditingEntry name="Animation Folder" input={animationFolder} placeholder={`assets/Animations/entities/${name.value.toLowerCase()}/.dca`} />

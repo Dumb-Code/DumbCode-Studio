@@ -28,7 +28,7 @@ const GithubCommitBox = ({ token, repo, processCommit, onCommitFinished }: { tok
       onCommitFinished()
     }
 
-  }, [message, description, processCommit, token, repo])
+  }, [message, description, processCommit, onCommitFinished, token, repo])
 
   return (
     <div className="w-full flex-col">
