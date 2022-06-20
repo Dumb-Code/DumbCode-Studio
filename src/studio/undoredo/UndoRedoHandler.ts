@@ -112,6 +112,12 @@ export type ActionBatch<S extends UndoRedoSection> = {
   chainState: ActionChainState
   actions: Action<S>[]
 }
+
+export type SerializedUndoRedoHandler = {
+  history: readonly ActionBatch<any>[];
+  silentActions: Action<any>[];
+  index: number;
+}
 export default class UndoRedoHandler<S extends UndoRedoSection> {
   private batchActions = false
   private batchedActions: Action<S>[] = []
@@ -122,7 +128,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
 
   public readonly history = new LO<readonly ActionBatch<S>[]>([])
   private readonly silentActions: Action<S>[] = []
-  public index = new LO(-1)
+  public readonly index = new LO(-1)
 
   public readonly canUndo = new LO(false)
   public readonly canRedo = new LO(false)
@@ -146,6 +152,27 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     if (this.batchedActions.length !== 0) {
       this._PUSH(actionType, reason, this.batchedActions, chainState)
     }
+  }
+
+  jsonRepresentation(): SerializedUndoRedoHandler {
+    if (this.batchActions) {
+      this.endBatchActions("!Object Closed While Batching!")
+    }
+    return {
+      history: this.history.value,
+      silentActions: this.silentActions,
+      index: this.index.value
+    }
+  }
+
+  loadFromJson(object: SerializedUndoRedoHandler) {
+    this.history.value = object.history
+    this.index.value = object.index
+    this.silentActions.length = 0
+    this.silentActions.push(...object.silentActions)
+
+    console.log(this.history.value)
+    console.log(this.sections)
   }
 
   private findSection<K extends string>(section_name: K) {
@@ -420,7 +447,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   private _dispatchModify(section_name: string, property_name: string, value: any) {
     const section = this.findSection(section_name)
     if (!section) {
-      throw new Error("Unable to find section " + section);
+      throw new Error("Unable to find section " + section_name);
     }
     section.data[property_name] = value
     if (value === undefined) {

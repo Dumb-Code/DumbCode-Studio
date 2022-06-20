@@ -1,4 +1,5 @@
 import JSZip, { JSZipObject } from "jszip";
+import { SerializedUndoRedoHandler } from "../../undoredo/UndoRedoHandler";
 import { ReferenceImage } from "../../util/ReferenceImageHandler";
 import { imgSourceToElement } from "../../util/Utils";
 import { loadUnknownAnimation, writeDCAAnimation } from "../animations/DCALoader";
@@ -8,6 +9,12 @@ import { TextureGroup } from "../textures/TextureManager";
 import { KeyframeLayerData } from './../animations/DcaAnimation';
 import DcProject from "./DcProject";
 
+
+type ModelDataJson = {
+  projectHistory: SerializedUndoRedoHandler,
+  modelHistory: SerializedUndoRedoHandler
+}
+
 export const loadDcProj = async (name: string, buffer: ArrayBuffer) => {
   const zip = await JSZip.loadAsync(buffer)
 
@@ -16,18 +23,23 @@ export const loadDcProj = async (name: string, buffer: ArrayBuffer) => {
 
   const awaiters: Promise<void>[] = []
 
+  const dataFile = zip.file("data.json")
+  if (dataFile !== null) {
+    awaiters.push(loadProjectData(dataFile, project))
+  }
+
   const textures = zip.folder("textures")
-  if (textures != null) {
+  if (textures !== null) {
     awaiters.push(loadTextures(textures, project))
   }
 
   const animations = zip.folder("animations")
-  if (animations != null) {
+  if (animations !== null) {
     awaiters.push(loadAnimations(animations, project))
   }
 
   const refImges = zip.folder("ref_images")
-  if (refImges != null) {
+  if (refImges !== null) {
     awaiters.push(loadRefImages(refImges, project))
   }
 
@@ -37,6 +49,12 @@ export const loadDcProj = async (name: string, buffer: ArrayBuffer) => {
 }
 
 const loadDcProjModel = async (zip: JSZip) => loadModelUnknown(file(zip, 'model.dcm').async('arraybuffer'))
+
+const loadProjectData = async (file: JSZip.JSZipObject, project: DcProject) => {
+  const json = JSON.parse(await file.async("text")) as ModelDataJson
+  project.undoRedoHandler.loadFromJson(json.projectHistory)
+  project.model.undoRedoHandler.loadFromJson(json.modelHistory)
+}
 
 //Load the animation data. The old structure was as follows:
 //
@@ -89,6 +107,7 @@ type AnimationData = {
     name: string,
     ikAnchorCubes: string[]
     layers: KeyframeLayerDataJson[]
+    history?: SerializedUndoRedoHandler,
   }[]
 }
 
@@ -121,6 +140,9 @@ const loadAnimations = async (folder: JSZip, project: DcProject) => {
 
     animation.keyframeLayers.value = data.layers.map(layer => new KeyframeLayerData(animation, layer.id, layer.name, layer.visible, layer.locked, layer.definedMode))
 
+    if (data.history !== undefined) {
+      animation.undoRedoHandler.loadFromJson(data.history)
+    }
     project.animationTabs.addAnimation(animation)
   })
 
@@ -280,7 +302,6 @@ const loadRefImages = async (folder: JSZip, project: DcProject) => {
   const data = await getRefImagesData(folder)
   const images = await getRefImages(folder, data.new_format ? null : data.entries.map(e => e.name))
 
-  console.log(data, images)
   project.referenceImageHandler.images.value = images.map((img, i) => {
     const d = data.entries[i];
 
@@ -324,12 +345,22 @@ export const writeDcProj = async (projet: DcProject): Promise<Blob> => {
   zip.file("model.dcm", writeModel(projet.model))
 
   await Promise.all([
+    writeProjectData(projet, zip),
     writeAnimations(projet, folder(zip, "animations")),
     writeTextures(projet, folder(zip, "textures")),
     writeRefImages(projet, folder(zip, "ref_images")),
   ])
 
   return zip.generateAsync({ type: "blob" })
+}
+
+
+const writeProjectData = async (project: DcProject, folder: JSZip) => {
+  const data: ModelDataJson = {
+    modelHistory: project.model.undoRedoHandler.jsonRepresentation(),
+    projectHistory: project.undoRedoHandler.jsonRepresentation()
+  }
+  folder.file("data.json", JSON.stringify(data))
 }
 
 const writeAnimations = async (project: DcProject, folder: JSZip) => {
@@ -343,10 +374,12 @@ const writeAnimations = async (project: DcProject, folder: JSZip) => {
         locked: layer.locked.value,
         visible: layer.visible.value,
         definedMode: layer.definedMode.value,
-      }))
+      })),
+      history: anim.undoRedoHandler.jsonRepresentation()
     }))
   }
   folder.file("data.json", JSON.stringify(animationData))
+
 
   project.animationTabs.animations.value.forEach((anim, index) => {
     folder.file(`${index}.dca`, writeDCAAnimation(anim))
