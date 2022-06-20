@@ -112,7 +112,7 @@ const NumberedList = ({ nameLO, list, setList, number }: { nameLO: LO<string>, l
       newList = list.filter(n => n !== number)
     }
     setList(newList)
-  }, [list, setList])
+  }, [list, setList, number])
   return <Checkbox value={list.includes(number)} setValue={setValue} extraText={name} />
 }
 

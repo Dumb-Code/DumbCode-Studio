@@ -1,4 +1,3 @@
-import { AES } from "crypto-js"
 import { NextApiRequest, NextApiResponse } from "next"
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -19,24 +18,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(400).json({ error: "Missing Access Token" })
   }
 
-  const authUser = await fetch(`https://api.github.com/user`, { headers: { "Authorization": `token ${accessToken}` } })
-    .then(r => r.json())
-  if (authUser.id === undefined) {
-    return res.status(500).json({ error: "Error Authenticating User" })
-  }
-
-  if (process.env.TOKEN_KEY === undefined) {
-    return res.status(500).json({ error: "No Token Key" })
-  }
-
-  const data = {
-    github_id: authUser.id,
-    time_created: Date.now(),
-  }
-  const token = AES.encrypt(JSON.stringify(data), process.env.TOKEN_KEY).toString()
-  //AES.decrypt(ciphertext, process.env.TOKEN_KEY).toString(enc.Utf8);
-
-  res.status(200).json({ github_token: accessToken, dumbcode_token: token })
+  // const authUser = await fetch(`https://api.github.com/user`, { headers: { "Authorization": `token ${accessToken}` } })
+  //   .then(r => r.json())
+  // if (authUser.id === undefined) {
+  //   return res.status(500).json({ error: "Error Authenticating User" })
+  // }
+  // authUser.id
+  res.status(200).json({ token: accessToken })
 }
 
 export default handler

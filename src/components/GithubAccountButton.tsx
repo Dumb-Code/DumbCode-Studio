@@ -4,7 +4,7 @@ import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
 import { SVGCross, SVGGithub } from "./Icons"
 
 const GithubAccountButton = () => {
-  const [accessToken, _, removeToken] = useGithubAccessToken()
+  const [accessToken, removeToken] = useGithubAccessToken()
 
   return (
     <>

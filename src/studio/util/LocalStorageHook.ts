@@ -27,11 +27,6 @@ export const useLocalStorage = (key: string) => {
 
 export const useGithubAccessToken = () => {
   const [github, setGithub] = useLocalStorage("github-access-token")
-  const [dumbcode, setDumbcode] = useLocalStorage("dumbcode-access-token")
-
-  const removeAll = useCallback(() => {
-    setGithub(null)
-    setDumbcode(null)
-  }, [setGithub, setDumbcode])
-  return [github, dumbcode, removeAll] as const
+  const remove = useCallback(() => setGithub(null), [setGithub])
+  return [github, remove] as const
 }

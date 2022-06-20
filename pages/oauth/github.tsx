@@ -28,9 +28,8 @@ const GithubAuthPage: NextPage = () => {
     fetch(`${window.location.protocol}//${window.location.host}/api/oauth/github?code=${code}`)
       .then(v => v.json())
       .then(j => {
-        if (j.github_token && j.dumbcode_token) {
-          localStorage.setItem("github-access-token", j.github_token)
-          localStorage.setItem("dumbcode-access-token", j.dumbcode_token)
+        if (j.token) {
+          localStorage.setItem("github-access-token", j.token)
           window.close()
           return
         }
