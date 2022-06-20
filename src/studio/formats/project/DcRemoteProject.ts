@@ -29,7 +29,11 @@ export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, 
 
   await Promise.all([textures, animations, referenceImages])
 
-  project.remoteLink = repo.repo
+  project.remoteLink = {
+    allData: repo.allData,
+    repo: repo.repo,
+    entry
+  }
   project.remoteUUID = entry.uuid
   return project
 }
@@ -40,7 +44,9 @@ const loadRemoteModel = async (repo: DcRemoteRepoContentGetterCounter, entry: Re
     const arraybuffer = Uint8Array.from(model.content, c => c.charCodeAt(0)).buffer
     return await loadModelUnknown(arraybuffer, model.name)
   }
-  return new DCMModel()
+  const newModel = new DCMModel()
+  newModel.needsSaving.value = true
+  return newModel
 }
 
 const loadIndividualTexture = async (repo: DcRemoteRepoContentGetterCounter, baseLoc: string, texture: string) => {
@@ -104,7 +110,7 @@ const loadAllAnimations = async (repo: DcRemoteRepoContentGetterCounter, animati
     const content = await repo.getContent(animation.path)
     if (content.type === "file") {
       const arraybuffer = Uint8Array.from(content.content, c => c.charCodeAt(0)).buffer
-      return loadUnknownAnimation(project, content.name, arraybuffer)
+      return loadUnknownAnimation(project, content.name.substring(0, content.name.lastIndexOf('.')), arraybuffer)
     }
     return null
   }))

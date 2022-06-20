@@ -170,9 +170,6 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     this.index.value = object.index
     this.silentActions.length = 0
     this.silentActions.push(...object.silentActions)
-
-    console.log(this.history.value)
-    console.log(this.sections)
   }
 
   private findSection<K extends string>(section_name: K) {

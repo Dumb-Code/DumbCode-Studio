@@ -78,8 +78,6 @@ export default class GithubCommiter {
       force: true,
     })
 
-
-
   }
 
 
@@ -143,7 +141,7 @@ export default class GithubCommiter {
     const tree = parentSha !== undefined ? await this.loadGitTree(parentSha, path) : []
 
     const pathIndex = (path: string) => {
-      const index = tree.findIndex(p => p === path)
+      const index = tree.findIndex(p => p.path === path)
       return index === -1 ? tree.length : index
     }
 

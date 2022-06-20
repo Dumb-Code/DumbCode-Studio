@@ -2,7 +2,7 @@ import JSZip from "jszip";
 import { v4 } from "uuid";
 import { StudioBuffer } from "../../util/StudioBuffer";
 import { convertMapToRecord, convertRecordToMap } from "../../util/Utils";
-import { getZippedFile, ParseError } from "../model/DCMLoader";
+import { getZippedFile, OutputByType, ParseError } from "../model/DCMLoader";
 import DcProject from "../project/DcProject";
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from "./DcaAnimation";
 import { loadDCAAnimationOLD } from "./OldDcaLoader";
@@ -76,7 +76,9 @@ const writeKeyframe = (kf: DcaKeyframe): ParsedKeyframeType => ({
   progressionPoints: kf.progressionPoints.value,
 })
 
-export const writeDCAAnimation = async (animation: DcaAnimation) => {
+export const writeDCAAnimation = async (animation: DcaAnimation) => writeDCAAnimationWithFormat(animation, "blob")
+
+export const writeDCAAnimationWithFormat = async <T extends keyof OutputByType>(animation: DcaAnimation, format: T): Promise<OutputByType[T]> => {
   const data: ParsedAnimationType = {
     version: 1,
     name: animation.name.value,
@@ -95,7 +97,7 @@ export const writeDCAAnimation = async (animation: DcaAnimation) => {
 
   const zip = new JSZip()
   zip.file("dca_animation", stringData)
-  const blob = await zip.generateAsync({ type: "blob" })
+  const blob = await zip.generateAsync({ type: format })
   return blob
 }
 

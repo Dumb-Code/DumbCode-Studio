@@ -55,7 +55,22 @@ export const loadModel = async (arrayBuffer: ArrayBuffer) => {
   return model
 }
 
-export const writeModel = async (model: DCMModel) => {
+//Copied from JSZIP
+export interface OutputByType {
+  base64: string;
+  string: string;
+  text: string;
+  binarystring: string;
+  array: number[];
+  uint8array: Uint8Array;
+  arraybuffer: ArrayBuffer;
+  blob: Blob;
+  nodebuffer: Buffer;
+}
+
+export const writeModel = async (model: DCMModel): Promise<Blob> => writeModelWithFormat(model, "blob")
+
+export const writeModelWithFormat = async <T extends keyof OutputByType>(model: DCMModel, format?: T): Promise<OutputByType[T]> => {
   const cubeMapper = (cube: DCMCube): ParseCubeType => ({
     name: cube.name.value,
     dimension: cube.dimension.value, position: cube.position.value,
@@ -81,7 +96,7 @@ export const writeModel = async (model: DCMModel) => {
 
   const zip = new JSZip()
   zip.file("dcm_model", stringData)
-  const blob = await zip.generateAsync({ type: "blob" })
+  const blob = await zip.generateAsync({ type: format })
   return blob
 }
 

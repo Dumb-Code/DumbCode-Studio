@@ -6,6 +6,8 @@ import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
+import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
+import PushToGithubDialogBox from "../../../dialogboxes/PushToGithubDialogBox"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import { exportAsBBModel } from "../../../studio/formats/project/BBModelExporter"
@@ -71,6 +73,9 @@ const ModelEntries = () => {
 const ModelEntry = ({ project, selected, changeModel, removeProject }: { project: DcProject, selected: boolean, changeModel: () => void, removeProject: () => void }) => {
     const [isModelDirty] = useListenableObject(project.model.needsSaving)
     const [isSaveable] = useListenableObject(project.saveableFile)
+
+    const dialogBoxes = useDialogBoxes()
+
     const saveModel = async () => {
         try {
             const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeModel(project.model))
@@ -122,9 +127,9 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
 
     const linkedToFile = isSaveable && FileSystemsAccessApi
 
-    const isRemote = false
+    const isRemote = project.remoteLink !== undefined
 
-    const iconButtonClass = (selected ? "bg-sky-600 hover:bg-sky-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white")
+    const iconButtonClass = (selected ? "bg-sky-600 hover:bg-sky-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400")
 
     return (
         <div>
@@ -133,7 +138,8 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                 <div className="pt-0 mr-2 text-white flex flex-row">
                     {isRemote &&
                         <ButtonWithTooltip
-                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"}
+                            onClick={e => { dialogBoxes.setDialogBox(() => <PushToGithubDialogBox project={project} />) }}
+                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1" + (isModelDirty ? " text-red-600 " : "")}
                             tooltip="Push to Github"
                         >
                             <SVGPushGithub className="h-4 w-4 mr-1" />

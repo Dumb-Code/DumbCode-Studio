@@ -1,7 +1,7 @@
 import JSZip, { JSZipObject } from "jszip";
 import { SerializedUndoRedoHandler } from "../../undoredo/UndoRedoHandler";
 import { ReferenceImage } from "../../util/ReferenceImageHandler";
-import { imgSourceToElement } from "../../util/Utils";
+import { imgSourceToElement, writeImgToBase64 } from "../../util/Utils";
 import { loadUnknownAnimation, writeDCAAnimation } from "../animations/DCALoader";
 import { loadModelUnknown, writeModel } from "../model/DCMLoader";
 import { DCMCube } from "../model/DcmModel";
@@ -450,17 +450,6 @@ const folder = (zip: JSZip, fileName: string) => {
 }
 
 const writeImg = async (folder: JSZip, name: string | number, img: HTMLImageElement) => {
-  const blob = await fetch(img.src).then(res => res.blob())
-  await new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      folder.file(`${name}.png`, (reader.result as string).replace(/^.+,/, ''), { base64: true })
-      resolve(null)
-    }
-    reader.onerror = e => {
-      console.error(e)
-      reject(e)
-    }
-    reader.readAsDataURL(blob)
-  })
+  const base64 = await writeImgToBase64(img)
+  folder.file(`${name}.png`, base64, { base64: true })
 }

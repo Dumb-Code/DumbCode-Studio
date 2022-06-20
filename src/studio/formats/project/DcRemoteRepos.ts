@@ -19,6 +19,7 @@ export default interface DcRemoteRepo {
 }
 
 export type DcRemoteRepoContentGetterCounter = {
+  readonly allData: DcRemoteRepo
   readonly repo: RemoteRepo
   readonly getContent: (path: string, decodeBase64?: boolean) => ContentReturnType
   readonly addListener: (func: (value: number, total: number) => void) => void
@@ -91,6 +92,7 @@ const getCountedContentGetter: (total: number, repo: DcRemoteRepo) => DcRemoteRe
   const counterListeners = new Set<(value: number, total: number) => void>()
 
   return {
+    allData: repo,
     repo: repo.repo,
     addUnforseenRequests: t => {
       total += t

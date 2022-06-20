@@ -14,7 +14,7 @@ import { CommandRoot } from './../../command/CommandRoot';
 import UndoRedoHandler from './../../undoredo/UndoRedoHandler';
 import { CubeSelectedHighlighter } from './../../util/CubeSelectedHighlighter';
 import { loadDcProj } from "./DcProjectLoader";
-import { RemoteRepo } from './DcRemoteRepos';
+import DcRemoteRepo, { RemoteProjectEntry, RemoteRepo } from './DcRemoteRepos';
 
 type UndoRedoDataType = {
   section_name: "root_name",
@@ -56,7 +56,11 @@ export default class DcProject {
 
   readonly referenceImageHandler = new ReferenceImageHandler(this.selectionGroup)
 
-  remoteLink?: RemoteRepo
+  remoteLink?: {
+    allData: DcRemoteRepo,
+    repo: RemoteRepo
+    entry: RemoteProjectEntry
+  }
   remoteUUID?: string
 
   constructor(name: string, model: DCMModel) {

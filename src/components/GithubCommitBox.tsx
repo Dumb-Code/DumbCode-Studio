@@ -2,14 +2,17 @@ import { FormEvent, useCallback, useMemo, useState } from "react"
 import { RemoteRepo } from "../studio/formats/project/DcRemoteRepos"
 import GithubCommiter from "../studio/git/GithubCommiter"
 import { useListenableObjectNullable } from "../studio/util/ListenableObject"
+import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
 import { ButtonWithTooltip } from "./Tooltips"
 
-const GithubCommitBox = ({ token, repo, processCommit, onCommitFinished }: { token: string, repo: RemoteRepo | null, processCommit: (commiter: GithubCommiter) => void, onCommitFinished?: () => void }) => {
+const GithubCommitBox = ({ repo, processCommit, onCommitFinished }: { repo: RemoteRepo | null, processCommit: (commiter: GithubCommiter) => any | Promise<any>, onCommitFinished?: () => void }) => {
   const [message, setMessage] = useState("")
   const [description, setDescription] = useState("")
 
   const [currentCommit, setCurrentCommit] = useState<GithubCommiter | null>(null)
   const [commitMsg] = useListenableObjectNullable(currentCommit?.message, [currentCommit])
+
+  const [token] = useGithubAccessToken()
 
   const messageValid = useMemo(() => message.length !== 0, [message])
 
@@ -17,12 +20,12 @@ const GithubCommitBox = ({ token, repo, processCommit, onCommitFinished }: { tok
   const onDescInput = useCallback((e: FormEvent<HTMLTextAreaElement>) => setDescription(e.currentTarget.value ?? ""), [])
 
   const onClickButton = useCallback(async () => {
-    if (repo === null) {
+    if (repo === null || token === null) {
       return
     }
     const github = new GithubCommiter(token, repo)
     setCurrentCommit(github)
-    processCommit(github)
+    await processCommit(github)
     await github.commit(message, description)
     if (onCommitFinished) {
       onCommitFinished()

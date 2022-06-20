@@ -110,6 +110,7 @@ export default class TextureManager {
 export class TextureGroup {
   readonly identifier: string;
   readonly name: LO<string>
+  readonly folderName: LO<string>
   readonly textures = new LO<readonly string[]>([])
   readonly unselectedTextures = new LO<readonly string[]>([])
   isDefault: boolean
@@ -118,6 +119,9 @@ export class TextureGroup {
     this.identifier = uuidv4()
     this.isDefault = isDefault
     this.name = new LO(name)
+    this.folderName = new LO(name.toLowerCase())
+
+    this.name.addListener(value => this.folderName.value = value.toLowerCase())
   }
 
   toggleTexture(texture: Texture, isInGroup: boolean, after?: string) {

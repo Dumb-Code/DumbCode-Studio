@@ -119,6 +119,8 @@ export default class DcaAnimation {
       }
     })
 
+    this.needsSaving.addPreModifyListener((newValue, oldValue, naughtyModifyValue) => naughtyModifyValue(oldValue || (newValue && !this.undoRedoHandler.ignoreActions)))
+
     this.keyframes.addListener(value => {
       this.maxTime.value = Math.max(...value.map(k => k.startTime.value + k.duration.value))
     })

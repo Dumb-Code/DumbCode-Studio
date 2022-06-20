@@ -103,13 +103,13 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
             <div className="flex flex-col flex-grow">
                 <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b border-black flex flex-row items-center">
                     <p className="flex-grow my-0.5 ml-1">REMOTE PROJECTS</p>
-                    <button disabled={loadedRepo === null} className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteProjectsDialogBox token={githubToken} repo={selectedRepo} onCommit={onRemoteProjectChanged} />)} >
+                    <button disabled={loadedRepo === null} className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteProjectsDialogBox repo={selectedRepo} onCommit={onRemoteProjectChanged} />)} >
                         <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
                     </button>
                 </div>
                 <div className="flex flex-col overflow-y-scroll pr-2 h-full studio-scrollbar">
                     {loadedRepo !== null && zippedProjects !== false &&
-                        zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} githubToken={githubToken} onRemoteProjectChanged={onRemoteProjectChanged} />)
+                        zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} onRemoteProjectChanged={onRemoteProjectChanged} />)
                     }
                 </div>
             </div>
@@ -138,8 +138,8 @@ const RepositoryEntry = ({ repo, selected, setRemote }: { repo: RemoteRepo, sele
     )
 }
 
-const ProjectEntry = ({ project, repo, githubToken, onRemoteProjectChanged, linked }: {
-    project: RemoteProjectEntry, repo: DcRemoteRepo, githubToken: string, linked: DcProject | null,
+const ProjectEntry = ({ project, repo, onRemoteProjectChanged, linked }: {
+    project: RemoteProjectEntry, repo: DcRemoteRepo, linked: DcProject | null,
     onRemoteProjectChanged: (commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry) => void,
 }) => {
     const { selectProject, addProject } = useStudio()
@@ -186,7 +186,7 @@ const ProjectEntry = ({ project, repo, githubToken, onRemoteProjectChanged, link
     const effectiveStatus = linked ? 100 : status
 
     const editRemoteRepo = (e: MouseEvent) => {
-        setDialogBox(() => <RemoteProjectsDialogBox editingRemote={project} token={githubToken} repo={repo.repo} onCommit={onRemoteProjectChanged} />)
+        setDialogBox(() => <RemoteProjectsDialogBox editingRemote={project} repo={repo.repo} onCommit={onRemoteProjectChanged} />)
         e.stopPropagation()
     }
 

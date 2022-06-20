@@ -6,8 +6,8 @@ import { RemoteProjectEntry, RemoteRepo } from "../studio/formats/project/DcRemo
 import GithubCommiter from "../studio/git/GithubCommiter";
 import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes";
 
-const RemoteProjectsDialogBox = ({ token, repo, editingRemote, onCommit, }: {
-  token: string, repo: RemoteRepo | null, editingRemote?: RemoteProjectEntry,
+const RemoteProjectsDialogBox = ({ repo, editingRemote, onCommit, }: {
+  repo: RemoteRepo | null, editingRemote?: RemoteProjectEntry,
   onCommit: (commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry) => void
 }) => {
   const moreThanThree = useCallback((value: string) => value.length >= 3, [])
@@ -56,7 +56,7 @@ const RemoteProjectsDialogBox = ({ token, repo, editingRemote, onCommit, }: {
         <EditingEntry name="Model" input={model} placeholder={`assets/models/entities/${name.value.toLowerCase()}/${name.value.toLowerCase()}.dcm`} />
         <EditingEntry name="Animation Folder" input={animationFolder} placeholder={`assets/Animations/entities/${name.value.toLowerCase()}/.dca`} />
         <EditingEntry name="Texture Folder" input={textureFolder} placeholder={`assets/textures/entities/${name.value.toLowerCase()}`} />
-        <GithubCommitBox token={token} repo={repo} processCommit={processCommit} onCommitFinished={clear} />
+        <GithubCommitBox repo={repo} processCommit={processCommit} onCommitFinished={clear} />
       </div>
     </OpenedDialogBox>
   )

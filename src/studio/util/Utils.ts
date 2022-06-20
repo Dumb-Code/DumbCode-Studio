@@ -16,3 +16,18 @@ export const imgSourceToElement = (src: string) => {
     img.src = src
   })
 }
+
+export const writeImgToBase64 = async (img: HTMLImageElement): Promise<string> => {
+  const blob = await fetch(img.src).then(res => res.blob())
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      resolve((reader.result as string).replace(/^.+,/, ''))
+    }
+    reader.onerror = e => {
+      console.error(e)
+      reject(e)
+    }
+    reader.readAsDataURL(blob)
+  })
+}
