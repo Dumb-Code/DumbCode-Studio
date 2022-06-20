@@ -1,10 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */ // -- we want to use exhaustive deps (or do we)
 import { DependencyList, useCallback, useEffect, useState } from 'react';
-import { HistoryActionType, SectionHandle, UndoRedoSection } from './../undoredo/UndoRedoHandler';
+import { HistoryActionTypes, SectionHandle, UndoRedoSection } from './../undoredo/UndoRedoHandler';
 
 type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
 
-function _getOrRun<T, R>(value: T | undefined, data: R | ((val: T | undefined) => R)): R {
+type ValueOrGetter<T, R> = R | ((val: T | undefined) => R)
+
+function _getOrRun<T, R>(value: T | undefined, data: ValueOrGetter<T, R>): R {
   if (typeof data === "function") {
     const fn = data as (val: T | undefined) => R
     return fn(value)
@@ -87,7 +89,7 @@ export class LO<T> {
       S extends UndoRedoSection,
       P extends FieldsFor<S['data'], T> & string
     >
-    (section: SectionHandle<any, S>, property_name: P, silent = false, reason?: string | ((val: T | undefined) => string), action?: HistoryActionType | ((val: T | undefined) => HistoryActionType)) {
+    (section: SectionHandle<any, S>, property_name: P, silent = false, reason?: ValueOrGetter<T, string>, action?: ValueOrGetter<T, HistoryActionTypes>) {
     let isModifying = false
     section.modifyFirst(property_name, this.value, value => {
       isModifying = true
@@ -104,7 +106,7 @@ export class LO<T> {
       M,
       P extends FieldsFor<S['data'], M> & string
     >
-    (section: SectionHandle<any, S>, mapper: (val: T) => M, reverseMapper: (val: M) => T, property_name: P, silent = false, reason?: string | ((val: T | undefined) => string), action?: HistoryActionType | ((val: T | undefined) => HistoryActionType)) {
+    (section: SectionHandle<any, S>, mapper: (val: T) => M, reverseMapper: (val: M) => T, property_name: P, silent = false, reason?: string | ((val: T | undefined) => string), action?: HistoryActionTypes | ((val: T | undefined) => HistoryActionTypes)) {
     let isModifying = false
     section.modifyFirst(property_name, mapper(this.value), value => {
       isModifying = true
@@ -303,7 +305,7 @@ export class LOMap<K, V> extends Map<K, V> {
   applyToSection<S extends UndoRedoSection>(
     section: SectionHandle<any, S>, propertyPrefix: string, silent = false,
     keyMapper: (key: K) => string, reverseKeyMapper: (str: string) => K | null,
-    reason?: string | ((val: V | undefined) => string), action?: HistoryActionType | ((val: V | undefined) => HistoryActionType)
+    reason?: ValueOrGetter<V, string>, action?: ValueOrGetter<V, HistoryActionTypes>
   ) {
     let isModifying = false
 
@@ -337,7 +339,7 @@ export class LOMap<K, V> extends Map<K, V> {
   static applyToSectionStringKey<S extends UndoRedoSection, V>(
     map: LOMap<string, V>,
     section: SectionHandle<any, S>, propertyPrefix: string, silent = false,
-    reason?: string | ((val: V | undefined) => string), action?: HistoryActionType | ((val: V | undefined) => HistoryActionType)
+    reason?: ValueOrGetter<V, string>, action?: ValueOrGetter<V, HistoryActionTypes>
   ) {
     return map.applyToSection(section, propertyPrefix, silent, s => s, s => s, reason, action)
   }

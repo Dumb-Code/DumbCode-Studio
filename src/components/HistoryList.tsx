@@ -1,6 +1,6 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useStudio } from "../contexts/StudioContext";
-import UndoRedoHandler, { ActionBatch } from "../studio/undoredo/UndoRedoHandler";
+import UndoRedoHandler, { ActionBatch, HistoryActionIcons } from "../studio/undoredo/UndoRedoHandler";
 import { useListenableObject, useListenableObjectNullable } from "../studio/util/ListenableObject";
 import CollapsableSidebarPannel from "./CollapsableSidebarPannel";
 
@@ -51,12 +51,14 @@ const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<an
 
 const HistoryItem = ({ batch, undone, selected, makeBatchHead }: { batch: ActionBatch<any>, undone: boolean, selected: boolean, makeBatchHead: (batch: ActionBatch<any>) => void }) => {
     const onClick = useCallback(() => makeBatchHead(batch), [batch, makeBatchHead])
+
+    const iconData = useMemo(() => HistoryActionIcons[batch.actionType], [batch.actionType])
     return (
         <button
             className={(undone ? "dark:text-gray-500 bg-gray-300 dark:bg-gray-700 bg-opacity-50 hover:bg-opacity-100" : (selected ? "text-white bg-blue-500 hover:bg-blue-600" : "dark:text-white bg-white dark:bg-gray-700 hover:bg-opacity-50")) + " flex flex-row items-center h-8 my-0.5"}
             onClick={onClick}
         >
-            <batch.actionType.Icon className="h-4 w-4 m-1.5" />
+            <iconData.Icon className="h-4 w-4 m-1.5" />
             <p className="">{batch.reason}</p>
         </button>
     );

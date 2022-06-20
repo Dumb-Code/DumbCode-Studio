@@ -79,7 +79,7 @@ export type UndoRedoSection = {
 
 export type Action<S extends UndoRedoSection> = AddSectionAction<S> | RemoveSectionAction<S> | ModifySectionAction<S>
 
-export type HistoryActionType = { Icon: (props: SVGProps<SVGSVGElement>) => JSX.Element }
+export type HistoryActionIcon = { Icon: (props: SVGProps<SVGSVGElement>) => JSX.Element }
 
 //Used to chain actions from different undohandlers together.
 //When deleting a cube, you first have to deselect, then delete. This is two different handlers
@@ -88,19 +88,26 @@ type ActionChainState =
   "chainLast" |  //The last action in a chain
   "none"         //There is no chain
 
-export const HistoryActionTypes = {
-  Command: { Icon: SVGTerminal },
-  Transformation: { Icon: SvgArrows },
-  Add: { Icon: SVGPlus },
-  Remove: { Icon: SVGTrash },
-  Edit: { Icon: SvgEdit },
-  ToggleVisibility: { Icon: SVGEye },
-  LockUnlock: { Icon: SVGLocked },
+//Only add to this, chaning the order of existing ones will break undo/redo handlers loaded from .dcproj
+export enum HistoryActionTypes {
+  Command, Transformation, Add,
+  Remove, Edit,
+  ToggleVisibility, LockUnlock
+}
+
+export const HistoryActionIcons: Record<HistoryActionTypes, HistoryActionIcon> = {
+  [HistoryActionTypes.Command]: { Icon: SVGTerminal },
+  [HistoryActionTypes.Transformation]: { Icon: SvgArrows },
+  [HistoryActionTypes.Add]: { Icon: SVGPlus },
+  [HistoryActionTypes.Remove]: { Icon: SVGTrash },
+  [HistoryActionTypes.Edit]: { Icon: SvgEdit },
+  [HistoryActionTypes.ToggleVisibility]: { Icon: SVGEye },
+  [HistoryActionTypes.LockUnlock]: { Icon: SVGLocked },
 }
 
 export type ActionBatch<S extends UndoRedoSection> = {
   time: number,
-  actionType: HistoryActionType
+  actionType: HistoryActionTypes
   reason: string
   chainState: ActionChainState
   actions: Action<S>[]
@@ -147,7 +154,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
 
   pruneHistory() { this.history.value = [] }
 
-  createNewSection<K extends S['section_name']>(section_name: K, defaultReason?: string, defaultAction?: HistoryActionType): SectionHandle<S, S & { section_name: K }> {
+  createNewSection<K extends S['section_name']>(section_name: K, defaultReason?: string, defaultAction?: HistoryActionTypes): SectionHandle<S, S & { section_name: K }> {
     const section = {
       section_name,
       data: {}
@@ -174,7 +181,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     this._PUSH(actionType, reason, [action])
   }
 
-  modifySection<P extends keyof S['data'] & string>(section: S, property_name: P, value: S['data'][P], old_value: S['data'][P], silent: boolean, reason: string, actionType: HistoryActionType) {
+  modifySection<P extends keyof S['data'] & string>(section: S, property_name: P, value: S['data'][P], old_value: S['data'][P], silent: boolean, reason: string, actionType: HistoryActionTypes) {
     section[property_name] = value
     const action: ModifySectionAction<S> = {
       type: "modify",
@@ -197,7 +204,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     this._PUSH(actionType, reason, [action])
   }
 
-  private _PUSH(actionType: HistoryActionType, reason: string, actions: Action<S>[], chainState: ActionChainState = "none") {
+  private _PUSH(actionType: HistoryActionTypes, reason: string, actions: Action<S>[], chainState: ActionChainState = "none") {
     if (this.ignoreActions) {
       return
     }
@@ -442,7 +449,7 @@ export class SectionHandle<S extends UndoRedoSection, T extends S> {
     private readonly undoRedoHandler: UndoRedoHandler<S>,
     private readonly section: T,
     private readonly defaultReason = "Properties Edit",
-    private readonly defaultAction: HistoryActionType = HistoryActionTypes.Edit
+    private readonly defaultAction: HistoryActionTypes = HistoryActionTypes.Edit
   ) {
 
   }
