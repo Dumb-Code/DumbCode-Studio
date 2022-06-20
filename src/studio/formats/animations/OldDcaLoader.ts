@@ -10,6 +10,7 @@ const compilerWarningsRemove = (_: any) => { }
 export const loadDCAAnimationOLD = (project: DcProject, name: string, buffer: StudioBuffer) => {
 
   const animation = new DcaAnimation(project, name)
+  animation.undoRedoHandler.ignoreActions = true
 
   const version = buffer.readNumber()
   //In version 1 we use a differnet type of string handling
@@ -83,6 +84,8 @@ export const loadDCAAnimationOLD = (project: DcProject, name: string, buffer: St
   repairKeyframes(project.model, version, keyframes, false)
 
   animation.keyframes.value = keyframes
+
+  animation.undoRedoHandler.ignoreActions = false
 
   return animation
 }

@@ -46,6 +46,8 @@ const readKeyframe = (animation: DcaAnimation, kfData: ParsedKeyframeType): DcaK
 const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayBuffer) => {
   const animation = new DcaAnimation(project, name)
 
+  animation.undoRedoHandler.ignoreActions = true
+
   const data = await getZippedFile<ParsedAnimationType>(buffer, "dca_animation")
 
   animation.name.value = data.name
@@ -60,6 +62,8 @@ const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayB
   convertRecordToMap(data.cubeNameOverrides ?? {}, animation.keyframeNameOverrides)
 
   animation.isSkeleton.value = data.isSkeleton ?? false
+
+  animation.undoRedoHandler.ignoreActions = false
 
   return animation
 }

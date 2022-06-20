@@ -45,7 +45,6 @@ export const loadDCMModel = async (arrayBuffer: ArrayBuffer | PromiseLike<ArrayB
         model.children.value = readCubes()
 
         model.undoRedoHandler.ignoreActions = false
-        console.log(model.undoRedoHandler)
     }
 
     //We need to invert the model. For this to work, we need three.js data. For that to happen, we need objects with geometry.
