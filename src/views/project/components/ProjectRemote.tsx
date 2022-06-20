@@ -1,7 +1,8 @@
-import { RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { MouseEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import GithubAccountButton from "../../../components/GithubAccountButton";
-import { SVGCross, SVGTrash } from "../../../components/Icons";
+import { SVGCross, SvgEdit, SVGTrash } from "../../../components/Icons";
 import { MinimizeButton } from "../../../components/MinimizeButton";
+import { ButtonWithTooltip } from "../../../components/Tooltips";
 import { useProjectPageContext } from "../../../contexts/ProjectPageContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";
@@ -10,6 +11,8 @@ import RemoteRepositoriesDialogBox from "../../../dialogboxes/RemoteRepositories
 import DcProject from "../../../studio/formats/project/DcProject";
 import { countTotalRequests, loadRemoteProject } from "../../../studio/formats/project/DcRemoteProject";
 import DcRemoteRepo, { DcRemoteRepoContentGetterCounter, loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual } from "../../../studio/formats/project/DcRemoteRepos";
+import GithubCommiter from "../../../studio/git/GithubCommiter";
+import { useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import { useGithubAccessToken } from "../../../studio/util/LocalStorageHook";
 import { removeRecentGithubRemoteProject, useRecentGithubRemoteProjects } from "../../../studio/util/RemoteProjectsManager";
 
@@ -50,17 +53,29 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
     const { selectedRepo: loadedRepo, setSelectedRepo: loadRepo } = useProjectPageContext()
 
     const dialogBoxes = useDialogBoxes()
-    const projects = useRecentGithubRemoteProjects()
+    const repos = useRecentGithubRemoteProjects()
     const [selectedRepo, setSelectedRepo] = useState<RemoteRepo | null>(loadedRepo?.repo ?? null)
+    const [projects, setProjects] = useListenableObjectNullable(loadedRepo?.projects, [loadedRepo])
 
     const { projects: openedProjects } = useStudio()
 
-    const zippedProjects = useMemo(() => loadedRepo !== null && loadedRepo.projects.map(project => {
+    const zippedProjects = useMemo(() => projects !== undefined && projects.map(project => {
         return {
             project,
             studio: openedProjects.find(p => p.remoteUUID === project.uuid) ?? null
         }
-    }), [loadedRepo, openedProjects])
+    }), [openedProjects, projects])
+
+    const onRemoteProjectChanged = useCallback((commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry) => {
+        if (projects === undefined || loadedRepo === null) {
+            return
+        }
+        const newProjects = projects.filter(project => project !== oldEntry)
+        newProjects.push(newEntry)
+        setProjects(newProjects)
+
+        commiter.pushChange(".studio_remote.json", JSON.stringify(newProjects, null, 4))
+    }, [projects, loadedRepo])
 
     return (
         <>
@@ -72,7 +87,7 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
                     </button>
                 </div>
                 <div className="dark:border-r border-black flex flex-col overflow-y-scroll flex-grow studio-scrollbar">
-                    {projects.map((p, i) =>
+                    {repos.map((p, i) =>
                         <RepositoryEntry
                             key={i}
                             repo={p}
@@ -88,13 +103,13 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
             <div className="flex flex-col flex-grow">
                 <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-1 dark:border-b border-black flex flex-row items-center">
                     <p className="flex-grow my-0.5 ml-1">REMOTE PROJECTS</p>
-                    <button className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteProjectsDialogBox />)} >
+                    <button disabled={loadedRepo === null} className="border bg-gray-600 hover:bg-gray-400 p-px" onClick={() => dialogBoxes.setDialogBox(() => <RemoteProjectsDialogBox token={githubToken} repo={selectedRepo} onCommit={onRemoteProjectChanged} />)} >
                         <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
                     </button>
                 </div>
                 <div className="flex flex-col overflow-y-scroll pr-2 h-full studio-scrollbar">
                     {loadedRepo !== null && zippedProjects !== false &&
-                        zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} />)
+                        zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} githubToken={githubToken} onRemoteProjectChanged={onRemoteProjectChanged} />)
                     }
                 </div>
             </div>
@@ -123,8 +138,13 @@ const RepositoryEntry = ({ repo, selected, setRemote }: { repo: RemoteRepo, sele
     )
 }
 
-const ProjectEntry = ({ project, repo, linked }: { project: RemoteProjectEntry, repo: DcRemoteRepo, linked: DcProject | null }) => {
+const ProjectEntry = ({ project, repo, githubToken, onRemoteProjectChanged, linked }: {
+    project: RemoteProjectEntry, repo: DcRemoteRepo, githubToken: string, linked: DcProject | null,
+    onRemoteProjectChanged: (commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry) => void,
+}) => {
     const { selectProject, addProject } = useStudio()
+
+    const { setDialogBox } = useDialogBoxes()
 
     const counterRef = useRef<DcRemoteRepoContentGetterCounter | null>(null)
 
@@ -165,8 +185,13 @@ const ProjectEntry = ({ project, repo, linked }: { project: RemoteProjectEntry, 
 
     const effectiveStatus = linked ? 100 : status
 
+    const editRemoteRepo = (e: MouseEvent) => {
+        setDialogBox(() => <RemoteProjectsDialogBox editingRemote={project} token={githubToken} repo={repo.repo} onCommit={onRemoteProjectChanged} />)
+        e.stopPropagation()
+    }
+
     return (
-        <div onClick={setProject} className={(effectiveStatus === 100 ? "bg-purple-500" : "dark:bg-gray-700 bg-gray-300 dark:text-white text-black") + " my-1 rounded-sm h-6 text-left pl-2 flex flex-row ml-4"} >
+        <div onClick={setProject} className={(effectiveStatus === 100 ? "bg-purple-500" : "dark:bg-gray-700 bg-gray-300 dark:text-white text-black") + " group my-1 rounded-sm h-6 text-left pl-2 flex flex-row ml-4"} >
             <button className="flex-grow truncate text-left">{project.name}</button>
 
             <div className={(effectiveStatus === 100 || effectiveStatus <= 0) ? "hidden" : "overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200 flex-grow mt-2"}>
@@ -176,6 +201,9 @@ const ProjectEntry = ({ project, repo, linked }: { project: RemoteProjectEntry, 
             <div className={(effectiveStatus === 100 ? "bg-purple-300 text-purple-700" : "dark:bg-gray-400 bg-white text-gray-700") + " flex-shrink px-2 rounded-xl text-xs w-20 text-center font-bold m-1"}>
                 {effectiveStatus === 100 ? "LOADED" : effectiveStatus <= 0 ? "UNLOADED" : "LOADING.."}
             </div>
+            <ButtonWithTooltip className="dark:hover:text-blue-500 hover:text-blue-200" tooltip="Edit" onClick={editRemoteRepo}>
+                <SvgEdit className="w-5 h-5" />
+            </ButtonWithTooltip>
         </div>
     )
 }

@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react"
-import React, { Fragment, PropsWithChildren, useContext, useEffect, useState } from "react"
+import React, { Fragment, PropsWithChildren, useCallback, useContext, useEffect, useState } from "react"
 import { SVGCross } from "../components/Icons"
 import { useOptions } from "../contexts/OptionsContext"
 
@@ -70,7 +70,7 @@ export const OpenedDialogBox = ({ title = "", width = "500px", height = "500px",
     >
       <Dialog
         as="div"
-        onClose={() => dialogBox.clear()}
+        onClose={useCallback(() => dialogBox.clear(), [dialogBox])}
         className={"fixed inset-0 z-10 " + (darkMode ? "dark" : "")}
       >
         <div id="DialogCloseBoundry" className="px-4 py-4 text-center bg-black bg-opacity-80 dark:text-white h-full" onClick={e => e.currentTarget.id === "DialogCloseBoundry" && dialogBox.clear()}>

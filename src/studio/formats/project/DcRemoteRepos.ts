@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest"
+import { LO } from "../../util/ListenableObject"
 
 const path_StudioRemoteBase = ".studio_remote.json"
 
@@ -10,7 +11,7 @@ type ContentReturnType = Promise<
 
 export default interface DcRemoteRepo {
   readonly repo: RemoteRepo
-  readonly projects: RemoteProjectEntry[]
+  readonly projects: LO<readonly RemoteProjectEntry[]>
 
   readonly createCounter: (total: number) => DcRemoteRepoContentGetterCounter
 
@@ -48,12 +49,12 @@ export const loadDcRemoteRepo = async (token: string, repo: RemoteRepo): Promise
   }).catch(() => { }) //Ignore
 
   const studioRootFile = await getContent(path_StudioRemoteBase)
-  const studioRoots: RemoteProjectEntry[] = studioRootFile && "content" in studioRootFile.data ? tryParseArray(atob(studioRootFile.data.content)) : []
+  const studioRoots: readonly RemoteProjectEntry[] = studioRootFile && "content" in studioRootFile.data ? tryParseArray(Buffer.from(studioRootFile.data.content, 'base64').toString("utf-8")) : []
 
 
   const ret: DcRemoteRepo = {
     repo,
-    projects: studioRoots,
+    projects: new LO(studioRoots),
     createCounter: total => getCountedContentGetter(total, ret),
     getContent: async (path, base64 = false) => {
       const result = await getContent(path)
@@ -118,23 +119,24 @@ export const remoteRepoEqual = (repo1: RemoteRepo, repo2: RemoteRepo) =>
   repo1.branch === repo2.branch
 
 export type RemoteProjectEntry = {
-  uuid: string
-  name: string,
-  model: string
-  texture?: {
-    baseFolder: string
-    groups: {
-      folderName: string
-      groupName: string
-      textures: string[]
+  readonly version: number,
+  readonly uuid: string
+  readonly name: string,
+  readonly model: string
+  readonly texture?: {
+    readonly baseFolder: string
+    readonly groups: readonly {
+      readonly folderName: string
+      readonly groupName: string
+      readonly textures: readonly string[]
     }[]
   }
-  animationFolder?: string
-  referenceImages?: {
-    name: string
-    position: { x: number, y: number, z: number }
-    rotation: { x: number, y: number, z: number }
-    scale: { x: number, y: number, z: number }
-    data: string
+  readonly animationFolder?: string
+  readonly referenceImages?: readonly {
+    readonly name: string
+    readonly position: { x: number, y: number, z: number }
+    readonly rotation: { x: number, y: number, z: number }
+    readonly scale: { x: number, y: number, z: number }
+    readonly data: string
   }[]
 }

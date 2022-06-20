@@ -1,6 +1,7 @@
 import { TextureGroup } from '../textures/TextureManager';
 import { loadUnknownAnimation } from './../animations/DCALoader';
 import { loadModelUnknown } from './../model/DCMLoader';
+import { DCMModel } from './../model/DcmModel';
 import DcProject from './DcProject';
 import { DcRemoteRepoContentGetterCounter, RemoteProjectEntry } from './DcRemoteRepos';
 
@@ -12,10 +13,6 @@ export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, 
   }
 
   const model = await loadRemoteModel(repo, entry)
-  if (model === null) {
-    alert("Unable to load model at \n" + entry.model)
-    return null;
-  }
   const project = new DcProject(entry.name, model)
 
   let textures: Promise<any> | null = null
@@ -43,7 +40,7 @@ const loadRemoteModel = async (repo: DcRemoteRepoContentGetterCounter, entry: Re
     const arraybuffer = Uint8Array.from(model.content, c => c.charCodeAt(0)).buffer
     return await loadModelUnknown(arraybuffer, model.name)
   }
-  return null
+  return new DCMModel()
 }
 
 const loadIndividualTexture = async (repo: DcRemoteRepoContentGetterCounter, baseLoc: string, texture: string) => {
@@ -96,7 +93,7 @@ const loadAllTextures = async (repo: DcRemoteRepoContentGetterCounter, entry: No
 const getAllAnimationPaths = async (repo: DcRemoteRepoContentGetterCounter, animationFolder: string) => {
   const res = await repo.getContent(animationFolder)
   if (res.type !== "dir") {
-    alert(animationFolder + " is not a folder")
+    console.warn(animationFolder + " is not a folder, skipping")
     return []
   }
   return res.files.filter(f => f.path.endsWith(".dca"))
