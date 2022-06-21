@@ -1,4 +1,5 @@
 import { useState } from "react"
+import AccountOptions from "./components/AccountOptions"
 import AcessibilityOptions from "./components/AcessibilityOptions"
 import AppearanceOptions from "./components/AppearanceOptions"
 import KeyBindOptions from "./components/KeyBindOptions"
@@ -12,6 +13,7 @@ type OptionsTab = {
 
 const OptionsTabs: OptionsTab[] = [
     { name: "Appearance", component: () => <AppearanceOptions /> },
+    { name: "Linked Accounts", component: () => <AccountOptions /> },
     { name: "Language", component: () => <LanguageOptions /> },
     { name: "Acessibility", component: () => <AcessibilityOptions /> },
     { name: "Key Binds", component: () => <KeyBindOptions /> },
