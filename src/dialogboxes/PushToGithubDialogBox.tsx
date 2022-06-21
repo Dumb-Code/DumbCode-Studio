@@ -86,7 +86,7 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
       const pairedMap = textureGroupPair.reduce((map, { group, texture }) => {
         map.set(group, (map.get(group) ?? []).concat(texture))
         return map
-      }, new Map<TextureGroup, Texture[]>)
+      }, new Map<TextureGroup, Texture[]>())
 
 
       //Export to the .studio_remote
