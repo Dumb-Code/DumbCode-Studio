@@ -40,9 +40,9 @@ const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElemen
 const ProjectRemoteRequiresAuthentication = () => {
     return (
         <div className="w-full flex flex-col items-center">
-            <div className="flex flex-col items-center">
-                <span className="text-2xl dark:text-white mt-2">Requires Authentication:</span>
-                <div className="w-full dark:text-white bg-gray-500 rounded h-10">
+            <div className="flex flex-col items-center pt-10">
+                <span className="text-2xl dark:text-white mt-2 mb-1">Requires Authentication:</span>
+                <div className="w-full dark:text-white bg-gray-500 hover:bg-purple-600 dark:hover:bg-purple-600 rounded-md h-10">
                     <GithubAccountButton />
                 </div>
             </div>

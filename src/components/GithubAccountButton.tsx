@@ -23,8 +23,10 @@ const LinkGithubButton = () => {
 
 
   return (
-    <button onClick={linkGH} className="w-full h-full pl-4 flex flex-row justify items-center font-semibold hover:bg-purple-600 dark:hover:bg-purple-600">
-      <SVGGithub width="20px" /> <span className="px-2 text-sm">Add Github Account</span>
+    <button onClick={linkGH} className="w-full h-full flex font-semibold">
+      <div className="m-auto flex flex-row">
+        <SVGGithub width="20px" /> <span className="px-2 text-sm">Add Github Account</span>
+      </div>
     </button>
   )
 }
