@@ -31,3 +31,7 @@ export const writeImgToBase64 = async (img: HTMLImageElement): Promise<string> =
     reader.readAsDataURL(blob)
   })
 }
+
+export type Mutable<T> = {
+  -readonly [P in keyof T]: T[P]
+};

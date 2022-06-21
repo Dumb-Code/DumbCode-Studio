@@ -5,10 +5,11 @@ import DcaAnimation from "../studio/formats/animations/DcaAnimation"
 import { writeDCAAnimationWithFormat } from "../studio/formats/animations/DCALoader"
 import { writeModelWithFormat } from "../studio/formats/model/DCMLoader"
 import DcProject from "../studio/formats/project/DcProject"
-import { TextureGroup } from "../studio/formats/textures/TextureManager"
+import { writeStudioRemote } from "../studio/formats/project/DcRemoteRepos"
+import { Texture, TextureGroup } from "../studio/formats/textures/TextureManager"
 import GithubCommiter from "../studio/git/GithubCommiter"
 import { LO, useListenableObject } from "../studio/util/ListenableObject"
-import { writeImgToBase64 } from "../studio/util/Utils"
+import { Mutable, writeImgToBase64 } from "../studio/util/Utils"
 import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes"
 
 const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
@@ -37,6 +38,8 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
 
 
     const { entry } = project.remoteLink
+    const mutable = entry as Mutable<typeof entry>
+
     if (model) {
       const exportModel = async () => {
         comitter.pushChange(entry.model, await writeModelWithFormat(project.model, "base64"), true)
@@ -48,21 +51,74 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
       const exportAnimation = async (animation: DcaAnimation) => {
         comitter.pushChange(`${entry.animationFolder}/${animation.name}.dca`, await writeDCAAnimationWithFormat(animation, "base64"), true)
       }
+      comitter.removeRedundentDirectory(entry.animationFolder, name => name.endsWith('.dca'))
       project.animationTabs.animations.value.filter((_, index) => animations.includes(index)).forEach(animation => awaiters.push(exportAnimation(animation)))
     }
 
     if (entry.texture !== undefined) {
-      const baseFolder = entry.texture?.baseFolder
-      const exportTexture = async (group: TextureGroup, textureUUID: string) => {
-        const texture = project.textureManager.textures.value.find(t => t.identifier === textureUUID)
-        if (texture !== undefined && textures.includes(project.textureManager.textures.value.indexOf(texture))) {
-          comitter.pushChange(`${baseFolder}/${group.folderName.value}${group.folderName.value === '' ? '' : '/'}${texture.name.value}.dca`, await writeImgToBase64(texture.element.value), true)
+      const mutableTextures = entry.texture as Mutable<typeof entry.texture>
+      const baseFolder = entry.texture.baseFolder
+
+      const exportTexture = async (folderName: string, texture: Texture) => {
+        if (textures.includes(project.textureManager.textures.value.indexOf(texture))) {
+          comitter.pushChange(`${baseFolder}/${folderName === '' ? '' : `${folderName}/`}${texture.name.value}.png`, await writeImgToBase64(texture.element.value), true)
         }
       }
-      project.textureManager.groups.value.forEach(group => group.textures.value.map(texture => awaiters.push(exportTexture(group, texture))))
+
+      const groups = project.textureManager.groups.value
+
+      //A map of each texture to the first group it's in
+      const textureGroupPair = project.textureManager.textures.value.map(texture => {
+        const group = groups.filter(group => !group.isDefault).find(group => group.textures.value.includes(texture.identifier)) ?? project.textureManager.defaultGroup
+        return {
+          texture, group
+        }
+      })
+
+      //Export the textures to their files
+      textureGroupPair.forEach(({ texture, group }) => awaiters.push(exportTexture(group.folderName.value, texture)))
+
+      //Remove unused files
+      groups.forEach(group => comitter.removeRedundentDirectory(`${baseFolder}${group.folderName.value.length === 0 ? '' : `/${group.folderName.value}`}`, name => name.endsWith(".png")))
+
+
+      //A map of groups to paired textures
+      const pairedMap = textureGroupPair.reduce((map, { group, texture }) => {
+        map.set(group, (map.get(group) ?? []).concat(texture))
+        return map
+      }, new Map<TextureGroup, Texture[]>)
+
+
+      //Export to the .studio_remote
+      mutableTextures.groups = Array.from(pairedMap.keys()).map(group => ({
+        groupName: group.name.value,
+        folderName: group.folderName.value,
+        textures: (pairedMap.get(group) ?? []).map(t => t.name.value)
+      })).filter(data => data.textures.length !== 0)
     }
 
+    const exportRefImgs = async () => {
+      const refImgs = project.referenceImageHandler.images.value
+      mutable.referenceImages = refImgs.length === 0 ? undefined : await Promise.all(refImgs.map(async (refImg): Promise<NonNullable<typeof mutable.referenceImages>[number]> => {
+        return {
+          name: refImg.name.value,
+          position: refImg.position.value,
+          rotation: refImg.rotation.value,
+          canSelect: refImg.canSelect.value,
+          hidden: refImg.hidden.value,
+          opacity: refImg.opacity.value,
+          scale: refImg.scale.value,
+          flipX: refImg.flipX.value,
+          flipY: refImg.flipY.value,
+          data: await writeImgToBase64(refImg.img)
+        }
+      }))
+    }
+    awaiters.push(exportRefImgs())
     await Promise.all(awaiters)
+
+    writeStudioRemote(comitter, project.remoteLink.allData.projects.value)
+
   }, [project, model, animations, textures])
 
   const { clear } = useOpenedDialogBoxes()

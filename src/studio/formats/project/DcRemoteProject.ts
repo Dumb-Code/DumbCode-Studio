@@ -1,3 +1,4 @@
+import { ReferenceImage } from '../../util/ReferenceImageHandler';
 import { TextureGroup } from '../textures/TextureManager';
 import { loadUnknownAnimation } from './../animations/DCALoader';
 import { loadModelUnknown } from './../model/DCMLoader';
@@ -25,7 +26,9 @@ export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, 
     animations = loadAllAnimations(repo, animationPaths, project)
   }
   let referenceImages: Promise<any> | null = null
-
+  if (entry.referenceImages !== undefined) {
+    referenceImages = loadAllReferenceImages(project, entry.referenceImages)
+  }
 
   await Promise.all([textures, animations, referenceImages])
 
@@ -39,9 +42,9 @@ export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, 
 }
 
 const loadRemoteModel = async (repo: DcRemoteRepoContentGetterCounter, entry: RemoteProjectEntry) => {
-  const model = await repo.getContent(entry.model)
+  const model = await repo.getContent(entry.model, true)
   if (model.type === "file") {
-    const arraybuffer = Uint8Array.from(model.content, c => c.charCodeAt(0)).buffer
+    const arraybuffer = Buffer.from(model.content, 'base64')
     return await loadModelUnknown(arraybuffer, model.name)
   }
   const newModel = new DCMModel()
@@ -53,17 +56,21 @@ const loadIndividualTexture = async (repo: DcRemoteRepoContentGetterCounter, bas
   return repo.getContent(`${baseLoc}${texture}.png`, true)
     .then(async (d) => {
       if (d.type === "file") {
-        let img = document.createElement("img")
-        img.src = 'data:image/png;base64,' + d.content.replaceAll('\n', '')
-        await new Promise(resolve => img.onload = resolve)
-        img.onload = null
         return {
           fileName: texture,
-          img,
+          img: await loadImg(d.content.replaceAll('\n', '')),
         }
       }
       return null
     })
+}
+
+const loadImg = async (content: string) => {
+  const img = document.createElement("img")
+  img.src = 'data:image/png;base64,' + content
+  await new Promise(resolve => img.onload = resolve)
+  img.onload = null
+  return img
 }
 
 const loadAllTextures = async (repo: DcRemoteRepoContentGetterCounter, entry: NonNullable<RemoteProjectEntry['texture']>, project: DcProject) => {
@@ -116,6 +123,16 @@ const loadAllAnimations = async (repo: DcRemoteRepoContentGetterCounter, animati
   }))
 
   loadedAnimations.forEach(t => t !== null && project.animationTabs.addAnimation(t))
+}
+
+const loadAllReferenceImages = async (project: DcProject, referenceImages: NonNullable<RemoteProjectEntry['referenceImages']>) => {
+  const loadedReferenceImages = await Promise.all(referenceImages.map((async (img) =>
+    new ReferenceImage(
+      project.referenceImageHandler, await loadImg(img.data),
+      img.name, img.opacity, img.canSelect, img.hidden,
+      img.position, img.rotation, img.scale, img.flipX, img.flipY
+    ))))
+  project.referenceImageHandler.images.value = loadedReferenceImages
 }
 
 export const countTotalRequests = (project: RemoteProjectEntry) =>

@@ -26,8 +26,8 @@ const GithubCommitBox = ({ repo, processCommit, onCommitFinished }: { repo: Remo
     const github = new GithubCommiter(token, repo)
     setCurrentCommit(github)
     await processCommit(github)
-    await github.commit(message, description)
-    if (onCommitFinished) {
+    const success = await github.commit(message, description)
+    if (success && onCommitFinished) {
       onCommitFinished()
     }
 

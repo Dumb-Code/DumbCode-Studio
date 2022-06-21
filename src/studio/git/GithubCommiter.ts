@@ -2,13 +2,20 @@ import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
 import { LO } from '../util/ListenableObject';
 import { RemoteRepo } from './../formats/project/DcRemoteRepos';
 
-type RedundentFilesDirectory = {
-  directory: string,
-  fileNamePredicate: (file: string) => boolean
+class RedundentFilesDirectory {
+
+  public readonly path: string
+
+  constructor(
+    public readonly directory: string,
+    public readonly fileNamePredicate: (file: string) => boolean
+  ) {
+    this.path = directory + "/_____remove"
+  }
 }
 class ChangedFileData {
   constructor(
-    public readonly filePath: string,
+    public readonly path: string,
     public readonly content: string,
     public readonly base64: boolean
   ) { }
@@ -18,7 +25,7 @@ type GitTreeNode = RestEndpointMethodTypes['git']['createTree']['parameters']['t
 
 
 type FileChangedTree = {
-  [s: string]: ChangedFileData | FileChangedTree
+  [s: string]: ChangedFileData | FileChangedTree | RedundentFilesDirectory
 }
 
 export default class GithubCommiter {
@@ -30,7 +37,7 @@ export default class GithubCommiter {
   private totalHashes = 0
   private computedHashes = 0
   constructor(
-    private readonly token: string,
+    readonly token: string,
     private readonly repo: RemoteRepo,
     private readonly octokit = new Octokit({
       auth: token,
@@ -43,7 +50,7 @@ export default class GithubCommiter {
 
   //Removes files that havn't changed in this directory
   removeRedundentDirectory(directory: string, fileNamePredicate: (file: string) => boolean) {
-    this.redundentFilesDirectory.push({ directory, fileNamePredicate })
+    this.redundentFilesDirectory.push(new RedundentFilesDirectory(directory, fileNamePredicate))
   }
 
   private markHashComputed() {
@@ -58,6 +65,11 @@ export default class GithubCommiter {
 
     const rootCommit = await this.getCommitSha()
     const rootSha = await this.generateTreeSha(rootCommit, fileTree)
+
+    if (rootSha === null) {
+      this.message.value = "Error: Could not compute root SHA, there were no files"
+      return false
+    }
 
 
     this.message.value = "Generating Commit"
@@ -78,6 +90,8 @@ export default class GithubCommiter {
       force: true,
     })
 
+    return true
+
   }
 
 
@@ -93,16 +107,31 @@ export default class GithubCommiter {
 
   private createFileChangedTree = () => {
     const root: FileChangedTree = {}
-    this.totalHashes++
     let doneIndex = 0
-    for (const file of this.changedFiles) {
-      this.message.value = `Creating File Tree ${doneIndex++}/${this.changedFiles.length}`
-      this.updateObjectToTree(file, file.filePath.split("/"), root)
+    const totalObjects: (ChangedFileData | RedundentFilesDirectory)[] = [...this.changedFiles, ...this.redundentFilesDirectory]
+    for (const file of totalObjects) {
+      this.message.value = `Creating File Tree ${doneIndex++}/${totalObjects.length}`
+      this.updateObjectToTree(file, file.path.split("/"), root)
     }
+
+    this.totalHashes = this.calculateTotalHashes(root)
     return root
   }
 
-  private updateObjectToTree(file: ChangedFileData, pathsRemaining: string[], parent: FileChangedTree) {
+  private calculateTotalHashes(tree: FileChangedTree) {
+    let count = 2 //Each directory has 2 computes
+    for (let key in tree) {
+      const object = tree[key]
+      if (object instanceof ChangedFileData) {
+        count++
+      } else if (!(object instanceof RedundentFilesDirectory)) {
+        count += this.calculateTotalHashes(object)
+      }
+    }
+    return count
+  }
+
+  private updateObjectToTree(file: ChangedFileData | RedundentFilesDirectory, pathsRemaining: string[], parent: FileChangedTree) {
     const isFile = pathsRemaining.length === 1
     const path = pathsRemaining.shift()
 
@@ -112,7 +141,6 @@ export default class GithubCommiter {
       return
     }
 
-    this.totalHashes++
     if (isFile) {
       this.updateFileToTree(file, path, parent)
     } else {
@@ -120,17 +148,17 @@ export default class GithubCommiter {
     }
   }
 
-  private updateFileToTree = (file: ChangedFileData, path: string, parent: FileChangedTree) => {
+  private updateFileToTree = (file: ChangedFileData | RedundentFilesDirectory, path: string, parent: FileChangedTree) => {
     if (parent[path] !== undefined) {
-      console.warn("Tried to set file where path existed: " + file.filePath)
+      console.warn("Tried to set file where path existed: " + file.path)
       return
     }
     parent[path] = file
   }
 
-  private updateFolderToTree = (file: ChangedFileData, path: string, parent: FileChangedTree, pathsRemaining: string[]) => {
+  private updateFolderToTree = (file: ChangedFileData | RedundentFilesDirectory, path: string, parent: FileChangedTree, pathsRemaining: string[]) => {
     const thisPath = parent[path] ??= {}
-    if (thisPath instanceof ChangedFileData) {
+    if (thisPath instanceof ChangedFileData || thisPath instanceof RedundentFilesDirectory) {
       console.warn("Tried to set folder where file existed: " + pathsRemaining.join("/") + "/" + path)
       return
     }
@@ -138,11 +166,16 @@ export default class GithubCommiter {
   }
 
   private async generateTreeSha(parentSha: string | undefined, filesChanged: FileChangedTree, path?: string) {
-    const tree = parentSha !== undefined ? await this.loadGitTree(parentSha, path) : []
+    const tree: (GitTreeNode | null)[] = parentSha !== undefined ? await this.loadGitTree(parentSha, path) : []
+    this.markHashComputed()
 
     const pathIndex = (path: string) => {
-      const index = tree.findIndex(p => p.path === path)
-      return index === -1 ? tree.length : index
+      const index = tree.findIndex(p => p !== null && p.path === path)
+      if (index === -1) {
+        tree.push(null)
+        return tree.length - 1
+      }
+      return index
     }
 
     const awaiters: Promise<any>[] = []
@@ -152,36 +185,41 @@ export default class GithubCommiter {
       const index = pathIndex(key)
       if (object instanceof ChangedFileData) {
         awaiters.push(this.generateFileTreeObject(key, object, index, tree))
-      } else {
-        awaiters.push(this.generateFolderTreeObject(key, object, index, tree))
+      } else if (!(object instanceof RedundentFilesDirectory)) {
+        awaiters.push(this.generateFolderTreeObject(path === undefined ? key : `${path}/${key}`, key, object, index, tree))
       }
     }
 
     await Promise.all(awaiters)
+
+    const nonNull = tree.filter((t): t is GitTreeNode => t !== null)
+    if (nonNull.length === 0) {
+      this.markHashComputed()
+      return null
+    }
     const response = await this.octokit.git.createTree({
       owner: this.repo.owner,
       repo: this.repo.repo,
-      tree: tree
+      tree: nonNull
     })
     this.markHashComputed()
     return response.data.sha
   }
 
   private async loadGitTree(sha: string, path?: string): Promise<GitTreeNode[]> {
-    let rf = path === undefined ? undefined : this.redundentFilesDirectory.find(d => d.directory == path)
+    let rf = path === undefined ? undefined : this.redundentFilesDirectory.find(d => d.path == path)
 
     //Get the tree. The returned tree is a list of git elements.
-    const resonse = await this.octokit.git.getTree({
+    const response = await this.octokit.git.getTree({
       owner: this.repo.owner,
       repo: this.repo.repo,
       tree_sha: sha
     })
-
     //Filter the git tree such that it removes all redudent files. Non redundent files will be re-added
-    return resonse.data.tree.filter(file => rf === undefined || file.path === undefined || file.type === 'tree' || !rf.fileNamePredicate(file.path)) as GitTreeNode[]
+    return response.data.tree.filter(file => rf === undefined || file.path === undefined || file.type === 'tree' || !rf.fileNamePredicate(file.path)) as GitTreeNode[]
   }
 
-  private async generateFileTreeObject(path: string, file: ChangedFileData, index: number, tree: GitTreeNode[]) {
+  private async generateFileTreeObject(path: string, file: ChangedFileData, index: number, tree: (GitTreeNode | null)[]) {
     const response = await this.octokit.git.createBlob({
       owner: this.repo.owner,
       repo: this.repo.repo,
@@ -197,8 +235,12 @@ export default class GithubCommiter {
     }
   }
 
-  private async generateFolderTreeObject(path: string, folderTree: FileChangedTree, index: number, tree: GitTreeNode[]) {
-    const sha = await this.generateTreeSha(tree[index]?.sha ?? undefined, folderTree, path)
+  private async generateFolderTreeObject(fullPath: string, path: string, folderTree: FileChangedTree, index: number, tree: (GitTreeNode | null)[]) {
+    const sha = await this.generateTreeSha(tree[index]?.sha ?? undefined, folderTree, fullPath)
+    if (sha === null) {
+      tree[index] = null
+      return
+    }
     tree[index] = {
       path,
       mode: '040000',

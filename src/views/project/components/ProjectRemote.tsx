@@ -10,7 +10,7 @@ import RemoteProjectsDialogBox from "../../../dialogboxes/RemoteProjectsDialogBo
 import RemoteRepositoriesDialogBox from "../../../dialogboxes/RemoteRepositoriesDialogBox";
 import DcProject from "../../../studio/formats/project/DcProject";
 import { countTotalRequests, loadRemoteProject } from "../../../studio/formats/project/DcRemoteProject";
-import DcRemoteRepo, { DcRemoteRepoContentGetterCounter, loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual } from "../../../studio/formats/project/DcRemoteRepos";
+import DcRemoteRepo, { DcRemoteRepoContentGetterCounter, loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual, writeStudioRemote } from "../../../studio/formats/project/DcRemoteRepos";
 import GithubCommiter from "../../../studio/git/GithubCommiter";
 import { useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import { useGithubAccessToken } from "../../../studio/util/LocalStorageHook";
@@ -72,11 +72,11 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
         }
         const newProjects = projects.filter(project => project !== oldEntry)
         if (newEntry !== undefined) {
-            newProjects.push()
+            newProjects.push(newEntry)
         }
         setProjects(newProjects)
 
-        commiter.pushChange(".studio_remote.json", JSON.stringify(newProjects, null, 4))
+        writeStudioRemote(commiter, newProjects)
     }, [projects, loadedRepo, setProjects])
 
     return (

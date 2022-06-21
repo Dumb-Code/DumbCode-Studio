@@ -21,6 +21,8 @@ export default class TextureManager {
     this.project = project
 
     this.defaultGroup = new TextureGroup("Default", true)
+    this.defaultGroup.folderName.addPreModifyListener((_new, _old, naughtyModifyValue) => naughtyModifyValue('')) //Default folder should always be empty
+    this.defaultGroup.folderName.value = ''
     this.selectedGroup = new LO<TextureGroup>(this.defaultGroup)
     this.groups = new LO<readonly TextureGroup[]>([this.defaultGroup])
 

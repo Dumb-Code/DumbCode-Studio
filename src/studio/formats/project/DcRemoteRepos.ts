@@ -1,8 +1,11 @@
 import { Octokit } from "@octokit/rest"
+import GithubCommiter from "../../git/GithubCommiter"
 import { LO } from "../../util/ListenableObject"
 
 const path_StudioRemoteBase = ".studio_remote.json"
-
+export const writeStudioRemote = (commiter: GithubCommiter, projects: readonly RemoteProjectEntry[]) => {
+  commiter.pushChange(path_StudioRemoteBase, JSON.stringify(projects, null, 2))
+}
 type ContentReturnType = Promise<
   { type: "file", name: string, content: string } |
   { type: "dir", files: { name: string, path: string }[] } |
@@ -66,7 +69,7 @@ export const loadDcRemoteRepo = async (token: string, repo: RemoteRepo): Promise
         return {
           type: "file",
           name: result.data.name,
-          content: base64 ? result.data.content : atob(result.data.content)
+          content: base64 ? result.data.content : Buffer.from(result.data.content, 'base64').toString()
         }
       }
       if (Array.isArray(result.data)) {
@@ -136,9 +139,14 @@ export type RemoteProjectEntry = {
   readonly animationFolder?: string
   readonly referenceImages?: readonly {
     readonly name: string
-    readonly position: { x: number, y: number, z: number }
-    readonly rotation: { x: number, y: number, z: number }
-    readonly scale: { x: number, y: number, z: number }
+    readonly opacity: number
+    readonly canSelect: boolean
+    readonly hidden: boolean
+    readonly position: readonly [number, number, number]
+    readonly rotation: readonly [number, number, number]
+    readonly scale: number,
+    readonly flipX: boolean,
+    readonly flipY: boolean,
     readonly data: string
   }[]
 }
