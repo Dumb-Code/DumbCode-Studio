@@ -119,8 +119,6 @@ export default class DcaAnimation {
       }
     })
 
-    this.needsSaving.addListener(v => console.trace(v))
-
     this.needsSaving.addPreModifyListener((newValue, oldValue, naughtyModifyValue) => naughtyModifyValue(oldValue || (newValue && !this.undoRedoHandler.ignoreActions)))
 
     this.keyframes.addListener(value => {
