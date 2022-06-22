@@ -44,7 +44,7 @@ export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, 
 const loadRemoteModel = async (repo: DcRemoteRepoContentGetterCounter, entry: RemoteProjectEntry) => {
   const model = await repo.getContent(entry.model, true)
   if (model.type === "file") {
-    const arraybuffer = Buffer.from(model.content, 'base64')
+    const arraybuffer = Buffer.from(model.content, 'base64').buffer
     return await loadModelUnknown(arraybuffer, model.name)
   }
   const newModel = new DCMModel()
@@ -114,9 +114,9 @@ const getAllAnimationPaths = async (repo: DcRemoteRepoContentGetterCounter, anim
 
 const loadAllAnimations = async (repo: DcRemoteRepoContentGetterCounter, animations: { name: string; path: string; }[], project: DcProject) => {
   const loadedAnimations = await Promise.all(animations.map(async (animation) => {
-    const content = await repo.getContent(animation.path)
+    const content = await repo.getContent(animation.path, true)
     if (content.type === "file") {
-      const arraybuffer = Uint8Array.from(content.content, c => c.charCodeAt(0)).buffer
+      const arraybuffer = Buffer.from(content.content, 'base64').buffer
       return loadUnknownAnimation(project, content.name.substring(0, content.name.lastIndexOf('.')), arraybuffer)
     }
     return null
