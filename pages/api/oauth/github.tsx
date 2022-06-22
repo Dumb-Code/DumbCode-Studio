@@ -5,7 +5,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (code === undefined) {
     return res.status(400).json({ error: "Missing Code" })
   }
-  const github = await fetch(`https://github.com/login/oauth/access_token?client_id=6df7dd9f54d48a6ab3a2&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`)
+  const github = await fetch(`https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`)
     .then(r => r.text())
     .then(t => new URLSearchParams(t))
 
