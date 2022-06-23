@@ -1,11 +1,11 @@
-import { FormEvent, useCallback, useMemo, useState } from "react"
+import { Dispatch, FormEvent, SetStateAction, useCallback, useMemo, useState } from "react"
 import { RemoteRepo } from "../studio/formats/project/DcRemoteRepos"
 import GithubCommiter from "../studio/git/GithubCommiter"
 import { useListenableObjectNullable } from "../studio/util/ListenableObject"
 import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
-import { ButtonWithTooltip } from "./Tooltips"
+import Checkbox from "./Checkbox"
 
-const GithubCommitBox = ({ repo, processCommit, onCommitFinished }: { repo: RemoteRepo | null, processCommit: (commiter: GithubCommiter) => any | Promise<any>, onCommitFinished?: () => void }) => {
+const GithubCommitBox = ({ deleteRemote, setDeleteRemote, repo, processCommit, onCommitFinished }: { deleteRemote: boolean, setDeleteRemote: Dispatch<SetStateAction<boolean>>, repo: RemoteRepo | null, processCommit: (commiter: GithubCommiter) => any | Promise<any>, onCommitFinished?: () => void }) => {
   const [message, setMessage] = useState("")
   const [description, setDescription] = useState("")
 
@@ -35,12 +35,19 @@ const GithubCommitBox = ({ repo, processCommit, onCommitFinished }: { repo: Remo
 
   return (
     <div className="w-full flex-col">
-      <div className="text-red-500 h-7">{commitMsg}</div>
-      <input className="dark:bg-gray-700 rounded w-full" value={message} onInput={onMessageInput} placeholder="Commit Message (required)" />
-      <textarea className="dark:bg-gray-700 rounded w-full" value={description} onInput={onDescInput} placeholder="Commit Description" />
-      <ButtonWithTooltip tooltip={messageValid ? "Execute Commit" : "Commit Message Required"} disabled={!messageValid} onClick={onClickButton}>
-        Commit
-      </ButtonWithTooltip>
+      <p className="font-semibold mb-2">Push your changes to your Remote:</p>
+      { /*<div className="text-red-500 h-7">{commitMsg}</div> */}
+      { /* //TODO Make this use the validated input component so that it matches. @wyn plz*/}
+      <input className={"dark:bg-gray-700 rounded w-full mb-1 px-2 py-1" + (messageValid || " ring-1 ring-red-600")} value={message} onInput={onMessageInput} placeholder="Commit Message (required)" />
+      <textarea className="dark:bg-gray-700 rounded w-full border-0 focus:ring-2 mb-2 py-1 px-2" value={description} onInput={onDescInput} placeholder="Commit Description" />
+
+      <div className="flex flex-row">
+        <Checkbox enabledColor="bg-red-500" value={deleteRemote} setValue={setDeleteRemote} extraText="Mark Deleted" />
+        <div className="flex-grow"></div>
+        <button className={(messageValid ? "bg-blue-600 hover:bg-blue-500" : "") + " py-1 px-16 rounded text-xs"} disabled={!messageValid} onClick={onClickButton}>
+          Commit
+        </button>
+      </div>
     </div>
   )
 }

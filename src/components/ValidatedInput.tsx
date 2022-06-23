@@ -1,4 +1,5 @@
 import { FormEvent, InputHTMLAttributes, useCallback, useMemo, useState } from "react";
+import { SVGCheck, SVGCross } from "./Icons";
 
 export type ValidatedInputType = {
   readonly value: string;
@@ -8,12 +9,29 @@ export type ValidatedInputType = {
 
 const ValidatedInput = (props: { input: ValidatedInputType } & InputHTMLAttributes<HTMLInputElement>) => {
   const { input, className, ...otherProps } = props
-  return <input
-    {...otherProps}
-    className={(className ?? "") + (input.valid ? " bg-blue-500" : " bg-red-500")}
-    value={input.value}
-    onInput={useCallback((e: FormEvent<HTMLInputElement>) => input.setter(e.currentTarget.value ?? ""), [input])}
-  />
+  return (
+    <div>
+      <input
+        {...otherProps}
+        className={(className ?? "") + " px-2 py-1 " + (input.valid || " ring-2 ring-red-600")}
+        value={input.value}
+        onInput={useCallback((e: FormEvent<HTMLInputElement>) => input.setter(e.currentTarget.value ?? ""), [input])}
+      />
+      {
+        input.valid ?
+          <div className="relative">
+            <div className="absolute right-1 -top-7">
+              <SVGCheck className="m-0.5 p-0.5 w-5 h-5 bg-green-600 rounded-full" />
+            </div>
+          </div> :
+          <div className="relative">
+            <div className="absolute right-1 -top-7">
+              <SVGCross className="m-0.5 p-0.5 w-5 h-5 bg-red-600 rounded-full" />
+            </div>
+          </div>
+      }
+    </div>
+  )
 }
 
 export const useValidatedInput = (validator: (value: string) => boolean, defaultValue = ""): ValidatedInputType => {
