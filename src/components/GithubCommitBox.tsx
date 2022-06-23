@@ -5,7 +5,7 @@ import { useListenableObjectNullable } from "../studio/util/ListenableObject"
 import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
 import Checkbox from "./Checkbox"
 
-const GithubCommitBox = ({ deleteRemote, setDeleteRemote, repo, processCommit, onCommitFinished }: { deleteRemote: boolean, setDeleteRemote: Dispatch<SetStateAction<boolean>>, repo: RemoteRepo | null, processCommit: (commiter: GithubCommiter) => any | Promise<any>, onCommitFinished?: () => void }) => {
+const GithubCommitBox = ({ deleteRemote, setDeleteRemote, repo, processCommit, onCommitFinished }: { deleteRemote?: boolean, setDeleteRemote?: Dispatch<SetStateAction<boolean>>, repo: RemoteRepo | null, processCommit: (commiter: GithubCommiter) => any | Promise<any>, onCommitFinished?: () => void }) => {
   const [message, setMessage] = useState("")
   const [description, setDescription] = useState("")
 
@@ -42,9 +42,9 @@ const GithubCommitBox = ({ deleteRemote, setDeleteRemote, repo, processCommit, o
       <textarea className="dark:bg-gray-700 rounded w-full border-0 focus:ring-2 mb-2 py-1 px-2" value={description} onInput={onDescInput} placeholder="Commit Description" />
 
       <div className="flex flex-row">
-        <Checkbox enabledColor="bg-red-500" value={deleteRemote} setValue={setDeleteRemote} extraText="Mark Deleted" />
+        { setDeleteRemote !== undefined && <Checkbox enabledColor="bg-red-500" value={deleteRemote} setValue={setDeleteRemote} extraText="Mark Deleted" />}
         <div className="flex-grow"></div>
-        <button className={(messageValid ? "bg-blue-600 hover:bg-blue-500" : "") + " py-1 px-16 rounded text-xs"} disabled={!messageValid} onClick={onClickButton}>
+        <button className={(messageValid ? "bg-blue-600 hover:bg-blue-500" : " bg-gray-700 cursor-not-allowed") + " py-1 px-16 rounded text-xs"} disabled={!messageValid} onClick={onClickButton}>
           Commit
         </button>
       </div>
