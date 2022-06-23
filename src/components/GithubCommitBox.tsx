@@ -33,16 +33,22 @@ const GithubCommitBox = ({ deleteRemote, setDeleteRemote, repo, processCommit, o
 
   }, [message, description, processCommit, onCommitFinished, token, repo])
 
+  { /* extract the number of commit steps done and divide by num commit stages*/}
+  const effectiveStatus = Math.random() * 100;
+
   return (
     <div className="w-full flex-col">
       <p className="font-semibold mb-2">Push your changes to your Remote:</p>
-      { /*<div className="text-red-500 h-7">{commitMsg}</div> */}
+      <div className={(effectiveStatus === 100 || effectiveStatus <= 0) ? "hidden" : "overflow-hidden h-2 text-xs flex rounded bg-gray-200 flex-grow mt-2"}>
+        <div style={{ width: Math.max(effectiveStatus, 0) + "%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"></div>
+      </div>
+      <div className="h-7">{commitMsg}</div>
       { /* //TODO Make this use the validated input component so that it matches. @wyn plz*/}
       <input className={"dark:bg-gray-700 rounded w-full mb-1 px-2 py-1" + (messageValid || " ring-1 ring-red-600")} value={message} onInput={onMessageInput} placeholder="Commit Message (required)" />
       <textarea className="dark:bg-gray-700 rounded w-full border-0 focus:ring-2 mb-2 py-1 px-2" value={description} onInput={onDescInput} placeholder="Commit Description" />
 
       <div className="flex flex-row">
-        { setDeleteRemote !== undefined && <Checkbox enabledColor="bg-red-500" value={deleteRemote} setValue={setDeleteRemote} extraText="Mark Deleted" />}
+        {setDeleteRemote !== undefined && <Checkbox enabledColor="bg-red-500" value={deleteRemote} setValue={setDeleteRemote} extraText="Mark Deleted" />}
         <div className="flex-grow"></div>
         <button className={(messageValid ? "bg-blue-600 hover:bg-blue-500" : " bg-gray-700 cursor-not-allowed") + " py-1 px-16 rounded text-xs"} disabled={!messageValid} onClick={onClickButton}>
           Commit
