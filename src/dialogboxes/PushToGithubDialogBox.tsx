@@ -49,7 +49,7 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
 
     if (entry.animationFolder !== undefined) {
       const exportAnimation = async (animation: DcaAnimation) => {
-        comitter.pushChange(`${entry.animationFolder}/${animation.name}.dca`, await writeDCAAnimationWithFormat(animation, "base64"), true)
+        comitter.pushChange(`${entry.animationFolder}/${animation.name.value}.dca`, await writeDCAAnimationWithFormat(animation, "base64"), true)
       }
       comitter.removeRedundentDirectory(entry.animationFolder, name => name.endsWith('.dca'))
       project.animationTabs.animations.value.filter((_, index) => animations.includes(index)).forEach(animation => awaiters.push(exportAnimation(animation)))
