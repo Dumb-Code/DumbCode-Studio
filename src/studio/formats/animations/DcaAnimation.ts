@@ -428,18 +428,14 @@ export class DcaKeyframe {
       cg: readonly [number, number, number],
     }>()
     const onPreModify = () => {
-      console.log("pre")
       nextDefinedKeyframe = null
       didStartBatch = false
       preCapturedDefinedModeData.clear()
 
       const layer = this.animation.keyframeLayers.value.find(kfl => kfl.layerId === this.layerId.value)
-      console.log(layer, layer?.definedMode.value)
       if (layer === undefined || !layer.definedMode.value) {
         return
       }
-
-      console.log("pre:data")
 
       const thisEndTime = this.startTime.value + this.duration.value
       const thisLayerEndAfterKeyframes = this.animation.keyframes.value
@@ -448,8 +444,6 @@ export class DcaKeyframe {
       if (thisLayerEndAfterKeyframes.length === 0) {
         return
       }
-
-      console.log("pre:action")
 
       //Get the keyframe that ends first, after this keyframe
       const nextEndKeyframe = thisLayerEndAfterKeyframes.reduce((a, b) => (a.startTime.value + a.duration.value) < (b.startTime.value + b.duration.value) ? a : b)
