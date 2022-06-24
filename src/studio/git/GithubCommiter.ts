@@ -44,13 +44,18 @@ export default class GithubCommiter {
     })
   ) { }
 
+  private removeMultipleAndTrailingSlashes(path: string) {
+    return path.replace(/\/+/g, '/').replace(/\/$/, '')
+  }
+
+
   pushChange(filePath: string, content: string, base64 = false) {
-    this.changedFiles.push(new ChangedFileData(filePath, content, base64))
+    this.changedFiles.push(new ChangedFileData(this.removeMultipleAndTrailingSlashes(filePath), content, base64))
   }
 
   //Removes files that havn't changed in this directory
   removeRedundentDirectory(directory: string, fileNamePredicate: (file: string) => boolean) {
-    this.redundentFilesDirectory.push(new RedundentFilesDirectory(directory, fileNamePredicate))
+    this.redundentFilesDirectory.push(new RedundentFilesDirectory(this.removeMultipleAndTrailingSlashes(directory), fileNamePredicate))
   }
 
   private markHashComputed() {
@@ -207,7 +212,7 @@ export default class GithubCommiter {
   }
 
   private async loadGitTree(sha: string, path?: string): Promise<GitTreeNode[]> {
-    let rf = path === undefined ? undefined : this.redundentFilesDirectory.find(d => d.path == path)
+    let rf = path === undefined ? undefined : this.redundentFilesDirectory.find(d => d.directory == path)
 
     //Get the tree. The returned tree is a list of git elements.
     const response = await this.octokit.git.getTree({
