@@ -124,35 +124,50 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
   const { clear } = useOpenedDialogBoxes()
 
   return (
-    <OpenedDialogBox width="800px" height="1000px" title="Push To Github">
-      <div className="flex flex-col h-full">
-        <div className="font-bold dark:text-white">What to push?</div>
-        <Checkbox value={model} setValue={setModel} extraText="Model" />
+    <OpenedDialogBox width="1400px" height="800px" title="Push To Github">
+      <div className="flex flex-row p-2 h-[760px]">
+        <div className="flex flex-col px-4 w-1/4">
+          <div className="font-bold dark:text-white">Select What to Push</div>
+          <p className="text-xs mb-4">Below you can select the items that you want to update on your remote repository with all your changes.</p>
 
-        <div className="font-bold mt-1 flex flex-row">
-          Animations:
-          <Checkbox
-            value={animations.length === project.animationTabs.animations.value.length}
-            setValue={v => setAnimations(v ? project.animationTabs.animations.value.map((_, index) => index) : [])}
-            extraText="All"
-          />
-        </div>
-        <div className="h-64 overflow-y-scroll studio-scrollbar">
-          {project.animationTabs.animations.value.map((anim, index) => <NumberedList key={index} nameLO={anim.name} list={animations} setList={setAnimations} number={index} />)}
+          <div className="font-bold dark:text-white">Model</div>
+          <div className={(model ? "bg-blue-600 hover:bg-blue-800" : "bg-gray-600 hover:bg-gray-700") + " p-0.5 rounded m-1 mb-2 flex flex-row cursor-pointer mr-10"} onClick={() => setModel(!model)}>
+            <Checkbox value={model} setValue={setModel} />
+            <p className="pt-0.5">{project.name.value}</p>
+          </div>
+
+          <div className="flex-grow"></div>
+
+          <GithubCommitBox repo={project.remoteLink?.repo ?? null} processCommit={processCommit} onCommitFinished={clear} />
         </div>
 
-        <div className="font-bold mt-1 flex flex-row">
-          Textures:
-          <Checkbox
-            value={textures.length === project.textureManager.textures.value.length}
-            setValue={v => setTextures(v ? project.textureManager.textures.value.map((_, index) => index) : [])}
-            extraText="All"
-          />
+        <div className="flex-grow px-4 pb-8 h-full">
+          <div className="font-bold mt-1 flex flex-row">
+            <Checkbox
+              value={animations.length === project.animationTabs.animations.value.length}
+              setValue={v => setAnimations(v ? project.animationTabs.animations.value.map((_, index) => index) : [])}
+              extraText="All"
+            />
+            Animations:
+          </div>
+          <div className="h-full overflow-y-scroll studio-scrollbar pr-4">
+            {project.animationTabs.animations.value.map((anim, index) => <NumberedList key={index} nameLO={anim.name} list={animations} setList={setAnimations} number={index} />)}
+          </div>
         </div>
-        <div className="h-64 overflow-y-scroll studio-scrollbar">
-          {project.textureManager.textures.value.map((texture, index) => <NumberedList key={index} nameLO={texture.name} list={textures} setList={setTextures} number={index} />)}
+
+        <div className="flex-grow px-4 pb-8 h-full">
+          <div className="font-bold mt-1 flex flex-row">
+            <Checkbox
+              value={textures.length === project.textureManager.textures.value.length && project.textureManager.textures.value.length > 0}
+              setValue={v => setTextures(v ? project.textureManager.textures.value.map((_, index) => index) : [])}
+              extraText="All"
+            />
+            Textures:
+          </div>
+          <div className="h-full overflow-y-scroll studio-scrollbar pr-4">
+            {project.textureManager.textures.value.map((texture, index) => <NumberedList key={index} nameLO={texture.name} list={textures} setList={setTextures} number={index} />)}
+          </div>
         </div>
-        <GithubCommitBox repo={project.remoteLink?.repo ?? null} processCommit={processCommit} onCommitFinished={clear} />
       </div>
     </OpenedDialogBox>
   )
@@ -169,7 +184,12 @@ const NumberedList = ({ nameLO, list, setList, number }: { nameLO: LO<string>, l
     }
     setList(newList)
   }, [list, setList, number])
-  return <Checkbox value={list.includes(number)} setValue={setValue} extraText={name} />
+  return (
+    <div className={(list.includes(number) ? "bg-blue-600 hover:bg-blue-800" : "bg-gray-600 hover:bg-gray-700") + " p-0.5 rounded m-1 flex flex-row cursor-pointer"} onClick={() => setValue(!list.includes(number))}>
+      <Checkbox value={list.includes(number)} setValue={setValue} />
+      <p className="pt-0.5">{name}</p>
+    </div>
+  )
 }
 
 export default PushToGithubDialogBox

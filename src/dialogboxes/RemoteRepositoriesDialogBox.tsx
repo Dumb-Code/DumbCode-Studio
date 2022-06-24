@@ -41,7 +41,7 @@ const RemoteRepositoriesDialogBox = () => {
   return (
     <OpenedDialogBox width="800px" height="800px" title="Load a Repository">
       <div className="flex flex-col h-full">
-        <div className="flex flex-row w-full justify-center items-center">
+        <div className="flex flex-row w-full justify-center items-center pt-2 pr-4">
           <input onKeyPress={e => e.key === "Enter" && setSearchedUsername(username)} value={username ?? ""} onChange={e => setUsername(e.target.value)} className="ml-4 w-32 text-black p-0 m-0 rounded-none rounded-l pl-1 h-8 dark:bg-gray-500 dark:placeholder-gray-800 " type="text" placeholder="Username" />
           <button onClick={() => setSearchedUsername(username)} className="h-8 rounded-none rounded-r p-1 ml-0 flex items-center justify-center dark:text-gray-700 bg-blue-500">
             <SVGSearch width={16} />
