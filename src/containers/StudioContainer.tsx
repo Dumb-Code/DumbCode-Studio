@@ -100,7 +100,7 @@ const StudioApp = () => {
               </NavBarButton>
             )}
           </div>
-          <div className="w-48 h-7 dark:bg-gray-800 bg-gray-300 rounded overflow-hidden dark:text-white text-left mr-2 mt-1 mb-1">
+          <div className="pt-0.5 absolute right-4">
             <GithubAccountButton />
           </div>
         </div>
