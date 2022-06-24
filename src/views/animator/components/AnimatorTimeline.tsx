@@ -435,8 +435,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
                 <AnimationLayerButton disabled={locked} onClick={addNewKeyframe} icon={SVGPlus} />
                 <AnimationLayerButton onClick={toggleVisible} icon={visible ? SVGEye : SVGEyeOff} />
                 <AnimationLayerButton highlighted={locked} onClick={toggleLocked} icon={locked ? SVGLocked : SVGUnlocked} />
-                <AnimationLayerButton icon={SVGTrash} onClick={deleteKeyframeLayer} />
-                <AnimationLayerButton icon={SVGSettings} />
+                <AnimationLayerButton icon={SVGSettings} onClick={openLayerSettings} />
             </div>
             <div className="relative w-full">
                 <div
@@ -468,7 +467,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
                 <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 h-7 -top-0.5" />
             </div>
             <div className="flex flex-row ml-1">
-                <AnimationLayerButton icon={SVGTrash} />
+                <AnimationLayerButton icon={SVGTrash} onClick={deleteKeyframeLayer} />
             </div>
         </div>
     )
