@@ -1,3 +1,5 @@
+import { Octokit } from "@octokit/rest";
+import Image from "next/image";
 import { MouseEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import GithubAccountButton from "../../../components/GithubAccountButton";
 import { SVGCross, SvgEdit, SVGTrash } from "../../../components/Icons";
@@ -93,6 +95,7 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
                         <RepositoryEntry
                             key={i}
                             repo={p}
+                            githubToken={githubToken}
                             selected={selectedRepo !== null && remoteRepoEqual(p, selectedRepo)}
                             // contentLoaded={selectedRemote !== null && remoteRepoEqual(selectedRemote.repo, p)}
                             setRemote={() => {
@@ -119,8 +122,19 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
     )
 }
 
-const RepositoryEntry = ({ repo, selected, setRemote }: { repo: RemoteRepo, selected: boolean, setRemote: () => void }) => {
+const RepositoryEntry = ({ repo, selected, setRemote, githubToken }: { repo: RemoteRepo, selected: boolean, setRemote: () => void, githubToken: string }) => {
     const removeRepoEntry = () => removeRecentGithubRemoteProject(repo)
+
+    const [imgSrc, setImgSrc] = useState<string | null>(null)
+
+    useEffect(() => {
+        new Octokit({
+            auth: githubToken
+        }).users.getByUsername({
+            username: repo.owner
+        }).then(response => setImgSrc(response.data.avatar_url as string)) //Why is response.data.avatar_url unknown?
+
+    }, [githubToken, repo.owner])
     return (
         <div className="py-1 px-2">
             <button
@@ -130,10 +144,15 @@ const RepositoryEntry = ({ repo, selected, setRemote }: { repo: RemoteRepo, sele
                 <div onClick={e => { e.stopPropagation(); removeRepoEntry() }} className="absolute top-0 right-0 text-red-600 hover:text-red-400 ">
                     <SVGTrash className="w-4" />
                 </div>
-                <div className="text-xs truncate">{repo.owner} /</div>
-                <div className="flex-grow flex flex-row w-full">
-                    <div className="font-bold transform -mt-2 truncate flex-grow">{repo.repo}</div>
-                    {repo.branch !== null && <div className="text-xs pr-1 -mt-0.5 text-gray-200">#{repo.branch}</div>}
+                <div className="flex-grow w-full flex flex-row items-center">
+                    <div className="w-8 h-8 m-1 flex justify-center rounded bg-black p-px">{imgSrc !== null && <Image className="rounded" width={32} height={32} src={imgSrc} alt="Avatar" />}</div>
+                    <div className="flex-grow">
+                        <div className="text-xs truncate">{repo.owner} /</div>
+                        <div className="flex-grow flex flex-row w-full">
+                            <div className="font-bold transform -mt-2 truncate flex-grow">{repo.repo}</div>
+                            {repo.branch !== null && <div className="text-xs pr-1 -mt-0.5 text-gray-200">#{repo.branch}</div>}
+                        </div>
+                    </div>
                 </div>
             </button>
         </div>
