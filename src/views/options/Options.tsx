@@ -29,6 +29,10 @@ const Options = () => {
             <div className="flex flex-col w-1/4 dark:bg-gray-800 bg-gray-200 pt-8 items-end">
                 <p className="dark:text-black text-gray-600 font-semibold text-xs w-44 pl-2 mb-1">APP SETTINGS</p>
                 {OptionsTabs.map(tab => <OptionsPageButton key={tab.name} tab={tab} selected={tab === optionsTab} setTab={() => setOptionsTab(tab)} />)}
+                <div className="flex-grow"></div>
+                <div className="dark:text-gray-400 text-black w-40 mr-4 text-left pl-2 text-xs pb-4">
+                    App Version v1.0.0
+                </div>
             </div>
             <div className="w-3/4 h-full overflow-auto studio-scrollbar dark:bg-gray-700 bg-gray-100 p-6">
                 {optionsTab.component()}

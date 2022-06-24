@@ -103,9 +103,6 @@ const StudioApp = () => {
           <div className="w-48 h-7 dark:bg-gray-800 bg-gray-300 rounded overflow-hidden dark:text-white text-left mr-2 mt-1 mb-1">
             <GithubAccountButton />
           </div>
-          <div className="dark:text-gray-200 text-black mt-1 mr-2">
-            v1.0.0
-          </div>
         </div>
         <div className={"flex-grow min-h-0"}>
           {settingsOpen ? <Options /> : activeTab.component()}
