@@ -44,9 +44,7 @@ const ProjectRemoteRequiresAuthentication = () => {
         <div className="w-full flex flex-col items-center">
             <div className="flex flex-col items-center pt-10">
                 <span className="text-2xl dark:text-white mt-2 mb-1">Requires Authentication:</span>
-                <div className="w-full dark:text-white bg-gray-500 hover:bg-purple-600 dark:hover:bg-purple-600 rounded-md h-10">
-                    <GithubAccountButton />
-                </div>
+                <GithubAccountButton />
             </div>
         </div>
     )
@@ -112,11 +110,16 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
                         <SVGCross className="h-3 w-3 transform p-0 rotate-45 -m-px text-white" />
                     </button>
                 </div>
-                <div className="flex flex-col overflow-y-scroll pr-2 h-full studio-scrollbar">
-                    {loadedRepo !== null && zippedProjects !== false &&
-                        zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} onRemoteProjectChanged={onRemoteProjectChanged} />)
-                    }
-                </div>
+                {
+                    loadedRepo == null ?
+                        <p className="text-xs dark:text-white text-center w-full mt-4">No Remote Repository Selected. Add or pick one to the left of this section.</p>
+                    :
+                        <div className="flex flex-col overflow-y-scroll pr-2 h-full studio-scrollbar">
+                            {loadedRepo !== null && zippedProjects !== false &&
+                                zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} onRemoteProjectChanged={onRemoteProjectChanged} />)
+                            }
+                        </div>
+                }
             </div>
         </>
     )
@@ -219,11 +222,11 @@ const ProjectEntry = ({ project, repo, onRemoteProjectChanged, linked }: {
                 <div style={{ width: Math.max(effectiveStatus, 0) + "%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-500"></div>
             </div>
 
-            <div className={(effectiveStatus === 100 ? "bg-purple-300 text-purple-700" : "dark:bg-gray-400 bg-white text-gray-700") + " flex-shrink px-2 rounded-xl text-xs w-20 text-center font-bold m-1"}>
-                {effectiveStatus === 100 ? "LOADED" : effectiveStatus <= 0 ? "UNLOADED" : "LOADING.."}
+            <div className={(effectiveStatus === 100 ? "bg-purple-300 text-purple-700" : "dark:bg-gray-400 bg-white text-gray-700") + " flex-shrink px-2 rounded-xl text-xs min-w-20 text-center font-bold m-1"}>
+                {effectiveStatus === 100 ? "LOADED" : effectiveStatus <= 0 ? "UNLOADED - CLICK TO LOAD" : "LOADING.."}
             </div>
             <ButtonWithTooltip className="dark:hover:text-blue-500 hover:text-blue-200" tooltip="Edit" onClick={editRemoteRepo}>
-                <SvgEdit className="w-5 h-5" />
+                <SvgEdit className="w-4 h-4 mr-1 ml-2 text-white opacity-70" />
             </ButtonWithTooltip>
         </div>
     )
