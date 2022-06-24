@@ -44,13 +44,13 @@ const GithubCommitBox = ({ deleteRemote, setDeleteRemote, repo, processCommit, o
         <div style={{ width: Math.max(effectiveStatus, 0) + "%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"></div>
       </div>
       { /* //TODO Make this use the validated input component so that it matches. @wyn plz*/}
-      <input className={"dark:bg-gray-700 rounded w-full mb-1 px-2 py-1" + (messageValid || " ring-1 ring-red-600")} value={message} onInput={onMessageInput} placeholder="Commit Message (required)" />
+      <input className={"dark:bg-gray-700 rounded w-full mb-1 px-2 py-1 focus:px-2 focus:py-1" + (messageValid || " ring-1 ring-red-600")} value={message} onInput={onMessageInput} placeholder="Commit Message (required)" />
       <textarea className="dark:bg-gray-700 rounded w-full border-0 focus:ring-2 mb-2 py-1 px-2" value={description} onInput={onDescInput} placeholder="Commit Description" />
 
       <div className="flex flex-row">
         {setDeleteRemote !== undefined && <Checkbox enabledColor="bg-red-500" value={deleteRemote} setValue={setDeleteRemote} extraText="Mark Deleted" />}
         <div className="flex-grow"></div>
-        <button className={(messageValid ? "bg-blue-600 hover:bg-blue-500" : " bg-gray-700 cursor-not-allowed") + " py-1 px-16 rounded text-xs"} disabled={!messageValid} onClick={onClickButton}>
+        <button className={(messageValid ? "bg-blue-600 hover:bg-blue-500" : " bg-gray-200 text-white dark:text-black dark:bg-gray-700 cursor-not-allowed") + " py-1 px-16 rounded text-xs"} disabled={!messageValid} onClick={onClickButton}>
           Commit
         </button>
       </div>

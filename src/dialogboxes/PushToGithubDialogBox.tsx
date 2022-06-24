@@ -131,7 +131,7 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
           <p className="text-xs mb-4">Below you can select the items that you want to update on your remote repository with all your changes.</p>
 
           <div className="font-bold dark:text-white">Model</div>
-          <div className={(model ? "bg-blue-600 hover:bg-blue-800" : "bg-gray-600 hover:bg-gray-700") + " p-0.5 rounded m-1 mb-2 flex flex-row cursor-pointer mr-10"} onClick={() => setModel(!model)}>
+          <div className={(model ? "bg-blue-400 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-800" : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-700") + " p-0.5 rounded m-1 mb-2 flex flex-row cursor-pointer mr-10"} onClick={() => setModel(!model)}>
             <Checkbox value={model} setValue={setModel} />
             <p className="pt-0.5">{project.name.value}</p>
           </div>
@@ -185,7 +185,7 @@ const NumberedList = ({ nameLO, list, setList, number }: { nameLO: LO<string>, l
     setList(newList)
   }, [list, setList, number])
   return (
-    <div className={(list.includes(number) ? "bg-blue-600 hover:bg-blue-800" : "bg-gray-600 hover:bg-gray-700") + " p-0.5 rounded m-1 flex flex-row cursor-pointer"} onClick={() => setValue(!list.includes(number))}>
+    <div className={(list.includes(number) ? "bg-blue-400 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-800" : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-700") + " p-0.5 rounded m-1 flex flex-row cursor-pointer"} onClick={() => setValue(!list.includes(number))}>
       <Checkbox value={list.includes(number)} setValue={setValue} />
       <p className="pt-0.5">{name}</p>
     </div>

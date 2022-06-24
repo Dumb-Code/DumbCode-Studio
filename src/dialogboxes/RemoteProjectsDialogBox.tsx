@@ -83,7 +83,7 @@ const EditingEntry = ({ name, placeholder, input }: { input: ValidatedInputType,
   return (
     <div className="flex flex-col w-full mb-2 group">
       <div className="w-full flex-grow dark:text-white text-xs">{name}</div>
-      <ValidatedInput input={input} className="w-full flex-grow rounded-md bg-gray-700 peer" placeholder={placeholder} onKeyDown={onKeyDown} />
+      <ValidatedInput input={input} className="w-full flex-grow rounded-md bg-gray-300 dark:bg-gray-700 peer" placeholder={placeholder} onKeyDown={onKeyDown} />
     </div>
   )
 }
