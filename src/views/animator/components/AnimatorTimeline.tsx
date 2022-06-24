@@ -3,6 +3,8 @@ import { SvgArrows, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGSettings, SVGTrash
 import { useCreatePortal } from "../../../contexts/CreatePortalContext";
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
+import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";
+import KeyframeLayerDialogBox from "../../../dialogboxes/KeyframeLayerDialogBox";
 import { KeyframeClipboardType } from "../../../studio/clipboard/KeyframeClipboardType";
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
 import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
@@ -270,6 +272,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
     const [name, setName] = useListenableObject(layer.name)
     const [visible, toggleVisible] = useListenableObjectToggle(layer.visible)
     const [locked, toggleLocked] = useListenableObjectToggle(layer.locked)
+    const dialogBox = useDialogBoxes()
 
     const { addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef, setHoveredLayerAndPosition } = useContext(ScrollZoomContext)
 
@@ -425,6 +428,11 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
             return
         }
         animation.deleteKeyframesLayers([layer.layerId])
+    }
+
+
+    const openLayerSettings = () => {
+        dialogBox.setDialogBox(() => <KeyframeLayerDialogBox layer={layer} />)
     }
 
     return (

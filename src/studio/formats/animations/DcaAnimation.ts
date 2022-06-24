@@ -410,6 +410,131 @@ export class DcaKeyframe {
         list.value = list.value.filter(val => val !== this)
       }
     })
+
+    this.setupDefinedListeners()
+  }
+
+  private setupDefinedListeners() {
+    let nextDefinedKeyframe: DcaKeyframe | null = null
+    let didStartBatch = false
+    const preCapturedDefinedModeData = new Map<DCMCube, {
+      pos: readonly [number, number, number],
+      rot: readonly [number, number, number],
+      cg: readonly [number, number, number],
+    }>()
+    const postCapturedDefinedModeData = new Map<DCMCube, {
+      pos: readonly [number, number, number],
+      rot: readonly [number, number, number],
+      cg: readonly [number, number, number],
+    }>()
+    const onPreModify = () => {
+      console.log("pre")
+      nextDefinedKeyframe = null
+      didStartBatch = false
+      preCapturedDefinedModeData.clear()
+
+      const layer = this.animation.keyframeLayers.value.find(kfl => kfl.layerId === this.layerId.value)
+      console.log(layer, layer?.definedMode.value)
+      if (layer === undefined || !layer.definedMode.value) {
+        return
+      }
+
+      console.log("pre:data")
+
+      const thisEndTime = this.startTime.value + this.duration.value
+      const thisLayerEndAfterKeyframes = this.animation.keyframes.value
+        .filter(kf => kf.layerId.value === this.layerId.value && kf.startTime.value + kf.duration.value > thisEndTime) //Has to end after this keyframe ends
+
+      if (thisLayerEndAfterKeyframes.length === 0) {
+        return
+      }
+
+      console.log("pre:action")
+
+      //Get the keyframe that ends first, after this keyframe
+      const nextEndKeyframe = thisLayerEndAfterKeyframes.reduce((a, b) => (a.startTime.value + a.duration.value) < (b.startTime.value + b.duration.value) ? a : b)
+      nextEndKeyframe.captureEndData(preCapturedDefinedModeData)
+      nextDefinedKeyframe = nextEndKeyframe
+
+      if (this.animation.undoRedoHandler.isBatching()) {
+        didStartBatch = true
+        this.animation.undoRedoHandler.startBatchActions()
+      } else {
+        didStartBatch = false
+      }
+    }
+
+    const performModify = (
+      cubeName: string,
+      current: readonly [number, number, number],
+      target: readonly [number, number, number],
+      dataMap: LOMap<string, readonly [number, number, number]>,
+      modifier = 1,
+    ) => {
+      if (target[0] !== current[0] || target[1] !== current[1] || target[2] !== current[2]) {
+        let delta = [(target[0] - current[0]) * modifier, (target[1] - current[1]) * modifier, (target[2] - current[2]) * modifier]
+
+        //map = map + (target - current) * modifier
+        const mapValue = dataMap.get(cubeName) ?? [0, 0, 0]
+        dataMap.set(cubeName, [
+          mapValue[0] + delta[0],
+          mapValue[1] + delta[1],
+          mapValue[2] + delta[2]
+        ])
+
+      }
+    }
+
+    const onPostModify = () => {
+      if (nextDefinedKeyframe !== null) {
+        nextDefinedKeyframe.captureEndData(postCapturedDefinedModeData)
+
+        preCapturedDefinedModeData.forEach((targetValues, cube) => {
+          const currentValues = postCapturedDefinedModeData.get(cube)
+          if (currentValues === undefined || nextDefinedKeyframe === null) {
+            return
+          }
+
+          performModify(cube.name.value, currentValues.pos, targetValues.pos, nextDefinedKeyframe.position)
+          performModify(cube.name.value, currentValues.rot, targetValues.rot, nextDefinedKeyframe.rotation, 180 / Math.PI)
+          performModify(cube.name.value, currentValues.cg, targetValues.cg, nextDefinedKeyframe.cubeGrow, -1)
+        })
+
+        if (didStartBatch) {
+          this.animation.undoRedoHandler.endBatchActions("Cube Moved")
+        }
+      }
+
+      nextDefinedKeyframe = null
+      didStartBatch = false
+      preCapturedDefinedModeData.clear()
+    }
+
+    this.position.addPreGlobalListener(onPreModify)
+    this.rotation.addPreGlobalListener(onPreModify)
+    this.cubeGrow.addPreGlobalListener(onPreModify)
+
+    this.position.addGlobalListener(onPostModify)
+    this.rotation.addGlobalListener(onPostModify)
+    this.cubeGrow.addGlobalListener(onPostModify)
+  }
+
+  captureEndData(map = new Map<DCMCube, {
+    pos: readonly [number, number, number];
+    rot: readonly [number, number, number];
+    cg: readonly [number, number, number];
+  }>()) {
+    map.clear()
+    this.project.model.resetVisuals()
+    this.animation.animateAt(this.startTime.value + this.duration.value)
+    this.project.model.identifierCubeMap.forEach(cube => {
+      map.set(cube, {
+        pos: [cube.cubeGroup.position.x, cube.cubeGroup.position.y, cube.cubeGroup.position.z],
+        rot: [cube.cubeGroup.rotation.x, cube.cubeGroup.rotation.y, cube.cubeGroup.rotation.z],
+        cg: [cube.cubeGrowGroup.position.x, cube.cubeGrowGroup.position.y, cube.cubeGrowGroup.position.z],
+      })
+    })
+    return map
   }
 
   createProgressionPointsGraph({ type = this.graphType.value, resolution = this.graphResolution.value, isIn = this.isGraphIn.value, isOut = this.isGraphOut.value }) {

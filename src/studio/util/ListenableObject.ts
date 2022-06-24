@@ -225,7 +225,9 @@ export class LOMap<K, V> extends Map<K, V> {
     defaultMap?: Map<K, V>,
     defaultCallback?: () => void,
     private listners: Map<K, Set<(newValue: V | undefined, oldValue: V | undefined) => void>> = new Map(),
-    private globalListeners = new Set<(changedKeys: MapChangedKeys<K, V>[]) => void>()
+
+    private preGlobalListeners = new Set<(changedKeys: MapChangedKeys<K, V>[]) => void>(),
+    private globalListeners = new Set<(changedKeys: MapChangedKeys<K, V>[]) => void>(),
   ) {
     super(defaultMap ?? null)
     if (defaultCallback) {
@@ -249,6 +251,7 @@ export class LOMap<K, V> extends Map<K, V> {
         get.forEach(l => l(undefined, v))
       }
     })
+    Array.from(this.preGlobalListeners).forEach(l => l(changedKeys))
     super.clear()
     Array.from(this.globalListeners).forEach(l => l(changedKeys))
   }
@@ -259,6 +262,7 @@ export class LOMap<K, V> extends Map<K, V> {
     if (listeners !== undefined) {
       listeners.forEach(l => l(undefined, oldValues))
     }
+    Array.from(this.preGlobalListeners).forEach(l => l([{ key, oldValue: oldValues, value: undefined }]))
     const ret = super.delete(key);
     Array.from(this.globalListeners).forEach(l => l([{ key, oldValue: oldValues, value: undefined }]))
     return ret
@@ -266,6 +270,9 @@ export class LOMap<K, V> extends Map<K, V> {
 
   set(key: K, value: V) {
     const oldValue = this.get(key) ?? undefined
+
+    Array.from(this.preGlobalListeners).forEach(l => l([{ key, oldValue, value }]))
+
     if (value === undefined) {
       super.delete(key)
     } else {
@@ -288,6 +295,10 @@ export class LOMap<K, V> extends Map<K, V> {
 
   addGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.globalListeners.add(func)
   removeGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.globalListeners.delete(func)
+
+
+  addPreGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.preGlobalListeners.add(func)
+  removePreGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.preGlobalListeners.delete(func)
 
   addListener(key: K, func: (newValue: V | undefined, oldValue: V | undefined) => void) {
     const arr = this.listners.get(key) ?? new Set()

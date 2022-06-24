@@ -142,6 +142,10 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     this.index.addPostListener(() => this._updateCanUndoCanRedo())
   }
 
+  isBatching() {
+    return this.batchActions
+  }
+
   startBatchActions() {
     this.batchActions = true
     this.batchedActions = []
