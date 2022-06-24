@@ -420,14 +420,22 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
         animation.undoRedoHandler.endBatchActions("Created Keyframe", HistoryActionTypes.Add)
     }
 
+    const deleteKeyframeLayer = () => {
+        if (locked) {
+            return
+        }
+        animation.deleteKeyframesLayers([layer.layerId])
+    }
+
     return (
         <div onClick={e => e.stopPropagation()} className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
             <div className="flex flex-row">
                 <AnimationLayerHandle color="bg-blue-500" type="Transform" />
-                <input value={layer.layerId} onChange={e => setName(e.target.value)} type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5  h-6 text-s" placeholder="layer name" />
+                <input value={name} onChange={e => setName(e.target.value)} type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5  h-6 text-s" placeholder="layer name" />
                 <AnimationLayerButton disabled={locked} onClick={addNewKeyframe} icon={SVGPlus} />
                 <AnimationLayerButton onClick={toggleVisible} icon={visible ? SVGEye : SVGEyeOff} />
                 <AnimationLayerButton highlighted={locked} onClick={toggleLocked} icon={locked ? SVGLocked : SVGUnlocked} />
+                <AnimationLayerButton icon={SVGTrash} onClick={deleteKeyframeLayer} />
                 <AnimationLayerButton icon={SVGSettings} />
             </div>
             <div className="relative w-full">

@@ -145,7 +145,7 @@ export default class DcaAnimation {
           newValue = newValue.concat(new KeyframeLayerData(this, kf.layerId.value))
         }
       })
-      naughtyModifyValue(newValue)
+      naughtyModifyValue(Array.from(newValue).sort((a, b) => a.layerId - b.layerId))
     })
   }
 
@@ -291,15 +291,14 @@ export default class DcaAnimation {
     this.undoRedoHandler.endBatchActions(`${selected.length} Keyframe${selected.length === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove)
   }
 
-  deleteSelectedKeyframesLayers() {
-    const selectedLayers = new Set(this.selectedKeyframes.value.map(kf => kf.layerId.value))
-    const selected = this.keyframes.value.filter(kf => selectedLayers.has(kf.layerId.value))
+  deleteKeyframesLayers(layers: readonly number[] = Array.from(new Set(this.selectedKeyframes.value.map(kf => kf.layerId.value)))) {
+    const selected = this.keyframes.value.filter(kf => layers.includes(kf.layerId.value))
     this.undoRedoHandler.startBatchActions()
     selected.forEach(kf => kf.delete())
     this.keyframeLayers.value
-      .filter(layer => selectedLayers.has(layer.layerId))
+      .filter(layer => layers.includes(layer.layerId))
       .map(layer => layer.delete())
-    this.undoRedoHandler.endBatchActions(`${selectedLayers} Keyframe Layer${selected.length === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove)
+    this.undoRedoHandler.endBatchActions(`${layers.length} Keyframe Layer${selected.length === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove)
   }
 
   cloneAnimation() {
