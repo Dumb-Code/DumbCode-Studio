@@ -441,8 +441,8 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
                 <AnimationLayerHandle color="bg-blue-500" type="Transform" />
                 <input value={name} onChange={e => setName(e.target.value)} type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5  h-6 text-s" placeholder="layer name" />
                 <AnimationLayerButton disabled={locked} onClick={addNewKeyframe} icon={SVGPlus} />
-                <AnimationLayerButton onClick={toggleVisible} icon={visible ? SVGEye : SVGEyeOff} />
-                <AnimationLayerButton highlighted={locked} onClick={toggleLocked} icon={locked ? SVGLocked : SVGUnlocked} />
+                <AnimationLayerButton highlighted={!visible} onClick={toggleVisible} icon={visible ? SVGEye : SVGEyeOff} negative={true} />
+                <AnimationLayerButton highlighted={locked} onClick={toggleLocked} icon={locked ? SVGLocked : SVGUnlocked} negative={ true } />
                 <AnimationLayerButton icon={SVGSettings} onClick={openLayerSettings} />
             </div>
             <div className="relative w-full">
@@ -475,24 +475,44 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
                 <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 h-7 -top-0.5" />
             </div>
             <div className="flex flex-row ml-1">
-                <AnimationLayerButton icon={SVGTrash} onClick={deleteKeyframeLayer} />
+                <AnimationLayerButton icon={SVGTrash} onClick={deleteKeyframeLayer} highlighted={true} negative={true} hoverOnly={true} />
             </div>
         </div>
     )
 }
 
 const AnimationLayerHandle = ({ type, color }: { type: string, color: string }) => {
+
+    const animationContextMenu = (e: MouseEvent) => { 
+        e.preventDefault()
+        e.stopPropagation()
+    }
+
     return (
         <div className={color + " rounded-full w-6 h-6 mr-1 p-1 text-white hover:cursor-move"}>
-            <SvgArrows />
+            <SvgArrows onContextMenu={() => {animationContextMenu}}/>
             { /* TODO Add icons for event and sound layer types*/}
         </div>
     );
 }
 
-const AnimationLayerButton = ({ onClick, icon: Icon, disabled, highlighted }: { onClick?: () => void, icon: ({ className }: { className: string }) => JSX.Element, disabled?: boolean, highlighted?: boolean }) => {
+const AnimationLayerButton = ({ onClick, icon: Icon, disabled, highlighted, negative, hoverOnly }: { onClick?: () => void, icon: ({ className }: { className: string }) => JSX.Element, disabled?: boolean, highlighted?: boolean, negative?: boolean, hoverOnly?: boolean }) => {
     return (
-        <button disabled={disabled} onClick={onClick} className={(highlighted ? "dark:bg-blue-900 bg-blue-400 dark:hover:bg-blue-800 hover:bg-blue-500 " : "dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 ") + "rounded pr-0.5 pl-1 py-1 mr-0.5 h-6 " + (disabled ? "cursor-not-allowed dark:text-gray-500 text-gray-500" : "dark:text-white text-black")}><Icon className="h-4 w-4 mr-1" /></button>
+        <button disabled={disabled} onClick={onClick}
+            className={
+                (highlighted ?
+                    (negative ?
+                        "dark:hover:bg-red-800 hover:bg-red-500 " +
+                        (!hoverOnly && "dark:bg-red-900 bg-red-400 ")
+                        :
+                        "dark:hover:bg-blue-800 hover:bg-blue-500 " +
+                        (!hoverOnly && "dark:bg-blue-900 bg-blue-400 ")
+                    )
+                    : "dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 "
+                ) +
+                " rounded pr-0.5 pl-1 py-1 mr-0.5 h-6 " +
+                (hoverOnly && "dark:bg-gray-900 bg-gray-400 ") +
+                (disabled ? "cursor-not-allowed dark:text-gray-500 text-gray-500" : " dark:text-white text-black")}><Icon className="h-4 w-4 mr-1" /></button>
     )
 }
 
