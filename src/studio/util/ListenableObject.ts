@@ -271,7 +271,10 @@ export class LOMap<K, V> extends Map<K, V> {
   set(key: K, value: V) {
     const oldValue = this.get(key) ?? undefined
 
-    Array.from(this.preGlobalListeners).forEach(l => l([{ key, oldValue, value }]))
+    //Super constructor can call this, meaning the fields of this class will be undefined.
+    if(this.preGlobalListeners !== undefined) {
+        Array.from(this.preGlobalListeners).forEach(l => l([{ key, oldValue, value }]))
+    }
 
     if (value === undefined) {
       super.delete(key)
