@@ -53,8 +53,9 @@ const InputField = ({ axis, color, value, setValue, onFocus, onBlur }: {
   onFocus?: () => void,
   onBlur?: () => void
 }) => {
+  let sliderValue = value
   if (value !== null && Math.abs(value) > 180) {
-    value = (mod(value + 180, 360)) - 180
+    sliderValue = (mod(value + 180, 360)) - 180
   }
   return (
     <div className="flex flex-row mb-2 h-7 col-span-2">
@@ -73,14 +74,14 @@ const InputField = ({ axis, color, value, setValue, onFocus, onBlur }: {
         <Slider
           xmin={-180}
           xmax={180}
-          disabled={value === null}
+          disabled={sliderValue === null}
           axis="x"
           styles={{
             track: { height: 6, backgroundColor: '#27272A', width: '100%' },
             active: { backgroundColor: '#0EA5E9' },
             thumb: { width: 15, height: 15 }
           }}
-          x={value ?? 0}
+          x={sliderValue ?? 0}
           onChange={({ x }) => setValue(x)}
 
           onDragStart={onFocus}
