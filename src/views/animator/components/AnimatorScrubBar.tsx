@@ -51,7 +51,7 @@ const AnimatorScrubBar = () => {
         if (animation !== null) {
             setTimeAt(mouseHoverXRef.current * max)
         }
-    }, [setTimeAt, mouseHoverXRef, max])
+    }, [setTimeAt, mouseHoverXRef, max, animation])
 
 
     useEffect(() => {
@@ -85,17 +85,17 @@ const AnimatorScrubBar = () => {
 
     const onToggle = useCallback(() => {
         setPlaying(!isPlaying)
-    }, [isPlaying])
+    }, [isPlaying, setPlaying])
 
     const onRestart = useCallback(() => {
         setTimeAt(0)
         setPlaying(true)
-    }, [setTimeAt])
+    }, [setTimeAt, setPlaying])
 
     const onStop = useCallback(() => {
         setTimeAt(0)
         setPlaying(false)
-    }, [setTimeAt])
+    }, [setTimeAt, setPlaying])
 
     useKeyComboPressed(
         useMemo(() => ({
