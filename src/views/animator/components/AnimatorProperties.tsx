@@ -65,7 +65,8 @@ const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaA
     const sharedProps = {
         cubeName, cube,
         keyframe: selectedKf,
-        mode: mode ?? "global"
+        mode: mode ?? "global",
+        animation
     }
 
     return (
@@ -332,20 +333,27 @@ type InputPropTypes = {
         z: number;
     } | undefined;
     obj?: LOMap<string, readonly [number, number, number]> | undefined;
+    animation: DcaAnimation | null,
     InputType: typeof CubeInput | typeof CubeRotationInput
 }
 const WrappedCubeInput = (props: InputPropTypes) => {
     return props.mode === "local" ? <WrappedInputLocal {...props} /> : <WrappedInputGlobal {...props} />
 }
 
-const WrappedInputLocal = ({ title, cubeName, obj, InputType }: InputPropTypes) => {
+const WrappedInputLocal = ({ title, cubeName, obj, InputType, animation }: InputPropTypes) => {
     const [rawValue, setValue] = useListenableObjectInMapNullable(obj, cubeName)
     const value = obj !== undefined && cubeName !== undefined && rawValue === undefined ? [0, 0, 0] as const : rawValue
-    return <InputType title={title} value={value} setValue={setValue} />
+    return <InputType
+        title={title}
+        value={value}
+        setValue={setValue}
+        onFocus={() => animation !== null && animation.undoRedoHandler.startBatchActions()}
+        onBlur={() => animation !== null && animation.undoRedoHandler.endBatchActions(`Animated Cube ${title} changed`)}
+    />
 }
 
 
-const WrappedInputGlobal = ({ title, cube, keyframe, obj, keyframeSetFunction, vector, InputType }: InputPropTypes) => {
+const WrappedInputGlobal = ({ title, cube, keyframe, keyframeSetFunction, vector, InputType, animation }: InputPropTypes) => {
     const { onFrameListeners } = useStudio()
     const vec = vector()
     const [x, setX] = useState<number | undefined>(vec?.x)
@@ -371,7 +379,13 @@ const WrappedInputGlobal = ({ title, cube, keyframe, obj, keyframeSetFunction, v
         keyframe[keyframeSetFunction](array[0], array[1], array[2], cube)
     }
     const value = cube === undefined || keyframe === undefined || x === undefined || y === undefined || z === undefined ? undefined : [x, y, z] as const
-    return <InputType title={title} value={value} setValue={setValue} />
+    return <InputType
+        title={title}
+        value={value}
+        setValue={setValue}
+        onFocus={() => animation !== null && animation.undoRedoHandler.startBatchActions()}
+        onBlur={() => animation !== null && animation.undoRedoHandler.endBatchActions(`Animated Cube ${title} changed`)}
+    />
 }
 
 export default AnimatorProperties;

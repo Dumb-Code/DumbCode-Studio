@@ -65,8 +65,8 @@ const InputField = ({ axis, color, value, setValue, onFocus, onBlur }: {
         <NumericInput
           value={value ?? undefined}
           onChange={setValue}
-          startBatchActions={onBlur}
-          endBatchActions={onFocus}
+          startBatchActions={onFocus}
+          endBatchActions={onBlur}
         />
       </div>
       <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
