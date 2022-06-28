@@ -7,6 +7,7 @@ const NumericInput = ({
   startBatchActions, endBatchActions,
   isPositiveInteger = false,
   defaultValue = 0,
+  hideArrows = false,
 }: {
   value?: number | null | undefined,
   onChange?: (value: number) => void,
@@ -16,6 +17,7 @@ const NumericInput = ({
 
   isPositiveInteger?: boolean
   defaultValue?: number
+  hideArrows?: boolean
 }) => {
 
   const inputRef = useRef<HTMLInputElement>(null)
@@ -32,7 +34,12 @@ const NumericInput = ({
   const [typedValue, setTypedValue] = useState(numToString(value))
   const [isFocused, setIsFocused] = useState(false)
 
-  const onTyped = useCallback<ChangeEventHandler<HTMLInputElement>>(event => setTypedValue(event.currentTarget.value), [])
+  const onTyped = useCallback<ChangeEventHandler<HTMLInputElement>>(event => {
+    setTypedValue(event.currentTarget.value)
+    if (onChange) {
+      onChange(stringToNum(event.currentTarget.value))
+    }
+  }, [stringToNum, onChange])
 
   const onInputFocus = useCallback(() => {
     setIsFocused(true)
@@ -99,6 +106,10 @@ const NumericInput = ({
     } else if (e.key === "ArrowDown") {
       modifyDecrease(e)
       e.preventDefault()
+    } else if (e.key === "Enter") {
+      if (inputRef.current) {
+        inputRef.current.blur()
+      }
     }
   }, [modifyIncrease, modifyDecrease])
 
@@ -140,10 +151,12 @@ const NumericInput = ({
         onBlur={onInputBlur}
         onKeyDown={onKeyDown}
       />
-      <div className="text-gray-700 dark:text-gray-400" style={{ fontSize: 8 }}>
-        <InputArrow text="&#9650;" onClick={modifyIncrease} />
-        <InputArrow text="&#9660;" onClick={modifyDecrease} />
-      </div>
+      {!hideArrows && (
+        <div className="text-gray-700 dark:text-gray-400" style={{ fontSize: 8 }}>
+          <InputArrow text="&#9650;" onClick={modifyIncrease} />
+          <InputArrow text="&#9660;" onClick={modifyDecrease} />
+        </div>
+      )}
     </div>
   )
 }

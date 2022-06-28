@@ -4,6 +4,7 @@ import { setIntersectType } from '../../../studio/util/ObjectClickedHook';
 import SelectedCubeManager from "../../../studio/util/SelectedCubeManager";
 import { useStudio } from './../../../contexts/StudioContext';
 import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
+import { setIntersectThrogh } from './../../../studio/util/ObjectClickedHook';
 
 const _defaultNormalColor = 0x23284d
 const _defaultHighlightColor = 0x15c1d4
@@ -76,6 +77,7 @@ export default class CubePointTracker extends EventDispatcher {
           const point: TrackedPoint = { x, y, z, mesh: visualMesh }
           pickerMesh.userData._point = point
           setIntersectType(pickerMesh, "pointtracker", () => this.enabled)
+          setIntersectThrogh(pickerMesh, true)
           this.points.push(point)
         }
       }

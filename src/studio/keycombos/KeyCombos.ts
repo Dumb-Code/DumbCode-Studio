@@ -77,6 +77,10 @@ const keyCombos = {
       delete_layer: new KeyCombo('Delete layer', "Deletes the selected keyframe(s) layer(s).", 'Delete'),
       paste_keyframes_defined: new KeyCombo('Paste as defined', "Pasted the keyframes in defined mode", "KeyV", true, true),
       individually_select: new KeyCombo('Individually Select', "Invividually select the keyframe", null),
+
+      pause_or_play: new KeyCombo('Pause/Play', "Pause or play the animation", 'Space', false),
+      restart_animation: new KeyCombo('Restart Animation', "Restart the animation", 'Space', true),
+      stop_animation: new KeyCombo('Stop Animation', "Stop the animation", 'Space', false, true),
     }
   },
 }

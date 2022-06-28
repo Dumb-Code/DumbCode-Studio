@@ -1,10 +1,10 @@
 import { Matrix4, Quaternion, Vector3 } from 'three';
 import { DCMCube } from '../../../formats/model/DcmModel';
 import DcProject from '../../../formats/project/DcProject';
+import { HistoryActionTypes } from '../../../undoredo/UndoRedoHandler';
 import CubeLocker from "../../../util/CubeLocker";
 import { Command } from "../../Command";
 import { CommandRunError } from '../../CommandRunError';
-import { HistoryActionTypes } from './../../../undoredo/UndoRedoHandler';
 
 const worldPosVector = new Vector3()
 const tempCubePos = new Vector3()
@@ -78,6 +78,9 @@ const VertexSnapping = (project: DcProject) => (addCommand: (command: Command) =
 
         //Deselect everything and click on the original cube.
         cube.selected.value = true
+
+        project.undoRedoHandler.endBatchActions("_WEAK", HistoryActionTypes.Edit, "chainFirst")
+        project.model.undoRedoHandler.endBatchActions(`Vertex Snap Command`, HistoryActionTypes.Command, "chainLast")
       }, 0x662141)
     }
 
@@ -96,12 +99,13 @@ const VertexSnapping = (project: DcProject) => (addCommand: (command: Command) =
       cube.cubeGroup.getWorldPosition(worldPosVector)
 
       cube.model.undoRedoHandler.startBatchActions()
+      project.undoRedoHandler.startBatchActions()
       phase2(cube)
-      project.model.undoRedoHandler.endBatchActions("Command Vertex", HistoryActionTypes.Command)
     } else {
       //Enable the point tracker to get the source point to move.
       pointTracker.enable((p, _, c) => {
         c.model.undoRedoHandler.startBatchActions()
+        project.undoRedoHandler.startBatchActions()
 
         project.model.identifierCubeMap.forEach(v => {
           if (v.selected.value) {
@@ -110,7 +114,6 @@ const VertexSnapping = (project: DcProject) => (addCommand: (command: Command) =
         })
         worldPosVector.copy(p)
         phase2(c)
-        project.model.undoRedoHandler.endBatchActions("Command Vertex", HistoryActionTypes.Command)
       }, undefined, undefined)
     }
 

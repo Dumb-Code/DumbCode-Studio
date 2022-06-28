@@ -64,15 +64,17 @@ const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
     clearTooltip: () => setTooltipData(null)
   }), [])
 
+  const tooltipValue = useMemo(() => tooltipData?.tooltip(), [tooltipData])
+
   return (
     <TooltipContext.Provider value={tooltip}>
       {children}
-      {tooltipData !== null && createPortal(
+      {tooltipValue !== null && tooltipValue !== undefined && createPortal(
         <div
           ref={containerRef}
           className={"absolute text-center border border-black p-0.5 " + (darkMode ? "dark text-gray-300 bg-gray-800 " : "bg-gray-300")}
         >
-          {tooltipData.tooltip()}
+          {tooltipValue}
         </div>
       )}
     </TooltipContext.Provider>

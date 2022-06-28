@@ -4,6 +4,7 @@ import { useStudio } from './../../contexts/StudioContext';
 
 const validTypes = ["cube", "refimg", "pointtracker"] as const
 const typeKey = "dumbcode_intersect_type"
+const intersectThrough = "dumbcode_intersect_through"
 const visibleKey = "dumbcode_visible_key"
 
 export const setIntersectType = (object: Object3D, type: typeof validTypes[number], enabled?: () => boolean) => {
@@ -11,6 +12,10 @@ export const setIntersectType = (object: Object3D, type: typeof validTypes[numbe
   if (enabled) {
     object.userData[visibleKey] = enabled
   }
+}
+
+export const setIntersectThrogh = (object: Object3D, through: boolean) => {
+  object.userData[intersectThrough] = through
 }
 
 export const useObjectUnderMouse = () => {
@@ -35,18 +40,34 @@ export const useObjectUnderMouse = () => {
 
       raycaster.setFromCamera(mouse.current, getCamera())
       const intersected = raycaster.intersectObjects(objects, false)
-      const object = intersected.length !== 0 ? intersected[0].object : undefined
-      const type = object?.userData?.[typeKey]
 
-      if (type !== undefined && !validTypes.includes(type)) {
-        throw new Error(`Type ${type} is not valid`)
+      if (intersected.length === 0) {
+        selectedCubeManager.update(undefined)
+        cubePointTracker.update(getCamera(), undefined)
+        referenceImageHandler.update(undefined)
+      } else {
+        const intersectedData: Partial<Record<typeof validTypes[number], Object3D>> = {}
+
+        for (const i of intersected) {
+          const object = i.object
+          const type = object.userData[typeKey]
+          if (type === "cube" && intersectedData.cube === undefined) {
+            intersectedData.cube = object
+          } else if (type === "refimg" && intersectedData.refimg === undefined) {
+            intersectedData.refimg = object
+          } else if (type === "pointtracker" && intersectedData.pointtracker === undefined) {
+            intersectedData.pointtracker = object
+          }
+          if (!object.userData[intersectThrough]) {
+            break
+          }
+        }
+
+        selectedCubeManager.update(intersectedData.cube)
+        cubePointTracker.update(getCamera(), intersectedData.pointtracker)
+        referenceImageHandler.update(intersectedData.refimg)
       }
 
-      const t = type as typeof validTypes[number]
-
-      selectedCubeManager.update(t === "cube" ? object : undefined)
-      cubePointTracker.update(getCamera(), t === "pointtracker" ? object : undefined)
-      referenceImageHandler.update(t === "refimg" ? object : undefined)
     }
 
     const onMouseMove = (e: MouseEvent) => {

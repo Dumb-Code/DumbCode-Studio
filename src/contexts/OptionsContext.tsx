@@ -38,13 +38,16 @@ export const useKeyComboPressed = (handlers: {
   [category in KeyComboCategory]?: {
     [combo in KeyComboKey<category>]?: () => void
   }
+}, options?: {
+  blurActiveElement?: boolean
 }) => {
-  const options = useOptions()
+  const blurActiveElement = options?.blurActiveElement ?? true
+  const studioOptions = useOptions()
   useEffect(() => {
     const handlerPairs = Object.keys(handlers)
       .flatMap(c => {
         const category = c as KeyComboCategory
-        const keyCat = options.keyCombos[category].combos as Record<string, KeyCombo>
+        const keyCat = studioOptions.keyCombos[category].combos as Record<string, KeyCombo>
         const handlerCat = handlers[category] as Record<string, () => void>
         if (handlerCat === undefined) {
           return []
@@ -54,6 +57,9 @@ export const useKeyComboPressed = (handlers: {
       })
 
     const listener = (e: KeyboardEvent) => {
+      if (!blurActiveElement && document.activeElement?.nodeName === "INPUT") {
+        return
+      }
       const found = handlerPairs.find(pair => pair.combo.matches(e))
       if (found !== undefined && found.handler !== undefined) {
         if (document.activeElement instanceof HTMLInputElement) {
@@ -67,7 +73,7 @@ export const useKeyComboPressed = (handlers: {
 
     document.addEventListener("keydown", listener)
     return () => document.removeEventListener("keydown", listener)
-  }, [handlers, options.keyCombos])
+  }, [handlers, studioOptions.keyCombos, blurActiveElement])
 }
 
 export const OptionsContextProvider = ({ children }: { children?: ReactNode }) => {
