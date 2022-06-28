@@ -16,7 +16,7 @@ const decomposeEuler = new Euler()
 
 export default class CubeLocker {
 
-  private readonly worldMatrix: Matrix4
+  public readonly worldMatrix: Matrix4
 
   constructor(
     public readonly cube: DCMCube,
@@ -32,6 +32,7 @@ export default class CubeLocker {
   static reconstructLockerFromLocker(locker: CubeLocker) {
     return CubeLocker.reconstructLocker(locker.cube, locker.type, locker.worldMatrix)
   }
+
 
   static reconstructLockerValues<T extends LockerType>(cube: DCMCube, type: T, worldMatrix: Matrix4):
     T extends LockerType.POSITION_ROTATION ? { position: [number, number, number], rotation: [number, number, number] } :
