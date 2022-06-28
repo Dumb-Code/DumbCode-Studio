@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import NumericInput from 'react-numeric-input';
 import { SVGLocked, SVGUnlocked } from './Icons';
+import NumericInput from './NumericInput';
 
 const axis = [
     { axis: "x", color: "bg-red-500" },
@@ -8,12 +8,12 @@ const axis = [
     { axis: "z", color: "bg-sky-500" },
 ] as const
 
-const CubeInput = ({ title, value, setValue, lock, lockPositive, onBlur, onFocus }: {
+const CubeInput = ({ title, value, setValue, lock, positiveInteger, onBlur, onFocus }: {
     title: string
     value?: readonly [number, number, number]
     setValue?: (value: readonly [number, number, number]) => void
     lock?: boolean,
-    lockPositive?: boolean,
+    positiveInteger?: boolean,
     onFocus?: () => void,
     onBlur?: () => void
 }) => {
@@ -45,7 +45,7 @@ const CubeInput = ({ title, value, setValue, lock, lockPositive, onBlur, onFocus
                                 ])
                             }
                         }}
-                        lockPositive={lockPositive}
+                        positiveInteger={positiveInteger}
                         onBlur={onBlur}
                         onFocus={onFocus}
                     />
@@ -55,12 +55,12 @@ const CubeInput = ({ title, value, setValue, lock, lockPositive, onBlur, onFocus
     )
 }
 
-const InputField = ({ axis, color, value, setValue, lockPositive, onFocus, onBlur }: {
+const InputField = ({ axis, color, value, setValue, positiveInteger, onFocus, onBlur }: {
     axis: string,
     color: string,
     value: number | null,
     setValue: (val: number) => void,
-    lockPositive: boolean | undefined,
+    positiveInteger: boolean | undefined,
     onFocus?: () => void,
     onBlur?: () => void
 }) => {
@@ -72,18 +72,11 @@ const InputField = ({ axis, color, value, setValue, lockPositive, onFocus, onBlu
 
             <NumericInput
                 value={value ?? undefined}
-                format={val => val === null ? "" : parseFloat(String(val)).toFixed(2)}
-                size={6}
-                mobile={false}
-                className="focus:outline-none focus:ring-gray-800 border-none"
-                onChange={val => {
-                    if (val !== null) {
-                        (val < 0 && (lockPositive !== null && lockPositive === true)) ? setValue(0) : setValue(val)
-                    }
-                }}
-                onBlur={onBlur}
-                onFocus={onFocus}
-
+                onChange={setValue}
+                isPositiveInteger={positiveInteger}
+                startBatchActions={onFocus}
+                endBatchActions={onBlur}
+                defaultValue={positiveInteger ? 1 : 0}
             />
         </div>
     )

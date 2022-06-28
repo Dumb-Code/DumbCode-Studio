@@ -30,6 +30,10 @@ export const useOptions = () => {
   return context
 }
 
+export const useKeyCombos = () => {
+  return useOptions().keyCombos
+}
+
 export const useKeyComboPressed = (handlers: {
   [category in KeyComboCategory]?: {
     [combo in KeyComboKey<category>]?: () => void

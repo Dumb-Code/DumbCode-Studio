@@ -1,13 +1,153 @@
-const NumericInput = () => { 
-    return (
-        <div className="bg-gray-300 dark:bg-gray-700 w-full h-8 flex flex-row pl-1">
-            <p className="text-xs dark:text-white py-2 flex-grow cursor-text">132</p>
-            <div className="text-gray-700 dark:text-gray-400" style={{fontSize: 8}}>
-                <div className="rounded-sm m-1 mb-0 h-3 w-3 pl-0.5 border-b border-gray-300 dark:border-gray-700 cursor-pointer hover:text-gray-500">&#9650;</div>
-                <div className="rounded-sm m-1 mt-0 h-3 w-3 pl-0.5 border-t border-gray-300 dark:border-gray-700 cursor-pointer hover:text-gray-500">&#9660;</div>
-            </div>
-        </div>
-    );
+import { ChangeEventHandler, KeyboardEventHandler, MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useKeyCombos } from "../contexts/OptionsContext";
+import { NeededEventData } from "../studio/keycombos/KeyCombo";
+
+const NumericInput = ({
+  value, onChange,
+  startBatchActions, endBatchActions,
+  isPositiveInteger = false,
+  defaultValue = 0,
+}: {
+  value?: number | null | undefined,
+  onChange?: (value: number) => void,
+
+  startBatchActions?: () => void,
+  endBatchActions?: () => void,
+
+  isPositiveInteger?: boolean
+  defaultValue?: number
+}) => {
+
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const stringToNum = useCallback((string: string) => {
+    const num = isPositiveInteger ? parseInt(string) : parseFloat(string)
+    if (isPositiveInteger && num < 0) {
+      return 0
+    }
+    return isNaN(num) ? defaultValue : num
+  }, [isPositiveInteger, defaultValue])
+  const numToString = useCallback((value: number | null | undefined) => value?.toFixed(isPositiveInteger ? 0 : 2) ?? "", [isPositiveInteger])
+
+  const [typedValue, setTypedValue] = useState(numToString(value))
+  const [isFocused, setIsFocused] = useState(false)
+
+  const onTyped = useCallback<ChangeEventHandler<HTMLInputElement>>(event => setTypedValue(event.currentTarget.value), [])
+
+  const onInputFocus = useCallback(() => {
+    setIsFocused(true)
+    setTypedValue(numToString(value))
+    if (startBatchActions) {
+      startBatchActions()
+    }
+  }, [value, numToString, setTypedValue, startBatchActions])
+
+  const onInputBlur = useCallback(() => {
+    setIsFocused(false)
+    if (onChange) {
+      onChange(stringToNum(typedValue))
+    }
+    if (endBatchActions) {
+      endBatchActions()
+    }
+  }, [typedValue, stringToNum, onChange, endBatchActions])
+
+  const inputValue = useMemo(() => isFocused ? typedValue : numToString(value), [isFocused, typedValue, numToString, value])
+  const { input_multipliers: combos } = useKeyCombos()
+
+  const getDeltaValue = useCallback((event: NeededEventData) => {
+    const maxPriorityItem = Object.keys(combos.combos)
+      .map(key => ({
+        key: key as keyof typeof combos.combos,
+        value: combos.combos[key as keyof typeof combos.combos],
+      }))
+      .filter(item => item.value.matchesUnknownEvent(event))
+      .sort((a, b) => a.value.computePriority() - b.value.computePriority())[0]
+
+    switch (maxPriorityItem.key) {
+      case "multiply_0_01": return 0.01
+      case "multiply_0_1": return 0.1
+      case "multiply_1": return 1
+      case "multiply_10": return 10
+    }
+  }, [combos])
+
+  const modifyIncrease = useCallback((e: NeededEventData) => {
+    if (value !== null && value !== undefined) {
+      const newValue = value + getDeltaValue(e)
+      if (onChange) {
+        onChange(newValue)
+      }
+      setTypedValue(numToString(newValue))
+    }
+  }, [value, onChange, getDeltaValue, setTypedValue, numToString])
+
+  const modifyDecrease = useCallback((e: NeededEventData) => {
+    if (value !== null && value !== undefined) {
+      const newValue = value - getDeltaValue(e)
+      if (onChange) {
+        onChange(newValue)
+      }
+      setTypedValue(numToString(newValue))
+    }
+  }, [value, onChange, getDeltaValue, setTypedValue, numToString])
+
+  const onKeyDown = useCallback<KeyboardEventHandler>(e => {
+    if (e.key === "ArrowUp") {
+      modifyIncrease(e)
+      e.preventDefault()
+    } else if (e.key === "ArrowDown") {
+      modifyDecrease(e)
+      e.preventDefault()
+    }
+  }, [modifyIncrease, modifyDecrease])
+
+  //Assign the onWheel event to the input like this, as to allow for preventing the default behavior
+  useEffect(() => {
+    const currentInput = inputRef.current
+    if (currentInput === null) {
+      return
+    }
+    const callback = (e: WheelEvent) => {
+      if (!isFocused) {
+        currentInput.focus()
+      }
+      if (e.deltaY < 0) {
+        modifyIncrease(e)
+      } else {
+        modifyDecrease(e)
+      }
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    currentInput.addEventListener("wheel", callback, { passive: false })
+    return () => {
+      currentInput.removeEventListener("wheel", callback)
+    }
+  }, [isFocused, modifyIncrease, modifyDecrease, inputRef, startBatchActions, endBatchActions])
+
+
+
+  return (
+    <div className="bg-gray-300 dark:bg-gray-700 w-full h-full flex flex-row items-center pl-1">
+      <input
+        disabled={value === null || value === undefined}
+        ref={inputRef}
+        className="text-xs bg-gray-300 dark:bg-gray-700 dark:text-white py-2 flex-grow cursor-text w-full h-full outline-0 outline-none"
+        value={inputValue}
+        onChange={onTyped}
+        onFocus={onInputFocus}
+        onBlur={onInputBlur}
+        onKeyDown={onKeyDown}
+      />
+      <div className="text-gray-700 dark:text-gray-400" style={{ fontSize: 8 }}>
+        <InputArrow text="&#9650;" onClick={modifyIncrease} />
+        <InputArrow text="&#9660;" onClick={modifyDecrease} />
+      </div>
+    </div>
+  )
 }
+
+const InputArrow = ({ text, onClick }: { text: string, onClick?: MouseEventHandler }) => <button onClick={onClick} className="flex justify-center items-center rounded-sm m-1 w-3 hover:text-gray-500 hover:bg-gray-200 first:mb-0 last:mt-0">{text}</button>
 
 export default NumericInput;

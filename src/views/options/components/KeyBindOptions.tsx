@@ -60,6 +60,8 @@ const KeyBindOption = ({ keyCombo }: { keyCombo: KeyCombo }) => {
 
     const [clashes] = useListenableObject(keyCombo.clashedWith)
 
+    const isInvalid = clashes.length !== 0 || !keyCombo.isNothingValid()
+
     return (
         <div className="flex flex-row ">
             <div className="dark:bg-gray-800 bg-gray-300 m-0.5 rounded-l p-1 text-black dark:text-gray-400 pl-3 w-3/4 flex flex-row">
@@ -70,7 +72,7 @@ const KeyBindOption = ({ keyCombo }: { keyCombo: KeyCombo }) => {
             </div>
             <ButtonWithTooltip
                 tooltip={clashes.length === 0 ? null : `Clashes with ${clashes.map(c => c.name).join(", ")}`}
-                className={(listening ? "dark:bg-purple-800 bg-purple-300 dark:hover:bg-purple-600 hover:bg-purple-200" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-600 hover:bg-gray-200") + (clashes.length !== 0 ? "text-red-700 dark:text-red-400" : "text-black dark:text-gray-400") + " w-40 m-0.5 rounded-r p-1  pl-2 "}
+                className={(listening ? "dark:bg-purple-800 bg-purple-300 dark:hover:bg-purple-600 hover:bg-purple-200" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-600 hover:bg-gray-200") + (isInvalid ? "text-red-700 dark:text-red-400" : "text-black dark:text-gray-400") + " w-40 m-0.5 rounded-r p-1  pl-2 "}
                 onClick={() => setIsListening(true)}
                 onBlur={() => setIsListening(false)}
                 onKeyDown={e => {

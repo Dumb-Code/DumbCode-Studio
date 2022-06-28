@@ -28,22 +28,6 @@ a {
 }
 */
 
-.react-numeric-input {
-  @apply dark:bg-gray-700 bg-gray-300 outline-none border-none rounded-r dark:text-white text-black text-xs w-full !important;
-}
-
-.react-numeric-input b {
-  @apply bg-gray-400 outline-none dark:border-gray-700 border-white border-t border-b shadow-none text-white pl-0.5 !important;
-}
-
-.react-numeric-input b i {
-  @apply text-white !important;
-}
-
-.react-numeric-input input {
-  @apply dark:bg-gray-700 bg-gray-300 outline-none border-none shadow-none h-full w-full dark:text-white text-black !important;
-}
-
 .studio-canvas-container canvas {
   @apply absolute;
 }
@@ -69,31 +53,33 @@ a {
 }
 
 button {
-  @apply focus:outline-none !important;
+  @apply focus: outline-none !important;
 }
 
 .icon-button {
-  @apply dark:bg-gray-800 bg-gray-200 dark:hover:bg-black hover:bg-gray-100 rounded pr-1 pl-2 py-1 my-0.5 mr-1
+  @apply dark: bg-gray-800 bg-gray-200 dark:hover:bg-black hover:bg-gray-100 rounded pr-1 pl-2 py-1 my-0.5 mr-1
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
 .no-scrollbar::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .studio-scrollbar {
-  @apply scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800 hover:scrollbar-thumb-blue-500
+  @apply scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 dark: scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800 hover:scrollbar-thumb-blue-500
 }
 
 /**
   * This injects Tailwind's utility classes and any utility classes registered
   * by plugins.
   */
-  
+
 @tailwind utilities;

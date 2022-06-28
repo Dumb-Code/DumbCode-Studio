@@ -1,7 +1,7 @@
-import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
 import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 import HistoryList from '../../../components/HistoryList';
+import NumericInput from "../../../components/NumericInput";
 
 const TextureMapperSidebar = () => {
     return (

@@ -58,8 +58,14 @@ const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<reado
         title={title}
         value={value}
         setValue={setValue}
-        onFocus={() => model.undoRedoHandler.startBatchActions()}
-        onBlur={() => model.undoRedoHandler.endBatchActions(`Cube ${title.toLowerCase()} edit`)}
+        onFocus={() => {
+            console.log("start batch")
+            model.undoRedoHandler.startBatchActions()
+        }}
+        onBlur={() => {
+            console.log("end batch")
+            model.undoRedoHandler.endBatchActions(`Cube ${title.toLowerCase()} edit`)
+        }}
     />
 }
 
@@ -69,7 +75,7 @@ const WrappedCubeInputDimensions = ({ title, obj, model }: { title: string, obj?
         title={title.toUpperCase()}
         value={value}
         setValue={setValue}
-        lockPositive={true}
+        positiveInteger={true}
         onFocus={() => model.undoRedoHandler.startBatchActions()}
         onBlur={() => model.undoRedoHandler.endBatchActions(`Cube ${title} changed`)}
     />

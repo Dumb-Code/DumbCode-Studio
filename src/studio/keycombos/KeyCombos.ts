@@ -1,5 +1,10 @@
 import KeyCombo from "./KeyCombo";
 
+enum Scope {
+  GLOBAL,
+  THIS_AND_GLOBAL,
+  THIS
+}
 const keyCombos = {
   common: {
     name: "COMMON SHORTCUT BINDINGS",
@@ -10,6 +15,20 @@ const keyCombos = {
       undo: new KeyCombo('Undo', "Un does the last operation", 'KeyZ'),
       redo: new KeyCombo('Redo', "Re does the last undone operation", 'KeyY'),
       repeat_previous_command: new KeyCombo('Repeat Previous Command', "Repeats the last command run by the user", 'Space', false),
+    }
+  },
+
+  input_multipliers: {
+    name: "INPUT MULTIPLIERS",
+    desc: "Key bindings that apply when editing an input field.",
+    scope: Scope.THIS,
+    canBeNothing: true,
+    canIncludeCodes: false,
+    combos: {
+      multiply_0_01: new KeyCombo('×0.01', "Multiplies the input by 0.01", null, true, false),
+      multiply_0_1: new KeyCombo('×0.1', "Multiplies the input by 0.1", null, false, false),
+      multiply_1: new KeyCombo('×1', "Multiplies the input by 1", null, false, true),
+      multiply_10: new KeyCombo('×10', "Multiplies the input by 10", null, true, true),
     }
   },
 
@@ -40,7 +59,7 @@ const keyCombos = {
   modeler: {
     name: "MODELER BINDINGS",
     desc: "Key bindings that apply to the modeler.",
-    scoped: true,
+    scope: Scope.THIS_AND_GLOBAL,
     combos: {
       delete: new KeyCombo('Delete', "Deletes the selected object.", 'Delete', false),
       delete_and_children: new KeyCombo('Delete + Children', "Deletes the selected object and it's children.", 'Delete'),
@@ -52,7 +71,7 @@ const keyCombos = {
   animator: {
     name: "ANIMATOR BINDINGS",
     desc: "Key bindings that apply to the animator.",
-    scoped: true,
+    scope: Scope.THIS_AND_GLOBAL,
     combos: {
       delete: new KeyCombo('Delete', "Deletes the selected keyframes.", 'Delete', false),
       delete_layer: new KeyCombo('Delete layer', "Deletes the selected keyframe(s) layer(s).", 'Delete'),
@@ -62,11 +81,14 @@ const keyCombos = {
   },
 }
 
+
 type KeyComboMapSchema = {
   [category: string]: {
     name: string,
     desc: string,
-    scoped?: boolean,
+    scope?: Scope,
+    canBeNothing?: boolean,
+    canIncludeCodes?: boolean,
     combos: {
       [key: string]: KeyCombo
     }
@@ -74,11 +96,28 @@ type KeyComboMapSchema = {
 }
 const stronglyTypedKeyCombo: KeyComboMapSchema = keyCombos
 
+function getScopeListFromCategory(key: string, category: KeyComboMapSchema[string]) {
+  const scope = category.scope ?? Scope.GLOBAL
+  switch (scope) {
+    case Scope.GLOBAL:
+      return ["global"]
+    case Scope.THIS:
+      return [key]
+    case Scope.THIS_AND_GLOBAL:
+      return ["global", key]
+  }
+}
+
 for (const key of Object.keys(keyCombos)) {
   const category = stronglyTypedKeyCombo[key]
-  if (category.scoped) {
-    for (const kb of Object.keys(category.combos)) {
-      category.combos[kb].withScope(key)
+  const scopes = getScopeListFromCategory(key, category)
+  for (const kb of Object.keys(category.combos)) {
+    const combo = category.combos[kb].withScopes(scopes).setScope(key)
+    if (category.canBeNothing !== undefined) {
+      combo.setCanBeNothing(category.canBeNothing)
+    }
+    if (category.canIncludeCodes !== undefined) {
+      combo.setCanIncludeCodes(category.canIncludeCodes)
     }
   }
 }

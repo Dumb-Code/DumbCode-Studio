@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Slider from 'react-input-slider';
-import NumericInput from 'react-numeric-input';
 import Checkbox from "../../../components/Checkbox";
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import CubeInput from "../../../components/CubeInput";
 import CubeRotationInput from "../../../components/CubeRotationInput";
 import Dropup, { DropupItem } from "../../../components/Dropup";
 import HistoryList from "../../../components/HistoryList";
+import NumericInput from "../../../components/NumericInput";
 import Toggle from "../../../components/Toggle";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
@@ -224,7 +224,11 @@ const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation 
                 </div>
                 <div className="flex flex-row mb-2 h-7 col-span-2">
                     <div className=" w-20 h-7">
-                        <NumericInput disabled={singleSelected === null} value={resolution} onChange={e => setResolution(e ?? 0)} min={5} max={50} size={2} mobile={false} className="focus:outline-none focus:ring-gray-800 border-none" />
+                        <NumericInput
+                            value={singleSelected === null ? null : resolution}
+                            onChange={e => setResolution(Math.min(Math.max(e, 5), 50))}
+                            isPositiveInteger
+                        />
                     </div>
                     <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
                         <Slider
@@ -307,14 +311,7 @@ const TitledField = ({ title, lo }: { title: string, lo?: LO<number> }) => {
                 <div className="mb-1 h-7">
                     <NumericInput
                         value={value}
-                        format={val => val === null ? "" : parseFloat(String(val)).toFixed(2)}
-                        onChange={(val: number | null) => {
-                            if (val !== null) {
-                                (val < 0) ? setValue(0) : setValue(val)
-                            }
-                        }}
-                        mobile={false}
-                        className="focus:outline-none focus:ring-gray-800 border-none"
+                        onChange={val => (val < 0) ? setValue(0) : setValue(val)}
                     />
                 </div>
             </div>

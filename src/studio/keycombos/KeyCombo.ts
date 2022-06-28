@@ -4,6 +4,8 @@ import { SavedKeyCombo } from './KeyCombos';
 
 const forbiddenKeys = ["ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight", "ContextMenu"]
 
+export type NeededEventData = { ctrlKey: boolean, shiftKey: boolean, altKey: boolean }
+
 export default class KeyCombo {
 
   public readonly code: LO<string | null>
@@ -20,7 +22,11 @@ export default class KeyCombo {
   private readonly defaultShift: boolean
   private readonly deafultAlt: boolean
 
-  public localScope: string = "global"
+  public scope: string = "global"
+  public validScopes: string[] = ["global"]
+
+  private canBeNothing: boolean = false
+  private canIncludeCodes: boolean = true
 
   constructor(
     public readonly name: string,
@@ -43,11 +49,31 @@ export default class KeyCombo {
     this.displayName = new LO(this.computeDisplayValue())
   }
 
-  withScope(scope: string) {
-    this.localScope = scope
+  setCanBeNothing(canBeNothing: boolean) {
+    this.canBeNothing = canBeNothing
+    this.displayName.value = this.computeDisplayValue()
     return this
   }
 
+  setCanIncludeCodes(canIncludeCodes: boolean) {
+    this.canIncludeCodes = canIncludeCodes
+    return this
+  }
+
+
+  setScope(scope: string) {
+    this.scope = scope
+    return this
+  }
+
+  withScopes(scopes: string[]) {
+    this.validScopes = scopes
+    return this
+  }
+
+  private isNothing() {
+    return !this.ctrl.value && !this.shift.value && !this.alt.value && this.code.value === null
+  }
 
 
   private computeDisplayValue() {
@@ -87,12 +113,19 @@ export default class KeyCombo {
     return null
   }
 
+  isNothingValid() {
+    return this.canBeNothing || !this.isNothing()
+  }
+
 
   isValid() {
-    return this.isKeyValid() && this.isMetaValid() && this.clashedWith.value.length === 0
+    return this.isKeyValid() && this.isMetaValid() && this.isNothingValid() && this.clashedWith.value.length === 0
   }
 
   private isKeyValid() {
+    if (!this.canIncludeCodes) {
+      return this.code.value === null
+    }
     return this.code.value === null || !forbiddenKeys.includes(this.code.value)
   }
 
@@ -120,8 +153,45 @@ export default class KeyCombo {
     return true
   }
 
+  matchesUnknownEvent(event: NeededEventData) {
+    if (!this.isValid()) {
+      return false
+    }
+    if (this.code.value !== null) {
+      return false
+    }
+    if (this.ctrl.value !== event.ctrlKey) {
+      return false
+    }
+    if (this.shift.value !== event.shiftKey) {
+      return false
+    }
+    if (this.alt.value !== event.altKey) {
+      return false
+    }
+
+    return true
+  }
+
+  computePriority() {
+    let priority = 0
+    if (this.ctrl.value) {
+      priority += 1
+    }
+    if (this.shift.value) {
+      priority += 1
+    }
+    if (this.alt.value) {
+      priority += 1
+    }
+    if (this.code.value !== null) {
+      priority += 1
+    }
+    return priority
+  }
+
   sharesScope(other: KeyCombo) {
-    return this.localScope === "global" || other.localScope === "global" || this.localScope === other.localScope
+    return this.validScopes.includes(other.scope) || other.validScopes.includes(this.scope)
   }
 
   //Whether this keycombo "contains" the other keycombo

@@ -1,7 +1,7 @@
 import Slider from 'react-input-slider';
-import NumericInput from "react-numeric-input";
 import CubeInput from "../../../components/CubeInput";
 import CubeRotationInput from "../../../components/CubeRotationInput";
+import NumericInput from '../../../components/NumericInput';
 import Toggle from "../../../components/Toggle";
 import { DCMModel } from "../../../studio/formats/model/DcmModel";
 import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
@@ -51,12 +51,10 @@ const WrappedImageScale = ({ obj, model }: { obj?: LO<number>, model: DCMModel }
                 <div className="h-7">
                     <NumericInput
                         value={value}
-                        onChange={value => setValue(value ?? 1)}
-                        step={0.1}
-                        min={0}
-                        max={100}
-                        onFocus={() => model.undoRedoHandler.startBatchActions()}
-                        onBlur={() => model.undoRedoHandler.endBatchActions(`Reference Image Scale Changed`)}
+                        onChange={value => setValue(Math.max(0.1, Math.min(value, 10)))}
+                        defaultValue={1}
+                        startBatchActions={() => model.undoRedoHandler.startBatchActions()}
+                        endBatchActions={() => model.undoRedoHandler.endBatchActions(`Reference Image Scale Changed`)}
                     />
                 </div>
             </div>
@@ -136,12 +134,9 @@ const WrappedSlider = ({ obj, title, model }:
                     <div className="w-24 h-7">
                         <NumericInput
                             value={value}
-                            onChange={value => setValue(value ?? 100)}
-                            step={1}
-                            min={0}
-                            max={100}
-                            onFocus={onFocus}
-                            onBlur={onBlur}
+                            onChange={value => setValue(Math.max(0, Math.min(value, 100)))}
+                            startBatchActions={onFocus}
+                            endBatchActions={onBlur}
                         />
                     </div>
                     <div className="rounded-r dark:bg-gray-700 bg-gray-300 flex-grow pr-4 pl-2 h-8">
