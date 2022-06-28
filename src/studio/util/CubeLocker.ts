@@ -29,7 +29,16 @@ export default class CubeLocker {
     CubeLocker.reconstructLocker(this.cube, this.type, this.worldMatrix)
   }
 
-  static reconstructLocker(cube: DCMCube, type: LockerType, worldMatrix: Matrix4) {
+  static reconstructLockerFromLocker(locker: CubeLocker) {
+    return CubeLocker.reconstructLocker(locker.cube, locker.type, locker.worldMatrix)
+  }
+
+  static reconstructLockerValues<T extends LockerType>(cube: DCMCube, type: T, worldMatrix: Matrix4):
+    T extends LockerType.POSITION_ROTATION ? { position: [number, number, number], rotation: [number, number, number] } :
+    T extends LockerType.POSITION ? { position: [number, number, number] } :
+    T extends LockerType.ROTATION ? { rotation: [number, number, number] } :
+    T extends LockerType.OFFSET ? { offset: [number, number, number] } : never {
+
     //      parent_world_matrix * local_matrix = world_matrix
     //  =>  local_matrix = 'parent_world_matrix * world_matrix
     const cubeElement = getElementFromCube(cube, type)
@@ -44,21 +53,51 @@ export default class CubeLocker {
     const localMatrix = resultMat.multiply(worldMatrix)
 
     localMatrix.decompose(decomposePos, decomposeRot, decomposeScale)
+    decomposeEuler.setFromQuaternion(decomposeRot, "ZYX")
 
-    if (type === LockerType.POSITION || type === LockerType.POSITION_ROTATION) {
-      cube.position.value = [decomposePos.x, decomposePos.y, decomposePos.z]
+    const position = [decomposePos.x, decomposePos.y, decomposePos.z]
+    const rotation = [decomposeEuler.x * 180 / Math.PI, decomposeEuler.y * 180 / Math.PI, decomposeEuler.z * 180 / Math.PI]
+
+    switch (type) {
+      case LockerType.POSITION_ROTATION:
+        return {
+          position,
+          rotation,
+        } as any
+      case LockerType.POSITION:
+        return {
+          position,
+        } as any
+      case LockerType.ROTATION:
+        return {
+          rotation,
+        } as any
+      case LockerType.OFFSET:
+        return {
+          offset: position,
+        } as any
+    }
+    return {} as any
+  }
+
+  static reconstructLocker<T extends LockerType>(cube: DCMCube, type: T, worldMatrix: Matrix4) {
+    const values = CubeLocker.reconstructLockerValues<T>(cube, type, worldMatrix) as any
+
+    if ((type === LockerType.POSITION || type === LockerType.POSITION_ROTATION)) {
+      cube.position.value = values.position
     }
 
     if (type === LockerType.ROTATION || type === LockerType.POSITION_ROTATION) {
-      decomposeEuler.setFromQuaternion(decomposeRot, "ZYX")
-      cube.rotation.value = [decomposeEuler.x * 180 / Math.PI, decomposeEuler.y * 180 / Math.PI, decomposeEuler.z * 180 / Math.PI]
+      cube.rotation.value = values.rotation
     }
 
     if (type === LockerType.OFFSET) {
-      cube.offset.value = [decomposePos.x, decomposePos.y, decomposePos.z]
+      cube.offset.value = values.offset
     }
   }
 }
+
+
 
 function getElementFromCube(cube: DCMCube, type: LockerType): Object3D {
   switch (type) {
