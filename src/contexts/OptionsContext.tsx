@@ -54,11 +54,11 @@ export const useKeyComboPressed = (handlers: {
       })
 
     const listener = (e: KeyboardEvent) => {
-      if (document.activeElement instanceof HTMLInputElement) {
-        document.activeElement.blur()
-      }
       const found = handlerPairs.find(pair => pair.combo.matches(e))
       if (found !== undefined && found.handler !== undefined) {
+        if (document.activeElement instanceof HTMLInputElement) {
+          document.activeElement.blur()
+        }
         found.handler()
         e.preventDefault()
         e.stopPropagation()
