@@ -3,6 +3,7 @@ import { drawProgressionPointGraph, GraphType } from '../../../views/animator/lo
 import { readFromClipboard, writeToClipboard } from '../../clipboard/Clipboard';
 import { convertClipboardToKeyframe, KeyframeClipboardType, writeKeyframeForClipboard } from '../../clipboard/KeyframeClipboardType';
 import UndoRedoHandler from '../../undoredo/UndoRedoHandler';
+import CubeLocker from '../../util/CubeLocker';
 import { getUndefinedWritable } from '../../util/FileTypes';
 import DcProject from '../project/DcProject';
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
@@ -20,6 +21,7 @@ type RootDataSectionType = {
   data: {
     name: string,
     ikAnchorCubes: readonly string[],
+    lockedCubes: readonly string[],
     keyframe_layers: readonly { layerId: number }[],
     propertiesMode: "local" | "global",
     time: number,
@@ -93,6 +95,7 @@ export default class DcaAnimation {
   readonly zoom = new LO(1, this.onDirty)
 
   readonly ikAnchorCubes = new LO<readonly string[]>([], this.onDirty).applyToSection(this._section, "ikAnchorCubes")
+  readonly lockedCubes = new LO<readonly string[]>([], this.onDirty).applyToSection(this._section, "lockedCubes")
 
   readonly keyframeStartOrDurationChanges = new Set<() => void>()
 
@@ -411,10 +414,10 @@ export class DcaKeyframe {
       }
     })
 
-    this.setupDefinedListeners()
+    this.setupKeyframeListeners()
   }
 
-  private setupDefinedListeners() {
+  private setupKeyframeListeners() {
     let nextDefinedKeyframe: DcaKeyframe | null = null
     let didStartBatch = false
     const preCapturedDefinedModeData = new Map<DCMCube, {
@@ -427,10 +430,18 @@ export class DcaKeyframe {
       rot: readonly [number, number, number],
       cg: readonly [number, number, number],
     }>()
+    const cubeLockers: CubeLocker[] = []
     const onPreModify = () => {
       nextDefinedKeyframe = null
       didStartBatch = false
       preCapturedDefinedModeData.clear()
+      cubeLockers.length = 0
+
+      this.animation.project.model.resetVisuals()
+      this.animation.animateAt(this.startTime.value)
+      this.project.model.identifListToCubes(this.animation.lockedCubes.value).forEach(cube => {
+        cubeLockers.push(new CubeLocker(cube))
+      })
 
       const layer = this.animation.keyframeLayers.value.find(kfl => kfl.layerId === this.layerId.value)
       if (layer === undefined || !layer.definedMode.value) {

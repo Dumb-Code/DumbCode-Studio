@@ -47,6 +47,7 @@ const AnimatorProperties = () => {
 const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaAnimation | null, cubeName: string | undefined, cube: DCMCube | undefined }) => {
     const [rawKfs] = useListenableObjectNullable(animation?.selectedKeyframes)
     const [mode, setMode] = useListenableObjectNullable(animation?.propertiesMode)
+    const [lockedCubes, setLockedCubes] = useListenableObjectNullable(animation?.lockedCubes)
     const keyframes = rawKfs ?? []
     const selectedKf = keyframes.length === 1 ? keyframes[0] : undefined
 
@@ -82,6 +83,28 @@ const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaA
                         setChecked={c => setMode(c ? "global" : "local")}
                     />
                     <p className="text-xs pt-0.5 ml-2 dark:text-gray-400 text-black">{mode === "global" ? "Global" : "Local"}</p>
+                </div>
+            </div>
+            <div
+                className="dark:text-white px-2 mt-2"
+                ref={useTooltipRef<HTMLDivElement>("When locked, a cube does not move with it's parent")}
+            >
+                <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow mb-2">Cube Locked</p>
+                <div className="flex flex-row">
+                    <Toggle
+                        checked={lockedCubes !== undefined && cube !== undefined && lockedCubes.includes(cube.identifier)}
+                        setChecked={c => {
+                            if (lockedCubes === undefined || cube === undefined) {
+                                return
+                            }
+                            if (c) {
+                                setLockedCubes([...lockedCubes, cube.identifier])
+                            } else {
+                                setLockedCubes(lockedCubes.filter(id => id !== cube.identifier))
+                            }
+                        }}
+                    />
+                    <p className="text-xs pt-0.5 ml-2 dark:text-gray-400 text-black">{lockedCubes !== undefined && cube !== undefined ? (lockedCubes.includes(cube.identifier) ? "Locked" : "Unlocked") : ""}</p>
                 </div>
             </div>
             <div className="w-full grid grid-cols-2 px-2 pt-1">
