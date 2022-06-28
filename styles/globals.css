@@ -53,25 +53,34 @@ a {
 }
 
 button {
-  @apply focus: outline-none !important;
+  @apply focus:outline-none !important;
 }
 
 .icon-button {
-  @apply dark: bg-gray-800 bg-gray-200 dark:hover:bg-black hover:bg-gray-100 rounded pr-1 pl-2 py-1 my-0.5 mr-1
+  @apply dark:bg-gray-800 bg-gray-200 dark:hover:bg-black hover:bg-gray-100 rounded pr-1 pl-2 py-1 my-0.5 mr-1
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
 .no-scrollbar::-webkit-scrollbar {
-  display: none;
+  display:none;
 }
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;
+  -ms-overflow-style:none;
   /* IE and Edge */
-  scrollbar-width: none;
+  scrollbar-width:none;
   /* Firefox */
 }
+
+.studio-scrollbar {
+  @apply scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-800
+}
+
+.studio-scrollbar::-webkit-scrollbar-thumb:hover {
+  --scrollbar-thumb: #a855f7;
+}
+
 
 /**
    * This injects Tailwind's utility classes and any utility classes registered
