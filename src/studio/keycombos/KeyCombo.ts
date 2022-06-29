@@ -173,6 +173,26 @@ export default class KeyCombo {
     return true
   }
 
+  isContainedInUnknownEvent(event: NeededEventData) {
+    if (!this.isValid()) {
+      return false
+    }
+    if (this.code.value !== null) {
+      return false
+    }
+    if (this.ctrl.value && !event.ctrlKey) {
+      return false
+    }
+    if (this.shift.value && !event.shiftKey) {
+      return false
+    }
+    if (this.alt.value && !event.altKey) {
+      return false
+    }
+
+    return true
+  }
+
   computePriority() {
     let priority = 0
     if (this.ctrl.value) {

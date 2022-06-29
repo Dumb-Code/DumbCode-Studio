@@ -223,9 +223,9 @@ export class DCMModel implements CubeParent {
 
     let pasted = false
     this.traverseAll(cube => {
-      if (cube.hasBeenPastedNeedsPlacement) {
+      if (cube.pastedWorldMatrix !== undefined) {
         pasted = true
-        if (this.pastedInWorld && cube.pastedWorldMatrix !== undefined && cube.cubeGroup.parent !== null) {
+        if (this.pastedInWorld && cube.cubeGroup.parent !== null) {
           CubeLocker.reconstructLocker(cube, LockerType.POSITION_ROTATION, tempMatrix.fromArray(cube.pastedWorldMatrix))
         }
         cube.hasBeenPastedNeedsPlacement = false

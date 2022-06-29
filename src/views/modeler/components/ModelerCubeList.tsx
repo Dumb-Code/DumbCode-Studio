@@ -4,12 +4,13 @@ import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import HorizontalDivider from '../../../components/HorizontalDivider';
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { useCreatePortal } from '../../../contexts/CreatePortalContext';
-import { useKeyComboPressed } from '../../../contexts/OptionsContext';
+import { useKeyComboPressed, useKeyCombos } from '../../../contexts/OptionsContext';
 import { useStudio } from '../../../contexts/StudioContext';
 import { usePanelValue } from '../../../contexts/StudioPanelsContext';
 import { useTooltipRef } from '../../../contexts/TooltipContext';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
 import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
+import CubeLocker from '../../../studio/util/CubeLocker';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 
@@ -272,7 +273,9 @@ const CubeListItem = ({
             }
             setHasAnimationChildrenForce(null)
 
-            cube.model.undoRedoHandler.startBatchActions()
+            if (!cube.model.undoRedoHandler.isBatching()) {
+                cube.model.undoRedoHandler.startBatchActions()
+            }
             cube.model.startPaste()
             cubeDragged.cubes.forEach(dragged => {
                 dragged.parent.deleteChild(dragged)
@@ -372,7 +375,9 @@ const CubeListItem = ({
                     mouseDraggedElementRef.current.style.transition = ""
                 }
                 if (dragData !== null) {
-                    cube.model.undoRedoHandler.startBatchActions()
+                    if (!cube.model.undoRedoHandler.isBatching()) {
+                        cube.model.undoRedoHandler.startBatchActions()
+                    }
                     cube.model.startPaste()
                     dragData.cubes.forEach(cube => {
                         cube.parent.deleteChild(cube)
@@ -445,6 +450,8 @@ const CubeListItem = ({
         }
     }, [beginDrag, finishDrag, cube, dragData?.cubes, mousePositionRef, updateDrag])
 
+    const keyCombos = useKeyCombos().modeler.combos
+
     return (
 
         //We need to basically hide this when the first frame is placed down, however we also need to know it's width and height
@@ -461,6 +468,29 @@ const CubeListItem = ({
                 onDragStart={useCallback((e: DragEvent) => {
                     //set the drag image to be empty
                     e.dataTransfer.setDragImage(emptySpan, 0, 0)
+
+                    cube.model.undoRedoHandler.startBatchActions()
+
+                    const cubes = cube.selected.value ? cube.model.identifListToCubes(cube.model.selectedCubeManager.selected.value) : [cube]
+                    if (!keyCombos.drag_cube_and_children.isContainedInUnknownEvent(e)) {
+                        cube.model.resetVisuals()
+                        const lockers = cubes.flatMap(cube => {
+                            const ret = cube.children.value.map(child => new CubeLocker(child))
+                            cube.children.value.forEach(child => {
+                                child.parent.deleteChild(child)
+                                cube.parent.addChild(child)
+                            })
+
+                            return ret
+                        })
+                        lockers.forEach(locker => locker.reconstruct())
+                    }
+                    if (!keyCombos.drag_cubes_in_place.isContainedInUnknownEvent(e)) {
+                        cubes.forEach(cube => {
+                            cube.pastedWorldMatrix = cube.cubeGroup.matrixWorld.toArray()
+                        })
+                        cube.model.pastedInWorld = true
+                    }
 
                     if (cube.selected.value) {
                         //We only want to drag cubes who don't share a common parent
