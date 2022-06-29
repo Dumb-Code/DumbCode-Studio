@@ -85,6 +85,10 @@ export default class CubePointTracker extends EventDispatcher {
   }
 
   onMouseUp() {
+    //If we click on a cube, but not a point, ignore the click
+    if (this.selectedCubeManager.mouseOverMesh !== null && this.intersected === null) {
+      return
+    }
     if (this.enabled) {
       let intersected = this.intersected
       const { cubeToPointTo, callback } = this
