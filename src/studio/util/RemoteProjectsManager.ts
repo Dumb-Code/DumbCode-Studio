@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { RemoteRepo, remoteRepoEqual } from '../formats/project/DcRemoteRepos';
 import { useLocalStorage } from './LocalStorageHook';
 
@@ -39,7 +39,7 @@ export const removeRecentGithubRemoteProject = (project: RemoteRepo) => {
 
 export const useRecentGithubRemoteProjects = (): [RemoteRepo[], (setUsed: RemoteRepo) => void, () => void] => {
   const [item, setItem] = useLocalStorage(localStorageKey)
-  const items: RemoteRepo[] = tryParseArray(item) ?? []
+  const items: RemoteRepo[] = useMemo(() => tryParseArray(item) ?? [], [item])
 
   const save = useCallback(() => {
     setItem(JSON.stringify(items))
@@ -49,7 +49,7 @@ export const useRecentGithubRemoteProjects = (): [RemoteRepo[], (setUsed: Remote
     const filtered = items.filter(i => i !== repo)
     filtered.unshift(repo)
     setItem(JSON.stringify(filtered))
-  }, [save, items, setItem])
+  }, [items, setItem])
 
   return [
     items,
