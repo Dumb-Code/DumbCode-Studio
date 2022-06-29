@@ -76,11 +76,11 @@ const StudioContainer = ({ githubClientId }: { githubClientId: string }) => {
 };
 
 export const useWhenAction = (action: "create_new_model" | "last_remote_repo_project", fn: () => void) => {
-  if (typeof window === "undefined") {
-    return
-  }
   const handled = useRef(false);
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
     const urlAction = new URLSearchParams(window.location.search).get("action");
     if (action === urlAction && !handled.current) {
       fn()

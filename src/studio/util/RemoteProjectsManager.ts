@@ -43,13 +43,13 @@ export const useRecentGithubRemoteProjects = (): [RemoteRepo[], (setUsed: Remote
 
   const save = useCallback(() => {
     setItem(JSON.stringify(items))
-  }, [items])
+  }, [items, setItem])
 
   const setUsed = useCallback((repo: RemoteRepo) => {
     const filtered = items.filter(i => i !== repo)
     filtered.unshift(repo)
     setItem(JSON.stringify(filtered))
-  }, [save])
+  }, [save, items, setItem])
 
   return [
     items,

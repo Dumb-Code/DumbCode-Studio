@@ -105,7 +105,7 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
         repos.filter(r => r.owner === selectedRepo.owner && r.repo === selectedRepo.repo && r.branch === selectedRepo.branch)
             .forEach(r => r.lastUsedProjectUUID = entry.uuid)
         saveOnChange()
-    }, [selectedRepo, saveOnChange])
+    }, [selectedRepo, saveOnChange, repos])
 
     useEffect(() => {
         if (loadElementIfPossible && zippedProjects !== false) {
