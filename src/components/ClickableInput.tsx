@@ -14,6 +14,25 @@ type Props = PropsWithChildren<{
 
 const ClickableInput = (props: Props) => {
   const ref = useTooltipRef<HTMLInputElement>(props.tooltip !== undefined ? () => props.tooltip : null)
+
+  const onClick = () => {
+    if (FileSystemsAccessApi) {
+      ref.current?.click()
+      return
+    }
+    window.showOpenFilePicker({
+      multiple: props.multiple ?? false,
+      types: [{
+        description: props.description,
+        accept: {
+          "custom/dumbcode": props.accept
+        }
+      }]
+    }).then(res => {
+      res.forEach(handle => props.onFile(createReadableFileExtended(handle)))
+    }).catch(() => { })
+  }
+
   return (
     <>
       <input
@@ -35,37 +54,10 @@ const ClickableInput = (props: Props) => {
         type="file"
         multiple={props.multiple ?? false}
       />
-      <button className={props.className} onClick={() => ref.current?.click()}>
+      <button disabled={props.disabled} className={props.className} onClick={onClick}>
         {props.children}
       </button>
     </>
   )
 }
-
-const ExtendedFilesClickableInput = (props: Props) => {
-  const ref = useTooltipRef<HTMLButtonElement>(props.tooltip !== undefined ? () => props.tooltip : null)
-
-  const onClick = () => {
-    window.showOpenFilePicker({
-      multiple: props.multiple ?? false,
-      types: [{
-        description: props.description,
-        accept: {
-          "custom/dumbcode": props.accept
-        }
-      }]
-    }).then(res => {
-      res.forEach(handle => props.onFile(createReadableFileExtended(handle)))
-    }).catch(() => { })
-  }
-  return (
-    <button ref={ref} disabled={props.disabled} className={props.className} onClick={onClick}>
-      {props.children}
-    </button>
-  )
-}
-
-
-
-export default (FileSystemsAccessApi ? ExtendedFilesClickableInput : ClickableInput)
-// export default ClickableInput
+export default ClickableInput

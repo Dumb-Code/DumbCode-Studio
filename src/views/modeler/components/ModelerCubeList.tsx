@@ -13,8 +13,7 @@ import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 
-const emptySpan = document.createElement("span")
-
+const emptySpan = (typeof window !== "undefined" && document.createElement("span")) as HTMLSpanElement
 const createCube = (model: DCMModel) => {
     let map = model.cubeMap
     let name = "newcube"

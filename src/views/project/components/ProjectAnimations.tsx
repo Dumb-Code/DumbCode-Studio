@@ -50,6 +50,7 @@ const ProjectAnimations = () => {
     )
 }
 
+
 const AnimationEntries = ({ project }: { project: DcProject }) => {
     const [animations, setAnimations] = useListenableObject(project.animationTabs.animations)
     const [tabs, setTabs] = useListenableObject(project.animationTabs.tabs)

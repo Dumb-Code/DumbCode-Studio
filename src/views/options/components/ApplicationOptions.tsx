@@ -4,7 +4,7 @@ import { useInstall } from "../../../contexts/PWAInstallButtonContext"
 
 const ApplicationOptions = () => {
   const isChrome = useMemo(() => "chrome" in window, [])
-  const isEdge = useMemo(() => isChrome && navigator.userAgent.indexOf("Edg") != -1, [])
+  const isEdge = useMemo(() => isChrome && navigator.userAgent.indexOf("Edg") != -1, [isChrome])
   const { installState } = useInstall()
 
   const appEdit = isEdge ? "edge://apps" : "chrome://apps"

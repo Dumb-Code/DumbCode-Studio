@@ -53,7 +53,7 @@ const PWAInstallButtonContext = ({ children }: { children: React.ReactNode }) =>
   const [isInstalling, setIsInstalling] = useState(false)
   const [canInstall, setCanInstall] = useState(false)
 
-  const updateIsInstalled = useCallback(() => window.matchMedia('(display-mode: standalone)').matches, [])
+  const updateIsInstalled = useCallback(() => typeof window !== "undefined" && window.matchMedia('(display-mode: standalone)').matches, [])
   const [isInstalled, setIsInstalled] = useState(updateIsInstalled)
 
   useEffect(() => {

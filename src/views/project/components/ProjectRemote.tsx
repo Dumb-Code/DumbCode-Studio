@@ -16,11 +16,11 @@ import DcRemoteRepo, { DcRemoteRepoContentGetterCounter, loadDcRemoteRepo, Remot
 import GithubCommiter from "../../../studio/git/GithubCommiter";
 import { useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import { useGithubAccessToken } from "../../../studio/util/LocalStorageHook";
+import WrapNoSSR from "../../../studio/util/NoSSR";
 import { removeRecentGithubRemoteProject, useRecentGithubRemoteProjects } from "../../../studio/util/RemoteProjectsManager";
 
 const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElement> }) => {
     const { remoteSettingsOpen, setRemoteSettingsOpen } = useProjectPageContext()
-    const [githubToken] = useGithubAccessToken()
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-100 flex flex-col overflow-hidden">
@@ -29,15 +29,18 @@ const ProjectRemote = ({ divHeightRef }: { divHeightRef: RefObject<HTMLDivElemen
                 <MinimizeButton active={remoteSettingsOpen} toggle={() => setRemoteSettingsOpen(!remoteSettingsOpen)} />
             </div>
             <div ref={divHeightRef} className={"h-0 flex flex-row overflow-y-hidden"}>
-
-                {githubToken === null ?
-                    <ProjectRemoteRequiresAuthentication /> :
-                    <ProjectRemoteIsAuthenticated githubToken={githubToken} />
-                }
+                <ProjectRemoteOpenedArea />
             </div>
         </div>
     )
 }
+
+const ProjectRemoteOpenedArea = WrapNoSSR(() => {
+    const [githubToken] = useGithubAccessToken()
+    return githubToken === null ?
+        <ProjectRemoteRequiresAuthentication /> :
+        <ProjectRemoteIsAuthenticated githubToken={githubToken} />
+})
 
 const ProjectRemoteRequiresAuthentication = () => {
     return (

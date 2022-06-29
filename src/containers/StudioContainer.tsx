@@ -30,7 +30,7 @@ declare global {
 }
 
 //Fix an issue with FIK
-if (typeof window !== undefined) {
+if (typeof window !== "undefined") {
   //@ts-expect-error
   window['FIK'] = require('@aminere/fullik')
   window['THREE'] = require('three')
@@ -75,12 +75,14 @@ const StudioContainer = ({ githubClientId }: { githubClientId: string }) => {
   );
 };
 
+
 const StudioApp = () => {
 
   const [activeTab, setActiveTab] = useState(Tabs[0])
   const [settingsOpen, setSettingsOpen] = useState(false)
   const { hasProject, getSelectedProject, addProject } = useStudio()
   const { darkMode } = useOptions()
+
 
   useEffect(() => {
     const handler = async (e: LaunchParams) => {
@@ -106,7 +108,7 @@ const StudioApp = () => {
     if (window.launchQueue !== undefined) {
       window.launchQueue.setConsumer(handler)
     }
-  }, [])
+  }, [addProject])
 
   const tabChanged = ((tab: Tab) => {
     if (tab !== Tabs[0] && !hasProject) {

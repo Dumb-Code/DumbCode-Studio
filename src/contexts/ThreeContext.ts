@@ -27,6 +27,9 @@ export type ThreeJsContext = {
 }
 
 export const createThreeContext: () => ThreeJsContext = () => {
+  if (typeof window === "undefined") {
+    return null as any
+  }
   console.log(`Creating ThreeJs (${REVISION}) Context`)
   //Set up the renderer
   const renderer = new WebGLRenderer({ antialias: true, alpha: true });

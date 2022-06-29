@@ -118,7 +118,7 @@ type DraggableContextType = {
 }
 const DraggableContext = createContext<DraggableContextType | null>(null)
 
-const emptySpan = document.createElement("span")
+const emptySpan = (typeof window !== "undefined" && document.createElement("span")) as HTMLSpanElement
 
 const TextureLists = ({ project }: { project: DcProject }) => {
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)

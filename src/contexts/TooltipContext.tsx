@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, ReactNode, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { createContext, PropsWithChildren, ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { useCreatePortal } from "./CreatePortalContext"
 import { useOptions } from "./OptionsContext"
 
@@ -39,7 +39,7 @@ const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const containerRef = useRef<HTMLDivElement>(null)
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const current = containerRef.current
     if (current === null || tooltipData === null) {
       return

@@ -4,6 +4,7 @@ import { Fragment } from "react"
 import { useGithubClientId } from "../contexts/GithubApplicationContext"
 import { useFetchGithubUserDetails } from "../studio/util/FetchHooks"
 import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
+import WrapNoSSR from "../studio/util/NoSSR"
 import { SVGOpenLink } from "./Icons"
 import LinkGithubButton from "./LinkGithubButton"
 
@@ -69,4 +70,5 @@ const SignedInToGithub = ({ accessToken, removeToken }: { accessToken: string, r
 }
 
 
-export default GithubAccountButton 
+export default WrapNoSSR(GithubAccountButton)
+

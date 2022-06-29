@@ -4,10 +4,14 @@ import KeyCombo from "../studio/keycombos/KeyCombo";
 import { KeyComboCategory, KeyComboKey, KeyComboMap, loadOrCreateKeyCombos, SavedKeyComboMap, updateClashes } from "../studio/keycombos/KeyCombos";
 import { useStudio } from "./StudioContext";
 
+type ThemeSetting = "light" | "dark" | "auto";
+
 const Context = createContext<OptionsContext | null>(null)
 export type OptionsContext = {
   darkMode: boolean
-  setDarkMode: (val: boolean) => void
+  isSystemDark: boolean,
+  theme: ThemeSetting,
+  setTheme: (val: ThemeSetting) => void
 
   compactMode: boolean
   setCompactMode: (val: boolean) => void
@@ -17,7 +21,7 @@ export type OptionsContext = {
 }
 
 type SavedOptions = {
-  readonly darkMode: boolean,
+  readonly theme: ThemeSetting,
   readonly compactMode: boolean,
   readonly keyCombos: SavedKeyComboMap
 }
@@ -80,6 +84,9 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
   const { scene, setGridColor } = useStudio()
 
   const loadedOptions: SavedOptions | null = useMemo(() => {
+    if (typeof window === "undefined") {
+      return null
+    }
     const json = localStorage.getItem("studio_options")
     if (json === null) {
       return null
@@ -87,13 +94,17 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
     return JSON.parse(json) as SavedOptions
   }, [])
 
-  const [darkMode, setDarkMode] = useState(loadedOptions?.darkMode ?? true)
+
+  const [theme, setTheme] = useState<ThemeSetting>("auto") //We want the theme to default "auto" for SSG. This is overriden below.
+  const [isSystemDark, setIsSystemDark] = useState(true)  //We want the dark theme to default true for SSG. This is overriden below.
   const [compactMode, setCompactMode] = useState(loadedOptions?.compactMode ?? false)
   const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [loadedOptions?.keyCombos])
 
+  const darkMode = useMemo(() => theme === "auto" ? isSystemDark : theme === "dark", [theme, isSystemDark])
+
   const saveOptions = useCallback(() => {
     const data: SavedOptions = {
-      darkMode: darkMode,
+      theme: theme,
       compactMode: compactMode,
       keyCombos: Object.keys(keyCombos).reduce((obj, c) => {
         const category = c as KeyComboCategory
@@ -108,30 +119,48 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       }, {} as SavedKeyComboMap)
     }
     localStorage.setItem("studio_options", JSON.stringify(data))
-  }, [darkMode, compactMode, keyCombos])
+  }, [compactMode, keyCombos, theme])
+  useEffect(() => saveOptions(), [saveOptions])
 
 
-  scene.background = new Color(darkMode ? 0x363636 : 0xF3F4F6)
-
-  const wrapThenSave = (fn: (val: boolean) => void) => {
-    return (val: boolean) => {
-      fn(val)
-      saveOptions()
+  useEffect(() => {
+    if (window.matchMedia !== undefined) {
+      const query = window.matchMedia('(prefers-color-scheme: dark)')
+      setIsSystemDark(query.matches)
+      const listener = (event: MediaQueryListEvent) => {
+        setIsSystemDark(event.matches)
+      }
+      query.addEventListener("change", listener)
+      return () => query.removeEventListener("change", listener)
     }
+
+    setTheme(loadedOptions?.theme ?? "auto")
+
+  }, [loadedOptions?.theme])
+
+
+  //When rendered SSR, scene is undefined
+  if (scene !== undefined) {
+    scene.background = new Color(darkMode ? 0x363636 : 0xF3F4F6)
   }
+
 
   const keyCombosChanged = useCallback(() => {
     updateClashes(keyCombos)
     saveOptions()
   }, [keyCombos, saveOptions])
-  if (darkMode) {
-    setGridColor(0x121212, 0x1c1c1c, 0x292929)
-  } else {
-    setGridColor(0x737373, 0x525252, 0x404040)
-  }
 
+  //When rendered SSR, setGridColor is undefined
+  if (setGridColor) {
+    if (darkMode) {
+      setGridColor(0x121212, 0x1c1c1c, 0x292929)
+    } else {
+      setGridColor(0x737373, 0x525252, 0x404040)
+    }
+
+  }
   return (
-    <Context.Provider value={{ darkMode, setDarkMode: wrapThenSave(setDarkMode), compactMode, setCompactMode: wrapThenSave(setCompactMode), keyCombos, keyCombosChanged }}>
+    <Context.Provider value={{ darkMode, isSystemDark, theme, setTheme, compactMode, setCompactMode, keyCombos, keyCombosChanged }}>
       {children}
     </Context.Provider>
   )

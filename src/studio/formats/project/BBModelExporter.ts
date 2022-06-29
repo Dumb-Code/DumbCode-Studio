@@ -316,7 +316,7 @@ const convertTextures = (manager: TextureManager): TextureElement[] => {
   return groups.map((group, index) => convertSingleTexture(manager, group, index))
 }
 
-const conversionCanvas = document.createElement("canvas")
+const conversionCanvas = (typeof window !== "undefined" && document.createElement("canvas")) as HTMLCanvasElement
 
 const convertSingleTexture = (manager: TextureManager, group: TextureGroup, index: number): TextureElement => {
   const textures = group.textures.value.map(tex => manager.findTexture(tex))

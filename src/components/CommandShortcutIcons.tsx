@@ -27,7 +27,7 @@ export const CommandShortcutIcon = ({ command, description, icon: Icon }: { comm
         if (root !== null) {
             root.runCommand(command)
         }
-    }, [root])
+    }, [root, command])
     return (
         <div className="has-tooltip">
             <button className="dark:bg-gray-700 dark:hover:bg-gray-600 bg-gray-300 hover:bg-gray-400 rounded p-1.5 mb-0.5 dark:text-gray-300 text-black" onClick={onClick}>
@@ -47,7 +47,7 @@ export const CommandShortcutIconWithSubCommands = ({ command, description, icon:
         if (root !== null) {
             root.runCommand(command)
         }
-    }, [root])
+    }, [root, command])
 
     const [subCommandsVisible, setSubVisible] = useState(false);
 
