@@ -113,7 +113,7 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
                 {
                     loadedRepo == null ?
                         <p className="text-xs dark:text-white text-center w-full mt-4">No Remote Repository Selected. Add or pick one to the left of this section.</p>
-                    :
+                        :
                         <div className="flex flex-col overflow-y-scroll pr-2 h-full studio-scrollbar">
                             {loadedRepo !== null && zippedProjects !== false &&
                                 zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} onRemoteProjectChanged={onRemoteProjectChanged} />)
@@ -131,12 +131,15 @@ const RepositoryEntry = ({ repo, selected, setRemote, githubToken }: { repo: Rem
     const [imgSrc, setImgSrc] = useState<string | null>(null)
 
     useEffect(() => {
-        new Octokit({
-            auth: githubToken
-        }).users.getByUsername({
-            username: repo.owner
-        }).then(response => setImgSrc(response.data.avatar_url as string)) //Why is response.data.avatar_url unknown?
-
+        async function runRequests() {
+            const response = await new Octokit({
+                auth: githubToken
+            }).users.getByUsername({
+                username: repo.owner
+            })
+            setImgSrc(response.data.avatar_url as string)  //Why is response.data.avatar_url unknown?
+        }
+        runRequests().catch(() => { })
     }, [githubToken, repo.owner])
     return (
         <div className="py-1 px-2">
@@ -148,7 +151,7 @@ const RepositoryEntry = ({ repo, selected, setRemote, githubToken }: { repo: Rem
                     <SVGTrash className="w-4" />
                 </div>
                 <div className="flex-grow w-full flex flex-row items-center">
-                    <div className="w-8 h-8 m-1 flex justify-center rounded bg-black p-px">{imgSrc !== null && <Image className="rounded" width={32} height={32} src={imgSrc} alt="Avatar" />}</div>
+                    <div className="w-8 h-8 m-1 flex justify-center rounded bg-black p-px">{<Image className="rounded" width={32} height={32} src={imgSrc ?? '/icons/account_unknown.png'} alt="Avatar" />}</div>
                     <div className="flex-grow">
                         <div className="text-xs truncate">{repo.owner} /</div>
                         <div className="flex-grow flex flex-row w-full">

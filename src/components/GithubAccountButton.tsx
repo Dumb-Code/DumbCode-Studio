@@ -24,10 +24,10 @@ const SignedInToGithub = ({ accessToken, removeToken }: { accessToken: string, r
 
   return (
     <div>
-      <Menu as="div" className="relative inline-block text-right w-60 z-50">
+      <Menu as="div" className="relative text-right z-50 flex">
         <Menu.Button>
-          <div className="text-right mt-[1px]">
-            {result !== null && <Image className="rounded-full" width={30} height={30} src={result.avatar_url} alt="Profile" />}
+          <div className="text-right flex">
+            {<Image className="rounded-full" width={30} height={30} src={result?.avatar_url ?? '/icons/account_unknown.png'} alt="Profile" />}
           </div>
         </Menu.Button>
         <Transition

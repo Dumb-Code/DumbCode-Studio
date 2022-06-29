@@ -1,3 +1,4 @@
+import { RestEndpointMethodTypes } from '@octokit/rest';
 import { useEffect, useState } from 'react';
 
 const responseCache = new Map<string, FetchResponse>()
@@ -49,7 +50,7 @@ export const useFetchRequest = (url: string, token: string | null, shouldRun = t
   return result
 }
 
-export const useFetchGithubUserDetails = (token: string | null) => {
-  const val = useFetchRequest("https://api.github.com/user", token, token !== null)
-  return val.result ?? null
+export const useFetchGithubUserDetails = (token: string | null): RestEndpointMethodTypes['users']['getAuthenticated']['response']['data'] | null => {
+  const val = useFetchRequest("https://api.github.com/user", token, token !== null).result
+  return val ?? null
 }

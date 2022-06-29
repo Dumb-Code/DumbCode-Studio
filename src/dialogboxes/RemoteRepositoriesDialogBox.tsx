@@ -83,7 +83,7 @@ const RepositoryEntry = ({ value, token, setRepo }: { value: PagedFetchType, tok
   return (
     <div onClick={() => setRepo(value.owner.login, value.name, branch)} className="group border-t border-b border-black flex flex-row p-2 items-center hover:bg-gray-500">
       <div className="relative w-[40px]  rounded overflow-hidden">
-        <Image className="w-full h-full" src={value.owner.avatar_url ?? ''} alt="Profile" width="100%" height="100%" layout="responsive" objectFit="contain" />
+        <Image className="w-full h-full" src={value.owner.avatar_url ?? '/icons/account_unknown.png'} alt="Profile" width="100%" height="100%" layout="responsive" objectFit="contain" />
       </div>
       <div className="pl-3 flex-grow group-hover:text-gray-300 dark:group-hover:text-gray-800">
         {value.owner.login} / {value.name}
@@ -165,7 +165,7 @@ const GithubAccount = ({ token }: { token: string }) => {
   return (
     <div className="flex flex-row items-center">
       <div className="relative w-[25px] rounded overflow-hidden">
-        <Image className="w-full h-full" src={result?.avatar_url ?? ''} alt="Profile" width="100%" height="100%" layout="responsive" objectFit="contain" />
+        <Image className="w-full h-full" src={result?.avatar_url ?? '/icons/account_unknown.png'} alt="Profile" width="100%" height="100%" layout="responsive" objectFit="contain" />
       </div>
       <div className="pl-2">{result?.name ?? 'Loading...'}</div>
     </div>
