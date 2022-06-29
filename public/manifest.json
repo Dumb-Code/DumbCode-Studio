@@ -53,5 +53,31 @@
       ],
       "launch_type": "single-client"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Create New Model",
+      "short_name": "New Model",
+      "description": "Creates a new model",
+      "url": "/?action=create_new_model",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Open Last Remote Repository",
+      "short_name": "Remote Repository",
+      "description": "Opens the last used remote repository",
+      "url": "/?action=last_remote_repo_project",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

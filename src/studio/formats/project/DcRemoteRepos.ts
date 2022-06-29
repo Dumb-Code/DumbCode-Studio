@@ -116,6 +116,7 @@ export type RemoteRepo = {
   owner: string,
   repo: string,
   branch: string,
+  lastUsedProjectUUID?: string
 }
 
 export const remoteRepoEqual = (repo1: RemoteRepo, repo2: RemoteRepo) =>

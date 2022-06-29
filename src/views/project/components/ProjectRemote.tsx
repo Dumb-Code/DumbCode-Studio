@@ -5,6 +5,7 @@ import GithubAccountButton from "../../../components/GithubAccountButton";
 import { SVGCross, SvgEdit, SVGTrash } from "../../../components/Icons";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { ButtonWithTooltip } from "../../../components/Tooltips";
+import { useWhenAction } from "../../../containers/StudioContainer";
 import { useProjectPageContext } from "../../../contexts/ProjectPageContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";
@@ -56,11 +57,12 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
     const { selectedRepo: loadedRepo, setSelectedRepo: loadRepo } = useProjectPageContext()
 
     const dialogBoxes = useDialogBoxes()
-    const repos = useRecentGithubRemoteProjects()
+    const [repos, setLastUsed, saveOnChange] = useRecentGithubRemoteProjects()
     const [selectedRepo, setSelectedRepo] = useState<RemoteRepo | null>(loadedRepo?.repo ?? null)
     const [projects, setProjects] = useListenableObjectNullable(loadedRepo?.projects, [loadedRepo])
+    const [loadElementIfPossible, setLoadElementIfPossible] = useState(-1)
 
-    const { projects: openedProjects } = useStudio()
+    const { projects: openedProjects, selectProject } = useStudio()
 
     const zippedProjects = useMemo(() => projects !== undefined && projects.map(project => {
         return {
@@ -82,6 +84,37 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
         writeStudioRemote(commiter, newProjects)
     }, [projects, loadedRepo, setProjects])
 
+    useWhenAction("last_remote_repo_project", async () => {
+        if (repos.length === 0) {
+            return
+        }
+        const repo = repos[0]
+        setSelectedRepo(repo)
+        const project = await loadDcRemoteRepo(githubToken, repo)
+        loadRepo(project)
+        setLoadElementIfPossible(project.projects.value.findIndex(p => p.uuid === repo.lastUsedProjectUUID))
+
+    })
+
+    const onSelected = useCallback((entry: RemoteProjectEntry) => {
+        if (selectedRepo === null) {
+            return
+        }
+        selectedRepo.lastUsedProjectUUID = entry.uuid
+
+        repos.filter(r => r.owner === selectedRepo.owner && r.repo === selectedRepo.repo && r.branch === selectedRepo.branch)
+            .forEach(r => r.lastUsedProjectUUID = entry.uuid)
+        saveOnChange()
+    }, [selectedRepo, saveOnChange])
+
+    useEffect(() => {
+        if (loadElementIfPossible && zippedProjects !== false) {
+            setLoadElementIfPossible(-1)
+        }
+    }, [loadElementIfPossible, zippedProjects])
+
+    console.log(loadElementIfPossible)
+
     return (
         <>
             <div className="w-4/12 flex flex-col">
@@ -92,14 +125,15 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
                     </button>
                 </div>
                 <div className="dark:border-r border-black flex flex-col overflow-y-scroll flex-grow studio-scrollbar">
-                    {repos.map((p, i) =>
+                    {repos.map(p =>
                         <RepositoryEntry
-                            key={i}
+                            key={p.owner + "/" + p.repo + "#" + p.branch}
                             repo={p}
                             githubToken={githubToken}
                             selected={selectedRepo !== null && remoteRepoEqual(p, selectedRepo)}
                             // contentLoaded={selectedRemote !== null && remoteRepoEqual(selectedRemote.repo, p)}
                             setRemote={() => {
+                                setLastUsed(p)
                                 loadDcRemoteRepo(githubToken, p).then(p => loadRepo(p))
                                 setSelectedRepo(p)
                             }}
@@ -119,7 +153,17 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
                         :
                         <div className="flex flex-col overflow-y-scroll pr-2 h-full studio-scrollbar">
                             {loadedRepo !== null && zippedProjects !== false &&
-                                zippedProjects.map((project, i) => <ProjectEntry key={i} project={project.project} repo={loadedRepo} linked={project.studio} onRemoteProjectChanged={onRemoteProjectChanged} />)
+                                zippedProjects.map((project, i) =>
+                                    <ProjectEntry
+                                        key={i}
+                                        immediateLoad={i === loadElementIfPossible}
+                                        onSelected={() => onSelected(project.project)}
+                                        project={project.project}
+                                        repo={loadedRepo}
+                                        linked={project.studio}
+                                        onRemoteProjectChanged={onRemoteProjectChanged}
+                                    />
+                                )
                             }
                         </div>
                 }
@@ -168,8 +212,9 @@ const RepositoryEntry = ({ repo, selected, setRemote, githubToken }: { repo: Rem
     )
 }
 
-const ProjectEntry = ({ project, repo, onRemoteProjectChanged, linked }: {
+const ProjectEntry = ({ project, repo, onRemoteProjectChanged, linked, onSelected, immediateLoad }: {
     project: RemoteProjectEntry, repo: DcRemoteRepo, linked: DcProject | null,
+    immediateLoad: boolean, onSelected: () => void,
     onRemoteProjectChanged: (commiter: GithubCommiter, oldEntry: RemoteProjectEntry | undefined, newEntry: RemoteProjectEntry | undefined) => void,
 }) => {
     const { selectProject, addProject } = useStudio()
@@ -182,7 +227,8 @@ const ProjectEntry = ({ project, repo, onRemoteProjectChanged, linked }: {
 
     const fullyLinked = useRef(false)
 
-    const setProject = () => {
+    const setProject = useCallback(() => {
+        onSelected()
         if (linked !== null) {
             selectProject(linked)
             return
@@ -190,7 +236,13 @@ const ProjectEntry = ({ project, repo, onRemoteProjectChanged, linked }: {
         const ref = counterRef.current = repo.createCounter(countTotalRequests(project))
         loadRemoteProject(ref, project).then(p => p !== null && addProject(p))
         setStatus(0)
-    }
+    }, [project, repo, linked, onSelected, selectProject, addProject])
+
+    useEffect(() => {
+        if (immediateLoad) {
+            setProject()
+        }
+    }, [immediateLoad, setProject])
 
     useEffect(() => {
         if (linked === null && counterRef.current !== null) {

@@ -39,4 +39,12 @@ export const useAnimationHook = (active: boolean, callback: (percent: number) =>
         currentActive.current = active
         return () => clear()
     })
+    return (active: boolean) => {
+        currentActive.current = active
+        currentPercentage.current = active ? 1 : 0
+        clearInterval(timeoutRef.current)
+        timeoutRef.current = undefined
+        totalmsRun.current = 0
+        callback(active ? 1 : 0)
+    }
 }

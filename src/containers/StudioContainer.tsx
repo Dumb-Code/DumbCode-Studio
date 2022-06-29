@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import GithubAccountButton from "../components/GithubAccountButton";
 import { SVGSettings } from "../components/Icons";
 import CreatePortalContext from "../contexts/CreatePortalContext";
@@ -10,7 +10,7 @@ import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
 import StudioPanelsContextProvider from "../contexts/StudioPanelsContext";
 import TooltipContextProvider from "../contexts/TooltipContext";
 import DialogBoxes from "../dialogboxes/DialogBoxes";
-import { createProject } from "../studio/formats/project/DcProject";
+import { createProject, newProject } from "../studio/formats/project/DcProject";
 import { createReadableFileExtended } from "../studio/util/FileTypes";
 import Animator from "../views/animator/Animator";
 import Modeler from "../views/modeler/Modeler";
@@ -75,6 +75,19 @@ const StudioContainer = ({ githubClientId }: { githubClientId: string }) => {
   );
 };
 
+export const useWhenAction = (action: "create_new_model" | "last_remote_repo_project", fn: () => void) => {
+  if (typeof window === "undefined") {
+    return
+  }
+  const handled = useRef(false);
+  useEffect(() => {
+    const urlAction = new URLSearchParams(window.location.search).get("action");
+    if (action === urlAction && !handled.current) {
+      fn()
+      handled.current = true
+    }
+  }, [action, fn])
+}
 
 const StudioApp = () => {
 
@@ -83,10 +96,13 @@ const StudioApp = () => {
   const { hasProject, getSelectedProject, addProject } = useStudio()
   const { darkMode } = useOptions()
 
+  useWhenAction("create_new_model", () => {
+    addProject(newProject())
+    setActiveTab(Tabs[1])
+  })
 
   useEffect(() => {
     const handler = async (e: LaunchParams) => {
-      console.log(e)
       const projects = await Promise.all(
         e.files
           .filter(file => !file.name.endsWith(".dca"))

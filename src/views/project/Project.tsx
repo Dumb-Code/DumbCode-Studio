@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { useWhenAction } from '../../containers/StudioContainer'
 import { useProjectPageContext } from '../../contexts/ProjectPageContext'
 import { useAnimationHook } from '../../studio/util/AnimationHooks'
 import ProjectAnimations from './components/ProjectAnimations'
@@ -12,15 +13,14 @@ function easeInOutCubic(x: number): number {
 
 const Project = () => {
 
-    const { remoteSettingsOpen } = useProjectPageContext()
+    const { remoteSettingsOpen, setRemoteSettingsOpen } = useProjectPageContext()
 
     const gridRef = useRef<HTMLDivElement>(null)
     const divHeightRef = useRef<HTMLDivElement>(null)
 
-    useAnimationHook(remoteSettingsOpen, percentRaw => {
+    const override = useAnimationHook(remoteSettingsOpen, percentRaw => {
         //Apply easing function to percentRaw
         const percent = easeInOutCubic(percentRaw)
-
         if (gridRef.current !== null) {
             gridRef.current.style.gridTemplateRows = `auto ${44 + (237 - 44) * percent}px`
         }
@@ -28,6 +28,11 @@ const Project = () => {
         if (divHeightRef.current !== null) {
             divHeightRef.current.style.height = `${0 + (12 - 0) * percent}rem`
         }
+    })
+
+    useWhenAction("last_remote_repo_project", () => {
+        setRemoteSettingsOpen(true)
+        override(true)
     })
 
 
