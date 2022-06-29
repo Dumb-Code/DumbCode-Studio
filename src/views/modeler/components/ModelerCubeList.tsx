@@ -28,6 +28,18 @@ const createCube = (model: DCMModel) => {
     }
     return new DCMCube(name, [1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0], false, [0, 0, 0], [], model)
 }
+const moveSiblingsUp = (cubes: readonly DCMCube[]) => {
+    const lockers = cubes.flatMap(cube => {
+        const ret = cube.children.value.map(child => new CubeLocker(child))
+        cube.children.value.forEach(child => {
+            child.parent.deleteChild(child)
+            cube.parent.addChild(child)
+        })
+
+        return ret
+    })
+    lockers.forEach(locker => locker.reconstruct())
+}
 const ModelerCubeList = () => {
 
     const { getSelectedProject } = useStudio()
@@ -67,7 +79,27 @@ const ModelerCubeList = () => {
 
     //Deletes all the selected cubes, but keeps their children. Moves the children to be the siblings of this cube.
     const deleteCubesKeepChildren = useCallback(() => {
-        alert("Not Added Yet.")
+        project.undoRedoHandler.startBatchActions()
+        project.model.undoRedoHandler.startBatchActions()
+        const cubes = project.model.identifListToCubes(project.selectedCubeManager.selected.value)
+        let amount = 0;
+
+        project.model.resetVisuals()
+        moveSiblingsUp(cubes)
+        cubes.forEach(cube => {
+            cube.traverse(c => {
+                c.selected.value = false
+                c.mouseHover.value = false
+                amount++
+            })
+
+            cube.parent.deleteChild(cube)
+            cube.fullyDelete()
+        })
+
+        project.undoRedoHandler.endBatchActions("_WEAK", HistoryActionTypes.Edit, "chainFirst")
+        project.model.undoRedoHandler.endBatchActions(`${amount} Cube${amount === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove, "chainLast")
+        model.undoRedoHandler.endBatchActions("Cube Deleted", HistoryActionTypes.Remove)
     }, [])
 
     //Deletes all the selected cubes, and all their children.
@@ -512,7 +544,7 @@ const CubeListItem = ({
                         beginDrag("takeover")
                     }
                     e.stopPropagation()
-                }, [cube, setDragData, beginDrag])}
+                }, [cube, setDragData, beginDrag, keyCombos.drag_cube_and_children, keyCombos.drag_cubes_in_place])}
 
                 //Called when the element is stopped dragging
                 onDragEnd={useCallback((e: DragEvent) => {
