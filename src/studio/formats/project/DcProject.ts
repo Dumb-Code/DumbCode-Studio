@@ -1,6 +1,7 @@
 import { Group, MeshBasicMaterial, MeshLambertMaterial, Texture } from "three";
 import { v4 as uuidv4 } from "uuid";
 import CubePointTracker from "../../../views/modeler/logic/CubePointTracker";
+import { createAnimatorCommandRoot } from "../../command/commands/animator/AnimatorCommands";
 import { createModelingCommandRoot } from "../../command/commands/modeling/ModelingCommands";
 import { getUndefinedWritable, ReadableFile } from '../../util/FileTypes';
 import { LO } from '../../util/ListenableObject';
@@ -48,6 +49,7 @@ export default class DcProject {
   previousThreeTexture: Texture | null
 
   readonly commandRoot: CommandRoot
+  readonly animatorCommandRoot: CommandRoot
 
   readonly cubePointTracker: CubePointTracker
   readonly modelerGumball: ModelerGumball
@@ -80,6 +82,9 @@ export default class DcProject {
 
     this.commandRoot = createModelingCommandRoot(this)
     this.commandRoot.addHelpCommand()
+
+    this.animatorCommandRoot = createAnimatorCommandRoot(this)
+    this.animatorCommandRoot.addHelpCommand()
 
     this.selectedCubeManager.selected.applyToSection(this._section, "selected_cubes")
   }

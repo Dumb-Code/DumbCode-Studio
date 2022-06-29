@@ -1,3 +1,4 @@
+import DcaAnimation from '../formats/animations/DcaAnimation';
 import { DCMCube, DCMModel } from './../formats/model/DcmModel';
 import { ArgumentHandler } from './Argument';
 import { CommandBuilder } from './CommandBuilder';
@@ -108,6 +109,7 @@ export class Command<
 export type CommandContext<M extends Record<string, any>> = {
   readonly getModel: () => DCMModel,
   readonly getCubes: (allowEmpty?: boolean) => DCMCube[],
+  readonly getSelectedAnimation: () => DcaAnimation | null,
   readonly getArgument: <S extends keyof M>(argument: S) => M[S],
   readonly hasFlag: (flag: string) => boolean,
   readonly logToConsole: (text: string) => void

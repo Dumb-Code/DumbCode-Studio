@@ -150,6 +150,7 @@ export class CommandRoot {
       this.commandBuilder.value.commitTyped()
       return
     }
+
     const split = splitStr(inputText)
     if (split !== null) {
       const builder = this.commands
@@ -165,12 +166,10 @@ export class CommandRoot {
       }
     }
 
-
     this.runCommand(this._findCommandAndArgs(split), false)
-
   }
 
-  runCommand(data: CommandParsedData | CommandParseError | string, dummy: boolean) {
+  runCommand(data: CommandParsedData | CommandParseError | string, dummy = false) {
     this.project.model.undoRedoHandler.startBatchActions()
     let commandForOutput: string | null = null
     try {
@@ -218,6 +217,7 @@ export class CommandRoot {
           }
           return cubes
         },
+        getSelectedAnimation: () => this.project.animationTabs.selectedAnimation.value,
         logToConsole: message => !dummy && this.logMessage(message),
         dummy,
       }

@@ -1,11 +1,11 @@
 import { useEffect, useMemo } from "react"
+import CommandInputBar from "../../components/CommandInputBar"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
 import UndoRedoHandler from "../../studio/undoredo/UndoRedoHandler"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
-import ModelerCommandInput from "./components/ModelerCommandInput"
 import ModelerGumballPropertiesBar from "./components/ModelerGumballPropertiesBar"
 import ModelerShortcuts from "./components/ModelerShortcuts"
 import ModelerSidebar from "./components/ModelerSidebar"
@@ -56,7 +56,7 @@ const Modeler = () => {
             }}
         >
             {/* The boreders are to visulize where everything is. */}
-            <div className="grid-in-command border dark:border-black border-white"><ModelerCommandInput command={project.commandRoot} /></div>
+            <div className="grid-in-command border dark:border-black border-white"><CommandInputBar command={project.commandRoot} /></div>
             <div className="grid-in-sidebar min-h-0 border dark:border-black border-white"><ModelerSidebar /></div>
             <div className="grid-in-shortcuts border dark:border-black border-white"><ModelerShortcuts /></div>
             <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>

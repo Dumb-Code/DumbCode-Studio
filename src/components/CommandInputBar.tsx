@@ -1,11 +1,11 @@
 import { MouseEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { SVGTerminal } from "../../../components/Icons";
-import { useStudio } from "../../../contexts/StudioContext";
-import { Command } from "../../../studio/command/Command";
-import { CommandRoot, ParsedArgument } from "../../../studio/command/CommandRoot";
-import { useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { useStudio } from "../contexts/StudioContext";
+import { Command } from "../studio/command/Command";
+import { CommandRoot, ParsedArgument } from "../studio/command/CommandRoot";
+import { useListenableObjectNullable } from "../studio/util/ListenableObject";
+import { SVGTerminal } from "./Icons";
 
-const ModelerCommandInput = ({ command }: { command?: CommandRoot }) => {
+const CommandInputBar = ({ command }: { command?: CommandRoot }) => {
   const { getSelectedProject, onFrameListeners } = useStudio()
   const project = getSelectedProject()
 
@@ -212,4 +212,4 @@ const CommandArguments = ({ activeCommand, currentArgumentMap, parsedArguments }
   )
 }
 
-export default ModelerCommandInput;
+export default CommandInputBar;

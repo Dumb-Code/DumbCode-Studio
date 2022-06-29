@@ -4,12 +4,10 @@ import { drawProgressionPointGraph, GraphType } from '../../../views/animator/lo
 import { readFromClipboard, writeToClipboard } from '../../clipboard/Clipboard';
 import { convertClipboardToKeyframe, KeyframeClipboardType, writeKeyframeForClipboard } from '../../clipboard/KeyframeClipboardType';
 import UndoRedoHandler from '../../undoredo/UndoRedoHandler';
-import CubeLocker from '../../util/CubeLocker';
 import { getUndefinedWritable } from '../../util/FileTypes';
 import DcProject from '../project/DcProject';
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
 import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
-import { LockerType } from './../../util/CubeLocker';
 import { LO, LOMap } from './../../util/ListenableObject';
 import { DCMCube } from './../model/DcmModel';
 
@@ -437,34 +435,31 @@ export class DcaKeyframe {
       rot: readonly [number, number, number],
       cg: readonly [number, number, number],
     }>()
-    const cubeLockers: {
-      locker: CubeLocker,
-      position: readonly [number, number, number],
-      rotation: readonly [number, number, number],
-    }[] = []
-    let isRecursing = false
+    // const cubeLockers: {
+    //   locker: CubeLocker,
+    //   position: readonly [number, number, number],
+    //   rotation: readonly [number, number, number],
+    // }[] = []
+    // let isRecursing = false
     const onPreModify = () => {
-      if (isRecursing) {
-        return
-      }
       nextDefinedKeyframe = null
       didStartBatch = false
       preCapturedDefinedModeData.clear()
-      cubeLockers.length = 0
+      // cubeLockers.length = 0
 
-      this.animation.project.model.resetVisuals()
-      this.animation.animateAt(this.startTime.value)
-      this.animation.project.model.updateMatrixWorld(true)
-      this.project.model.identifListToCubes(this.animation.lockedCubes.value).forEach(cube => {
-        const pos = tempVec.copy(cube.cubeGroup.position)
-        const quat = tempQuat.copy(cube.cubeGroup.quaternion)
-        tempEuler.setFromQuaternion(quat, "ZYX")
-        cubeLockers.push({
-          locker: new CubeLocker(cube),
-          position: [pos.x, pos.y, pos.z],
-          rotation: [tempEuler.x * 180 / Math.PI, tempEuler.y * 180 / Math.PI, tempEuler.z * 180 / Math.PI],
-        })
-      })
+      // this.animation.project.model.resetVisuals()
+      // this.animation.animateAt(this.startTime.value)
+      // this.animation.project.model.updateMatrixWorld(true)
+      // this.project.model.identifListToCubes(this.animation.lockedCubes.value).forEach(cube => {
+      //   const pos = tempVec.copy(cube.cubeGroup.position)
+      //   const quat = tempQuat.copy(cube.cubeGroup.quaternion)
+      //   tempEuler.setFromQuaternion(quat, "ZYX")
+      //   cubeLockers.push({
+      //     locker: new CubeLocker(cube),
+      //     position: [pos.x, pos.y, pos.z],
+      //     rotation: [tempEuler.x * 180 / Math.PI, tempEuler.y * 180 / Math.PI, tempEuler.z * 180 / Math.PI],
+      //   })
+      // })
 
       if (this.animation.undoRedoHandler.isBatching()) {
         didStartBatch = true
@@ -514,25 +509,25 @@ export class DcaKeyframe {
     }
 
     const onPostModify = () => {
-      if (isRecursing) {
-        return
-      }
-      this.animation.project.model.resetVisuals()
-      this.animation.animateAt(this.startTime.value + this.duration.value, true)
-      this.animation.project.model.updateMatrixWorld(true)
-      isRecursing = true
-      cubeLockers.forEach(({ locker, position, rotation }) => {
-        const values = CubeLocker.reconstructLockerValues(locker.cube, LockerType.POSITION_ROTATION, locker.worldMatrix)
-        const posDelta = [values.position[0] - position[0], values.position[1] - position[1], values.position[2] - position[2]] as const
-        const rotDelta = [values.rotation[0] - rotation[0], values.rotation[1] - rotation[1], values.rotation[2] - rotation[2]] as const
-        if (posDelta[0] !== 0 || posDelta[1] !== 0 || posDelta[2] !== 0) {
-          this.position.set(locker.cube.name.value, posDelta)
-        }
-        if (rotDelta[0] !== 0 || rotDelta[1] !== 0 || rotDelta[2] !== 0) {
-          this.rotation.set(locker.cube.name.value, rotDelta)
-        }
-      })
-      isRecursing = false
+      // if (isRecursing) {
+      //   return
+      // }
+      // this.animation.project.model.resetVisuals()
+      // this.animation.animateAt(this.startTime.value + this.duration.value, true)
+      // this.animation.project.model.updateMatrixWorld(true)
+      // isRecursing = true
+      // cubeLockers.forEach(({ locker, position, rotation }) => {
+      //   const values = CubeLocker.reconstructLockerValues(locker.cube, LockerType.POSITION_ROTATION, locker.worldMatrix)
+      //   const posDelta = [values.position[0] - position[0], values.position[1] - position[1], values.position[2] - position[2]] as const
+      //   const rotDelta = [values.rotation[0] - rotation[0], values.rotation[1] - rotation[1], values.rotation[2] - rotation[2]] as const
+      //   if (posDelta[0] !== 0 || posDelta[1] !== 0 || posDelta[2] !== 0) {
+      //     this.position.set(locker.cube.name.value, posDelta)
+      //   }
+      //   if (rotDelta[0] !== 0 || rotDelta[1] !== 0 || rotDelta[2] !== 0) {
+      //     this.rotation.set(locker.cube.name.value, rotDelta)
+      //   }
+      // })
+      // isRecursing = false
 
       if (nextDefinedKeyframe !== null) {
         nextDefinedKeyframe.captureEndData(postCapturedDefinedModeData)
