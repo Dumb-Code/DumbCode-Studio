@@ -113,8 +113,6 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
         }
     }, [loadElementIfPossible, zippedProjects])
 
-    console.log(loadElementIfPossible)
-
     return (
         <>
             <div className="w-4/12 flex flex-col">
