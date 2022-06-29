@@ -53,11 +53,5 @@
       ],
       "launch_type": "single-client"
     }
-  ],
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "http://localhost:3000/manifest.json"
-    }
   ]
 }
