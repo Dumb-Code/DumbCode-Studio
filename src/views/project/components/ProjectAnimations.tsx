@@ -4,9 +4,9 @@ import { SVGCross, SVGDownload, SVGPlus, SVGSave, SVGUpload } from "../../../com
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
-import { loadUnknownAnimation, writeDCAAnimation } from "../../../studio/formats/animations/DCALoader"
+import { writeDCAAnimation } from "../../../studio/formats/animations/DCALoader"
 import DcProject, { getProjectName } from "../../../studio/formats/project/DcProject"
-import { downloadBlob, FileSystemsAccessApi, ReadableFile, readFileArrayBuffer } from "../../../studio/util/FileTypes"
+import { downloadBlob, FileSystemsAccessApi, ReadableFile } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
@@ -19,15 +19,7 @@ const ProjectAnimations = () => {
 
     const uploadFile = (file: ReadableFile) => {
         const project = getSelectedProject()
-        readFileArrayBuffer(file)
-            .then(buff => loadUnknownAnimation(project, file.name.substring(0, file.name.lastIndexOf(".")), buff))
-            .then(animation => {
-                if (!animation.isSkeleton.value) {
-                    animation.saveableFile.value = true
-                    animation.animationWritableFile = file.asWritable()
-                }
-                addAnimation(animation)
-            })
+        project.loadAnimation(file)
     }
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(animationExtensions, uploadFile)
 

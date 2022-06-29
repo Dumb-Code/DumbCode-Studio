@@ -1,5 +1,6 @@
 import JSZip, { JSZipObject } from "jszip";
 import { SerializedUndoRedoHandler } from "../../undoredo/UndoRedoHandler";
+import { WritableFile } from "../../util/FileTypes";
 import { ReferenceImage } from "../../util/ReferenceImageHandler";
 import { imgSourceToElement, writeImgToBase64 } from "../../util/Utils";
 import { loadUnknownAnimation, writeDCAAnimation } from "../animations/DCALoader";
@@ -15,11 +16,14 @@ type ModelDataJson = {
   modelHistory: SerializedUndoRedoHandler
 }
 
-export const loadDcProj = async (name: string, buffer: ArrayBuffer) => {
+export const loadDcProj = async (name: string, buffer: ArrayBuffer, writeable: WritableFile) => {
   const zip = await JSZip.loadAsync(buffer)
 
   const model = await loadDcProjModel(zip)
   const project = new DcProject(name, model)
+
+  project.projectWritableFile = writeable
+  project.projectSaveType.value = "project"
 
   const awaiters: Promise<void>[] = []
 

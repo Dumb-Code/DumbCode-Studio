@@ -1,14 +1,17 @@
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import GithubAccountButton from "../components/GithubAccountButton";
 import { SVGSettings } from "../components/Icons";
 import CreatePortalContext from "../contexts/CreatePortalContext";
 import GithubApplicationContext from "../contexts/GithubApplicationContext";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
 import ProjectPageContextProvider from "../contexts/ProjectPageContext";
+import PWAInstallButtonContext from "../contexts/PWAInstallButtonContext";
 import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
 import StudioPanelsContextProvider from "../contexts/StudioPanelsContext";
 import TooltipContextProvider from "../contexts/TooltipContext";
 import DialogBoxes from "../dialogboxes/DialogBoxes";
+import { createProject } from "../studio/formats/project/DcProject";
+import { createReadableFileExtended } from "../studio/util/FileTypes";
 import Animator from "../views/animator/Animator";
 import Modeler from "../views/modeler/Modeler";
 import Options from "../views/options/Options";
@@ -16,6 +19,15 @@ import Project from "../views/project/Project";
 import TextureMapper from "../views/texturemapper/Texturemapper";
 import Texturer from "../views/texturer/Texturer";
 
+declare global {
+  interface Window { readonly launchQueue?: LaunchQueue; }
+  interface LaunchQueue {
+    setConsumer(consumer: (params: LaunchParams) => void): void;
+  }
+  interface LaunchParams {
+    readonly files: FileSystemFileHandle[];
+  }
+}
 
 //Fix an issue with FIK
 if (typeof window !== undefined) {
@@ -41,23 +53,25 @@ const Tabs: Tab[] = [
 
 const StudioContainer = ({ githubClientId }: { githubClientId: string }) => {
   return (
-    <GithubApplicationContext githubClientId={githubClientId} >
-      <StudioContextProvider>
-        <StudioPanelsContextProvider>
-          <OptionsContextProvider>
-            <ProjectPageContextProvider>
-              <CreatePortalContext>
-                <TooltipContextProvider>
-                  <DialogBoxes>
-                    <StudioApp />
-                  </DialogBoxes>
-                </TooltipContextProvider>
-              </CreatePortalContext>
-            </ProjectPageContextProvider>
-          </OptionsContextProvider>
-        </StudioPanelsContextProvider>
-      </StudioContextProvider>
-    </GithubApplicationContext>
+    <PWAInstallButtonContext>
+      <GithubApplicationContext githubClientId={githubClientId} >
+        <StudioContextProvider>
+          <StudioPanelsContextProvider>
+            <OptionsContextProvider>
+              <ProjectPageContextProvider>
+                <CreatePortalContext>
+                  <TooltipContextProvider>
+                    <DialogBoxes>
+                      <StudioApp />
+                    </DialogBoxes>
+                  </TooltipContextProvider>
+                </CreatePortalContext>
+              </ProjectPageContextProvider>
+            </OptionsContextProvider>
+          </StudioPanelsContextProvider>
+        </StudioContextProvider>
+      </GithubApplicationContext>
+    </PWAInstallButtonContext>
   );
 };
 
@@ -65,8 +79,34 @@ const StudioApp = () => {
 
   const [activeTab, setActiveTab] = useState(Tabs[0])
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const { hasProject, getSelectedProject } = useStudio()
+  const { hasProject, getSelectedProject, addProject } = useStudio()
   const { darkMode } = useOptions()
+
+  useEffect(() => {
+    const handler = async (e: LaunchParams) => {
+      console.log(e)
+      const projects = await Promise.all(
+        e.files
+          .filter(file => !file.name.endsWith(".dca"))
+          .map(file => createProject(createReadableFileExtended(file)).then(p => { addProject(p); return p }))
+      )
+      //We need to load the animations to the project. We can just choose the first one, as if there are multiple
+      //It's impossible to know which one to load to.
+      if (projects.length === 0) {
+        return
+      }
+      const project = projects[0]
+
+      e.files.filter(file => file.name.endsWith(".dca"))
+        .forEach(file => {
+          project.loadAnimation(createReadableFileExtended(file))
+        })
+
+    }
+    if (window.launchQueue !== undefined) {
+      window.launchQueue.setConsumer(handler)
+    }
+  }, [])
 
   const tabChanged = ((tab: Tab) => {
     if (tab !== Tabs[0] && !hasProject) {

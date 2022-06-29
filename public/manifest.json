@@ -28,10 +28,36 @@
       "type": "image/png"
     },
     {
-      "src": "maskable.png",
+      "src": "/icons/maskable.png",
       "sizes": "1024x1024",
       "type": "image/x-icon",
       "purpose": "maskable"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": {
+        "application/zip": [
+          ".dcproj",
+          ".dcm",
+          ".dca"
+        ]
+      },
+      "icons": [
+        {
+          "src": "icon-256x256.png",
+          "sizes": "256x256",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "http://localhost:3000/manifest.json"
     }
   ]
 }

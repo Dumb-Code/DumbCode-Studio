@@ -11,7 +11,7 @@ export type ReadableFile = {
 }
 
 export type WritableFile = {
-  write: (name: string, blob: Blob | PromiseLike<Blob>) => Promise<any>
+  write: (name: string, blob: Blob | PromiseLike<Blob>) => Promise<string>
 }
 
 // const WritableFileRefreshLoop
@@ -55,7 +55,7 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
 
       //saveName should never by null, but if it is then test.
       file.write(saveName ?? name, blob)
-      return saveName
+      return saveName ?? name
     }
   }
 }

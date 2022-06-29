@@ -71,17 +71,27 @@ const ModelEntries = () => {
 }
 
 const ModelEntry = ({ project, selected, changeModel, removeProject }: { project: DcProject, selected: boolean, changeModel: () => void, removeProject: () => void }) => {
-    const [isModelDirty] = useListenableObject(project.model.needsSaving)
-    const [isSaveable] = useListenableObject(project.saveableFile)
+    const [isProjectDirty, setIsProjectDirty] = useListenableObject(project.projectNeedsSaving)
+    const [isModelDirty, setIsModelDirty] = useListenableObject(project.model.needsSaving)
+    const [saveType, setSaveType] = useListenableObject(project.projectSaveType)
 
     const dialogBoxes = useDialogBoxes()
 
-    const saveModel = async () => {
+    const saveModel = async (type = saveType) => {
         try {
-            const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeModel(project.model))
-            project.name.value = getProjectName(name)
-            project.saveableFile.value = true
-            project.model.needsSaving.value = false
+            if (type === "model") {
+                const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeModel(project.model))
+                project.name.value = getProjectName(name)
+                setSaveType(type)
+                setIsModelDirty(false)
+            } else if (type === "project") {
+                const name = await project.projectWritableFile.write(project.name.value + ".dcproj", await writeDcProj(project))
+                project.name.value = getProjectName(name)
+                setSaveType(type)
+                setIsProjectDirty(false)
+                setIsModelDirty(false)
+            }
+
         } catch (e) {
             console.error(e)
             //Ignore e
@@ -115,17 +125,12 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
         defaultWritable.write(project.name.value + ".obj", new Blob([value]))
     }
 
-    const exportToDcProj = async () => {
-        const blob = await writeDcProj(project)
-        defaultWritable.write(project.name.value + ".dcproj", blob)
-    }
-
     const exportToBBModel = async () => {
         const blob = exportAsBBModel(project)
         defaultWritable.write(project.name.value + ".bbmodel", blob)
     }
 
-    const linkedToFile = isSaveable && FileSystemsAccessApi
+    const linkedToFile = saveType !== "unknown" && FileSystemsAccessApi
 
     const isRemote = project.remoteLink !== undefined
 
@@ -139,7 +144,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                     {isRemote &&
                         <ButtonWithTooltip
                             onClick={e => { dialogBoxes.setDialogBox(() => <PushToGithubDialogBox project={project} />) }}
-                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1" + (isModelDirty ? " text-red-600 " : "")}
+                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1" + (isProjectDirty ? " text-red-600 " : "")}
                             tooltip="Push to Github"
                         >
                             <SVGPushGithub className="h-4 w-4 mr-1" />
@@ -148,7 +153,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                     {linkedToFile &&
                         <ButtonWithTooltip
                             onClick={e => { saveModel(); e.stopPropagation() }}
-                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isModelDirty ? " text-red-600 " : "")}
+                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + ((saveType === "project" ? isProjectDirty : isModelDirty) ? " text-red-600 " : "")}
                             tooltip="Save to file"
                         >
                             <SVGSave className="h-4 w-4 mr-1" />
@@ -161,10 +166,10 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         menuId={SAVE_AS_CONTEXT}
                         name={project.name.value}
                     >
-                        <DownloadOption exportFunction={saveModel} extension="dcm" />
+                        <DownloadOption exportFunction={() => saveModel("model")} extension="dcm" />
                         <DownloadOption exportFunction={exportToObj} extension="obj" />
                         <DownloadOption exportFunction={exportToGLTF} extension="gltf" />
-                        <DownloadOption exportFunction={exportToDcProj} extension="dcproj" />
+                        <DownloadOption exportFunction={() => saveModel("project")} extension="dcproj" />
                         <DownloadOption exportFunction={exportToBBModel} extension="bbmodel" />
                     </DownloadAsButton>
                     <ButtonWithTooltip

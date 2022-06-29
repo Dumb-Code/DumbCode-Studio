@@ -3,9 +3,10 @@ import { v4 as uuidv4 } from "uuid";
 import CubePointTracker from "../../../views/modeler/logic/CubePointTracker";
 import { createAnimatorCommandRoot } from "../../command/commands/animator/AnimatorCommands";
 import { createModelingCommandRoot } from "../../command/commands/modeling/ModelingCommands";
-import { getUndefinedWritable, ReadableFile } from '../../util/FileTypes';
+import { getUndefinedWritable, ReadableFile, readFileArrayBuffer } from '../../util/FileTypes';
 import { LO } from '../../util/ListenableObject';
 import ReferenceImageHandler from "../../util/ReferenceImageHandler";
+import { loadUnknownAnimation } from "../animations/DCALoader";
 import DcaTabs from '../animations/DcaTabs';
 import { loadModelUnknown } from "../model/DCMLoader";
 import { DCMModel } from '../model/DcmModel';
@@ -41,8 +42,12 @@ export default class DcProject {
   readonly overlayGroup = new Group()
 
   readonly model: DCMModel
-  readonly saveableFile = new LO(false)
+  readonly projectSaveType = new LO<"unknown" | "project" | "model">("unknown")
   modelWritableFile = getUndefinedWritable("Model File", ".dcm")
+
+  readonly projectNeedsSaving = new LO(false)
+  projectWritableFile = getUndefinedWritable("Project File", ".dcproj")
+
 
   readonly textureManager: TextureManager
   readonly animationTabs: DcaTabs
@@ -73,7 +78,7 @@ export default class DcProject {
     this.textureManager = new TextureManager(this)
     this.cubePointTracker = new CubePointTracker(this.selectedCubeManager, this.model, this.selectionGroup)
     this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.model, this.group, this.cubePointTracker)
-    this.animationTabs = new DcaTabs()
+    this.animationTabs = new DcaTabs(this)
     this.cubeHighlighter = new CubeSelectedHighlighter(this.overlayGroup, this.model)
 
     this.group.add(this.selectionGroup)
@@ -87,6 +92,8 @@ export default class DcProject {
     this.animatorCommandRoot.addHelpCommand()
 
     this.selectedCubeManager.selected.applyToSection(this._section, "selected_cubes")
+
+    this.model.needsSaving.addListener(v => this.projectNeedsSaving.value ||= v)
   }
 
   get selectedCubeManager() {
@@ -112,6 +119,18 @@ export default class DcProject {
     this.model.materials.selected.needsUpdate = true
     this.model.materials.highlight.needsUpdate = true
     this.model.materials.export.needsUpdate = true
+  }
+
+  loadAnimation(file: ReadableFile) {
+    readFileArrayBuffer(file)
+      .then(buff => loadUnknownAnimation(this, file.name.substring(0, file.name.lastIndexOf(".")), buff))
+      .then(animation => {
+        if (!animation.isSkeleton.value) {
+          animation.saveableFile.value = true
+          animation.animationWritableFile = file.asWritable()
+        }
+        this.animationTabs.addAnimation(animation)
+      })
   }
 
   /**
@@ -147,13 +166,13 @@ export const newProject = () => {
 export const createProject = async (read: ReadableFile) => {
   const file = await read.asFile()
   if (file.name.endsWith(".dcproj")) {
-    return await loadDcProj(getProjectName(file.name), await file.arrayBuffer())
+    return await loadDcProj(getProjectName(file.name), await file.arrayBuffer(), read.asWritable())
   }
   const model = await loadModelUnknown(file.arrayBuffer(), file.name)
   const project = new DcProject(getProjectName(file.name), model)
 
-  project.saveableFile.value = true
   project.modelWritableFile = read.asWritable()
+  project.projectSaveType.value = "model"
 
   return project
 }

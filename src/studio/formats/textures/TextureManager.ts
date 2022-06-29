@@ -36,6 +36,7 @@ export default class TextureManager {
   addTexture(name?: string, element?: HTMLImageElement) {
     const texture = new Texture(this.project.model, name, element)
     texture.element.addListener(() => this.refresh())
+    texture.needsSaving.addListener(v => this.project.projectNeedsSaving.value ||= v)
     this.textures.value = this.textures.value.concat([texture])
     this.defaultGroup.textures.value = [texture.identifier].concat(this.defaultGroup.textures.value)
     this.groups.value.forEach(g => g.unselectedTextures.value = g.unselectedTextures.value.concat(texture.identifier))
@@ -52,6 +53,7 @@ export default class TextureManager {
 
   addGroup(...groups: TextureGroup[]) {
     groups.forEach(group => {
+      group.needsSaving.addListener(v => this.project.projectNeedsSaving.value ||= v)
       group.textures.addListener(() => this.refresh())
       group.unselectedTextures.value = this.defaultGroup.textures.value
     })
@@ -110,6 +112,7 @@ export default class TextureManager {
 }
 
 export class TextureGroup {
+  readonly needsSaving = new LO(false)
   readonly identifier: string;
   readonly name: LO<string>
   readonly folderName: LO<string>
@@ -124,6 +127,13 @@ export class TextureGroup {
     this.folderName = new LO(name.toLowerCase())
 
     this.name.addListener(value => this.folderName.value = value.toLowerCase())
+
+    const onDirty = () => this.needsSaving.value = true
+
+    this.name.addListener(onDirty)
+    this.folderName.addListener(onDirty)
+    this.textures.addListener(onDirty)
+    this.unselectedTextures.addListener(onDirty)
   }
 
   toggleTexture(texture: Texture, isInGroup: boolean, after?: string) {
@@ -147,6 +157,8 @@ export class Texture {
   readonly identifier: string
   readonly name: LO<string>
   readonly element: LO<HTMLImageElement>
+
+  readonly needsSaving = new LO(false)
 
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
@@ -193,6 +205,10 @@ export class Texture {
       this.ctx.drawImage(this.element.value, 0, 0, this.width, this.height)
     }
     this.hidden = new LO<boolean>(false)
+
+    const onDirty = () => this.needsSaving.value = true
+    this.name.addListener(onDirty)
+
   }
 
   onCanvasChanged(refresh: boolean) {
