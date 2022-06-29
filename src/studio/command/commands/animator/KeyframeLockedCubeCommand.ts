@@ -79,7 +79,7 @@ const KeyframeLockedCubeCommand = (addCommand: (command: Command) => void) => {
         })
       }
 
-      const steps = Math.round(keyframe.duration.value / 0.01)
+      const steps = Math.round(keyframe.duration.value / 0.05)
       for (let i = 0; i < steps; i++) {
         insertEndKeyframe(i / steps, (i + 1) / steps)
       }
