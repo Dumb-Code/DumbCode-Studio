@@ -1,11 +1,6 @@
-import { Matrix4, Matrix4Tuple } from 'three';
+import { Matrix4 } from 'three';
+import { NumArray } from '../util/NumArray';
 import { DCMCube, DCMModel } from './../formats/model/DcmModel';
-type NumArray<V extends 2 | 3 | 16> =
-  V extends 2 ? readonly [number, number] :
-  V extends 3 ? readonly [number, number, number] :
-  V extends 16 ? Readonly<Matrix4Tuple> :
-  never
-
 const matrix = new Matrix4()
 
 export type CubeClipboardType = {
