@@ -84,6 +84,9 @@ export const loadDCAAnimationOLD = (project: DcProject, name: string, buffer: St
 
   repairKeyframes(project.model, version, keyframes, false)
 
+  //We need to update the keyframe layer listener for it to ensure that all layers defined by the keyframes exist
+  animation.keyframeLayers.value = []
+
   animation.keyframes.value = keyframes
 
   animation.undoRedoHandler.ignoreActions = false

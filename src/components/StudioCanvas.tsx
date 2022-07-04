@@ -1,20 +1,19 @@
-import { useEffect, useRef } from "react";
+import { HTMLAttributes, useEffect, useRef } from "react";
 import { useStudio } from "../contexts/StudioContext";
 import { useSelectedCubeHighlighter } from "../studio/util/CubeSelectedHighlighter";
 import { useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
-const StudioCanvas = () => {
-  const { renderer, setSize, onMouseUp } = useStudio()
-  useSelectedCubeManager()
-  useSelectedCubeHighlighter()
+export const RawCanvas = ({ autoChangeSize = true, ...props }: HTMLAttributes<HTMLDivElement> & { autoChangeSize?: boolean }) => {
+  const { renderer, setSize } = useStudio()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (ref.current === null) {
       throw new Error("Error: Ref is not set");
     }
+
     const observer = new ResizeObserver(() => {
-      if (ref.current !== null) {
+      if (ref.current !== null && autoChangeSize) {
         setSize(ref.current.clientWidth, ref.current.clientHeight)
       }
     })
@@ -28,14 +27,27 @@ const StudioCanvas = () => {
       observer.disconnect()
       currentRef.removeChild(renderer.domElement)
     }
-  }, [renderer.domElement, setSize])
+  }, [renderer.domElement, setSize, autoChangeSize])
 
-  const startPosition = useRef({ x: 0, y: 0 })
-  const movedAmount = useRef({ x: 0, y: 0 })
 
   return (
     <div
       ref={ref}
+      className="studio-canvas-container rounded-sm bg-gray-800 h-full"
+      {...props}
+    />
+  )
+}
+
+const StudioCanvas = () => {
+  const { onMouseUp } = useStudio()
+  useSelectedCubeManager()
+  useSelectedCubeHighlighter()
+
+  const startPosition = useRef({ x: 0, y: 0 })
+  const movedAmount = useRef({ x: 0, y: 0 })
+  return (
+    <RawCanvas
       onPointerDown={e => {
         movedAmount.current = { x: 0, y: 0 }
         startPosition.current = { x: e.clientX, y: e.clientY }
@@ -54,7 +66,6 @@ const StudioCanvas = () => {
 
       }}
 
-      className="studio-canvas-container rounded-sm bg-gray-800 h-full"
     />
   )
 }

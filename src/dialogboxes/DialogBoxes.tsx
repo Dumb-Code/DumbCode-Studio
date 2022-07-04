@@ -37,12 +37,17 @@ const DialogBoxes = ({ children }: PropsWithChildren<{}>) => {
     return () => { currentSetter = null }
   }, [])
 
+  const clear = useCallback(() => {
+    setShowDialogBox(false)
+    setElementFunc(null)
+  }, [])
+
   return (
     <DialogContext.Provider value={{
       setDialogBox: val => currentSetter?.(val)
     }}>
       <OpenedDialogContext.Provider value={{
-        clear: () => setShowDialogBox(false),
+        clear: clear,
         showDialogBox,
       }}>
         {ElementFunc !== null && <ElementFunc />}

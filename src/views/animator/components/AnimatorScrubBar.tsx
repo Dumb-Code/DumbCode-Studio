@@ -3,15 +3,10 @@ import { SVGPause, SVGPlay, SVGRestart, SVGStop } from "../../../components/Icon
 import NumericInput from "../../../components/NumericInput";
 import { ButtonWithTooltip } from "../../../components/Tooltips";
 import { useKeyComboPressed, useKeyCombos } from "../../../contexts/OptionsContext";
-import { useStudio } from "../../../contexts/StudioContext";
+import DcaAnimation from "../../../studio/formats/animations/DcaAnimation";
 import { useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 
-const AnimatorScrubBar = () => {
-    const { getSelectedProject } = useStudio()
-    const project = getSelectedProject()
-
-    const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
-
+const AnimatorScrubBar = ({ animation }: { animation: DcaAnimation | null }) => {
     const [isHovering, setIsHovering] = useState(false)
     const [isDragging, setIsDragging] = useState(false)
 

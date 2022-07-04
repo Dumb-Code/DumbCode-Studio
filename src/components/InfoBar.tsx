@@ -87,7 +87,7 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
     )
 }
 
-const DisplayModeDropup = () => {
+export const DisplayModeDropup = () => {
     const { getSelectedProject } = useStudio()
     const project = getSelectedProject()
     type Func = (mat: MeshBasicMaterial | MeshLambertMaterial) => void
@@ -119,7 +119,7 @@ const DisplayModeDropup = () => {
     );
 }
 
-const RenderModeDropup = () => {
+export const RenderModeDropup = () => {
     const { setCameraType } = useStudio()
     return (
         <div className="mx-0.5">
@@ -133,7 +133,7 @@ const RenderModeDropup = () => {
     );
 }
 
-const TextureGroupDropup = () => {
+export const TextureGroupDropup = () => {
     const groups = useTextureGroupSelect()
     return (
         <div className="mx-0.5">

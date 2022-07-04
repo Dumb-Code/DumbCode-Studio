@@ -1,4 +1,4 @@
-import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, OrthographicCamera, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
+import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, Object3D, OrthographicCamera, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
@@ -23,7 +23,10 @@ export type ThreeJsContext = {
   getCamera: () => Camera
   setCameraType: (isPerspective: boolean) => void
 
-  transformControls: TransformControls
+  transformControls: TransformControls,
+
+  box: Object3D,
+  grid: Object3D,
 }
 
 export const createThreeContext: () => ThreeJsContext = () => {
@@ -157,7 +160,9 @@ export const createThreeContext: () => ThreeJsContext = () => {
       majorGridMaterial.color.set(majorColor)
       minorGridMaterial.color.set(minorColor)
       subGridMaterial.color.set(subColor)
-    }
+    },
+
+    box, grid
   }
 }
 

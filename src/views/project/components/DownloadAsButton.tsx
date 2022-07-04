@@ -12,14 +12,14 @@ const DownloadAsButton = ({ menuId, iconButtonClass, name, tooltip, Icon, childr
 
   return (
     <DownloadAsNameContext.Provider value={name} >
-      <ContextMenuTrigger id={menuId} mouseButton={0}>
+      <ContextMenuTrigger id={menuId + name} mouseButton={0}>
         <ButtonWithTooltip
           tooltip={tooltip}
           className={iconButtonClass}>
           <Icon className="h-6 w-4 mr-1" />
         </ButtonWithTooltip>
       </ContextMenuTrigger>
-      <ContextMenu id={menuId} className="bg-gray-900 rounded">
+      <ContextMenu id={menuId + name} className="bg-gray-900 rounded">
         <MenuItem>
           <div className="p-1 rounded-t bg-gray-700">Download As</div>
         </MenuItem>
