@@ -1,4 +1,4 @@
-import { Material } from "three"
+import { AnimationClip, KeyframeTrack, Material } from "three"
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter'
 import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter'
 import ClickableInput from "../../../components/ClickableInput"
@@ -8,6 +8,7 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import PushToGithubDialogBox from "../../../dialogboxes/PushToGithubDialogBox"
+import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import { exportAsBBModel } from "../../../studio/formats/project/BBModelExporter"
@@ -16,6 +17,7 @@ import { writeDcProj } from "../../../studio/formats/project/DcProjectLoader"
 import { defaultWritable, FileSystemsAccessApi } from "../../../studio/util/FileTypes"
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { NumArray } from "../../../studio/util/NumArray"
 import DownloadAsButton, { DownloadOption } from "./DownloadAsButton"
 
 const SAVE_AS_CONTEXT = "studio-project-models-save-as"
@@ -99,6 +101,95 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
     }
 
     const exportToGLTF = async () => {
+
+        const exportAnimationToGlTFClip = (animation: DcaAnimation): AnimationClip | null => {
+            type ClipData<Val extends 3 | 4 = 3> = {
+                time: number,
+                value: NumArray<Val>
+            }
+
+            const position = new Map<string, ClipData[]>()
+            const rotation = new Map<string, ClipData<4>[]>()
+
+            const cgGroupPosition = new Map<string, ClipData[]>()
+            const cgMeshScale = new Map<string, ClipData[]>()
+
+            const getAllCubesFor = (name: string) => {
+                const set = project.model.cubeMap.get(name)
+                if (!set) return []
+                return Array.from(set)
+            }
+
+            animation.keyframes.value.forEach(kf => {
+                for (const pp of kf.progressionPoints.value) {
+                    animation.project.model.resetVisuals()
+                    const time = kf.startTime.value + kf.duration.value * pp.x
+
+                    console.log(time, pp.x)
+                    animation.animateAt(time, true)
+
+                    kf.position.forEach((_, name) => getAllCubesFor(name).forEach(cube => {
+                        const group = cube.cubeGroup
+                        const pos = group.position
+
+                        const data = position.get(group.uuid) ?? []
+                        data.push({ time, value: [pos.x, pos.y, pos.z] })
+                        position.set(group.uuid, data)
+                    }))
+
+                    kf.rotation.forEach((_, name) => getAllCubesFor(name).forEach(cube => {
+                        const group = cube.cubeGroup
+                        const rot = group.quaternion
+
+                        const data = rotation.get(group.uuid) ?? []
+                        data.push({ time, value: [rot.x, rot.y, rot.z, rot.w] })
+                        rotation.set(group.uuid, data)
+                    }))
+
+                    kf.cubeGrow.forEach((_, name) => getAllCubesFor(name).forEach(cube => {
+                        const { cubeGrowGroup, cubeMesh } = cube
+
+                        const groupPosition = cubeGrowGroup.position
+                        const meshScale = cubeMesh.scale
+
+                        const positionData = cgGroupPosition.get(cubeGrowGroup.uuid) ?? []
+                        positionData.push({ time, value: [groupPosition.x, groupPosition.y, groupPosition.z] })
+                        cgGroupPosition.set(cubeGrowGroup.uuid, positionData)
+
+                        const meshScaleData = cgMeshScale.get(cubeMesh.uuid) ?? []
+                        meshScaleData.push({ time, value: [meshScale.x, meshScale.y, meshScale.z] })
+                        cgMeshScale.set(cubeMesh.uuid, meshScaleData)
+                    }))
+
+                }
+            })
+
+
+
+            const compressClipMap = <V extends 3 | 4,>(map: Map<string, ClipData<V>[]>, name: string): KeyframeTrack[] => {
+                const result: KeyframeTrack[] = []
+
+                for (const [key, values] of map) {
+                    const times = values.map(t => t.time)
+                    const data = values.flatMap(t => t.value)
+                    result.push(new KeyframeTrack(`${key}.${name}`, times, data))
+                }
+
+                return result
+            }
+
+
+            const keyframes = ([] as KeyframeTrack[])
+                .concat(compressClipMap(position, "position"))
+                .concat(compressClipMap(rotation, "quaternion"))
+                .concat(compressClipMap(cgGroupPosition, "position"))
+                .concat(compressClipMap(cgMeshScale, "scale"))
+
+            project.model.resetVisuals()
+            return new AnimationClip(animation.name.value, animation.maxTime.value, keyframes)
+        }
+
+
         const exporter = new GLTFExporter()
         const oldCubeMaterials = new Map<DCMCube, Material | Material[]>()
         project.model.traverseAll(cube => {
@@ -106,9 +197,13 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
             oldCubeMaterials.set(cube, cube.cubeMesh.material)
             cube.cubeMesh.material = project.model.materials.export
         })
-        exporter.parse(project.model.modelGroup, value => {
-            defaultWritable.write(project.name.value + ".gltf", new Blob([JSON.stringify(value)]))
-        }, er => console.warn("Error Parsing: " + er), { includeCustomExtensions: false })
+        exporter.parse(project.model.modelGroup,
+            value => { defaultWritable.write(project.name.value + ".gltf", new Blob([JSON.stringify(value)])) },
+            er => console.warn("Error Parsing: " + er),
+            {
+                includeCustomExtensions: false,
+                animations: project.animationTabs.animations.value.map(anim => exportAnimationToGlTFClip(anim)).filter((anim): anim is AnimationClip => anim !== null),
+            })
         project.model.traverseAll(cube => {
             cube.setUserData()
             const mats = oldCubeMaterials.get(cube)
