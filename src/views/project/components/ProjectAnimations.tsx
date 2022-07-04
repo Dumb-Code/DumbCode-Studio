@@ -10,6 +10,7 @@ import { downloadBlob, FileSystemsAccessApi, ReadableFile } from "../../../studi
 import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
+const SAVE_AS_CONTEXT = "studio-project-animations-save-as"
 const animationExtensions = [".dca", ".dcsa"]
 
 const ProjectAnimations = () => {
@@ -75,6 +76,7 @@ const AnimationEntries = ({ project }: { project: DcProject }) => {
 const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation }: { animation: DcaAnimation, selected: boolean, toggleAnimation: () => void, removeAnimation: () => void }) => {
     const [isAnimationDirty] = useListenableObject(animation.needsSaving)
     const [isSaveable] = useListenableObject(animation.saveableFile)
+    const [isSkeleton] = useListenableObject(animation.isSkeleton)
     const saveAnimation = async () => {
         if (animation.isSkeleton.value) {
             downloadBlob(animation.name.value + "_skeleton.dcsa", writeDCAAnimation(animation))
@@ -92,16 +94,30 @@ const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation 
     }
 
     const saveable = isSaveable && FileSystemsAccessApi
+    const iconButtonClass = (selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5"
     const DownloadIcon = saveable ? SVGSave : SVGDownload
     return (
         <div>
             <div className={(selected ? "bg-yellow-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " flex-shrink-0 rounded-sm h-8 text-left pl-2 mb-2 flex flex-row ml-2"} onClick={toggleAnimation}>
                 <DblClickEditLO obj={animation.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
                 <p className="mr-2 flex flex-row text-white">
-                    <ButtonWithTooltip onClick={e => { saveAnimation(); e.stopPropagation() }} className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 mr-1 " + (isAnimationDirty ? " text-red-600 " : "")} tooltip={saveable ? "Save" : "Download"}>
+                    <ButtonWithTooltip onClick={e => { saveAnimation(); e.stopPropagation() }} className={iconButtonClass + " mr-1 " + (isAnimationDirty ? " text-red-600 " : "")} tooltip={saveable ? "Save" : "Download"}>
                         <DownloadIcon className="h-4 w-4" />
                     </ButtonWithTooltip>
-                    <ButtonWithTooltip onClick={e => { removeAnimation(); e.stopPropagation() }} className={(selected ? "bg-yellow-600 hover:bg-yellow-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 text-black dark:text-white") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"} tooltip="Delete"><SVGCross className="h-4 w-4 group-hover:text-red-500" /></ButtonWithTooltip>
+                    {/* <DownloadAsButton
+                        Icon={SVGDownload}
+                        tooltip="Download As"
+                        iconButtonClass={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + (isAnimationDirty ? " text-red-600 " : "")}
+                        menuId={SAVE_AS_CONTEXT}
+                        name={animation.name.value}
+                    >
+                        <DownloadOption exportFunction={() => saveModel("model")} extension="dca" />
+                        <DownloadOption exportFunction={exportToObj} extension="obj" />
+                        <DownloadOption exportFunction={exportToGLTF} extension="gltf" />
+                        <DownloadOption exportFunction={() => saveModel("project")} extension="dcproj" />
+                        <DownloadOption exportFunction={exportToBBModel} extension="bbmodel" />
+                    </DownloadAsButton> */}
+                    <ButtonWithTooltip onClick={e => { removeAnimation(); e.stopPropagation() }} className={iconButtonClass + " group"} tooltip="Delete"><SVGCross className="h-4 w-4 group-hover:text-red-500" /></ButtonWithTooltip>
                 </p>
             </div>
         </div>
