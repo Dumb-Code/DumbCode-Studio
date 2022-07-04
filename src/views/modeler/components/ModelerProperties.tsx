@@ -4,6 +4,7 @@ import CubeRotationInput from "../../../components/CubeRotationInput";
 import { useStudio } from "../../../contexts/StudioContext";
 import { DCMModel } from "../../../studio/formats/model/DcmModel";
 import { LO, useListenableMap, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { NumArray } from "../../../studio/util/NumArray";
 
 const ModelerProperties = () => {
     const { getSelectedProject } = useStudio()
