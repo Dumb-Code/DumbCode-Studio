@@ -6,12 +6,13 @@ import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
 import { DcaKeyframe } from './../../../studio/formats/animations/DcaAnimation';
 import { LO, useListenableObject } from './../../../studio/util/ListenableObject';
+import { NumArray } from './../../../studio/util/NumArray';
 import { AnimatorGumballIK } from './AnimatorGumballIK';
 
 
 type StartingCacheData = {
   root: boolean,
-  position: readonly [number, number, number]
+  position: NumArray
   quaternion: Quaternion,
 }
 

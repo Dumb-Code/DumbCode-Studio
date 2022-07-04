@@ -9,6 +9,7 @@ import DcProject from '../project/DcProject';
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
 import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
+import { NumArray } from './../../util/NumArray';
 import { DCMCube } from './../model/DcmModel';
 
 const skeletal_export_named = "skeletal_export_named_"
@@ -46,9 +47,9 @@ type KeyframeSectionType = {
     progressionPoints: readonly ProgressionPoint[]
 
     //Maps:
-    [k: `${typeof kfmap_position}${string}`]: readonly [number, number, number]
-    [k: `${typeof kfmap_rotation}${string}`]: readonly [number, number, number]
-    [k: `${typeof kfmap_cubegrow}${string}`]: readonly [number, number, number]
+    [k: `${typeof kfmap_position}${string}`]: NumArray
+    [k: `${typeof kfmap_rotation}${string}`]: NumArray
+    [k: `${typeof kfmap_cubegrow}${string}`]: NumArray
   }
 }
 
@@ -247,9 +248,9 @@ export default class DcaAnimation {
 
   createKeyframe(
     layerId = 0, identifier?: string, startTime?: number, duration?: number, selected?: boolean,
-    rotation?: Map<string, readonly [number, number, number]>,
-    position?: Map<string, readonly [number, number, number]>,
-    cubeGrow?: Map<string, readonly [number, number, number]>,
+    rotation?: Map<string, NumArray>,
+    position?: Map<string, NumArray>,
+    cubeGrow?: Map<string, NumArray>,
     progressionPoints?: readonly ProgressionPoint[],
   ) {
     const kf = new DcaKeyframe(this.project, this, identifier, layerId, startTime, duration, selected, progressionPoints, rotation, position, cubeGrow)
@@ -344,9 +345,9 @@ export class DcaKeyframe {
   readonly isGraphOut = new LO(true)
   readonly graphResolution = new LO(10)
 
-  readonly rotation: LOMap<string, readonly [number, number, number]>
-  readonly position: LOMap<string, readonly [number, number, number]>
-  readonly cubeGrow: LOMap<string, readonly [number, number, number]>
+  readonly rotation: LOMap<string, NumArray>
+  readonly position: LOMap<string, NumArray>
+  readonly cubeGrow: LOMap<string, NumArray>
 
   readonly progressionPoints: LO<readonly ProgressionPoint[]>
 
@@ -362,9 +363,9 @@ export class DcaKeyframe {
     duration = 1,
     selected = false,
     progressionPoints: readonly ProgressionPoint[] = [{ x: 0, y: 1, required: true }, { x: 1, y: 0, required: true }],
-    rotation?: Map<string, readonly [number, number, number]>,
-    position?: Map<string, readonly [number, number, number]>,
-    cubeGrow?: Map<string, readonly [number, number, number]>,
+    rotation?: Map<string, NumArray>,
+    position?: Map<string, NumArray>,
+    cubeGrow?: Map<string, NumArray>,
   ) {
     this.project = project
     this.animation = animation
@@ -426,19 +427,19 @@ export class DcaKeyframe {
     let nextDefinedKeyframe: DcaKeyframe | null = null
     let didStartBatch = false
     const preCapturedDefinedModeData = new Map<DCMCube, {
-      pos: readonly [number, number, number],
-      rot: readonly [number, number, number],
-      cg: readonly [number, number, number],
+      pos: NumArray,
+      rot: NumArray,
+      cg: NumArray,
     }>()
     const postCapturedDefinedModeData = new Map<DCMCube, {
-      pos: readonly [number, number, number],
-      rot: readonly [number, number, number],
-      cg: readonly [number, number, number],
+      pos: NumArray,
+      rot: NumArray,
+      cg: NumArray,
     }>()
     // const cubeLockers: {
     //   locker: CubeLocker,
-    //   position: readonly [number, number, number],
-    //   rotation: readonly [number, number, number],
+    //   position: NumArray,
+    //   rotation: NumArray,
     // }[] = []
     // let isRecursing = false
     const onPreModify = () => {
@@ -489,9 +490,9 @@ export class DcaKeyframe {
 
     const performModify = (
       cubeName: string,
-      current: readonly [number, number, number],
-      target: readonly [number, number, number],
-      dataMap: LOMap<string, readonly [number, number, number]>,
+      current: NumArray,
+      target: NumArray,
+      dataMap: LOMap<string, NumArray>,
       modifier = 1,
     ) => {
       if (target[0] !== current[0] || target[1] !== current[1] || target[2] !== current[2]) {
@@ -563,9 +564,9 @@ export class DcaKeyframe {
   }
 
   captureEndData(map = new Map<DCMCube, {
-    pos: readonly [number, number, number];
-    rot: readonly [number, number, number];
-    cg: readonly [number, number, number];
+    pos: NumArray;
+    rot: NumArray;
+    cg: NumArray;
   }>()) {
     map.clear()
     this.project.model.resetVisuals()

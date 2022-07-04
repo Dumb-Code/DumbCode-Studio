@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { NumArray } from '../studio/util/NumArray';
 import { SVGLocked, SVGUnlocked } from './Icons';
 import NumericInput from './NumericInput';
 
@@ -10,8 +11,8 @@ const axis = [
 
 const CubeInput = ({ title, value, setValue, lock, positiveInteger, onBlur, onFocus }: {
     title: string
-    value?: readonly [number, number, number]
-    setValue?: (value: readonly [number, number, number]) => void
+    value?: NumArray
+    setValue?: (value: NumArray) => void
     lock?: boolean,
     positiveInteger?: boolean,
     onFocus?: () => void,

@@ -1,5 +1,6 @@
 import { Euler, Matrix4, Object3D, Quaternion, Vector3 } from 'three';
 import { DCMCube } from './../formats/model/DcmModel';
+import { NumArray } from './NumArray';
 
 export enum LockerType {
   POSITION_ROTATION, //legacy 0
@@ -35,10 +36,10 @@ export default class CubeLocker {
 
 
   static reconstructLockerValues<T extends LockerType>(cube: DCMCube, type: T, worldMatrix: Matrix4):
-    T extends LockerType.POSITION_ROTATION ? { position: [number, number, number], rotation: [number, number, number] } :
-    T extends LockerType.POSITION ? { position: [number, number, number] } :
-    T extends LockerType.ROTATION ? { rotation: [number, number, number] } :
-    T extends LockerType.OFFSET ? { offset: [number, number, number] } : never {
+    T extends LockerType.POSITION_ROTATION ? { position: NumArray, rotation: NumArray } :
+    T extends LockerType.POSITION ? { position: NumArray } :
+    T extends LockerType.ROTATION ? { rotation: NumArray } :
+    T extends LockerType.OFFSET ? { offset: NumArray } : never {
 
     //      parent_world_matrix * local_matrix = world_matrix
     //  =>  local_matrix = 'parent_world_matrix * world_matrix

@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { NumArray } from "../../util/NumArray";
 import { DCMCube, DCMModel } from "./DcmModel";
 import { loadDCMModel } from "./OldDCMLoader";
 
@@ -100,8 +101,6 @@ export const writeModelWithFormat = async <T extends keyof OutputByType>(model: 
   return blob
 }
 
-type TriVec = readonly [number, number, number]
-
 type ParseModelType = {
   version: number,
   author: string,
@@ -114,12 +113,12 @@ type ParseModelType = {
 type ParseCubeType = {
   identifier: string,
   name: string,
-  dimension: TriVec,
-  position: TriVec,
-  offset: TriVec,
-  rotation: TriVec,
-  cubeGrow: TriVec,
-  textureOffset: readonly [number, number],
+  dimension: NumArray,
+  position: NumArray,
+  offset: NumArray,
+  rotation: NumArray,
+  cubeGrow: NumArray,
+  textureOffset: NumArray<2>,
   textureMirrored: boolean,
   children: readonly ParseCubeType[],
   metadata?: Record<string, string>

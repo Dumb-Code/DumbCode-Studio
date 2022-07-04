@@ -2,6 +2,7 @@ import { LO, LOMap } from '../../util/ListenableObject';
 import { StudioBuffer } from '../../util/StudioBuffer';
 import { DCMCube, DCMModel } from '../model/DcmModel';
 import DcProject from '../project/DcProject';
+import { NumArray } from './../../util/NumArray';
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from './DcaAnimation';
 
 const compilerWarningsRemove = (_: any) => { }
@@ -100,8 +101,8 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
       keyframes.forEach(kf => {
         //Function to mutate array to array+subvalue
         function transformMap(
-          partMap: LOMap<string, readonly [number, number, number]>,
-          func: (c: DCMCube) => LO<readonly [number, number, number]>
+          partMap: LOMap<string, NumArray>,
+          func: (c: DCMCube) => LO<NumArray>
         ) {
           partMap.forEach((value, key) => {
             const s = map.get(key)

@@ -1,4 +1,5 @@
 import Slider from 'react-input-slider';
+import { NumArray } from '../studio/util/NumArray';
 import NumericInput from './NumericInput';
 
 const axis = [
@@ -9,8 +10,8 @@ const axis = [
 
 const CubeRotationInput = ({ title, value, setValue, onFocus, onBlur }: {
   title: string
-  value?: readonly [number, number, number]
-  setValue?: (value: readonly [number, number, number]) => void,
+  value?: NumArray
+  setValue?: (value: NumArray) => void,
   onFocus?: () => void,
   onBlur?: () => void
 }) => {

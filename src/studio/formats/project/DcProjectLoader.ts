@@ -7,6 +7,7 @@ import { loadUnknownAnimation, writeDCAAnimation } from "../animations/DCALoader
 import { loadModelUnknown, writeModel } from "../model/DCMLoader";
 import { DCMCube } from "../model/DcmModel";
 import { TextureGroup } from "../textures/TextureManager";
+import { NumArray } from './../../util/NumArray';
 import { KeyframeLayerData } from './../animations/DcaAnimation';
 import DcProject from "./DcProject";
 
@@ -286,9 +287,9 @@ const getLegacyTexturesData = async (folder: JSZip): Promise<TextureData> => {
 
 type LegacyRefImgData = {
   name: string,
-  pos: [number, number, number],
-  rot: [number, number, number],
-  scale: number | [number, number, number],
+  pos: NumArray,
+  rot: NumArray,
+  scale: number | NumArray,
   opacity: number,
   canSelect: boolean,
 

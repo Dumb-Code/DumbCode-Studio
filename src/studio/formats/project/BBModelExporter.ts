@@ -3,6 +3,7 @@ import { LO } from '../../util/ListenableObject';
 import DcaAnimation from '../animations/DcaAnimation';
 import DcaTabs from '../animations/DcaTabs';
 import TextureManager from '../textures/TextureManager';
+import { NumArray } from './../../util/NumArray';
 import { DCMCube, DCMModel } from './../model/DcmModel';
 import { TextureGroup } from './../textures/TextureManager';
 import DcProject from "./DcProject";
@@ -34,13 +35,13 @@ type CubeElement = {
   type: "cube"
   rescale: boolean
   locked: boolean
-  from: readonly [number, number, number]
-  to: readonly [number, number, number]
+  from: NumArray
+  to: NumArray
   autouv: number
   color: number
-  origin: readonly [number, number, number]
-  rotation?: readonly [number, number, number]
-  uv_offset?: readonly [number, number]
+  origin: NumArray
+  rotation?: NumArray
+  uv_offset?: NumArray<2>
   faces: {
     north: CubeElementFace
     east: CubeElementFace
@@ -59,8 +60,8 @@ type CubeElementFace = {
 
 type BoneElement = {
   name: string,
-  origin: readonly [number, number, number],
-  rotation?: readonly [number, number, number],
+  origin: NumArray,
+  rotation?: NumArray,
   bedrock_binding: "",
   color: 0,
   uuid: string,
@@ -121,7 +122,7 @@ type KeyframeElement = {
 }
 
 type LookupMap = Map<DCMCube, { cube: CubeElement, bone: BoneElement }>
-type WorldPositionCache = Map<DCMCube, readonly [number, number, number]>
+type WorldPositionCache = Map<DCMCube, NumArray>
 
 export const exportAsBBModel = async (project: DcProject): Promise<Blob> => {
   const lookupMap: LookupMap = new Map()
@@ -196,8 +197,8 @@ const convertSingleAnimation = (project: DcProject, animation: DcaAnimation): An
 
 type TimeSnapshot = {
   time: number,
-  positionCubes: Map<string, readonly [number, number, number]>,
-  rotationCubes: Map<string, readonly [number, number, number]>,
+  positionCubes: Map<string, NumArray>,
+  rotationCubes: Map<string, NumArray>,
 }
 
 const createBoneAnimatorKeyframes = (identifier: string, positionTimes: number[], rotationTimes: number[], timeSnapshots: TimeSnapshot[]): KeyframeElement[] => {
@@ -288,7 +289,7 @@ const createTimePosition = (time: number, animation: DcaAnimation, positionCubes
       })
     }
     return map
-  }, new Map<string, readonly [number, number, number]>())
+  }, new Map<string, NumArray>())
 
   const rotationCubes = rotationCubesIdentifiers.reduce((map, name) => {
     const cubes = animation.project.model.cubeMap.get(name)
@@ -302,7 +303,7 @@ const createTimePosition = (time: number, animation: DcaAnimation, positionCubes
       })
     }
     return map
-  }, new Map<string, readonly [number, number, number]>());
+  }, new Map<string, NumArray>());
 
   return {
     time, positionCubes, rotationCubes
@@ -406,7 +407,7 @@ const convertBoneWithoutChildren = (cube: DCMCube, positionCache: WorldPositionC
   }
 }
 
-const getCubePosition = (cube: DCMCube, positionCache: WorldPositionCache): readonly [number, number, number] => {
+const getCubePosition = (cube: DCMCube, positionCache: WorldPositionCache): NumArray => {
   const cache = positionCache.get(cube)
   if (cache !== undefined) {
     return cache
@@ -453,7 +454,7 @@ const getCubeFace = (cube: DCMCube, face: number): CubeElementFace => ({
   uv: [0, 0, 1, 1]
 })
 
-const plusArr = (arr1: readonly [number, number, number], arr2: readonly [number, number, number]): readonly [number, number, number] => {
+const plusArr = (arr1: NumArray, arr2: NumArray): NumArray => {
   return [
     arr1[0] + arr2[0],
     arr1[1] + arr2[1],

@@ -3,6 +3,7 @@ import { Euler, Quaternion, Vector3 } from "three";
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from "../../../studio/formats/animations/DcaAnimation";
 import { DCMCube } from "../../../studio/formats/model/DcmModel";
+import { NumArray } from "../../../studio/util/NumArray";
 import { AnimatorGumballIK } from "../logic/AnimatorGumballIK";
 
 const computeVec = new Vector3();
@@ -50,7 +51,7 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
         animation.project.model.resetVisuals();
         animation.animate(0);
 
-        const computeCache: { cube: DCMCube; values: readonly [number, number, number]; time: number; }[] = [];
+        const computeCache: { cube: DCMCube; values: NumArray; time: number; }[] = [];
         const rootGroundSpeed = new Map<DCMCube, { distance: number; time: number; }>();
 
         // const selectedRef = gravityRef.current.getSelectedCubes()
@@ -351,7 +352,7 @@ const AnimatorAutoGravity = ({ animation, selectedCubes }: { animation: DcaAnima
                 });
             }
 
-            const resultMap = new Map<DCMCube, readonly [number, number, number]>();
+            const resultMap = new Map<DCMCube, NumArray>();
 
             //Solve the ik chains
             update();

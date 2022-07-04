@@ -1,6 +1,7 @@
-import { Octokit } from "@octokit/rest"
-import GithubCommiter from "../../git/GithubCommiter"
-import { LO } from "../../util/ListenableObject"
+import { Octokit } from "@octokit/rest";
+import GithubCommiter from "../../git/GithubCommiter";
+import { LO } from "../../util/ListenableObject";
+import { NumArray } from './../../util/NumArray';
 
 const path_StudioRemoteBase = ".studio_remote.json"
 export const writeStudioRemote = (commiter: GithubCommiter, projects: readonly RemoteProjectEntry[]) => {
@@ -143,8 +144,8 @@ export type RemoteProjectEntry = {
     readonly opacity: number
     readonly canSelect: boolean
     readonly hidden: boolean
-    readonly position: readonly [number, number, number]
-    readonly rotation: readonly [number, number, number]
+    readonly position: NumArray
+    readonly rotation: NumArray
     readonly scale: number,
     readonly flipX: boolean,
     readonly flipY: boolean,

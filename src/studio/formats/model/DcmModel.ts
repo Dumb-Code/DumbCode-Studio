@@ -4,6 +4,7 @@ import { readFromClipboard, writeToClipboard } from "../../clipboard/Clipboard";
 import { writeCubesForClipboard } from "../../clipboard/CubeClipboardType";
 import CubeLocker, { LockerType } from "../../util/CubeLocker";
 import LockedCubes from "../../util/LockedCubes";
+import { NumArray } from "../../util/NumArray";
 import SelectedCubeManager from "../../util/SelectedCubeManager";
 import DcProject from '../project/DcProject';
 import { readCubesForClipboard } from './../../clipboard/CubeClipboardType';
@@ -55,12 +56,12 @@ type UndoRedoDataType = {
     identifier: string, //Unchaning
     metadata: Readonly<Record<string, string>>,
     name: string,
-    dimension: readonly [number, number, number],
-    position: readonly [number, number, number],
-    offset: readonly [number, number, number],
-    rotation: readonly [number, number, number],
-    cubeGrow: readonly [number, number, number],
-    textureOffset: readonly [number, number],
+    dimension: NumArray,
+    position: NumArray,
+    offset: NumArray,
+    rotation: NumArray,
+    cubeGrow: NumArray,
+    textureOffset: NumArray<2>,
     textureMirrored: boolean,
     children: readonly string[],
 
@@ -285,13 +286,13 @@ export class DCMModel implements CubeParent {
 type CubeSectionType = SectionHandle<UndoRedoDataType, UndoRedoDataType & { section_name: `cube_${string}` }>
 export class DCMCube implements CubeParent {
   readonly name: LO<string>
-  readonly dimension: LO<readonly [number, number, number]>
-  readonly position: LO<readonly [number, number, number]>
-  readonly offset: LO<readonly [number, number, number]>
-  readonly rotation: LO<readonly [number, number, number]>
-  readonly textureOffset: LO<readonly [number, number]>
+  readonly dimension: LO<NumArray>
+  readonly position: LO<NumArray>
+  readonly offset: LO<NumArray>
+  readonly rotation: LO<NumArray>
+  readonly textureOffset: LO<NumArray<2>>
   readonly textureMirrored: LO<boolean>
-  readonly cubeGrow: LO<readonly [number, number, number]>
+  readonly cubeGrow: LO<NumArray>
   readonly children: LO<readonly DCMCube[]>
 
   readonly mouseHover = new LO(false)
@@ -325,13 +326,13 @@ export class DCMCube implements CubeParent {
 
   constructor(
     name: string,
-    dimension: readonly [number, number, number],
-    rotationPoint: readonly [number, number, number],
-    offset: readonly [number, number, number],
-    rotation: readonly [number, number, number],
-    textureOffset: readonly [number, number],
+    dimension: NumArray,
+    rotationPoint: NumArray,
+    offset: NumArray,
+    rotation: NumArray,
+    textureOffset: NumArray<2>,
     textureMirrored: boolean,
-    cubeGrow: readonly [number, number, number],
+    cubeGrow: NumArray,
     children: readonly DCMCube[],
     model: DCMModel,
     readonly identifier = uuidv4(),
@@ -649,7 +650,7 @@ export class DCMCube implements CubeParent {
     this.uvBuffer.needsUpdate = true
   }
 
-  _genereateFaceData(face: number, tm: boolean, toff: readonly [number, number], tw: number, th: number, offU: number, offV: number, heightU: number, heightV: number) {
+  _genereateFaceData(face: number, tm: boolean, toff: NumArray<2>, tw: number, th: number, offU: number, offV: number, heightU: number, heightV: number) {
 
     let u = toff[0]
     let v = toff[1]

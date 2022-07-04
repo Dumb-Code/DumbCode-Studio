@@ -52,7 +52,7 @@ const WrappedCubeName = ({ obj, model }: { obj?: LO<string>, model: DCMModel }) 
     )
 }
 
-const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<readonly [number, number, number]>, model: DCMModel }) => {
+const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<NumArray>, model: DCMModel }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeInput
         title={title}
@@ -69,7 +69,7 @@ const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<reado
     />
 }
 
-const WrappedCubeInputDimensions = ({ title, obj, model }: { title: string, obj?: LO<readonly [number, number, number]>, model: DCMModel }) => {
+const WrappedCubeInputDimensions = ({ title, obj, model }: { title: string, obj?: LO<NumArray>, model: DCMModel }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeInput
         title={title.toUpperCase()}
@@ -81,7 +81,7 @@ const WrappedCubeInputDimensions = ({ title, obj, model }: { title: string, obj?
     />
 }
 
-const WrappedCubeInputRotation = ({ title, obj, model }: { title: string, obj?: LO<readonly [number, number, number]>, model: DCMModel }) => {
+const WrappedCubeInputRotation = ({ title, obj, model }: { title: string, obj?: LO<NumArray>, model: DCMModel }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeRotationInput
         title={title.toUpperCase()}

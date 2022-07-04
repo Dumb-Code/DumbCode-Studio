@@ -7,13 +7,14 @@ import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
 import { HistoryActionTypes } from './../../../studio/undoredo/UndoRedoHandler';
 import { LockerType } from './../../../studio/util/CubeLocker';
 import { useListenableObject } from './../../../studio/util/ListenableObject';
+import { NumArray } from './../../../studio/util/NumArray';
 import CubePointTracker from './CubePointTracker';
 
 type StartingCacheData = {
   root: boolean,
-  position: readonly [number, number, number]
-  offset: readonly [number, number, number]
-  dimension: readonly [number, number, number]
+  position: NumArray
+  offset: NumArray
+  dimension: NumArray
   quaternion: Quaternion,
   threeWorldPos: Vector3
 }

@@ -5,6 +5,7 @@ import NumericInput from '../../../components/NumericInput';
 import Toggle from "../../../components/Toggle";
 import { DCMModel } from "../../../studio/formats/model/DcmModel";
 import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { NumArray } from '../../../studio/util/NumArray';
 import { ReferenceImage, useReferenceImageTransform } from "../../../studio/util/ReferenceImageHandler";
 
 const ModelerReferenceImageEdit = ({ model, image }: { model: DCMModel, image: ReferenceImage }) => {
@@ -76,7 +77,7 @@ const WrappedCubeName = ({ obj, model }: { obj?: LO<string>, model: DCMModel }) 
     )
 }
 
-const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<readonly [number, number, number]>, model: DCMModel }) => {
+const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<NumArray>, model: DCMModel }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeInput
         title={title.toUpperCase()}
@@ -87,7 +88,7 @@ const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<reado
     />
 }
 
-const WrappedCubeInputRotation = ({ title, obj, model }: { title: string, obj?: LO<readonly [number, number, number]>, model: DCMModel }) => {
+const WrappedCubeInputRotation = ({ title, obj, model }: { title: string, obj?: LO<NumArray>, model: DCMModel }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeRotationInput
         title={title.toUpperCase()}

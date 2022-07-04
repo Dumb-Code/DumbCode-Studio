@@ -3,6 +3,7 @@ import { DoubleSide, Group, Mesh, MeshBasicMaterial, NearestFilter, Object3D, Pl
 import { useStudio } from './../../contexts/StudioContext';
 import { ReadableFile } from './FileTypes';
 import { LO } from './ListenableObject';
+import { NumArray } from './NumArray';
 import { setIntersectType } from './ObjectClickedHook';
 export default class ReferenceImageHandler {
 
@@ -83,8 +84,8 @@ export class ReferenceImage {
   readonly canSelect: LO<boolean>
   readonly hidden: LO<boolean>
 
-  readonly position: LO<readonly [number, number, number]>
-  readonly rotation: LO<readonly [number, number, number]>
+  readonly position: LO<NumArray>
+  readonly rotation: LO<NumArray>
 
   readonly scale: LO<number>
   readonly flipX: LO<boolean>
@@ -107,8 +108,8 @@ export class ReferenceImage {
     opacity = 100,
     canSelect = true,
     hidden = false,
-    position: readonly [number, number, number] = [0, 0, 0],
-    rotation: readonly [number, number, number] = [0, 0, 0],
+    position: NumArray = [0, 0, 0],
+    rotation: NumArray = [0, 0, 0],
     scale = 1,
     flipX = false,
     flipY = false,

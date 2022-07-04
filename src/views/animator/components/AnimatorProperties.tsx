@@ -13,6 +13,7 @@ import { useTooltipRef } from "../../../contexts/TooltipContext";
 import DcaAnimation, { DcaKeyframe } from "../../../studio/formats/animations/DcaAnimation";
 import { DCMCube } from "../../../studio/formats/model/DcmModel";
 import { LO, LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { NumArray } from "../../../studio/util/NumArray";
 import AnimatorAutoGravity from "./AnimatorAutoGravity";
 import AnimatorSkeletalExport from "./AnimatorSkeletalExport";
 import { ProgressionPointsCanvas } from "./ProgressionPointsCanvas";
@@ -355,7 +356,7 @@ type InputPropTypes = {
         y: number;
         z: number;
     } | undefined;
-    obj?: LOMap<string, readonly [number, number, number]> | undefined;
+    obj?: LOMap<string, NumArray> | undefined;
     animation: DcaAnimation | null,
     InputType: typeof CubeInput | typeof CubeRotationInput
 }
@@ -395,7 +396,7 @@ const WrappedInputGlobal = ({ title, cube, keyframe, keyframeSetFunction, vector
         }
     }, [onFrameListeners, vector])
 
-    const setValue = (array: readonly [number, number, number]) => {
+    const setValue = (array: NumArray) => {
         if (keyframe === undefined) {
             return
         }

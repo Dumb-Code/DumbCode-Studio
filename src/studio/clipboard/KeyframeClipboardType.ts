@@ -1,10 +1,11 @@
 import { v4 } from "uuid";
 import DcaAnimation, { ProgressionPoint } from "../formats/animations/DcaAnimation";
 import { loadToMap, writeFromMap } from "../formats/animations/DCALoader";
+import { NumArray } from "../util/NumArray";
 import { DcaKeyframe } from './../formats/animations/DcaAnimation';
 import { DCMCube, DCMModel } from './../formats/model/DcmModel';
 
-type KfMapData = Record<string, readonly [number, number, number]>
+type KfMapData = Record<string, NumArray>
 
 export type KeyframeClipboardType = {
   identifier: string,
@@ -35,7 +36,7 @@ export type KeyframeClipboardType = {
 const writeDefinedMap = (
   model: DCMModel, elements: Map<string, any>,
   elementGetter: (cube: DCMCube) => { x: number, y: number, z: number },
-  originalElementGetter: (cube: DCMCube) => readonly [number, number, number],
+  originalElementGetter: (cube: DCMCube) => NumArray,
   elementModifier = 1
 ): KfMapData => {
   return Array.from(elements.keys())
@@ -108,7 +109,7 @@ const convertDefinedDataToAdditional = (animation: DcaAnimation, item: KeyframeC
 const convertDefinedMapToAdditional = (
   model: DCMModel, elements: KfMapData,
   elementGetter: (cube: DCMCube) => { x: number, y: number, z: number },
-  originalElementGetter: (cube: DCMCube) => readonly [number, number, number],
+  originalElementGetter: (cube: DCMCube) => NumArray,
   elementModifier = 1
 ) => {
   return Object.keys(elements)

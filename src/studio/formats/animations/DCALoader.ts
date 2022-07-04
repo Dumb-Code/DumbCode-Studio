@@ -4,6 +4,7 @@ import { StudioBuffer } from "../../util/StudioBuffer";
 import { convertMapToRecord, convertRecordToMap } from "../../util/Utils";
 import { getZippedFile, OutputByType, ParseError } from "../model/DCMLoader";
 import DcProject from "../project/DcProject";
+import { NumArray } from './../../util/NumArray';
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from "./DcaAnimation";
 import { loadDCAAnimationOLD } from "./OldDcaLoader";
 
@@ -21,14 +22,14 @@ export const loadUnknownAnimation = async (project: DcProject, name: string, buf
 }
 
 export const loadToMap = (data: ParsedKfMap) => {
-  const map = new Map<string, readonly [number, number, number]>()
+  const map = new Map<string, NumArray>()
   Object.keys(data).forEach(key => {
     map.set(key, data[key])
   })
   return map
 }
 
-export const writeFromMap = (map: Map<string, readonly [number, number, number]>): ParsedKfMap => {
+export const writeFromMap = (map: Map<string, NumArray>): ParsedKfMap => {
   return Array.from(map.entries()).reduce((map, data) => {
     map[data[0]] = data[1]
     return map
@@ -114,7 +115,7 @@ type ParsedAnimationType = {
   isSkeleton?: boolean
 }
 
-type ParsedKfMap = Record<string, readonly [number, number, number]>
+type ParsedKfMap = Record<string, NumArray>
 type ParsedKeyframeType = {
   layerId: number,
   start: number,

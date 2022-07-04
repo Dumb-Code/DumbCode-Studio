@@ -7,6 +7,7 @@ import { writeDCAAnimation } from "../../../studio/formats/animations/DCALoader"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import { downloadBlob } from "../../../studio/util/FileTypes"
 import { useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject"
+import { NumArray } from "../../../studio/util/NumArray"
 
 
 const AnimatorSkeletalExport = ({ animation, cube }: { animation: DcaAnimation | null, cube?: DCMCube }) => {
@@ -33,7 +34,7 @@ const AnimatorSkeletalExport = ({ animation, cube }: { animation: DcaAnimation |
     newAnimation.keyframes.value.forEach(keyframe => {
       for (let map of [keyframe.position, keyframe.rotation, keyframe.cubeGrow]) {
 
-        const newMap = new Map<string, readonly [number, number, number]>()
+        const newMap = new Map<string, NumArray>()
         animation.reverseKeyframeNameOverrides.forEach((identifs, name) => {
 
           if (identifs.length > 1) {

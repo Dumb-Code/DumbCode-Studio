@@ -3,6 +3,7 @@ import { SvgArrowRight, SVGCube } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { useListenableObject, useListenableObjectInMap } from "../../../studio/util/ListenableObject"
+import { NumArray } from "../../../studio/util/NumArray"
 
 const AnimatorSkeletonProperties = () => {
 
@@ -54,7 +55,7 @@ const AnimatorSkeletonProperties = () => {
       animation.keyframes.value
         .flatMap(kf => [kf.position, kf.rotation, kf.cubeGrow])
         .forEach(map => {
-          const newMap = new Map<string, readonly [number, number, number]>()
+          const newMap = new Map<string, NumArray>()
           map.forEach((value, key) => {
             const replacement = nameToCubeNameMap.get(key)
             if (replacement) {
