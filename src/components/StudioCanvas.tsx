@@ -72,7 +72,7 @@ const StudioCanvas = () => {
       return
     }
     selectedScreenshotActions.forEach(action => ScreenshotActionMap[action](blob))
-  }, [selectedScreenshotActions])
+  }, [selectedScreenshotActions, renderer, renderSingleFrame, isolationFactory, noBackgroundFactory])
 
   useKeyComboPressed(useMemo(() => ({
     common: {
