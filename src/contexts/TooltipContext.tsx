@@ -58,13 +58,23 @@ const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
       if (typeof tooltip === "function") {
         setTooltipData({ tooltip, xPos, yPos })
       } else if (typeof tooltip === "string") {
-        setTooltipData({ tooltip: () => tooltip.split("\n").map((s, i) => <p key={i}>{s}</p>), xPos, yPos })
+        setTooltipData({ tooltip: () => tooltip, xPos, yPos })
       }
     },
     clearTooltip: () => setTooltipData(null)
   }), [])
 
-  const tooltipValue = useMemo(() => tooltipData?.tooltip(), [tooltipData])
+  const tooltipValue = useMemo(() => {
+    if (tooltipData === null) {
+      return null
+    }
+
+    const res = tooltipData.tooltip()
+    if (typeof res === "string") {
+      return res.split(/\n|\\+n/).map((s, i) => <div key={i}>{s || <span className="opacity-0">_empty</span>}</div>)
+    }
+    return res
+  }, [tooltipData])
 
   return (
     <TooltipContext.Provider value={tooltip}>
