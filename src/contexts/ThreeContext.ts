@@ -23,13 +23,15 @@ export type ThreeJsContext = {
   getCamera: () => Camera
   setCameraType: (isPerspective: boolean) => void
 
+  renderSingleFrame: () => void
+
   transformControls: TransformControls,
 
   box: Object3D,
   grid: Object3D,
 }
 
-export const createThreeContext: () => ThreeJsContext = () => {
+export const createThreeContext = (): ThreeJsContext => {
   if (typeof window === "undefined") {
     return null as any
   }
@@ -113,19 +115,24 @@ export const createThreeContext: () => ThreeJsContext = () => {
     }
   }
 
-  const onFrame = () => {
-    requestAnimationFrame(onFrame)
+  const runFrameAndRequest = () => {
+    requestAnimationFrame(runFrameAndRequest)
+    onFrame()
+  }
 
+  const onFrame = () => {
     const deltaTime = clock.getDelta()
     onFrameListeners.forEach(l => l(deltaTime))
 
-    renderer.render(scene, camera)
+    renderSingleFrame()
 
     renderer.clearDepth()
     renderer.render(onTopScene, camera)
   }
 
-  onFrame()
+  const renderSingleFrame = () => renderer.render(scene, camera)
+
+  runFrameAndRequest()
 
   return {
     renderer, scene, onTopScene, controls,
@@ -161,6 +168,8 @@ export const createThreeContext: () => ThreeJsContext = () => {
       minorGridMaterial.color.set(minorColor)
       subGridMaterial.color.set(subColor)
     },
+
+    renderSingleFrame: () => renderSingleFrame(),
 
     box, grid
   }

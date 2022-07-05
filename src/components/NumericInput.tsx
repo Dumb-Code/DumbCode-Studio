@@ -8,6 +8,8 @@ const NumericInput = ({
   isPositiveInteger = false,
   defaultValue = 0,
   hideArrows = false,
+
+  min, max
 }: {
   value?: number | null | undefined,
   onChange?: (value: number) => void,
@@ -18,17 +20,26 @@ const NumericInput = ({
   isPositiveInteger?: boolean
   defaultValue?: number
   hideArrows?: boolean
+
+  min?: number
+  max?: number
 }) => {
 
   const inputRef = useRef<HTMLInputElement>(null)
 
   const stringToNum = useCallback((string: string) => {
-    const num = isPositiveInteger ? parseInt(string) : parseFloat(string)
+    let num = isPositiveInteger ? parseInt(string) : parseFloat(string)
     if (isPositiveInteger && num < 0) {
-      return 0
+      num = 0
+    }
+    if (min !== undefined && num < min) {
+      num = min
+    }
+    if (max !== undefined && num > max) {
+      num = max
     }
     return isNaN(num) ? defaultValue : num
-  }, [isPositiveInteger, defaultValue])
+  }, [isPositiveInteger, defaultValue, min, max])
   const numToString = useCallback((value: number | null | undefined) => value?.toFixed(isPositiveInteger ? 0 : 2) ?? "", [isPositiveInteger])
 
   const [typedValue, setTypedValue] = useState(numToString(value))
@@ -71,13 +82,17 @@ const NumericInput = ({
       .filter(item => item.value.matchesUnknownEvent(event))
       .sort((a, b) => a.value.computePriority() - b.value.computePriority())[0]
 
+    if (maxPriorityItem === undefined) {
+      return 0
+    }
+
     switch (maxPriorityItem.key) {
-      case "multiply_0_01": return 0.01
-      case "multiply_0_1": return 0.1
+      case "multiply_0_01": return isPositiveInteger ? 1 : 0.01
+      case "multiply_0_1": return isPositiveInteger ? 1 : 0.1
       case "multiply_1": return 1
       case "multiply_10": return 10
     }
-  }, [combos])
+  }, [combos, isPositiveInteger])
 
   const modifyIncrease = useCallback((e: NeededEventData) => {
     if (value !== null && value !== undefined) {
