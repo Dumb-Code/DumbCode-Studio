@@ -9,6 +9,7 @@ import NumericInput from "../components/NumericInput"
 import { RawCanvas } from "../components/StudioCanvas"
 import { ButtonWithTooltip } from "../components/Tooltips"
 import { useStudio } from "../contexts/StudioContext"
+import { useModelIsolationFactory } from "../contexts/ThreeContext"
 import DcaAnimation from "../studio/formats/animations/DcaAnimation"
 import { exportAnimationAsGif } from "../studio/formats/animations/DcaGifExporter"
 import { downloadBlob } from "../studio/util/FileTypes"
@@ -38,31 +39,8 @@ const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation 
   const clampedWidth = width < height ? displayMax * width / height : displayMax
   const clampedHeight = width < height ? displayMax : displayMax * height / width
 
-  useEffect(() => {
-    const gridVisible = grid.visible
-    const boxVisible = box.visible
-
-    grid.visible = false
-    box.visible = false
-
-    const defaultParent = project.model.modelGroup.parent!
-
-    scene.remove(project.group)
-    onTopScene.remove(project.overlayGroup)
-    scene.add(project.model.modelGroup)
-
-    project.model.traverseAll(cube => cube.updateMaterials({ selected: false, hovering: false }))
-    return () => {
-      scene.remove(project.model.modelGroup)
-      scene.add(project.group)
-      onTopScene.add(project.overlayGroup)
-      defaultParent.add(project.model.modelGroup)
-
-      project.model.traverseAll(cube => cube.updateMaterials({}))
-      grid.visible = gridVisible
-      box.visible = boxVisible
-    }
-  }, [project, grid, box, scene, onTopScene])
+  const isolationFactory = useModelIsolationFactory()
+  useEffect(isolationFactory, [isolationFactory])
 
   useEffect(() => {
     const onFrame = (deltaTime: number) => {

@@ -1,8 +1,10 @@
 import { useCallback, useMemo } from "react"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
+import { useOptions } from "../../../contexts/OptionsContext"
 import { useInstall } from "../../../contexts/PWAInstallButtonContext"
+import { AllScreenshotActionTypes } from "../../../studio/screenshot/ScreenshotActions"
 
-const ApplicationOptions = () => {
+const GeneralOptions = () => {
   const isChrome = useMemo(() => "chrome" in window, [])
   const isEdge = useMemo(() => isChrome && navigator.userAgent.indexOf("Edg") != -1, [isChrome])
   const { installState } = useInstall()
@@ -13,8 +15,10 @@ const ApplicationOptions = () => {
     navigator.clipboard.writeText(appEdit)
   }, [appEdit])
 
+  const { selectedScreenshotActions, setScreenshotActionEnabled } = useOptions()
+
   return (
-    <div className="">
+    <div className="dark:text-white">
       <p className="text-black dark:text-white font-semibold mb-2">APPLICATION OPTIONS</p>
 
       <p className="text-gray-900 text-xs font-semibold">INSTALL</p>
@@ -29,6 +33,19 @@ const ApplicationOptions = () => {
         </>
       )}
 
+      <p className="text-gray-900 text-xs font-semibold mt-2">Screenshot Actions</p>
+      {AllScreenshotActionTypes.map(action => (
+        <button
+          key={action}
+          className={
+            "px-5 py-2 border-blue-500 border " +
+            (selectedScreenshotActions.includes(action) ? "bg-blue-500 hover:bg-blue-600" : "dark:bg-gray-800 bg-gray-400 hover:dark:bg-gray-600 hover:bg-gray-200 ")
+          }
+          onClick={() => setScreenshotActionEnabled(action, !selectedScreenshotActions.includes(action))}
+        >
+          {action}
+        </button>
+      ))}
 
     </div>
   )
@@ -66,4 +83,4 @@ const PWAInstallButton = () => {
   )
 }
 
-export default ApplicationOptions
+export default GeneralOptions

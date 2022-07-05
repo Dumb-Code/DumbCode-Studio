@@ -48,7 +48,7 @@ export const exportAnimationAsGif = async (
         animation.animateAt(time)
 
         context.renderer.clear()
-        context.renderSingleFrame()
+        context.renderSingleFrame(false)
 
         gif.addFrame(canvas, { copy: true, delay: 1000 / fps })
       }

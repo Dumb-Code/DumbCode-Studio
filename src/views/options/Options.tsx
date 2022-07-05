@@ -2,7 +2,7 @@ import { useState } from "react"
 import AccountOptions from "./components/AccountOptions"
 import AcessibilityOptions from "./components/AcessibilityOptions"
 import AppearanceOptions from "./components/AppearanceOptions"
-import ApplicationOptions from "./components/ApplicationOptions"
+import GeneralOptions from "./components/GeneralOptions"
 import KeyBindOptions from "./components/KeyBindOptions"
 import LanguageOptions from "./components/LanguageOptions"
 import LinksToOurStuff from "./components/LinksToOurStuff"
@@ -13,7 +13,7 @@ type OptionsTab = {
 }
 
 const OptionsTabs: OptionsTab[] = [
-    { name: "Application", component: () => <ApplicationOptions /> },
+    { name: "General", component: () => <GeneralOptions /> },
     { name: "Appearance", component: () => <AppearanceOptions /> },
     { name: "Linked Accounts", component: () => <AccountOptions /> },
     { name: "Language", component: () => <LanguageOptions /> },

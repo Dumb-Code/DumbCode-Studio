@@ -1,7 +1,9 @@
+import { useCallback } from 'react';
 import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, Object3D, OrthographicCamera, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
+import { useStudio } from './StudioContext';
 
 export type ThreeJsContext = {
   scene: Scene,
@@ -23,7 +25,7 @@ export type ThreeJsContext = {
   getCamera: () => Camera
   setCameraType: (isPerspective: boolean) => void
 
-  renderSingleFrame: () => void
+  renderSingleFrame: (includeOverlay?: boolean) => void
 
   transformControls: TransformControls,
 
@@ -125,12 +127,15 @@ export const createThreeContext = (): ThreeJsContext => {
     onFrameListeners.forEach(l => l(deltaTime))
 
     renderSingleFrame()
-
-    renderer.clearDepth()
-    renderer.render(onTopScene, camera)
   }
 
-  const renderSingleFrame = () => renderer.render(scene, camera)
+  const renderSingleFrame = (overlay = true) => {
+    renderer.render(scene, camera)
+    if (overlay) {
+      renderer.clearDepth()
+      renderer.render(onTopScene, camera)
+    }
+  }
 
   runFrameAndRequest()
 
@@ -169,7 +174,7 @@ export const createThreeContext = (): ThreeJsContext => {
       subGridMaterial.color.set(subColor)
     },
 
-    renderSingleFrame: () => renderSingleFrame(),
+    renderSingleFrame: (overlay) => renderSingleFrame(overlay),
 
     box, grid
   }
@@ -313,4 +318,50 @@ const convertToPerspective = (cameraP: PerspectiveCamera, cameraO: OrthographicC
   cameraP.getWorldDirection(cameraP.position).multiplyScalar(-cameraMove).add(orbitControls.target)
 
   return cameraP
+}
+
+export const useModelIsolationFactory = () => {
+  const { scene, onTopScene, getSelectedProject, grid, box } = useStudio()
+  const project = getSelectedProject()
+
+  return useCallback(() => {
+    const gridVisible = grid.visible
+    const boxVisible = box.visible
+
+    grid.visible = false
+    box.visible = false
+
+    const defaultParent = project.model.modelGroup.parent!
+
+    scene.remove(project.group)
+    onTopScene.remove(project.overlayGroup)
+    scene.add(project.model.modelGroup)
+
+    project.model.traverseAll(cube => cube.updateMaterials({ selected: false, hovering: false }))
+    return () => {
+      scene.remove(project.model.modelGroup)
+      scene.add(project.group)
+      onTopScene.add(project.overlayGroup)
+      defaultParent.add(project.model.modelGroup)
+
+      project.model.traverseAll(cube => cube.updateMaterials({}))
+      grid.visible = gridVisible
+      box.visible = boxVisible
+    }
+  }, [project, grid, box, scene, onTopScene])
+}
+
+export const useNoBackgroundFactory = () => {
+  const { scene, onTopScene } = useStudio()
+
+  return useCallback(() => {
+    const sceneBackground = scene.background
+    const onTopSceneBackground = onTopScene.background
+    scene.background = null
+    onTopScene.background = null
+    return () => {
+      scene.background = sceneBackground
+      onTopScene.background = onTopSceneBackground
+    }
+  }, [scene, onTopScene])
 }

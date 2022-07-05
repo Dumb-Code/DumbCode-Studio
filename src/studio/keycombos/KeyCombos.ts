@@ -15,6 +15,9 @@ const keyCombos = {
       undo: new KeyCombo('Undo', "Un does the last operation", 'KeyZ'),
       redo: new KeyCombo('Redo', "Re does the last undone operation", 'KeyY'),
       repeat_previous_command: new KeyCombo('Repeat Previous Command', "Repeats the last command run by the user", 'Space', false),
+      screenshot: new KeyCombo('Screenshot', "Captures a screenshot of the current view", 'F2', false),
+      screenshot_only_model: new KeyCombo('Screenshot Only The Model', "Captures a screenshot of only the current model", 'F2', true),
+
     }
   },
 
@@ -67,6 +70,7 @@ const keyCombos = {
       paste_world_position: new KeyCombo('Paste as World', "Paste the cubes in the world position they were copied from", "KeyV", true, true),
       drag_cube_and_children: new KeyCombo('Drag Cubes + Children', "In the cube list, dragging cubes will also move their children", null, true),
       drag_cubes_in_place: new KeyCombo('Drag Cubes in Place', "In the cube list, dragging cubes will not change their overall position/rotation", null, false, false, true),
+
     }
   },
 

@@ -1,5 +1,8 @@
-import { HTMLAttributes, useEffect, useRef } from "react";
+import { HTMLAttributes, useCallback, useEffect, useMemo, useRef } from "react";
+import { useKeyComboPressed, useOptions } from "../contexts/OptionsContext";
 import { useStudio } from "../contexts/StudioContext";
+import { useModelIsolationFactory, useNoBackgroundFactory } from "../contexts/ThreeContext";
+import { ScreenshotActionMap } from "../studio/screenshot/ScreenshotActions";
 import { useSelectedCubeHighlighter } from "../studio/util/CubeSelectedHighlighter";
 import { useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
@@ -40,9 +43,43 @@ export const RawCanvas = ({ autoChangeSize = true, ...props }: HTMLAttributes<HT
 }
 
 const StudioCanvas = () => {
-  const { onMouseUp } = useStudio()
+  const { onMouseUp, renderer, renderSingleFrame } = useStudio()
   useSelectedCubeManager()
   useSelectedCubeHighlighter()
+
+  const { selectedScreenshotActions } = useOptions()
+
+  const isolationFactory = useModelIsolationFactory()
+  const noBackgroundFactory = useNoBackgroundFactory()
+
+  const screenshot = useCallback(async (onlyModel: boolean) => {
+    let resetIsolation = onlyModel ? isolationFactory() : null
+    let resetBackground = onlyModel ? noBackgroundFactory() : null
+
+    renderSingleFrame(!onlyModel)
+
+    if (resetIsolation !== null) {
+      resetIsolation()
+    }
+    if (resetBackground !== null) {
+      resetBackground()
+    }
+
+    const blob = await new Promise<Blob | null>(resolve => {
+      renderer.domElement.toBlob(blob => resolve(blob))
+    })
+    if (blob === null) {
+      return
+    }
+    selectedScreenshotActions.forEach(action => ScreenshotActionMap[action](blob))
+  }, [selectedScreenshotActions])
+
+  useKeyComboPressed(useMemo(() => ({
+    common: {
+      screenshot: () => screenshot(false),
+      screenshot_only_model: () => screenshot(true),
+    }
+  }), [screenshot]), {})
 
   const startPosition = useRef({ x: 0, y: 0 })
   const movedAmount = useRef({ x: 0, y: 0 })

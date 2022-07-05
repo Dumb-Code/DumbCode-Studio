@@ -106,6 +106,10 @@ export class AnimatorGumballIK {
       }
 
       const mesh = cubeHelperMesh.clone()
+      if (this.visualHelpers.length === 0) {
+        mesh.material = mesh.material.clone()
+        mesh.material.color.set('red')
+      }
       this.helperGroup.add(mesh)
       this.visualHelpers.push({ cube, mesh })
 
@@ -222,6 +226,7 @@ export class AnimatorGumballIK {
     //If there's a change before it, then it essentially ignores them. FIgure out why this is.
     //Look at the varibles here, and look what changes between having and not having a keyframe before
     //the current. I am sleep
+    //PRetty sure it's because we are animating the model, so any changes before get erased? idk thats not quite right
     //Might be due to the fact we use the world matrix ?
 
     //Get the euler angles and set it to the rotation. Push these changes.

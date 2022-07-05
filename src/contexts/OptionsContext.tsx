@@ -2,6 +2,7 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, 
 import { Color } from "three";
 import KeyCombo from "../studio/keycombos/KeyCombo";
 import { KeyComboCategory, KeyComboKey, KeyComboMap, loadOrCreateKeyCombos, SavedKeyComboMap, updateClashes } from "../studio/keycombos/KeyCombos";
+import { ScreenshotActionType } from "../studio/screenshot/ScreenshotActions";
 import { useStudio } from "./StudioContext";
 
 type ThemeSetting = "light" | "dark" | "auto";
@@ -12,6 +13,9 @@ export type OptionsContext = {
   isSystemDark: boolean,
   theme: ThemeSetting,
   setTheme: (val: ThemeSetting) => void
+
+  selectedScreenshotActions: ScreenshotActionType[]
+  setScreenshotActionEnabled: (action: ScreenshotActionType, enabled: boolean) => void
 
   compactMode: boolean
   setCompactMode: (val: boolean) => void
@@ -24,6 +28,7 @@ type SavedOptions = {
   readonly theme: ThemeSetting,
   readonly compactMode: boolean,
   readonly keyCombos: SavedKeyComboMap
+  readonly selectedScreenshotActions?: ScreenshotActionType[]
 }
 
 export const useOptions = () => {
@@ -42,10 +47,7 @@ export const useKeyComboPressed = (handlers: {
   [category in KeyComboCategory]?: {
     [combo in KeyComboKey<category>]?: () => void
   }
-}, options?: {
-  blurActiveElement?: boolean
-}) => {
-  const blurActiveElement = options?.blurActiveElement ?? true
+}, { blurActiveElement = true } = {}) => {
   const studioOptions = useOptions()
   useEffect(() => {
     const handlerPairs = Object.keys(handlers)
@@ -58,6 +60,7 @@ export const useKeyComboPressed = (handlers: {
         }
         return Object.keys(handlerCat)
           .map(k => ({ combo: keyCat[k], handler: handlerCat[k] }))
+          .filter(({ combo, handler }) => combo !== undefined && handler !== undefined)
       })
 
     const listener = (e: KeyboardEvent) => {
@@ -99,6 +102,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
   const [isSystemDark, setIsSystemDark] = useState(true)  //We want the dark theme to default true for SSG. This is overriden below.
   const [compactMode, setCompactMode] = useState(loadedOptions?.compactMode ?? false)
   const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [loadedOptions?.keyCombos])
+  const [selectedScreenshotActions, setScreenshotAction] = useState<ScreenshotActionType[]>(loadedOptions?.selectedScreenshotActions ?? ["copy_to_clipboard"])
 
   const darkMode = useMemo(() => theme === "auto" ? isSystemDark : theme === "dark", [theme, isSystemDark])
 
@@ -116,10 +120,11 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
         }, {} as SavedKeyComboMap[typeof category])
 
         return obj
-      }, {} as SavedKeyComboMap)
+      }, {} as SavedKeyComboMap),
+      selectedScreenshotActions: selectedScreenshotActions
     }
     localStorage.setItem("studio_options", JSON.stringify(data))
-  }, [compactMode, keyCombos, theme])
+  }, [compactMode, keyCombos, theme, selectedScreenshotActions])
   useEffect(() => saveOptions(), [saveOptions])
 
 
@@ -150,6 +155,10 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
     saveOptions()
   }, [keyCombos, saveOptions])
 
+  const setScreenshotActionEnabled = useCallback((action: ScreenshotActionType, enabled: boolean) => {
+    setScreenshotAction(selectedScreenshotActions.filter(a => a !== action).concat(enabled ? [action] : []))
+  }, [selectedScreenshotActions])
+
   //When rendered SSR, setGridColor is undefined
   if (setGridColor) {
     if (darkMode) {
@@ -160,7 +169,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
 
   }
   return (
-    <Context.Provider value={{ darkMode, isSystemDark, theme, setTheme, compactMode, setCompactMode, keyCombos, keyCombosChanged }}>
+    <Context.Provider value={{ darkMode, isSystemDark, theme, setTheme, compactMode, setCompactMode, selectedScreenshotActions, setScreenshotActionEnabled, keyCombos, keyCombosChanged }}>
       {children}
     </Context.Provider>
   )
