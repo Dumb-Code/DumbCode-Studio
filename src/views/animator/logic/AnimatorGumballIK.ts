@@ -148,8 +148,8 @@ export class AnimatorGumballIK {
     this.updateHelpers()
 
     const arr = this.ikDirection === "move_root_from_cube" ? Array.from(this.chainData).reverse() : Array.from(this.chainData)
-
-    const changedData = arr.map((data, i) => {
+    const changedData = arr.map((data, iRaw) => {
+      const i = this.ikDirection === "move_root_from_cube" ? arr.length - iRaw - 1 : iRaw
       const bone = this.solver.chains[0].bones[i] as Bone3D
       return AnimatorGumballIK.applyBoneToCube(bone, data)
     })
