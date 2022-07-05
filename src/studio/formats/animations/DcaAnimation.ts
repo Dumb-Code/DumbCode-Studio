@@ -29,6 +29,7 @@ type RootDataSectionType = {
     name: string,
     ikAnchorCubes: readonly string[],
     lockedCubes: readonly string[],
+    ikDirection: "upwards" | "downwards",
     keyframe_layers: readonly { layerId: number }[],
     propertiesMode: "local" | "global",
     time: number,
@@ -102,6 +103,7 @@ export default class DcaAnimation {
   readonly zoom = new LO(1, this.onDirty)
 
   readonly ikAnchorCubes = new LO<readonly string[]>([], this.onDirty).applyToSection(this._section, "ikAnchorCubes")
+  readonly ikDirection = new LO<"upwards" | "downwards">("upwards", this.onDirty).applyToSection(this._section, "ikDirection")
   readonly lockedCubes = new LO<readonly string[]>([], this.onDirty).applyToSection(this._section, "lockedCubes")
 
   readonly keyframeStartOrDurationChanges = new Set<() => void>()

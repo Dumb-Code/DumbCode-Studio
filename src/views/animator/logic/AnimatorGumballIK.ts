@@ -5,6 +5,7 @@ import { DcaKeyframe } from './../../../studio/formats/animations/DcaAnimation';
 import { CubeParent, DCMCube } from './../../../studio/formats/model/DcmModel';
 
 const tempVec = new Vector3()
+const tempVec2 = new Vector3()
 const tempQuat = new Quaternion()
 const worldQuat = new Quaternion()
 const tempEuler = new Euler()
@@ -40,6 +41,8 @@ export class AnimatorGumballIK {
   readonly linePositionBuffer: BufferAttribute
   readonly lineHelper: Line
 
+  private ikDirection: "move_cube_from_root" | "move_root_from_cube" = "move_cube_from_root"
+
   constructor(group: Group, overlayGroup: Group) {
     this.anchor.rotation.order = "ZYX"
     group.add(this.anchor)
@@ -51,11 +54,12 @@ export class AnimatorGumballIK {
     this.helperGroup.add(this.lineHelper)
   }
 
-  begin(cubes: readonly DCMCube[], anchorCubes: readonly string[]) {
+  begin(cubes: readonly DCMCube[], anchorCubes: readonly string[], direction: "upwards" | "downwards") {
     this.end() //todo: conditional - only call this if we need to 
     if (cubes.length !== 1) {
       return
     }
+    this.ikDirection = direction === "upwards" ? "move_cube_from_root" : "move_root_from_cube"
     const selected = cubes[0]
 
     const chain = new Chain3D()
@@ -69,14 +73,22 @@ export class AnimatorGumballIK {
       }
     }
 
+    if (this.ikDirection === "move_root_from_cube") {
+      allCubes.reverse()
+    }
+
+    const firstCube = allCubes[0]
+
+    firstCube.getWorldPosition(0.5, 0.5, 0.5, this.anchor.position)
+    firstCube.cubeGroup.getWorldQuaternion(this.anchor.quaternion)
+
     this.lineHelper.geometry.setDrawRange(0, allCubes.length)
     this.lineHelper.visible = true
 
     let previousPosition: number[] | null = null
     let previousCube: DCMCube | null = null
 
-    selected.cubeGroup.getWorldPosition(this.startingPosOffset).sub(selected.getWorldPosition(0.5, 0.5, 0.5, tempVec))
-
+    firstCube.cubeGroup.getWorldPosition(this.startingPosOffset).sub(firstCube.getWorldPosition(0.5, 0.5, 0.5, tempVec))
 
     allCubes.reverse().forEach(cube => {
       const position = cube.cubeGroup.getWorldPosition(tempVec)
@@ -86,7 +98,7 @@ export class AnimatorGumballIK {
         let bone = new Bone3D(start, end)
 
         this.chainData.push({
-          cube: previousCube,
+          cube: cube,
           startingWorldRot: previousCube.cubeGroup.getWorldQuaternion(new Quaternion()),
           offset: new Vector3(end.x - start.x, end.y - start.y, end.z - start.z).normalize(),
         })
@@ -106,7 +118,7 @@ export class AnimatorGumballIK {
       this.solver.add(chain, this.transformAnchor)
       this.solver.update()
       this.updateHelpers()
-      selected.cubeGroup.getWorldQuaternion(this.startingWorldRot)
+      firstCube.cubeGroup.getWorldQuaternion(this.startingWorldRot)
     }
   }
 
@@ -135,29 +147,53 @@ export class AnimatorGumballIK {
     this.solver.update()
     this.updateHelpers()
 
-    const changedData = this.chainData.map((data, i) => {
+    const arr = this.ikDirection === "move_root_from_cube" ? Array.from(this.chainData).reverse() : Array.from(this.chainData)
+
+
+    const changedData = arr.map((data, i) => {
       const bone = this.solver.chains[0].bones[i] as Bone3D
       return AnimatorGumballIK.applyBoneToCube(bone, data)
     })
 
-    const selectParent = selected.cubeGroup.parent as any
-    if (!selectParent) {
-      throw new Error("Cube had no parent?");
+
+    if (this.ikDirection === "move_cube_from_root") {
+      const selectParent = selected.cubeGroup.parent as any
+      if (!selectParent) {
+        throw new Error("Cube had no parent?");
+      }
+      //We need to have the selected cube have the same axis. So here it basically "inverts" the parent changes.
+      selectParent.updateMatrixWorld()
+      const quat = selectParent.getWorldQuaternion(worldQuat).invert().multiply(this.startingWorldRot)
+      tempEuler.setFromQuaternion(quat)
+
+      keyframe.wrapToSetValue(() => {
+        keyframe.setRotationAbsoluteAnimated(selected,
+          tempEuler.x * 180 / Math.PI,
+          tempEuler.y * 180 / Math.PI,
+          tempEuler.z * 180 / Math.PI,
+        )
+        changedData.forEach(data => data !== null && keyframe.setRotationAbsoluteAnimated(data.cube, ...data.rotations))
+      })
+    } else {
+      keyframe.wrapToSetValue(() => {
+        const last = this.chainData.length - 1
+        const bone = this.solver.chains[0].bones[last] as Bone3D
+        const data = this.chainData[last]
+
+        const targetWorldPos = bone.end
+        const currentWorldPos = data.cube.cubeGroup.getWorldPosition(tempVec)
+        const worldChange = tempVec2.set(targetWorldPos.x - currentWorldPos.x, targetWorldPos.y - currentWorldPos.y, targetWorldPos.z - currentWorldPos.z)
+
+        data.cube.cubeGroup.getWorldQuaternion(worldQuat)
+        worldQuat.invert()
+        const localChange = worldChange.applyQuaternion(worldQuat).multiplyScalar(16)
+
+        const localAbsolutePosition = localChange.add(data.cube.cubeGroup.position)
+        keyframe.setPositionAbsoluteAnimated(data.cube, localAbsolutePosition.x, localAbsolutePosition.y, localAbsolutePosition.z)
+
+        changedData.forEach(data => data !== null && keyframe.setRotationAbsoluteAnimated(data.cube, ...data.rotations))
+      })
     }
-
-    //We need to have the selected cube have the same axis. So here it basically "inverts" the parent changes.
-    selectParent.updateMatrixWorld()
-    const quat = selectParent.getWorldQuaternion(worldQuat).invert().multiply(this.startingWorldRot)
-    tempEuler.setFromQuaternion(quat)
-
-    keyframe.wrapToSetValue(() => {
-      keyframe.setRotationAbsoluteAnimated(selected,
-        tempEuler.x * 180 / Math.PI,
-        tempEuler.y * 180 / Math.PI,
-        tempEuler.z * 180 / Math.PI,
-      )
-      changedData.forEach(data => data !== null && keyframe.setRotationAbsoluteAnimated(data.cube, ...data.rotations))
-    })
   }
 
   static applyBoneToCube(bone: Bone3D, data: { offset: Vector3, cube: DCMCube, startingWorldRot: Quaternion }) {
@@ -208,32 +244,34 @@ export class AnimatorGumballIK {
   }
 
   updateHelpers() {
-    // const chain = this.solver.chains[0]
-    // if (chain === undefined) {
-    //   return
-    // }
-    // const bones = this.solver.chains[0].bones as Bone3D[]
-    // if (bones === null) {
-    //   return
-    // }
+    //Update the helpers based on the solver
+    const chain = this.solver.chains[0]
+    if (chain === undefined) {
+      return
+    }
+    const bones = this.solver.chains[0].bones as Bone3D[]
+    if (bones === null) {
+      return
+    }
 
-    // bones.forEach((bone, index) => {
-    //   if (index === 0) {
-    //     this.visualHelpers[0].mesh.position.set(bone.start.x, bone.start.y, bone.start.z)
-    //     this.linePositionBuffer.setXYZ(0, bone.start.x, bone.start.y, bone.start.z)
-    //   }
-    //   this.visualHelpers[index + 1].mesh.position.set(bone.end.x, bone.end.y, bone.end.z)
-    //   this.linePositionBuffer.setXYZ(index + 1, bone.end.x, bone.end.y, bone.end.z)
-    // })
-    // this.linePositionBuffer.needsUpdate = true
-
-    this.visualHelpers.forEach(({ cube, mesh }, index) => {
-      cube.cubeGroup.getWorldQuaternion(mesh.quaternion)
-      cube.getWorldPosition(0.5, 0.5, 0.5, mesh.position)
-
-      this.linePositionBuffer.setXYZ(index, mesh.position.x, mesh.position.y, mesh.position.z)
+    bones.forEach((bone, index) => {
+      if (index === 0) {
+        this.visualHelpers[0].mesh.position.set(bone.start.x, bone.start.y, bone.start.z)
+        this.linePositionBuffer.setXYZ(0, bone.start.x, bone.start.y, bone.start.z)
+      }
+      this.visualHelpers[index + 1].mesh.position.set(bone.end.x, bone.end.y, bone.end.z)
+      this.linePositionBuffer.setXYZ(index + 1, bone.end.x, bone.end.y, bone.end.z)
     })
     this.linePositionBuffer.needsUpdate = true
+
+    //Update the helpers based on the cubes
+    // this.visualHelpers.forEach(({ cube, mesh }, index) => {
+    //   cube.cubeGroup.getWorldQuaternion(mesh.quaternion)
+    //   cube.getWorldPosition(0.5, 0.5, 0.5, mesh.position)
+
+    //   this.linePositionBuffer.setXYZ(index, mesh.position.x, mesh.position.y, mesh.position.z)
+    // })
+    // this.linePositionBuffer.needsUpdate = true
   }
 
 

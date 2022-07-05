@@ -290,6 +290,7 @@ const LoopCheck = ({ title }: { title: string }) => {
 const IKCheck = ({ title, animation }: { title: string, animation: DcaAnimation | null }) => {
     const [selected] = useListenableObjectNullable(animation?.project?.selectedCubeManager?.selected)
     const [anchors, setAnchors] = useListenableObjectNullable(animation?.ikAnchorCubes)
+    const [direction, setDirection] = useListenableObjectNullable(animation?.ikDirection)
     const isAllSelected = selected !== undefined && anchors !== undefined && selected.every(s => anchors.includes(s))
     const toggleAllSelected = () => {
         if (selected === undefined || anchors === undefined) {
@@ -321,6 +322,12 @@ const IKCheck = ({ title, animation }: { title: string, animation: DcaAnimation 
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7">
                     <Checkbox value={isAllSelected} setValue={toggleAllSelected} />
+                </div>
+            </div>
+            <p className="ml-1 dark:text-gray-400 text-black text-xs mr-2 mt-2">Reversed?</p>
+            <div className="flex flex-col p-1">
+                <div className="mb-1 h-7">
+                    <Checkbox value={direction === "downwards"} setValue={v => setDirection(v ? "downwards" : "upwards")} />
                 </div>
             </div>
         </div>

@@ -69,9 +69,6 @@ export class AnimatorGumball {
       if (this.gumball_autoRotate.value) {
         cube.cubeGroup.getWorldQuaternion(this.transformAnchor.quaternion)
       }
-
-      this.gumballIK.anchor.position.copy(this.transformAnchor.position)
-      this.gumballIK.anchor.quaternion.copy(this.transformAnchor.quaternion)
     }
   }
 }
@@ -107,7 +104,7 @@ export const useAnimatorGumball = () => {
         case "translateIK":
           transformControls.mode = "translate"
           transformControls.attach(gumball.gumballIK.anchor)
-          gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value)
+          gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value, animation.ikDirection.value)
           break
         default:
           transformControls.mode = mode
@@ -164,14 +161,19 @@ export const useAnimatorGumball = () => {
         gumball.moveToSelected(val)
       }
       if (gumball.mode.value === "object" && gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value)
+        gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value, animation.ikDirection.value)
       }
       updateTransformControlsVisability({})
     }
 
     const updateIKAnchors = (val: readonly string[]) => {
       if (gumball.mode.value === "object" && gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, val)
+        gumball.gumballIK.begin(selectedCubes.current, val, animation.ikDirection.value)
+      }
+    }
+    const updateIKDirection = (direction: "upwards" | "downwards") => {
+      if (gumball.mode.value === "object" && gumball.object_transformMode.value === "translateIK") {
+        gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value, direction)
       }
     }
 
@@ -232,7 +234,7 @@ export const useAnimatorGumball = () => {
       const kf = selectedKfs[0]
       const cubes = selectedCubes.current
       if (gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value)
+        gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value, animation.ikDirection.value)
 
         return
       }
@@ -337,6 +339,7 @@ export const useAnimatorGumball = () => {
     selectedCubeManager.selected.addAndRunListener(updateSelectedCubes)
     animation.selectedKeyframes.addListener(updateSelectedKeyframes)
     animation.ikAnchorCubes.addListener(updateIKAnchors)
+    animation.ikDirection.addListener(updateIKDirection)
 
     return () => {
       transformControls.detach()
@@ -356,6 +359,7 @@ export const useAnimatorGumball = () => {
       selectedCubeManager.selected.removeListener(updateSelectedCubes)
       animation.selectedKeyframes.removeListener(updateSelectedKeyframes)
       animation.ikAnchorCubes.removeListener(updateIKAnchors)
+      animation.ikDirection.removeListener(updateIKDirection)
 
       gumball.gumballIK.end()
 
