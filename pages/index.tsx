@@ -10,7 +10,7 @@ const Home = ({ githubClientId }: InferGetStaticPropsType<typeof getStaticProps>
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-        <meta name="description" content="description of your project" />
+        <meta name="description" content="A full stack blocky asset creation tool." />
         <meta name="theme-color" content="#262626" />
         <title>Dumbcode Studio</title>
         <link rel="manifest" href="/manifest.json" />
