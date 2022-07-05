@@ -98,7 +98,7 @@ export class AnimatorGumballIK {
         let bone = new Bone3D(start, end)
 
         this.chainData.push({
-          cube: cube,
+          cube: this.ikDirection === "move_cube_from_root" ? previousCube : cube,
           startingWorldRot: previousCube.cubeGroup.getWorldQuaternion(new Quaternion()),
           offset: new Vector3(end.x - start.x, end.y - start.y, end.z - start.z).normalize(),
         })
@@ -148,7 +148,6 @@ export class AnimatorGumballIK {
     this.updateHelpers()
 
     const arr = this.ikDirection === "move_root_from_cube" ? Array.from(this.chainData).reverse() : Array.from(this.chainData)
-
 
     const changedData = arr.map((data, i) => {
       const bone = this.solver.chains[0].bones[i] as Bone3D
