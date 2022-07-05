@@ -10,7 +10,8 @@ export const loadModelUnknown = async (arrayBuffer: ArrayBuffer | PromiseLike<Ar
   }
 
   try {
-    return loadModel(await arrayBuffer)
+    //We need the await here, so any errors are thrown instead of passed down 
+    return await loadModel(await arrayBuffer)
   } catch (e) {
     if (e instanceof ParseError) {
       console.warn(e)
