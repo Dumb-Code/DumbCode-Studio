@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react"
-import { InfoBubble, SVGCross, SVGTrash } from "../../../components/Icons"
+import { SVGCross, SVGInfoBubble, SVGTrash } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useOptions } from "../../../contexts/OptionsContext"
 import KeyCombo from "../../../studio/keycombos/KeyCombo"
@@ -67,7 +67,7 @@ const KeyBindOption = ({ keyCombo }: { keyCombo: KeyCombo }) => {
             <div className="dark:bg-gray-800 bg-gray-300 m-0.5 rounded-l p-1 text-black dark:text-gray-400 pl-3 w-3/4 flex flex-row">
                 {keyCombo.name}
                 <ButtonWithTooltip className="w-5 -mt-1" tooltip={keyCombo.moreInfo}>
-                    <InfoBubble className="w-4 h-4 mt-1 ml-2" />
+                    <SVGInfoBubble className="w-4 h-4 mt-1 ml-2" />
                 </ButtonWithTooltip>
             </div>
             <ButtonWithTooltip
