@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import InputSlider from "react-input-slider"
 import { Color } from "three"
 import Checkbox from "../components/Checkbox"
-import { SVGDownload } from "../components/Icons"
+import { SVGDownload, SVGInfoBubble } from "../components/Icons"
 import { DisplayModeDropup, RenderModeDropup, TextureGroupDropup } from "../components/InfoBar"
 import NumericInput from "../components/NumericInput"
 import { RawCanvas } from "../components/StudioCanvas"
@@ -113,25 +113,36 @@ const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation 
     <OpenedDialogBox width="1000px" height="800px" title={`Gif Export (${animation.name.value})`}>
       <div className="flex flex-row items-center w-full h-full">
         <div className="w-full flex flex-col h-full py-10 pl-5">
-          <div>
+          <div className="flex flex-row items-center my-1">
             Width:
-            <InputSlider x={width} onChange={v => setWidth(v.x)} xmin={5} xmax={3000} />
-            {width}px
+            <div className="mx-3">
+              <InputSlider x={width} onChange={v => setWidth(v.x)} xmin={5} xmax={3000} />
+            </div>
+            <NumericInput value={width} onChange={setWidth} isPositiveInteger min={5} />px
           </div>
-          <div>
+          <div className="flex flex-row items-center my-1">
             Height:
-            <InputSlider x={height} onChange={v => setHeight(v.x)} xmin={5} xmax={3000} />
-            {height}px
+            <div className="mx-3">
+              <InputSlider x={height} onChange={v => setHeight(v.x)} xmin={5} xmax={3000} />
+            </div>
+            <NumericInput value={height} onChange={setHeight} isPositiveInteger min={5} />px
           </div>
-          <div>
+          <div className="flex flex-row items-center my-1">
             FPS:
-            <NumericInput value={fps} onChange={setFPS} isPositiveInteger min={5} max={60} />
-            {height}px
+            <div className="mx-3">
+              <InputSlider x={fps} onChange={v => setFPS(v.x)} xmin={1} xmax={60} />
+            </div>
+            <NumericInput value={fps} onChange={setFPS} isPositiveInteger min={1} max={60} />fps
           </div>
-          <div>
+          <div className="flex flex-row items-center my-1">
             Background Colour:
-            <input type="color" onChange={e => setBackgroundColour(e.currentTarget.value)} />
+            <div className="mx-3">
+              <input type="color" onChange={e => setBackgroundColour(e.currentTarget.value)} />
+            </div>
             <Checkbox setValue={setUseTranslucentBackground} value={useTranslucentBackground} extraText="Use As Translucent" />
+            <ButtonWithTooltip className="w-5 -mt-1" tooltip="When transparent, pixels the same colour as the background are culled.\nSo choose a colour not shown\n\nTODO: make this tooltip better">
+              <SVGInfoBubble className="w-4 h-4 mt-1 ml-2" />
+            </ButtonWithTooltip>
           </div>
           {/* Note that for the modes below, we don't need to use the same element as the info bar 
             We only *need* to have the Render Mode and Texture Group, both of which are very easy to implement, 
