@@ -87,7 +87,7 @@ const NumericInput = ({
     }
 
     switch (maxPriorityItem.key) {
-      case "multiply_0_01": return isPositiveInteger ? 1 : 0.01
+      case "multiply_0_01": return isPositiveInteger ? 10 : 0.01
       case "multiply_0_1": return isPositiveInteger ? 1 : 0.1
       case "multiply_1": return 1
       case "multiply_10": return 10
