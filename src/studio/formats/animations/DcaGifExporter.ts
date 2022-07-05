@@ -2,12 +2,16 @@ import GIF from "gif.js";
 import { StudioContext } from './../../../contexts/StudioContext';
 import DcaAnimation from "./DcaAnimation";
 
-const numberOfFramesToExportPerFrame = 10
+const numberOfFramesToExportPerFrame = 5
 
 export const exportAnimationAsGif = async (
   animation: DcaAnimation, context: StudioContext, fps: number, transparent: string | null,
-  onProgress: (prog: number) => void, setFramesRendered: (prog: number) => void
+  setProcessed: (prog: number) => void, setFramesRendered: (prog: number) => void,
+  abort: AbortController
 ) => {
+  setFramesRendered(0)
+  setProcessed(0)
+
   const { project } = animation
   const { model } = project
 
@@ -29,6 +33,9 @@ export const exportAnimationAsGif = async (
   await new Promise((resolve) => {
     let time = 0;
     const onFrame = () => {
+      if (abort.signal.aborted) {
+        return
+      }
       for (let iter = 0; iter < numberOfFramesToExportPerFrame; iter++) {
         time += 1 / fps
         if (time > animation.maxTime.value) {
@@ -52,13 +59,17 @@ export const exportAnimationAsGif = async (
     }
     onFrame()
   })
-
+  if (abort.signal.aborted) {
+    return null
+  }
   context.renderer.autoClear = false
 
   return new Promise<Blob>((resolve, reject) => {
     gif.on('finished', blob => resolve(blob))
-    gif.on("progress", onProgress)
-    gif.on("abort", () => reject("Aborted?"))
+    gif.on("progress", setProcessed)
+
+    abort.signal.addEventListener("abort", () => gif.abort())
+
     gif.render()
   })
 }

@@ -28,8 +28,10 @@ const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation 
   const [processed, setProcessed] = useState(0)
   const [resultBlob, setResultBlob] = useState<Blob | null>(null)
   const [resultBlobString, setResultBlobString] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
 
-  const isExporting = useRef(false)
+  const abortControllerRef = useRef<AbortController>()
+
 
   const displayMax = 500;
 
@@ -64,7 +66,7 @@ const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation 
 
   useEffect(() => {
     const onFrame = (deltaTime: number) => {
-      if (isExporting.current) {
+      if (isExporting) {
         return
       }
       project.model.resetVisuals()
@@ -74,7 +76,7 @@ const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation 
     return () => {
       onFrameListeners.delete(onFrame)
     }
-  }, [project, onFrameListeners, animation])
+  }, [project, onFrameListeners, animation, isExporting])
 
   useEffect(() => {
     setSize(width, height)
@@ -98,15 +100,25 @@ const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation 
   }, [renderer, scene, onTopScene, backgroundColour, useTranslucentBackground])
 
   const beginRender = useCallback(async () => {
-    isExporting.current = true
-    setFramesRendered(0)
-    setProcessed(0)
+    setIsExporting(true)
+
     setResultBlob(null)
     setResultBlobString(null)
-    const blob = await exportAnimationAsGif(animation, studio, fps, useTranslucentBackground ? backgroundColour : null, setProcessed, setFramesRendered)
-    setResultBlob(blob)
-    setResultBlobString(URL.createObjectURL(blob))
-    isExporting.current = false
+
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
+
+    const blob = await exportAnimationAsGif(animation, studio, fps, useTranslucentBackground ? backgroundColour : null, setProcessed, setFramesRendered, abortController)
+
+    abortControllerRef.current = undefined
+
+    if (blob !== null) {
+      setResultBlob(blob)
+      setResultBlobString(URL.createObjectURL(blob))
+    }
+
+
+    setIsExporting(false)
   }, [animation, studio, fps, backgroundColour, useTranslucentBackground, setProcessed, setFramesRendered])
 
   return (
@@ -215,13 +227,16 @@ const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation 
           <div className="w-full mt-16">
             <AnimatorScrubBar animation={animation} />
           </div>
-          <button onClick={beginRender}>Render</button>
+          <button className="bg-blue-500 rounded p-2" onClick={beginRender}>Render</button>
           <div>
             Frames Rendered: {Math.round(framesRendered * 100)}%
           </div>
           <div>
             Processed: {Math.round(processed * 100)}%
           </div>
+          <button onClick={() => abortControllerRef.current?.abort()} className={`${isExporting ? "bg-red-500 hover:bg-red-400" : "bg-gray-500"} rounded p-2`} disabled={!isExporting}>
+            Cancel
+          </button>
         </div>
       </div>
     </OpenedDialogBox >
