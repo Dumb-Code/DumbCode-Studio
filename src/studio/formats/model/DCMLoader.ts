@@ -2,14 +2,19 @@ import JSZip from "jszip";
 import { NumArray } from "../../util/NumArray";
 import { DCMCube, DCMModel } from "./DcmModel";
 import { loadDCMModel } from "./OldDCMLoader";
+import { readTblFile } from "./TBLLoader";
 
 export const loadModelUnknown = async (arrayBuffer: ArrayBuffer | PromiseLike<ArrayBuffer>, name = "") => {
+  if (name.endsWith('.tbl')) {
+    return readTblFile(await arrayBuffer)
+  }
+
   try {
-    return await loadModel(await arrayBuffer)
+    return loadModel(await arrayBuffer)
   } catch (e) {
     if (e instanceof ParseError) {
       console.warn(e)
-      return await loadDCMModel(arrayBuffer, name)
+      return loadDCMModel(arrayBuffer, name)
     } else {
       throw e
     }
