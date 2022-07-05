@@ -60,7 +60,7 @@ const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation 
       grid.visible = gridVisible
       box.visible = boxVisible
     }
-  }, [project, grid, box])
+  }, [project, grid, box, scene, onTopScene])
 
   useEffect(() => {
     const onFrame = (deltaTime: number) => {
