@@ -87,3 +87,5 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
     </CreatedContext.Provider>
   )
 }
+
+export const unsafe_getThreeContext = () => three

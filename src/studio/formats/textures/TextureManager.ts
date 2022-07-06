@@ -1,5 +1,6 @@
 import { NearestFilter, Texture as ThreeTexture } from 'three';
 import { v4 as uuidv4 } from 'uuid';
+import { unsafe_getThreeContext } from '../../../contexts/StudioContext';
 import { useDomParent } from '../../util/DomParentRef';
 import DcProject from '../project/DcProject';
 import { LO, useListenableObject } from './../../util/ListenableObject';
@@ -26,9 +27,8 @@ export default class TextureManager {
     this.selectedGroup = new LO<TextureGroup>(this.defaultGroup)
     this.groups = new LO<readonly TextureGroup[]>([this.defaultGroup])
 
-    this.defaultGroup.textures.addListener(() => this.refresh())
-    this.selectedGroup.addListener(value => this.refresh(value))
-    this.textures.addListener(() => this.refresh())
+    this.defaultGroup.textures.addPostListener(() => this.refresh())
+    this.selectedGroup.addPostListener(() => this.refresh())
 
     this.canvas = document.createElement("canvas")
   }
@@ -54,16 +54,17 @@ export default class TextureManager {
   addGroup(...groups: TextureGroup[]) {
     groups.forEach(group => {
       group.needsSaving.addListener(v => this.project.projectNeedsSaving.value ||= v)
-      group.textures.addListener(() => this.refresh())
+      group.textures.addPostListener(() => this.refresh())
       group.unselectedTextures.value = this.defaultGroup.textures.value
     })
     this.groups.value = this.groups.value.concat(...groups)
   }
 
-  refresh(groupToUse: TextureGroup = this.selectedGroup.value) {
-    const textures = groupToUse.textures.value
+  refresh() {
+    const textures = this.selectedGroup.value.textures.value
       .map(t => this.findTexture(t))
       .filter(t => !t.hidden.value)
+
 
     TextureManager.writeToCanvas(textures, this.canvas)
 
@@ -83,8 +84,20 @@ export default class TextureManager {
     }
 
     //Get the width/height to render. Gets the width/height needed for all textures to render fully
-    const width = canvas.width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
-    const height = canvas.height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
+    let width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
+    let height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
+
+    const maxTextureSize = unsafe_getThreeContext().renderer.capabilities.maxTextureSize
+    const scale = maxTextureSize / Math.max(width, height);
+
+    if (scale < 1) {
+      width *= scale
+      height *= scale
+    }
+
+    canvas.width = width
+    canvas.height = height
+
     ctx.imageSmoothingEnabled = false
 
     //Draw white if no textures
