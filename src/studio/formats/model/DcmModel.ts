@@ -11,6 +11,7 @@ import { readCubesForClipboard } from './../../clipboard/CubeClipboardType';
 import UndoRedoHandler, { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
 import { setIntersectType } from './../../util/ObjectClickedHook';
+import { ModelTextureCoordinates } from './ModelTextureCoordinates';
 
 const tempVector = new Vector3()
 const tempQuaterion = new Quaternion()
@@ -46,14 +47,12 @@ type UndoRedoDataType = {
   data: {
     author: string,
     metadata: Readonly<Record<string, string>>,
-    textureWidth: number,
-    textureHeight: number,
     root: readonly string[],
   }
 } | {
   section_name: `cube_${string}`
   data: {
-    identifier: string, //Unchaning
+    identifier: string, //Unchanging
     metadata: Readonly<Record<string, string>>,
     name: string,
     dimension: NumArray,
@@ -61,8 +60,6 @@ type UndoRedoDataType = {
     offset: NumArray,
     rotation: NumArray,
     cubeGrow: NumArray,
-    textureOffset: NumArray<2>,
-    textureMirrored: boolean,
     children: readonly string[],
 
     hideChildren: boolean,
@@ -71,6 +68,7 @@ type UndoRedoDataType = {
     locked: boolean,
   }
 }
+
 
 export class DCMModel implements CubeParent {
 
@@ -83,9 +81,6 @@ export class DCMModel implements CubeParent {
   readonly _section = this.undoRedoHandler.createNewSection("root_data")
 
   readonly author = new LO("???").applyToSection(this._section, "author")
-
-  readonly textureWidth = new LO(64).applyToSection(this._section, "textureWidth")
-  readonly textureHeight = new LO(64).applyToSection(this._section, "textureHeight")
 
   readonly cubeMap: Map<string, Set<DCMCube>> = new Map()
   readonly identifierCubeMap = new LOMap<string, DCMCube>()
@@ -103,6 +98,8 @@ export class DCMModel implements CubeParent {
   readonly selectedCubeManager = new SelectedCubeManager()
 
   readonly metadata: Readonly<Record<string, string>> = {}
+
+  readonly textureCoordinates = new ModelTextureCoordinates(this)
 
   constructor() {
     this.materials = new ProjectMaterials()
@@ -136,6 +133,14 @@ export class DCMModel implements CubeParent {
     this.modelGroup.position.set(0.5, 0, 0.5)
   }
 
+  get textureWidth() {
+    return this.textureCoordinates.textureWidth
+  }
+
+  get textureHeight() {
+    return this.textureCoordinates.textureHeight
+  }
+
   modifyMetadata(data: Record<string, string>) {
     Object.assign(this.metadata, data)
     this._section.modifyDirectly("metadata", this.metadata, true)
@@ -155,12 +160,13 @@ export class DCMModel implements CubeParent {
     const {
       identifier, name, dimension, position,
       rotation, offset, cubeGrow, children,
-      textureMirrored, textureOffset,
       hideChildren, visible, locked
     } = data as (UndoRedoDataType & { section_name: `cube_${string}` })['data']
+
+    const coords = this.textureCoordinates.getCoordinates(identifier)
     const cube = new DCMCube(
       name, dimension, position, offset, rotation,
-      textureOffset, textureMirrored, cubeGrow,
+      coords.coords.value, coords.mirrored.value, cubeGrow,
       this.identifListToCubes(children), this, identifier,
       true, hideChildren, visible, locked)
     this.identifierCubeMap.set(identifier, cube)
@@ -290,8 +296,6 @@ export class DCMCube implements CubeParent {
   readonly position: LO<NumArray>
   readonly offset: LO<NumArray>
   readonly rotation: LO<NumArray>
-  readonly textureOffset: LO<NumArray<2>>
-  readonly textureMirrored: LO<boolean>
   readonly cubeGrow: LO<NumArray>
   readonly children: LO<readonly DCMCube[]>
 
@@ -350,8 +354,6 @@ export class DCMCube implements CubeParent {
     this.position = new LO(rotationPoint, onDirty)
     this.offset = new LO(offset, onDirty)
     this.rotation = new LO(rotation, onDirty)
-    this.textureOffset = new LO(textureOffset, onDirty)
-    this.textureMirrored = new LO(textureMirrored, onDirty)
     this.cubeGrow = new LO(cubeGrow, onDirty)
     this.children = new LO(children, onDirty)
     this.model = model
@@ -428,7 +430,14 @@ export class DCMCube implements CubeParent {
         this.cubeGroup.add(child.cubeGroup)
       })
     })
+  }
 
+  get textureMirrored() {
+    return this.model.textureCoordinates.getCoordinates(this.identifier).mirrored
+  }
+
+  get textureOffset() {
+    return this.model.textureCoordinates.getCoordinates(this.identifier).coords
   }
 
   applyToSection() {
@@ -445,8 +454,6 @@ export class DCMCube implements CubeParent {
     this.position.applyToSection(this._section, "position", false, "Cube Position Edit")
     this.offset.applyToSection(this._section, "offset", false, "Cube Offset Edit")
     this.rotation.applyToSection(this._section, "rotation", false, "Cube Rotation Edit")
-    this.textureOffset.applyToSection(this._section, "textureOffset", true)
-    this.textureMirrored.applyToSection(this._section, "textureMirrored", true)
     this.cubeGrow.applyToSection(this._section, "cubeGrow", false, "Cube Grow Edit")
     this.children.applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.model.identifListToCubes(s), "children", false, "Cube Children Edit")
 
