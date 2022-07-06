@@ -1,7 +1,8 @@
+import { ListenableFileData } from "./FileTypes"
 
 type FileListener = {
   lastModified: number
-  file: () => File | Promise<File>
+  file: () => File | PromiseLike<File> | null | undefined
   onChange: (file: File) => void
 }
 
@@ -9,19 +10,26 @@ export default class FileChangeListener {
 
   public readonly files: FileListener[] = []
 
-  async addFile(file: FileListener['file'], onChange: FileListener['onChange']) {
-    const start = await file()
-
-    const entry = { file, onChange, lastModified: start.lastModified }
-    this.files.push(entry)
-
-    //Return a function to delete the entry from the list
-    return () => {
-      const index = this.files.indexOf(entry)
-      if (index !== -1) {
-        this.files.splice(index, 1)
+  async addFile(file: FileListener['file']) {
+    const data: ListenableFileData = {
+      onChange: () => { },
+      dispose: () => {
+        const index = this.files.indexOf(entry)
+        if (index !== -1) {
+          this.files.splice(index, 1)
+        }
       }
     }
+
+    const start = await file()
+
+    const entry: FileListener = {
+      file,
+      onChange: file => data.onChange(file),
+      lastModified: start?.lastModified ?? -1
+    }
+    this.files.push(entry)
+    return data
   }
 
   onTick() {
@@ -32,10 +40,12 @@ export default class FileChangeListener {
 
   async onTickFile(listener: FileListener) {
     const file = await listener.file()
-    if (file.lastModified > listener.lastModified) {
+    if (file !== null && file !== undefined && file.lastModified !== -1 && file.lastModified > listener.lastModified) {
       console.log(`File ${file.name} changed`)
-      listener.lastModified = file.lastModified
       listener.onChange(file)
+    }
+    if (file !== null && file !== undefined) {
+      listener.lastModified = file.lastModified
     }
   }
 }

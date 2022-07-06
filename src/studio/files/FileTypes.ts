@@ -48,6 +48,7 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
   }
   let saveName: string | null = null
   let file: WritableFile | null = null
+  let readable: ReadableFile | null = null
   return {
     write: async (name, blob) => {
       if (file === null) {
@@ -69,10 +70,7 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
       return saveName ?? name
     },
     startListening: (listener) => {
-      if (file === null) {
-        return null
-      }
-      return file.startListening(listener)
+      return listener.addFile(() => readable?.asFile())
     }
   }
 }
@@ -100,17 +98,11 @@ export const createReadableFileExtended = (handle: FileSystemFileHandle): Readab
       }
     },
     name: handle.name,
-    startListening: async (listener) => {
-      const file: ListenableFileData = {
-        onChange: () => { },
-        dispose: () => remove()
-      }
-      const remove = await listener.addFile(() => handle.getFile(), f => file.onChange(f))
-      return file
-    }
+    startListening: listener => listener.addFile(() => handle.getFile())
   }
   return file
 }
+
 
 export const readFileDataUrl = (file: ReadableFile | File) => {
   return new Promise<string>(async (resolve, reject) => {
