@@ -2,8 +2,9 @@ import InfoBar from "../../components/InfoBar"
 import { useStudio } from "../../contexts/StudioContext"
 import TextureMapperSidebar from "./components/TextureMapperSidebar"
 import TextureMapperTools from "./components/TextureMapperTools"
+import TextureMapperViewport from "./components/TextureMapperViewport"
 
-const TextureMapper = () => { 
+const TextureMapper = () => {
     const { getSelectedProject } = useStudio()
     const project = getSelectedProject()
 
@@ -19,7 +20,7 @@ const TextureMapper = () => {
         >
             <div className="grid-in-layers border dark:border-black border-white h-full"><TextureMapperSidebar /></div>
             <div className="grid-in-tools border dark:border-black border-white"><TextureMapperTools /></div>
-            <div className="grid-in-canvas border dark:border-black border-white  dark:bg-gray-700 bg-gray-200">Put map here</div>
+            <div className="grid-in-canvas border dark:border-black border-white  dark:bg-gray-700 bg-gray-200"><TextureMapperViewport /></div>
             <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
         </div>
     )
