@@ -16,7 +16,7 @@ const ClickableInput = (props: Props) => {
   const ref = useTooltipRef<HTMLInputElement>(props.tooltip !== undefined ? () => props.tooltip : null)
 
   const onClick = () => {
-    if (FileSystemsAccessApi) {
+    if (!FileSystemsAccessApi) {
       ref.current?.click()
       return
     }
