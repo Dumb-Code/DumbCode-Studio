@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import CubePointTracker from "../../../views/modeler/logic/CubePointTracker";
 import { createAnimatorCommandRoot } from "../../command/commands/animator/AnimatorCommands";
 import { createModelingCommandRoot } from "../../command/commands/modeling/ModelingCommands";
+import FileChangeListener from "../../files/FileChangeListener";
 import { getUndefinedWritable, ReadableFile, readFileArrayBuffer } from '../../files/FileTypes';
 import { LO } from '../../util/ListenableObject';
 import ReferenceImageHandler from "../../util/ReferenceImageHandler";
@@ -27,6 +28,8 @@ type UndoRedoDataType = {
 
 export default class DcProject {
   readonly identifier: string
+
+  readonly fileChangeListener = new FileChangeListener()
 
   readonly undoRedoHandler: UndoRedoHandler<UndoRedoDataType> = new UndoRedoHandler(
     () => { throw new Error("Tried to add root section") },

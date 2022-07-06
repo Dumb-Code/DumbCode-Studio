@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import DcProject, { newProject } from '../studio/formats/project/DcProject';
 import { createThreeContext, ThreeJsContext } from './ThreeContext';
 
@@ -27,6 +27,15 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
   const [projects, setProjects] = useState<DcProject[]>([])
   //NOT const, as we want to make sure that the selectedProject ALWAYS points to the correct project
   let [selectedProject, setSelectedProject] = useState<DcProject | null>(null)
+
+  useEffect(() => {
+    if (selectedProject === null) {
+      return
+    }
+    const project = selectedProject
+    const interval = setInterval(() => project.fileChangeListener.onTick(), 1000)
+    return () => clearInterval(interval)
+  }, [selectedProject])
 
   const context: StudioContext = {
     projects,

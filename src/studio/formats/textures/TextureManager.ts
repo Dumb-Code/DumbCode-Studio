@@ -1,6 +1,7 @@
 import { NearestFilter, Texture as ThreeTexture } from 'three';
 import { v4 as uuidv4 } from 'uuid';
 import { unsafe_getThreeContext } from '../../../contexts/StudioContext';
+import { ListenableFileData, ReadableFile, readFileToImg } from '../../files/FileTypes';
 import { useDomParent } from '../../util/DomParentRef';
 import DcProject from '../project/DcProject';
 import { LO, useListenableObject } from './../../util/ListenableObject';
@@ -31,6 +32,22 @@ export default class TextureManager {
     this.selectedGroup.addPostListener(() => this.refresh())
 
     this.canvas = document.createElement("canvas")
+  }
+
+  async addFile(readable: ReadableFile) {
+    const file = await readable.asFile()
+    const img = await readFileToImg(file)
+
+    const texture = this.addTexture(readable.name, img)
+
+    const listenable = await readable.startListening(this.project.fileChangeListener)
+    texture.listenableFile = listenable
+    if (listenable !== null) {
+      listenable.onChange = async (file) => {
+        const img = await readFileToImg(file)
+        texture.element.value = img
+      }
+    }
   }
 
   addTexture(name?: string, element?: HTMLImageElement) {
@@ -173,6 +190,8 @@ export class Texture {
 
   readonly needsSaving = new LO(false)
 
+  listenableFile: ListenableFileData | null = null
+
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
 
@@ -187,40 +206,48 @@ export class Texture {
 
     this.identifier = uuidv4()
 
+    this.width = model.textureWidth.value
+    this.height = model.textureHeight.value
+
     if (element === undefined) {
       this.name = new LO("New Texture")
-      this.width = model.textureWidth.value
-      this.height = model.textureHeight.value
       element = document.createElement("img")
     } else {
       //We know that name is not undefined here
       this.name = new LO(name as string)
-      this.width = element.naturalWidth
-      this.height = element.naturalHeight
     }
 
     this.element = new LO(element)
     this.canvas = document.createElement("canvas")
-    this.canvas.width = this.width
-    this.canvas.height = this.height
 
     const ctx = this.canvas.getContext("2d")
     if (ctx === null) throw new Error("Unable to create 2D context");
     this.ctx = ctx
 
-    this.ctx.imageSmoothingEnabled = false
 
-    if (name === undefined) {
-      this.ctx.fillStyle = "rgba(255, 255, 255, 1)"
-      this.ctx.fillRect(0, 0, this.width, this.height)
-      this.onCanvasChanged(false)
-    } else {
-      this.ctx.drawImage(this.element.value, 0, 0, this.width, this.height)
-    }
+    this.element.addAndRunListener((element) => {
+      this.width = element.naturalWidth
+      this.height = element.naturalHeight
+
+      this.canvas.width = this.width
+      this.canvas.height = this.height
+
+      this.ctx.imageSmoothingEnabled = false
+
+      if (name === undefined) {
+        this.ctx.fillStyle = "rgba(255, 255, 255, 1)"
+        this.ctx.fillRect(0, 0, this.width, this.height)
+        this.onCanvasChanged(false)
+      } else {
+        this.ctx.drawImage(element, 0, 0, this.width, this.height)
+      }
+    })
+
     this.hidden = new LO<boolean>(false)
 
     const onDirty = () => this.needsSaving.value = true
     this.name.addListener(onDirty)
+    this.element.addListener(onDirty)
 
   }
 

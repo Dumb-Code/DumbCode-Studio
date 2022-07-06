@@ -1,20 +1,30 @@
 import { SVGDownload, SVGSave } from '../../components/Icons';
+import FileChangeListener from './FileChangeListener';
+
 export const FileSystemsAccessApi = typeof window !== "undefined" && window.showOpenFilePicker !== undefined
 if (FileSystemsAccessApi) {
   console.log("Using FileSystemAccess where available.")
 }
 
+export type ListenableFileData = {
+  onChange: (file: File) => void
+  dispose: () => void
+}
+
+export type ListenableFile = {
+  startListening: (listener: FileChangeListener) => Promise<ListenableFileData> | null
+}
+
 export type ReadableFile = {
   asFile: () => File | PromiseLike<File>
   asWritable: () => WritableFile
+
   name: string
-}
+} & ListenableFile
 
 export type WritableFile = {
   write: (name: string, blob: Blob | PromiseLike<Blob>) => Promise<string>
-}
-
-// const WritableFileRefreshLoop
+} & ListenableFile
 
 export const downloadBlob: WritableFile['write'] = async (name, blob) => {
   const url = window.URL.createObjectURL(await blob);
@@ -27,7 +37,8 @@ export const downloadBlob: WritableFile['write'] = async (name, blob) => {
 }
 
 export const defaultWritable: WritableFile = {
-  write: async (name, blob) => downloadBlob(name, await blob)
+  write: async (name, blob) => downloadBlob(name, await blob),
+  startListening: () => null
 }
 
 //Gets the writeable file for where nothing has been defined.
@@ -56,6 +67,12 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
       //saveName should never by null, but if it is then test.
       file.write(saveName ?? name, blob)
       return saveName ?? name
+    },
+    startListening: (listener) => {
+      if (file === null) {
+        return null
+      }
+      return file.startListening(listener)
     }
   }
 }
@@ -65,10 +82,11 @@ export const createReadableFile = (file: File): ReadableFile => {
     asFile: () => file,
     name: file.name,
     asWritable: () => defaultWritable,
+    startListening: () => null
   }
 }
 export const createReadableFileExtended = (handle: FileSystemFileHandle): ReadableFile => {
-  return {
+  const file: ReadableFile = {
     asFile: () => handle.getFile(),
     asWritable: () => {
       return {
@@ -77,28 +95,47 @@ export const createReadableFileExtended = (handle: FileSystemFileHandle): Readab
           await writable.write(await blob)
           await writable.close()
           return handle.name
-        }
+        },
+        startListening: listener => file.startListening(listener)
       }
     },
-    name: handle.name
+    name: handle.name,
+    startListening: async (listener) => {
+      const file: ListenableFileData = {
+        onChange: () => { },
+        dispose: () => remove()
+      }
+      const remove = await listener.addFile(() => handle.getFile(), f => file.onChange(f))
+      return file
+    }
   }
+  return file
 }
 
-export const readFileDataUrl = (file: ReadableFile) => {
+export const readFileDataUrl = (file: ReadableFile | File) => {
   return new Promise<string>(async (resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result as string)
     reader.onerror = error => reject(error)
-    reader.readAsDataURL(await file.asFile())
+    reader.readAsDataURL(file instanceof File ? file : await file.asFile())
   })
 }
 
-export const readFileArrayBuffer = (file: ReadableFile) => {
+export const readFileArrayBuffer = (file: ReadableFile | File) => {
   return new Promise<ArrayBuffer>(async (resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result as ArrayBuffer)
     reader.onerror = error => reject(error)
-    reader.readAsArrayBuffer(await file.asFile())
+    reader.readAsArrayBuffer(file instanceof File ? file : await file.asFile())
+  })
+}
+
+export const readFileToImg = async (file: ReadableFile | File) => {
+  const url = await readFileDataUrl(file)
+  const img = document.createElement('img')
+  return new Promise<HTMLImageElement>(resolve => {
+    img.onload = () => resolve(img)
+    img.src = url
   })
 }
 

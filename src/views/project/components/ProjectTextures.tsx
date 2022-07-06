@@ -6,7 +6,7 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useCreatePortal } from "../../../contexts/CreatePortalContext"
 import { useOptions } from "../../../contexts/OptionsContext"
 import { useStudio } from "../../../contexts/StudioContext"
-import { ReadableFile, readFileDataUrl, SaveIcon } from "../../../studio/files/FileTypes"
+import { ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
 import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcProject from "../../../studio/formats/project/DcProject"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
@@ -14,14 +14,6 @@ import { useListenableObject } from "../../../studio/util/ListenableObject"
 
 const imageExtensions = [".png", ".jpeg", ".gif"]
 
-const readFileToImg = async (file: ReadableFile) => {
-    const url = await readFileDataUrl(file)
-    const img = document.createElement('img')
-    return new Promise<HTMLImageElement>(resolve => {
-        img.onload = () => resolve(img)
-        img.src = url
-    })
-}
 
 const ProjectTextures = () => {
     const { getSelectedProject, hasProject } = useStudio()
@@ -34,9 +26,9 @@ const ProjectTextures = () => {
         getSelectedProject().textureManager.addTexture(name, img)
     }
 
-    const uploadTexture = (file: ReadableFile) =>
-        readFileToImg(file)
-            .then(img => addTexture(file.name, img))
+    const uploadTexture = async (readable: ReadableFile) => {
+        getSelectedProject().textureManager.addFile(readable)
+    }
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(imageExtensions, uploadTexture)
 
     return (
