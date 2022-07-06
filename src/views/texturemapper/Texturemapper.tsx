@@ -1,12 +1,26 @@
+import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
 import { useStudio } from "../../contexts/StudioContext"
+import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import TextureMapperSidebar from "./components/TextureMapperSidebar"
 import TextureMapperTools from "./components/TextureMapperTools"
 import TextureMapperViewport from "./components/TextureMapperViewport"
 
 const TextureMapper = () => {
-    const { getSelectedProject } = useStudio()
+    const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
+
+    useObjectUnderMouse()
+
+    useEffect(() => {
+        const onFrame = () => {
+            project.model.resetVisuals()
+        }
+        onFrameListeners.add(onFrame)
+        return () => {
+            onFrameListeners.delete(onFrame)
+        }
+    })
 
     return (
         <div className="grid grid-areas-mapper h-full"
