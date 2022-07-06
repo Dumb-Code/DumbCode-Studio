@@ -40,8 +40,7 @@ export default class FileChangeListener {
 
   async onTickFile(listener: FileListener) {
     const file = await listener.file()
-    if (file !== null && file !== undefined && file.lastModified !== -1 && file.lastModified > listener.lastModified) {
-      console.log(`File ${file.name} changed`)
+    if (file !== null && file !== undefined && listener.lastModified !== -1 && file.lastModified > listener.lastModified) {
       listener.onChange(file)
     }
     if (file !== null && file !== undefined) {

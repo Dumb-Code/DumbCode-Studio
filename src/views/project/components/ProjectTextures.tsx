@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus, SVGUpload } from "../../../components/Icons"
@@ -6,11 +6,12 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useCreatePortal } from "../../../contexts/CreatePortalContext"
 import { useOptions } from "../../../contexts/OptionsContext"
 import { useStudio } from "../../../contexts/StudioContext"
-import { ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
+import { FileSystemsAccessApi, ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
 import { useFileUpload } from "../../../studio/files/FileUploadBox"
-import DcProject from "../../../studio/formats/project/DcProject"
+import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { writeImgToBlob } from "../../../studio/util/Utils"
 
 const imageExtensions = [".png", ".jpeg", ".gif"]
 
@@ -105,7 +106,7 @@ type DraggableContextType = {
     startDragging: (texture: Texture) => void
     currentlyDragging: Texture | null,
     droppedOntoLocation?: { x: number, y: number, width?: number }
-    setDroppedOntoLocation: ({ x, y, width }?: { x: number, y: number, width?: number }) => void
+    setDroppedOntoLocation: ({ x, y, width }: { x: number, y: number, width?: number }) => void
     dropTextureAt: (texture: Texture | undefined, isSelected: boolean) => void
 }
 const DraggableContext = createContext<DraggableContextType | null>(null)
@@ -127,13 +128,6 @@ const TextureLists = ({ project }: { project: DcProject }) => {
     //A better way would be to perform the movement, then apply the actual change.
     const [numTimesRefresh, setNumTimesRefreshed] = useState(0)
 
-    if (selectedGroup.isDefault) {
-        return (
-            <div className="flex-grow flex-col dark:border-l border-black overflow-y-scroll overflow-x-hidden pr-4 studio-scrollbar" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
-                <SelectableTextureList project={project} isSelected />
-            </div>
-        )
-    }
 
     const dropTextureAt = (texture: Texture | undefined, isSelected: boolean) => {
         if (draggingTexture === null) {
@@ -143,37 +137,51 @@ const TextureLists = ({ project }: { project: DcProject }) => {
         setNumTimesRefreshed(numTimesRefresh + 1)
     }
 
+    const contextType: DraggableContextType = {
+        startDragging: setDraggingTexture,
+        currentlyDragging: draggingTexture,
+        dropTextureAt,
+        droppedOntoLocation: droppedOntoLocationRef.current,
+        setDroppedOntoLocation: val => droppedOntoLocationRef.current = val,
+    }
 
-    return (
-        <>
+    if (selectedGroup.isDefault) {
+        return (
             <DraggableContext.Provider
                 key={numTimesRefresh}
-                value={{
-                    startDragging: setDraggingTexture,
-                    currentlyDragging: draggingTexture,
-                    dropTextureAt,
-                    droppedOntoLocation: droppedOntoLocationRef.current,
-                    setDroppedOntoLocation: val => droppedOntoLocationRef.current = val,
-                }}
+                value={contextType}
             >
-                <div className="flex-grow flex flex-col border-r border-black w-1/2">
-                    <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black">
-                        <p className="flex-grow">SELECTED</p>
-                    </div>
-                    <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full w-full">
-                        <SelectableTextureList project={project} isSelected={true} />
-                    </div>
+                <div className="flex-grow flex-col dark:border-l border-black overflow-y-scroll overflow-x-hidden pr-4 studio-scrollbar" style={{ flexBasis: '0' }}> {/* Flex basis is to make the columns equal. TODO: tailwind. */}
+                    <SelectableTextureList project={project} isSelected />
                 </div>
-                <div className="flex-grow flex flex-col w-1/2">
-                    <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black">
-                        <p className="flex-grow">AVAILABLE</p>
-                    </div>
-                    <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full w-full">
-                        <SelectableTextureList project={project} isSelected={false} />
-                    </div>
+            </DraggableContext.Provider >
+        )
+    }
+
+
+
+    return (
+        <DraggableContext.Provider
+            key={numTimesRefresh}
+            value={contextType}
+        >
+            <div className="flex-grow flex flex-col border-r border-black w-1/2">
+                <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black">
+                    <p className="flex-grow">SELECTED</p>
                 </div>
-            </DraggableContext.Provider>
-        </>
+                <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full w-full">
+                    <SelectableTextureList project={project} isSelected={true} />
+                </div>
+            </div>
+            <div className="flex-grow flex flex-col w-1/2">
+                <div className="dark:bg-gray-800 bg-gray-300 dark:text-gray-400 text-black font-bold text-xs px-2 flex flex-row dark:border-b border-black">
+                    <p className="flex-grow">AVAILABLE</p>
+                </div>
+                <div className="overflow-y-scroll overflow-x-hidden studio-scrollbar h-full w-full">
+                    <SelectableTextureList project={project} isSelected={false} />
+                </div>
+            </div>
+        </DraggableContext.Provider>
     )
 }
 
@@ -279,6 +287,7 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { 
 
     const { darkMode } = useOptions()
 
+
     return (
         <div
             className={"transition-all duration-300 pr-2 " + (isBeingDragged ? "h-0" : isDraggedOver ? "pt-20" : "pt-2")}
@@ -371,7 +380,32 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { 
 }
 
 const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, selected: boolean }) => {
-    const ref = useTextureDomRef<HTMLDivElement>(texture, undefined, img => img.draggable = false)
+    const ref = useTextureDomRef<HTMLDivElement>(texture, undefined, useCallback((img: HTMLImageElement) => img.draggable = false, []))
+
+    const [isTextureDirty, setIsTextureDirty] = useListenableObject(texture.needsSaving)
+    const [saveableFile, setSaveableFile] = useListenableObject(texture.saveableFile)
+
+    const saveTexture = async () => {
+        const name = await texture.textureWritableFile.write(texture.name.value + ".png", writeImgToBlob(texture.element.value))
+        texture.name.value = removeFileExtension(name)
+        setIsTextureDirty(false)
+        setSaveableFile(true)
+    }
+
+    const deleteTexture = async () => {
+        texture.delete()
+    }
+
+
+    const iconClassName = (
+        selected ?
+            "bg-green-600 hover:bg-green-700" :
+            "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black"
+    )
+        + " rounded group h-5 w-5 p-0.5"
+
+    const saveable = saveableFile && FileSystemsAccessApi
+
     return (
         <div className={(selected ? "bg-green-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " ml-2 rounded-sm text-left pl-2 w-full h-[50px] flex flex-row pr-0.5"}
         >
@@ -381,8 +415,16 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
             </div>
             <DblClickEditLO obj={texture.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
             <p className="flex flex-col text-white items-center justify-center">
-                <ButtonWithTooltip className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded h-5 w-5 p-0.5 mb-1"} tooltip="Download Texture"><SaveIcon className="h-4 w-4" /></ButtonWithTooltip>
-                <ButtonWithTooltip onClick={e => { ; e.stopPropagation() }} className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded group h-5 w-5 p-0.5"} tooltip="Delete Texture"><SVGCross className="h-4 w-4 group-hover:text-red-500" /></ButtonWithTooltip>
+                <ButtonWithTooltip onClick={e => { saveTexture(); e.stopPropagation() }} className={iconClassName + " mb-1 "} tooltip={saveable ? "Save Texture" : "Download Texture"}>
+                    <SaveIcon className={"h-4 w-4 " + (isTextureDirty ? "text-red-500" : "")} />
+                </ButtonWithTooltip>
+                <ButtonWithTooltip
+                    onClick={e => { deleteTexture(); e.stopPropagation() }}
+                    className={iconClassName}
+                    tooltip="Delete Texture"
+                >
+                    <SVGCross className="h-4 w-4 group-hover:text-red-500" />
+                </ButtonWithTooltip>
             </p>
         </div>
     )

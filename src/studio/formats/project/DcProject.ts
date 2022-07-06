@@ -169,10 +169,10 @@ export const newProject = () => {
 export const createProject = async (read: ReadableFile) => {
   const file = await read.asFile()
   if (file.name.endsWith(".dcproj")) {
-    return await loadDcProj(getProjectName(file.name), await file.arrayBuffer(), read.asWritable())
+    return await loadDcProj(removeFileExtension(file.name), await file.arrayBuffer(), read.asWritable())
   }
   const model = await loadModelUnknown(file.arrayBuffer(), file.name)
-  const project = new DcProject(getProjectName(file.name), model)
+  const project = new DcProject(removeFileExtension(file.name), model)
 
   project.modelWritableFile = read.asWritable()
   project.projectSaveType.value = "model"
@@ -180,4 +180,10 @@ export const createProject = async (read: ReadableFile) => {
   return project
 }
 
-export const getProjectName = (name: string) => name.substring(0, name.lastIndexOf("."))
+export const removeFileExtension = (fileName: string) => {
+  const lastDot = fileName.lastIndexOf(".")
+  if (lastDot === -1) {
+    return fileName
+  }
+  return fileName.substring(0, lastDot)
+}

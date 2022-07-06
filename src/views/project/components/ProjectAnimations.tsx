@@ -10,7 +10,7 @@ import { downloadBlob, FileSystemsAccessApi, ReadableFile } from "../../../studi
 import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeDCAAnimation } from "../../../studio/formats/animations/DCALoader"
-import DcProject, { getProjectName } from "../../../studio/formats/project/DcProject"
+import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import DownloadAsButton, { DownloadOption } from "./DownloadAsButton"
 
@@ -88,7 +88,7 @@ const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation 
         }
         try {
             const name = await animation.animationWritableFile.write(animation.name.value + ".dca", writeDCAAnimation(animation))
-            animation.name.value = getProjectName(name)
+            animation.name.value = removeFileExtension(name)
             animation.saveableFile.value = true
             animation.needsSaving.value = false
         } catch (e) {

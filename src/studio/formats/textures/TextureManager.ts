@@ -1,9 +1,11 @@
+import { useCallback } from 'react';
 import { NearestFilter, Texture as ThreeTexture } from 'three';
 import { v4 as uuidv4 } from 'uuid';
 import { unsafe_getThreeContext } from '../../../contexts/StudioContext';
-import { ListenableFileData, ReadableFile, readFileToImg } from '../../files/FileTypes';
+import { getUndefinedWritable, ListenableFileData, ReadableFile, readFileToImg, WritableFile } from '../../files/FileTypes';
 import { useDomParent } from '../../util/DomParentRef';
 import DcProject from '../project/DcProject';
+import { ListenableFile } from './../../files/FileTypes';
 import { LO, useListenableObject } from './../../util/ListenableObject';
 import { DCMModel } from './../model/DcmModel';
 
@@ -18,6 +20,8 @@ export default class TextureManager {
 
   readonly activeTexture = new LO<Texture | null>(null)
   readonly textures = new LO<readonly Texture[]>([])
+
+  private stopRefresh = false
 
   constructor(project: DcProject) {
     this.project = project
@@ -39,25 +43,32 @@ export default class TextureManager {
     const img = await readFileToImg(file)
 
     const texture = this.addTexture(readable.name, img)
-
-    const listenable = await readable.startListening(this.project.fileChangeListener)
-    texture.listenableFile = listenable
-    if (listenable !== null) {
-      listenable.onChange = async (file) => {
-        const img = await readFileToImg(file)
-        texture.element.value = img
-      }
-    }
+    texture.setTextureFile(readable.asWritable())
+    texture.saveableFile.value = true
   }
 
   addTexture(name?: string, element?: HTMLImageElement) {
-    const texture = new Texture(this.project.model, name, element)
+    this.stopRefresh = true
+    const texture = new Texture(this, this.project.model, name, element)
     texture.element.addListener(() => this.refresh())
     texture.needsSaving.addListener(v => this.project.projectNeedsSaving.value ||= v)
     this.textures.value = this.textures.value.concat([texture])
     this.defaultGroup.textures.value = [texture.identifier].concat(this.defaultGroup.textures.value)
     this.groups.value.forEach(g => g.unselectedTextures.value = g.unselectedTextures.value.concat(texture.identifier))
+    this.stopRefresh = false
+    this.refresh()
     return texture
+  }
+
+  deleteTexture(texture: Texture) {
+    this.stopRefresh = true
+    this.textures.value = this.textures.value.filter(t => t !== texture)
+    this.groups.value.forEach(g => {
+      g.unselectedTextures.value = g.unselectedTextures.value.filter(t => t !== texture.identifier)
+      g.textures.value = g.textures.value.filter(t => t !== texture.identifier)
+    })
+    this.stopRefresh = false
+    this.refresh()
   }
 
   findTexture(identifier: string) {
@@ -69,15 +80,21 @@ export default class TextureManager {
   }
 
   addGroup(...groups: TextureGroup[]) {
+    this.stopRefresh = true
     groups.forEach(group => {
       group.needsSaving.addListener(v => this.project.projectNeedsSaving.value ||= v)
       group.textures.addPostListener(() => this.refresh())
       group.unselectedTextures.value = this.defaultGroup.textures.value
     })
     this.groups.value = this.groups.value.concat(...groups)
+    this.stopRefresh = false
+    this.refresh()
   }
 
   refresh() {
+    if (this.stopRefresh) {
+      return
+    }
     const textures = this.selectedGroup.value.textures.value
       .map(t => this.findTexture(t))
       .filter(t => !t.hidden.value)
@@ -106,6 +123,7 @@ export default class TextureManager {
 
     const maxTextureSize = unsafe_getThreeContext().renderer.capabilities.maxTextureSize
     const scale = maxTextureSize / Math.max(width, height);
+
 
     if (scale < 1) {
       width *= scale
@@ -172,10 +190,6 @@ export class TextureGroup {
     const from = isDraggingSelected ? this.textures : this.unselectedTextures
     const to = isInGroup ? this.textures : this.unselectedTextures
 
-    if (from === to) {
-      return
-    }
-
     from.value = from.value.filter(f => f !== texture.identifier)
     const newVal = [...to.value]
     newVal.splice(after === undefined ? to.value.length : to.value.indexOf(after), 0, texture.identifier)
@@ -188,7 +202,10 @@ export class Texture {
   readonly name: LO<string>
   readonly element: LO<HTMLImageElement>
 
+  readonly saveableFile = new LO(false)
   readonly needsSaving = new LO(false)
+  textureWritableFile = getUndefinedWritable("Texture File", ".png")
+
 
   listenableFile: ListenableFileData | null = null
 
@@ -199,7 +216,9 @@ export class Texture {
   height: number
   readonly hidden: LO<boolean>
 
-  constructor(model: DCMModel, name?: string, element?: HTMLImageElement) {
+  constructor(
+    readonly manager: TextureManager,
+    model: DCMModel, name?: string, element?: HTMLImageElement) {
     if ((name === undefined) !== (element === undefined)) {
       throw new Error("Either name and element need to be defined, or none need to be.");
     }
@@ -224,24 +243,28 @@ export class Texture {
     if (ctx === null) throw new Error("Unable to create 2D context");
     this.ctx = ctx
 
-
     this.element.addAndRunListener((element) => {
-      this.width = element.naturalWidth
-      this.height = element.naturalHeight
+      if (element.naturalHeight !== 0 && element.naturalWidth !== 0) {
+        this.width = element.naturalWidth
+        this.height = element.naturalHeight
+      }
 
+      //Why is this 0?
       this.canvas.width = this.width
       this.canvas.height = this.height
 
       this.ctx.imageSmoothingEnabled = false
 
-      if (name === undefined) {
+      if (element.naturalHeight === 0 || element.naturalWidth === 0) {
         this.ctx.fillStyle = "rgba(255, 255, 255, 1)"
         this.ctx.fillRect(0, 0, this.width, this.height)
-        this.onCanvasChanged(false)
       } else {
         this.ctx.drawImage(element, 0, 0, this.width, this.height)
       }
     })
+
+    this.onCanvasChanged(false)
+
 
     this.hidden = new LO<boolean>(false)
 
@@ -249,6 +272,33 @@ export class Texture {
     this.name.addListener(onDirty)
     this.element.addListener(onDirty)
 
+    this.startListeningToFile(this.textureWritableFile)
+  }
+
+  async setTextureFile(file: WritableFile) {
+    this.textureWritableFile = file
+    this.startListeningToFile(file)
+  }
+
+  private async startListeningToFile(file: ListenableFile) {
+    const listenable = await file.startListening(this.manager.project.fileChangeListener)
+    if (this.listenableFile !== null) {
+      this.listenableFile.dispose()
+    }
+    this.listenableFile = listenable
+    if (listenable !== null) {
+      listenable.onChange = async (file) => {
+        this.element.value = await readFileToImg(file)
+        this.needsSaving.value = false
+      }
+    }
+  }
+
+  delete() {
+    if (this.listenableFile !== null) {
+      this.listenableFile.dispose()
+    }
+    this.manager.deleteTexture(this)
   }
 
   onCanvasChanged(refresh: boolean) {
@@ -260,7 +310,7 @@ export class Texture {
 
 export const useTextureDomRef = <T extends HTMLElement>(texture: Texture, className?: string, modify?: (img: HTMLImageElement) => void) => {
   const [img] = useListenableObject(texture.element)
-  const ref = useDomParent<T>(() => {
+  const ref = useDomParent<T>(useCallback(() => {
     //TODO: reuse img cloned?
     const cloned = img.cloneNode() as HTMLImageElement
     if (className !== undefined) {
@@ -270,6 +320,6 @@ export const useTextureDomRef = <T extends HTMLElement>(texture: Texture, classN
       modify(cloned)
     }
     return cloned
-  })
+  }, [img.src, className, modify]))
   return ref
 }

@@ -14,7 +14,7 @@ import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import { exportAsBBModel } from "../../../studio/formats/project/BBModelExporter"
-import DcProject, { createProject, getProjectName, newProject } from "../../../studio/formats/project/DcProject"
+import DcProject, { createProject, newProject, removeFileExtension } from "../../../studio/formats/project/DcProject"
 import { writeDcProj } from "../../../studio/formats/project/DcProjectLoader"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import { NumArray } from "../../../studio/util/NumArray"
@@ -83,12 +83,12 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
         try {
             if (type === "model") {
                 const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeModel(project.model))
-                project.name.value = getProjectName(name)
+                project.name.value = removeFileExtension(name)
                 setSaveType(type)
                 setIsModelDirty(false)
             } else if (type === "project") {
                 const name = await project.projectWritableFile.write(project.name.value + ".dcproj", await writeDcProj(project))
-                project.name.value = getProjectName(name)
+                project.name.value = removeFileExtension(name)
                 setSaveType(type)
                 setIsProjectDirty(false)
                 setIsModelDirty(false)

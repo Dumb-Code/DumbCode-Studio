@@ -10,7 +10,7 @@ export const useDomParent = <T extends HTMLElement>(element: () => HTMLElement) 
     const currentRef = ref.current
     currentRef.appendChild(cloned)
     return () => { currentRef.removeChild(cloned) }
-  })
+  }, [element])
 
   return ref
 }

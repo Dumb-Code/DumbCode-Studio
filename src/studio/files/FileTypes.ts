@@ -60,7 +60,7 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
             }
           }]
         })
-        const readable = createReadableFileExtended(picked)
+        readable = createReadableFileExtended(picked)
         saveName = readable.name
         file = readable.asWritable()
       }
@@ -84,7 +84,9 @@ export const createReadableFile = (file: File): ReadableFile => {
   }
 }
 export const createReadableFileExtended = (handle: FileSystemFileHandle): ReadableFile => {
-  const file: ReadableFile = {
+  const startListening: ListenableFile['startListening'] = listener => listener.addFile(() => handle.getFile())
+
+  return {
     asFile: () => handle.getFile(),
     asWritable: () => {
       return {
@@ -94,13 +96,12 @@ export const createReadableFileExtended = (handle: FileSystemFileHandle): Readab
           await writable.close()
           return handle.name
         },
-        startListening: listener => file.startListening(listener)
+        startListening
       }
     },
     name: handle.name,
-    startListening: listener => listener.addFile(() => handle.getFile())
+    startListening
   }
-  return file
 }
 
 

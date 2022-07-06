@@ -17,8 +17,10 @@ export const imgSourceToElement = (src: string) => {
   })
 }
 
+export const writeImgToBlob = async (img: HTMLImageElement): Promise<Blob> => fetch(img.src).then(res => res.blob())
+
 export const writeImgToBase64 = async (img: HTMLImageElement): Promise<string> => {
-  const blob = await fetch(img.src).then(res => res.blob())
+  const blob = await writeImgToBlob(img)
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onloadend = () => {
