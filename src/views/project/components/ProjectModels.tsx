@@ -8,7 +8,7 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import PushToGithubDialogBox from "../../../dialogboxes/PushToGithubDialogBox"
-import { defaultWritable, downloadBlob, FileSystemsAccessApi } from "../../../studio/files/FileTypes"
+import { defaultWritable, FileSystemsAccessApi } from "../../../studio/files/FileTypes"
 import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
@@ -102,7 +102,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
     }
 
     const exportToOldDCM = async () => {
-        downloadBlob(project.name.value + ".dcm", writeOldModel(project.model))
+        defaultWritable.write(project.name.value + ".dcm", writeOldModel(project.model))
     }
 
     const exportToGLTF = async () => {
