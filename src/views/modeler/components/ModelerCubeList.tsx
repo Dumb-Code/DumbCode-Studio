@@ -1,4 +1,4 @@
-import { Dispatch, DragEvent, MouseEvent as ReactMouseEvent, MutableRefObject, PropsWithChildren, RefObject, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, Dispatch, DragEvent, MouseEvent as ReactMouseEvent, MutableRefObject, PropsWithChildren, RefObject, SetStateAction, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import HorizontalDivider from '../../../components/HorizontalDivider';
@@ -13,6 +13,8 @@ import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import CubeLocker from '../../../studio/util/CubeLocker';
 import { useListenableObject } from '../../../studio/util/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
+
+const CanEditContext = createContext(false)
 
 const emptySpan = (typeof window !== "undefined" && document.createElement("span")) as HTMLSpanElement
 const createCube = (model: DCMModel) => {
@@ -40,7 +42,7 @@ const moveSiblingsUp = (cubes: readonly DCMCube[]) => {
     })
     lockers.forEach(locker => locker.reconstruct())
 }
-const ModelerCubeList = () => {
+const ModelerCubeList = ({ canEdit = true }: { canEdit?: boolean }) => {
 
     const { getSelectedProject } = useStudio()
     const project = getSelectedProject()
@@ -146,39 +148,43 @@ const ModelerCubeList = () => {
     const toggleRef = useRef<HTMLDivElement>(null)
     const [propertiesActive] = usePanelValue("cube_list")
     return (
-        <div ref={toggleRef} style={{ height: propertiesActive ? propertiesHeight : 32 }}>
-            <CollapsableSidebarPannel title="CUBE LIST" heightClassname="h-full" panelName="cube_list">
-                <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full flex flex-col">
-                    <div className="flex flex-row px-1 dark:bg-gray-900 bg-gray-200 pb-1 pt-0.5">
-                        <CubeListButton onClick={createSiblingCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Sibling Cube">
-                            <SVGPlus className="h-6 w-6" />
-                            <SVGCube className="h-5 w-5 mt-0.5" />
-                        </ CubeListButton>
-                        <CubeListButton onClick={createChildCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Child Cube">
-                            <SVGPlus className="h-6 w-6" />
-                            <SVGCube className="h-5 w-5 mt-0.5" />
-                            <SVGCube className="h-4 w-4 mt-1.5" />
-                        </ CubeListButton>
-                        <CubeListButton onClick={deleteCubesKeepChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube">
-                            <SVGTrash className="h-5 w-5 mt-0.5" />
-                        </ CubeListButton>
-                        <CubeListButton onClick={deleteCubesAndChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube And Children">
-                            <SVGTrash className="h-5 w-5 mt-0.5" />
-                            <SVGCube className="h-5 w-5 mt-0.5" />
-                            <SVGCube className="h-4 w-4 mt-1.5" />
-                        </ CubeListButton>
+        <CanEditContext.Provider value={canEdit}>
+            <div ref={toggleRef} style={{ height: propertiesActive ? propertiesHeight : 32 }}>
+                <CollapsableSidebarPannel title="CUBE LIST" heightClassname="h-full" panelName="cube_list">
+                    <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full flex flex-col">
+                        {canEdit && (
+                            <div className="flex flex-row px-1 dark:bg-gray-900 bg-gray-200 pb-1 pt-0.5">
+                                <CubeListButton onClick={createSiblingCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Sibling Cube">
+                                    <SVGPlus className="h-6 w-6" />
+                                    <SVGCube className="h-5 w-5 mt-0.5" />
+                                </ CubeListButton>
+                                <CubeListButton onClick={createChildCube} className="bg-sky-500 hover:bg-sky-400" hoverText="Create Child Cube">
+                                    <SVGPlus className="h-6 w-6" />
+                                    <SVGCube className="h-5 w-5 mt-0.5" />
+                                    <SVGCube className="h-4 w-4 mt-1.5" />
+                                </ CubeListButton>
+                                <CubeListButton onClick={deleteCubesKeepChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube">
+                                    <SVGTrash className="h-5 w-5 mt-0.5" />
+                                </ CubeListButton>
+                                <CubeListButton onClick={deleteCubesAndChildren} className="bg-red-500 hover:bg-red-600" hoverText="Delete Cube And Children">
+                                    <SVGTrash className="h-5 w-5 mt-0.5" />
+                                    <SVGCube className="h-5 w-5 mt-0.5" />
+                                    <SVGCube className="h-4 w-4 mt-1.5" />
+                                </ CubeListButton>
+                            </div>
+                        )}
+                        <div className="w-full flex-grow h-0 pr-2 pl-1 overflow-x-hidden overflow-y-scroll studio-scrollbar">
+                            <CubeList model={model} selectedCubeManager={project.selectedCubeManager} />
+                        </div>
                     </div>
-                    <div className="w-full flex-grow h-0 pr-2 pl-1 overflow-x-hidden overflow-y-scroll studio-scrollbar">
-                        <CubeList model={model} selectedCubeManager={project.selectedCubeManager} />
-                    </div>
-                </div>
-            </CollapsableSidebarPannel>
-            <HorizontalDivider max={800} min={50} value={propertiesHeight} setValue={setPropertiesHeight} toggleDragging={val => {
-                if (toggleRef.current) {
-                    toggleRef.current.className = val ? "" : "transition-height ease-in-out duration-200"
-                }
-            }} />
-        </div>
+                </CollapsableSidebarPannel>
+                <HorizontalDivider max={800} min={50} value={propertiesHeight} setValue={setPropertiesHeight} toggleDragging={val => {
+                    if (toggleRef.current) {
+                        toggleRef.current.className = val ? "" : "transition-height ease-in-out duration-200"
+                    }
+                }} />
+            </div>
+        </CanEditContext.Provider>
     )
 }
 
@@ -484,6 +490,8 @@ const CubeListItem = ({
 
     const keyCombos = useKeyCombos().modeler.combos
 
+    const canEdit = useContext(CanEditContext)
+
     return (
 
         //We need to basically hide this when the first frame is placed down, however we also need to know it's width and height
@@ -493,11 +501,14 @@ const CubeListItem = ({
             <div
                 // Per frame, when this cube is dragged, set the mouse dragged element to be the position
                 onDrag={useCallback((e: DragEvent) => {
+                    if (!canEdit) return
                     e.preventDefault()
                 }, [])}
 
                 //Called when the cube is started to drag.
                 onDragStart={useCallback((e: DragEvent) => {
+                    if (!canEdit) return
+
                     //set the drag image to be empty
                     e.dataTransfer.setDragImage(emptySpan, 0, 0)
 
@@ -548,6 +559,8 @@ const CubeListItem = ({
 
                 //Called when the element is stopped dragging
                 onDragEnd={useCallback((e: DragEvent) => {
+                    if (!canEdit) return
+
                     finishDrag()
                     e.preventDefault()
                     e.stopPropagation()
@@ -555,12 +568,16 @@ const CubeListItem = ({
 
                 //Called when a cube is dragged over this
                 onDragOver={useCallback((e: DragEvent) => {
+                    if (!canEdit) return
+
                     onDragOver(e.clientY)
                     e.preventDefault()
                     e.stopPropagation()
                 }, [onDragOver])}
 
                 onMouseMoveCapture={useCallback((e: ReactMouseEvent) => {
+                    if (!canEdit) return
+
                     if (dragData !== null && dragData.cubes.some(cube => cube.hasBeenPastedNeedsPlacement)) {
                         onDragOver(e.clientY)
                     }
@@ -568,6 +585,8 @@ const CubeListItem = ({
 
                 //Called when a cube exits being dragged over this
                 onDragLeave={useCallback((e: DragEvent) => {
+                    if (!canEdit) return
+
                     dragOverRef.current = false
                     setDragState(null)
                     e.preventDefault()
@@ -575,6 +594,8 @@ const CubeListItem = ({
                 }, [dragOverRef, setDragState])}
 
                 onMouseLeave={useCallback((e: ReactMouseEvent) => {
+                    if (!canEdit) return
+
                     if (dragData !== null && dragData.cubes.some(cube => cube.hasBeenPastedNeedsPlacement)) {
                         dragOverRef.current = false
                         setDragState(null)
@@ -585,12 +606,17 @@ const CubeListItem = ({
 
                 //Called when a cube is dropped on this
                 onDrop={useCallback((e: DragEvent) => {
+                    if (!canEdit) return
+
                     setDragState(null)
                     e.preventDefault()
                     e.stopPropagation()
                     onCubeDroppedOntoThis()
                 }, [setDragState, onCubeDroppedOntoThis])}
+
                 onMouseDown={useCallback((e: ReactMouseEvent) => {
+                    if (!canEdit) return
+
                     if (dragData !== null && dragData.cubes.some(cube => cube.hasBeenPastedNeedsPlacement)) {
                         setDragState(null)
                         e.preventDefault()
@@ -598,7 +624,7 @@ const CubeListItem = ({
                         onCubeDroppedOntoThis()
                     }
                 }, [dragData, setDragState, onCubeDroppedOntoThis])}
-                draggable
+                draggable={canEdit}
             >
                 <div ref={draggableRef} className={(isDragging || isAnimating) ? "hidden" : ""}>
                     <div ref={cubeItemRef}><CubeItemEntry cube={cube} selectedCubeManager={selectedCubeManager} dragState={dragState} isDragging={isDragging} hasChildren={hasAnimationChildrenForce !== null ? hasAnimationChildrenForce : children.length !== 0} /></div>
@@ -740,6 +766,8 @@ const CubeList = ({ model, selectedCubeManager }: { model: DCMModel, selectedCub
 const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasChildren }: { cube: DCMCube, selectedCubeManager: SelectedCubeManager, dragState: DragState, isDragging: boolean, hasChildren: boolean }) => {
     let itemBackgroundColor: string
 
+    const canEdit = useContext(CanEditContext)
+
     const [visible, setVisible] = useListenableObject(cube.visible);
     const [locked, setLocked] = useListenableObject(cube.locked);
 
@@ -810,26 +838,29 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
                     <SVGChevronDown className="w-4 h-4" />
                 </button>
                 <DblClickEditLO
+                    disabled={!canEdit}
                     onStartEditing={() => cube.model.undoRedoHandler.startBatchActions()}
                     onFinishEditing={() => cube.model.undoRedoHandler.endBatchActions("Cube Name Changed")}
                     obj={cube.name}
                     className="truncate text-white text-s pl-1 flex-grow cursor-pointer"
                     inputClassName="p-0 w-full h-full bg-gray-500 text-black"
                 />
-                <div className="flex flex-row text-white m-0 p-0">
-                    {
-                        locked ?
-                            <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setLocked(false)}><SVGLocked className="h-4 w-4" /></button>
-                            :
-                            <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={() => setLocked(true)}><SVGUnlocked className="h-4 w-4" /></button>
-                    }
-                    {
-                        visible ?
-                            <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={() => setVisible(false)}><SVGEye className="h-4 w-4" /></button>
-                            :
-                            <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setVisible(true)}><SVGEyeOff className="h-4 w-4" /></button>
-                    }
-                </div>
+                {canEdit && (
+                    <div className="flex flex-row text-white m-0 p-0">
+                        {
+                            locked ?
+                                <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setLocked(false)}><SVGLocked className="h-4 w-4" /></button>
+                                :
+                                <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={() => setLocked(true)}><SVGUnlocked className="h-4 w-4" /></button>
+                        }
+                        {
+                            visible ?
+                                <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={() => setVisible(false)}><SVGEye className="h-4 w-4" /></button>
+                                :
+                                <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setVisible(true)}><SVGEyeOff className="h-4 w-4" /></button>
+                        }
+                    </div>
+                )}
             </div>
         </div>
     )
