@@ -363,6 +363,8 @@ export class DCMCube implements CubeParent {
     this.visible = new LO(visible, onDirty)
     this.locked = new LO(locked, onDirty)
 
+    this.model.textureCoordinates.setCoordinates(this.identifier, textureOffset, textureMirrored)
+
     if (applyToSectionNow) {
       this.applyToSection()
     }
@@ -637,7 +639,6 @@ export class DCMCube implements CubeParent {
   }
 
   updateTexture({ textureOffset = this.textureOffset.value, dimension = this.dimension.value, texWidth = this.model.textureWidth.value, texHeight = this.model.textureHeight.value, textureMirrored = this.textureMirrored.value } = {}) {
-
     let tm = textureMirrored
     let to = textureOffset
     let tw = texWidth
