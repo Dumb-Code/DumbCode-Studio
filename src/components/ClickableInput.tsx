@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react"
 import { useTooltipRef } from "../contexts/TooltipContext"
-import { createReadableFile, createReadableFileExtended, FileSystemsAccessApi, ReadableFile } from "../studio/util/FileTypes"
+import { createReadableFile, createReadableFileExtended, FileSystemsAccessApi, ReadableFile } from "../studio/files/FileTypes"
 
 type Props = PropsWithChildren<{
   description: string

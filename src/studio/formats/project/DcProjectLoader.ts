@@ -1,6 +1,6 @@
 import JSZip, { JSZipObject } from "jszip";
+import { WritableFile } from "../../files/FileTypes";
 import { SerializedUndoRedoHandler } from "../../undoredo/UndoRedoHandler";
-import { WritableFile } from "../../util/FileTypes";
 import { ReferenceImage } from "../../util/ReferenceImageHandler";
 import { imgSourceToElement, writeImgToBase64 } from "../../util/Utils";
 import { loadUnknownAnimation, writeDCAAnimation } from "../animations/DCALoader";

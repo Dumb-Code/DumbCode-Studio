@@ -1,4 +1,4 @@
-import { SVGDownload, SVGSave } from './../../components/Icons';
+import { SVGDownload, SVGSave } from '../../components/Icons';
 export const FileSystemsAccessApi = typeof window !== "undefined" && window.showOpenFilePicker !== undefined
 if (FileSystemsAccessApi) {
   console.log("Using FileSystemAccess where available.")

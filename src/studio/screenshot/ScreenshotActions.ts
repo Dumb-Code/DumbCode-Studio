@@ -1,4 +1,4 @@
-import { downloadBlob } from './../util/FileTypes';
+import { downloadBlob } from '../files/FileTypes';
 export type ScreenshotActionType = "download" | "open_in_new_tab" | "copy_to_clipboard" | "upload_to_imgur"
 
 type ScreenshotAction = (screenshot: Blob) => any | Promise<any>

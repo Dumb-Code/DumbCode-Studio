@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneBufferGeometry, Texture } from 'three';
+import { ReadableFile } from '../files/FileTypes';
 import { useStudio } from './../../contexts/StudioContext';
-import { ReadableFile } from './FileTypes';
 import { LO } from './ListenableObject';
 import { NumArray } from './NumArray';
 import { setIntersectType } from './ObjectClickedHook';

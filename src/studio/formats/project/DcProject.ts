@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import CubePointTracker from "../../../views/modeler/logic/CubePointTracker";
 import { createAnimatorCommandRoot } from "../../command/commands/animator/AnimatorCommands";
 import { createModelingCommandRoot } from "../../command/commands/modeling/ModelingCommands";
-import { getUndefinedWritable, ReadableFile, readFileArrayBuffer } from '../../util/FileTypes';
+import { getUndefinedWritable, ReadableFile, readFileArrayBuffer } from '../../files/FileTypes';
 import { LO } from '../../util/ListenableObject';
 import ReferenceImageHandler from "../../util/ReferenceImageHandler";
 import { loadUnknownAnimation } from "../animations/DCALoader";

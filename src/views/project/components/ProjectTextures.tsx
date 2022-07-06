@@ -6,10 +6,10 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useCreatePortal } from "../../../contexts/CreatePortalContext"
 import { useOptions } from "../../../contexts/OptionsContext"
 import { useStudio } from "../../../contexts/StudioContext"
+import { ReadableFile, readFileDataUrl, SaveIcon } from "../../../studio/files/FileTypes"
+import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcProject from "../../../studio/formats/project/DcProject"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
-import { ReadableFile, readFileDataUrl, SaveIcon } from "../../../studio/util/FileTypes"
-import { useFileUpload } from "../../../studio/util/FileUploadBox"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 
 const imageExtensions = [".png", ".jpeg", ".gif"]
