@@ -8,11 +8,12 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import PushToGithubDialogBox from "../../../dialogboxes/PushToGithubDialogBox"
-import { defaultWritable, FileSystemsAccessApi } from "../../../studio/files/FileTypes"
+import { defaultWritable, downloadBlob, FileSystemsAccessApi } from "../../../studio/files/FileTypes"
 import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
+import { writeOldModel } from "../../../studio/formats/model/OldDCMLoader"
 import { exportAsBBModel } from "../../../studio/formats/project/BBModelExporter"
 import DcProject, { createProject, newProject, removeFileExtension } from "../../../studio/formats/project/DcProject"
 import { writeDcProj } from "../../../studio/formats/project/DcProjectLoader"
@@ -98,6 +99,10 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
             console.error(e)
             //Ignore e
         }
+    }
+
+    const exportToOldDCM = async () => {
+        downloadBlob(project.name.value + ".dcm", writeOldModel(project.model))
     }
 
     const exportToGLTF = async () => {
@@ -262,6 +267,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         name={project.name.value}
                     >
                         <DownloadOption exportFunction={() => saveModel("model")} extension="dcm" />
+                        <DownloadOption exportFunction={exportToOldDCM} extension="dcm (old)" />
                         <DownloadOption exportFunction={exportToObj} extension="obj" />
                         <DownloadOption exportFunction={exportToGLTF} extension="gltf" />
                         <DownloadOption exportFunction={() => saveModel("project")} extension="dcproj" />
