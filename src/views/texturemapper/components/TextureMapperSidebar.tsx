@@ -6,7 +6,10 @@ import NumericInput from "../../../components/NumericInput";
 import { OptionSet } from "../../../components/OptionPick";
 import { useStudio } from "../../../contexts/StudioContext";
 import { usePanelValue } from "../../../contexts/StudioPanelsContext";
+import { useToast } from "../../../contexts/ToastContext";
+import TextureManager from "../../../studio/formats/textures/TextureManager";
 import { useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { imgSourceToElement } from "../../../studio/util/Utils";
 import ModelerCubeList from "../../modeler/components/ModelerCubeList";
 import { GridDisplayModes } from "./TextureMapperViewport";
 
@@ -50,10 +53,37 @@ const TextureProperties = () => {
 const TextureSettings = () => {
     const [gridType, setGridType] = usePanelValue("texture_grid_type")
 
+    const { getSelectedProject } = useStudio()
+    const project = getSelectedProject()
+
+    const { addToast } = useToast()
+
+    const generateTexturemapToTexture = async () => {
+        const canvas = document.createElement("canvas")
+        canvas.width = project.model.textureWidth.value
+        canvas.height = project.model.textureHeight.value
+
+        const ctx = canvas.getContext("2d")
+        if (ctx === null) {
+            addToast("Failed to create canvas context")
+            return
+        }
+        ctx.imageSmoothingEnabled = false
+
+        project.model.identifierCubeMap.forEach(cube => {
+            TextureManager.drawCubeToCanvas(cube, canvas.width, canvas.height, ctx, false)
+        })
+
+        const img = await imgSourceToElement(canvas.toDataURL("image/png"))
+        project.textureManager.addTexture("TextureMap", img)
+        addToast("Generated texture map")
+    }
+
     return (
         <CollapsableSidebarPannel title="TEXTURE MAPPER SETTINGS" heightClassname="h-auto" panelName="texture_mapper_settings">
-            <div className="flex flex-row py-1">
+            <div className="flex flex-col py-1">
                 <OptionSet title="Grid Mode" options={GridDisplayModes} selected={gridType} setSelected={setGridType} />
+                <button onClick={generateTexturemapToTexture} className="dark:text-white text-black font-semibold p-2 ml-2 mt-2 rounded dark:bg-cyan-700 bg-cyan-500">Generate texturemap to texture</button>
             </div>
         </CollapsableSidebarPannel>
     )
