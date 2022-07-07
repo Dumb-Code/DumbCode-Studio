@@ -503,7 +503,7 @@ const CubeListItem = ({
                 onDrag={useCallback((e: DragEvent) => {
                     if (!canEdit) return
                     e.preventDefault()
-                }, [])}
+                }, [canEdit])}
 
                 //Called when the cube is started to drag.
                 onDragStart={useCallback((e: DragEvent) => {
@@ -555,7 +555,7 @@ const CubeListItem = ({
                         beginDrag("takeover")
                     }
                     e.stopPropagation()
-                }, [cube, setDragData, beginDrag, keyCombos.drag_cube_only, keyCombos.drag_cubes_locally])}
+                }, [cube, setDragData, beginDrag, keyCombos.drag_cube_only, keyCombos.drag_cubes_locally, canEdit])}
 
                 //Called when the element is stopped dragging
                 onDragEnd={useCallback((e: DragEvent) => {
@@ -564,7 +564,7 @@ const CubeListItem = ({
                     finishDrag()
                     e.preventDefault()
                     e.stopPropagation()
-                }, [finishDrag])}
+                }, [finishDrag, canEdit])}
 
                 //Called when a cube is dragged over this
                 onDragOver={useCallback((e: DragEvent) => {
@@ -573,7 +573,7 @@ const CubeListItem = ({
                     onDragOver(e.clientY)
                     e.preventDefault()
                     e.stopPropagation()
-                }, [onDragOver])}
+                }, [onDragOver, canEdit])}
 
                 onMouseMoveCapture={useCallback((e: ReactMouseEvent) => {
                     if (!canEdit) return
@@ -581,7 +581,7 @@ const CubeListItem = ({
                     if (dragData !== null && dragData.cubes.some(cube => cube.hasBeenPastedNeedsPlacement)) {
                         onDragOver(e.clientY)
                     }
-                }, [dragData, onDragOver])}
+                }, [dragData, onDragOver, canEdit])}
 
                 //Called when a cube exits being dragged over this
                 onDragLeave={useCallback((e: DragEvent) => {
@@ -591,7 +591,7 @@ const CubeListItem = ({
                     setDragState(null)
                     e.preventDefault()
                     e.stopPropagation()
-                }, [dragOverRef, setDragState])}
+                }, [dragOverRef, setDragState, canEdit])}
 
                 onMouseLeave={useCallback((e: ReactMouseEvent) => {
                     if (!canEdit) return
@@ -602,7 +602,7 @@ const CubeListItem = ({
                         e.preventDefault()
                         e.stopPropagation()
                     }
-                }, [dragData, dragOverRef, setDragState])}
+                }, [dragData, dragOverRef, setDragState, canEdit])}
 
                 //Called when a cube is dropped on this
                 onDrop={useCallback((e: DragEvent) => {
@@ -612,7 +612,7 @@ const CubeListItem = ({
                     e.preventDefault()
                     e.stopPropagation()
                     onCubeDroppedOntoThis()
-                }, [setDragState, onCubeDroppedOntoThis])}
+                }, [setDragState, onCubeDroppedOntoThis, canEdit])}
 
                 onMouseDown={useCallback((e: ReactMouseEvent) => {
                     if (!canEdit) return
@@ -623,7 +623,7 @@ const CubeListItem = ({
                         e.stopPropagation()
                         onCubeDroppedOntoThis()
                     }
-                }, [dragData, setDragState, onCubeDroppedOntoThis])}
+                }, [dragData, setDragState, onCubeDroppedOntoThis, canEdit])}
                 draggable={canEdit}
             >
                 <div ref={draggableRef} className={(isDragging || isAnimating) ? "hidden" : ""}>

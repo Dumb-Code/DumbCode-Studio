@@ -47,7 +47,7 @@ const TextureMapElementProperties = () => {
     const { getSelectedProject } = useStudio()
     const project = getSelectedProject()
     const [selected] = useListenableObject(project.selectedCubeManager.selected)
-    const singleSelected = useMemo(() => selected.length === 1 ? project.model.identifierCubeMap.get(selected[0]) : null, [selected])
+    const singleSelected = useMemo(() => selected.length === 1 ? project.model.identifierCubeMap.get(selected[0]) : null, [selected, project])
 
     const [mirrored, setMirrored] = useListenableObjectNullable(singleSelected?.textureMirrored)
     const [offset, setOffset] = useListenableObjectNullable(singleSelected?.textureOffset)

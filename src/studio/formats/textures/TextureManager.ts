@@ -161,8 +161,11 @@ export default class TextureManager {
   static drawCubeToCanvas(cube: DCMCube, width: number, height: number, ctx: CanvasRenderingContext2D, allowModifiers: boolean,
     textureWidth = cube.model.textureWidth.value,
     textureHeight = cube.model.textureHeight.value,
+    textureOffset = cube.textureOffset.value,
+    dimension = cube.dimension.value,
     hovered = cube.mouseHover.value,
     selected = cube.selected.value,
+
   ) {
     const bounds = fitAreaWithinBounds(textureWidth, textureHeight, width, height)
 
@@ -188,12 +191,12 @@ export default class TextureManager {
       }
     }
 
-    let u = cube.textureOffset.value[0] / su
-    let v = cube.textureOffset.value[1] / sv
+    let u = textureOffset[0] / su
+    let v = textureOffset[1] / sv
 
-    let w = cube.dimension.value[0]
-    let h = cube.dimension.value[1]
-    let d = cube.dimension.value[2]
+    let w = dimension[0]
+    let h = dimension[1]
+    let d = dimension[2]
 
     let uw = w / su
     let ud = d / su
@@ -385,6 +388,6 @@ export const useTextureDomRef = <T extends HTMLElement>(texture: Texture, classN
       modify(cloned)
     }
     return cloned
-  }, [img.src, className, modify]))
+  }, [className, modify, img]))
   return ref
 }

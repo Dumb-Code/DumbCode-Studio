@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import { useCallback, useRef } from "react"
 import { SplitViewport } from "../../../components/SplitViewport"
 import TransformCanvas, { CanvasMouseCallbackEvent, CanvasPoint, RedrawCallback, TransformCanvasRenderElement } from "../../../components/TransformCanvas"
 import { useStudio } from "../../../contexts/StudioContext"
@@ -66,7 +66,7 @@ const TextureMapperViewport = () => {
         //For every other cube, don't have it hover
         otherCubes.forEach(cube => cube.mouseHover.value = false)
 
-    }, [transformMousePosition, project])
+    }, [getCubeUnderMouse])
 
     const onMouseUp = useCallback<CanvasMouseCallbackEvent>(({ setHandled, event }) => {
         const result = project.selectedCubeManager.clickOnHovered(event.ctrlKey)
@@ -76,7 +76,7 @@ const TextureMapperViewport = () => {
             project.selectedCubeManager.deselectAll()
         }
 
-    }, [transformMousePosition, project])
+    }, [project])
 
     return (
         <SplitViewport otherName="Texture Mapper">
@@ -95,12 +95,13 @@ const TextureMapperViewport = () => {
 const TextureMapperVisualCube = ({ cube, textureWidth, textureHeight }: { cube: DCMCube, textureWidth: number, textureHeight: number }) => {
     const [children] = useListenableObject(cube.children, [cube])
     const [textureOffset] = useListenableObject(cube.textureOffset, [cube])
+    const [dimension] = useListenableObject(cube.dimension, [cube])
     const [hovered] = useListenableObject(cube.mouseHover, [cube])
     const [selected] = useListenableObject(cube.selected, [cube])
 
     const redraw = useCallback<RedrawCallback>((width, height, ctx) => {
-        TextureManager.drawCubeToCanvas(cube, width, height, ctx, true, textureWidth, textureHeight, hovered, selected)
-    }, [textureOffset, textureWidth, textureHeight, hovered, selected])
+        TextureManager.drawCubeToCanvas(cube, width, height, ctx, true, textureWidth, textureHeight, textureOffset, dimension, hovered, selected)
+    }, [cube, textureWidth, textureHeight, textureOffset, dimension, hovered, selected])
 
 
     return (

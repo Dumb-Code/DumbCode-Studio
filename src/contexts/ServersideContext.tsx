@@ -11,7 +11,7 @@ const ServersideContext = ({ githubClientId, gitCommitMessage, children }: Props
 }>) => {
   const value = useMemo(() => ({
     gitCommitMessage, githubClientId
-  }), [])
+  }), [githubClientId, gitCommitMessage])
   return (
     <Context.Provider value={value}>
       {children}
