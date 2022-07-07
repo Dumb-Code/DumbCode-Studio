@@ -11,6 +11,8 @@ import { NumArray } from './../../util/NumArray';
 import { KeyframeLayerData } from './../animations/DcaAnimation';
 import DcProject from "./DcProject";
 
+let useFullFileNames = false
+
 
 type ModelDataJson = {
   projectHistory: SerializedUndoRedoHandler,
@@ -95,7 +97,7 @@ const createWriteableFolder = (handle: FileSystemDirectoryHandle): WriteableFold
 
 export const loadDcProj = async (name: string, buffer: ArrayBuffer, writeable: WritableFile) => {
   const zip = await JSZip.loadAsync(buffer)
-  const project = await loadFolderProject(name, zip)
+  const project = await loadFolderProject(name, zip, false)
 
   project.projectWritableFile = writeable
   project.projectSaveType.value = "project"
@@ -104,11 +106,11 @@ export const loadDcProj = async (name: string, buffer: ArrayBuffer, writeable: W
 }
 
 export const loadDcFolder = async (folder: FileSystemDirectoryHandle) => {
-  return loadFolderProject(folder.name, createReadableFolder(folder))
+  return loadFolderProject(folder.name, createReadableFolder(folder), true)
 }
 
-export const loadFolderProject = async (name: string, zip: ReadableFolder) => {
-
+export const loadFolderProject = async (name: string, zip: ReadableFolder, shouldUseFullFileNames: boolean) => {
+  useFullFileNames = shouldUseFullFileNames
   const model = await loadDcProjModel(zip)
   const project = new DcProject(name, model)
 
@@ -174,6 +176,7 @@ const loadProjectData = async (fileP: OrPromise<ReadableFile | null>, project: D
 //     }]
 //   }]
 // }
+//Note that in folder saving, the `animation_name` file is used, but called `file_indexes`
 
 type KeyframeLayerDataJson = {
   id: number,
@@ -435,7 +438,7 @@ const getRefImagesData = async (folder: ReadableFolder): Promise<RefImgData> => 
 }
 
 const getRefImages = async (folder: ReadableFolder, legacyImgNames: string[] | null): Promise<HTMLImageElement[]> => {
-  return Promise.all((await getFileArrayIndex(folder, index => (legacyImgNames !== null ? legacyImgNames[index] : index) + ".png"))
+  return Promise.all((await getFileArrayIndex(folder, ".png", legacyImgNames ?? undefined))
     .map(async (file) => file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))))
   )
 }
@@ -451,16 +454,16 @@ const wrapZip = (zip: JSZip): WriteableFolder => {
 
 export const writeDcProj = async (project: DcProject): Promise<Blob> => {
   const zip = new JSZip()
-  writeFolderProject(project, wrapZip(zip))
+  writeFolderProject(project, wrapZip(zip), false)
   return zip.generateAsync({ type: "blob" })
 }
 
 export const writeDcFolder = async (project: DcProject, folder: FileSystemDirectoryHandle) => {
-  await writeFolderProject(project, createWriteableFolder(folder))
+  await writeFolderProject(project, createWriteableFolder(folder), true)
 }
 
-const writeFolderProject = async (projet: DcProject, folder: WriteableFolder) => {
-
+const writeFolderProject = async (projet: DcProject, folder: WriteableFolder, shouldUseFullFileNames: boolean) => {
+  useFullFileNames = shouldUseFullFileNames
   await Promise.all([
     folder.file("model.dcm", writeModel(projet.model)),
     writeProjectData(projet, folder),
@@ -470,7 +473,6 @@ const writeFolderProject = async (projet: DcProject, folder: WriteableFolder) =>
   ])
 
 }
-
 
 const writeProjectData = async (project: DcProject, folder: WriteableFolder) => {
   const data: ModelDataJson = {
@@ -501,8 +503,9 @@ const writeAnimations = async (project: DcProject, folderP: OrPromise<WriteableF
     folder.file("data.json", JSON.stringify(animationData)),
 
     ...project.animationTabs.animations.value.map((anim, index) =>
-      folder.file(`${index}.dca`, writeDCAAnimation(anim))
-    )
+      folder.file(`${useFullFileNames ? anim.name.value : index}.dca`, writeDCAAnimation(anim))
+    ),
+    writeNameIndexFileIfNeeded(folder, project.animationTabs.animations.value.map(a => a.name.value))
   ])
 
 }
@@ -521,8 +524,8 @@ const writeTextures = async (project: DcProject, folderP: OrPromise<WriteableFol
 
   await Promise.all([
     folder.file("data.json", JSON.stringify(textureData)),
-
-    ...textures.map((texture, index) => writeImg(folder, index, texture.element.value))
+    ...textures.map((texture, index) => writeImg(folder, useFullFileNames ? texture.name.value : index, texture.element.value)),
+    writeNameIndexFileIfNeeded(folder, textures.map(t => t.name.value))
   ])
 }
 
@@ -546,20 +549,26 @@ const writeRefImages = async (project: DcProject, folderP: OrPromise<WriteableFo
 
   await Promise.all([
     folder.file("data.json", JSON.stringify(refImgData)),
-
-    ...images.map((image, index) => writeImg(folder, index, image.img))
+    ...images.map((image, index) => writeImg(folder, useFullFileNames ? image.name.value : index, image.img)),
+    writeNameIndexFileIfNeeded(folder, images.map(t => t.name.value))
   ])
 }
 
 // --- Utils
 
-const getFileArray = (folder: ReadableFolder, extension: string) => getFileArrayIndex(folder, index => `${index}.${extension}`)
+const getFileArray = (folder: ReadableFolder, extension: string) => getFileArrayIndex(folder, extension)
 
-const getFileArrayIndex = async (folder: ReadableFolder, applier: (index: number) => string) => {
+const getFileArrayIndex = async (folder: ReadableFolder, extension: string, nameOverrides?: string[]) => {
   const files: ReadableFile[] = []
+
+  const names = nameOverrides ?? await getNameIndexFileIfNeeded(folder)
+  const applier = (index: number) => `${names[index] ?? index}.${extension}`
+
   for (let index = 0, file: OrPromise<ReadableFile | null> = null; (file = await folder.file(applier(index))) !== null; index++) {
     files.push(file)
   }
+
+  console.log(files)
   return files
 }
 
@@ -582,4 +591,22 @@ const folder = async (zip: ReadableFolder, fileName: string) => {
 const writeImg = async (folder: WriteableFolder, name: string | number, img: HTMLImageElement) => {
   const blob = await writeImgToBlob(img)
   await folder.file(`${name}.png`, blob)
+}
+
+const getNameIndexFileIfNeeded = async (folder: ReadableFolder): Promise<string[]> => {
+  if (!useFullFileNames) {
+    return []
+  }
+  const file = await folder.file("name_index")
+  if (file === null) {
+    return []
+  }
+  return JSON.parse(await file.async("text"))
+}
+
+const writeNameIndexFileIfNeeded = async (folder: WriteableFolder, names: string[]) => {
+  if (!useFullFileNames) {
+    return
+  }
+  const file = await folder.file("name_index", JSON.stringify(names))
 }
