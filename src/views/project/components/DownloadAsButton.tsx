@@ -30,14 +30,14 @@ const DownloadAsButton = ({ menuId, iconButtonClass, name, tooltip, Icon, childr
 }
 
 
-export const DownloadOption = ({ extension, exportFunction }: { extension: string, exportFunction: () => void }) => {
+export const DownloadOption = ({ extension, exportFunction, dot = "." }: { extension: string, exportFunction: () => void, dot?: string }) => {
   const name = useContext(DownloadAsNameContext)
   return (
     <MenuItem
       onClick={e => { exportFunction(); e.stopPropagation() }}
     >
       <div className="hover:bg-gray-700 cursor-pointer p-1 rounded m-1 flex flex-row">
-        <p className="text-gray-300">{name}</p><p className="text-sky-400 font-bold">.{extension}</p>
+        <p className="text-gray-300">{name}</p><p className="text-sky-400 font-bold">{dot}{extension}</p>
       </div>
     </MenuItem>
   )

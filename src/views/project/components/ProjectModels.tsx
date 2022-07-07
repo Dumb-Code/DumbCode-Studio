@@ -3,13 +3,13 @@ import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter'
 import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter'
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
+import { SvgCopypaste, SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useToast } from "../../../contexts/ToastContext"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import PushToGithubDialogBox from "../../../dialogboxes/PushToGithubDialogBox"
-import { defaultWritable, FileSystemsAccessApi } from "../../../studio/files/FileTypes"
+import { defaultWritable, FileSystemsAccessApi, useFileSystemAccessApi } from "../../../studio/files/FileTypes"
 import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
@@ -17,7 +17,7 @@ import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import { writeOldModel } from "../../../studio/formats/model/OldDCMLoader"
 import { exportAsBBModel } from "../../../studio/formats/project/BBModelExporter"
 import DcProject, { createProject, newProject, removeFileExtension } from "../../../studio/formats/project/DcProject"
-import { writeDcProj } from "../../../studio/formats/project/DcProjectLoader"
+import { loadDcFolder, writeDcFolder, writeDcProj } from "../../../studio/formats/project/DcProjectLoader"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import { NumArray } from "../../../studio/util/NumArray"
 import DownloadAsButton, { DownloadOption } from "./DownloadAsButton"
@@ -29,6 +29,26 @@ const ProjectModels = () => {
     const { hasProject, addProject } = useStudio()
 
     const [ref, isDragging] = useFileUpload<HTMLDivElement>(modelExtensions, file => createProject(file).then(addProject))
+
+    const { addToast } = useToast()
+
+    const fileSystemsAccess = useFileSystemAccessApi()
+
+    const openFolderProject = async () => {
+        if (!fileSystemsAccess) {
+            addToast("FileSystemsAccessApi is not available in this browser", "error")
+            return
+        }
+        try {
+            const folder = await window.showDirectoryPicker()
+            addProject(await loadDcFolder(folder))
+            addToast(`Loaded project from ${folder.name}`, "success")
+        } catch (e) {
+            console.error(e)
+            addToast("Error Picking Folder", "error")
+            return
+        }
+    }
 
     return (
         <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'dark:bg-gray-800 bg-gray-100'} h-full flex flex-col overflow-hidden`}>
@@ -46,6 +66,13 @@ const ProjectModels = () => {
                     >
                         <SVGUpload className="h-4 w-4 mr-1" />
                     </ClickableInput>
+                    {fileSystemsAccess && (
+                        <button onClick={openFolderProject} className="icon-button relative">
+                            <SVGUpload className="absolute h-3.5 w-3.5 top-[3px] right-[7px] text-white dark:text-gray-900" />
+                            <SvgCopypaste className="h-4 w-4 mr-1" />
+                        </button>
+                    )}
+
                 </p>
             </div>
             <div className="overflow-y-scroll h-full w-full studio-scrollbar">
@@ -90,14 +117,14 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                 project.name.value = removeFileExtension(name)
                 setSaveType(type)
                 setIsModelDirty(false)
-                addToast(`Saved model as ${name}`)
+                addToast(`Saved model as ${name}`, "success")
             } else if (type === "project") {
                 const name = await project.projectWritableFile.write(project.name.value + ".dcproj", await writeDcProj(project))
                 project.name.value = removeFileExtension(name)
                 setSaveType(type)
                 setIsProjectDirty(false)
                 setIsModelDirty(false)
-                addToast(`Saved dcproj as ${name}`)
+                addToast(`Saved dcproj as ${name}`, "success")
             }
 
         } catch (e) {
@@ -235,6 +262,26 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
         defaultWritable.write(project.name.value + ".bbmodel", blob)
     }
 
+    const fileSystemsAccess = useFileSystemAccessApi()
+
+    const exportToFolder = async () => {
+        if (!fileSystemsAccess) {
+            addToast("File System Access API Not Available", "error")
+            return
+        }
+
+        try {
+            const folder = await window.showDirectoryPicker()
+            await writeDcFolder(project, folder)
+            addToast(`Exported to Folder ${folder.name}`, "success")
+        } catch (e) {
+            console.error(e)
+            addToast("Error Picking Folder", "error")
+            return
+        }
+
+    }
+
     const linkedToFile = saveType !== "unknown" && FileSystemsAccessApi
 
     const isRemote = project.remoteLink !== undefined
@@ -277,6 +324,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         <DownloadOption exportFunction={exportToGLTF} extension="gltf" />
                         <DownloadOption exportFunction={() => saveModel("project")} extension="dcproj" />
                         <DownloadOption exportFunction={exportToBBModel} extension="bbmodel" />
+                        {fileSystemsAccess && <DownloadOption exportFunction={exportToFolder} extension="&nbsp;as folder" dot="" />}
                     </DownloadAsButton>
                     <ButtonWithTooltip
                         onClick={e => { removeProject(); e.stopPropagation() }}

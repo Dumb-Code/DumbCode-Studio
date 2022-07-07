@@ -1,8 +1,8 @@
-import JSZip, { JSZipObject } from "jszip";
-import { WritableFile } from "../../files/FileTypes";
+import JSZip from "jszip";
+import { createReadableFileExtended, WritableFile } from "../../files/FileTypes";
 import { SerializedUndoRedoHandler } from "../../undoredo/UndoRedoHandler";
 import { ReferenceImage } from "../../util/ReferenceImageHandler";
-import { imgSourceToElement, writeImgToBase64 } from "../../util/Utils";
+import { imgSourceToElement, writeImgToBlob } from "../../util/Utils";
 import { loadUnknownAnimation, writeDCAAnimation } from "../animations/DCALoader";
 import { loadModelUnknown, writeModel } from "../model/DCMLoader";
 import { DCMCube } from "../model/DcmModel";
@@ -17,45 +17,121 @@ type ModelDataJson = {
   modelHistory: SerializedUndoRedoHandler
 }
 
+interface TypeByName {
+  text: string;
+  arraybuffer: ArrayBuffer;
+  blob: Blob;
+}
+
+type ReadableFolder = {
+  file: (name: string) => OrPromise<ReadableFile | null>
+  folder: (name: string) => OrPromise<ReadableFolder | null>
+}
+
+type ReadableFile = {
+  async: <T extends keyof TypeByName, >(type: T) => Promise<TypeByName[T]>
+  asHandle?: () => FileSystemFileHandle
+}
+
+type WriteableFolder = {
+  file: (name: string, content: OrPromise<Blob | string>) => OrPromise<void>
+  folder: (name: string) => OrPromise<WriteableFolder>
+}
+
+type OrPromise<T> = T | Promise<T>
+
+const createReadableFile = (handle: FileSystemFileHandle): ReadableFile => {
+  return {
+    async: async<T extends keyof TypeByName, R = TypeByName[T]>(type: T): Promise<R> => {
+      const file = await handle.getFile()
+      if (type === "arraybuffer") {
+        return (await file.arrayBuffer()) as any as R
+      }
+      if (type === "blob") {
+        return file as any as R
+      }
+      if (type === "text") {
+        return (await file.text()) as any as R
+      }
+      throw new Error(`Unknown file type ${type}`)
+    },
+    asHandle: () => handle
+  }
+}
+
+const createReadableFolder = (handle: FileSystemDirectoryHandle): ReadableFolder => {
+  return {
+    file: async (name: string) => {
+      try {
+        return createReadableFile(await handle.getFileHandle(name))
+      } catch (e) {
+        return null
+      }
+    },
+    folder: async (name: string) => {
+      try {
+        return createReadableFolder(await handle.getDirectoryHandle(name))
+      } catch (e) {
+        return null
+      }
+    }
+  }
+}
+
+const createWriteableFolder = (handle: FileSystemDirectoryHandle): WriteableFolder => {
+  return {
+    file: async (name, content) => {
+      const file = await handle.getFileHandle(name, { create: true })
+      const writeable = await file.createWritable()
+      await writeable.write(await content)
+      await writeable.close()
+    },
+    folder: async (name: string) => {
+      const folder = await handle.getDirectoryHandle(name, { create: true })
+      return createWriteableFolder(folder)
+    }
+  }
+}
+
 export const loadDcProj = async (name: string, buffer: ArrayBuffer, writeable: WritableFile) => {
   const zip = await JSZip.loadAsync(buffer)
-
-  const model = await loadDcProjModel(zip)
-  const project = new DcProject(name, model)
+  const project = await loadFolderProject(name, zip)
 
   project.projectWritableFile = writeable
   project.projectSaveType.value = "project"
 
+  return project
+}
+
+export const loadDcFolder = async (folder: FileSystemDirectoryHandle) => {
+  return loadFolderProject(folder.name, createReadableFolder(folder))
+}
+
+export const loadFolderProject = async (name: string, zip: ReadableFolder) => {
+
+  const model = await loadDcProjModel(zip)
+  const project = new DcProject(name, model)
+
   const awaiters: Promise<void>[] = []
 
-  const dataFile = zip.file("data.json")
-  if (dataFile !== null) {
-    awaiters.push(loadProjectData(dataFile, project))
-  }
+  awaiters.push(loadProjectData(zip.file("data.json"), project))
+  awaiters.push(loadTextures(zip.folder("textures"), project))
+  awaiters.push(loadAnimations(zip.folder("animations"), project))
+  awaiters.push(loadRefImages(zip.folder("ref_images"), project))
 
-  const textures = zip.folder("textures")
-  if (textures !== null) {
-    awaiters.push(loadTextures(textures, project))
-  }
-
-  const animations = zip.folder("animations")
-  if (animations !== null) {
-    awaiters.push(loadAnimations(animations, project))
-  }
-
-  const refImges = zip.folder("ref_images")
-  if (refImges !== null) {
-    awaiters.push(loadRefImages(refImges, project))
-  }
 
   await Promise.all(awaiters)
 
   return project
 }
 
-const loadDcProjModel = async (zip: JSZip) => loadModelUnknown(file(zip, 'model.dcm').async('arraybuffer'))
+const loadDcProjModel = async (zip: ReadableFolder) => loadModelUnknown((await file(zip, 'model.dcm')).async('arraybuffer'))
 
-const loadProjectData = async (file: JSZip.JSZipObject, project: DcProject) => {
+const loadProjectData = async (fileP: OrPromise<ReadableFile | null>, project: DcProject) => {
+  const file = await fileP
+  if (file === null) {
+    return
+  }
   const json = JSON.parse(await file.async("text")) as ModelDataJson
   project.undoRedoHandler.loadFromJson(json.projectHistory)
   project.model.undoRedoHandler.loadFromJson(json.modelHistory)
@@ -121,7 +197,11 @@ type LegacyAnimationData = {
   keyframeInfo: KeyframeLayerDataJson[]
 }
 
-const loadAnimations = async (folder: JSZip, project: DcProject) => {
+const loadAnimations = async (folderP: OrPromise<ReadableFolder | null>, project: DcProject) => {
+  const folder = await folderP
+  if (folder === null) {
+    return
+  }
   const [animations, animationData] = await Promise.all([
     loadDcaAnimations(folder, project),
     loadAnimationData(folder)
@@ -154,19 +234,19 @@ const loadAnimations = async (folder: JSZip, project: DcProject) => {
 
 }
 
-const loadAnimationData = async (folder: JSZip): Promise<AnimationData> => {
-  const dataFile = folder.file("data.json")
+const loadAnimationData = async (folder: ReadableFolder): Promise<AnimationData> => {
+  const dataFile = await folder.file("data.json")
   if (dataFile === null) {
     return loadLegacyAnimationData(folder)
   }
   return dataFile.async("text").then(file => JSON.parse(file) as AnimationData)
 }
 
-const loadLegacyAnimationData = async (folder: JSZip): Promise<AnimationData> => {
+const loadLegacyAnimationData = async (folder: ReadableFolder): Promise<AnimationData> => {
   const [animationNames, dataFiles] = await Promise.all([
-    file(folder, "animation_names").async("text").then(s => s.split("\n")),
-    Promise.all(getFileArray(folder, "json")
-      .map(file => file.async("text").then(file => JSON.parse(file) as LegacyAnimationData))
+    (await file(folder, "animation_names")).async("text").then(s => s.split("\n")),
+    Promise.all((await getFileArray(folder, "json"))
+      .map(async (file) => file.async("text").then(file => JSON.parse(file) as LegacyAnimationData))
     )
   ])
 
@@ -180,9 +260,9 @@ const loadLegacyAnimationData = async (folder: JSZip): Promise<AnimationData> =>
 }
 
 
-const loadDcaAnimations = (folder: JSZip, project: DcProject) => {
-  return Promise.all(getFileArray(folder, "dca")
-    .map((file, index) => file.async("arraybuffer").then(arrayBuffer => loadUnknownAnimation(project, `Dc_ProjAnim_${index}`, arrayBuffer)))
+const loadDcaAnimations = async (folder: ReadableFolder, project: DcProject) => {
+  return Promise.all((await getFileArray(folder, "dca"))
+    .map(async (file, index) => file.async("arraybuffer").then(arrayBuffer => loadUnknownAnimation(project, `Dc_ProjAnim_${index}`, arrayBuffer)))
   )
 }
 
@@ -218,15 +298,25 @@ const loadDcaAnimations = (folder: JSZip, project: DcProject) => {
 // }
 
 type TextureData = { texture_names: string[], groups: TextureGroupData[], textures_need_flipping?: boolean }
-type TextureGroupData = { name: string, layerIDs: number[] }
+type TextureGroupData = { name: string, layerIDs: number[], isDefault?: boolean }
 
-const loadTextures = async (folder: JSZip, project: DcProject) => {
+const loadTextures = async (folderP: OrPromise<ReadableFolder | null>, project: DcProject) => {
+  const folder = await folderP
+  if (folder === null) {
+    return
+  }
   const [imgs, datas] = await Promise.all([
     getTexturesArray(folder),
     getTexturesData(folder)
   ])
 
-  const textures = imgs.map((img, index) => project.textureManager.addTexture(datas.texture_names[index], img))
+  const textures = imgs.map(({ img, handle }, index) => {
+    const texture = project.textureManager.addTexture(datas.texture_names[index], img)
+    if (handle !== undefined) {
+      project.textureManager.linkFile(createReadableFileExtended(handle), texture)
+    }
+    return texture
+  })
 
   //For some reason, the legacy code reverses the array list here?
   if (datas.textures_need_flipping === true) {
@@ -234,20 +324,23 @@ const loadTextures = async (folder: JSZip, project: DcProject) => {
   }
 
   datas.groups.forEach(groupData => {
-    const group = new TextureGroup(groupData.name, false);
+    const group = new TextureGroup(groupData.name, groupData.isDefault ?? false);
     groupData.layerIDs.forEach(id => group.toggleTexture(textures[id], true))
     project.textureManager.addGroup(group)
   })
 }
 
-const getTexturesArray = (folder: JSZip) => {
-  return Promise.all(getFileArray(folder, "png")
-    .map(file => file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))))
+const getTexturesArray = async (folder: ReadableFolder) => {
+  return Promise.all((await getFileArray(folder, "png"))
+    .map(async (file) => ({
+      img: await file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))),
+      handle: file.asHandle?.()
+    }))
   )
 }
 
-const getTexturesData = async (folder: JSZip): Promise<TextureData> => {
-  const dataFile = folder.file("data.json")
+const getTexturesData = async (folder: ReadableFolder): Promise<TextureData> => {
+  const dataFile = await folder.file("data.json")
   if (dataFile === null) {
     return getLegacyTexturesData(folder)
   }
@@ -258,10 +351,10 @@ const getTexturesData = async (folder: JSZip): Promise<TextureData> => {
   }
 }
 
-const getLegacyTexturesData = async (folder: JSZip): Promise<TextureData> => {
+const getLegacyTexturesData = async (folder: ReadableFolder): Promise<TextureData> => {
   const [groups, textureNames] = await Promise.all([
-    file(folder, "groups.json").async('text').then(g => JSON.parse(g) as TextureGroupData[]),
-    file(folder, "texture_names").async('text').then(s => s.split("\n"))
+    (await file(folder, "groups.json")).async('text').then(g => JSON.parse(g) as TextureGroupData[]),
+    (await file(folder, "texture_names")).async('text').then(s => s.split("\n"))
   ])
   return {
     texture_names: textureNames,
@@ -303,7 +396,11 @@ type RefImgData = {
   new_format: boolean, //False on old versions, true on new versions
   entries: LegacyRefImgData
 }
-const loadRefImages = async (folder: JSZip, project: DcProject) => {
+const loadRefImages = async (folderP: OrPromise<ReadableFolder | null>, project: DcProject) => {
+  const folder = await folderP
+  if (folder === null) {
+    return
+  }
   const data = await getRefImagesData(folder)
   const images = await getRefImages(folder, data.new_format ? null : data.entries.map(e => e.name))
 
@@ -322,8 +419,9 @@ const loadRefImages = async (folder: JSZip, project: DcProject) => {
   })
 }
 
-const getRefImagesData = async (folder: JSZip): Promise<RefImgData> => {
-  const dataFile = await file(folder, "data.json").async('text').then(g => JSON.parse(g) as RefImgData | LegacyRefImgData)
+const getRefImagesData = async (folder: ReadableFolder): Promise<RefImgData> => {
+  const f = await file(folder, "data.json")
+  const dataFile = await f.async('text').then(g => JSON.parse(g) as RefImgData | LegacyRefImgData)
   if (Array.isArray(dataFile)) {
     return {
       new_format: false,
@@ -336,39 +434,54 @@ const getRefImagesData = async (folder: JSZip): Promise<RefImgData> => {
   }
 }
 
-const getRefImages = async (folder: JSZip, legacyImgNames: string[] | null): Promise<HTMLImageElement[]> => {
-  return Promise.all(getFileArrayIndex(folder, index => (legacyImgNames !== null ? legacyImgNames[index] : index) + ".png")
-    .map(file => file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))))
+const getRefImages = async (folder: ReadableFolder, legacyImgNames: string[] | null): Promise<HTMLImageElement[]> => {
+  return Promise.all((await getFileArrayIndex(folder, index => (legacyImgNames !== null ? legacyImgNames[index] : index) + ".png"))
+    .map(async (file) => file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))))
   )
 }
 
 // --- EXPORTER
 
-export const writeDcProj = async (projet: DcProject): Promise<Blob> => {
+const wrapZip = (zip: JSZip): WriteableFolder => {
+  return {
+    file: (name, content) => { zip.file(name, content) },
+    folder: (name) => wrapZip(zip.folder(name)!)
+  }
+}
+
+export const writeDcProj = async (project: DcProject): Promise<Blob> => {
   const zip = new JSZip()
-
-  zip.file("model.dcm", writeModel(projet.model))
-
-  await Promise.all([
-    writeProjectData(projet, zip),
-    writeAnimations(projet, folder(zip, "animations")),
-    writeTextures(projet, folder(zip, "textures")),
-    writeRefImages(projet, folder(zip, "ref_images")),
-  ])
-
+  writeFolderProject(project, wrapZip(zip))
   return zip.generateAsync({ type: "blob" })
 }
 
+export const writeDcFolder = async (project: DcProject, folder: FileSystemDirectoryHandle) => {
+  await writeFolderProject(project, createWriteableFolder(folder))
+}
 
-const writeProjectData = async (project: DcProject, folder: JSZip) => {
+const writeFolderProject = async (projet: DcProject, folder: WriteableFolder) => {
+
+  await Promise.all([
+    folder.file("model.dcm", writeModel(projet.model)),
+    writeProjectData(projet, folder),
+    writeAnimations(projet, folder.folder("animations")),
+    writeTextures(projet, folder.folder("textures")),
+    writeRefImages(projet, folder.folder("ref_images")),
+  ])
+
+}
+
+
+const writeProjectData = async (project: DcProject, folder: WriteableFolder) => {
   const data: ModelDataJson = {
     modelHistory: project.model.undoRedoHandler.jsonRepresentation(),
     projectHistory: project.undoRedoHandler.jsonRepresentation()
   }
-  folder.file("data.json", JSON.stringify(data))
+  await folder.file("data.json", JSON.stringify(data))
 }
 
-const writeAnimations = async (project: DcProject, folder: JSZip) => {
+const writeAnimations = async (project: DcProject, folderP: OrPromise<WriteableFolder>) => {
+  const folder = await folderP
   const animationData: AnimationData = {
     animations: project.animationTabs.animations.value.map(anim => ({
       name: anim.name.value,
@@ -383,29 +496,38 @@ const writeAnimations = async (project: DcProject, folder: JSZip) => {
       history: anim.undoRedoHandler.jsonRepresentation()
     }))
   }
-  folder.file("data.json", JSON.stringify(animationData))
 
+  await Promise.all([
+    folder.file("data.json", JSON.stringify(animationData)),
 
-  project.animationTabs.animations.value.forEach((anim, index) => {
-    folder.file(`${index}.dca`, writeDCAAnimation(anim))
-  })
+    ...project.animationTabs.animations.value.map((anim, index) =>
+      folder.file(`${index}.dca`, writeDCAAnimation(anim))
+    )
+  ])
+
 }
 
-const writeTextures = async (project: DcProject, folder: JSZip) => {
+const writeTextures = async (project: DcProject, folderP: OrPromise<WriteableFolder>) => {
+  const folder = await folderP
   const textures = project.textureManager.textures.value
   const textureData: TextureData = {
     texture_names: textures.map(t => t.name.value),
     groups: project.textureManager.groups.value.map(group => ({
+      isDefault: group.isDefault,
       name: group.name.value,
       layerIDs: group.textures.value.map(identifier => textures.findIndex(texture => texture.identifier === identifier)).filter(id => id !== -1)
     }))
   }
-  folder.file("data.json", JSON.stringify(textureData))
 
-  await Promise.all([textures.map((texture, index) => writeImg(folder, index, texture.element.value))])
+  await Promise.all([
+    folder.file("data.json", JSON.stringify(textureData)),
+
+    ...textures.map((texture, index) => writeImg(folder, index, texture.element.value))
+  ])
 }
 
-const writeRefImages = async (project: DcProject, folder: JSZip) => {
+const writeRefImages = async (project: DcProject, folderP: OrPromise<WriteableFolder>) => {
+  const folder = await folderP
   const images = project.referenceImageHandler.images.value
   const refImgData: RefImgData = {
     new_format: true,
@@ -421,40 +543,43 @@ const writeRefImages = async (project: DcProject, folder: JSZip) => {
       hidden: imgs.hidden.value
     }))
   }
-  folder.file("data.json", JSON.stringify(refImgData))
 
-  await Promise.all(images.map((image, index) => writeImg(folder, index, image.img)))
+  await Promise.all([
+    folder.file("data.json", JSON.stringify(refImgData)),
+
+    ...images.map((image, index) => writeImg(folder, index, image.img))
+  ])
 }
 
 // --- Utils
 
-const getFileArray = (folder: JSZip, extension: string) => getFileArrayIndex(folder, index => `${index}.${extension}`)
+const getFileArray = (folder: ReadableFolder, extension: string) => getFileArrayIndex(folder, index => `${index}.${extension}`)
 
-const getFileArrayIndex = (folder: JSZip, applier: (index: number) => string) => {
-  const files: JSZipObject[] = []
-  for (let index = 0, file: JSZipObject | null = null; (file = folder.file(applier(index))) !== null; index++) {
+const getFileArrayIndex = async (folder: ReadableFolder, applier: (index: number) => string) => {
+  const files: ReadableFile[] = []
+  for (let index = 0, file: OrPromise<ReadableFile | null> = null; (file = await folder.file(applier(index))) !== null; index++) {
     files.push(file)
   }
   return files
 }
 
-const file = (zip: JSZip, fileName: string) => {
-  const file = zip.file(fileName)
+const file = async (zip: ReadableFolder, fileName: string) => {
+  const file = await zip.file(fileName)
   if (file === null) {
     throw new Error(`Unable to find the file '${fileName}'.`)
   }
   return file
 }
 
-const folder = (zip: JSZip, fileName: string) => {
-  const file = zip.folder(fileName)
+const folder = async (zip: ReadableFolder, fileName: string) => {
+  const file = await zip.folder(fileName)
   if (file === null) {
     throw new Error(`Unable to find the folder '${fileName}'.`)
   }
   return file
 }
 
-const writeImg = async (folder: JSZip, name: string | number, img: HTMLImageElement) => {
-  const base64 = await writeImgToBase64(img)
-  folder.file(`${name}.png`, base64, { base64: true })
+const writeImg = async (folder: WriteableFolder, name: string | number, img: HTMLImageElement) => {
+  const blob = await writeImgToBlob(img)
+  await folder.file(`${name}.png`, blob)
 }

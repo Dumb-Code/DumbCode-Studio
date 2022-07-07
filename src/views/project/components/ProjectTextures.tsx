@@ -390,11 +390,12 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
         texture.name.value = removeFileExtension(name)
         setIsTextureDirty(false)
         setSaveableFile(true)
-        addToast(`Saved texture as ${name}`)
+        addToast(`Saved texture as ${name}`, "success")
     }
 
     const deleteTexture = async () => {
         texture.delete()
+        addToast("Deleted texture", "success")
     }
 
 

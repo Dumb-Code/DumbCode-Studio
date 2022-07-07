@@ -15,7 +15,7 @@ export default class TextureManager {
 
   readonly canvas: HTMLCanvasElement
 
-  readonly defaultGroup: TextureGroup
+  defaultGroup: TextureGroup
   readonly selectedGroup: LO<TextureGroup>
   readonly groups: LO<readonly TextureGroup[]>
 
@@ -44,6 +44,10 @@ export default class TextureManager {
     const img = await readFileToImg(file)
 
     const texture = this.addTexture(readable.name, img)
+    this.linkFile(readable, texture)
+  }
+
+  async linkFile(readable: ReadableFile, texture: Texture) {
     texture.setTextureFile(readable.asWritable())
     texture.saveableFile.value = true
   }
@@ -87,6 +91,11 @@ export default class TextureManager {
       group.textures.addPostListener(() => this.refresh())
       group.unselectedTextures.value = this.defaultGroup.textures.value
     })
+    const containedDefault = groups.find(groups => groups.isDefault)
+    if (containedDefault) {
+      this.groups.value = this.groups.value.filter(g => !g.isDefault)
+      this.defaultGroup = containedDefault
+    }
     this.groups.value = this.groups.value.concat(...groups)
     this.stopRefresh = false
     this.refresh()

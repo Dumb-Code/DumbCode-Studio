@@ -3,8 +3,11 @@ import { v4 } from "uuid"
 import { LO, useListenableObject } from "../studio/util/ListenableObject"
 import { useCreatePortal } from "./CreatePortalContext"
 
+//Currently, info isn't used anywhere. Review if it's ever needed?
+type ToastType = "info" | "success" | "error"
+
 type ContextType = {
-  addToast: (message: string) => void
+  addToast: (message: string, type: ToastType, duration?: number) => void
 }
 
 const timeToFadeOut = 700
@@ -18,6 +21,7 @@ class ToastObject {
 
   constructor(
     public readonly message: string,
+    public readonly type: ToastType
   ) {
 
   }
@@ -37,8 +41,8 @@ const ToastContext = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<ToastObject[]>([])
   const createPortal = useCreatePortal()
 
-  const addToast = useCallback((message: string, duration = 5000) => {
-    const obj: ToastObject = new ToastObject(message)
+  const addToast = useCallback((message: string, type: ToastType, duration = 5000) => {
+    const obj: ToastObject = new ToastObject(message, type)
 
     obj.fadingOut.addListener(fadingOut => {
       if (fadingOut) {

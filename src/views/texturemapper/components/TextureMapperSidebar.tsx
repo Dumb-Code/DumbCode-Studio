@@ -65,7 +65,7 @@ const TextureSettings = () => {
 
         const ctx = canvas.getContext("2d")
         if (ctx === null) {
-            addToast("Failed to create canvas context")
+            addToast("Failed to create canvas context", "error")
             return
         }
         ctx.imageSmoothingEnabled = false
@@ -76,7 +76,7 @@ const TextureSettings = () => {
 
         const img = await imgSourceToElement(canvas.toDataURL("image/png"))
         project.textureManager.addTexture("TextureMap", img)
-        addToast("Generated texture map")
+        addToast("Generated texture map", "success")
     }
 
     return (

@@ -95,7 +95,7 @@ const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation 
             animation.name.value = removeFileExtension(name)
             animation.saveableFile.value = true
             animation.needsSaving.value = false
-            addToast(`Saved animation as ${name}`)
+            addToast(`Saved animation as ${name}`, "success")
         } catch (e) {
             console.error(e)
             //Ignore e

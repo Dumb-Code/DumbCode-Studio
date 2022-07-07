@@ -1,9 +1,16 @@
+import { useEffect, useState } from 'react';
 import { SVGDownload, SVGSave } from '../../components/Icons';
 import FileChangeListener from './FileChangeListener';
 
 export const FileSystemsAccessApi = typeof window !== "undefined" && window.showOpenFilePicker !== undefined
 if (FileSystemsAccessApi) {
   console.log("Using FileSystemAccess where available.")
+}
+
+export const useFileSystemAccessApi = () => {
+  const [access, setAccess] = useState(true)
+  useEffect(() => setAccess(FileSystemsAccessApi), [])
+  return access
 }
 
 export type ListenableFileData = {

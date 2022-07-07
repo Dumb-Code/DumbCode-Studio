@@ -72,15 +72,15 @@ const StudioCanvas = () => {
       renderer.domElement.toBlob(blob => resolve(blob))
     })
     if (blob === null) {
-      addToast("Failed to take screenshot")
+      addToast("Failed to take screenshot", "error")
       return
     }
 
     try {
       await ScreenshotActionMap[selectedScreenshotAction](blob)
-      addToast(`Screenshot taken (${ScreenshotDesciptionMap[selectedScreenshotAction]})`)
+      addToast(`Screenshot taken (${ScreenshotDesciptionMap[selectedScreenshotAction]})`, "success")
     } catch (e) {
-      addToast(`Error completing action: ${selectedScreenshotAction}`)
+      addToast(`Error completing action: ${selectedScreenshotAction}`, "error")
     }
 
   }, [selectedScreenshotAction, renderer, renderSingleFrame, isolationFactory, noBackgroundFactory, addToast])
