@@ -4,8 +4,8 @@ import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useCreatePortal } from "../../../contexts/CreatePortalContext"
-import { useOptions } from "../../../contexts/OptionsContext"
 import { useStudio } from "../../../contexts/StudioContext"
+import { useToast } from "../../../contexts/ToastContext"
 import { FileSystemsAccessApi, ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
 import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
@@ -285,8 +285,6 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { 
         }
     }, [isAnimatingToPlace, context])
 
-    const { darkMode } = useOptions()
-
 
     return (
         <div
@@ -369,7 +367,7 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { 
                 </div>
             </div>
             {(isBeingDragged || isAnimatingToPlace) && createPortal(
-                <div ref={draggingRef} className={"absolute " + (darkMode ? "dark" : "")} style={{
+                <div ref={draggingRef} className="absolute" style={{
                     width: isAnimatingToPlace ? context?.droppedOntoLocation?.width : dragStartWidth.current
                 }}>
                     <GroupTextureSwitchEntry texture={texture} selected={selected} />
@@ -385,11 +383,14 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
     const [isTextureDirty, setIsTextureDirty] = useListenableObject(texture.needsSaving)
     const [saveableFile, setSaveableFile] = useListenableObject(texture.saveableFile)
 
+    const { addToast } = useToast()
+
     const saveTexture = async () => {
         const name = await texture.textureWritableFile.write(texture.name.value + ".png", writeImgToBlob(texture.element.value))
         texture.name.value = removeFileExtension(name)
         setIsTextureDirty(false)
         setSaveableFile(true)
+        addToast(`Saved texture as ${name}`)
     }
 
     const deleteTexture = async () => {

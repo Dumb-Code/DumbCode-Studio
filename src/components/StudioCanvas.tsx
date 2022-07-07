@@ -2,7 +2,8 @@ import { HTMLAttributes, useCallback, useEffect, useMemo, useRef } from "react";
 import { useKeyComboPressed, useOptions } from "../contexts/OptionsContext";
 import { useStudio } from "../contexts/StudioContext";
 import { useModelIsolationFactory, useNoBackgroundFactory } from "../contexts/ThreeContext";
-import { ScreenshotActionMap } from "../studio/screenshot/ScreenshotActions";
+import { useToast } from "../contexts/ToastContext";
+import { ScreenshotActionMap, ScreenshotDesciptionMap } from "../studio/screenshot/ScreenshotActions";
 import { useSelectedCubeHighlighter } from "../studio/util/CubeSelectedHighlighter";
 import { useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
@@ -47,7 +48,9 @@ const StudioCanvas = () => {
   useSelectedCubeManager()
   useSelectedCubeHighlighter()
 
-  const { selectedScreenshotActions } = useOptions()
+  const { selectedScreenshotAction } = useOptions()
+
+  const { addToast } = useToast()
 
   const isolationFactory = useModelIsolationFactory()
   const noBackgroundFactory = useNoBackgroundFactory()
@@ -69,10 +72,18 @@ const StudioCanvas = () => {
       renderer.domElement.toBlob(blob => resolve(blob))
     })
     if (blob === null) {
+      addToast("Failed to take screenshot")
       return
     }
-    selectedScreenshotActions.forEach(action => ScreenshotActionMap[action](blob))
-  }, [selectedScreenshotActions, renderer, renderSingleFrame, isolationFactory, noBackgroundFactory])
+
+    try {
+      await ScreenshotActionMap[selectedScreenshotAction](blob)
+      addToast(`Screenshot taken (${ScreenshotDesciptionMap[selectedScreenshotAction]})`)
+    } catch (e) {
+      addToast(`Error completing action: ${selectedScreenshotAction}`)
+    }
+
+  }, [selectedScreenshotAction, renderer, renderSingleFrame, isolationFactory, noBackgroundFactory, addToast])
 
   useKeyComboPressed(useMemo(() => ({
     common: {

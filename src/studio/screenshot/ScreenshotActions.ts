@@ -11,15 +11,26 @@ export const ScreenshotActionMap: Record<ScreenshotActionType, ScreenshotAction>
   upload_to_imgur: async (screenshot) => {
     const formData = new FormData()
     formData.append("image", screenshot, "screenshot.png")
-    const json = await fetch("https://api.imgur.com/3/image", {
+    const response = await fetch("https://api.imgur.com/3/image", {
       method: "POST",
       headers: {
         Authorization: `Client-ID 1b01948f72fbc4f`
       },
       body: formData
-    }).then(res => res.json())
+    })
+    const json = await response.json()
+    if (response.status !== 200) {
+      throw new Error(`Failed to upload screenshot to Imgur: ${response.status}, ${json.data.error}`)
+    }
     return navigator.clipboard?.writeText(json.data.link)
   }
+}
+
+export const ScreenshotDesciptionMap: Record<ScreenshotActionType, string> = {
+  download: "Downloaded",
+  open_in_new_tab: "Opened in new tab",
+  copy_to_clipboard: "Copied to clipboard",
+  upload_to_imgur: "Uploaded to Imgur and copied URL to clipboard"
 }
 
 export const AllScreenshotActionTypes = Object.keys(ScreenshotActionMap) as ScreenshotActionType[]

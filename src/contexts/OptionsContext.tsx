@@ -14,8 +14,8 @@ export type OptionsContext = {
   theme: ThemeSetting,
   setTheme: (val: ThemeSetting) => void
 
-  selectedScreenshotActions: ScreenshotActionType[]
-  setScreenshotActionEnabled: (action: ScreenshotActionType, enabled: boolean) => void
+  selectedScreenshotAction: ScreenshotActionType
+  setScreenshotAction: (action: ScreenshotActionType) => void
 
   compactMode: boolean
   setCompactMode: (val: boolean) => void
@@ -28,7 +28,7 @@ type SavedOptions = {
   readonly theme: ThemeSetting,
   readonly compactMode: boolean,
   readonly keyCombos: SavedKeyComboMap
-  readonly selectedScreenshotActions?: ScreenshotActionType[]
+  readonly selectedScreenshotAction: ScreenshotActionType
 }
 
 export const useOptions = () => {
@@ -102,7 +102,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
   const [isSystemDark, setIsSystemDark] = useState(true)  //We want the dark theme to default true for SSG. This is overriden below.
   const [compactMode, setCompactMode] = useState(loadedOptions?.compactMode ?? false)
   const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [loadedOptions?.keyCombos])
-  const [selectedScreenshotActions, setScreenshotAction] = useState<ScreenshotActionType[]>(loadedOptions?.selectedScreenshotActions ?? ["copy_to_clipboard"])
+  const [selectedScreenshotAction, setScreenshotAction] = useState<ScreenshotActionType>(loadedOptions?.selectedScreenshotAction ?? "copy_to_clipboard")
 
   const darkMode = useMemo(() => theme === "auto" ? isSystemDark : theme === "dark", [theme, isSystemDark])
 
@@ -121,10 +121,10 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
 
         return obj
       }, {} as SavedKeyComboMap),
-      selectedScreenshotActions: selectedScreenshotActions
+      selectedScreenshotAction: selectedScreenshotAction
     }
     localStorage.setItem("studio_options", JSON.stringify(data))
-  }, [compactMode, keyCombos, theme, selectedScreenshotActions])
+  }, [compactMode, keyCombos, theme, selectedScreenshotAction])
   useEffect(() => saveOptions(), [saveOptions])
 
 
@@ -155,10 +155,6 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
     saveOptions()
   }, [keyCombos, saveOptions])
 
-  const setScreenshotActionEnabled = useCallback((action: ScreenshotActionType, enabled: boolean) => {
-    setScreenshotAction(selectedScreenshotActions.filter(a => a !== action).concat(enabled ? [action] : []))
-  }, [selectedScreenshotActions])
-
   //When rendered SSR, setGridColor is undefined
   if (setGridColor) {
     if (darkMode) {
@@ -169,7 +165,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
 
   }
   return (
-    <Context.Provider value={{ darkMode, isSystemDark, theme, setTheme, compactMode, setCompactMode, selectedScreenshotActions, setScreenshotActionEnabled, keyCombos, keyCombosChanged }}>
+    <Context.Provider value={{ darkMode, isSystemDark, theme, setTheme, compactMode, setCompactMode, setScreenshotAction, selectedScreenshotAction, keyCombos, keyCombosChanged }}>
       {children}
     </Context.Provider>
   )

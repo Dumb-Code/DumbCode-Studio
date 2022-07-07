@@ -6,6 +6,7 @@ import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
+import { useToast } from "../../../contexts/ToastContext"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import PushToGithubDialogBox from "../../../dialogboxes/PushToGithubDialogBox"
 import { defaultWritable, FileSystemsAccessApi } from "../../../studio/files/FileTypes"
@@ -80,6 +81,8 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
 
     const dialogBoxes = useDialogBoxes()
 
+    const { addToast } = useToast()
+
     const saveModel = async (type = saveType) => {
         try {
             if (type === "model") {
@@ -87,12 +90,14 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                 project.name.value = removeFileExtension(name)
                 setSaveType(type)
                 setIsModelDirty(false)
+                addToast(`Saved model as ${name}`)
             } else if (type === "project") {
                 const name = await project.projectWritableFile.write(project.name.value + ".dcproj", await writeDcProj(project))
                 project.name.value = removeFileExtension(name)
                 setSaveType(type)
                 setIsProjectDirty(false)
                 setIsModelDirty(false)
+                addToast(`Saved dcproj as ${name}`)
             }
 
         } catch (e) {

@@ -1,6 +1,5 @@
 import { createContext, PropsWithChildren, ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { useCreatePortal } from "./CreatePortalContext"
-import { useOptions } from "./OptionsContext"
 
 type ContextType = {
   clearTooltip: () => void
@@ -34,8 +33,6 @@ function clampWithPadding(value: number, width: number, max: number) {
 const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null)
   const createPortal = useCreatePortal()
-
-  const { darkMode } = useOptions()
 
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -82,7 +79,7 @@ const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
       {tooltipValue !== null && tooltipValue !== undefined && createPortal(
         <div
           ref={containerRef}
-          className={"absolute text-center border border-black p-0.5 " + (darkMode ? "dark text-gray-300 bg-gray-800 " : "bg-gray-300")}
+          className="absolute text-center border border-black p-0.5 dark:text-gray-300 dark:bg-gray-800 bg-gray-300"
         >
           {tooltipValue}
         </div>

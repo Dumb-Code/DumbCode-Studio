@@ -15,7 +15,7 @@ const GeneralOptions = () => {
     navigator.clipboard.writeText(appEdit)
   }, [appEdit])
 
-  const { selectedScreenshotActions, setScreenshotActionEnabled } = useOptions()
+  const { selectedScreenshotAction, setScreenshotAction } = useOptions()
 
   return (
     <div className="dark:text-white">
@@ -39,9 +39,9 @@ const GeneralOptions = () => {
           key={action}
           className={
             "px-5 py-2 border-blue-500 border " +
-            (selectedScreenshotActions.includes(action) ? "bg-blue-500 hover:bg-blue-600" : "dark:bg-gray-800 bg-gray-400 hover:dark:bg-gray-600 hover:bg-gray-200 ")
+            (selectedScreenshotAction === action ? "bg-blue-500 hover:bg-blue-600" : "dark:bg-gray-800 bg-gray-400 hover:dark:bg-gray-600 hover:bg-gray-200 ")
           }
-          onClick={() => setScreenshotActionEnabled(action, !selectedScreenshotActions.includes(action))}
+          onClick={() => setScreenshotAction(action)}
         >
           {action}
         </button>

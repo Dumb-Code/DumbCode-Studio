@@ -18,7 +18,13 @@ const TextureMapperViewport = () => {
 
     const [root] = useListenableObject(project.model.children)
 
-    // const ref = useDomParent<HTMLDivElement>(() => getSelectedProject().textureManager.canvas, true)
+    //TODO: this
+    const cubeMoveRef = useRef<{
+        cube: DCMCube,
+        startX: number,
+        startY: number,
+    } | null>(null)
+
 
     const redraw = useCallback<RedrawCallback>((width, height, ctx) => {
         const res = fitAreaWithinBounds(textureWidth, textureHeight, width, height)

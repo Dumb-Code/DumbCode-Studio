@@ -4,6 +4,7 @@ import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SVGPlus, SVGSave, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
+import { useToast } from "../../../contexts/ToastContext"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import ExportAnimationAsGifDialogBox from "../../../dialogboxes/ExportAnimationAsGifDialogBox"
 import { downloadBlob, FileSystemsAccessApi, ReadableFile } from "../../../studio/files/FileTypes"
@@ -81,6 +82,9 @@ const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation 
     const [isAnimationDirty] = useListenableObject(animation.needsSaving)
     const [isSaveable] = useListenableObject(animation.saveableFile)
     const [isSkeleton] = useListenableObject(animation.isSkeleton)
+
+    const { addToast } = useToast()
+
     const saveAnimation = async () => {
         if (animation.isSkeleton.value) {
             downloadBlob(animation.name.value + "_skeleton.dcsa", writeDCAAnimation(animation))
@@ -91,6 +95,7 @@ const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation 
             animation.name.value = removeFileExtension(name)
             animation.saveableFile.value = true
             animation.needsSaving.value = false
+            addToast(`Saved animation as ${name}`)
         } catch (e) {
             console.error(e)
             //Ignore e

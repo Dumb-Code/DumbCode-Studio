@@ -7,6 +7,7 @@ import ProjectPageContextProvider from "../contexts/ProjectPageContext";
 import PWAInstallButtonContext from "../contexts/PWAInstallButtonContext";
 import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
 import StudioPanelsContextProvider from "../contexts/StudioPanelsContext";
+import ToastContext from "../contexts/ToastContext";
 import TooltipContextProvider from "../contexts/TooltipContext";
 import DialogBoxes from "../dialogboxes/DialogBoxes";
 import { createReadableFileExtended } from "../studio/files/FileTypes";
@@ -58,11 +59,13 @@ const StudioContainer = () => {
           <OptionsContextProvider>
             <ProjectPageContextProvider>
               <CreatePortalContext>
-                <TooltipContextProvider>
-                  <DialogBoxes>
-                    <StudioApp />
-                  </DialogBoxes>
-                </TooltipContextProvider>
+                <ToastContext>
+                  <TooltipContextProvider>
+                    <DialogBoxes>
+                      <StudioApp />
+                    </DialogBoxes>
+                  </TooltipContextProvider>
+                </ToastContext>
               </CreatePortalContext>
             </ProjectPageContextProvider>
           </OptionsContextProvider>
