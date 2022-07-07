@@ -258,8 +258,7 @@ const TransformCanvas = ({
     const duration = 100
 
     //As we only do translation / scale, we can literally just interpolate the matrix values
-
-    const start = [matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f]
+    const start = [rawMatrix.a, rawMatrix.b, rawMatrix.c, rawMatrix.d, rawMatrix.e, rawMatrix.f]
     const end = [defaultMatrix.a, defaultMatrix.b, defaultMatrix.c, defaultMatrix.d, defaultMatrix.e, defaultMatrix.f]
 
     const onFrame = () => {
