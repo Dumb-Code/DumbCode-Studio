@@ -515,7 +515,7 @@ const CubeListItem = ({
                     cube.model.undoRedoHandler.startBatchActions()
 
                     const cubes = cube.selected.value ? cube.model.identifListToCubes(cube.model.selectedCubeManager.selected.value) : [cube]
-                    if (!keyCombos.drag_cube_and_children.isContainedInUnknownEvent(e)) {
+                    if (keyCombos.drag_cube_only.isContainedInUnknownEvent(e)) {
                         cube.model.resetVisuals()
                         const lockers = cubes.flatMap(cube => {
                             const ret = cube.children.value.map(child => new CubeLocker(child))
@@ -528,7 +528,7 @@ const CubeListItem = ({
                         })
                         lockers.forEach(locker => locker.reconstruct())
                     }
-                    if (!keyCombos.drag_cubes_in_place.isContainedInUnknownEvent(e)) {
+                    if (!keyCombos.drag_cubes_locally.isContainedInUnknownEvent(e)) {
                         cubes.forEach(cube => {
                             cube.pastedWorldMatrix = cube.cubeGroup.matrixWorld.toArray()
                         })
@@ -555,7 +555,7 @@ const CubeListItem = ({
                         beginDrag("takeover")
                     }
                     e.stopPropagation()
-                }, [cube, setDragData, beginDrag, keyCombos.drag_cube_and_children, keyCombos.drag_cubes_in_place])}
+                }, [cube, setDragData, beginDrag, keyCombos.drag_cube_only, keyCombos.drag_cubes_locally])}
 
                 //Called when the element is stopped dragging
                 onDragEnd={useCallback((e: DragEvent) => {

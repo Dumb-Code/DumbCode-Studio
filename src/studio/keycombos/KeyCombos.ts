@@ -68,8 +68,8 @@ const keyCombos = {
       delete_and_children: new KeyCombo('Delete + Children', "Deletes the selected object and it's children.", 'Delete'),
       copy_only_selected: new KeyCombo('Copy No Children', "Copy only the selected cubes (no children)", "KeyC", true, true),
       paste_world_position: new KeyCombo('Paste as World', "Paste the cubes in the world position they were copied from", "KeyV", true, true),
-      drag_cube_and_children: new KeyCombo('Drag Cubes + Children', "In the cube list, dragging cubes will also move their children", null, true),
-      drag_cubes_in_place: new KeyCombo('Drag Cubes in Place', "In the cube list, dragging cubes will not change their overall position/rotation", null, false, false, true),
+      drag_cube_and_children: new KeyCombo('Drag Cube Only', "In the cube list, dragging cubes will not move their children", null, true),
+      drag_cubes_locally: new KeyCombo('Drag Cubes Locally', "In the cube list, dragging cubes will preserve their local movements, but change their global transform ", null, false, false, true),
 
     }
   },
