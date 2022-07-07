@@ -1,6 +1,6 @@
 import { SVGOpenLink } from "../../../components/Icons"
 import LinkGithubButton from "../../../components/LinkGithubButton"
-import { useGithubClientId } from "../../../contexts/GithubApplicationContext"
+import { useGithubClientId } from "../../../contexts/ServersideContext"
 import { useFetchGithubUserDetails } from "../../../studio/util/FetchHooks"
 import { useGithubAccessToken } from "../../../studio/util/LocalStorageHook"
 

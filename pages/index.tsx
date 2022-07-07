@@ -1,9 +1,11 @@
 import type { InferGetStaticPropsType } from 'next'
 import Head from 'next/head'
 import StudioContainer from '../src/containers/StudioContainer'
+import ServersideContext from '../src/contexts/ServersideContext'
 
 
-const Home = ({ githubClientId }: InferGetStaticPropsType<typeof getStaticProps>) => {
+const Home = ({ githubClientId, commitAuthor, commitMessage, commitSha }: InferGetStaticPropsType<typeof getStaticProps>) => {
+  const gitCommitMessage = `${commitMessage} - ${commitAuthor} (${commitSha})`
   return (
     <>
       <Head>
@@ -17,7 +19,9 @@ const Home = ({ githubClientId }: InferGetStaticPropsType<typeof getStaticProps>
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-icon.png"></link>
       </Head>
-      <StudioContainer githubClientId={githubClientId} />
+      <ServersideContext githubClientId={githubClientId} gitCommitMessage={gitCommitMessage} >
+        <StudioContainer />
+      </ServersideContext>
     </>
   )
 }
@@ -25,7 +29,10 @@ const Home = ({ githubClientId }: InferGetStaticPropsType<typeof getStaticProps>
 export const getStaticProps = async () => {
   return {
     props: {
-      githubClientId: process.env.GITHUB_CLIENT_ID ?? ''
+      githubClientId: process.env.GITHUB_CLIENT_ID ?? '',
+      commitSha: process.env.VERCEL_GIT_COMMIT_SHA ?? '<unknown>',
+      commitMessage: process.env.VERCEL_GIT_COMMIT_MESSAGE ?? '',
+      commitAuthor: process.env.VERCEL_GIT_COMMIT_AUTHOR_NAME ?? '',
     },
   }
 }

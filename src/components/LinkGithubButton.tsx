@@ -1,4 +1,4 @@
-import { useGithubClientId } from "../contexts/GithubApplicationContext"
+import { useGithubClientId } from "../contexts/ServersideContext"
 import { SVGGithub } from "./Icons"
 
 const LinkGithubButton = () => {

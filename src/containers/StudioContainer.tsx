@@ -2,7 +2,6 @@ import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import GithubAccountButton from "../components/GithubAccountButton";
 import { SVGSettings } from "../components/Icons";
 import CreatePortalContext from "../contexts/CreatePortalContext";
-import GithubApplicationContext from "../contexts/GithubApplicationContext";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
 import ProjectPageContextProvider from "../contexts/ProjectPageContext";
 import PWAInstallButtonContext from "../contexts/PWAInstallButtonContext";
@@ -51,26 +50,24 @@ const Tabs: Tab[] = [
   { name: "Animator", color: "bg-yellow-500 hover:bg-yellow-600", component: () => <Animator /> },
 ]
 
-const StudioContainer = ({ githubClientId }: { githubClientId: string }) => {
+const StudioContainer = () => {
   return (
     <PWAInstallButtonContext>
-      <GithubApplicationContext githubClientId={githubClientId} >
-        <StudioContextProvider>
-          <StudioPanelsContextProvider>
-            <OptionsContextProvider>
-              <ProjectPageContextProvider>
-                <CreatePortalContext>
-                  <TooltipContextProvider>
-                    <DialogBoxes>
-                      <StudioApp />
-                    </DialogBoxes>
-                  </TooltipContextProvider>
-                </CreatePortalContext>
-              </ProjectPageContextProvider>
-            </OptionsContextProvider>
-          </StudioPanelsContextProvider>
-        </StudioContextProvider>
-      </GithubApplicationContext>
+      <StudioContextProvider>
+        <StudioPanelsContextProvider>
+          <OptionsContextProvider>
+            <ProjectPageContextProvider>
+              <CreatePortalContext>
+                <TooltipContextProvider>
+                  <DialogBoxes>
+                    <StudioApp />
+                  </DialogBoxes>
+                </TooltipContextProvider>
+              </CreatePortalContext>
+            </ProjectPageContextProvider>
+          </OptionsContextProvider>
+        </StudioPanelsContextProvider>
+      </StudioContextProvider>
     </PWAInstallButtonContext>
   );
 };
