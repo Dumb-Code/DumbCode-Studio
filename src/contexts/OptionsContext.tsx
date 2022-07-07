@@ -129,6 +129,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
 
 
   useEffect(() => {
+    setTheme(loadedOptions?.theme ?? "auto")
     if (window.matchMedia !== undefined) {
       const query = window.matchMedia('(prefers-color-scheme: dark)')
       setIsSystemDark(query.matches)
@@ -139,7 +140,6 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       return () => query.removeEventListener("change", listener)
     }
 
-    setTheme(loadedOptions?.theme ?? "auto")
 
   }, [loadedOptions?.theme])
 
