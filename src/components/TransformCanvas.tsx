@@ -67,6 +67,8 @@ const TransformCanvas = ({
 
   const redrawCallbacks = useRef<RedrawCallback[]>([])
 
+  const [rerenderedTriggered, setRerenderedTriggered] = useState(0)
+
   const defaultMatrix = useMemo(() => {
     const matrix = new DOMMatrix()
     matrix.translateSelf(width / 2, height / 2)
@@ -80,7 +82,7 @@ const TransformCanvas = ({
   }, [])
 
   //Listen to re-render the canvas
-  const redrawAll = useCallback(() => {
+  useEffect(() => {
     const canvas = ref.current
     const ctx = canvas?.getContext("2d") ?? null
     if (canvas === null || ctx === null) {
@@ -107,11 +109,7 @@ const TransformCanvas = ({
     }
 
 
-  }, [backgroundStyle, enabled, mulMatrix, width, height, renderMatrix, defaultMatrix, redraw])
-
-  useEffect(() => {
-    redrawAll()
-  }, [redrawAll])
+  }, [backgroundStyle, enabled, mulMatrix, width, height, renderMatrix, defaultMatrix, redraw, rerenderedTriggered])
 
 
   //Listen to the dimension change
@@ -268,16 +266,16 @@ const TransformCanvas = ({
     submitRedraw: redraw => {
       redrawCallbacks.current.push(redraw)
 
-      redrawAll()
+      setTimeout(() => setRerenderedTriggered(r => r + 1), 1)
     },
     removeRedraw: redraw => {
       const index = redrawCallbacks.current.indexOf(redraw)
       if (index !== -1) {
         redrawCallbacks.current.splice(index, 1)
       }
-      redrawAll()
+      setTimeout(() => setRerenderedTriggered(r => r + 1), 1)
     }
-  }), [redrawAll])
+  }), [])
 
   return (
     <TransformCanvasChildRenderContext.Provider value={ctxValue}>
