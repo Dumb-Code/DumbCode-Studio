@@ -797,33 +797,7 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
                 if (cube.model.parentProject === undefined) {
                     return
                 }
-                //When selected:
-                //  - if ctrl is pressed, we deselect, keeping the current cubes
-                //  - if more than one cube is selected, we deselect all OTHER cubes
-                //  - else, we deslect this cube
-                //
-                //When not selected:
-                //  - if ctrl is pressed, select THIS cube, and keep the other cubes
-                //  - else, we only select THIS cube
-                if (selected) {
-                    cube.model.parentProject.undoRedoHandler.startBatchActions()
-                    if (e.ctrlKey || selectedCubeManager.selected.value.length === 1) {
-                        setSelected(false)
-                        cube.model.parentProject.undoRedoHandler.endBatchActions(`Cube Deselected`)
-                    } else {
-                        //If other cubes are selected too
-                        //Using `setSelected` won't do anything, as it's already selected.
-                        //We can call onCubeSelected to essentially deselect the other cubes
-                        selectedCubeManager.onCubeSelected(cube)
-                        cube.model.undoRedoHandler.endBatchActions(`Cubes Selected`)
-                    }
-                } else {
-                    selectedCubeManager.keepCurrentCubes = e.ctrlKey
-                    cube.model.parentProject.undoRedoHandler.startBatchActions()
-                    setSelected(true)
-                    cube.model.parentProject.undoRedoHandler.endBatchActions(`Cube Selected`)
-                    selectedCubeManager.keepCurrentCubes = false
-                }
+                selectedCubeManager.clickOnCube(cube, e.ctrlKey)
                 e.stopPropagation()
             }}
             className={`${itemBackgroundColor} ml-2 my-0.5`}

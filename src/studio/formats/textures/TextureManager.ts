@@ -4,10 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { unsafe_getThreeContext } from '../../../contexts/StudioContext';
 import { getUndefinedWritable, ListenableFileData, ReadableFile, readFileToImg, WritableFile } from '../../files/FileTypes';
 import { useDomParent } from '../../util/DomParentRef';
+import { fitAreaWithinBounds } from '../../util/Utils';
 import DcProject from '../project/DcProject';
 import { ListenableFile } from './../../files/FileTypes';
 import { LO, useListenableObject } from './../../util/ListenableObject';
-import { DCMModel } from './../model/DcmModel';
+import { DCMCube, DCMModel } from './../model/DcmModel';
 
 export default class TextureManager {
   readonly project: DcProject
@@ -155,6 +156,70 @@ export default class TextureManager {
     }
 
     return this._gcd(b, a % b);
+  }
+
+  static drawCubeToCanvas(cube: DCMCube, width: number, height: number, ctx: CanvasRenderingContext2D, allowModifiers: boolean,
+    textureWidth = cube.model.textureWidth.value,
+    textureHeight = cube.model.textureHeight.value,
+    hovered = cube.mouseHover.value,
+    selected = cube.selected.value,
+  ) {
+    const bounds = fitAreaWithinBounds(textureWidth, textureHeight, width, height)
+
+    const su = textureWidth / bounds.width
+    const sv = textureHeight / bounds.height
+
+
+
+    let r = 1
+    let g = 1
+    let b = 1
+    let a = allowModifiers ? 0.2 : 1
+
+    if (allowModifiers) {
+      if (hovered) {
+        g = 0.2
+        b = 0.2
+        a = 0.5
+      } else if (selected) {
+        r = 0.2
+        g = 0.2
+        a = 0.5
+      }
+    }
+
+    let u = cube.textureOffset.value[0] / su
+    let v = cube.textureOffset.value[1] / sv
+
+    let w = cube.dimension.value[0]
+    let h = cube.dimension.value[1]
+    let d = cube.dimension.value[2]
+
+    let uw = w / su
+    let ud = d / su
+
+    let vh = h / sv
+    let vd = d / sv
+
+    //Draw the different faces with the different colors
+    ctx.fillStyle = `rgba(${255 * r}, 0, 0, ${a})`
+    ctx.fillRect(u, v + vd, ud, vh)
+
+    ctx.fillStyle = `rgba(0, ${255 * g}, 0, ${a})`
+    ctx.fillRect(u + ud, v, uw, vd)
+
+    ctx.fillStyle = `rgba(0, 0, ${255 * b}, ${a})`
+    ctx.fillRect(u + ud + uw + ud, v + vd, uw, vh)
+
+
+    ctx.fillStyle = `rgba(${127 * r}, 0, 0, ${a})`
+    ctx.fillRect(u + ud + uw, v + vd, ud, vh)
+
+    ctx.fillStyle = `rgba(0, ${127 * g}, 0, ${a})`
+    ctx.fillRect(u + ud + uw, v, uw, vd)
+
+    ctx.fillStyle = `rgba(0, 0, ${127 * b}, ${a})`
+    ctx.fillRect(u + ud, v + vd, uw, vh)
   }
 
 }

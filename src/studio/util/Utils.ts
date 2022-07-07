@@ -37,3 +37,12 @@ export const writeImgToBase64 = async (img: HTMLImageElement): Promise<string> =
 export type Mutable<T> = {
   -readonly [P in keyof T]: T[P]
 };
+
+
+export const fitAreaWithinBounds = (width: number, height: number, areaWidth: number, areaHeight: number) => {
+  const ratio = Math.min(areaWidth / width, areaHeight / height)
+  return {
+    width: width * ratio,
+    height: height * ratio
+  }
+}

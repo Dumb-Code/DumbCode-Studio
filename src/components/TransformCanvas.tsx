@@ -1,4 +1,4 @@
-import { MouseEvent as ReactMouseEvent, PropsWithChildren, SVGProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, MouseEvent as ReactMouseEvent, PropsWithChildren, SVGProps, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { SVGUndo } from './Icons';
 import { ButtonWithTooltip } from './Tooltips';
 
@@ -13,6 +13,19 @@ export type CanvasMouseCallbackEvent<T extends MouseEvent | ReactMouseEvent = Re
 }) => void
 export type RedrawCallback = (width: number, height: number, ctx: CanvasRenderingContext2D) => void
 
+type TransformCanvasChildRenderContextType = {
+  readonly submitRedraw: (redraw: RedrawCallback) => void
+  readonly removeRedraw: (redraw: RedrawCallback) => void
+}
+
+const TransformCanvasChildRenderContext = createContext<TransformCanvasChildRenderContextType | null>(null)
+const useTransformCanvasChildRenderContext = () => {
+  const context = useContext(TransformCanvasChildRenderContext)
+  if (context === null) {
+    throw new Error('useTransformCanvasChildRenderContext must be used within a TransformCanvas')
+  }
+  return context
+}
 //A moveable, scaleable canvas, used mainly for progression points, texture map, ect
 const TransformCanvas = ({
   enabled = true, defaultScaleOut = 1,
@@ -24,7 +37,7 @@ const TransformCanvas = ({
   enabled?: boolean
   defaultScaleOut?: number,
   backgroundStyle: string | CanvasGradient | CanvasPattern
-  redraw: RedrawCallback
+  redraw?: RedrawCallback
 
   onMouseEnter?: CanvasMouseCallbackEvent,
   onMouseLeave?: CanvasMouseCallbackEvent,
@@ -51,6 +64,10 @@ const TransformCanvas = ({
 
   const hasDefaultZoomedOut = useRef(false)
   const animateBackTo0Ref = useRef(-1)
+
+  const redrawCallbacks = useRef<RedrawCallback[]>([])
+
+  const [rerenderedTriggered, setRerenderedTriggered] = useState(0)
 
   const defaultMatrix = useMemo(() => {
     const matrix = new DOMMatrix()
@@ -86,12 +103,13 @@ const TransformCanvas = ({
 
     if (enabled) {
       ctx.setTransform(renderMatrix)
-      redraw(width, height, ctx)
+      redraw?.(width, height, ctx)
+      redrawCallbacks.current.forEach(cb => cb(width, height, ctx))
       ctx.resetTransform()
     }
 
 
-  }, [backgroundStyle, enabled, mulMatrix, width, height, renderMatrix, defaultMatrix, redraw])
+  }, [backgroundStyle, enabled, mulMatrix, width, height, renderMatrix, defaultMatrix, redraw, rerenderedTriggered])
 
 
   //Listen to the dimension change
@@ -244,25 +262,42 @@ const TransformCanvas = ({
     onFrame()
   }
 
+  const ctxValue = useMemo<TransformCanvasChildRenderContextType>(() => ({
+    submitRedraw: redraw => {
+      redrawCallbacks.current.push(redraw)
+
+      setTimeout(() => setRerenderedTriggered(r => r + 1), 1)
+    },
+    removeRedraw: redraw => {
+      const index = redrawCallbacks.current.indexOf(redraw)
+      if (index !== -1) {
+        redrawCallbacks.current.splice(index, 1)
+      }
+      setTimeout(() => setRerenderedTriggered(r => r + 1), 1)
+    }
+  }), [])
+
   return (
-    <div className="relative w-full h-full group">
-      <div className={"flex flex-row-reverse transition-opacity opacity-0 absolute top-1 right-1 " + (enabled ? "group-hover:opacity-100" : "")}>
-        <TransformCanvasWidget tooltip="Reset View" onClick={resetView} Icon={SVGUndo} />
-        {children}
+    <TransformCanvasChildRenderContext.Provider value={ctxValue}>
+      <div className="relative w-full h-full group">
+        <div className={"flex flex-row-reverse transition-opacity opacity-0 absolute top-1 right-1 " + (enabled ? "group-hover:opacity-100" : "")}>
+          <TransformCanvasWidget tooltip="Reset View" onClick={resetView} Icon={SVGUndo} />
+          {children}
+        </div>
+        <canvas
+          ref={ref}
+          className="w-full h-full"
+
+          onContextMenu={e => e.preventDefault()}
+
+          onMouseEnter={createMouseEventHandler(onMouseEnter)}
+          onMouseLeave={createMouseEventHandler(onMouseLeave)}
+          onMouseMove={createMouseEventHandler(onMouseMove)}
+          onMouseDown={createMouseEventHandler(onMouseDown, onMouseDownDeafult)}
+          onMouseUp={createMouseEventHandler(onMouseUpWhenDragging, onMouseUp)}
+        />
       </div>
-      <canvas
-        ref={ref}
-        className="w-full h-full"
-
-        onContextMenu={e => e.preventDefault()}
-
-        onMouseEnter={createMouseEventHandler(onMouseEnter)}
-        onMouseLeave={createMouseEventHandler(onMouseLeave)}
-        onMouseMove={createMouseEventHandler(onMouseMove)}
-        onMouseDown={createMouseEventHandler(onMouseDown, onMouseDownDeafult)}
-        onMouseUp={createMouseEventHandler(onMouseUpWhenDragging, onMouseUp)}
-      />
-    </div>
+    </TransformCanvasChildRenderContext.Provider >
   )
 }
 
@@ -277,6 +312,18 @@ export const TransformCanvasWidget = ({ tooltip, onClick, Icon }: { tooltip: str
       <Icon className="w-3 h-3 m-1 dark:text-white" />
     </ButtonWithTooltip>
   )
+}
+
+export const TransformCanvasRenderElement = ({ redraw }: { redraw: RedrawCallback }) => {
+  const ctx = useTransformCanvasChildRenderContext()
+
+  useEffect(() => {
+    ctx.submitRedraw(redraw)
+    return () => {
+      ctx.removeRedraw(redraw)
+    }
+  }, [ctx, redraw])
+  return <></>
 }
 
 export default TransformCanvas

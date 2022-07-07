@@ -95,7 +95,7 @@ export class DCMModel implements CubeParent {
   readonly modelGroup: Group
 
   readonly lockedCubes = new LockedCubes(this)
-  readonly selectedCubeManager = new SelectedCubeManager()
+  readonly selectedCubeManager = new SelectedCubeManager(this)
 
   readonly metadata: Readonly<Record<string, string>> = {}
 

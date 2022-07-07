@@ -13,6 +13,7 @@ import { useModelIsolationFactory } from "../contexts/ThreeContext"
 import { downloadBlob } from "../studio/files/FileTypes"
 import DcaAnimation from "../studio/formats/animations/DcaAnimation"
 import { exportAnimationAsGif } from "../studio/formats/animations/DcaGifExporter"
+import { fitAreaWithinBounds } from "../studio/util/Utils"
 import AnimatorScrubBar from "../views/animator/components/AnimatorScrubBar"
 import { OpenedDialogBox } from "./DialogBoxes"
 
@@ -35,9 +36,10 @@ const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation 
 
 
   const displayMax = 500;
+  const { width: clampedWidth, height: clampedHeight } = fitAreaWithinBounds(width, height, displayMax, displayMax)
 
-  const clampedWidth = width < height ? displayMax * width / height : displayMax
-  const clampedHeight = width < height ? displayMax : displayMax * height / width
+  // const clampedWidth = width < height ? displayMax * width / height : displayMax
+  // const clampedHeight = width < height ? displayMax : displayMax * height / width
 
   const isolationFactory = useModelIsolationFactory()
   useEffect(isolationFactory, [isolationFactory])

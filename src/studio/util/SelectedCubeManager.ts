@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Event, Mesh, Object3D, Vector2 } from 'three';
 import { useStudio } from '../../contexts/StudioContext';
 import DcProject from '../formats/project/DcProject';
-import { DCMCube } from './../formats/model/DcmModel';
+import { DCMCube, DCMModel } from './../formats/model/DcmModel';
 import { LO } from './ListenableObject';
 export default class SelectedCubeManager {
   disabled = false
@@ -18,27 +18,72 @@ export default class SelectedCubeManager {
 
   isSettingCubeSelected = false
 
+  constructor(
+    private readonly model: DCMModel
+  ) { }
+
   onMouseUpOnCanvas(project: DcProject, ctrlPressed: boolean) {
     let ignore = false
     this.listeners.forEach(listener => {
       ignore = listener(project) || ignore
     })
     if (!ignore) {
-      if (this.mouseOverMesh !== null) {
-        const cube = this.getCube(this.mouseOverMesh)
-        this.keepCurrentCubes = ctrlPressed
-        cube.selected.value = !cube.selected.value
-        this.keepCurrentCubes = false
-      } else {
-        project.model.undoRedoHandler.startBatchActions()
-        project.model.identifierCubeMap.forEach(v => {
-          if (v.selected.value) {
-            v.selected.value = false
-          }
-        })
-        project.model.undoRedoHandler.endBatchActions(`Cubes Deselected`)
-      }
+      this.clickOnHovered(ctrlPressed)
     }
+  }
+
+  deselectAll() {
+    this.model.undoRedoHandler.startBatchActions()
+    this.model.identifierCubeMap.forEach(v => {
+      if (v.selected.value) {
+        v.selected.value = false
+      }
+    })
+    this.model.undoRedoHandler.endBatchActions(`Cubes Deselected`)
+  }
+
+  clickOnHovered(ctrlPressed: boolean) {
+    if (this.mouseOverMesh !== null) {
+      const cube = this.getCube(this.mouseOverMesh)
+      return this.clickOnCube(cube, ctrlPressed)
+    }
+    this.deselectAll()
+    return false
+  }
+
+  clickOnCube(cube: DCMCube, ctrlPressed: boolean) {
+    const project = cube.model.parentProject
+    if (!project) {
+      return false
+    }
+    //When selected:
+    //  - if ctrl is pressed, we deselect, keeping the current cubes
+    //  - if more than one cube is selected, we deselect all OTHER cubes
+    //  - else, we deslect this cube
+    //
+    //When not selected:
+    //  - if ctrl is pressed, select THIS cube, and keep the other cubes
+    //  - else, we only select THIS cube
+    if (cube.selected.value) {
+      project.undoRedoHandler.startBatchActions()
+      if (ctrlPressed || this.selected.value.length === 1) {
+        cube.selected.value = false
+        project.undoRedoHandler.endBatchActions(`Cube Deselected`)
+      } else {
+        //If other cubes are selected too
+        //Using `setSelected` won't do anything, as it's already selected.
+        //We can call onCubeSelected to essentially deselect the other cubes
+        this.onCubeSelected(cube)
+        cube.model.undoRedoHandler.endBatchActions(`Cubes Selected`)
+      }
+    } else {
+      this.keepCurrentCubes = ctrlPressed
+      project.undoRedoHandler.startBatchActions()
+      cube.selected.value = true
+      project.undoRedoHandler.endBatchActions(`Cube Selected`)
+      this.keepCurrentCubes = false
+    }
+    return true
   }
 
   onCubeSelected(cube: DCMCube) {
