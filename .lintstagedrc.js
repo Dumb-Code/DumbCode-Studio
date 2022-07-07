@@ -2,9 +2,11 @@
 const path = require('path')
 
 const buildEslintCommand = (filenames) =>
-  `next lint --fix --file ${filenames
+  `next lint --fix --max-warnings=0 ${filenames
     .map((f) => path.relative(process.cwd(), f))
-    .join(' --file ')}`
+    .filter(f => f !== ".lintstagedrc.js")
+    .map((f) => `--file ${f}`)
+    .join(' ')}`
 
 module.exports = {
   '*.{js,jsx,ts,tsx}': [buildEslintCommand],
