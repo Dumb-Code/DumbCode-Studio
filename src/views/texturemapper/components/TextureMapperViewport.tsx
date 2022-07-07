@@ -2,10 +2,14 @@ import { useCallback, useRef } from "react"
 import { SplitViewport } from "../../../components/SplitViewport"
 import TransformCanvas, { CanvasMouseCallbackEvent, CanvasPoint, RedrawCallback, TransformCanvasRenderElement } from "../../../components/TransformCanvas"
 import { useStudio } from "../../../contexts/StudioContext"
+import { usePanelValue } from "../../../contexts/StudioPanelsContext"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import TextureManager from "../../../studio/formats/textures/TextureManager"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import { fitAreaWithinBounds } from "../../../studio/util/Utils"
+
+export const GridDisplayModes = ["hidden", "shown", "fade"] as const
+export type GridDisplayMode = typeof GridDisplayModes[number]
 
 const TextureMapperViewport = () => {
 
@@ -18,18 +22,67 @@ const TextureMapperViewport = () => {
 
     const [root] = useListenableObject(project.model.children)
 
-    //TODO: this
     const cubeMoveRef = useRef<{
         cube: DCMCube,
-        startX: number,
-        startY: number,
+        offsetX: number,
+        offsetY: number,
+        mouseMoved?: boolean
     } | null>(null)
 
+    const [gridType] = usePanelValue("texture_grid_type")
+
+    const computeOffset = useCallback((width: number, height: number): CanvasPoint => {
+        const bounds = fitAreaWithinBounds(textureWidth, textureHeight, width, height)
+        return {
+            x: (width - bounds.width) / 2,
+            y: (height - bounds.height) / 2
+        }
+    }, [textureWidth, textureHeight])
 
     const redraw = useCallback<RedrawCallback>((width, height, ctx) => {
-        const res = fitAreaWithinBounds(textureWidth, textureHeight, width, height)
-        ctx.drawImage(project.textureManager.canvas, 0, 0, res.width, res.height)
-    }, [project, textureWidth, textureHeight])
+        const bounds = fitAreaWithinBounds(textureWidth, textureHeight, width, height)
+        //Draw the gray background
+        ctx.fillStyle = "hsl(0, 0%, 20%)"
+        ctx.fillRect(0, 0, bounds.width, bounds.height)
+
+        //Draw the image
+        ctx.drawImage(project.textureManager.canvas, 0, 0, bounds.width, bounds.height)
+
+        //Set the line width to be the inverse of the scale, so it stays the same size regardless of the zoom
+        ctx.lineWidth = Math.min(1, 1 / ctx.getTransform().a)
+
+        //Draw the grid
+        if (gridType !== "hidden") {
+            const opacityAt100 = 5
+            const opacityAt0 = 20
+
+            const value = bounds.ratio * ctx.getTransform().a
+            const opacity = Math.min(Math.max((value - opacityAt100) / (opacityAt0 - opacityAt100), 0), 1)
+
+            ctx.strokeStyle = `rgba(0, 0, 0, ${gridType === "fade" ? opacity : 1})`
+            for (let rawX = 1; rawX < textureHeight; rawX++) {
+                const x = rawX / textureWidth * bounds.width
+                ctx.beginPath()
+                ctx.moveTo(0, x)
+                ctx.lineTo(bounds.width, x)
+                ctx.stroke()
+            }
+            for (let rawY = 1; rawY < textureWidth; rawY++) {
+                const y = rawY / textureHeight * bounds.height
+                ctx.beginPath()
+                ctx.moveTo(y, 0)
+                ctx.lineTo(y, bounds.height)
+                ctx.stroke()
+            }
+        }
+
+        //Draw the outlines
+        ctx.strokeStyle = "hsl(204, 86%, 53%)" //A blue colour
+        ctx.beginPath();
+        ctx.rect(0, 0, bounds.width, bounds.height);
+        ctx.stroke();
+
+    }, [project, textureWidth, textureHeight, gridType])
 
 
     const transformMousePosition = useCallback((point: CanvasPoint, width: number, height: number) => {
@@ -44,6 +97,8 @@ const TextureMapperViewport = () => {
     const getCubeUnderMouse = useCallback((transformedMouse: CanvasPoint, width: number, height: number): {
         cubeUnderMouse: DCMCube | undefined;
         otherCubes: DCMCube[];
+        mouseX: number;
+        mouseY: number;
     } => {
         const { mouseX, mouseY } = transformMousePosition(transformedMouse, width, height)
         const notUnderMouse: DCMCube[] = []
@@ -59,7 +114,7 @@ const TextureMapperViewport = () => {
         const cubeUnderMouse = underMouse.splice(underMouse.length - 1, 1)[0]
         const otherCubes = notUnderMouse.concat(underMouse)
 
-        return { cubeUnderMouse, otherCubes }
+        return { cubeUnderMouse, otherCubes, mouseX, mouseY }
     }, [project, transformMousePosition])
 
 
@@ -75,13 +130,49 @@ const TextureMapperViewport = () => {
     }, [getCubeUnderMouse])
 
     const onMouseUp = useCallback<CanvasMouseCallbackEvent>(({ setHandled, event }) => {
+        if (cubeMoveRef.current !== null && cubeMoveRef.current.mouseMoved) {
+            return
+        }
         const result = project.selectedCubeManager.clickOnHovered(event.ctrlKey)
-        if (result) {
-            setHandled()
-        } else {
+        if (!result) {
             project.selectedCubeManager.deselectAll()
         }
 
+    }, [project])
+
+    const onMouseDown = useCallback<CanvasMouseCallbackEvent>(({ transformedMouse, width, height, setHandled }) => {
+        const { cubeUnderMouse, mouseX, mouseY } = getCubeUnderMouse(transformedMouse, width, height)
+        if (cubeUnderMouse !== undefined) {
+            project.model.textureCoordinates.undoRedoHandler.startBatchActions()
+            cubeMoveRef.current = {
+                cube: cubeUnderMouse,
+                offsetX: mouseX - cubeUnderMouse.textureOffset.value[0],
+                offsetY: mouseY - cubeUnderMouse.textureOffset.value[1],
+            }
+            setHandled()
+        }
+    }, [getCubeUnderMouse, project])
+
+    const onMouseMoveGlobally = useCallback<CanvasMouseCallbackEvent<MouseEvent>>(({ transformedMouse, width, height, setHandled }) => {
+        if (cubeMoveRef.current !== null) {
+            const { cube, offsetX, offsetY } = cubeMoveRef.current
+            const { mouseX, mouseY } = transformMousePosition(transformedMouse, width, height)
+            const oldOffset = cube.textureOffset.value
+            const newOffset = [Math.floor(mouseX - offsetX), Math.floor(mouseY - offsetY)] as const
+            if (oldOffset[0] !== newOffset[0] || oldOffset[1] !== newOffset[1]) {
+                cube.textureOffset.value = newOffset
+            }
+            cubeMoveRef.current.mouseMoved = true
+            setHandled()
+        }
+    }, [transformMousePosition])
+
+    const onMouseUpGlobally = useCallback<CanvasMouseCallbackEvent<MouseEvent>>(({ setHandled }) => {
+        if (cubeMoveRef.current !== null) {
+            project.model.textureCoordinates.undoRedoHandler.endBatchActions("Cube Texture Coordinates Dragged")
+            cubeMoveRef.current = null
+            setHandled()
+        }
     }, [project])
 
     return (
@@ -90,7 +181,12 @@ const TextureMapperViewport = () => {
                 redraw={redraw}
                 onMouseMove={onMouseMove}
                 onMouseUp={onMouseUp}
+                onMouseDown={onMouseDown}
+                onMouseMoveGlobally={onMouseMoveGlobally}
+                onMouseUpGlobally={onMouseUpGlobally}
+                computeOffset={computeOffset}
                 backgroundStyle="hsl(0, 0%, 10%)"
+                defaultScaleOut={1.1}
             >
                 {root.map(cube => <TextureMapperVisualCube key={cube.identifier} cube={cube} textureWidth={textureWidth} textureHeight={textureHeight} />)}
             </TransformCanvas>

@@ -43,6 +43,7 @@ export const fitAreaWithinBounds = (width: number, height: number, areaWidth: nu
   const ratio = Math.min(areaWidth / width, areaHeight / height)
   return {
     width: width * ratio,
-    height: height * ratio
+    height: height * ratio,
+    ratio
   }
 }

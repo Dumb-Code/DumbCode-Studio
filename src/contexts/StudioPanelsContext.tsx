@@ -1,4 +1,5 @@
 import { createContext, PropsWithChildren, useContext, useState } from "react"
+import { GridDisplayMode } from "../views/texturemapper/components/TextureMapperViewport"
 
 export type PanelValue<T> = {
   get: () => T
@@ -22,8 +23,12 @@ export type StudioPanelsContext = {
 
   history_list: PanelValue<boolean>
 
-  texture_properties: PanelValue<boolean>
-  texture_element_properties: PanelValue<boolean>
+  texture_mapper_properties: PanelValue<boolean>
+  texture_mapper_element_properties: PanelValue<boolean>
+  texture_mapper_settings: PanelValue<boolean>
+
+  texture_grid_type: PanelValue<GridDisplayMode>
+
   texture_layers: PanelValue<boolean>
 }
 
@@ -57,9 +62,11 @@ const StudioPanelsContextProvider = ({ children }: PropsWithChildren<{}>) => {
   useValueGetterSetter(context, "animator_ag", false)
   useValueGetterSetter(context, "animator_se", false)
   useValueGetterSetter(context, "history_list", false)
-  useValueGetterSetter(context, "texture_properties", true)
-  useValueGetterSetter(context, "texture_element_properties", true)
+  useValueGetterSetter(context, "texture_mapper_properties", true)
+  useValueGetterSetter(context, "texture_mapper_element_properties", true)
+  useValueGetterSetter(context, "texture_mapper_settings", true)
   useValueGetterSetter(context, "texture_layers", true)
+  useValueGetterSetter(context, "texture_grid_type", "fade")
   return (
     <Context.Provider value={context}>
       {children}

@@ -3,15 +3,19 @@ import Checkbox from "../../../components/Checkbox";
 import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 import HistoryList from '../../../components/HistoryList';
 import NumericInput from "../../../components/NumericInput";
+import { OptionSet } from "../../../components/OptionPick";
 import { useStudio } from "../../../contexts/StudioContext";
+import { usePanelValue } from "../../../contexts/StudioPanelsContext";
 import { useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import ModelerCubeList from "../../modeler/components/ModelerCubeList";
+import { GridDisplayModes } from "./TextureMapperViewport";
 
 const TextureMapperSidebar = () => {
     return (
         <div className="dark:bg-gray-800 bg-gray-200 flex flex-col overflow-x-hidden overflow-y-scroll studio-scrollbar h-full">
             <TextureProperties />
             <TextureMapElementProperties />
+            <TextureSettings />
             <ModelerCubeList canEdit={false} />
             <HistoryList />
         </div>
@@ -27,7 +31,7 @@ const TextureProperties = () => {
     const [height, setHeight] = useListenableObject(project.model.textureCoordinates.textureHeight)
 
     return (
-        <CollapsableSidebarPannel title="TEXTURE PROPERTIES" heightClassname="h-auto" panelName="texture_properties">
+        <CollapsableSidebarPannel title="TEXTURE PROPERTIES" heightClassname="h-auto" panelName="texture_mapper_properties">
             <div className="flex flex-row py-1">
                 <div className="mx-1">
                     <p className="dark:text-gray-400 text-black text-xs">WIDTH</p>
@@ -37,6 +41,19 @@ const TextureProperties = () => {
                     <p className="dark:text-gray-400 text-black  text-xs">HEIGHT</p>
                     <NumericInput value={height} onChange={setHeight} isPositiveInteger />
                 </div>
+            </div>
+        </CollapsableSidebarPannel>
+    )
+}
+
+
+const TextureSettings = () => {
+    const [gridType, setGridType] = usePanelValue("texture_grid_type")
+
+    return (
+        <CollapsableSidebarPannel title="TEXTURE MAPPER SETTINGS" heightClassname="h-auto" panelName="texture_mapper_settings">
+            <div className="flex flex-row py-1">
+                <OptionSet title="Grid Mode" options={GridDisplayModes} selected={gridType} setSelected={setGridType} />
             </div>
         </CollapsableSidebarPannel>
     )
@@ -65,7 +82,7 @@ const TextureMapElementProperties = () => {
     }, [offset, setOffset])
 
     return (
-        <CollapsableSidebarPannel title="CUBE UV PROPERTIES" heightClassname="h-auto" panelName="texture_element_properties">
+        <CollapsableSidebarPannel title="CUBE UV PROPERTIES" heightClassname="h-auto" panelName="texture_mapper_element_properties">
             <div className="flex flex-row py-1">
                 <div className="mx-1">
                     <p className="dark:text-gray-400 text-black  text-xs">MIRROR</p>

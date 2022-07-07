@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { useOptions } from "../../../contexts/OptionsContext";
 
-const AppearangeOptions = () => {
+const AppearanceOptions = () => {
     const { isSystemDark, theme, setTheme, compactMode, setCompactMode } = useOptions()
 
     return (
@@ -56,4 +56,4 @@ const OptionButton = ({ isSelected, toggle, disabled = false, forcedThemeDark, c
     )
 }
 
-export default AppearangeOptions
+export default AppearanceOptions

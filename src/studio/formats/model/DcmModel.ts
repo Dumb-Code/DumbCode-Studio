@@ -118,8 +118,8 @@ export class DCMModel implements CubeParent {
     })
 
     const refreshTextures = () => this.traverseAll(cube => cube.updateTexture())
-    this.textureWidth.addListener(refreshTextures)
-    this.textureHeight.addListener(refreshTextures)
+    this.textureWidth.addPostListener(refreshTextures)
+    this.textureHeight.addPostListener(refreshTextures)
 
     const onDirty = () => this.needsSaving.value = true
     this.children.addListener(onDirty)

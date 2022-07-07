@@ -6,9 +6,11 @@ import TextureMapperSidebar from "./components/TextureMapperSidebar"
 import TextureMapperTools from "./components/TextureMapperTools"
 import TextureMapperViewport from "./components/TextureMapperViewport"
 
+
 const TextureMapper = () => {
     const { getSelectedProject, onFrameListeners } = useStudio()
     const project = getSelectedProject()
+
 
     useObjectUnderMouse()
 

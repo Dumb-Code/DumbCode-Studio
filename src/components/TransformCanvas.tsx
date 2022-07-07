@@ -31,7 +31,7 @@ const TransformCanvas = ({
   enabled = true, defaultScaleOut = 1,
   backgroundStyle, redraw,
   onMouseEnter, onMouseLeave, onMouseMove, onMouseMoveGlobally,
-  onMouseDown, onMouseUp, onMouseUpGlobally, onWheel,
+  onMouseDown, onMouseUp, onMouseUpGlobally, onWheel, computeOffset,
   children
 }: PropsWithChildren<{
   enabled?: boolean
@@ -48,6 +48,8 @@ const TransformCanvas = ({
   onMouseUpGlobally?: CanvasMouseCallbackEvent<MouseEvent>,
 
   onWheel?: CanvasMouseCallbackEvent<WheelEvent>,
+
+  computeOffset?: (width: number, height: number) => CanvasPoint,
 }>) => {
 
   const ref = useRef<HTMLCanvasElement>(null)
@@ -57,10 +59,20 @@ const TransformCanvas = ({
   const [width, setWidth] = useState(0)
   const [height, setHeight] = useState(0)
 
-  const [matrix, setMatrix] = useState(new DOMMatrixReadOnly())
+  const [rawMatrix, setRawMatrix] = useState(new DOMMatrixReadOnly())
   const [draggingMatrix, setDraggingMatrix] = useState(new DOMMatrixReadOnly())
 
-  const renderMatrix = useMemo((): DOMMatrixReadOnly => draggingMatrix.multiply(matrix), [draggingMatrix, matrix])
+  const moveMatrixByOffset = useCallback((matrix: DOMMatrixReadOnly) => {
+    const offset = computeOffset?.(width, height)
+    if (offset === undefined) {
+      return matrix
+    }
+    return matrix.translate(offset.x, offset.y)
+  }, [computeOffset, width, height])
+
+  const matrix = useMemo<DOMMatrixReadOnly>(() => moveMatrixByOffset(rawMatrix), [moveMatrixByOffset, rawMatrix])
+
+  const renderMatrix = useMemo<DOMMatrixReadOnly>(() => draggingMatrix.multiply(matrix), [draggingMatrix, matrix])
 
   const hasDefaultZoomedOut = useRef(false)
   const animateBackTo0Ref = useRef(-1)
@@ -74,11 +86,12 @@ const TransformCanvas = ({
     matrix.translateSelf(width / 2, height / 2)
     matrix.scaleSelf(1 / defaultScaleOut)
     matrix.translateSelf(-width / 2, -height / 2)
+    moveMatrixByOffset(matrix)
     return matrix
-  }, [width, height, defaultScaleOut])
+  }, [width, height, defaultScaleOut, moveMatrixByOffset])
 
   const mulMatrix = useCallback((other: DOMMatrixReadOnly) => {
-    setMatrix(mat => other.multiply(mat))
+    setRawMatrix(mat => other.multiply(mat))
   }, [])
 
   //Listen to re-render the canvas
@@ -91,6 +104,7 @@ const TransformCanvas = ({
 
     canvas.width = width
     canvas.height = height
+    ctx.imageSmoothingEnabled = false
 
     if (!hasDefaultZoomedOut.current && width !== 0 && height !== 0) {
       hasDefaultZoomedOut.current = true
@@ -252,11 +266,11 @@ const TransformCanvas = ({
       const time = Date.now()
       const percent = (time - timeStart) / duration
       if (percent > 1) {
-        setMatrix(defaultMatrix)
+        setRawMatrix(defaultMatrix)
         return
       }
       const easingPercent = -(Math.cos(Math.PI * percent) - 1) / 2;
-      setMatrix(new DOMMatrix(start.map((s, index) => s + (end[index] - s) * easingPercent)))
+      setRawMatrix(new DOMMatrix(start.map((s, index) => s + (end[index] - s) * easingPercent)))
       animateBackTo0Ref.current = requestAnimationFrame(onFrame)
     }
     onFrame()
