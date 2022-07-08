@@ -103,7 +103,7 @@ class CubeTextureCoordinates {
     this.coords = new LO(coords).applyToSection(this._section, "textureOffset")
     this.mirrored = new LO(mirrored).applyToSection(this._section, "textureMirrored")
 
-    this._section.pushCreation("Cube Texture Coords Creation")
+    // this._section.pushCreation("Cube Texture Coords Creation")
 
     const onDirty = () => modelCoords.model.needsSaving.value = true
     this.coords.addListener(onDirty)
