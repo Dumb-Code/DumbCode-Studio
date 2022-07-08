@@ -37,7 +37,7 @@ const TextureMapper = () => {
             <div className="grid-in-layers border dark:border-black border-white h-full"><TextureMapperSidebar /></div>
             <div className="grid-in-tools border dark:border-black border-white"><TextureMapperTools /></div>
             <div className="grid-in-canvas border dark:border-black border-white  dark:bg-gray-700 bg-gray-200 min-h-0"><TextureMapperViewport /></div>
-            <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
+            <div className="grid-in-info border dark:border-black border-white"><InfoBar undoRedo={project.model.textureCoordinates.undoRedoHandler} /></div>
         </div>
     )
 }

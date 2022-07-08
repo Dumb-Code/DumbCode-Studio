@@ -4,7 +4,6 @@ import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
-import UndoRedoHandler from "../../studio/undoredo/UndoRedoHandler"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import ModelerGumballPropertiesBar from "./components/ModelerGumballPropertiesBar"
 import ModelerShortcuts from "./components/ModelerShortcuts"
@@ -18,9 +17,6 @@ const Modeler = () => {
 
     useKeyComboPressed(useMemo(() => ({
         common: {
-            undo: () => UndoRedoHandler.undo(project.model.undoRedoHandler, project.undoRedoHandler),
-            redo: () => UndoRedoHandler.redo(project.model.undoRedoHandler, project.undoRedoHandler),
-
             copy: () => project.model.copyCubes(true),
             paste: () => project.model.pasteCubes(false),
         },

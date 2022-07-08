@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { MeshBasicMaterial, MeshLambertMaterial } from 'three';
+import { useKeyComboPressed } from '../contexts/OptionsContext';
 import { useStudio } from '../contexts/StudioContext';
 import { DCMCube } from '../studio/formats/model/DcmModel';
 import { TextureGroup } from '../studio/formats/textures/TextureManager';
@@ -19,6 +21,13 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
     const selectedCube = selectedCubeIdentifs.map(c => totalCubes.get(c)).filter(cube => cube !== undefined) as DCMCube[]
 
     const childrenOfSelectedCubes = selectedCube.flatMap(cube => cube.getAllChildrenCubes([]))
+
+    useKeyComboPressed(useMemo(() => ({
+        common: {
+            undo: () => undoRedo !== undefined && UndoRedoHandler.undo(undoRedo, project.undoRedoHandler),
+            redo: () => undoRedo !== undefined && UndoRedoHandler.redo(undoRedo, project.undoRedoHandler),
+        },
+    }), [undoRedo, project]))
 
     const selectAllCubes = () => {
         project.selectedCubeManager.keepCurrentCubes = true

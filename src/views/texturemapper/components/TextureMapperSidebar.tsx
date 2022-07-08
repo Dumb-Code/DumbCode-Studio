@@ -14,13 +14,15 @@ import ModelerCubeList from "../../modeler/components/ModelerCubeList";
 import { GridDisplayModes } from "./TextureMapperViewport";
 
 const TextureMapperSidebar = () => {
+    const { getSelectedProject } = useStudio()
+    const project = getSelectedProject()
     return (
         <div className="dark:bg-gray-800 bg-gray-200 flex flex-col overflow-x-hidden overflow-y-scroll studio-scrollbar h-full">
             <TextureProperties />
             <TextureMapElementProperties />
             <TextureSettings />
             <ModelerCubeList canEdit={false} />
-            <HistoryList />
+            <HistoryList undoRedoHandler={project.model.textureCoordinates.undoRedoHandler} />
         </div>
     )
 }

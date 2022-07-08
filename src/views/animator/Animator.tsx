@@ -3,7 +3,6 @@ import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
-import UndoRedoHandler from "../../studio/undoredo/UndoRedoHandler"
 import { useListenableObject, useListenableObjectNullable } from "../../studio/util/ListenableObject"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import AnimatorGumballPropertiesBar from "./components/AnimatorGumballPropertiesBar"
@@ -24,9 +23,6 @@ const Animator = () => {
 
     useKeyComboPressed(useMemo(() => ({
         common: {
-            undo: () => animation !== null && UndoRedoHandler.undo(animation.undoRedoHandler, project.undoRedoHandler),
-            redo: () => animation !== null && UndoRedoHandler.redo(animation.undoRedoHandler, project.undoRedoHandler),
-
             copy: () => animation !== null && animation.copyKeyframes(),
             paste: () => animation !== null && animation.pasteKeyframes(false),
         },
@@ -36,7 +32,7 @@ const Animator = () => {
             delete_layer: () => animation !== null && animation.deleteKeyframesLayers(),
             paste_keyframes_defined: () => animation !== null && animation.pasteKeyframes(true),
         }
-    }), [animation, project]))
+    }), [animation]))
 
     useObjectUnderMouse()
 
