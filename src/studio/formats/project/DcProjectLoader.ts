@@ -237,6 +237,9 @@ const loadAnimations = async (folderP: OrPromise<ReadableFolder | null>, project
 
   animations.forEach((animation, index) => {
     const data = animationData.animations[index]
+    if (animation === null) {
+      return
+    }
     animation.name.value = data.name
 
 
@@ -275,15 +278,15 @@ const loadLegacyAnimationData = async (folder: ReadableFolder): Promise<Animatio
   const [animationNames, dataFiles] = await Promise.all([
     (await file(folder, "animation_names")).async("text").then(s => s.split("\n")),
     Promise.all((await getFileArray(folder, "json"))
-      .map(async (file) => file.async("text").then(file => JSON.parse(file) as LegacyAnimationData))
+      .map(async (file) => file === null ? null : file.async("text").then(file => JSON.parse(file) as LegacyAnimationData))
     )
   ])
 
   return {
     animations: animationNames.map((name, index) => ({
       name,
-      ikAnchorCubes: dataFiles[index].ikaCubes,
-      layers: dataFiles[index].keyframeInfo,
+      ikAnchorCubes: dataFiles[index]?.ikaCubes ?? [],
+      layers: dataFiles[index]?.keyframeInfo ?? [],
     }))
   }
 }
@@ -291,7 +294,7 @@ const loadLegacyAnimationData = async (folder: ReadableFolder): Promise<Animatio
 
 const loadDcaAnimations = async (folder: ReadableFolder, project: DcProject) => {
   return Promise.all((await getFileArray(folder, "dca"))
-    .map(async (file, index) => file.async("arraybuffer").then(arrayBuffer => loadUnknownAnimation(project, `Dc_ProjAnim_${index}`, arrayBuffer)))
+    .map(async (file, index) => file === null ? null : file.async("arraybuffer").then(arrayBuffer => loadUnknownAnimation(project, `Dc_ProjAnim_${index}`, arrayBuffer)))
   )
 }
 
@@ -340,6 +343,9 @@ const loadTextures = async (folderP: OrPromise<ReadableFolder | null>, project: 
   ])
 
   const textures = imgs.map(({ img, handle }, index) => {
+    if (img === null) {
+      return null
+    }
     const texture = project.textureManager.addTexture(datas.texture_names[index], img)
     if (handle !== undefined) {
       project.textureManager.linkFile(createReadableFileExtended(handle), texture)
@@ -354,7 +360,12 @@ const loadTextures = async (folderP: OrPromise<ReadableFolder | null>, project: 
 
   datas.groups.forEach(groupData => {
     const group = new TextureGroup(groupData.name, groupData.isDefault ?? false);
-    groupData.layerIDs.forEach(id => group.toggleTexture(textures[id], true))
+    groupData.layerIDs.forEach(id => {
+      const texture = textures[id]
+      if (texture !== null) {
+        group.toggleTexture(texture, true)
+      }
+    }, true)
     project.textureManager.addGroup(group)
   })
 }
@@ -362,8 +373,8 @@ const loadTextures = async (folderP: OrPromise<ReadableFolder | null>, project: 
 const getTexturesArray = async (folder: ReadableFolder) => {
   return Promise.all((await getFileArray(folder, "png"))
     .map(async (file) => ({
-      img: await file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))),
-      handle: file.asHandle?.()
+      img: file === null ? null : await file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))),
+      handle: file?.asHandle?.()
     }))
   )
 }
@@ -435,6 +446,9 @@ const loadRefImages = async (folderP: OrPromise<ReadableFolder | null>, project:
   const images = await getRefImages(folder, data.new_format ? null : data.entries.map(e => e.name))
 
   project.referenceImageHandler.images.value = images.map((img, i) => {
+    if (img === null) {
+      return null
+    }
     const d: LegacyRefImgData[number] = data.entries[i];
 
     const scale = Array.isArray(d.scale) ? d.scale[2] : d.scale
@@ -446,7 +460,7 @@ const loadRefImages = async (folderP: OrPromise<ReadableFolder | null>, project:
       d.opacity, d.canSelect, d.hidden ?? false,
       d.pos, d.rot, scale, flipX, flipY
     )
-  })
+  }).filter((img): img is ReferenceImage => img !== null)
 }
 
 const getRefImagesData = async (folder: ReadableFolder): Promise<RefImgData> => {
@@ -465,9 +479,9 @@ const getRefImagesData = async (folder: ReadableFolder): Promise<RefImgData> => 
   }
 }
 
-const getRefImages = async (folder: ReadableFolder, legacyImgNames: string[] | null): Promise<HTMLImageElement[]> => {
+const getRefImages = async (folder: ReadableFolder, legacyImgNames: string[] | null): Promise<(HTMLImageElement | null)[]> => {
   return Promise.all((await getFileArrayIndex(folder, "png", legacyImgNames ?? undefined))
-    .map(async (file) => file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))))
+    .map(async (file) => file === null ? null : file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))))
   )
 }
 
@@ -599,18 +613,18 @@ const writeRefImages = async (project: DcProject, folderP: OrPromise<WriteableFo
 const getFileArray = (folder: ReadableFolder, extension: string) => getFileArrayIndex(folder, extension)
 
 const getFileArrayIndex = async (folder: ReadableFolder, extension: string, nameOverrides?: string[]) => {
-  const files: ReadableFile[] = []
-
   const names = nameOverrides ?? await getNameIndexFileIfNeeded(folder)
-  const applier = (index: number) => `${names[index] ?? index}.${extension}`
 
-  for (let index = 0, file: OrPromise<ReadableFile | null> = null; (file = await folder.file(applier(index))) !== null; index++) {
-    files.push(file)
+  if (names !== undefined) {
+    const files = await Promise.all(names.map(async (name) => await folder.file(`${name}.${extension}`)))
+    return files
+  } else {
+    const files: ReadableFile[] = []
+    for (let index = 0, file: OrPromise<ReadableFile | null> = null; (file = await folder.file(`${index}.${extension}`)) !== null; index++) {
+      files.push(file)
+    }
+    return files
   }
-
-  console.log(files, applier(files.length), folder.name)
-
-  return files
 }
 
 const file = async (zip: ReadableFolder, fileName: string) => {
@@ -634,14 +648,14 @@ const writeImg = async (folder: WriteableFolder, name: string | number, img: HTM
   await folder.file(`${name}.png`, blob)
 }
 
-const getNameIndexFileIfNeeded = async (folder: ReadableFolder): Promise<string[]> => {
+const getNameIndexFileIfNeeded = async (folder: ReadableFolder): Promise<string[] | undefined> => {
   if (!keepFilesNice) {
-    return []
+    return
   }
   const dataFolder = await getDataRootFolderReadable(folder)
   const file = await dataFolder.file("name_index")
   if (file === null) {
-    return []
+    return
   }
   return JSON.parse(await file.async("text"))
 }
