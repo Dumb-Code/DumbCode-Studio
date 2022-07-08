@@ -19,7 +19,7 @@ import { OpenedDialogBox } from "./DialogBoxes"
 
 const ExportAnimationAsGifDialogBox = ({ animation }: { animation: DcaAnimation }) => {
   const studio = useStudio()
-  const { scene, onTopScene, renderer, setSize, getSelectedProject, onFrameListeners, grid, box } = studio
+  const { scene, onTopScene, renderer, setSize, getSelectedProject, onFrameListeners } = studio
   const project = getSelectedProject()
   const [width, setWidth] = useState(renderer.domElement.width)
   const [height, setHeight] = useState(renderer.domElement.height)

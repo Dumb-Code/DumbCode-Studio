@@ -16,6 +16,7 @@ import Animator from "../views/animator/Animator";
 import Modeler from "../views/modeler/Modeler";
 import Options from "../views/options/Options";
 import Project from "../views/project/Project";
+import Showcase from "../views/showcase/Showcase";
 import TextureMapper from "../views/texturemapper/Texturemapper";
 import Texturer from "../views/texturer/Texturer";
 
@@ -49,6 +50,7 @@ const Tabs: Tab[] = [
   { name: "Mapper", color: "bg-teal-500 hover:bg-teal-600", component: () => <TextureMapper /> },
   { name: "Texturer", color: "bg-green-500 hover:bg-green-600", component: () => <Texturer /> },
   { name: "Animator", color: "bg-yellow-500 hover:bg-yellow-600", component: () => <Animator /> },
+  { name: "Showcase", color: "bg-orange-500 hover:bg-orange-600", component: () => <Showcase /> },
 ]
 
 const StudioContainer = () => {

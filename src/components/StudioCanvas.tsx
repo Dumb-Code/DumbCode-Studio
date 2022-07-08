@@ -41,10 +41,7 @@ export const RawCanvas = ({ autoChangeSize = true, ...props }: HTMLAttributes<HT
   )
 }
 
-const StudioCanvas = () => {
-  const { onMouseUp } = useStudio()
-  useSelectedCubeManager()
-  useSelectedCubeHighlighter()
+export const NonSelectableCanvas = (props: HTMLAttributes<HTMLDivElement>) => {
 
   const screenshot = useScreenshotHook()
 
@@ -55,10 +52,24 @@ const StudioCanvas = () => {
     }
   }), [screenshot]), {})
 
-  const startPosition = useRef({ x: 0, y: 0 })
-  const movedAmount = useRef({ x: 0, y: 0 })
   return (
     <RawCanvas
+      {...props}
+    />
+  )
+}
+
+const StudioCanvas = () => {
+  useSelectedCubeManager()
+  useSelectedCubeHighlighter()
+
+  const { onMouseUp } = useStudio()
+
+  const startPosition = useRef({ x: 0, y: 0 })
+  const movedAmount = useRef({ x: 0, y: 0 })
+
+  return (
+    <NonSelectableCanvas
       onPointerDown={e => {
         movedAmount.current = { x: 0, y: 0 }
         startPosition.current = { x: e.clientX, y: e.clientY }
@@ -76,7 +87,6 @@ const StudioCanvas = () => {
         }
 
       }}
-
     />
   )
 }

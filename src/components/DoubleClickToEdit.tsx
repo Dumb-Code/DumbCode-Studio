@@ -5,12 +5,13 @@ type DivExtended = {
   className?: string,
   disabled?: boolean,
   inputClassName?: string,
+  textClassName?: string,
   props?: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>
   onStartEditing?: () => void,
   onFinishEditing?: () => void,
 }
 
-const DblClickEditInternal = ({ callback, text, className, inputClassName, disabled, props, onStartEditing, onFinishEditing }:
+const DblClickEditInternal = ({ callback, text, className, inputClassName, textClassName, disabled, props, onStartEditing, onFinishEditing }:
   {
     callback: (str: string) => void,
     text: string,
@@ -75,7 +76,8 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
       />
       {
         openEdit ||
-        <span
+        <div
+          className={textClassName}
           // onClick={e => e.stopPropagation()}
           onDoubleClick={e => {
             onDoubleClick()
@@ -83,7 +85,7 @@ const DblClickEditInternal = ({ callback, text, className, inputClassName, disab
           }}
         >
           {text}
-        </span>}
+        </div>}
     </div>
   )
 }

@@ -64,6 +64,10 @@ module.exports = {
         "tabs properties",
         "canvas properties",
         "scrub properties"
+      ],
+      "showcase": [
+        'canvas sidebar',
+        'info sidebar'
       ]
     },
   },

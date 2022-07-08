@@ -30,6 +30,8 @@ export type StudioPanelsContext = {
   texture_grid_type: PanelValue<GridDisplayMode>
 
   texture_layers: PanelValue<boolean>
+
+  showcase_lights: PanelValue<boolean>
 }
 
 const Context = createContext<StudioPanelsContext | null>(null)
@@ -67,6 +69,7 @@ const StudioPanelsContextProvider = ({ children }: PropsWithChildren<{}>) => {
   useValueGetterSetter(context, "texture_mapper_settings", true)
   useValueGetterSetter(context, "texture_layers", true)
   useValueGetterSetter(context, "texture_grid_type", "fade")
+  useValueGetterSetter(context, "showcase_lights", true)
   return (
     <Context.Provider value={context}>
       {children}

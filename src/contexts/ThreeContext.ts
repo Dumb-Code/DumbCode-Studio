@@ -8,6 +8,8 @@ import { useStudio } from './StudioContext';
 export type ThreeJsContext = {
   scene: Scene,
   onTopScene: Scene,
+  lightGroup: Group,
+  itemsGroup: Group,
   renderer: WebGLRenderer,
   controls: OrbitControls,
   raycaster: Raycaster,
@@ -64,9 +66,9 @@ export const createThreeContext = (): ThreeJsContext => {
   camera.position.set(0.45, 1.5, 4.5)
   camera.lookAt(0.5, 1.5, 0.5)
 
-  const scene = createScene()
+  const { scene, lightGroup } = createScene()
 
-  const onTopScene = createScene()
+  const { scene: onTopScene } = createScene()
   onTopScene.background = null;
 
   //Set up the controls
@@ -86,11 +88,16 @@ export const createThreeContext = (): ThreeJsContext => {
 
   const onMouseUp = new IndexedEventHandler<React.MouseEvent>()
 
+
+  const itemsGroup = new Group()
+
   const { grid, majorGridMaterial, minorGridMaterial, subGridMaterial } = createGrid()
-  scene.add(grid)
+  itemsGroup.add(grid)
 
   const box = createBox()
-  scene.add(box)
+  itemsGroup.add(box)
+
+  scene.add(itemsGroup)
 
   let width = 100
   let height = 100
@@ -140,7 +147,7 @@ export const createThreeContext = (): ThreeJsContext => {
   runFrameAndRequest()
 
   return {
-    renderer, scene, onTopScene, controls,
+    renderer, scene, onTopScene, controls, lightGroup, itemsGroup,
     raycaster, onMouseUp, onFrameListeners, transformControls,
 
     getCamera: () => camera,
@@ -185,14 +192,16 @@ const createScene = () => {
   let scene = new Scene();
   scene.background = new Color(0x363636);
 
+  let lightGroup = new Group()
+
   //Set up lighting
-  scene.add(new AmbientLight(0xffffff))
+  lightGroup.add(new AmbientLight(0xffffff))
 
   let createLight = (x: number, y: number, z: number, i: number) => {
     let light = new DirectionalLight()
     light.position.set(x, y, z)
     light.intensity = i
-    scene.add(light)
+    lightGroup.add(light)
   }
 
   createLight(1, 0, 0, 0.2)
@@ -201,7 +210,9 @@ const createScene = () => {
   createLight(0, 0, 1, 0.6)
   createLight(0, 0, -1, 0.6)
 
-  return scene
+  scene.add(lightGroup)
+
+  return { scene, lightGroup }
 }
 
 const createBox = () => {
@@ -321,16 +332,11 @@ const convertToPerspective = (cameraP: PerspectiveCamera, cameraO: OrthographicC
 }
 
 export const useModelIsolationFactory = () => {
-  const { scene, onTopScene, getSelectedProject, grid, box } = useStudio()
+  const { scene, onTopScene, getSelectedProject, itemsGroup } = useStudio()
   const project = getSelectedProject()
 
   return useCallback(() => {
-    const gridVisible = grid.visible
-    const boxVisible = box.visible
-
-    grid.visible = false
-    box.visible = false
-
+    itemsGroup.visible = false
     const defaultParent = project.model.modelGroup.parent!
 
     scene.remove(project.group)
@@ -345,10 +351,9 @@ export const useModelIsolationFactory = () => {
       defaultParent.add(project.model.modelGroup)
 
       project.model.traverseAll(cube => cube.updateMaterials({}))
-      grid.visible = gridVisible
-      box.visible = boxVisible
+      itemsGroup.visible = true
     }
-  }, [project, grid, box, scene, onTopScene])
+  }, [project, itemsGroup, scene, onTopScene])
 }
 
 export const useNoBackgroundFactory = () => {
