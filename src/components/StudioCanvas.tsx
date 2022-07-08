@@ -1,9 +1,7 @@
-import { HTMLAttributes, useCallback, useEffect, useMemo, useRef } from "react";
-import { useKeyComboPressed, useOptions } from "../contexts/OptionsContext";
+import { HTMLAttributes, useEffect, useMemo, useRef } from "react";
+import { useKeyComboPressed } from "../contexts/OptionsContext";
 import { useStudio } from "../contexts/StudioContext";
-import { useModelIsolationFactory, useNoBackgroundFactory } from "../contexts/ThreeContext";
-import { useToast } from "../contexts/ToastContext";
-import { ScreenshotActionMap, ScreenshotDesciptionMap } from "../studio/screenshot/ScreenshotActions";
+import { useScreenshotHook } from "../studio/screenshot/ScreenshotHook";
 import { useSelectedCubeHighlighter } from "../studio/util/CubeSelectedHighlighter";
 import { useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
@@ -44,46 +42,11 @@ export const RawCanvas = ({ autoChangeSize = true, ...props }: HTMLAttributes<HT
 }
 
 const StudioCanvas = () => {
-  const { onMouseUp, renderer, renderSingleFrame } = useStudio()
+  const { onMouseUp } = useStudio()
   useSelectedCubeManager()
   useSelectedCubeHighlighter()
 
-  const { selectedScreenshotAction } = useOptions()
-
-  const { addToast } = useToast()
-
-  const isolationFactory = useModelIsolationFactory()
-  const noBackgroundFactory = useNoBackgroundFactory()
-
-  const screenshot = useCallback(async (onlyModel: boolean) => {
-    let resetIsolation = onlyModel ? isolationFactory() : null
-    let resetBackground = onlyModel ? noBackgroundFactory() : null
-
-    renderSingleFrame(!onlyModel)
-
-    if (resetIsolation !== null) {
-      resetIsolation()
-    }
-    if (resetBackground !== null) {
-      resetBackground()
-    }
-
-    const blob = await new Promise<Blob | null>(resolve => {
-      renderer.domElement.toBlob(blob => resolve(blob))
-    })
-    if (blob === null) {
-      addToast("Failed to take screenshot", "error")
-      return
-    }
-
-    try {
-      await ScreenshotActionMap[selectedScreenshotAction](blob)
-      addToast(`Screenshot taken (${ScreenshotDesciptionMap[selectedScreenshotAction]})`, "success")
-    } catch (e) {
-      addToast(`Error completing action: ${selectedScreenshotAction}`, "error")
-    }
-
-  }, [selectedScreenshotAction, renderer, renderSingleFrame, isolationFactory, noBackgroundFactory, addToast])
+  const screenshot = useScreenshotHook()
 
   useKeyComboPressed(useMemo(() => ({
     common: {
