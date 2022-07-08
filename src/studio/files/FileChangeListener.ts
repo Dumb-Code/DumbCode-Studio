@@ -39,12 +39,17 @@ export default class FileChangeListener {
   }
 
   async onTickFile(listener: FileListener) {
-    const file = await listener.file()
-    if (file !== null && file !== undefined && listener.lastModified !== -1 && file.lastModified > listener.lastModified) {
-      listener.onChange(file)
-    }
-    if (file !== null && file !== undefined) {
-      listener.lastModified = file.lastModified
+    try {
+      const file = await listener.file()
+      if (file !== null && file !== undefined && listener.lastModified !== -1 && file.lastModified > listener.lastModified) {
+        listener.onChange(file)
+      }
+      if (file !== null && file !== undefined) {
+        listener.lastModified = file.lastModified
+      }
+    } catch (e) {
+      //Ignore, usually means the file has been moved. Nothing we can do bout that
+      //We could potentially warn the user that the file has been moved, but that's a bit of a pain
     }
   }
 }
