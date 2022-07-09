@@ -1,16 +1,19 @@
 import { ReactNode } from "react"
 
-export const OptionSet = <T extends string>({ options, selected, setSelected, title }: {
+export const OptionSet = <T extends string | number>({
+  options, selected, setSelected, title,
+  labelGetter = (v) => String(v).charAt(0).toUpperCase() + String(v).slice(1)
+}: {
   options: readonly T[]
   selected: T
   setSelected: (value: T) => void
   title: string
+  labelGetter?: (value: T) => string
 }) => {
-  const toTitleCase = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
   return (
     <div className="flex flex-col w-full m-2">
       <div className="dark:text-white text-black font-semibold pl-2">{title}</div>
-      {options.map(option => <OptionButton key={option} isSelected={option === selected} toggle={() => setSelected(option)}>{toTitleCase(option)}</OptionButton>)}
+      {options.map(option => <OptionButton key={option} isSelected={option === selected} toggle={() => setSelected(option)}>{labelGetter(option)}</OptionButton>)}
     </div>
   )
 }

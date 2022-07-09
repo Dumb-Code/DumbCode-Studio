@@ -1,11 +1,12 @@
 import { ReactNode, useCallback } from "react"
+import Checkbox from "../../../components/Checkbox"
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGPlus } from "../../../components/Icons"
 import NumericInput from "../../../components/NumericInput"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
-import { ShowcaseLight } from "../../../studio/showcase/DirectionLight"
+import { ShowcaseLight } from "../../../studio/showcase/ShowcaseLight"
 import ShowcaseProperties from "../../../studio/showcase/ShowcaseProperties"
 import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject"
 
@@ -14,7 +15,36 @@ const ShowcaseLights = () => {
     <CollapsableSidebarPannel title="LIGHTS" heightClassname="h-[32rem]" panelName="showcase_lights">
       <AmbientLightSection />
       <DirectionalLightSection />
+      <ShadowSection />
     </CollapsableSidebarPannel>
+  )
+}
+
+const ShadowSection = () => {
+  const { getSelectedProject, renderer } = useStudio()
+  const showcase = getSelectedProject().showcaseProperties
+  const [view] = useListenableObject(showcase.selectedView)
+  const [shadow, setShadow] = useListenableObject(view.shadow)
+
+  const [floorOpacity, setFloorOpacity] = useListenableObject(showcase.floorShadowOpacity)
+  const [shadowMapSize, setShadowMapSize] = useListenableObject(showcase.previewShadowMapSize)
+
+  const current = Math.floor(Math.log2(shadowMapSize))
+  const maxMapSizePow2 = Math.floor(Math.log2(renderer.capabilities.maxTextureSize))
+
+
+  return (
+    <Section title="Shadow">
+      <Checkbox value={shadow} setValue={setShadow} extraText="Enabled" />
+      <div className="flex flex-row">
+        Preview Shadow Quality: <input type="range" value={current} min={0} max={maxMapSizePow2} onInput={e => setShadowMapSize(Math.pow(2, e.currentTarget.valueAsNumber))} />
+      </div>
+      <div className="flex flex-row">
+        Floor Shadow Opacity: <input type="range" step={0.01} value={floorOpacity} min={0} max={1} onInput={e => setFloorOpacity(e.currentTarget.valueAsNumber)} />
+      </div>
+
+
+    </Section>
   )
 }
 
@@ -59,7 +89,7 @@ const DirectionalLightSection = () => {
       <div className="flex flex-row">
         Name: <input className="h-8 bg-gray-500 text-black dark:text-white" disabled={selectedLight === null} value={selectedName === undefined ? '' : selectedName} onChange={e => setSelectedName(e.currentTarget.value)} />
       </div>
-      <div className="h-48 overflow-x-hidden overflow-y-scroll studio-scrollbar">
+      <div className="h-32 overflow-x-hidden overflow-y-scroll studio-scrollbar">
         {lights.map(light => <DirectionalLightEntry key={light.identifer} showcase={showcase} light={light} />)}
       </div>
     </Section>

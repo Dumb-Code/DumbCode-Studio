@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Mesh, MeshLambertMaterial, Object3D, SphereBufferGeometry, Vector3 } from "three";
+import { Mesh, MeshLambertMaterial, Object3D, SphereBufferGeometry } from "three";
 import { useStudio } from "../../../contexts/StudioContext";
 import ShowcaseProperties from "../../../studio/showcase/ShowcaseProperties";
 import { useListenableObject } from "../../../studio/util/ListenableObject";
@@ -18,7 +18,6 @@ export default class ShowcaseGumball {
 }
 
 
-const tempVec3 = new Vector3()
 
 export const useShowcaseGumball = () => {
   const { getSelectedProject, transformControls, onTopScene } = useStudio()
@@ -34,29 +33,27 @@ export const useShowcaseGumball = () => {
       return
     }
     transformControls.attach(gumball.transformAnchor)
-    transformControls.mode = "rotate"
+    transformControls.mode = "translate"
     transformControls.space = "world"
     transformControls.enabled = true
 
+    const position = selectedLight.light.position
+    gumball.visualAnchor.position.copy(position)
+    gumball.transformAnchor.position.copy(position)
+
     const objectChange = () => {
-      tempVec3.set(0, 1, 0).applyQuaternion(gumball.transformAnchor.quaternion)
-      selectedLight.direction.value = [tempVec3.x, tempVec3.y, tempVec3.z]
-      gumball.visualAnchor.position.copy(tempVec3).add(gumball.transformAnchor.position)
+      const position = gumball.transformAnchor.position
+      selectedLight.direction.value = [position.x, position.y, position.z]
+      gumball.visualAnchor.position.copy(position)
     }
 
-    const mouseDown = () => {
-      gumball.transformAnchor.rotation.set(0, 0, 0)
-      gumball.transformAnchor.updateMatrixWorld(true)
-    }
 
     onTopScene.add(gumball.visualAnchor)
-    transformControls.addEventListener("mouseDown", mouseDown)
     transformControls.addEventListener("objectChange", objectChange)
 
     return () => {
       transformControls.detach()
       transformControls.enabled = false
-      transformControls.removeEventListener("mouseDown", mouseDown)
       transformControls.removeEventListener("objectChange", objectChange)
       onTopScene.remove(gumball.visualAnchor)
     }

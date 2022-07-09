@@ -1,6 +1,8 @@
 import { LO } from './../util/ListenableObject';
-import { ShowcaseLight } from './DirectionLight';
+import { ShowcaseLight } from './ShowcaseLight';
 import ShowcaseProperties from './ShowcaseProperties';
+
+
 
 export default class ShowcaseView {
   readonly ambientLightColour = new LO('#ffffff')
@@ -9,10 +11,11 @@ export default class ShowcaseView {
   readonly lights = new LO<ShowcaseLight[]>([])
   readonly selectedLight = new LO<ShowcaseLight | null>(null)
 
+  readonly shadow = new LO(true)
+
   constructor(
     readonly properties: ShowcaseProperties
   ) {
-
   }
 
 

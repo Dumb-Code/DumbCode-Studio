@@ -45,7 +45,7 @@ export default class DcProject {
   readonly selectionGroup = new Group()
   readonly overlayGroup = new Group()
 
-  readonly showcaseProperties = new ShowcaseProperties()
+  readonly showcaseProperties: ShowcaseProperties
 
   readonly model: DCMModel
   readonly projectSaveType = new LO<"unknown" | "project" | "model">("unknown")
@@ -81,6 +81,7 @@ export default class DcProject {
     this.name = new LO(name)
     this.model = model
     model.parentProject = this
+    this.showcaseProperties = new ShowcaseProperties(this)
     this.textureManager = new TextureManager(this)
     this.cubePointTracker = new CubePointTracker(this.selectedCubeManager, this.model, this.selectionGroup)
     this.modelerGumball = new ModelerGumball(this.selectedCubeManager, this.model, this.group, this.cubePointTracker)
