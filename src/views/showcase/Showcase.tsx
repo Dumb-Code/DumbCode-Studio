@@ -1,15 +1,17 @@
 import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
-import StudioCanvas from "../../components/StudioCanvas"
+import { NonSelectableCanvas } from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import ShowcaseSidebar from "./components/ShowcaseSidebar"
+import { useShowcaseGumball } from "./logic/ShowcaseGumball"
 
 const Showcase = () => {
   const { scene, lightGroup, itemsGroup, getSelectedProject, onFrameListeners } = useStudio()
   const project = getSelectedProject()
 
   useObjectUnderMouse()
+  useShowcaseGumball()
 
   useEffect(() => {
     scene.remove(lightGroup)
@@ -38,7 +40,7 @@ const Showcase = () => {
         gridTemplateRows: 'auto 28px'
       }}
     >
-      <div className="grid-in-canvas border dark:border-black border-white min-h-0"><StudioCanvas /></div>
+      <div className="grid-in-canvas border dark:border-black border-white min-h-0"><NonSelectableCanvas /></div>
       <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
       <div className="grid-in-sidebar border dark:border-black border-white"><ShowcaseSidebar /></div>
     </div>

@@ -7,11 +7,11 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { ShowcaseLight } from "../../../studio/showcase/DirectionLight"
 import ShowcaseProperties from "../../../studio/showcase/ShowcaseProperties"
-import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject"
 
 const ShowcaseLights = () => {
   return (
-    <CollapsableSidebarPannel title="LIGHTS" heightClassname="h-64" panelName="showcase_lights">
+    <CollapsableSidebarPannel title="LIGHTS" heightClassname="h-[32rem]" panelName="showcase_lights">
       <AmbientLightSection />
       <DirectionalLightSection />
     </CollapsableSidebarPannel>
@@ -20,20 +20,13 @@ const ShowcaseLights = () => {
 
 const AmbientLightSection = () => {
   const { getSelectedProject } = useStudio()
-  const project = getSelectedProject()
-  const [colour, setColour] = useListenableObject(project.showcaseProperties.ambientLightColour)
-  const [intensity, setIntensity] = useListenableObject(project.showcaseProperties.ambientLightIntensity)
+  const showcase = getSelectedProject().showcaseProperties
+
+  const [veiw] = useListenableObject(showcase.selectedView)
 
   return (
     <Section title="Ambient Light">
-      <div className="flex flex-row">
-        Color:
-        <input type="color" value={colour} onChange={e => setColour(e.currentTarget.value)} />
-      </div>
-      <div className="flex flex-row">
-        Intensity:
-        <NumericInput value={intensity} onChange={setIntensity} min={0} />
-      </div>
+      <ColourEditEntry colour={veiw.ambientLightColour} intensity={veiw.ambientLightIntensity} />
     </Section>
   )
 }
@@ -42,11 +35,16 @@ const DirectionalLightSection = () => {
   const { getSelectedProject } = useStudio()
   const showcase = getSelectedProject().showcaseProperties
 
-  const [lights] = useListenableObject(showcase.lights)
+  const [veiw] = useListenableObject(showcase.selectedView)
+
+  const [selectedLight] = useListenableObject(veiw.selectedLight)
+  const [lights] = useListenableObject(veiw.lights)
 
   const addLight = useCallback(() => {
-    showcase.addLight()
-  }, [showcase])
+    veiw.addLight()
+  }, [veiw])
+
+  const [selectedName, setSelectedName] = useListenableObjectNullable(selectedLight?.name, [selectedLight])
 
 
   return (
@@ -55,15 +53,24 @@ const DirectionalLightSection = () => {
         <SVGPlus className="w-4 h-4" />
       </ButtonWithTooltip>
     }>
-      {lights.map(light => <DirectionalLightEntry key={light.identifer} showcase={showcase} light={light} />)}
+      <div className="flex flex-row">
+        <ColourEditEntry colour={selectedLight?.colour} intensity={selectedLight?.intensity} />
+      </div>
+      <div className="flex flex-row">
+        Name: <input className="h-8 bg-gray-500 text-black dark:text-white" disabled={selectedLight === null} value={selectedName === undefined ? '' : selectedName} onChange={e => setSelectedName(e.currentTarget.value)} />
+      </div>
+      <div className="h-48 overflow-x-hidden overflow-y-scroll studio-scrollbar">
+        {lights.map(light => <DirectionalLightEntry key={light.identifer} showcase={showcase} light={light} />)}
+      </div>
     </Section>
   )
 }
 
 const DirectionalLightEntry = ({ showcase, light }: { showcase: ShowcaseProperties, light: ShowcaseLight }) => {
   const [color] = useListenableObject(light.colour)
+  const [veiw] = useListenableObject(showcase.selectedView)
 
-  const [selected, setSelected] = useListenableObject(showcase.selectedLight)
+  const [selected, setSelected] = useListenableObject(veiw.selectedLight)
 
   const className = selected === light ?
     "hover:bg-blue-300 dark:hover:bg-blue-300 dark:bg-blue-600 bg-blue-300" :
@@ -72,7 +79,7 @@ const DirectionalLightEntry = ({ showcase, light }: { showcase: ShowcaseProperti
   return (
     <div
       className={className + " my-1 cursor-pointer h-8 mr-5 flex items-center"}
-      onClick={() => setSelected(light)}
+      onClick={() => setSelected(selected === light ? null : light)}
     >
       <DblClickEditLO className="flex-grow dark:text-white" obj={light.name} inputClassName="h-8 bg-gray-500 text-black dark:text-white" textClassName="pl-3 w-full" />
       <div className="h-2/3 aspect-1 rounded-full mr-2" style={{
@@ -84,7 +91,7 @@ const DirectionalLightEntry = ({ showcase, light }: { showcase: ShowcaseProperti
 
 const Section = ({ title, children, buttons }: { title: string, children: ReactNode, buttons?: ReactNode }) => {
   return (
-    <div className="flex flex-col dark:text-white ml-2">
+    <div className="flex flex-col dark:text-white ml-2 mt-5 first:mt-0">
       <div className="flex flex-row">
         <div className="font-semibold">{title}</div>
         {buttons}
@@ -93,6 +100,24 @@ const Section = ({ title, children, buttons }: { title: string, children: ReactN
         {children}
       </div>
     </div>
+  )
+}
+
+const ColourEditEntry = ({ colour, intensity }: { colour?: LO<string>, intensity?: LO<number> }) => {
+  const [colourVal, setColour] = useListenableObjectNullable(colour)
+  const [intensityVal, setIntensity] = useListenableObjectNullable(intensity)
+
+  return (
+    <>
+      <div className="flex flex-row">
+        Color:
+        <input disabled={colour === undefined} type="color" value={colourVal ?? '#ffffff'} onChange={e => setColour(e.currentTarget.value)} />
+      </div>
+      <div className="flex flex-row">
+        Intensity:
+        <NumericInput value={intensityVal} onChange={setIntensity} min={0} />
+      </div>
+    </>
   )
 }
 
