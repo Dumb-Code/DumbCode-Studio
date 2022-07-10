@@ -84,7 +84,7 @@ const Animator = () => {
             <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
             <div className="grid-in-scrub border dark:border-black border-white"><AnimatorScrubBar animation={animation} /></div>
             <div className="grid-in-timeline border dark:border-black border-white"><AnimatorTimeline /></div>
-            <div className="grid-in-gumball border dark:border-black border-white"><AnimatorGumballPropertiesBar /></div>
+            <div className="grid-in-gumball border dark:border-black border-white"><AnimatorGumballPropertiesBar consumer={animation} /></div>
             <div className="grid-in-info border dark:border-black border-white"><InfoBar undoRedo={animation?.undoRedoHandler} /></div>
         </div>
     )

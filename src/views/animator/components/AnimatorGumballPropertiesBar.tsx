@@ -1,25 +1,18 @@
 import { Switch } from "@headlessui/react";
 import Dropup, { DropupItem } from "../../../components/Dropup";
 import { ButtonList, GumballButton, GumballToggle } from "../../../components/GumballComponents";
-import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
+import AnimatorGumballConsumer from "../../../studio/formats/animations/AnimatorGumballConsumer";
 import { useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
 import { AnimatorGumball, useAnimatorGumball } from "../logic/AnimatorGumball";
 
-const AnimatorGumballPropertiesBar = () => {
+const AnimatorGumballPropertiesBar = ({ consumer }: { consumer: AnimatorGumballConsumer | null | undefined }) => {
     //We want to force a refresh on useAnimatorGumball as little as possible
-
-    const { getSelectedProject } = useStudio()
-    const project = getSelectedProject()
-    const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
-    useAnimatorGumball(animation)
-    return <AnimationGumballPropertiesBarContained />
+    useAnimatorGumball(consumer ?? null)
+    return <AnimationGumballPropertiesBarContained gumball={consumer?.getAnimatorGumball()} />
 }
 
-const AnimationGumballPropertiesBarContained = () => {
-    const { getSelectedProject } = useStudio()
-    const [selectedAnimation] = useListenableObject(getSelectedProject().animationTabs.selectedAnimation)
-    const gumball = selectedAnimation?.animatorGumball
+const AnimationGumballPropertiesBarContained = ({ gumball }: { gumball: AnimatorGumball | undefined }) => {
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full">
             <GumballToggle toggle={gumball?.enabled}>
