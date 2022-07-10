@@ -105,6 +105,7 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   readonly scroll = new LO(0, this.onDirty)
   readonly zoom = new LO(1, this.onDirty)
 
+  readonly lockedCubes = new LO<readonly string[]>([])
 
   readonly keyframeStartOrDurationChanges = new Set<() => void>()
 
@@ -453,6 +454,10 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
 
   gumballGetPosition(cube: DCMCube): NumArray | undefined {
     return this.position.get(cube.name.value)
+  }
+
+  gumballGetRotation(cube: DCMCube): NumArray | undefined {
+    return this.rotation.get(cube.name.value)
   }
 
   gumballSetPosition(cube: DCMCube, position: NumArray): void {

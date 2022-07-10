@@ -10,6 +10,7 @@ import NumericInput from "../../../components/NumericInput";
 import Toggle from "../../../components/Toggle";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
+import AnimatorGumballConsumer from "../../../studio/formats/animations/AnimatorGumballConsumer";
 import DcaAnimation, { DcaKeyframe } from "../../../studio/formats/animations/DcaAnimation";
 import { DCMCube } from "../../../studio/formats/model/DcmModel";
 import { LO, LOMap, useListenableMap, useListenableObject, useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
@@ -200,7 +201,7 @@ const AnimatorVisibilityProperties = () => {
     );
 }
 
-const AnimatorIKProperties = ({ animation }: { animation: DcaAnimation | null }) => {
+export const AnimatorIKProperties = ({ animation }: { animation: AnimatorGumballConsumer | null }) => {
     return (
         <CollapsableSidebarPannel title="INVERSE KINEMATICS" heightClassname="h-10" panelName="animator_ik">
             <div className="w-full flex flex-row px-2 pt-1">
@@ -287,8 +288,9 @@ const LoopCheck = ({ title }: { title: string }) => {
     )
 }
 
-const IKCheck = ({ title, animation }: { title: string, animation: DcaAnimation | null }) => {
-    const [selected] = useListenableObjectNullable(animation?.project?.selectedCubeManager?.selected)
+const IKCheck = ({ title, animation }: { title: string, animation: AnimatorGumballConsumer | null }) => {
+    const { getSelectedProject } = useStudio()
+    const [selected] = useListenableObjectNullable(animation === null ? undefined : getSelectedProject().selectedCubeManager.selected)
     const [anchors, setAnchors] = useListenableObjectNullable(animation?.ikAnchorCubes)
     const [direction, setDirection] = useListenableObjectNullable(animation?.ikDirection)
     const isAllSelected = selected !== undefined && anchors !== undefined && selected.every(s => anchors.includes(s))

@@ -8,7 +8,6 @@ export default class AnimatorGumballConsumer {
 
   readonly ikAnchorCubes = new LO<readonly string[]>([])
   readonly ikDirection = new LO<"upwards" | "downwards">("upwards")
-  readonly lockedCubes = new LO<readonly string[]>([])
 
   getUndoRedoHandler(): UndoRedoHandler<any> | undefined {
     return undefined
@@ -42,19 +41,25 @@ export class AnimatorGumballConsumerPart {
     throw new Error("Method not implemented.");
   }
 
+  gumballGetRotation(cube: DCMCube): NumArray | undefined {
+    throw new Error("Method not implemented.");
+  }
+
   wrapToSetValue(callback: () => void) {
     callback()
   }
 
   setPositionAbsoluteAnimated(cube: DCMCube | undefined, x: number, y: number, z: number) {
     if (cube) {
-      this.gumballSetPosition(cube, [x, y, z])
+      const [cx, cy, cz] = this.gumballGetPosition(cube) ?? [0, 0, 0]
+      this.gumballSetPosition(cube, [x - cx, y - cy, z - cz])
     }
   }
 
   setRotationAbsoluteAnimated(cube: DCMCube | undefined, x: number, y: number, z: number) {
     if (cube) {
-      this.gumballSetRotation(cube, [x, y, z])
+      const [cx, cy, cz] = this.gumballGetRotation(cube) ?? [0, 0, 0]
+      this.gumballSetRotation(cube, [x - cx, y - cy, z - cz])
     }
   }
 }

@@ -67,6 +67,7 @@ module.exports = {
       ],
       "showcase": [
         'canvas sidebar',
+        'gumball sidebar',
         'info sidebar'
       ]
     },

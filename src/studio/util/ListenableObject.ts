@@ -145,6 +145,12 @@ export class LO<T> {
     return lo
   }
 
+  static createReadonly = <T>(value: T) => {
+    const lo = new LO(value)
+    lo.addPreModifyListener((_new, _old, naughtModifyValue) => naughtModifyValue(value))
+    return lo
+  }
+
 }
 
 export const useListenableObjectNullable = <T>(obj: LO<T> | undefined, deps: DependencyList = []): [T | undefined, (val: T) => void] => {
