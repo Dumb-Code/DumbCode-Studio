@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { MeshBasicMaterial, MeshLambertMaterial } from 'three';
+import { MeshBasicMaterial, MeshStandardMaterial } from 'three';
 import { useKeyComboPressed } from '../contexts/OptionsContext';
 import { useStudio } from '../contexts/StudioContext';
 import { DCMCube } from '../studio/formats/model/DcmModel';
@@ -99,7 +99,7 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
 export const DisplayModeDropup = () => {
     const { getSelectedProject } = useStudio()
     const project = getSelectedProject()
-    type Func = (mat: MeshBasicMaterial | MeshLambertMaterial) => void
+    type Func = (mat: MeshBasicMaterial | MeshStandardMaterial) => void
     const setTextured: Func = (mat) => {
         mat.userData._mode = 0
         mat.map = project.previousThreeTexture

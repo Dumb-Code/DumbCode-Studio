@@ -1,4 +1,4 @@
-import { Group, MeshBasicMaterial, MeshLambertMaterial, Texture } from "three";
+import { Group, MeshBasicMaterial, MeshStandardMaterial, Texture } from "three";
 import { v4 as uuidv4 } from "uuid";
 import CubePointTracker from "../../../views/modeler/logic/CubePointTracker";
 import { createAnimatorCommandRoot } from "../../command/commands/animator/AnimatorCommands";
@@ -115,7 +115,7 @@ export default class DcProject {
  * Helper method to update all the materials for the selected project.
  * @param {function} callback the material callback
  */
-  updateTexture(callback: (mat: MeshLambertMaterial | MeshBasicMaterial) => void) {
+  updateTexture(callback: (mat: MeshStandardMaterial | MeshBasicMaterial) => void) {
     callback(this.model.materials.normal)
     callback(this.model.materials.selected)
     callback(this.model.materials.highlight)

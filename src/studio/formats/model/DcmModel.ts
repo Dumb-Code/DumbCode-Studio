@@ -1,4 +1,4 @@
-import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Matrix4, Matrix4Tuple, Mesh, MeshBasicMaterial, MeshLambertMaterial, Quaternion, Vector3 } from "three";
+import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Matrix4, Matrix4Tuple, Mesh, MeshBasicMaterial, MeshStandardMaterial, Quaternion, Vector3 } from "three";
 import { v4 as uuidv4 } from "uuid";
 import { readFromClipboard, writeToClipboard } from "../../clipboard/Clipboard";
 import { writeCubesForClipboard } from "../../clipboard/CubeClipboardType";
@@ -701,7 +701,7 @@ export class DCMCube implements CubeParent {
 }
 
 
-const material = new MeshLambertMaterial({
+const material = new MeshStandardMaterial({
   color: 0x777777,
   // transparent: true,
   side: DoubleSide,
@@ -712,9 +712,9 @@ const exportMaterial = new MeshBasicMaterial({
   alphaTest: 0.0001
 })
 export class ProjectMaterials {
-  readonly normal: MeshLambertMaterial
-  readonly highlight: MeshLambertMaterial
-  readonly selected: MeshLambertMaterial
+  readonly normal: MeshStandardMaterial
+  readonly highlight: MeshStandardMaterial
+  readonly selected: MeshStandardMaterial
 
   readonly export: MeshBasicMaterial
 
