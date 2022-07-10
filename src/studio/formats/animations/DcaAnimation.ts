@@ -12,6 +12,7 @@ import { LO, LOMap } from './../../util/ListenableObject';
 import { NumArray } from './../../util/NumArray';
 import { DCMCube } from './../model/DcmModel';
 import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from './AnimatorGumballConsumer';
+import DcaSoundLayer from './DcaSoundLayer';
 
 const skeletal_export_named = "skeletal_export_named_"
 const kfmap_position = "pos_"
@@ -120,6 +121,8 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
 
   readonly keyframeNameOverrides = LOMap.applyToSectionStringKey(new LOMap<string, string>(), this._section, skeletal_export_named, false, "Keyframe Skeletal Override Change") //isSkeleton ? {identifier, name} : {name, identifier}
   readonly reverseKeyframeNameOverrides = new Map<string, string[]>() //name, [identifier]
+
+  readonly soundLayers = new LO<readonly DcaSoundLayer[]>([], this.onDirty)
 
   constructor(project: DcProject, name: string) {
     super()

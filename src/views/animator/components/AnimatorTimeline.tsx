@@ -170,15 +170,16 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
             <>
                 {keyframesByLayers.map(({ layer, keyframes }) => <AnimationLayer key={layer.layerId} animation={animation} keyframes={keyframes} layer={layer} />)}
                 <div className="flex flex-row">
-                    <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Transformation Layer</p></button>
-                    <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Sound Layer</p></button>
-                    <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row"><SVGPlus className="h-4 w-4 mr-1" /><p className="text-xs mr-2">Event Layer</p></button>
+                    <LayerButton text="Transformation Layer" addLayer={addLayer} />
+                    <LayerButton text="Sound Layer" addLayer={addLayer} />
+                    <LayerButton text="Event Layer" addLayer={addLayer} />
                 </div>
                 <PastedKeyframePortal animation={animation} pastedKeyframes={pastedKeyframes} hoveredLayer={hoveredLayer} />
             </>
         </ScrollZoomContext.Provider>
     )
 }
+
 
 const PastedKeyframePortal = ({ animation, pastedKeyframes, hoveredLayer }: { animation: DcaAnimation, pastedKeyframes: readonly KeyframeClipboardType[] | null, hoveredLayer: number | null }) => {
     const [mouseX, setMouseX] = useState(0)
@@ -442,7 +443,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
                 <input value={name} onChange={e => setName(e.target.value)} type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5  h-6 text-s" placeholder="layer name" />
                 <AnimationLayerButton disabled={locked} onClick={addNewKeyframe} icon={SVGPlus} />
                 <AnimationLayerButton highlighted={!visible} onClick={toggleVisible} icon={visible ? SVGEye : SVGEyeOff} negative={true} />
-                <AnimationLayerButton highlighted={locked} onClick={toggleLocked} icon={locked ? SVGLocked : SVGUnlocked} negative={ true } />
+                <AnimationLayerButton highlighted={locked} onClick={toggleLocked} icon={locked ? SVGLocked : SVGUnlocked} negative={true} />
                 <AnimationLayerButton icon={SVGSettings} onClick={openLayerSettings} />
             </div>
             <div className="relative w-full">
@@ -483,14 +484,14 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
 
 const AnimationLayerHandle = ({ type, color }: { type: string, color: string }) => {
 
-    const animationContextMenu = (e: MouseEvent) => { 
+    const animationContextMenu = (e: MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
     }
 
     return (
         <div className={color + " rounded-full w-6 h-6 mr-1 p-1 text-white hover:cursor-move"}>
-            <SvgArrows onContextMenu={() => {animationContextMenu}}/>
+            <SvgArrows onContextMenu={() => { animationContextMenu }} />
             { /* TODO Add icons for event and sound layer types*/}
         </div>
     );
@@ -678,6 +679,15 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
             </div>
         </div>
     )
+}
+
+const LayerButton = ({ addLayer, text }: { addLayer: (e: ReactMouseEvent) => void, text: string }) => {
+    return (
+        <button onClick={addLayer} className="dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-0.5 pl-1 py-1 mr-0.5 dark:text-white text-black h-6 flex flex-row">
+            <SVGPlus className="h-4 w-4 mr-1" />
+            <p className="text-xs mr-2">{text}</p>
+        </button>
+    );
 }
 
 export default AnimatorTimeline;

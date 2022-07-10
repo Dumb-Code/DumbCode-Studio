@@ -17,6 +17,7 @@ import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
 import { CommandRoot } from './../../command/CommandRoot';
 import UndoRedoHandler from './../../undoredo/UndoRedoHandler';
 import { CubeSelectedHighlighter } from './../../util/CubeSelectedHighlighter';
+import { StudioSound } from './../sounds/StudioSound';
 import { loadDcProj } from "./DcProjectLoader";
 import DcRemoteRepo, { RemoteProjectEntry, RemoteRepo } from './DcRemoteRepos';
 
@@ -58,6 +59,8 @@ export default class DcProject {
   readonly textureManager: TextureManager
   readonly animationTabs: DcaTabs
   previousThreeTexture: Texture | null
+
+  readonly sounds = new LO<readonly StudioSound[]>([])
 
   readonly commandRoot: CommandRoot
   readonly animatorCommandRoot: CommandRoot

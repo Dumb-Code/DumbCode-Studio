@@ -19,6 +19,7 @@
     "@tailwindcss/forms": "0.5.1",
     "@tailwindcss/typography": "^0.5.2",
     "gif.js": "^0.2.0",
+    "howler": "^2.2.3",
     "jszip": "^3.9.1",
     "next": "12.1.6",
     "next-pwa": "^5.5.4",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "@types/gif.js": "^0.2.2",
+    "@types/howler": "^2.2.7",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "^17.0.33",
     "@types/react": "18.0.9",
