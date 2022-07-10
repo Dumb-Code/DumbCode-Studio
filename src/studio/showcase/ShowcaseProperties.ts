@@ -32,7 +32,6 @@ export default class ShowcaseProperties {
     const mapSize = this.previewShadowMapSize.value
     lights.forEach(light => {
       this.lightGroup.add(light.light)
-      light.light.castShadow = this.selectedView.value.shadow.value
       light.setShadowMapSize(mapSize)
     })
   }
@@ -40,16 +39,6 @@ export default class ShowcaseProperties {
   readonly ambientLightColourCallback = (c: string) => this.ambientLight.color.set(c)
   readonly ambientLightIntensityCallback = (i: number) => this.ambientLight.intensity = i
 
-  readonly shadowCallback = (value: boolean) => {
-    const ctx = unsafe_getThreeContext()
-    ctx.renderer.shadowMap.enabled = value
-
-    this.project.model.traverseAll(cube => {
-      cube.cubeMesh.castShadow = value
-      cube.cubeMesh.receiveShadow = value
-    })
-    this.selectedView.value.lights.value.forEach(light => light.light.castShadow = value)
-  }
   readonly shadowTypeCallback = (value: ShadowMapType) => {
     const ctx = unsafe_getThreeContext()
     ctx.renderer.shadowMap.type = value
@@ -72,12 +61,10 @@ export default class ShowcaseProperties {
       oldView.ambientLightColour.removeListener(this.ambientLightColourCallback)
       oldView.ambientLightIntensity.removeListener(this.ambientLightIntensityCallback)
       oldView.lights.removeListener(this.lightsCallback)
-      oldView.shadow.removeListener(this.shadowCallback)
 
       view.ambientLightColour.addAndRunListener(this.ambientLightColourCallback)
       view.ambientLightIntensity.addAndRunListener(this.ambientLightIntensityCallback)
       view.lights.addAndRunListener(this.lightsCallback)
-      view.shadow.addAndRunListener(this.shadowCallback)
     })
 
     this.previewShadowMapSize.addAndRunListener((value) => {

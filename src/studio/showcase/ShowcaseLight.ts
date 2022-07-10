@@ -15,6 +15,8 @@ export class ShowcaseLight {
   readonly intensity: LO<number>
   readonly direction: LO<NumArray>
 
+  readonly shadow = new LO(true)
+
   constructor(
     name = 'New Light',
     colour = '#ffffff',
@@ -25,6 +27,8 @@ export class ShowcaseLight {
     this.colour = new LO(colour)
     this.intensity = new LO(intensity)
     this.direction = new LO(direction)
+
+    this.shadow.addAndRunListener(v => this.light.castShadow = v)
 
     this.colour.addAndRunListener(c => this.light.color.set(c))
     this.intensity.addAndRunListener(i => this.light.intensity = i)

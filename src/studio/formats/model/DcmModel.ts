@@ -420,6 +420,8 @@ export class DCMCube implements CubeParent {
     this.cubeGroup = new Group();
     this.cubeGrowGroup = new Group()
     this.cubeMesh = new Mesh(new BoxBufferGeometry(), this.model.materials.normal)
+    this.cubeMesh.castShadow = true
+    this.cubeMesh.receiveShadow = true
     setIntersectType(this.cubeMesh, "cube")
     children.forEach(child => this.cubeGroup.add(child.cubeGroup))
     this.createGroup()

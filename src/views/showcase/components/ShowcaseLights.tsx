@@ -24,7 +24,6 @@ const ShadowSection = () => {
   const { getSelectedProject, renderer } = useStudio()
   const showcase = getSelectedProject().showcaseProperties
   const [view] = useListenableObject(showcase.selectedView)
-  const [shadow, setShadow] = useListenableObject(view.shadow)
 
   const [floorOpacity, setFloorOpacity] = useListenableObject(showcase.floorShadowOpacity)
   const [shadowMapSize, setShadowMapSize] = useListenableObject(showcase.previewShadowMapSize)
@@ -35,7 +34,6 @@ const ShadowSection = () => {
 
   return (
     <Section title="Shadow">
-      <Checkbox value={shadow} setValue={setShadow} extraText="Enabled" />
       <div className="flex flex-row">
         Preview Shadow Quality: <input type="range" value={current} min={0} max={maxMapSizePow2} onInput={e => setShadowMapSize(Math.pow(2, e.currentTarget.valueAsNumber))} />
       </div>
@@ -75,6 +73,7 @@ const DirectionalLightSection = () => {
   }, [veiw])
 
   const [selectedName, setSelectedName] = useListenableObjectNullable(selectedLight?.name, [selectedLight])
+  const [shadow, setShadow] = useListenableObjectNullable(selectedLight?.shadow)
 
 
   return (
@@ -88,6 +87,10 @@ const DirectionalLightSection = () => {
       </div>
       <div className="flex flex-row">
         Name: <input className="h-8 bg-gray-500 text-black dark:text-white" disabled={selectedLight === null} value={selectedName === undefined ? '' : selectedName} onChange={e => setSelectedName(e.currentTarget.value)} />
+      </div>
+      <div>
+        <Checkbox value={shadow} setValue={setShadow} extraText="Enabled" />
+
       </div>
       <div className="h-32 overflow-x-hidden overflow-y-scroll studio-scrollbar">
         {lights.map(light => <DirectionalLightEntry key={light.identifer} showcase={showcase} light={light} />)}

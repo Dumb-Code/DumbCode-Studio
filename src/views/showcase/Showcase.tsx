@@ -7,7 +7,7 @@ import ShowcaseSidebar from "./components/ShowcaseSidebar"
 import { useShowcaseGumball } from "./logic/ShowcaseGumball"
 
 const Showcase = () => {
-  const { scene, lightGroup, itemsGroup, getSelectedProject, onFrameListeners } = useStudio()
+  const { scene, lightGroup, itemsGroup, getSelectedProject, onFrameListeners, renderer } = useStudio()
   const project = getSelectedProject()
 
   useObjectUnderMouse()
@@ -17,15 +17,17 @@ const Showcase = () => {
     scene.remove(lightGroup)
     scene.remove(itemsGroup)
     scene.add(project.showcaseProperties.group)
-
+    renderer.shadowMap.enabled = true
     const onFrame = () => {
       project.model.resetVisuals()
     }
     onFrameListeners.add(onFrame)
+
     return () => {
       scene.add(lightGroup)
       scene.add(itemsGroup)
       scene.remove(project.showcaseProperties.group)
+      renderer.shadowMap.enabled = false
 
       onFrameListeners.delete(onFrame)
     }

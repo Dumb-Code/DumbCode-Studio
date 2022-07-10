@@ -11,8 +11,6 @@ export default class ShowcaseView {
   readonly lights = new LO<ShowcaseLight[]>([])
   readonly selectedLight = new LO<ShowcaseLight | null>(null)
 
-  readonly shadow = new LO(true)
-
   constructor(
     readonly properties: ShowcaseProperties
   ) {
