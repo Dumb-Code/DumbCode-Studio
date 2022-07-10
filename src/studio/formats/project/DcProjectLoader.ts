@@ -497,7 +497,7 @@ const wrapZip = (zip: JSZip, name = "_root"): WriteableFolder => {
 
 export const writeDcProj = async (project: DcProject): Promise<Blob> => {
   const zip = new JSZip()
-  writeFolderProject(project, wrapZip(zip), false)
+  await writeFolderProject(project, wrapZip(zip), false)
   return zip.generateAsync({ type: "blob" })
 }
 
