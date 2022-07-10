@@ -29,7 +29,7 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
     LO.createReadonly(new ConstantGumballPart(this)),
     (selectedLight, part) => {
       //If a light is selected, then don't have anything selected, so 
-      //the animator
+      //the animator gumball is not enabled
       if (selectedLight) {
         return null
       } else {

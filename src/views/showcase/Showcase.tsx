@@ -58,7 +58,7 @@ const Showcase = () => {
       <div className="grid-in-tabs border dark:border-black border-white">
         <AnimatorTabBar
           all={allViews}
-          selected={project.showcaseProperties.selectedView as any /** More annoyin casting. TODO: look at fixing this */}
+          selected={project.showcaseProperties.selectedView as any /** More annoying casting. TODO: look at fixing this */}
           createNew={newView}
         /></div>
       <div className="grid-in-canvas border dark:border-black border-white min-h-0"><StudioCanvas /></div>
