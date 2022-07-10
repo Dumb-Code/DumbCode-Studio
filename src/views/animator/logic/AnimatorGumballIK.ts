@@ -1,7 +1,6 @@
 import { Bone3D, Chain3D, Structure3D, V3 } from "@aminere/fullik";
 import { BoxGeometry, BufferAttribute, BufferGeometry, Euler, Group, Line, LineBasicMaterial, Mesh, MeshLambertMaterial, Object3D, Quaternion, Vector3 } from 'three';
-import DcaAnimation from "../../../studio/formats/animations/DcaAnimation";
-import { DcaKeyframe } from './../../../studio/formats/animations/DcaAnimation';
+import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from "../../../studio/formats/animations/AnimatorGumballConsumer";
 import { CubeParent, DCMCube } from './../../../studio/formats/model/DcmModel';
 
 const tempVec = new Vector3()
@@ -134,7 +133,7 @@ export class AnimatorGumballIK {
     this.lineHelper.visible = false
   }
 
-  objectChange(animation: DcaAnimation, keyframe: DcaKeyframe, cubes: readonly DCMCube[]) {
+  objectChange(animation: AnimatorGumballConsumer, keyframe: AnimatorGumballConsumerPart, cubes: readonly DCMCube[]) {
     if (cubes.length !== 1 || this.solver.chains[0] === undefined) {
       return
     }
@@ -143,10 +142,10 @@ export class AnimatorGumballIK {
     const selected = cubes[0]
     //We rely on some three.js element math stuff, so we need to make sure the model is animated correctly.
     //TODO: make sure this is actually true
-    const model = animation.project.model
-    model.resetVisuals()
-    animation.animate(0)
-    model.updateMatrixWorld(true)
+    // const model = animation.project.model
+    // model.resetVisuals()
+    // animation.animate(0)
+    animation.renderForGumball()
 
     this.solver.update()
     this.updateHelpers()

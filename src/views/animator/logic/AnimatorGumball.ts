@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { Euler, Event, Group, Matrix4, Object3D, Quaternion, Vector3 } from 'three';
+import { Euler, Event, Matrix4, Object3D, Quaternion, Vector3 } from 'three';
+import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from '../../../studio/formats/animations/AnimatorGumballConsumer';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
+import DcProject from '../../../studio/formats/project/DcProject';
 import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
-import { DcaKeyframe } from './../../../studio/formats/animations/DcaAnimation';
 import { LO, useListenableObject } from './../../../studio/util/ListenableObject';
 import { NumArray } from './../../../studio/util/NumArray';
 import { AnimatorGumballIK } from './AnimatorGumballIK';
@@ -46,12 +47,20 @@ export class AnimatorGumball {
 
   readonly gumballIK: AnimatorGumballIK
 
+  public readonly selectedCubeManager: SelectedCubeManager
+  private readonly model: DCMModel
+
+
   constructor(
-    public readonly selectedCubeManager: SelectedCubeManager,
-    private readonly model: DCMModel,
-    group: Group,
-    overlayGroup: Group,
+    private readonly project: DcProject
   ) {
+
+    this.selectedCubeManager = project.selectedCubeManager
+    this.model = project.model
+
+    const { group, overlayGroup } = project
+
+
     this.transformAnchor.rotation.order = "ZYX"
     group.add(this.transformAnchor)
 
@@ -89,9 +98,19 @@ export const useAnimatorGumball = () => {
     if (selectedAnim === null) {
       return
     }
-    const animation = selectedAnim
+    const animation: AnimatorGumballConsumer = selectedAnim
+    const ikAnchorCubes = animation.ikAnchorCubes.value
+    const ikDirection = animation.ikDirection.value
+    const undoRedoHandler = animation.getUndoRedoHandler()
+    const gumball = animation.getAnimatorGumball()
 
-    const gumball = animation.animatorGumball
+    const selectedPart = animation.getSingleSelectedPart()
+
+    const render = () => {
+      animation.renderForGumball()
+      // model.resetVisuals()
+      // animation.animate(0)
+    }
 
     //TODO: move the callbacks to the AnimatorGumball class
     const updateObjectMode = ({
@@ -104,7 +123,7 @@ export const useAnimatorGumball = () => {
         case "translateIK":
           transformControls.mode = "translate"
           transformControls.attach(gumball.gumballIK.anchor)
-          gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value, animation.ikDirection.value)
+          gumball.gumballIK.begin(selectedCubes.current, ikAnchorCubes, ikDirection)
           break
         default:
           transformControls.mode = mode
@@ -113,8 +132,8 @@ export const useAnimatorGumball = () => {
       }
     }
 
-    const updateTransformControlsVisability = ({ enabled = gumball.enabled.value, blockedReasons = gumballBlockedReasons.value, gumballMode = gumball.mode.value, keyframesSelected = animation.selectedKeyframes.value.length }) => {
-      const visible = enabled && (gumballMode === "gumball" || (selectedCubes.current.length !== 0 && keyframesSelected === 1))
+    const updateTransformControlsVisability = ({ enabled = gumball.enabled.value, blockedReasons = gumballBlockedReasons.value, gumballMode = gumball.mode.value, part = selectedPart.value }) => {
+      const visible = enabled && (gumballMode === "gumball" || (selectedCubes.current.length !== 0 && part !== null))
       transformControls.visible = visible
       transformControls.enabled = visible && blockedReasons.length === 0
     }
@@ -127,8 +146,8 @@ export const useAnimatorGumball = () => {
       updateTransformControlsVisability({ blockedReasons: reasons })
     }
 
-    const updateSelectedKeyframes = (keyframes: readonly DcaKeyframe[]) => {
-      updateTransformControlsVisability({ keyframesSelected: keyframes.length })
+    const updateSelectedKeyframes = (part: AnimatorGumballConsumerPart | null) => {
+      updateTransformControlsVisability({ part })
     }
 
     const changeModeCallback = (val = gumball.mode.value) => {
@@ -161,19 +180,19 @@ export const useAnimatorGumball = () => {
         gumball.moveToSelected(val)
       }
       if (gumball.mode.value === "object" && gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value, animation.ikDirection.value)
+        gumball.gumballIK.begin(selectedCubes.current, ikAnchorCubes, ikDirection)
       }
       updateTransformControlsVisability({})
     }
 
     const updateIKAnchors = (val: readonly string[]) => {
       if (gumball.mode.value === "object" && gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, val, animation.ikDirection.value)
+        gumball.gumballIK.begin(selectedCubes.current, val, ikDirection)
       }
     }
     const updateIKDirection = (direction: "upwards" | "downwards") => {
       if (gumball.mode.value === "object" && gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value, direction)
+        gumball.gumballIK.begin(selectedCubes.current, ikAnchorCubes, direction)
       }
     }
 
@@ -181,8 +200,8 @@ export const useAnimatorGumball = () => {
       if (!transformControls.dragging) {
         gumball.moveToSelected()
       }
-      model.resetVisuals()
-      animation.animate(0)
+
+      render()
       gumball.gumballIK.updateHelpers()
     }
 
@@ -217,30 +236,29 @@ export const useAnimatorGumball = () => {
     }
 
     const objectChangeReconstructIK = runWhenObjectSelected(() => {
-      const selectedKfs = animation.selectedKeyframes.value
-      if (selectedKfs.length !== 1) {
+      const selectedKfs = animation.getSingleSelectedPart().value
+      if (selectedKfs === null) {
         return
       }
       if (gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.objectChange(selectedAnim, selectedKfs[0], selectedCubes.current)
+        gumball.gumballIK.objectChange(selectedAnim, selectedKfs, selectedCubes.current)
       }
     })
     const mouseDownTransformControls = runWhenObjectSelected(() => {
-      animation.undoRedoHandler.startBatchActions()
-      const selectedKfs = animation.selectedKeyframes.value
-      if (selectedKfs.length !== 1) {
+      undoRedoHandler?.startBatchActions()
+      const selectedKfs = animation.getSingleSelectedPart().value
+      if (selectedKfs === null) {
         return
       }
-      const kf = selectedKfs[0]
+      const kf = selectedKfs
       const cubes = selectedCubes.current
       if (gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, animation.ikAnchorCubes.value, animation.ikDirection.value)
+        gumball.gumballIK.begin(selectedCubes.current, ikAnchorCubes, ikDirection)
 
         return
       }
 
-      model.resetVisuals()
-      animation.animate(0)
+      render()
 
       gumball.startingCache.clear()
       cubes.forEach(cube => {
@@ -258,13 +276,13 @@ export const useAnimatorGumball = () => {
         }
         gumball.startingCache.set(cube, {
           root: root,
-          position: kf.position.get(cube.name.value) ?? [0, 0, 0],
+          position: kf.gumballGetPosition(cube) ?? [0, 0, 0],
           quaternion: elem.quaternion.clone()
         })
       })
     })
     const onMouseUpTransformControls = runWhenObjectSelected(() => {
-      animation.undoRedoHandler.endBatchActions("Gumball Move", HistoryActionTypes.Transformation)
+      undoRedoHandler?.endBatchActions("Gumball Move", HistoryActionTypes.Transformation)
     })
 
     //The translate event
@@ -273,11 +291,11 @@ export const useAnimatorGumball = () => {
       if (gumball.object_transformMode.value === "translateIK") {
         return
       }
-      const selectedKfs = animation.selectedKeyframes.value
-      if (selectedKfs.length !== 1) {
+      const selectedKfs = animation.getSingleSelectedPart().value
+      if (selectedKfs === null) {
         return
       }
-      const kf = selectedKfs[0]
+      const kf = selectedKfs
       const e = evt as TranslateEvent
       forEachCube(e.axis, true, gumball.space.value, (axis, cube, data) => {
         axis.multiplyScalar(e.length)
@@ -287,7 +305,7 @@ export const useAnimatorGumball = () => {
           pos[1] + data.position[1],
           pos[2] + data.position[2],
         ] as const
-        kf.position.set(cube.name.value, position)
+        kf.gumballSetPosition(cube, position)
         cube.updatePositionVisuals(position)
         cube.updateMatrixWorld()
       })
@@ -299,11 +317,11 @@ export const useAnimatorGumball = () => {
       if (gumball.object_transformMode.value === "translateIK") {
         return
       }
-      const selectedKfs = animation.selectedKeyframes.value
-      if (selectedKfs.length !== 1) {
+      const selectedKfs = animation.getSingleSelectedPart().value
+      if (selectedKfs === null) {
         return
       }
-      const kf = selectedKfs[0]
+      const kf = selectedKfs
       const e = evt as RotateEvent
       forEachCube(e.rotationAxis, true, gumball.space.value, (axis, cube, data) => {
         decomposeRotation2.setFromAxisAngle(axis, e.rotationAngle)
@@ -315,7 +333,7 @@ export const useAnimatorGumball = () => {
           decomposeEuler.y * 180 / Math.PI,
           decomposeEuler.z * 180 / Math.PI
         ] as const
-        kf.rotation.set(cube.name.value, rotation)
+        kf.gumballSetRotation(cube, rotation)
         cube.updateRotationVisuals(rotation)
         cube.updateMatrixWorld()
       })
@@ -337,7 +355,7 @@ export const useAnimatorGumball = () => {
 
     onFrameListeners.add(moveOnFrame)
     selectedCubeManager.selected.addAndRunListener(updateSelectedCubes)
-    animation.selectedKeyframes.addListener(updateSelectedKeyframes)
+    selectedPart.addListener(updateSelectedKeyframes)
     animation.ikAnchorCubes.addListener(updateIKAnchors)
     animation.ikDirection.addListener(updateIKDirection)
 
@@ -357,7 +375,7 @@ export const useAnimatorGumball = () => {
 
       onFrameListeners.delete(moveOnFrame)
       selectedCubeManager.selected.removeListener(updateSelectedCubes)
-      animation.selectedKeyframes.removeListener(updateSelectedKeyframes)
+      selectedPart.removeListener(updateSelectedKeyframes)
       animation.ikAnchorCubes.removeListener(updateIKAnchors)
       animation.ikDirection.removeListener(updateIKDirection)
 

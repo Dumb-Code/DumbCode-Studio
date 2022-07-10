@@ -11,6 +11,7 @@ import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHand
 import { LO, LOMap } from './../../util/ListenableObject';
 import { NumArray } from './../../util/NumArray';
 import { DCMCube } from './../model/DcmModel';
+import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from './AnimatorGumballConsumer';
 
 const skeletal_export_named = "skeletal_export_named_"
 const kfmap_position = "pos_"
@@ -67,7 +68,7 @@ type KeyframeLayerSectionType = {
 
 type UndoRedoDataType = RootDataSectionType | KeyframeSectionType | KeyframeLayerSectionType
 
-export default class DcaAnimation {
+export default class DcaAnimation extends AnimatorGumballConsumer {
   readonly identifier = v4()
   readonly project: DcProject
 
@@ -90,6 +91,8 @@ export default class DcaAnimation {
   readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty)
   readonly pastedKeyframes = new LO<readonly KeyframeClipboardType[] | null>(null)
 
+  readonly singleSelectedKeyframe = LO.createOneWayDelegateListener(this.keyframes, kfs => kfs.length === 1 ? kfs[0] : null)
+
   readonly time = new LO(0, this.onDirty).applyToSection(this._section, "time", true)
   readonly displayTime = new LO(0, this.onDirty)
   readonly maxTime = new LO(1, this.onDirty)
@@ -102,9 +105,6 @@ export default class DcaAnimation {
   readonly scroll = new LO(0, this.onDirty)
   readonly zoom = new LO(1, this.onDirty)
 
-  readonly ikAnchorCubes = new LO<readonly string[]>([], this.onDirty).applyToSection(this._section, "ikAnchorCubes")
-  readonly ikDirection = new LO<"upwards" | "downwards">("upwards", this.onDirty).applyToSection(this._section, "ikDirection")
-  readonly lockedCubes = new LO<readonly string[]>([], this.onDirty).applyToSection(this._section, "lockedCubes")
 
   readonly keyframeStartOrDurationChanges = new Set<() => void>()
 
@@ -121,10 +121,16 @@ export default class DcaAnimation {
   readonly reverseKeyframeNameOverrides = new Map<string, string[]>() //name, [identifier]
 
   constructor(project: DcProject, name: string) {
+    super()
+
+    this.ikAnchorCubes.applyToSection(this._section, "ikAnchorCubes").addListener(this.onDirty)
+    this.ikDirection.applyToSection(this._section, "ikDirection").addListener(this.onDirty)
+    this.lockedCubes.applyToSection(this._section, "lockedCubes").addListener(this.onDirty)
+
     this.name = new LO(name, this.onDirty).applyToSection(this._section, "name")
     this.project = project
     this.keyframeData = new KeyframeLoopData()
-    this.animatorGumball = new AnimatorGumball(project.selectedCubeManager, project.model, project.group, project.overlayGroup)
+    this.animatorGumball = new AnimatorGumball(project)
     this.time.addListener(value => {
       if (this.displayTimeMatch) {
         this.displayTime.value = value
@@ -159,6 +165,25 @@ export default class DcaAnimation {
       })
       naughtyModifyValue(Array.from(newValue).sort((a, b) => a.layerId - b.layerId))
     })
+  }
+
+  getUndoRedoHandler(): UndoRedoHandler<any> | undefined {
+    return this.undoRedoHandler
+  }
+
+  renderForGumball(): void {
+    this.project.model.resetVisuals()
+    this.animate(0)
+    this.project.model.updateMatrixWorld(true)
+
+  }
+
+  getAnimatorGumball(): AnimatorGumball {
+    return this.animatorGumball
+  }
+
+  getSingleSelectedPart(): LO<AnimatorGumballConsumerPart | null> {
+    return this.singleSelectedKeyframe as any //TODO: Why does this need to be casted? 
   }
 
   onAddSection<K extends UndoRedoDataType['section_name']>(section: K, dataIn: any) {
@@ -328,7 +353,7 @@ export default class DcaAnimation {
 }
 
 export type ProgressionPoint = Readonly<{ required?: boolean, x: number, y: number }>
-export class DcaKeyframe {
+export class DcaKeyframe extends AnimatorGumballConsumerPart {
   readonly layerId: LO<number>
   readonly project: DcProject
   readonly animation: DcaAnimation
@@ -369,6 +394,7 @@ export class DcaKeyframe {
     position?: Map<string, NumArray>,
     cubeGrow?: Map<string, NumArray>,
   ) {
+    super()
     this.project = project
     this.animation = animation
 
@@ -423,6 +449,18 @@ export class DcaKeyframe {
     })
 
     this.setupKeyframeListeners()
+  }
+
+  gumballGetPosition(cube: DCMCube): NumArray | undefined {
+    return this.position.get(cube.name.value)
+  }
+
+  gumballSetPosition(cube: DCMCube, position: NumArray): void {
+    this.position.set(cube.name.value, position)
+  }
+
+  gumballSetRotation(cube: DCMCube, rotation: NumArray): void {
+    this.rotation.set(cube.name.value, rotation)
   }
 
   private setupKeyframeListeners() {
