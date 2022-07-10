@@ -115,7 +115,7 @@ type ParsedAnimationType = {
   isSkeleton?: boolean
 }
 
-type ParsedKfMap = Record<string, NumArray>
+export type ParsedKfMap = Record<string, NumArray>
 type ParsedKeyframeType = {
   layerId: number,
   start: number,

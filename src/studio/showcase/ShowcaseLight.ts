@@ -17,7 +17,7 @@ export class ShowcaseLight {
   readonly shadow = new LO(true)
 
   constructor(
-    readonly identifer = v4(),
+    readonly identifier = v4(),
     name = 'New Light',
     colour = '#ffffff',
     intensity = 1,
