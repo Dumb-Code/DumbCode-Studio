@@ -71,7 +71,7 @@ export default class ShowcaseProperties {
       this.selectedView.value.lights.value.forEach(light => light.setShadowMapSize(value))
     })
 
-    this.floorShadowOpacity.addListener(opacity => this.plane.material.opacity = opacity)
+    this.floorShadowOpacity.addAndRunListener(opacity => this.plane.material.opacity = opacity)
 
     this.group.add(this.ambientLight)
     this.group.add(this.lightGroup)
