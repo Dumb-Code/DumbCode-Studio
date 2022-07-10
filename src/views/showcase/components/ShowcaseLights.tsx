@@ -2,10 +2,12 @@ import { ReactNode, useCallback } from "react"
 import Checkbox from "../../../components/Checkbox"
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGPlus } from "../../../components/Icons"
+import { SVGPlus, SVGSave } from "../../../components/Icons"
 import NumericInput from "../../../components/NumericInput"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
+import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
+import ShowcaseLightSavedPresetsDialogBox from "../../../dialogboxes/ShowcaseLightSavedPresets"
 import { ShowcaseLight } from "../../../studio/showcase/ShowcaseLight"
 import ShowcaseProperties from "../../../studio/showcase/ShowcaseProperties"
 import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject"
@@ -63,24 +65,34 @@ const DirectionalLightSection = () => {
   const { getSelectedProject } = useStudio()
   const showcase = getSelectedProject().showcaseProperties
 
-  const [veiw] = useListenableObject(showcase.selectedView)
+  const [view] = useListenableObject(showcase.selectedView)
 
-  const [selectedLight] = useListenableObject(veiw.selectedLight)
-  const [lights] = useListenableObject(veiw.lights)
+  const [selectedLight] = useListenableObject(view.selectedLight)
+  const [lights] = useListenableObject(view.lights)
 
   const addLight = useCallback(() => {
-    veiw.addLight()
-  }, [veiw])
+    view.addLight()
+  }, [view])
 
   const [selectedName, setSelectedName] = useListenableObjectNullable(selectedLight?.name, [selectedLight])
   const [shadow, setShadow] = useListenableObjectNullable(selectedLight?.shadow)
 
+  const dialogBoxes = useDialogBoxes()
+  const openDialog = useCallback(() => {
+    dialogBoxes.setDialogBox(() => <ShowcaseLightSavedPresetsDialogBox view={view} />)
+  }, [dialogBoxes, view])
 
   return (
     <Section title="Directional Lights" buttons={
-      <ButtonWithTooltip tooltip="Add Light" onClick={addLight}>
-        <SVGPlus className="w-4 h-4" />
-      </ButtonWithTooltip>
+      <>
+        <ButtonWithTooltip tooltip="Presets" onClick={openDialog}>
+          <SVGSave className="w-4 h-4" />
+        </ButtonWithTooltip>
+        <ButtonWithTooltip tooltip="Add Light" onClick={addLight}>
+          <SVGPlus className="w-4 h-4" />
+        </ButtonWithTooltip>
+      </>
+
     }>
       <div className="flex flex-row">
         <ColourEditEntry colour={selectedLight?.colour} intensity={selectedLight?.intensity} />
