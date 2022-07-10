@@ -20,9 +20,10 @@ export default class ShowcaseGumball {
 
 
 export const useShowcaseGumball = () => {
-  const { getSelectedProject, transformControls, onTopScene, } = useStudio()
+  const { getSelectedProject, transformControls, onTopScene } = useStudio()
   const { showcaseProperties: properties, selectedCubeManager } = getSelectedProject()
-  const [selectedCubes] = useListenableObject(selectedCubeManager.selected)
+
+  const [cubes] = useListenableObject(selectedCubeManager.selected)
 
   const [view] = useListenableObject(properties.selectedView)
   const [selectedLight] = useListenableObject(view.selectedLight)
@@ -30,13 +31,15 @@ export const useShowcaseGumball = () => {
   const gumball = properties.gumball
 
   useEffect(() => {
-    if (selectedLight === null || selectedCubes.length === 1) {
+    if (selectedLight === null) {
       return
     }
     transformControls.attach(gumball.transformAnchor)
     transformControls.mode = "translate"
     transformControls.space = "world"
     transformControls.enabled = true
+
+
 
     const position = selectedLight.light.position
     gumball.visualAnchor.position.copy(position)
@@ -53,11 +56,14 @@ export const useShowcaseGumball = () => {
     transformControls.addEventListener("objectChange", objectChange)
 
     return () => {
-      transformControls.detach()
-      transformControls.enabled = false
-      transformControls.removeEventListener("objectChange", objectChange)
+      //Only detach if there are no cubes selected and the light is not selected
+      if (cubes.length === 0 && view.selectedLight.internalValue === null) {
+        transformControls.detach()
+        transformControls.enabled = false
+        transformControls.removeEventListener("objectChange", objectChange)
+      }
       onTopScene.remove(gumball.visualAnchor)
     }
-  }, [transformControls, gumball, selectedLight, view, onTopScene, selectedCubes])
+  }, [transformControls, gumball, selectedLight, view, onTopScene, cubes])
 
 }

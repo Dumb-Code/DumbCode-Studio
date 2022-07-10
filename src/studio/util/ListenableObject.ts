@@ -151,6 +151,13 @@ export class LO<T> {
     return lo
   }
 
+  static combine = <L, R, T>(left: LO<L>, right: LO<R>, mapper: (left: L, right: R) => T) => {
+    const lo = new LO(mapper(left.value, right.value))
+    left.addListener(newVal => lo.value = mapper(newVal, right.internalValue))
+    right.addListener(newVal => lo.value = mapper(left.internalValue, newVal))
+    return lo
+  }
+
 }
 
 export const useListenableObjectNullable = <T>(obj: LO<T> | undefined, deps: DependencyList = []): [T | undefined, (val: T) => void] => {

@@ -28,7 +28,6 @@ const decomposeScale2 = new Vector3()
 
 const _identityMatrix = new Matrix4()
 
-
 export class AnimatorGumball {
   readonly enabled = new LO(true)
 
@@ -135,6 +134,9 @@ export const useAnimatorGumball = (consumer: AnimatorGumballConsumer | null) => 
       const visible = enabled && (gumballMode === "gumball" || (selectedCubes.current.length !== 0 && part !== null))
       transformControls.visible = visible
       transformControls.enabled = visible && blockedReasons.length === 0
+      if (visible) {
+        updateObjectMode({})
+      }
     }
 
     const enableDisableCallback = (enabled: boolean) => {

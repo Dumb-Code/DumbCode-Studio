@@ -24,7 +24,19 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
   readonly position = new LOMap<string, NumArray>()
   readonly rotation = new LOMap<string, NumArray>()
 
-  readonly constantPart = LO.createReadonly(new ConstantGumballPart(this))
+  readonly constantPart = LO.combine(
+    this.selectedLight,
+    LO.createReadonly(new ConstantGumballPart(this)),
+    (selectedLight, part) => {
+      //If a light is selected, then don't have anything selected, so 
+      //the animator
+      if (selectedLight) {
+        return null
+      } else {
+        return part
+      }
+    }
+  )
 
   constructor(
     readonly properties: ShowcaseProperties
