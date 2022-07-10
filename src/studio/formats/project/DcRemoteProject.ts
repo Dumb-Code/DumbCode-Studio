@@ -79,13 +79,13 @@ const loadAllTextures = async (repo: DcRemoteRepoContentGetterCounter, entry: No
     const baseLoc = `${baseFolder}/${group.folderName}${group.folderName === '' ? '' : '/'}`
     const datas = Promise.all(group.textures.map(t => loadIndividualTexture(repo, baseLoc, t)))
     return {
-      name: group.groupName,
+      group,
       images: datas
     }
   }))
 
   const finishedGroups = await Promise.all(groupData.map(async (group) => {
-    const newGroup = new TextureGroup(group.name, false)
+    const newGroup = new TextureGroup(group.group.groupName, group.group.isDefault ?? group.group.folderName === "")
     const identifiers = await group.images.then(imgs => Promise.all(imgs.map(img => {
       if (img === null) {
         return null

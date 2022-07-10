@@ -136,6 +136,7 @@ export type RemoteProjectEntry = {
     readonly groups: readonly {
       readonly folderName: string
       readonly groupName: string
+      readonly isDefault?: boolean
       readonly textures: readonly string[]
     }[]
   }
