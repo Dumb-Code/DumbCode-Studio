@@ -114,7 +114,7 @@ const DirectionalLightEntry = ({ showcase, light }: { showcase: ShowcaseProperti
       className={className + " my-1 cursor-pointer h-8 mr-5 flex items-center"}
       onClick={() => setSelected(selected === light ? null : light)}
     >
-      <DblClickEditLO className="flex-grow dark:text-white" obj={light.name} inputClassName="h-8 bg-gray-500 text-black dark:text-white" textClassName="pl-3 w-full" />
+      <DblClickEditLO obj={light.name} className="flex-grow dark:text-white" inputClassName="h-8 bg-gray-500 text-black dark:text-white" textClassName="pl-3 w-full" />
       <div className="h-2/3 aspect-1 rounded-full mr-2" style={{
         backgroundColor: color
       }} />

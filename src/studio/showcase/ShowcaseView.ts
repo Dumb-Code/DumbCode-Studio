@@ -1,3 +1,4 @@
+import { v4 } from 'uuid';
 import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from '../formats/animations/AnimatorGumballConsumer';
 import { DCMCube } from '../formats/model/DcmModel';
 import { AnimatorGumball } from './../../views/animator/logic/AnimatorGumball';
@@ -7,6 +8,11 @@ import { ShowcaseLight } from './ShowcaseLight';
 import ShowcaseProperties from './ShowcaseProperties';
 
 export default class ShowcaseView extends AnimatorGumballConsumer {
+
+  readonly identifier = v4()
+
+  readonly name = new LO<string>("New View")
+
   readonly ambientLightColour = new LO('#ffffff')
   readonly ambientLightIntensity = new LO(1)
 
@@ -43,17 +49,28 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
     this.position.forEach((value, key) => {
       const cube = model.identifierCubeMap.get(key)
       if (cube) {
-        cube.updatePositionVisuals(value)
+        const current = cube.position.value
+        cube.updatePositionVisuals([
+          current[0] + value[0],
+          current[1] + value[1],
+          current[2] + value[2]
+        ])
       }
     })
 
     this.rotation.forEach((value, key) => {
       const cube = model.identifierCubeMap.get(key)
       if (cube) {
-        cube.updateRotationVisuals(value)
+        const current = cube.rotation.value
+        cube.updateRotationVisuals([
+          current[0] + value[0],
+          current[1] + value[1],
+          current[2] + value[2]
+        ])
       }
     })
   }
+
 
   getAnimatorGumball(): AnimatorGumball {
     return this.animatorGumball
