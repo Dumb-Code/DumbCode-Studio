@@ -51,7 +51,7 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
       const exportAnimation = async (animation: DcaAnimation) => {
         comitter.pushChange(`${entry.animationFolder}/${animation.name.value}.dca`, await writeDCAAnimationWithFormat(animation, "base64"), true)
       }
-      comitter.removeRedundentDirectory(entry.animationFolder, name => name.endsWith('.dca'))
+      // comitter.removeRedundentDirectory(entry.animationFolder, name => name.endsWith('.dca'))
       project.animationTabs.animations.value.filter((_, index) => animations.includes(index)).forEach(animation => awaiters.push(exportAnimation(animation)))
     }
 
@@ -79,7 +79,7 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
       textureGroupPair.forEach(({ texture, group }) => awaiters.push(exportTexture(group.folderName.value, texture)))
 
       //Remove unused files
-      groups.forEach(group => comitter.removeRedundentDirectory(`${baseFolder}${group.folderName.value.length === 0 ? '' : `/${group.folderName.value}`}`, name => name.endsWith(".png")))
+      // groups.forEach(group => comitter.removeRedundentDirectory(`${baseFolder}${group.folderName.value.length === 0 ? '' : `/${group.folderName.value}`}`, name => name.endsWith(".png")))
 
 
       //A map of groups to paired textures
@@ -90,9 +90,10 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
 
 
       //Export to the .studio_remote
-      mutableTextures.groups = Array.from(pairedMap.keys()).map(group => ({
+      mutableTextures.groups = Array.from(pairedMap.keys()).filter(group => !group.isDefault).map(group => ({
         groupName: group.name.value,
         folderName: group.folderName.value,
+        isDefault: group.isDefault,
         textures: (pairedMap.get(group) ?? []).map(t => t.name.value)
       })).filter(data => data.textures.length !== 0)
     }
@@ -115,6 +116,9 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
       }))
     }
     awaiters.push(exportRefImgs())
+
+    mutable.showcaseViews = project.showcaseProperties.exportViewsToJson()
+
     await Promise.all(awaiters)
 
     writeStudioRemote(comitter, project.remoteLink.allData.projects.value)

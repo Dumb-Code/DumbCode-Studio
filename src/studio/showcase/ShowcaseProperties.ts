@@ -3,6 +3,7 @@ import { unsafe_getThreeContext } from '../../contexts/StudioContext';
 import ShowcaseGumball from '../../views/showcase/logic/ShowcaseGumball';
 import DcProject from '../formats/project/DcProject';
 import { LO } from '../util/ListenableObject';
+import { JsonShowcaseView, jsonToView, viewToJson } from './../formats/showcase/JsonShowcaseView';
 import { ShowcaseLight } from './ShowcaseLight';
 import ShowcaseView from './ShowcaseView';
 
@@ -19,8 +20,8 @@ export default class ShowcaseProperties {
 
   private readonly ambientLight = new AmbientLight()
 
-  readonly selectedView: LO<ShowcaseView>
-  readonly views: LO<readonly ShowcaseView[]>
+  readonly selectedView = new LO(new ShowcaseView(this))
+  readonly views = new LO<readonly ShowcaseView[]>([this.selectedView.value])
 
   readonly previewShadowMapSize = new LO(512)
   readonly floorShadowOpacity = new LO(0.5)
@@ -46,16 +47,10 @@ export default class ShowcaseProperties {
 
   constructor(
     readonly project: DcProject,
-    views: readonly ShowcaseView[] = [],
   ) {
     this.plane.receiveShadow = true
     this.plane.rotation.set(-Math.PI / 2, 0, 0)
     this.group.add(this.plane)
-    if (views.length === 0) {
-      views = [new ShowcaseView(this)]
-    }
-    this.views = new LO(views)
-    this.selectedView = new LO(views[0])
 
     this.selectedView.addAndRunListener((view, oldView) => {
       oldView.ambientLightColour.removeListener(this.ambientLightColourCallback)
@@ -98,6 +93,21 @@ export default class ShowcaseProperties {
         this.selectedView.value = this.views.value[0]
       }
     }
+  }
+
+  loadViewsFromJson(showcaseViews: JsonShowcaseView[]) {
+    const views = showcaseViews.map(json => jsonToView(this, json))
+    if (views.length !== 0) {
+      this.views.value = views
+      this.selectedView.value = views[0]
+    }
+  }
+
+  exportViewsToJson(): JsonShowcaseView[] | undefined {
+    if (this.views.value.length === 0) {
+      return undefined
+    }
+    return this.views.value.map(viewToJson)
   }
 
 }

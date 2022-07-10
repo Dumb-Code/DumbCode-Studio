@@ -30,6 +30,10 @@ export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, 
     referenceImages = loadAllReferenceImages(project, entry.referenceImages)
   }
 
+  if (entry.showcaseViews !== undefined) {
+    project.showcaseProperties.loadViewsFromJson(entry.showcaseViews)
+  }
+
   await Promise.all([textures, animations, referenceImages])
 
   project.remoteLink = {

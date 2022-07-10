@@ -9,6 +9,7 @@ import { DCMCube } from "../model/DcmModel";
 import { TextureGroup } from "../textures/TextureManager";
 import { NumArray } from './../../util/NumArray';
 import { KeyframeLayerData } from './../animations/DcaAnimation';
+import { JsonShowcaseView } from './../showcase/JsonShowcaseView';
 import DcProject from "./DcProject";
 
 let keepFilesNice = false
@@ -18,7 +19,8 @@ let dumbcodeHiddenFolder_write: WriteableFolder | null = null
 
 type ModelDataJson = {
   projectHistory: SerializedUndoRedoHandler,
-  modelHistory: SerializedUndoRedoHandler
+  modelHistory: SerializedUndoRedoHandler,
+  showcaseViews?: JsonShowcaseView[],
 }
 
 interface TypeByName {
@@ -162,6 +164,10 @@ const loadProjectData = async (fileP: OrPromise<ReadableFile | null>, project: D
   const json = JSON.parse(await file.async("text")) as ModelDataJson
   project.undoRedoHandler.loadFromJson(json.projectHistory)
   project.model.undoRedoHandler.loadFromJson(json.modelHistory)
+
+  if (json.showcaseViews !== undefined) {
+    project.showcaseProperties.loadViewsFromJson(json.showcaseViews)
+  }
 }
 
 //Load the animation data. The old structure was as follows:
@@ -489,7 +495,10 @@ const getRefImages = async (folder: ReadableFolder, legacyImgNames: string[] | n
 
 const wrapZip = (zip: JSZip, name = "_root"): WriteableFolder => {
   return {
-    file: (name, content) => { zip.file(name, content) },
+    file: async (fn, content) => {
+      zip.file(fn, await content)
+      console.log(fn, content)
+    },
     folder: (name) => wrapZip(zip.folder(name)!, name),
     name: name
   }
@@ -524,7 +533,8 @@ const writeFolderProject = async (projet: DcProject, folder: WriteableFolder, sh
 const writeProjectData = async (project: DcProject, folder: WriteableFolder) => {
   const data: ModelDataJson = {
     modelHistory: project.model.undoRedoHandler.jsonRepresentation(),
-    projectHistory: project.undoRedoHandler.jsonRepresentation()
+    projectHistory: project.undoRedoHandler.jsonRepresentation(),
+    showcaseViews: project.showcaseProperties.exportViewsToJson(),
   }
   const dataFolder = await getDataRootFolderWriteable(folder)
   await dataFolder.file("data.json", JSON.stringify(data))

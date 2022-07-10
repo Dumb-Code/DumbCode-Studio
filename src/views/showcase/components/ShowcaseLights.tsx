@@ -93,7 +93,7 @@ const DirectionalLightSection = () => {
 
       </div>
       <div className="h-32 overflow-x-hidden overflow-y-scroll studio-scrollbar">
-        {lights.map(light => <DirectionalLightEntry key={light.identifer} showcase={showcase} light={light} />)}
+        {lights.map(light => <DirectionalLightEntry key={light.identifier} showcase={showcase} light={light} />)}
       </div>
     </Section>
   )
