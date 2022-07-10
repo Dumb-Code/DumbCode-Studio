@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
@@ -11,7 +11,7 @@ import ShowcaseSidebar from "./components/ShowcaseSidebar"
 import { useShowcaseGumball } from "./logic/ShowcaseGumball"
 
 const Showcase = () => {
-  const { scene, lightGroup, itemsGroup, getSelectedProject, onFrameListeners, renderer } = useStudio()
+  const { scene, lightGroup, itemsGroup, getSelectedProject, onFrameListeners, renderer, controls, getCamera } = useStudio()
   const project = getSelectedProject()
 
   const [allViews, setViews] = useListenableObject(project.showcaseProperties.views)
@@ -19,6 +19,49 @@ const Showcase = () => {
 
   useObjectUnderMouse()
   useShowcaseGumball()
+
+  //TODO: get three context and listen on orbit controls for a change, then update the view's camera position and target
+  //Also, in the view add a listener to update the orbit controls when view#position/target changes 
+
+  const hasCameraAlreadyUpdated = useRef(false)
+
+  useEffect(() => {
+
+    const updatePosition = (position = view.cameraPosition.value) => {
+      if (hasCameraAlreadyUpdated.current) {
+        return
+      }
+      const camera = getCamera()
+      camera.position.set(position[0], position[1], position[2])
+      controls.update()
+    }
+    const updateTarget = (target = view.cameraTarget.value) => {
+      if (hasCameraAlreadyUpdated.current) {
+        return
+      }
+      controls.target.set(target[0], target[1], target[2])
+      controls.update()
+    }
+
+    const onControlsChange = () => {
+      const camera = getCamera()
+      hasCameraAlreadyUpdated.current = true
+      view.cameraPosition.value = [camera.position.x, camera.position.y, camera.position.z]
+      view.cameraTarget.value = [controls.target.x, controls.target.y, controls.target.z]
+      hasCameraAlreadyUpdated.current = false
+    }
+
+    controls.addEventListener('change', onControlsChange)
+    view.cameraPosition.addAndRunListener(updatePosition)
+    view.cameraTarget.addAndRunListener(updateTarget)
+    return () => {
+      controls.removeEventListener('change', onControlsChange)
+      view.cameraPosition.removeListener(updatePosition)
+      view.cameraTarget.removeListener(updateTarget)
+    }
+
+
+  }, [view, getCamera, controls])
 
   useEffect(() => {
     scene.remove(lightGroup)

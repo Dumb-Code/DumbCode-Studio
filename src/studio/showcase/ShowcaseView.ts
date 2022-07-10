@@ -1,6 +1,7 @@
 import { v4 } from 'uuid';
 import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from '../formats/animations/AnimatorGumballConsumer';
 import { DCMCube } from '../formats/model/DcmModel';
+import { unsafe_getThreeContext } from './../../contexts/StudioContext';
 import { AnimatorGumball } from './../../views/animator/logic/AnimatorGumball';
 import { LO, LOMap } from './../util/ListenableObject';
 import { NumArray } from './../util/NumArray';
@@ -9,20 +10,21 @@ import ShowcaseProperties from './ShowcaseProperties';
 
 export default class ShowcaseView extends AnimatorGumballConsumer {
 
-  readonly identifier = v4()
+  readonly name
 
-  readonly name = new LO<string>("New View")
+  readonly ambientLightColour: LO<string>
+  readonly ambientLightIntensity: LO<number>
 
-  readonly ambientLightColour = new LO('#ffffff')
-  readonly ambientLightIntensity = new LO(1)
-
-  readonly lights = new LO<ShowcaseLight[]>([])
+  readonly lights: LO<ShowcaseLight[]>
   readonly selectedLight = new LO<ShowcaseLight | null>(null)
 
   readonly animatorGumball: AnimatorGumball
 
-  readonly position = new LOMap<string, NumArray>()
-  readonly rotation = new LOMap<string, NumArray>()
+  readonly position: LOMap<string, NumArray>
+  readonly rotation: LOMap<string, NumArray>
+
+  readonly cameraPosition: LO<NumArray>
+  readonly cameraTarget: LO<NumArray>
 
   readonly constantPart = LO.combine(
     this.selectedLight,
@@ -39,9 +41,33 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
   )
 
   constructor(
-    readonly properties: ShowcaseProperties
+    readonly properties: ShowcaseProperties,
+    readonly identifier = v4(),
+    name = 'New View',
+    ambientLightColour = "#ffffff",
+    ambientLightIntensity = 1,
+    lights: ShowcaseLight[] = [],
+    position: Map<string, NumArray> = new Map(),
+    rotation: Map<string, NumArray> = new Map(),
+    cameraPosition: NumArray | null = null,
+    cameraTarget: NumArray | null = null
   ) {
     super()
+
+    this.name = new LO(name)
+    this.ambientLightColour = new LO(ambientLightColour)
+    this.ambientLightIntensity = new LO(ambientLightIntensity)
+    this.lights = new LO(lights)
+    this.position = new LOMap(position)
+    this.rotation = new LOMap(rotation)
+
+    const ctx = unsafe_getThreeContext()
+    const camPosition = ctx.getCamera().position
+    const camTarget = ctx.controls.target
+
+    this.cameraPosition = new LO(cameraPosition ?? [camPosition.x, camPosition.y, camPosition.z])
+    this.cameraTarget = new LO(cameraTarget ?? [camTarget.x, camTarget.y, camTarget.z])
+
     this.animatorGumball = new AnimatorGumball(this.properties.project)
   }
 

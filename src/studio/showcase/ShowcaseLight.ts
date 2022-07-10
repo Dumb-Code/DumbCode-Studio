@@ -5,7 +5,6 @@ import { NumArray } from '../util/NumArray';
 
 export class ShowcaseLight {
 
-  readonly identifer = v4()
 
   readonly light = new DirectionalLight()
 
@@ -18,6 +17,7 @@ export class ShowcaseLight {
   readonly shadow = new LO(true)
 
   constructor(
+    readonly identifer = v4(),
     name = 'New Light',
     colour = '#ffffff',
     intensity = 1,
