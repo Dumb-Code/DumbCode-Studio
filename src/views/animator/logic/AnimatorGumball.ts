@@ -6,7 +6,7 @@ import DcProject from '../../../studio/formats/project/DcProject';
 import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
-import { LO, useListenableObject } from './../../../studio/util/ListenableObject';
+import { LO } from './../../../studio/util/ListenableObject';
 import { NumArray } from './../../../studio/util/NumArray';
 import { AnimatorGumballIK } from './AnimatorGumballIK';
 
@@ -82,11 +82,10 @@ export class AnimatorGumball {
   }
 }
 
-export const useAnimatorGumball = () => {
+export const useAnimatorGumball = (consumer: AnimatorGumballConsumer | null) => {
   const { getSelectedProject, transformControls, onFrameListeners } = useStudio()
-  const { selectedCubeManager, animationTabs, modelerGumball, model, cubePointTracker } = getSelectedProject()
+  const { selectedCubeManager, modelerGumball, model, cubePointTracker } = getSelectedProject()
   const gumballBlockedReasons = modelerGumball.blockedReasons
-  const [selectedAnim] = useListenableObject(animationTabs.selectedAnimation)
 
   const getCubes = useCallback((selected: readonly string[] = selectedCubeManager.selected.value) => {
     return selected.map(cube => model.identifierCubeMap.get(cube)).filter(c => c !== undefined) as readonly DCMCube[]
@@ -95,10 +94,10 @@ export const useAnimatorGumball = () => {
   const selectedCubes = useRef<readonly DCMCube[]>([])
 
   useEffect(() => {
-    if (selectedAnim === null) {
+    if (consumer === null) {
       return
     }
-    const animation: AnimatorGumballConsumer = selectedAnim
+    const animation = consumer
     const ikAnchorCubes = animation.ikAnchorCubes.value
     const ikDirection = animation.ikDirection.value
     const undoRedoHandler = animation.getUndoRedoHandler()
@@ -241,7 +240,7 @@ export const useAnimatorGumball = () => {
         return
       }
       if (gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.objectChange(selectedAnim, selectedKfs, selectedCubes.current)
+        gumball.gumballIK.objectChange(animation, selectedKfs, selectedCubes.current)
       }
     })
     const mouseDownTransformControls = runWhenObjectSelected(() => {
@@ -382,6 +381,6 @@ export const useAnimatorGumball = () => {
       gumball.gumballIK.end()
 
     }
-  }, [getCubes, model, selectedCubeManager.selected, transformControls, cubePointTracker, selectedAnim, gumballBlockedReasons, onFrameListeners])
+  }, [getCubes, model, selectedCubeManager.selected, transformControls, cubePointTracker, consumer, gumballBlockedReasons, onFrameListeners])
 
 }

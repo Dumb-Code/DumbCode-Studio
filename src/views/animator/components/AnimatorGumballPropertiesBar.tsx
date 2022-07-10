@@ -8,7 +8,11 @@ import { AnimatorGumball, useAnimatorGumball } from "../logic/AnimatorGumball";
 
 const AnimatorGumballPropertiesBar = () => {
     //We want to force a refresh on useAnimatorGumball as little as possible
-    useAnimatorGumball()
+
+    const { getSelectedProject } = useStudio()
+    const project = getSelectedProject()
+    const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
+    useAnimatorGumball(animation)
     return <AnimationGumballPropertiesBarContained />
 }
 
