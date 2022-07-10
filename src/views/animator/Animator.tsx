@@ -3,6 +3,7 @@ import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
+import DcaAnimation from "../../studio/formats/animations/DcaAnimation"
 import { useListenableObject, useListenableObjectNullable } from "../../studio/util/ListenableObject"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import AnimatorGumballPropertiesBar from "./components/AnimatorGumballPropertiesBar"
@@ -60,7 +61,7 @@ const Animator = () => {
                     gridTemplateRows: "32px auto 32px"
                 }}
             >
-                <div className="grid-in-tabs border dark:border-black border-white overflow-hidden"><AnimatorTabBar /></div>
+                <div className="grid-in-tabs border dark:border-black border-white overflow-hidden"><WrappedAnimatorTabBar /></div>
                 <div className="grid-in-properties border dark:border-black h-full border-white"><AnimatorSkeletonProperties /></div>
                 <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
                 <div className="grid-in-scrub border dark:border-black border-white"><AnimatorScrubBar animation={animation} /></div>
@@ -78,7 +79,7 @@ const Animator = () => {
                 gridTemplateRows: '32px minmax(0px, 1fr) 32px 150px 30px 28px'
             }}
         >
-            <div className="grid-in-tabs border dark:border-black border-white overflow-hidden"><AnimatorTabBar /></div>
+            <div className="grid-in-tabs border dark:border-black border-white overflow-hidden"><WrappedAnimatorTabBar /></div>
             <div className="grid-in-properties border dark:border-black h-full border-white"><AnimatorProperties /></div>
             <div className="grid-in-tools border dark:border-black border-white"><AnimatorShortcuts /></div>
             <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
@@ -88,6 +89,25 @@ const Animator = () => {
             <div className="grid-in-info border dark:border-black border-white"><InfoBar undoRedo={animation?.undoRedoHandler} /></div>
         </div>
     )
+}
+
+const WrappedAnimatorTabBar = () => {
+    const { getSelectedProject } = useStudio()
+    const selectedProject = getSelectedProject()
+
+    const [animations] = useListenableObject(selectedProject.animationTabs.animations)
+    const [tabs] = useListenableObject(selectedProject.animationTabs.tabs)
+
+
+    const createNewAnimation = () => {
+        selectedProject.animationTabs.addAnimation(DcaAnimation.createNew(selectedProject))
+    }
+
+    return <AnimatorTabBar
+        all={animations.filter(t => tabs.includes(t.identifier))}
+        selected={selectedProject.animationTabs.selectedAnimation}
+        createNew={createNewAnimation}
+    />
 }
 
 export default Animator;

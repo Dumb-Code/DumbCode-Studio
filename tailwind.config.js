@@ -66,6 +66,7 @@ module.exports = {
         "scrub properties"
       ],
       "showcase": [
+        'tabs sidebar',
         'canvas sidebar',
         'gumball sidebar',
         'info sidebar'

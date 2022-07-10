@@ -1,17 +1,18 @@
 import { useEffect, useRef } from "react"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGPlus } from "../../../components/Icons"
-import { useStudio } from "../../../contexts/StudioContext"
-import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
-import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { LO, useListenableObject } from "../../../studio/util/ListenableObject"
 
-const AnimatorTabBar = () => {
-    const { getSelectedProject } = useStudio()
-    const selectedProject = getSelectedProject()
-
-    const [animations] = useListenableObject(selectedProject.animationTabs.animations)
-    const [tabs] = useListenableObject(selectedProject.animationTabs.tabs)
-    const [selectedTab, setSelectedTab] = useListenableObject(selectedProject.animationTabs.selectedAnimation)
+type TabType = {
+    identifier: string,
+    name: LO<string>
+}
+const AnimatorTabBar = <T extends TabType,>({ all, selected, createNew }: {
+    all: readonly T[],
+    selected: LO<T | null>
+    createNew: () => void
+}) => {
+    const [selectedObj, setSelected] = useListenableObject(selected)
 
     const ref = useRef<HTMLDivElement>(null)
 
@@ -34,17 +35,15 @@ const AnimatorTabBar = () => {
         }
     })
 
-    const createNewAnimation = () => {
-        selectedProject.animationTabs.addAnimation(DcaAnimation.createNew(selectedProject))
-    }
 
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full flex">
             <div ref={ref} className="flex flex-row overflow-auto w-full">
-                {animations.filter(a => tabs.includes(a.identifier))
-                    .map(a => <AnimatorTab key={a.identifier} animation={a} selected={a === selectedTab} onSelect={() => setSelectedTab(a)} />)
+                {all.map(a =>
+                    <AnimatorTab key={a.identifier} animation={a} selected={a === selectedObj} onSelect={() => setSelected(a)} />
+                )
                 }
-                <div onClick={e => { e.stopPropagation(); createNewAnimation() }} className="bg-green-500 px-1 hover:bg-green-600 flex-shrink-0 flex flex-row rounded m-1 cursor-pointer group">
+                <div onClick={e => { e.stopPropagation(); createNew() }} className="bg-green-500 px-1 hover:bg-green-600 flex-shrink-0 flex flex-row rounded m-1 cursor-pointer group">
                     <SVGPlus className="text-white group-hover:text-white h-4 w-4 mt-1" />
                 </div>
             </div>
@@ -52,7 +51,7 @@ const AnimatorTabBar = () => {
     )
 }
 
-const AnimatorTab = ({ animation, selected, onSelect }: { animation: DcaAnimation, selected: boolean, onSelect: () => void }) => {
+const AnimatorTab = ({ animation, selected, onSelect }: { animation: TabType, selected: boolean, onSelect: () => void }) => {
     return (
         <div onClick={e => { e.stopPropagation(); onSelect() }} className={(selected ? "bg-sky-500" : "dark:bg-gray-900 bg-gray-300 hover:bg-gray-400 dark:hover:bg-black truncate") + " flex-shrink-1 flex flex-row rounded m-1 cursor-pointer"}>
             <DblClickEditLO obj={animation.name} className={(selected ? "text-white" : "dark:text-gray-400 text-black") + " flex-grow pl-1 pr-0.5 truncate"} inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
