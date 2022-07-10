@@ -30,7 +30,7 @@ const ShadowSection = () => {
   const [shadowMapSize, setShadowMapSize] = useListenableObject(showcase.previewShadowMapSize)
 
   const current = Math.floor(Math.log2(shadowMapSize))
-  const maxMapSizePow2 = Math.floor(Math.log2(renderer.capabilities.maxTextureSize))
+  const maxMapSizePow2 = Math.floor(Math.log2(renderer.capabilities.maxTextureSize)) - 1
 
 
   return (

@@ -11,7 +11,7 @@ const ShowcaseScreenshot = () => {
     const showcase = getSelectedProject().showcaseProperties
     const view = showcase.selectedView.value
     const lights = view.lights.value
-    lights.forEach(light => light.setShadowMapSize(renderer.capabilities.maxTextureSize))
+    lights.forEach(light => light.setShadowMapSize(renderer.capabilities.maxTextureSize / 2))
     screenshot(true)
     lights.forEach(light => light.setShadowMapSize(showcase.previewShadowMapSize.value))
   }
