@@ -52,7 +52,7 @@ const ProjectModels = () => {
         <BasicProjectFileArea
             extensions={modelExtensions}
             onChange={file => createProject(file).then(addProject)}
-            title="Animations"
+            title="Models"
             buttons={
                 <>
                     <ButtonWithTooltip className="icon-button" onClick={() => addProject(newProject())} tooltip="New Project"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
