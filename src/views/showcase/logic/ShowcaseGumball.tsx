@@ -20,8 +20,9 @@ export default class ShowcaseGumball {
 
 
 export const useShowcaseGumball = () => {
-  const { getSelectedProject, transformControls, onTopScene } = useStudio()
-  const properties = getSelectedProject().showcaseProperties
+  const { getSelectedProject, transformControls, onTopScene, } = useStudio()
+  const { showcaseProperties: properties, selectedCubeManager } = getSelectedProject()
+  const [selectedCubes] = useListenableObject(selectedCubeManager.selected)
 
   const [view] = useListenableObject(properties.selectedView)
   const [selectedLight] = useListenableObject(view.selectedLight)
@@ -29,7 +30,7 @@ export const useShowcaseGumball = () => {
   const gumball = properties.gumball
 
   useEffect(() => {
-    if (selectedLight === null) {
+    if (selectedLight === null || selectedCubes.length === 1) {
       return
     }
     transformControls.attach(gumball.transformAnchor)
@@ -57,6 +58,6 @@ export const useShowcaseGumball = () => {
       transformControls.removeEventListener("objectChange", objectChange)
       onTopScene.remove(gumball.visualAnchor)
     }
-  }, [transformControls, gumball, selectedLight, view, onTopScene])
+  }, [transformControls, gumball, selectedLight, view, onTopScene, selectedCubes])
 
 }
