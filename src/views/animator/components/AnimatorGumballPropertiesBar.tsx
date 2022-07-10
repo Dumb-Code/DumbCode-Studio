@@ -13,6 +13,8 @@ const AnimatorGumballPropertiesBar = ({ consumer }: { consumer: AnimatorGumballC
 }
 
 const AnimationGumballPropertiesBarContained = ({ gumball }: { gumball: AnimatorGumball | undefined }) => {
+
+
     return (
         <div className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full">
             <GumballToggle toggle={gumball?.enabled}>
@@ -23,6 +25,7 @@ const AnimationGumballPropertiesBarContained = ({ gumball }: { gumball: Animator
 }
 
 const AnimatorTransformationTypeSelect = ({ gumball }: { gumball: AnimatorGumball | undefined }) => {
+    //todo: dont shwo gumball whenb light selecteds
     const [objectMode, setObjectMode] = useListenableObjectNullable(gumball?.mode)
     const nonNullGumball = gumball as AnimatorGumball //When objectMode!==undefined, gumball!==undefined. Therefore we can pass it in to the select mods
 

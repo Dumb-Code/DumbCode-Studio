@@ -35,6 +35,7 @@ module.exports = {
     gridTemplateAreas: {
       'project': [
         'model animation texture',
+        'model sounds texture',
         'remote remote texture'
       ],
       'modeling': [

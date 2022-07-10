@@ -10,7 +10,6 @@ import { useToast } from "../../../contexts/ToastContext"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import PushToGithubDialogBox from "../../../dialogboxes/PushToGithubDialogBox"
 import { defaultWritable, FileSystemsAccessApi, useFileSystemAccessApi } from "../../../studio/files/FileTypes"
-import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeModel } from "../../../studio/formats/model/DCMLoader"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
@@ -21,14 +20,13 @@ import { loadDcFolder, writeDcFolder, writeDcProj } from "../../../studio/format
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import { NumArray } from "../../../studio/util/NumArray"
 import DownloadAsButton, { DownloadOption } from "./DownloadAsButton"
+import { BasicProjectFileArea } from "./ProjectFileArea"
 
 const SAVE_AS_CONTEXT = "studio-project-models-save-as"
 const modelExtensions = [".dcm", ".tbl", ".bbmodel", ".dcproj"]
 
 const ProjectModels = () => {
     const { hasProject, addProject } = useStudio()
-
-    const [ref, isDragging] = useFileUpload<HTMLDivElement>(modelExtensions, file => createProject(file).then(addProject))
 
     const { addToast } = useToast()
 
@@ -51,10 +49,12 @@ const ProjectModels = () => {
     }
 
     return (
-        <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'dark:bg-gray-800 bg-gray-100'} h-full flex flex-col overflow-hidden`}>
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                <p className="flex-grow mt-1 ml-1">MODELS</p>
-                <p className="text-md flex flex-row">
+        <BasicProjectFileArea
+            extensions={modelExtensions}
+            onChange={file => createProject(file).then(addProject)}
+            title="Animations"
+            buttons={
+                <>
                     <ButtonWithTooltip className="icon-button" onClick={() => addProject(newProject())} tooltip="New Project"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
                     <ClickableInput
                         onFile={file => createProject(file).then(addProject)}
@@ -72,15 +72,11 @@ const ProjectModels = () => {
                             <SvgCopypaste className="h-4 w-4 mr-1" />
                         </button>
                     )}
-
-                </p>
-            </div>
-            <div className="overflow-y-scroll h-full w-full studio-scrollbar">
-                <div className="h-0 flex flex-col m-1 mt-2">
-                    {hasProject && <ModelEntries />}
-                </div>
-            </div>
-        </div>
+                </>
+            }
+        >
+            {hasProject && <ModelEntries />}
+        </BasicProjectFileArea>
     )
 }
 

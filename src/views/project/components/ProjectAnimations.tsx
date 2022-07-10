@@ -8,12 +8,12 @@ import { useToast } from "../../../contexts/ToastContext"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import ExportAnimationAsGifDialogBox from "../../../dialogboxes/ExportAnimationAsGifDialogBox"
 import { downloadBlob, FileSystemsAccessApi, ReadableFile } from "../../../studio/files/FileTypes"
-import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeDCAAnimation } from "../../../studio/formats/animations/DCALoader"
 import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import DownloadAsButton, { DownloadOption } from "./DownloadAsButton"
+import { BasicProjectFileArea } from "./ProjectFileArea"
 
 const SAVE_AS_CONTEXT = "studio-project-animations-save-as"
 const animationExtensions = [".dca", ".dcsa"]
@@ -27,14 +27,16 @@ const ProjectAnimations = () => {
         const project = getSelectedProject()
         project.loadAnimation(file)
     }
-    const [ref, isDragging] = useFileUpload<HTMLDivElement>(animationExtensions, uploadFile)
-
     return (
-        <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'dark:bg-gray-800 bg-gray-100'} h-full flex flex-col overflow-hidden`}>
-            <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                <p className="flex-grow mt-1 ml-1">ANIMATIONS</p>
-                <p className="flex flex-row">
-                    <ButtonWithTooltip className="icon-button" onClick={() => addAnimation(DcaAnimation.createNew(getSelectedProject()))} tooltip="New Animation"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
+        <BasicProjectFileArea
+            extensions={animationExtensions}
+            onChange={uploadFile}
+            title="Animations"
+            buttons={
+                <>
+                    <ButtonWithTooltip className="icon-button" onClick={() => addAnimation(DcaAnimation.createNew(getSelectedProject()))} tooltip="New Animation">
+                        <SVGPlus className="h-4 w-4 mr-1" />
+                    </ButtonWithTooltip>
                     <ClickableInput
                         onFile={uploadFile}
                         accept={animationExtensions}
@@ -45,14 +47,11 @@ const ProjectAnimations = () => {
                     >
                         <SVGUpload className="h-4 w-4 mr-1" />
                     </ClickableInput>
-                </p>
-            </div>
-            <div className="overflow-y-scroll h-full w-full studio-scrollbar">
-                <div className="h-0 flex flex-col m-1 mt-2">
-                    {hasProject && <AnimationEntries project={getSelectedProject()} />}
-                </div>
-            </div>
-        </div >
+                </>
+            }
+        >
+            {hasProject && <AnimationEntries project={getSelectedProject()} />}
+        </BasicProjectFileArea>
     )
 }
 

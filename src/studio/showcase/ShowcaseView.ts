@@ -10,7 +10,7 @@ import ShowcaseProperties from './ShowcaseProperties';
 
 export default class ShowcaseView extends AnimatorGumballConsumer {
 
-  readonly name
+  readonly name: LO<string>
 
   readonly ambientLightColour: LO<string>
   readonly ambientLightIntensity: LO<number>

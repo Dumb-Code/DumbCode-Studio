@@ -7,11 +7,11 @@ import { useCreatePortal } from "../../../contexts/CreatePortalContext"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useToast } from "../../../contexts/ToastContext"
 import { FileSystemsAccessApi, ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
-import { useFileUpload } from "../../../studio/files/FileUploadBox"
 import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import { writeImgToBlob } from "../../../studio/util/Utils"
+import { ProjectFileAreaBase, ProjectFileAreaHeader } from "./ProjectFileArea"
 
 const imageExtensions = [".png", ".jpeg", ".gif"]
 
@@ -30,42 +30,35 @@ const ProjectTextures = () => {
     const uploadTexture = async (readable: ReadableFile) => {
         getSelectedProject().textureManager.addFile(readable)
     }
-    const [ref, isDragging] = useFileUpload<HTMLDivElement>(imageExtensions, uploadTexture)
 
     return (
-        <div className="flex flex-col h-full">
-            <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'dark:bg-gray-800 bg-gray-100'} flex flex-col overflow-hidden flex-grow h-0`}>
-                <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                    <p className="flex-grow mt-1 ml-1">TEXTURE GROUPS</p>
-                    <p className="flex flex-row">
-                        <ButtonWithTooltip className="icon-button" onClick={addGroup} tooltip="New Texture Group"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
-                    </p>
-                </div>
-                <div className="flex flex-col overflow-y-scroll overflow-x-hidden h-3/6 w-full pr-6 studio-scrollbar">
-                    {hasProject && <GroupList project={getSelectedProject()} />}
-                </div>
-                <div className="dark:bg-gray-900 bg-white dark:text-gray-400 text-black font-bold text-xs p-1 flex flex-row">
-                    <p className="flex-grow mt-1 ml-1">TEXTURES</p>
-                    <p className="flex flex-row">
-                        <ButtonWithTooltip onClick={() => addTexture()} className="icon-button" tooltip="New Texture"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
-                        <ClickableInput
-                            onFile={uploadTexture}
-                            accept={imageExtensions}
-                            multiple
-                            description="Texture Files"
-                            className="icon-button"
-                            tooltip="Upload Texture Files"
-                        >
-                            <SVGUpload className="h-4 w-4 mr-1" />
-                        </ClickableInput>
-                    </p>
-                </div>
-                <div className="flex flex-row overflow-hidden h-full w-full">
-                    {hasProject && <TextureLists project={getSelectedProject()} />}
-                </div>
-
+        <ProjectFileAreaBase extensions={imageExtensions} onChange={uploadTexture}>
+            <ProjectFileAreaHeader title="Texture Groups">
+                <ButtonWithTooltip className="icon-button" onClick={addGroup} tooltip="New Texture Group">
+                    <SVGPlus className="h-4 w-4 mr-1" />
+                </ButtonWithTooltip>
+            </ProjectFileAreaHeader>
+            <div className="flex flex-col overflow-y-scroll overflow-x-hidden h-3/6 w-full pr-6 studio-scrollbar">
+                {hasProject && <GroupList project={getSelectedProject()} />}
             </div>
-        </div>
+
+            <ProjectFileAreaHeader title="Texture Groups">
+                <ButtonWithTooltip onClick={() => addTexture()} className="icon-button" tooltip="New Texture"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
+                <ClickableInput
+                    onFile={uploadTexture}
+                    accept={imageExtensions}
+                    multiple
+                    description="Texture Files"
+                    className="icon-button"
+                    tooltip="Upload Texture Files"
+                >
+                    <SVGUpload className="h-4 w-4 mr-1" />
+                </ClickableInput>
+            </ProjectFileAreaHeader>
+            <div className="flex flex-row overflow-hidden h-full w-full">
+                {hasProject && <TextureLists project={getSelectedProject()} />}
+            </div>
+        </ProjectFileAreaBase>
     )
 }
 
