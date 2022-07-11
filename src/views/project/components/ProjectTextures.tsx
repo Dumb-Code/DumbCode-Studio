@@ -42,7 +42,7 @@ const ProjectTextures = () => {
                 {hasProject && <GroupList project={getSelectedProject()} />}
             </div>
 
-            <ProjectFileAreaHeader title="Texture Groups">
+            <ProjectFileAreaHeader title="Textures">
                 <ButtonWithTooltip onClick={() => addTexture()} className="icon-button" tooltip="New Texture"><SVGPlus className="h-4 w-4 mr-1" /></ButtonWithTooltip>
                 <ClickableInput
                     onFile={uploadTexture}
