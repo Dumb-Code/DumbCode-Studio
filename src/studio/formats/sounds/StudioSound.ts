@@ -15,32 +15,63 @@ export class StudioSound {
 
   readonly name: LO<string>
 
+  readonly _howler = new LO<Howl | null>(null)
+  readonly _duration = new LO<number | null>(null)
   readonly imgUrl = new LO<string | null>(null)
 
-  readonly duration: number
+  readonly isLoaded = new LO(false)
 
   constructor(
-    public readonly howler: Howl,
     name: string,
     identifier?: string
   ) {
     this.name = new LO(name)
-    this.duration = howler.duration()
     this.identifier = identifier ?? v4()
+
+    this._howler.addListener(h => {
+      if (h) {
+        this._duration.value = h.duration()
+      }
+      this.isLoaded.value = h !== null
+    })
   }
 
-  static async loadFromFile(file: ReadableFile, name: string): Promise<StudioSound> {
+  get howler() {
+    const value = this._howler.value
+    if (value === null) {
+      throw new Error('Sound is not loaded')
+    }
+    return value
+  }
+
+  get duration() {
+    const value = this._duration.value
+    if (value === null) {
+      throw new Error('Sound is not loaded')
+    }
+    return value
+  }
+
+  static async setupFromFile(file: ReadableFile, sound: StudioSound) {
     const url = await readFileDataUrl(file)
+
     const howler = new Howl({
       src: [url],
     })
 
-    const sound: StudioSound = await new Promise((resolve, reject) => {
-      howler.once('load', () => resolve(new StudioSound(howler, name)))
+    await new Promise((resolve, reject) => {
+      howler.once('load', () => resolve(0))
       howler.once('loaderror', (_, err) => reject(err))
     })
 
-    StudioSound.drawVisulization(sound, file, 100).then(d => sound.imgUrl.value = d)
+    sound._howler.value = howler
+
+    sound.imgUrl.value = await StudioSound.drawVisulization(sound, file, 100)
+  }
+
+  static loadFromFile(file: ReadableFile, name: string): StudioSound {
+    const sound = new StudioSound(name)
+    StudioSound.setupFromFile(file, sound)
     return sound
   }
 
@@ -59,14 +90,16 @@ export class StudioSound {
 
     const audioBuffer = await Howler.ctx.decodeAudioData(arraybuffer)
 
-    const rawData = audioBuffer.getChannelData(0)
-    const blockSize = Math.floor(rawData.length / numBars); // the number of samples in each subdivision
-    const filteredData = [];
+    const blockSize = Math.floor(audioBuffer.getChannelData(0).length / numBars); // the number of samples in each subdivision
+    const filteredData: number[] = [];
     for (let i = 0; i < numBars; i++) {
       let blockStart = blockSize * i; // the location of the first sample in the block
       let sum = 0;
-      for (let j = 0; j < blockSize; j++) {
-        sum = sum + Math.abs(rawData[blockStart + j]) // find the sum of all the samples in the block
+      for (let c = 0; c < audioBuffer.numberOfChannels; c++) {
+        const channelData = audioBuffer.getChannelData(c);
+        for (let j = 0; j < blockSize; j++) {
+          sum += channelData[blockStart + j]; // find the sum of all the samples in the block
+        }
       }
       filteredData.push(sum / blockSize); // divide the sum by the block size to get the average
     }
