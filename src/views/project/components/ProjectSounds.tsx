@@ -7,7 +7,7 @@ import { StudioSound } from "../../../studio/formats/sounds/StudioSound"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import { BasicProjectFileArea } from "./ProjectFileArea"
 
-const soundExtensions = [".wav", ".mp3"]
+const soundExtensions = [".wav", ".mp3", ".ogg"]
 
 const ProjectSounds = () => {
   const { hasProject, getSelectedProject } = useStudio()
