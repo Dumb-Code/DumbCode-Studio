@@ -67,8 +67,8 @@ export class StudioSound {
 
   static async setupFromFile(file: ReadableFile, sound: StudioSound) {
     await Promise.all([
-      StudioSound.setupAudioBuffer(file, sound),
       sound._loadHowlerPromise = StudioSound.setupHowler(sound, file),
+      StudioSound.setupAudioBuffer(file, sound),
     ])
     sound.imgUrl.value = StudioSound.drawVisulization(sound, 200, 30)
   }
