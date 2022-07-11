@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useOptions } from "../../../contexts/OptionsContext"
 import { useInstall } from "../../../contexts/PWAInstallButtonContext"
-import { AllScreenshotActionTypes } from "../../../studio/screenshot/ScreenshotActions"
+import { AllScreenshotActionTypes, ScreenshotDesciptionMap } from "../../../studio/screenshot/ScreenshotActions"
 
 const GeneralOptions = () => {
   const isChrome = useMemo(() => "chrome" in window, [])
@@ -43,7 +43,7 @@ const GeneralOptions = () => {
           }
           onClick={() => setScreenshotAction(action)}
         >
-          {action}
+          {ScreenshotDesciptionMap[action]}
         </button>
       ))}
 
