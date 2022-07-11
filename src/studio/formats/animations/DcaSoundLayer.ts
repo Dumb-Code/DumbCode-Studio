@@ -25,31 +25,38 @@ export default class DcaSoundLayer {
     this.visible = new LO(visible)
   }
 
+  findAllSounds() {
+    this.instances.value.forEach(instance => instance.findSounds())
+  }
 
 }
 
 export class DcaSoundLayerInstance {
 
   readonly startTime: LO<number>
-  readonly sound: StudioSound | null
-  readonly soundInstance: StudioSoundInstance | null
+  sound: StudioSound | null = null
+  soundInstance: StudioSoundInstance | null = null
 
   startTimeChanged = false
 
   constructor(
     readonly animation: DcaAnimation,
-    readonly soundUUID: string,
+    readonly soundName: string,
     startTime = 0,
     readonly identifier = v4()
   ) {
 
     this.startTime = new LO(startTime)
-    this.sound = this.animation.project.sounds.value.find(s => s.identifier === soundUUID) ?? null
-    this.soundInstance = this.sound !== null ? new StudioSoundInstance(this.sound) : null
+    this.findSounds()
 
     this.startTime.addListener(() => {
       this.startTimeChanged = true
     })
+  }
+
+  findSounds() {
+    this.sound = this.animation.project.sounds.value.find(s => s.name.value === this.soundName) ?? null
+    this.soundInstance = this.sound !== null ? new StudioSoundInstance(this.sound) : null
   }
 
 }

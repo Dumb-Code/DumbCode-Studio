@@ -11,7 +11,7 @@ const NewAnimationSoundDialogBox = ({ layer }: { layer: DcaSoundLayer }) => {
   const { clear } = useOpenedDialogBoxes()
 
   const pickSound = (sound: StudioSound) => {
-    setSounds([...sounds, new DcaSoundLayerInstance(layer.animation, sound.identifier, layer.animation.time.value)])
+    setSounds([...sounds, new DcaSoundLayerInstance(layer.animation, sound.name.value, layer.animation.time.value)])
     clear()
   }
 

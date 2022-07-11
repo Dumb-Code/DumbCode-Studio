@@ -1,5 +1,6 @@
 import { Howl } from 'howler';
 import { v4 } from 'uuid';
+import { removeFileExtension } from '../project/DcProject';
 import { ReadableFile, readFileArrayBuffer, readFileDataUrl } from './../../files/FileTypes';
 import { LO } from './../../util/ListenableObject';
 
@@ -57,7 +58,7 @@ export class StudioSound {
 
 
   static loadFromFile(file: ReadableFile, name: string): StudioSound {
-    const sound = new StudioSound(name)
+    const sound = new StudioSound(removeFileExtension(name))
 
     //Don't await this, as we don't want to block the main thread
     StudioSound.setupFromFile(file, sound)
