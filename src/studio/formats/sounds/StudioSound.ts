@@ -15,6 +15,7 @@ export class StudioSound {
 
   readonly name: LO<string>
 
+  _audioBuffer: AudioBuffer | null = null
   readonly _howler = new LO<Howl | null>(null)
   readonly _duration = new LO<number | null>(null)
   readonly imgUrl = new LO<string | null>(null)
@@ -52,7 +53,25 @@ export class StudioSound {
     return value
   }
 
+
+  static loadFromFile(file: ReadableFile, name: string): StudioSound {
+    const sound = new StudioSound(name)
+
+    //Don't await this, as we don't want to block the main thread
+    StudioSound.setupFromFile(file, sound)
+    return sound
+  }
+
+
   static async setupFromFile(file: ReadableFile, sound: StudioSound) {
+    await Promise.all([
+      StudioSound.setupAudioBuffer(file, sound),
+      StudioSound.setupHowler(sound, file),
+    ])
+    sound.imgUrl.value = StudioSound.drawVisulization(sound, 100)
+  }
+
+  static async setupHowler(sound: StudioSound, file: ReadableFile) {
     const url = await readFileDataUrl(file)
 
     const howler = new Howl({
@@ -66,29 +85,30 @@ export class StudioSound {
 
     sound._howler.value = howler
 
-    sound.imgUrl.value = await StudioSound.drawVisulization(sound, file, 100)
   }
 
-  static loadFromFile(file: ReadableFile, name: string): StudioSound {
-    const sound = new StudioSound(name)
-    StudioSound.setupFromFile(file, sound)
-    return sound
-  }
-
-  static async drawVisulization(sound: StudioSound, file: ReadableFile, fixedNumberOfBars?: number) {
+  static async setupAudioBuffer(file: ReadableFile, sound: StudioSound) {
     const arraybuffer = await readFileArrayBuffer(file)
+    const audioBuffer = await Howler.ctx.decodeAudioData(arraybuffer)
+    sound._audioBuffer = audioBuffer
+  }
+
+  static drawVisulization(sound: StudioSound, fixedNumberOfBars?: number) {
 
     const ctx = canvas.getContext('2d')
     if (!ctx) {
       throw new Error('Could not get canvas context')
     }
-
     const numBars = fixedNumberOfBars !== undefined ? fixedNumberOfBars : Math.ceil(sound.duration * BARS_PER_SECOND)
     canvas.width = numBars * BAR_WIDTH
     canvas.height = CANVAS_HEIGHT
     ctx.imageSmoothingEnabled = false
 
-    const audioBuffer = await Howler.ctx.decodeAudioData(arraybuffer)
+    const audioBuffer = sound._audioBuffer
+    if (!audioBuffer) {
+      throw new Error('Sound is not loaded')
+    }
+
 
     const blockSize = Math.floor(audioBuffer.getChannelData(0).length / numBars); // the number of samples in each subdivision
     const filteredData: number[] = [];

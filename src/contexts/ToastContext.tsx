@@ -113,8 +113,8 @@ const ToastEntry = ({ toast, index }: { toast: ToastObject, index: number }) => 
       className={"pointer-events-auto text-left absolute right-0 transition-all duration-200 w-80 h-16 rounded " + (fadingOut ? "" : "cursor-pointer")}
       style={{ bottom: essentialIndex * 72 + 16 }}
     >
-      <div className={"transition-opacity duration-700 w-full h-full bg-gray-500 dark:bg-gray-900 dark:text-white m-2 p-2 rounded " + (fadingOut ? "opacity-0" : "opacity-100")}>
-        {toast.message}
+      <div className={"transition-opacity duration-700 w-full h-full flex flex-col bg-gray-500 dark:bg-gray-900 dark:text-white m-2 p-2 rounded " + (fadingOut ? "opacity-0" : "opacity-100")}>
+        {toast.message.split("\n").map((line, index) => <p key={index}>{line}</p>)}
       </div>
     </div>
   )

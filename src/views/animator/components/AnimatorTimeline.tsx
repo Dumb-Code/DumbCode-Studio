@@ -2,10 +2,12 @@ import { createContext, MouseEvent as ReactMouseEvent, MutableRefObject, useCall
 import { SvgArrows, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGSettings, SVGUnlocked } from "../../../components/Icons";
 import { useCreatePortal } from "../../../contexts/CreatePortalContext";
 import { useStudio } from "../../../contexts/StudioContext";
+import { useToast } from "../../../contexts/ToastContext";
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";
 import KeyframeLayerDialogBox from "../../../dialogboxes/KeyframeLayerDialogBox";
 import { KeyframeClipboardType } from "../../../studio/clipboard/KeyframeClipboardType";
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
+import DcaSoundLayer from "../../../studio/formats/animations/DcaSoundLayer";
 import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef";
 import { useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/util/ListenableObject";
@@ -58,6 +60,8 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
 
     const [hoveredLayer, setHoveredLayer] = useState<number | null>(null)
     const [hoveredLayerClientX, setHoveredLayerClientX] = useState<number | null>(null)
+
+    const [soundLayers, setSoundLayers] = useListenableObject(animation.soundLayers)
 
     const listeners = useRef(new Set<(scroll: number, zoom: number) => void>())
     const addAndRunListener: ListenerEffect = useCallback(func => {
@@ -119,8 +123,11 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
         e.stopPropagation()
     }, [layers, animation, setLayers])
 
-    // const addSoundLayer = useCallback((e: ReactMouseEvent) => {
-    // })
+    const addSoundLayer = useCallback((e: ReactMouseEvent) => {
+        const newLayer = new DcaSoundLayer(animation)
+        setSoundLayers(soundLayers.concat(newLayer))
+        e.stopPropagation()
+    }, [soundLayers, animation, setSoundLayers])
 
     const getPixelsPerSecond = useCallback(() => {
         return width * blockPerSecond * animation.zoom.value
@@ -171,10 +178,11 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     return (
         <ScrollZoomContext.Provider value={context}>
             <>
+                {soundLayers.map(layer => <SoundLayer key={layer.identifier} animation={animation} soundLayer={layer} />)}
                 {keyframesByLayers.map(({ layer, keyframes }) => <AnimationLayer key={layer.layerId} animation={animation} keyframes={keyframes} layer={layer} />)}
                 <div className="flex flex-row">
                     <LayerButton text="Transformation Layer" addLayer={addLayer} />
-                    <LayerButton text="Sound Layer" addLayer={addLayer} />
+                    <LayerButton text="Sound Layer" addLayer={addSoundLayer} />
                     <LayerButton text="Event Layer" addLayer={addLayer} />
                 </div>
                 <PastedKeyframePortal animation={animation} pastedKeyframes={pastedKeyframes} hoveredLayer={hoveredLayer} />
@@ -249,28 +257,56 @@ const PastedKeyframePortal = ({ animation, pastedKeyframes, hoveredLayer }: { an
     )
 }
 
-class OffsetKeyframeInLayer {
-    constructor(
-        public keyframe: DcaKeyframe | KeyframeClipboardType,
-        public offsetLevel: number
-    ) { }
-}
+const SoundLayer = ({ animation, soundLayer }: { animation: DcaAnimation, soundLayer: DcaSoundLayer }) => {
+    const [sounds, setSounds] = useListenableObject(soundLayer.instances)
+    const [name, setName] = useListenableObject(soundLayer.name)
+    const [locked, toggleLocked] = useListenableObjectToggle(soundLayer.locked)
+    const [visible, toggleVisible] = useListenableObjectToggle(soundLayer.visible)
 
-const isInbetween = (min: number, delta: number, test: number) => test >= min && test <= min + delta
+    const deleteLayer = () => {
+        animation.soundLayers.value = animation.soundLayers.value.filter(l => l !== soundLayer)
+    }
+
+    const { addToast } = useToast()
+
+    const addNewSound = () => {
+        addToast("Not added yet \nsorry ely", "error")
+    }
+
+    const openLayerSettings = () => {
+        addToast("Not added yet", "error")
+    }
+
+    return (
+        <AnimationTimelineLayer
+            animation={animation}
+            deleteLayer={deleteLayer}
+            keyframes={sounds}
+            getStartTime={s => s.startTime.value}
+            getDuration={s => s.sound?.duration ?? 1}
+            getHeight={maxLayer => Math.max(1, maxLayer) * 1.5}
+            header={
+                <>
+                    <AnimationLayerHandle color="bg-blue-500" type="Transform" />
+                    <input value={name} onChange={e => setName(e.target.value)} type="text" className="w-36 border-none dark:bg-gray-900 bg-gray-400 text-white rounded mr-0.5  h-6 text-s" placeholder="layer name" />
+                    <AnimationLayerButton disabled={locked} onClick={addNewSound} icon={SVGPlus} />
+                    <AnimationLayerButton highlighted={!visible} onClick={toggleVisible} icon={visible ? SVGEye : SVGEyeOff} negative={true} />
+                    <AnimationLayerButton highlighted={locked} onClick={toggleLocked} icon={locked ? SVGLocked : SVGUnlocked} negative={true} />
+                    <AnimationLayerButton icon={SVGSettings} onClick={openLayerSettings} />
+                </>
+            }
+        >
+            {sound => (
+                <div>{sound.soundUUID}</div>
+            )}
+        </AnimationTimelineLayer>
+    )
+}
 
 //Grim
 const getStartTime = (kf: DcaKeyframe | KeyframeClipboardType) => kf instanceof DcaKeyframe ? kf.startTime.value : kf.start
 const getDuration = (kf: DcaKeyframe | KeyframeClipboardType) => kf instanceof DcaKeyframe ? kf.duration.value : kf.duration
-const canKeyframeBeInsertedAtTimelinelayer = (keyframe: DcaKeyframe | KeyframeClipboardType, layerData?: OffsetKeyframeInLayer[]) => {
-    if (layerData === undefined) {
-        return true
-    }
 
-    return !layerData.some(d =>
-        isInbetween(getStartTime(d.keyframe), getDuration(d.keyframe), getStartTime(keyframe)) ||
-        isInbetween(getStartTime(keyframe), getDuration(keyframe), getStartTime(d.keyframe))
-    )
-}
 
 const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimation, keyframes: (DcaKeyframe | KeyframeClipboardType)[], layer: KeyframeLayerData }) => {
     const [name, setName] = useListenableObject(layer.name)

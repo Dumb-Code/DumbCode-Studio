@@ -22,7 +22,7 @@ const isInbetween = (min: number, delta: number, test: number) => test >= min &&
 type HasIdentif = { identifier: string }
 
 export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyframes, getStartTime, getDuration, getHeight, deleteLayer, header, children, containerProps }: {
-  animation: DcaAnimation, keyframes: T[],
+  animation: DcaAnimation, keyframes: readonly T[],
   getStartTime: (kf: T) => number,
   getDuration: (kf: T) => number,
   getHeight: (numLayers: number) => number,
@@ -58,7 +58,7 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
   })
 
   let maxLayer = 0
-  const sorted = keyframes.sort((a, b) => getStartTime(a) - getStartTime(b))
+  const sorted = Array.from(keyframes).sort((a, b) => getStartTime(a) - getStartTime(b))
   const map = new Map<number, OffsetKeyframeInLayer<T>[]>()
   sorted.forEach(kf => {
     let layer = 0
@@ -84,11 +84,7 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
   }
 
 
-  const divHeight = getHeight(maxLayer)//maxLayer <= 2 ? 1.5 : 1.5 + ((maxLayer - 2) * .75)
-  // const colors = ["bg-sky-500", "bg-green-500", "bg-yellow-500", "bg-red-500"]
-  // const hoverColors = ["group-hover:bg-sky-300", "group-hover:bg-green-300", "group-hover:bg-yellow-300", "group-hover:bg-red-300"]
-  // const color = colors[layer.layerId % colors.length]
-  // const hoverColor = hoverColors[layer.layerId % colors.length]
+  const divHeight = getHeight(maxLayer)
 
   const draggingRef = useDraggbleRef<HTMLDivElement, number>(
     useCallback(() => animation.scroll.value, [animation]),
@@ -183,7 +179,7 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
 
   return (
     <div onClick={e => e.stopPropagation()} className="flex flex-row m-0.5 mt-0" style={{ height: divHeight + 'rem' }}>
-      <div className="flex flex-row">
+      <div className="flex flex-row min-w-[286px]">
         {header}
       </div>
       <div className="relative w-full">
