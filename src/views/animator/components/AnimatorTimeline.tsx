@@ -1,13 +1,17 @@
+import Image from "next/image";
 import { createContext, MouseEvent as ReactMouseEvent, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { SvgArrows, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGSettings, SVGUnlocked } from "../../../components/Icons";
 import { useCreatePortal } from "../../../contexts/CreatePortalContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useToast } from "../../../contexts/ToastContext";
+import { useTooltipRef } from "../../../contexts/TooltipContext";
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";
 import KeyframeLayerDialogBox from "../../../dialogboxes/KeyframeLayerDialogBox";
+import NewAnimationSoundDialogBox from "../../../dialogboxes/NewAnimationSoundDialogBox";
 import { KeyframeClipboardType } from "../../../studio/clipboard/KeyframeClipboardType";
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
-import DcaSoundLayer from "../../../studio/formats/animations/DcaSoundLayer";
+import DcaSoundLayer, { DcaSoundLayerInstance } from "../../../studio/formats/animations/DcaSoundLayer";
+import { StudioSound } from "../../../studio/formats/sounds/StudioSound";
 import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef";
 import { useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/util/ListenableObject";
@@ -267,10 +271,12 @@ const SoundLayer = ({ animation, soundLayer }: { animation: DcaAnimation, soundL
         animation.soundLayers.value = animation.soundLayers.value.filter(l => l !== soundLayer)
     }
 
+    const dialogBoxes = useDialogBoxes()
+
     const { addToast } = useToast()
 
     const addNewSound = () => {
-        addToast("Not added yet \nsorry ely", "error")
+        dialogBoxes.setDialogBox(() => <NewAnimationSoundDialogBox layer={soundLayer} />)
     }
 
     const openLayerSettings = () => {
@@ -284,7 +290,7 @@ const SoundLayer = ({ animation, soundLayer }: { animation: DcaAnimation, soundL
             keyframes={sounds}
             getStartTime={s => s.startTime.value}
             getDuration={s => s.sound?.duration ?? 1}
-            getHeight={maxLayer => Math.max(1, maxLayer) * 1.5}
+            getHeight={maxLayer => Math.max(1, maxLayer + 1) * 1.5}
             header={
                 <>
                     <AnimationLayerHandle color="bg-blue-500" type="Transform" />
@@ -296,10 +302,78 @@ const SoundLayer = ({ animation, soundLayer }: { animation: DcaAnimation, soundL
                 </>
             }
         >
-            {sound => (
-                <div>{sound.soundUUID}</div>
-            )}
+            {sound => <SoundEntry key={sound.identifier} sound={sound} />}
         </AnimationTimelineLayer>
+    )
+}
+const SoundEntry = ({ sound }: { sound: DcaSoundLayerInstance }) => {
+    const [start, setStart] = useListenableObject(sound.startTime)
+    // const [src] = useListenableObjectNullable(sound.sound?.fullImgUrl)
+    const duration = sound.sound?.duration ?? 1
+
+
+    const { getPixelsPerSecond, getScroll, addAndRunListener, removeListener } = useContext(ScrollZoomContext)
+
+    const pps = getPixelsPerSecond()
+
+    const src = useMemo(() => {
+        if (sound.sound === null) {
+            return null
+        }
+        return StudioSound.drawVisulization(sound.sound, duration * pps, 10, 1, 2)
+    }, [sound.sound, duration, pps])
+
+
+    const soundHandleRef = useDraggbleRef<HTMLDivElement, number>(
+        useCallback(() => {
+            //Start batch actions
+            return sound.startTime.value
+        }, [sound]),
+        useCallback(({ dx, initial }) => {
+            sound.startTime.value = Math.max(initial + dx / getPixelsPerSecond(), 0)
+        }, [sound, getPixelsPerSecond]),
+        useCallback(() => {
+            //end batch actions
+        }, [])
+    )
+
+    useTooltipRef<HTMLDivElement>(() => sound.sound?.name.value, undefined, soundHandleRef)
+    //Updates the keyframe left and width
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (soundHandleRef.current !== null) {
+            soundHandleRef.current.style.left = `${sound.startTime.value * pixelsPerSecond - scroll}px`
+            soundHandleRef.current.style.width = `${duration * pixelsPerSecond}px`
+        }
+    }, [sound, duration, getPixelsPerSecond, getScroll, soundHandleRef])
+
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
+
+    return (
+        <div
+            ref={soundHandleRef}
+            className="absolute h-full flex flex-col justify-center"
+            style={{
+                left: `${start * getPixelsPerSecond() - getScroll()}px`,
+                width: `${duration * getPixelsPerSecond()}px`,
+            }}
+        >
+            <div className="w-full bg-blue-500 bg-opacity-30 py-1 px-0 rounded-lg">
+                {src &&
+                    <Image
+                        src={src}
+                        alt="Waveform"
+                        draggable={false}
+                        width={duration * getPixelsPerSecond()}
+                        height="10px"
+                        layout="responsive"
+                        objectFit="contain"
+                    />
+                }
+            </div>
+        </div>
     )
 }
 

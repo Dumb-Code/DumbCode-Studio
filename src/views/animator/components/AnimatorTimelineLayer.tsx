@@ -83,7 +83,6 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
     layers = [[]]
   }
 
-
   const divHeight = getHeight(maxLayer)
 
   const draggingRef = useDraggbleRef<HTMLDivElement, number>(

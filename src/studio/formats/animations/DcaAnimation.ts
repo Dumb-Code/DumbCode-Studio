@@ -124,6 +124,8 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
 
   readonly soundLayers = new LO<readonly DcaSoundLayer[]>([], this.onDirty)
 
+  private updatingTimeNaturally = false
+
   constructor(project: DcProject, name: string) {
     super()
 
@@ -168,6 +170,28 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
         }
       })
       naughtyModifyValue(Array.from(newValue).sort((a, b) => a.layerId - b.layerId))
+    })
+
+    this.time.addListener(value => {
+
+      this.soundLayers.value.forEach(layer => layer.instances.value.forEach(instance => {
+        const timeOffset = value - instance.startTime.value
+        if (instance.sound !== null && instance.soundInstance !== null && timeOffset >= 0 && timeOffset < instance.sound.duration) {
+          if (!this.updatingTimeNaturally || instance.startTimeChanged) { //|| Math.abs(instance.soundInstance.seekForTime() - timeOffset) > 0.025
+            instance.soundInstance.seek(timeOffset)
+            instance.startTimeChanged = false
+          }
+          instance.soundInstance.playing.value = this.playing.value
+        }
+      }))
+    })
+
+    this.playing.addAndRunListener(playing => {
+      this.soundLayers.value.forEach(layer => layer.instances.value.forEach(instance => {
+        if (instance.soundInstance !== null) {
+          instance.soundInstance.playing.value = playing
+        }
+      }))
     })
   }
 
@@ -265,7 +289,9 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
 
   animate(delta: number) {
     if (this.playing.value) {
+      this.updatingTimeNaturally = true
       this.time.value += delta
+      this.updatingTimeNaturally = false
     }
     const time = this.time.value
     const skipForced = this.isDraggingTimeline || this.playing.value

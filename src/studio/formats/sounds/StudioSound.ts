@@ -20,6 +20,8 @@ export class StudioSound {
   readonly _duration = new LO<number | null>(null)
   readonly imgUrl = new LO<string | null>(null)
 
+  _loadHowlerPromise: Promise<void> | null = null
+
   readonly isLoaded = new LO(false)
 
   constructor(
@@ -65,10 +67,10 @@ export class StudioSound {
 
   static async setupFromFile(file: ReadableFile, sound: StudioSound) {
     await Promise.all([
-      StudioSound.setupAudioBuffer(file, sound),
+      sound._loadHowlerPromise = StudioSound.setupAudioBuffer(file, sound),
       StudioSound.setupHowler(sound, file),
     ])
-    sound.imgUrl.value = StudioSound.drawVisulization(sound, 100)
+    sound.imgUrl.value = StudioSound.drawVisulization(sound, 200, 30)
   }
 
   static async setupHowler(sound: StudioSound, file: ReadableFile) {
@@ -88,20 +90,23 @@ export class StudioSound {
   }
 
   static async setupAudioBuffer(file: ReadableFile, sound: StudioSound) {
+    if (Howler.ctx === null) {
+      await sound._loadHowlerPromise
+    }
     const arraybuffer = await readFileArrayBuffer(file)
     const audioBuffer = await Howler.ctx.decodeAudioData(arraybuffer)
     sound._audioBuffer = audioBuffer
   }
 
-  static drawVisulization(sound: StudioSound, fixedNumberOfBars?: number) {
+  static drawVisulization(sound: StudioSound, fixedCanvasWidth?: number, fixedCanvasHeight?: number, middleBar?: number, rollingAverage = 0) {
 
     const ctx = canvas.getContext('2d')
     if (!ctx) {
       throw new Error('Could not get canvas context')
     }
-    const numBars = fixedNumberOfBars !== undefined ? fixedNumberOfBars : Math.ceil(sound.duration * BARS_PER_SECOND)
+    const numBars = Math.floor(fixedCanvasWidth !== undefined ? fixedCanvasWidth / BAR_WIDTH : Math.ceil(sound.duration * BARS_PER_SECOND))
     canvas.width = numBars * BAR_WIDTH
-    canvas.height = CANVAS_HEIGHT
+    canvas.height = fixedCanvasHeight ?? CANVAS_HEIGHT
     ctx.imageSmoothingEnabled = false
 
     const audioBuffer = sound._audioBuffer
@@ -111,7 +116,7 @@ export class StudioSound {
 
 
     const blockSize = Math.floor(audioBuffer.getChannelData(0).length / numBars); // the number of samples in each subdivision
-    const filteredData: number[] = [];
+    let filteredData: number[] = [];
     for (let i = 0; i < numBars; i++) {
       let blockStart = blockSize * i; // the location of the first sample in the block
       let sum = 0;
@@ -121,7 +126,18 @@ export class StudioSound {
           sum += channelData[blockStart + j]; // find the sum of all the samples in the block
         }
       }
-      filteredData.push(sum / blockSize); // divide the sum by the block size to get the average
+      filteredData.push(sum); // divide the sum by the block size to get the average
+    }
+
+
+
+    if (rollingAverage !== 0) {
+      filteredData = filteredData.map((_, i) => {
+        const start = Math.max(0, i - rollingAverage)
+        const end = Math.min(filteredData.length, i + rollingAverage)
+        const sum = filteredData.slice(start, end).reduce((a, b) => a + b, 0)
+        return sum / (end - start)
+      })
     }
 
     const max = Math.max(...filteredData)
@@ -132,12 +148,12 @@ export class StudioSound {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     for (let i = 0; i < numBars; i++) {
       ctx.fillStyle = '#fff'
-      const height = normlizedData[i] * CANVAS_HEIGHT
-      ctx.fillRect(i * BAR_WIDTH, (CANVAS_HEIGHT - height) / 2, BAR_WIDTH, height)
+      const height = normlizedData[i] * canvas.height
+      ctx.fillRect(i * BAR_WIDTH, (canvas.height - height) / 2, BAR_WIDTH, height)
     }
 
-    const middleBar = 5
-    ctx.fillRect(0, (CANVAS_HEIGHT - middleBar) / 2, canvas.width, middleBar)
+    const middleBarVal = middleBar ?? 3
+    ctx.fillRect(0, (canvas.height - middleBarVal) / 2, canvas.width, middleBarVal)
 
     return canvas.toDataURL('image/png')
 

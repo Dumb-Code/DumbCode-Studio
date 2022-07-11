@@ -44,6 +44,10 @@ export default class StudioSoundInstance {
     this.sound.howler.seek(time, this.soundId)
   }
 
+  seekForTime() {
+    return this.sound.howler.seek(this.soundId)
+  }
+
   getPlaybackPosition() {
     return this.sound.howler.seek(this.soundId)
   }

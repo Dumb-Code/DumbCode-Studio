@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { createContext, PropsWithChildren, ReactNode, RefObject, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { useCreatePortal } from "./CreatePortalContext"
 
 type ContextType = {
@@ -88,8 +88,9 @@ const TooltipContextProvider = ({ children }: PropsWithChildren<{}>) => {
   )
 }
 
-export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => ReactNode) | null | string, delay = 500) => {
-  const ref = useRef<T>(null)
+export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => ReactNode) | null | string, delay = 500, existingRef?: RefObject<T>) => {
+  const createdRef = useRef<T>(null)
+  const ref = existingRef ?? createdRef
 
   const tooltip = useContext(TooltipContext)
   const mousePosition = useRef<{ x: number, y: number }>({ x: -1, y: -1 })
@@ -145,7 +146,7 @@ export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => Rea
         timeoutRef.current = undefined
       }
     }
-  }, [TooltipElement, delay, tooltip])
+  }, [TooltipElement, delay, tooltip, ref])
 
   return ref
 }
