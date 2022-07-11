@@ -77,8 +77,11 @@ export class StudioSound {
   static async setupHowler(sound: StudioSound, file: ReadableFile) {
     const url = await readFileDataUrl(file)
 
+    const fileExtension = file.name.split('.').pop()
+
     const howler = new Howl({
       src: [url],
+      format: fileExtension !== undefined ? [fileExtension] : undefined
     })
 
     await new Promise((resolve, reject) => {
