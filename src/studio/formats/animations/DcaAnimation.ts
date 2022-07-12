@@ -92,7 +92,7 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   readonly selectedKeyframes = new LO<readonly DcaKeyframe[]>([], this.onDirty)
   readonly pastedKeyframes = new LO<readonly KeyframeClipboardType[] | null>(null)
 
-  readonly singleSelectedKeyframe = LO.createOneWayDelegateListener(this.keyframes, kfs => kfs.length === 1 ? kfs[0] : null)
+  readonly singleSelectedKeyframe = LO.createOneWayDelegateListener(this.selectedKeyframes, kfs => kfs.length === 1 ? kfs[0] : null)
 
   readonly time = new LO(0, this.onDirty).applyToSection(this._section, "time", true)
   readonly displayTime = new LO(0, this.onDirty)
