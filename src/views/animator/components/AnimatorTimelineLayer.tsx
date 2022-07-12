@@ -192,7 +192,7 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
             <TimelineLayer key={i} keyframes={layer}>{children}</TimelineLayer>
           )}
         </div>
-        <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 h-7 -top-0.5" />
+        <div ref={timeMarkerRef} className="absolute bg-blue-900 w-1 -top-0.5 -bottom-0.5" />
       </div>
       <div className="flex flex-row ml-1">
         <AnimationLayerButton icon={SVGTrash} onClick={deleteLayer} highlighted={true} negative={true} hoverOnly={true} />
