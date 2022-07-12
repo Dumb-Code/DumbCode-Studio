@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
+import { ShowcaseLight } from "../../studio/showcase/ShowcaseLight"
 import ShowcaseView from "../../studio/showcase/ShowcaseView"
 import { useListenableObject } from "../../studio/util/ListenableObject"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
@@ -26,6 +27,16 @@ const Showcase = () => {
   const hasCameraAlreadyUpdated = useRef(false)
 
   useEffect(() => {
+
+    const updateSelectedLight = (light: ShowcaseLight | null, oldLight: ShowcaseLight | null) => {
+      if (oldLight) {
+        scene.remove(oldLight.cameraHelper)
+      }
+      if (light) {
+        scene.add(light.cameraHelper)
+      }
+
+    }
 
     const updatePosition = (position = view.cameraPosition.value) => {
       if (hasCameraAlreadyUpdated.current) {
@@ -54,14 +65,19 @@ const Showcase = () => {
     controls.addEventListener('change', onControlsChange)
     view.cameraPosition.addAndRunListener(updatePosition)
     view.cameraTarget.addAndRunListener(updateTarget)
+    view.selectedLight.addAndRunListener(updateSelectedLight)
     return () => {
       controls.removeEventListener('change', onControlsChange)
       view.cameraPosition.removeListener(updatePosition)
       view.cameraTarget.removeListener(updateTarget)
+      view.selectedLight.removeListener(updateSelectedLight)
+      if (view.selectedLight.value) {
+        scene.remove(view.selectedLight.value.cameraHelper)
+      }
     }
 
 
-  }, [view, getCamera, controls])
+  }, [view, getCamera, controls, scene])
 
   useEffect(() => {
     scene.remove(lightGroup)

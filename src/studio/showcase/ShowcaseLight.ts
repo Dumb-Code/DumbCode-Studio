@@ -1,4 +1,4 @@
-import { DirectionalLight } from 'three';
+import { CameraHelper, DirectionalLight } from 'three';
 import { v4 } from 'uuid';
 import { LO } from "../util/ListenableObject";
 import { NumArray } from '../util/NumArray';
@@ -7,7 +7,7 @@ export class ShowcaseLight {
 
 
   readonly light = new DirectionalLight()
-
+  readonly cameraHelper = new CameraHelper(this.light.shadow.camera)
   readonly name: LO<string>
 
   readonly colour: LO<string>
@@ -32,7 +32,10 @@ export class ShowcaseLight {
 
     this.colour.addAndRunListener(c => this.light.color.set(c))
     this.intensity.addAndRunListener(i => this.light.intensity = i)
-    this.direction.addAndRunListener(d => this.light.position.set(d[0], d[1], d[2]))
+    this.direction.addAndRunListener(d => {
+      this.light.position.set(d[0], d[1], d[2])
+      this.cameraHelper.update()
+    })
 
     this.light.shadow.bias = -0.001
   }
