@@ -320,7 +320,7 @@ const SoundEntry = ({ sound }: { sound: DcaSoundLayerInstance }) => {
         if (sound.sound === null) {
             return null
         }
-        return StudioSound.drawVisulization(sound.sound, duration * pps, 10, 1, 2)
+        return StudioSound.drawVisualization(sound.sound, 'white', duration * pps, 10, 1, 2)
     }, [sound.sound, duration, pps])
 
 

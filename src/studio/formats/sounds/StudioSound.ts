@@ -16,9 +16,8 @@ export class StudioSound {
   readonly name: LO<string>
 
   _audioBuffer: AudioBuffer | null = null
-  readonly _howler = new LO<Howl | null>(null)
-  readonly _duration = new LO<number | null>(null)
-  readonly imgUrl = new LO<string | null>(null)
+  _howler: Howl | null = null
+  _duration: number | null = null
 
   _loadHowlerPromise: Promise<void> | null = null
 
@@ -32,13 +31,6 @@ export class StudioSound {
   ) {
     this.name = new LO(name)
     this.identifier = identifier ?? v4()
-
-    this._howler.addListener(h => {
-      if (h) {
-        this._duration.value = h.duration()
-      }
-      this.isLoaded.value = h !== null
-    })
   }
 
   get fullFileName() {
@@ -46,7 +38,7 @@ export class StudioSound {
   }
 
   get howler() {
-    const value = this._howler.value
+    const value = this._howler
     if (value === null) {
       throw new Error('Sound is not loaded')
     }
@@ -54,7 +46,7 @@ export class StudioSound {
   }
 
   get duration() {
-    const value = this._duration.value
+    const value = this._duration
     if (value === null) {
       throw new Error('Sound is not loaded')
     }
@@ -83,7 +75,7 @@ export class StudioSound {
       sound._loadHowlerPromise = StudioSound.setupHowler(sound),
       StudioSound.setupAudioBuffer(sound, file),
     ])
-    sound.imgUrl.value = StudioSound.drawVisulization(sound, 200, 30)
+    sound.isLoaded.value = true
   }
 
   static async setupHowler(sound: StudioSound) {
@@ -100,7 +92,8 @@ export class StudioSound {
       howler.once('loaderror', (_, err) => reject(err))
     })
 
-    sound._howler.value = howler
+    sound._howler = howler
+    sound._duration = howler.duration()
 
   }
 
@@ -113,7 +106,7 @@ export class StudioSound {
     sound._audioBuffer = audioBuffer
   }
 
-  static drawVisulization(sound: StudioSound, fixedCanvasWidth?: number, fixedCanvasHeight?: number, middleBar?: number, rollingAverage = 0) {
+  static drawVisualization(sound: StudioSound, colour: string, fixedCanvasWidth?: number, fixedCanvasHeight?: number, middleBar?: number, rollingAverage = 0) {
 
     const ctx = canvas.getContext('2d')
     if (!ctx) {
@@ -159,10 +152,11 @@ export class StudioSound {
     const multiplier = 1 / max
     const normlizedData = filteredData.map(n => n * multiplier);
 
+    ctx.fillStyle = colour
+
     //normlizedData is scaled from 0 to 1
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     for (let i = 0; i < numBars; i++) {
-      ctx.fillStyle = '#fff'
       const height = normlizedData[i] * canvas.height
       ctx.fillRect(i * BAR_WIDTH, (canvas.height - height) / 2, BAR_WIDTH, height)
     }
