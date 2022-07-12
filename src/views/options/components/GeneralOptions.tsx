@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react"
+import { SVGCheck } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useOptions } from "../../../contexts/OptionsContext"
 import { useInstall } from "../../../contexts/PWAInstallButtonContext"
@@ -33,19 +34,23 @@ const GeneralOptions = () => {
         </>
       )}
 
-      <p className="text-gray-900 text-xs font-semibold mt-2">Screenshot Actions</p>
-      {AllScreenshotActionTypes.map(action => (
-        <button
-          key={action}
-          className={
-            "px-5 py-2 border-blue-500 border " +
-            (selectedScreenshotAction === action ? "bg-blue-500 hover:bg-blue-600" : "dark:bg-gray-800 bg-gray-400 hover:dark:bg-gray-600 hover:bg-gray-200 ")
-          }
-          onClick={() => setScreenshotAction(action)}
-        >
-          {ScreenshotDesciptionMap[action]}
-        </button>
-      ))}
+      <p className="text-gray-900 text-xs font-semibold mt-2">SCREENSHOT ACTIONS</p>
+      <p className="text-gray-900 text-xs mb-2">Allows you to customize the way screenshots or showcase tab exports are saved.</p>
+      <div className="flex flex-col w-fit">
+        {AllScreenshotActionTypes.map(action => (
+          <button
+            key={action}
+            className={
+              "p-2 pr-4 rounded-md my-1 text-left flex flex-row " +
+              (selectedScreenshotAction === action ? "border-2 border-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600" : "border-2 dark:border-gray-800 dark:bg-gray-800 bg-gray-300 dark-hover:dark:bg-gray-600 hover:bg-gray-200 ")
+            }
+            onClick={() => setScreenshotAction(action)}
+          >
+            {(selectedScreenshotAction === action ? <SVGCheck className="dark:text-black text-white h-6 w-6 rounded-full bg-green-600 mr-2" /> : <div className="h-6 w-6 rounded-full bg-gray-500 border-2 border-gray-300 mr-2"></div>)}
+            {ScreenshotDesciptionMap[action]}
+          </button>
+        ))}
+      </div>
 
     </div>
   )
