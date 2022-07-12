@@ -38,6 +38,8 @@ export class ShowcaseLight {
     })
 
     this.light.shadow.bias = -0.001
+    this.light.shadow.camera.left = this.light.shadow.camera.bottom = -7
+    this.light.shadow.camera.right = this.light.shadow.camera.top = 7
   }
 
   setShadowMapSize(size: number) {
