@@ -1,5 +1,6 @@
 import { v4 } from 'uuid';
 import { LO } from "../../util/ListenableObject";
+import DcProject from '../project/DcProject';
 import { StudioSound } from '../sounds/StudioSound';
 import StudioSoundInstance from '../sounds/StudioSoundInstance';
 import DcaAnimation from "./DcaAnimation";
@@ -40,7 +41,7 @@ export class DcaSoundLayerInstance {
   startTimeChanged = false
 
   constructor(
-    readonly animation: DcaAnimation,
+    readonly project: DcProject,
     readonly soundName: string,
     startTime = 0,
     readonly identifier = v4()
@@ -55,7 +56,7 @@ export class DcaSoundLayerInstance {
   }
 
   findSounds() {
-    this.sound = this.animation.project.sounds.value.find(s => s.name.value === this.soundName) ?? null
+    this.sound = this.project.sounds.value.find(s => s.name.value === this.soundName) ?? null
     this.soundInstance = this.sound !== null ? new StudioSoundInstance(this.sound) : null
   }
 

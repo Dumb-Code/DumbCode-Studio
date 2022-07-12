@@ -14,7 +14,7 @@ const ProjectSounds = () => {
 
   const uploadFile = async (file: ReadableFile) => {
     const project = getSelectedProject()
-    const sound = StudioSound.loadFromFile(file, file.name)
+    const sound = StudioSound.loadFromFile(await file.asFile(), file.name)
     project.sounds.value = [...project.sounds.value, sound]
   }
 

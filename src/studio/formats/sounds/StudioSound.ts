@@ -1,7 +1,6 @@
 import { Howl } from 'howler';
 import { v4 } from 'uuid';
 import { removeFileExtension } from '../project/DcProject';
-import { ReadableFile, readFileArrayBuffer, readFileDataUrl } from './../../files/FileTypes';
 import { LO } from './../../util/ListenableObject';
 
 const CANVAS_HEIGHT = 30
@@ -26,7 +25,9 @@ export class StudioSound {
   readonly isLoaded = new LO(false)
 
   constructor(
+    readonly url: string,
     name: string,
+    readonly extension: string,
     identifier?: string
   ) {
     this.name = new LO(name)
@@ -38,6 +39,10 @@ export class StudioSound {
       }
       this.isLoaded.value = h !== null
     })
+  }
+
+  get fullFileName() {
+    return `${this.name.value}${this.extension.length !== 0 ? ("." + this.extension) : ""}`
   }
 
   get howler() {
@@ -56,9 +61,16 @@ export class StudioSound {
     return value
   }
 
+  async getBlob() {
+    return new Blob([await fetch(this.url).then(r => r.arrayBuffer())], { type: 'audio/' + this.extension })
+  }
 
-  static loadFromFile(file: ReadableFile, name: string): StudioSound {
-    const sound = new StudioSound(removeFileExtension(name))
+  static loadFromFile(file: Blob, name: string): StudioSound {
+    const fileName = removeFileExtension(name)
+    const extension = name.split('.').pop() ?? ""
+    const url = URL.createObjectURL(file)
+
+    const sound = new StudioSound(url, fileName, extension)
 
     //Don't await this, as we don't want to block the main thread
     StudioSound.setupFromFile(file, sound)
@@ -66,21 +78,20 @@ export class StudioSound {
   }
 
 
-  static async setupFromFile(file: ReadableFile, sound: StudioSound) {
+  static async setupFromFile(file: Blob, sound: StudioSound) {
     await Promise.all([
-      sound._loadHowlerPromise = StudioSound.setupHowler(sound, file),
-      StudioSound.setupAudioBuffer(file, sound),
+      sound._loadHowlerPromise = StudioSound.setupHowler(sound),
+      StudioSound.setupAudioBuffer(sound, file),
     ])
     sound.imgUrl.value = StudioSound.drawVisulization(sound, 200, 30)
   }
 
-  static async setupHowler(sound: StudioSound, file: ReadableFile) {
-    const url = await readFileDataUrl(file)
+  static async setupHowler(sound: StudioSound) {
 
-    const fileExtension = file.name.split('.').pop()
+    const fileExtension = sound.extension
 
     const howler = new Howl({
-      src: [url],
+      src: [sound.url],
       format: fileExtension !== undefined ? [fileExtension] : undefined
     })
 
@@ -93,11 +104,11 @@ export class StudioSound {
 
   }
 
-  static async setupAudioBuffer(file: ReadableFile, sound: StudioSound) {
+  static async setupAudioBuffer(sound: StudioSound, file: Blob) {
     if (Howler.ctx === null) {
       await sound._loadHowlerPromise
     }
-    const arraybuffer = await readFileArrayBuffer(file)
+    const arraybuffer = await file.arrayBuffer()
     const audioBuffer = await Howler.ctx.decodeAudioData(arraybuffer)
     sound._audioBuffer = audioBuffer
   }

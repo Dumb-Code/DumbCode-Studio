@@ -10,6 +10,7 @@ import { TextureGroup } from "../textures/TextureManager";
 import { NumArray } from './../../util/NumArray';
 import { KeyframeLayerData } from './../animations/DcaAnimation';
 import { JsonShowcaseView } from './../showcase/JsonShowcaseView';
+import { StudioSound } from './../sounds/StudioSound';
 import DcProject from "./DcProject";
 
 let keepFilesNice = false
@@ -38,6 +39,7 @@ type ReadableFolder = {
 type ReadableFile = {
   async: <T extends keyof TypeByName, >(type: T) => Promise<TypeByName[T]>
   asHandle?: () => FileSystemFileHandle
+  name: string
 }
 
 type WriteableFolder = {
@@ -63,7 +65,8 @@ const createReadableFile = (handle: FileSystemFileHandle): ReadableFile => {
       }
       throw new Error(`Unknown file type ${type}`)
     },
-    asHandle: () => handle
+    asHandle: () => handle,
+    name: handle.name
   }
 }
 
@@ -145,7 +148,7 @@ export const loadFolderProject = async (name: string, zip: ReadableFolder, shoul
   awaiters.push(loadTextures(zip.folder("textures"), project))
   awaiters.push(loadAnimations(zip.folder("animations"), project))
   awaiters.push(loadRefImages(zip.folder("ref_images"), project))
-
+  awaiters.push(loadSounds(zip.folder("sounds"), project))
 
   await Promise.all(awaiters)
 
@@ -491,6 +494,24 @@ const getRefImages = async (folder: ReadableFolder, legacyImgNames: string[] | n
   )
 }
 
+const loadSounds = async (folderP: OrPromise<ReadableFolder | null>, project: DcProject) => {
+  const folder = await folderP
+  if (folder === null) {
+    return
+  }
+  const array = await getFileArray(folder, keepFilesNice ? "" : "dcs")
+  const sounds = await Promise.all(
+    array.map(async (file) => {
+      if (file === null) {
+        return null
+      }
+      const blob = await file.async('blob')
+      return StudioSound.loadFromFile(blob, file.name)
+    })
+  )
+  project.sounds.value = sounds.filter((s): s is StudioSound => s !== null)
+}
+
 // --- EXPORTER
 
 const wrapZip = (zip: JSZip, name = "_root"): WriteableFolder => {
@@ -525,6 +546,7 @@ const writeFolderProject = async (projet: DcProject, folder: WriteableFolder, sh
     writeAnimations(projet, folder.folder("animations")),
     writeTextures(projet, folder.folder("textures")),
     writeRefImages(projet, folder.folder("ref_images")),
+    writeSounds(projet, folder.folder("sounds")),
   ])
   dumbcodeHiddenFolder_write = null
 
@@ -618,19 +640,41 @@ const writeRefImages = async (project: DcProject, folderP: OrPromise<WriteableFo
   ])
 }
 
+const writeSounds = async (project: DcProject, folderP: OrPromise<WriteableFolder>) => {
+  const folder = await folderP
+  const sounds = project.sounds.value
+
+  await Promise.all([
+    ...sounds.map(async (sound, index) =>
+      writeSound(folder,
+        keepFilesNice ?
+          sound.fullFileName :
+          `${index}.dcs`,
+        sound
+      )
+    ),
+    writeNameIndexFileIfNeeded(folder, sounds.map(t => t.fullFileName))
+  ])
+}
+const writeSound = async (folder: WriteableFolder, name: string | number, sound: StudioSound) => {
+  return folder.file(`${name}`, sound.getBlob())
+}
+
 // --- Utils
 
 const getFileArray = (folder: ReadableFolder, extension: string) => getFileArrayIndex(folder, extension)
 
-const getFileArrayIndex = async (folder: ReadableFolder, extension: string, nameOverrides?: string[]) => {
+const getFileArrayIndex = async (folder: ReadableFolder, extension: string | null, nameOverrides?: string[]) => {
   const names = nameOverrides ?? await getNameIndexFileIfNeeded(folder)
 
+  const ext = extension === null ? "" : "." + extension
+
   if (names !== undefined) {
-    const files = await Promise.all(names.map(async (name) => await folder.file(`${name}.${extension}`)))
+    const files = await Promise.all(names.map(async (name) => await folder.file(`${name}${ext}`)))
     return files
   } else {
     const files: ReadableFile[] = []
-    for (let index = 0, file: OrPromise<ReadableFile | null> = null; (file = await folder.file(`${index}.${extension}`)) !== null; index++) {
+    for (let index = 0, file: OrPromise<ReadableFile | null> = null; (file = await folder.file(`${index}${ext}`)) !== null; index++) {
       files.push(file)
     }
     return files

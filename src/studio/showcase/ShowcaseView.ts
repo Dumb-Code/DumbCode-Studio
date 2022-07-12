@@ -26,6 +26,7 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
   readonly cameraPosition: LO<NumArray>
   readonly cameraTarget: LO<NumArray>
 
+
   readonly constantPart = LO.combine(
     this.selectedLight,
     LO.createReadonly(new ConstantGumballPart(this)),
