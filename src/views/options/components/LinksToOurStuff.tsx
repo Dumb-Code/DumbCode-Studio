@@ -2,7 +2,7 @@ const LinksToOurStuff = () => {
 
     return (
         <div className="">
-            <p className="text-white font-semibold mb-2">DUMBCODE LINKS</p>
+            <p className="dark:text-white font-semibold mb-2">DUMBCODE LINKS</p>
 
             <p className="text-gray-900 text-xs font-semibold">DUMBCODE COMMUNITY DISCORD</p>
             <p className="text-gray-900 text-xs mb-1">Join our discord to connect with community members, get updates, and showcase your work.</p>

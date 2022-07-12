@@ -6,7 +6,7 @@ const AccessibilityOptions = () => {
 
     return (
         <div className="">
-            <p className="text-white font-semibold mb-2">ACESSIBILITY OPTIONS</p>
+            <p className="dark:text-white font-semibold mb-2">ACESSIBILITY OPTIONS</p>
 
             <p className="text-gray-900 text-xs font-semibold">REDUCED ANIMATIONS</p>
             <p className="text-gray-900 text-xs mb-2">Allows you to reduce animations if you are prone to motion sickness.</p>

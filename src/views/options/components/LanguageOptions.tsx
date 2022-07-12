@@ -6,7 +6,7 @@ const LanguageOptions = () => {
 
     return (
         <div className="">
-            <p className="text-white font-semibold mb-2">LANGUAGE OPTIONS</p>
+            <p className="dark:text-white font-semibold mb-2">LANGUAGE OPTIONS</p>
 
             <p className="text-gray-900 text-xs font-semibold">LANGUAGE SELECTION</p>
             <p className="text-gray-900 text-xs mb-2">Allows you to pick your most familliar language.</p>
