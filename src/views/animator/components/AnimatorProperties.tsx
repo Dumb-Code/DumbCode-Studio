@@ -4,6 +4,7 @@ import Checkbox from "../../../components/Checkbox";
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import CubeInput from "../../../components/CubeInput";
 import CubeRotationInput from "../../../components/CubeRotationInput";
+import CubeSelectionInputButton from "../../../components/CubeSelectionInputButton";
 import Dropup, { DropupItem } from "../../../components/Dropup";
 import HistoryList from "../../../components/HistoryList";
 import NumericInput from "../../../components/NumericInput";
@@ -49,7 +50,7 @@ const AnimatorProperties = () => {
 const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaAnimation | null, cubeName: string | undefined, cube: DCMCube | undefined }) => {
     const [rawKfs] = useListenableObjectNullable(animation?.selectedKeyframes)
     const [mode, setMode] = useListenableObjectNullable(animation?.propertiesMode)
-    const [lockedCubes, setLockedCubes] = useListenableObjectNullable(animation?.lockedCubes)
+    // const [lockedCubes, setLockedCubes] = useListenableObjectNullable(animation?.lockedCubes)
     const keyframes = rawKfs ?? []
     const selectedKf = keyframes.length === 1 ? keyframes[0] : undefined
 
@@ -91,23 +92,9 @@ const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaA
                 className="dark:text-white px-2 mt-2"
                 ref={useTooltipRef<HTMLDivElement>("When locked, a cube does not move with it's parent")}
             >
-                <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow mb-2">Cube Locked</p>
-                <div className="flex flex-row">
-                    <Toggle
-                        checked={lockedCubes !== undefined && cube !== undefined && lockedCubes.includes(cube.identifier)}
-                        setChecked={c => {
-                            if (lockedCubes === undefined || cube === undefined) {
-                                return
-                            }
-                            if (c) {
-                                setLockedCubes([...lockedCubes, cube.identifier])
-                            } else {
-                                setLockedCubes(lockedCubes.filter(id => id !== cube.identifier))
-                            }
-                        }}
-                    />
-                    <p className="text-xs pt-0.5 ml-2 dark:text-gray-400 text-black">{lockedCubes !== undefined && cube !== undefined ? (lockedCubes.includes(cube.identifier) ? "Locked" : "Unlocked") : ""}</p>
-                </div>
+                <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow mb-2">Cube Tempoary Parent</p>
+                <TempoaryParenting animation={animation} />
+
             </div>
             <div className="w-full grid grid-cols-2 px-2 pt-1">
                 <WrappedCubeInput
@@ -148,6 +135,21 @@ const AnimatorCubeProperties = ({ animation, cubeName, cube }: { animation: DcaA
                 />
             </div>
         </CollapsableSidebarPannel>
+    )
+}
+
+const TempoaryParenting = ({ animation }: { animation: DcaAnimation | null }) => {
+    const [selected] = useListenableObjectNullable(animation?.project?.model?.selectedCubeManager?.selected)
+    const [tempParent, setTempParent, deleteTempParent] = useListenableObjectInMapNullable(animation?.tempoaryParenting, selected !== undefined && selected.length === 1 ? selected[0] : undefined)
+
+    const dcmCube = animation === null || tempParent === undefined ? null : animation.project.model.identifierCubeMap.get(tempParent)
+
+    return (
+        <CubeSelectionInputButton
+            cube={dcmCube ?? null}
+            setCube={cube => cube ? setTempParent(cube.identifier) : deleteTempParent()}
+            setErrorMessage={e => console.log(e)}
+        />
     )
 }
 

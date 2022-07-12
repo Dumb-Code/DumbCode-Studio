@@ -516,10 +516,7 @@ const loadSounds = async (folderP: OrPromise<ReadableFolder | null>, project: Dc
 
 const wrapZip = (zip: JSZip, name = "_root"): WriteableFolder => {
   return {
-    file: async (fn, content) => {
-      zip.file(fn, await content)
-      console.log(fn, content)
-    },
+    file: (fn, content) => { zip.file(fn, content) },
     folder: (name) => wrapZip(zip.folder(name)!, name),
     name: name
   }
@@ -684,7 +681,7 @@ const getFileArrayIndex = async (folder: ReadableFolder, extension: string | nul
 const file = async (zip: ReadableFolder, fileName: string) => {
   const file = await zip.file(fileName)
   if (file === null) {
-    throw new Error(`Unable to find the file '${fileName}'.`)
+    throw new Error(`Unable to find the file '${fileName}' in folder '${zip.name}'.`)
   }
   return file
 }

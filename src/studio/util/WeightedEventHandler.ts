@@ -1,9 +1,18 @@
 type Callback<D> = (data: D) => boolean | void
-export default class IndexedEventHandler<D> {
-  listeners: { index: number, callback: Callback<D>, alwaysRecieve: boolean }[] = []
 
-  addListener(weight: number, callback: Callback<D>, alwaysRecieve = false) {
-    this.listeners.push({ index: weight, callback, alwaysRecieve })
+type Options = {
+  alwaysRecieve: boolean
+  recieveWhenIndexBlocked: boolean
+}
+export default class IndexedEventHandler<D> {
+  listeners: { index: number, callback: Callback<D>, options: Options }[] = []
+
+  addListener(weight: number, callback: Callback<D>, opts: Partial<Options> = {}) {
+    const options: Options = {
+      alwaysRecieve: opts.alwaysRecieve ?? false,
+      recieveWhenIndexBlocked: opts.recieveWhenIndexBlocked ?? false,
+    }
+    this.listeners.push({ index: weight, callback, options })
     this.listeners.sort((a, b) => a.index - b.index)
   }
 
@@ -12,10 +21,16 @@ export default class IndexedEventHandler<D> {
   }
 
   fireEvent(data: D) {
-    let canceled = false
+    let canceledIndex = -1
     for (let listener of this.listeners) {
-      if ((!canceled || listener.alwaysRecieve) && listener.callback(data) === true) {
-        canceled = true
+      if ((
+        canceledIndex === -1 ||            //The event is not cancled
+        listener.options.alwaysRecieve ||  //The listener always recieves the event
+
+        //The listener recieves the event when the index is blocked at the same index as the listener
+        (listener.options.recieveWhenIndexBlocked && listener.index === canceledIndex)
+      ) && listener.callback(data) === true) {
+        canceledIndex = listener.index
         const dataAny = data as any
         if (dataAny["stopPropagation"] !== undefined) {
           dataAny["stopPropagation"]()

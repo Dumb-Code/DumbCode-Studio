@@ -96,9 +96,18 @@ export const writeDCAAnimationWithFormat = async <T extends keyof OutputByType>(
     },
     cubeNameOverrides: convertMapToRecord(animation.keyframeNameOverrides),
     isSkeleton: animation.isSkeleton.value,
+    soundLayers: animation.soundLayers.value.map(layer => ({
+      sounds: layer.instances.value.map(sound => ({
+        soundName: sound.soundName,
+        start: sound.startTime.value,
+      })),
+    }))
   }
 
   const stringData = JSON.stringify(data)
+
+  //TODO: save sound uuids instead of `soundName`, and have DcaSoundLayerInstance load the sound from the uuid instead of the name
+  //Also, save the sound uuid to a data.json (that needs to be created)
 
   const zip = new JSZip()
   zip.file("dca_animation", stringData)
@@ -113,6 +122,7 @@ type ParsedAnimationType = {
   loopData: ParsedLoopdataType,
   cubeNameOverrides?: Record<string, string>
   isSkeleton?: boolean
+  soundLayers?: ParsedSoundLayerType[]
 }
 
 export type ParsedKfMap = Record<string, NumArray>
@@ -133,4 +143,13 @@ type ParsedLoopdataType = {
   start: number,
   end: number,
   duration: number
+}
+
+type ParsedSoundLayerType = {
+  sounds: ParsedSoundType[]
+}
+
+type ParsedSoundType = {
+  soundName: string,
+  start: number,
 }

@@ -30,7 +30,6 @@ type RootDataSectionType = {
   data: {
     name: string,
     ikAnchorCubes: readonly string[],
-    lockedCubes: readonly string[],
     ikDirection: "upwards" | "downwards",
     keyframe_layers: readonly { layerId: number }[],
     propertiesMode: "local" | "global",
@@ -106,7 +105,8 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   readonly scroll = new LO(0, this.onDirty)
   readonly zoom = new LO(1, this.onDirty)
 
-  readonly lockedCubes = new LO<readonly string[]>([])
+  // readonly lockedCubes = new LO<readonly string[]>([])
+  readonly tempoaryParenting = new LOMap<string, string>() //{cube@identifier, tempParent@identifier}
 
   readonly keyframeStartOrDurationChanges = new Set<() => void>()
 
@@ -131,7 +131,7 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
 
     this.ikAnchorCubes.applyToSection(this._section, "ikAnchorCubes").addListener(this.onDirty)
     this.ikDirection.applyToSection(this._section, "ikDirection").addListener(this.onDirty)
-    this.lockedCubes.applyToSection(this._section, "lockedCubes").addListener(this.onDirty)
+    // this.lockedCubes.applyToSection(this._section, "lockedCubes").addListener(this.onDirty)
 
     this.name = new LO(name, this.onDirty).applyToSection(this._section, "name")
     this.project = project

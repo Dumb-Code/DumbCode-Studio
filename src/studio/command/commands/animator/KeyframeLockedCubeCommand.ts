@@ -1,7 +1,9 @@
-import { Euler, Quaternion, Vector3 } from 'three';
+import { Euler, Matrix4, Quaternion, Vector3 } from 'three';
 import { v4 } from 'uuid';
 import CubeLocker from '../../../util/CubeLocker';
 import { CommandRunError } from '../../CommandRunError';
+import DcaAnimation, { DcaKeyframe } from './../../../formats/animations/DcaAnimation';
+import { DCMCube } from './../../../formats/model/DcmModel';
 import { HistoryActionTypes } from './../../../undoredo/UndoRedoHandler';
 import { LockerType } from './../../../util/CubeLocker';
 import { Command } from './../../Command';
@@ -34,22 +36,6 @@ const KeyframeLockedCubeCommand = (addCommand: (command: Command) => void) => {
     animation.undoRedoHandler.startBatchActions()
     keyframes.forEach(keyframe => {
 
-      const captureData = (time: number) => {
-        model.resetVisuals()
-        animation.animateAt(time)
-        model.updateMatrixWorld(true)
-        return cubes.map(cube => {
-          const pos = tempVec.copy(cube.cubeGroup.position)
-          const quat = tempQuat.copy(cube.cubeGroup.quaternion)
-          tempEuler.setFromQuaternion(quat, "ZYX")
-          return {
-            locker: new CubeLocker(cube),
-            position: [pos.x, pos.y, pos.z],
-            rotation: [tempEuler.x * 180 / Math.PI, tempEuler.y * 180 / Math.PI, tempEuler.z * 180 / Math.PI],
-          }
-        }).sort((a, b) => a.locker.cube.hierarchyLevel - b.locker.cube.hierarchyLevel)
-      }
-
       const insertEndKeyframe = (percent: number, nextPercent: number) => {
         const start = keyframe.startTime.value + keyframe.duration.value * percent
         const end = keyframe.startTime.value + keyframe.duration.value * Math.min(nextPercent, 1)
@@ -61,22 +47,24 @@ const KeyframeLockedCubeCommand = (addCommand: (command: Command) => void) => {
           false
         )
 
-        captureData(newKeyframe.startTime.value).forEach(({ locker, position, rotation }) => {
-          model.resetVisuals()
-          animation.animateAt(newKeyframe.startTime.value + newKeyframe.duration.value)
-          model.updateMatrixWorld(true)
+        const [captured] = captureData(animation, newKeyframe.startTime.value, cubes)
 
-          const values = CubeLocker.reconstructLockerValues(locker.cube, LockerType.POSITION_ROTATION, locker.worldMatrix)
-          const posDelta = [values.position[0] - position[0], values.position[1] - position[1], values.position[2] - position[2]] as const
-          const rotDelta = [values.rotation[0] - rotation[0], values.rotation[1] - rotation[1], values.rotation[2] - rotation[2]] as const
+        const wrongfullyMovedCubes = cubes.flatMap(c => c.children.value).filter(c => !cubes.includes(c))
 
-          if (posDelta[0] !== 0 || posDelta[1] !== 0 || posDelta[2] !== 0) {
-            newKeyframe.position.set(locker.cube.name.value, posDelta)
-          }
-          if (rotDelta[0] !== 0 || rotDelta[1] !== 0 || rotDelta[2] !== 0) {
-            newKeyframe.rotation.set(locker.cube.name.value, rotDelta)
-          }
-        })
+        const [wrongfullyMovedCaptured] = captureData(
+          animation,
+          newKeyframe.startTime.value + newKeyframe.duration.value,
+          wrongfullyMovedCubes,
+        )
+
+        captured.forEach(d => reconstruct(d, newKeyframe))
+
+        model.resetVisuals()
+        animation.animateAt(newKeyframe.startTime.value + newKeyframe.duration.value)
+        model.updateMatrixWorld(true)
+
+        wrongfullyMovedCaptured.forEach(cube => reconstruct(cube, newKeyframe))
+
       }
 
       const steps = Math.round(keyframe.duration.value / 0.05)
@@ -89,6 +77,46 @@ const KeyframeLockedCubeCommand = (addCommand: (command: Command) => void) => {
 
 
   }))
+}
+
+type CapturedData = {
+  cube: DCMCube,
+  worldMatrix: Matrix4,
+  position: number[];
+  rotation: number[];
+}
+
+export const captureCube = (cube: DCMCube): CapturedData => {
+  const pos = tempVec.copy(cube.cubeGroup.position)
+  const quat = tempQuat.copy(cube.cubeGroup.quaternion)
+  tempEuler.setFromQuaternion(quat, "ZYX")
+  const locker = new CubeLocker(cube)
+  return {
+    cube,
+    worldMatrix: locker.worldMatrix,
+    position: [pos.x, pos.y, pos.z],
+    rotation: [tempEuler.x * 180 / Math.PI, tempEuler.y * 180 / Math.PI, tempEuler.z * 180 / Math.PI],
+  }
+}
+
+export const captureData = (animation: DcaAnimation, time: number, ...cubes: DCMCube[][]) => {
+  animation.project.model.resetVisuals()
+  animation.animateAt(time)
+  animation.project.model.updateMatrixWorld(true)
+  return cubes.map(cubes => cubes.map(captureCube).sort((a, b) => a.cube.hierarchyLevel - b.cube.hierarchyLevel))
+}
+
+export const reconstruct = ({ cube, worldMatrix, position, rotation }: CapturedData, newKeyframe: DcaKeyframe) => {
+  const values = CubeLocker.reconstructLockerValues(cube, LockerType.POSITION_ROTATION, worldMatrix)
+  const posDelta = [values.position[0] - position[0], values.position[1] - position[1], values.position[2] - position[2]] as const
+  const rotDelta = [values.rotation[0] - rotation[0], values.rotation[1] - rotation[1], values.rotation[2] - rotation[2]] as const
+
+  if (posDelta[0] !== 0 || posDelta[1] !== 0 || posDelta[2] !== 0) {
+    newKeyframe.position.set(cube.name.value, posDelta)
+  }
+  if (rotDelta[0] !== 0 || rotDelta[1] !== 0 || rotDelta[2] !== 0) {
+    newKeyframe.rotation.set(cube.name.value, rotDelta)
+  }
 }
 
 export default KeyframeLockedCubeCommand

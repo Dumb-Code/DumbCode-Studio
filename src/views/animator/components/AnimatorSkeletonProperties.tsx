@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
-import { SvgArrowRight, SVGCube } from "../../../components/Icons"
+import CubeSelectionInputButton from "../../../components/CubeSelectionInputButton"
+import { SvgArrowRight } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { useListenableObject, useListenableObjectInMap } from "../../../studio/util/ListenableObject"
@@ -88,69 +89,9 @@ const AnimatorSkeletonProperties = () => {
 }
 
 const SkeletonEntry = ({ animation, name }: { animation: DcaAnimation, name: string }) => {
-  // animation.project.selectedCubeManager.
-  const { onMouseUp } = useStudio()
-
   const [foundCube, setFoundCube, deleteFoundCube] = useListenableObjectInMap(animation.keyframeNameOverrides, name)
-  const [typedCubeName, setTypedCubename] = useState("")
 
   const [errorMessage, setErrorMessage] = useState("")
-
-  const [isAwaitingClick, setIsAwaitingClick] = useState(false)
-
-  const manager = animation.project.selectedCubeManager
-  useEffect(() => {
-    if (!isAwaitingClick) {
-      return
-    }
-    const mouseUpListener = () => {
-      if (manager.mouseOverMesh) {
-        const cube = manager.getCube(manager.mouseOverMesh)
-        setFoundCube(cube.identifier)
-        setIsAwaitingClick(false)
-        return true
-      }
-      return false
-    }
-    onMouseUp.addListener(900, mouseUpListener)
-    return () => onMouseUp.removeListener(mouseUpListener)
-  }, [manager, isAwaitingClick, onMouseUp, setFoundCube])
-
-  const cubeButtonClicked = () => {
-    if (isAwaitingClick) {
-      setIsAwaitingClick(false)
-      return
-    }
-    if (manager.selected.value.length === 0) {
-      setErrorMessage("")
-      setIsAwaitingClick(true)
-      return
-    } else if (manager.selected.value.length === 1) {
-      setErrorMessage("")
-      setFoundCube(manager.selected.value[0])
-    } else {
-      setErrorMessage("Can only select one cube")
-      setIsAwaitingClick(true)
-      deleteFoundCube()
-    }
-  }
-
-  const cubeNamedTyped = (value: string) => {
-    setTypedCubename(value)
-    const cubesWithName = animation.project.model.cubeMap.get(value)
-    if (cubesWithName) {
-      if (cubesWithName.size === 1) {
-        cubesWithName.forEach(c => setFoundCube(c.identifier))
-        setErrorMessage("")
-      } else {
-        setErrorMessage("Too many cubes of that name")
-        deleteFoundCube()
-      }
-    } else {
-      setErrorMessage("Cube not found")
-      deleteFoundCube()
-    }
-  }
 
   const foundDcm = foundCube === undefined ? undefined : animation.project.model.identifierCubeMap.get(foundCube)
 
@@ -159,15 +100,12 @@ const SkeletonEntry = ({ animation, name }: { animation: DcaAnimation, name: str
       <div className="flex flex-row items-center pt-8 first:pt-3 px-2 w-full">
         <p className="dark:text-white bg-gray-200 dark:bg-gray-700 px-1 rounded">{name}</p>
         <p className="dark:text-white ml-3"><SvgArrowRight className="h-4 w-4 " /></p>
-        <input
-          value={foundDcm?.name?.value ?? typedCubeName}
-          onInput={e => cubeNamedTyped(e.currentTarget.value)}
-          className={"w-0 flex-grow dark:text-white ml-3 px-1 rounded h-6 " + (foundCube === undefined ? "bg-red-500" : "bg-gray-200 dark:bg-gray-700")}
-          type="text"
+        <CubeSelectionInputButton
+          cube={foundDcm ?? null}
+          setCube={cube => cube ? setFoundCube(cube.identifier) : deleteFoundCube()}
+          setErrorMessage={setErrorMessage}
+          allowInferedSelection
         />
-        <button onClick={cubeButtonClicked} className={"group w-6 h-6 ml-3 flex justify-center items-center rounded " + (isAwaitingClick ? "bg-purple-500" : "bg-gray-500 hover:bg-blue-600")}>
-          <SVGCube className="dark:text-white w-4 h-4" />
-        </button>
       </div>
       {errorMessage.length !== 0 && <p className="h-0 mx-3 text-sm text-red-500">{errorMessage}</p>}
     </>
