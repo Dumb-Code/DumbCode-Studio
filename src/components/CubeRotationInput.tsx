@@ -59,11 +59,11 @@ const InputField = ({ axis, color, value, setValue, onFocus, onBlur }: {
     sliderValue = (mod(value + 180, 360)) - 180
   }
   return (
-    <div className="flex flex-row mb-2 h-7 col-span-2">
+    <div className="flex flex-row mb-2 h-8 col-span-2">
       <div className={`${color} rounded-l px-2 text-white font-bold border-gray-900 pt-2 text-xs h-8`}>
         {axis.toUpperCase()}
       </div>
-      <div className=" w-20 h-7">
+      <div className=" w-20 h-8">
         <NumericInput
           value={value ?? undefined}
           onChange={setValue}
