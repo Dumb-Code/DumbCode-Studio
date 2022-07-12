@@ -9,7 +9,10 @@ import { AnimatorGumball, useAnimatorGumball } from "../logic/AnimatorGumball";
 const AnimatorGumballPropertiesBar = ({ consumer }: { consumer: AnimatorGumballConsumer | null | undefined }) => {
     //We want to force a refresh on useAnimatorGumball as little as possible
     useAnimatorGumball(consumer ?? null)
-    return <AnimationGumballPropertiesBarContained gumball={consumer?.getAnimatorGumball()} />
+
+    const [singleSelected] = useListenableObjectNullable(consumer?.getSingleSelectedPart())
+
+    return <AnimationGumballPropertiesBarContained gumball={(singleSelected === null || singleSelected === undefined) ? undefined : consumer?.getAnimatorGumball()} />
 }
 
 const AnimationGumballPropertiesBarContained = ({ gumball }: { gumball: AnimatorGumball | undefined }) => {
@@ -27,7 +30,6 @@ const AnimationGumballPropertiesBarContained = ({ gumball }: { gumball: Animator
 const AnimatorTransformationTypeSelect = ({ gumball }: { gumball: AnimatorGumball | undefined }) => {
     //todo: dont shwo gumball whenb light selecteds
     const [objectMode, setObjectMode] = useListenableObjectNullable(gumball?.mode)
-    const nonNullGumball = gumball as AnimatorGumball //When objectMode!==undefined, gumball!==undefined. Therefore we can pass it in to the select mods
 
     return (
         <>
@@ -35,8 +37,8 @@ const AnimatorTransformationTypeSelect = ({ gumball }: { gumball: AnimatorGumbal
                 <GumballButton title="Object" selected={objectMode === "object"} selectedClassName="bg-green-500" onClick={() => setObjectMode("object")} />
                 <GumballButton title="Gumball" selected={objectMode === "gumball"} selectedClassName="bg-green-500" onClick={() => setObjectMode("gumball")} />
             </ButtonList>
-            {objectMode === "object" && <AnimatorObjectTransformationModeSelect gumball={nonNullGumball} />}
-            {objectMode === "gumball" && <AnimatorGumballTransformationModeSelect gumball={nonNullGumball} />}
+            {gumball !== undefined && objectMode === "object" && <AnimatorObjectTransformationModeSelect gumball={gumball} />}
+            {gumball !== undefined && objectMode === "gumball" && <AnimatorGumballTransformationModeSelect gumball={gumball} />}
         </>
     )
 }
