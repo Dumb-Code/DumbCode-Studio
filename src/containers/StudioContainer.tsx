@@ -20,16 +20,6 @@ import Showcase from "../views/showcase/Showcase";
 import TextureMapper from "../views/texturemapper/Texturemapper";
 import Texturer from "../views/texturer/Texturer";
 
-declare global {
-  interface Window { readonly launchQueue?: LaunchQueue; }
-  interface LaunchQueue {
-    setConsumer(consumer: (params: LaunchParams) => void): void;
-  }
-  interface LaunchParams {
-    readonly files: FileSystemFileHandle[];
-  }
-}
-
 //Fix an issue with FIK
 if (typeof window !== "undefined") {
   //@ts-expect-error
