@@ -12,6 +12,8 @@ type ContextType = {
 
 const timeToFadeOut = 700
 
+type Renderable = string | (() => ReactNode)
+
 class ToastObject {
 
   readonly uuid = v4()
@@ -20,7 +22,7 @@ class ToastObject {
   readonly animatedUp = new LO(false)
 
   constructor(
-    public readonly message: string,
+    public readonly message: Renderable,
     public readonly type: ToastType
   ) {
 
@@ -41,7 +43,7 @@ const ToastContext = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<ToastObject[]>([])
   const createPortal = useCreatePortal()
 
-  const addToast = useCallback((message: string, type: ToastType, duration = 5000) => {
+  const addToast = useCallback((message: Renderable, type: ToastType, duration = 5000) => {
     const obj: ToastObject = new ToastObject(message, type)
 
     obj.fadingOut.addListener(fadingOut => {
@@ -114,7 +116,11 @@ const ToastEntry = ({ toast, index }: { toast: ToastObject, index: number }) => 
       style={{ bottom: essentialIndex * 72 + 16 }}
     >
       <div className={"transition-opacity duration-700 w-full h-full flex flex-col bg-gray-500 dark:bg-gray-900 dark:text-white m-2 p-2 rounded " + (fadingOut ? "opacity-0" : "opacity-100")}>
-        {toast.message.split("\n").map((line, index) => <p key={index}>{line}</p>)}
+        {
+          typeof toast.message === "string" ?
+            toast.message.split("\n").map((line, index) => <p key={index}>{line}</p>) :
+            toast.message()
+        }
       </div>
     </div>
   )
