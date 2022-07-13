@@ -1,0 +1,53 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <button onclick="runclick()">Open</button>
+  <button onclick="deleteAll()">Delete</button>
+
+  <script>
+    let file
+    async function runclick() {
+      //Storing the file names as a datetime string for ordering will break on Sat Nov 20 2286 17:46:40
+      const onInit = (fs) => {
+        file = fs.root
+        fs.root.createReader().readEntries(e => console.log(e.sort((a, b) => a.name > b.name ? 1 : -1)));
+        fs.root.getFile(Date.now() + ".txt", { create: true }, e => console.log(e), err => console.log(err))
+      }
+      const onError = (err) => {
+        console.log(err);
+      }
+
+      var requestedBytes = 1024 * 1024 * 50;
+      navigator.webkitPersistentStorage.requestQuota(
+        requestedBytes, function (grantedBytes) {
+          console.log("Granted " + grantedBytes + " bytes");
+          window.webkitRequestFileSystem(window.PERSISTENT, grantedBytes, onInit, onError);
+
+        }, function (e) { console.log('Error', e); }
+      );
+
+
+      navigator.webkitTemporaryStorage.queryUsageAndQuota(
+        function (usedBytes, grantedBytes) {
+          console.log('we are using ', usedBytes, ' of ', requestedBytes, 'bytes, out of ', grantedBytes);
+        },
+        function (e) { console.log('Error', e); }
+      );
+    }
+
+    async function deleteAll() {
+      if (file === undefined) return
+      file.createReader().readEntries(e => e.forEach(e => e.remove(s => console.log(s), err => console.log(err))));
+    }
+  </script>
+</body>
+
+</html>
