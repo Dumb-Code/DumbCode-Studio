@@ -39,6 +39,25 @@ declare global {
   interface FileSystemDirectoryEntry {
     removeRecursively(successCallback: () => void, errorCallback?: (error: Error) => void): void;
   }
+
+  interface FileSystemFileEntry {
+    createWriter(successCallback: (writer: FileWriter) => void, errorCallback?: (error: Error) => void): void;
+  }
+
+  interface FileWriter {
+    write(blob: Blob): void;
+    seek(offset: number): void;
+    truncate(size: number): void;
+    abort(): void;
+    readyState: number;
+    error: Error;
+    onwritestart: (event: any) => void;
+    onprogress: (event: any) => void;
+    onwrite: (event: any) => void;
+    onabort: (event: any) => void;
+    onerror: (event: any) => void;
+    onwriteend: (event: any) => void;
+  }
 }
 
 export { };

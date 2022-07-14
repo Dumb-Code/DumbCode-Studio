@@ -22,6 +22,12 @@ export type OptionsContext = {
 
   readonly keyCombos: KeyComboMap,
   keyCombosChanged: () => void, //TODO: remove this anti-pattern
+
+  autoRecoveryEnabled: boolean
+  setAutoRecoveryEnabled: (val: boolean) => void
+
+  autoRecoverySaveTime: number
+  setAutoRecoverySaveTime: (val: number) => void
 }
 
 type SavedOptions = {
@@ -29,6 +35,8 @@ type SavedOptions = {
   readonly compactMode: boolean,
   readonly keyCombos: SavedKeyComboMap
   readonly selectedScreenshotAction: ScreenshotActionType
+  readonly autoRecoveryEnabled: boolean,
+  readonly autoRecoverySaveTime: number,
 }
 
 export const useOptions = () => {
@@ -101,15 +109,21 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
   const [theme, setTheme] = useState<ThemeSetting>("auto") //We want the theme to default "auto" for SSG. This is overriden below.
   const [isSystemDark, setIsSystemDark] = useState(true)  //We want the dark theme to default true for SSG. This is overriden below.
   const [compactMode, setCompactMode] = useState(loadedOptions?.compactMode ?? false)
+  const [autoRecoveryEnabled, setAutoRecoveryEnabled] = useState(loadedOptions?.autoRecoveryEnabled ?? true)
+  const [autoRecoverySaveTime, setAutoRecoverySaveTime] = useState(loadedOptions?.autoRecoverySaveTime ?? 600000) //10 minutes in ms
+
   const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [loadedOptions?.keyCombos])
   const [selectedScreenshotAction, setScreenshotAction] = useState<ScreenshotActionType>(loadedOptions?.selectedScreenshotAction ?? "copy_to_clipboard")
 
   const darkMode = useMemo(() => theme === "auto" ? isSystemDark : theme === "dark", [theme, isSystemDark])
 
+
   const saveOptions = useCallback(() => {
     const data: SavedOptions = {
       theme: theme,
-      compactMode: compactMode,
+      compactMode,
+      autoRecoveryEnabled,
+      autoRecoverySaveTime,
       keyCombos: Object.keys(keyCombos).reduce((obj, c) => {
         const category = c as KeyComboCategory
         const keyCat = keyCombos[category].combos as Record<string, KeyCombo>
@@ -124,7 +138,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       selectedScreenshotAction: selectedScreenshotAction
     }
     localStorage.setItem("studio_options", JSON.stringify(data))
-  }, [compactMode, keyCombos, theme, selectedScreenshotAction])
+  }, [compactMode, keyCombos, theme, selectedScreenshotAction, autoRecoveryEnabled, autoRecoverySaveTime])
   useEffect(() => saveOptions(), [saveOptions])
 
 
@@ -165,7 +179,14 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
 
   }
   return (
-    <Context.Provider value={{ darkMode, isSystemDark, theme, setTheme, compactMode, setCompactMode, setScreenshotAction, selectedScreenshotAction, keyCombos, keyCombosChanged }}>
+    <Context.Provider value={{
+      darkMode, isSystemDark, theme, setTheme,
+      compactMode, setCompactMode,
+      setScreenshotAction, selectedScreenshotAction,
+      keyCombos, keyCombosChanged,
+      autoRecoveryEnabled, setAutoRecoveryEnabled,
+      autoRecoverySaveTime, setAutoRecoverySaveTime,
+    }}>
       {children}
     </Context.Provider>
   )

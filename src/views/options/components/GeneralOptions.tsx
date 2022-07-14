@@ -99,7 +99,7 @@ const AutoRecoverySection = () => {
 }
 
 const UsageAndQuota = () => {
-  const [usage, quota, refreshUsageAndQuota] = useUsageAndQuota()
+  const [usage, quota, numFiles, refreshUsageAndQuota] = useUsageAndQuota()
   const usageInMb = Math.round(usage / 1024 / 1024 * 100) / 100
   const quotaInMb = Math.round(quota / 1024 / 1024)
 
@@ -130,7 +130,7 @@ const UsageAndQuota = () => {
         </div>
         <button disabled={!AutoRecoveryFileSystem.canAutoRecover} onClick={openDeleteDialogBox} className={"icon-button h-full pr-2 " + (AutoRecoveryFileSystem.canAutoRecover ? "text-gray-500" : "")}>Delete</button>
       </div>
-      <p className="text-gray-900 text-xs mb-2">{`${usageInMb} MB of ${quotaInMb} MB`}</p>
+      <p className="text-gray-900 text-xs mb-2">{`${usageInMb} MB of ${quotaInMb} MB (${numFiles} total backups)`}</p>
     </>
   )
 }
