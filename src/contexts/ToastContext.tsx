@@ -3,11 +3,11 @@ import { v4 } from "uuid"
 import { LO, useListenableObject } from "../studio/util/ListenableObject"
 import { useCreatePortal } from "./CreatePortalContext"
 
-//Currently, info isn't used anywhere. Review if it's ever needed?
+//Info IS used btw
 type ToastType = "info" | "success" | "error"
 
 type ContextType = {
-  addToast: (message: string, type: ToastType, duration?: number) => void
+  addToast: (message: Renderable, type: ToastType, duration?: number) => void
 }
 
 const timeToFadeOut = 700
@@ -112,8 +112,8 @@ const ToastEntry = ({ toast, index }: { toast: ToastObject, index: number }) => 
   return (
     <div
       onClick={() => setFadingOut(true)}
-      className={"pointer-events-auto text-left absolute right-0 transition-all duration-200 w-80 h-16 rounded " + (fadingOut ? "" : "cursor-pointer")}
-      style={{ bottom: essentialIndex * 72 + 16 }}
+      className={"pointer-events-auto text-left absolute right-0 transition-all duration-200 w-80 h-20 rounded " + (fadingOut ? "" : "cursor-pointer")}
+      style={{ bottom: essentialIndex * 88 + 16 }}
     >
       <div className={"transition-opacity duration-700 w-full h-full flex flex-col bg-gray-500 dark:bg-gray-900 dark:text-white m-2 p-2 rounded " + (fadingOut ? "opacity-0" : "opacity-100")}>
         {
