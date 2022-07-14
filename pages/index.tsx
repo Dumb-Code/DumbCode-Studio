@@ -5,7 +5,7 @@ import ServersideContext from '../src/contexts/ServersideContext'
 
 
 const Home = ({ githubClientId, commitAuthor, commitMessage, commitSha }: InferGetStaticPropsType<typeof getStaticProps>) => {
-  const gitCommitMessage = `${commitMessage} - ${commitAuthor} (${commitSha})`
+  const gitCommitMessage = `${commitMessage} - ${commitAuthor} (${commitSha.substring(0, 7)})`
   return (
     <>
       <Head>
