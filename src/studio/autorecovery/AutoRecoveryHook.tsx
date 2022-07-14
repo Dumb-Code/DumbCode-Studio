@@ -83,7 +83,7 @@ const useAutoRecoveryListener = () => {
 
         if (file !== null) {
           const writer = await new Promise<FileWriter>((resolve, reject) => file.createWriter(resolve, reject))
-          console.log(writer.write(blob))
+          writer.write(blob)
         }
 
       }

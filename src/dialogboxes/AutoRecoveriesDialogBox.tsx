@@ -12,7 +12,7 @@ const AutoRecoveriesDialogBox = () => {
     <OpenedDialogBox width="600px" height="600px" title="Auto Recoveries">
       <div className="flex flex-col justify-center h-full p-5">
         <div className="text-center dark:text-white font-semibold">Select an auto recovery to add load it</div>
-        <div className="flex-grow min-h-0 overflow-x-hidden overflow-y-auto studio-scrollbar flex flex-col bg-gray-200 dark:bg-gray-900 m-3">
+        <div className="flex-grow h-0 overflow-x-hidden overflow-y-auto studio-scrollbar flex flex-col bg-gray-200 dark:bg-gray-700 m-3">
           {entries.reverse().map((e, i) => <AutoRecoveryEntry key={i} entry={e} />)}
         </div>
       </div>
