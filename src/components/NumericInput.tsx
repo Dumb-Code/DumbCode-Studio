@@ -8,7 +8,7 @@ const NumericInput = ({
   isPositiveInteger = false,
   defaultValue = 0,
   hideArrows = false,
-
+  background = "bg-gray-300 dark:bg-gray-700",
   min, max
 }: {
   value?: number | null | undefined,
@@ -23,12 +23,13 @@ const NumericInput = ({
 
   min?: number
   max?: number
+
+  background?: string
 }) => {
 
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const stringToNum = useCallback((string: string) => {
-    let num = isPositiveInteger ? parseInt(string) : parseFloat(string)
+  const clampValue = useCallback((num: number) => {
     if (isPositiveInteger && num < 0) {
       num = 0
     }
@@ -38,12 +39,18 @@ const NumericInput = ({
     if (max !== undefined && num > max) {
       num = max
     }
+    return num
+  }, [isPositiveInteger, min, max])
+
+  const stringToNum = useCallback((string: string) => {
+    const num = clampValue(isPositiveInteger ? parseInt(string) : parseFloat(string))
     return isNaN(num) ? defaultValue : num
-  }, [isPositiveInteger, defaultValue, min, max])
+  }, [isPositiveInteger, defaultValue, clampValue])
   const numToString = useCallback((value: number | null | undefined) => value?.toFixed(isPositiveInteger ? 0 : 2) ?? "", [isPositiveInteger])
 
   const [typedValue, setTypedValue] = useState(numToString(value))
   const [isFocused, setIsFocused] = useState(false)
+
 
   const onTyped = useCallback<ChangeEventHandler<HTMLInputElement>>(event => {
     setTypedValue(event.currentTarget.value)
@@ -96,23 +103,23 @@ const NumericInput = ({
 
   const modifyIncrease = useCallback((e: NeededEventData) => {
     if (value !== null && value !== undefined) {
-      const newValue = value + getDeltaValue(e)
+      const newValue = clampValue(value + getDeltaValue(e))
       if (onChange) {
         onChange(newValue)
       }
       setTypedValue(numToString(newValue))
     }
-  }, [value, onChange, getDeltaValue, setTypedValue, numToString])
+  }, [value, onChange, getDeltaValue, setTypedValue, numToString, clampValue])
 
   const modifyDecrease = useCallback((e: NeededEventData) => {
     if (value !== null && value !== undefined) {
-      const newValue = value - getDeltaValue(e)
+      const newValue = clampValue(value - getDeltaValue(e))
       if (onChange) {
         onChange(newValue)
       }
       setTypedValue(numToString(newValue))
     }
-  }, [value, onChange, getDeltaValue, setTypedValue, numToString])
+  }, [value, onChange, getDeltaValue, setTypedValue, numToString, clampValue])
 
   const onKeyDown = useCallback<KeyboardEventHandler>(e => {
     if (e.key === "ArrowUp") {
@@ -155,11 +162,11 @@ const NumericInput = ({
 
 
   return (
-    <div className="bg-gray-300 dark:bg-gray-700 w-full h-full flex flex-row items-center pl-1">
+    <div className={background + " w-full h-full flex flex-row items-center pl-1"}>
       <input
         disabled={value === null || value === undefined}
         ref={inputRef}
-        className="text-xs bg-gray-300 dark:bg-gray-700 dark:text-white py-2 flex-grow cursor-text w-full h-full outline-0 outline-none"
+        className={background + " text-xs dark:text-white py-2 flex-grow cursor-text w-full h-full outline-0 outline-none"}
         value={inputValue}
         onChange={onTyped}
         onFocus={onInputFocus}
