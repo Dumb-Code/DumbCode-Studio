@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export const useLocalStorage = (key: string) => {
+const useActualLocalStorage = (key: string) => {
   const [storage, _setStorage] = useState(localStorage.getItem(key))
 
   const setStorage = useCallback((value: string | null) => {
@@ -24,6 +24,12 @@ export const useLocalStorage = (key: string) => {
 
   return [storage, setStorage] as const
 }
+
+const useDummyLocalStorage = (key: string) => {
+  return useState<string | null>(null)
+}
+
+export const useLocalStorage = typeof window !== "undefined" ? useActualLocalStorage : useDummyLocalStorage
 
 export const useGithubAccessToken = () => {
   const [github, setGithub] = useLocalStorage("github-access-token")

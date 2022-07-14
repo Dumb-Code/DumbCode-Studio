@@ -3,6 +3,10 @@ import { SVGCheck } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useOptions } from "../../../contexts/OptionsContext"
 import { useInstall } from "../../../contexts/PWAInstallButtonContext"
+import { useTooltipRef } from "../../../contexts/TooltipContext"
+import ConfirmActionDialogBox from "../../../dialogboxes/ConfirmActionDialogBox"
+import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
+import AutoRecoveryFileSystem, { useIfHasBeenGivenAccess, useUsageAndQuota } from "../../../studio/autorecovery/AutoRecoveryFileSystem"
 import { AllScreenshotActionTypes, ScreenshotDesciptionMap } from "../../../studio/screenshot/ScreenshotActions"
 
 const GeneralOptions = () => {
@@ -18,9 +22,11 @@ const GeneralOptions = () => {
 
   const { selectedScreenshotAction, setScreenshotAction } = useOptions()
 
+
+
   return (
     <div className="dark:text-white">
-      <p className="text-black dark:text-white font-semibold mb-2">APPLICATION OPTIONS</p>
+      <p className="text-black dark:text-white font-semibold mb-2">GENERAL OPTIONS</p>
 
       <p className="text-gray-900 text-xs font-semibold">INSTALL</p>
       <PWAInstallButton />
@@ -34,7 +40,7 @@ const GeneralOptions = () => {
         </>
       )}
 
-      <p className="text-gray-900 text-xs font-semibold mt-2">SCREENSHOT ACTIONS</p>
+      <p className="text-gray-900 text-xs font-semibold mt-5">SCREENSHOT ACTIONS</p>
       <p className="text-gray-900 text-xs mb-2">Allows you to customize the way screenshots or showcase tab exports are saved.</p>
       <div className="flex flex-col w-fit">
         {AllScreenshotActionTypes.map(action => (
@@ -52,7 +58,80 @@ const GeneralOptions = () => {
         ))}
       </div>
 
+      <AutoRecoverySection />
+
+
     </div>
+  )
+}
+
+const AutoRecoverySection = () => {
+  const hasBeenGivenAccess = useIfHasBeenGivenAccess()
+
+  const isPossible = AutoRecoveryFileSystem.canAutoRecover
+
+  const tryGrantAccess = useCallback(() => {
+    AutoRecoveryFileSystem.getOrCreateSystem()
+  }, [])
+
+  return (
+    <>
+      <p className="text-gray-900 text-xs font-semibold mt-5">AUTO RECOVERY</p>
+      <p className={(isPossible ? "text-gray-900" : "text-red-500") + " text-xs mb-2"}>
+        {isPossible ? "Manage the auto recovery process" : "Auto recovery is not supported on this browser"}
+      </p>
+      <button
+        onClick={isPossible && hasBeenGivenAccess === false ? tryGrantAccess : undefined}
+        className={
+          (isPossible && hasBeenGivenAccess === true ? "bg-green-500 border-2 border-green-500 dark:bg-green-600 pointer-events-none" :
+            isPossible && hasBeenGivenAccess === false ? "bg-red-500 border-2 border-red-500 dark:bg-red-600 dark:hover:bg-red-700" :
+              "bg-gray-500 border-2 border-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700")
+          + " p-1"
+        }
+        disabled={!isPossible}
+      >
+        {isPossible ? hasBeenGivenAccess === true ? "Access granted" : "Grant Access" : "Not possible"}
+      </button>
+      <UsageAndQuota />
+
+    </>
+  )
+}
+
+const UsageAndQuota = () => {
+  const [usage, quota, refreshUsageAndQuota] = useUsageAndQuota()
+  const usageInMb = Math.round(usage / 1024 / 1024 * 100) / 100
+  const quotaInMb = Math.round(quota / 1024 / 1024)
+
+  const tooltip = `The amount of space used by the auto recovery system.\nWhen full, the oldest files will be deleted.`
+  const tooltipRef = useTooltipRef<HTMLDivElement>(tooltip)
+
+  const dialogBoxes = useDialogBoxes()
+
+  const openDeleteDialogBox = () => {
+    if (!AutoRecoveryFileSystem.canAutoRecover) {
+      return
+    }
+    dialogBoxes.setDialogBox(() => <ConfirmActionDialogBox
+      title="Delete Recovery Data"
+      description="You are about to delete all recovery data. This action cannot be undone. Are you sure you want to continue?"
+      onYes={async () => {
+        await AutoRecoveryFileSystem.deleteAll()
+        refreshUsageAndQuota()
+      }}
+    />)
+  }
+
+  return (
+    <>
+      <div className="flex flex-row items-center mt-2 h-8  ">
+        <div ref={tooltipRef} className="w-64 h-full dark:bg-gray-800 bg-gray-300 mr-2">
+          {AutoRecoveryFileSystem.canAutoRecover && <div className="h-full bg-green-500 dark:bg-green-600" style={{ width: `${usage / quota * 100}%` }} />}
+        </div>
+        <button disabled={!AutoRecoveryFileSystem.canAutoRecover} onClick={openDeleteDialogBox} className={"icon-button h-full pr-2 " + (AutoRecoveryFileSystem.canAutoRecover ? "text-gray-500" : "")}>Delete</button>
+      </div>
+      <p className="text-gray-900 text-xs mb-2">{`${usageInMb} MB of ${quotaInMb} MB`}</p>
+    </>
   )
 }
 

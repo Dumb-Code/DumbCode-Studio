@@ -10,6 +10,7 @@ import StudioPanelsContextProvider from "../contexts/StudioPanelsContext";
 import ToastContext from "../contexts/ToastContext";
 import TooltipContextProvider from "../contexts/TooltipContext";
 import DialogBoxes from "../dialogboxes/DialogBoxes";
+import { useAutoRecoveryFileSystem } from "../studio/autorecovery/AutoRecoveryHook";
 import { createReadableFileExtended } from "../studio/files/FileTypes";
 import { createProject, newProject } from "../studio/formats/project/DcProject";
 import Animator from "../views/animator/Animator";
@@ -87,6 +88,8 @@ const StudioApp = () => {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const { hasProject, getSelectedProject, addProject } = useStudio()
   const { darkMode } = useOptions()
+
+  useAutoRecoveryFileSystem()
 
   useWhenAction("create_new_model", () => {
     addProject(newProject())
