@@ -95,8 +95,8 @@ export default class AutoRecoveryFileSystem {
   //Say a recovery file was pushed at 1650000000, at a rate of 1 per minute.
   //99 files later and we're at 1656000000
   //We can then split up the file name into subdirectories as follows:
-  // 1650000000-<filename> --> 16/50/000000-<filename> 
-  // 1656000000-<filename> --> 16/56/000000-<filename>
+  // 1650000000-<filename> --> 16/50/1650000000-<filename> 
+  // 1656000000-<filename> --> 16/56/1656000000-<filename>
   //
   //And therefore they're in different directories \o/, thus no issue.
   //Note that the first two directories are numbers 00-99, which is 100 entries exactly.
@@ -105,7 +105,6 @@ export default class AutoRecoveryFileSystem {
     const [l1, l2, l3, l4, ...rest] = name
     const dir1 = l1 + l2
     const dir2 = l3 + l4
-    const filename = rest.join("")
 
     const directory = await AutoRecoveryFileSystem.getBaseDirectory()
     if (directory === null) {
@@ -116,7 +115,7 @@ export default class AutoRecoveryFileSystem {
     const directory2 = await AutoRecoveryFileSystem.getSubDirectory(directory1, dir2, { create: true })
 
     return new Promise<FileSystemFileEntry>((resolve, reject) => {
-      directory2.getFile(filename, { create: true }, file => {
+      directory2.getFile(name, { create: true }, file => {
         if (file.isFile) {
           resolve(file as FileSystemFileEntry)
         } else {
@@ -131,7 +130,7 @@ export default class AutoRecoveryFileSystem {
     if (directory === null) {
       return []
     }
-    //16/50/000000-<filename>
+    //16/50/1650000000-<filename>
 
     const topLevelDirectories = await AutoRecoveryFileSystem.listFiles(directory, false)
 
@@ -202,7 +201,7 @@ export const useIfHasBeenGivenAccess = () => {
 }
 
 export const useAllEntries = () => {
-  const [entries, setEntries] = useState<FileSystemEntry[]>([])
+  const [entries, setEntries] = useState<FileSystemFileEntry[]>([])
   const updateEntries = useCallback(() => {
     AutoRecoveryFileSystem.getAllEntries().then(setEntries)
   }, [])

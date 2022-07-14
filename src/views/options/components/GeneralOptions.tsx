@@ -1,9 +1,11 @@
 import { useCallback, useMemo } from "react"
 import { SVGCheck } from "../../../components/Icons"
+import NumericInput from "../../../components/NumericInput"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useOptions } from "../../../contexts/OptionsContext"
 import { useInstall } from "../../../contexts/PWAInstallButtonContext"
 import { useTooltipRef } from "../../../contexts/TooltipContext"
+import AutoRecoveriesDialogBox from "../../../dialogboxes/AutoRecoveriesDialogBox"
 import ConfirmActionDialogBox from "../../../dialogboxes/ConfirmActionDialogBox"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import AutoRecoveryFileSystem, { useIfHasBeenGivenAccess, useUsageAndQuota } from "../../../studio/autorecovery/AutoRecoveryFileSystem"
@@ -68,11 +70,28 @@ const GeneralOptions = () => {
 const AutoRecoverySection = () => {
   const hasBeenGivenAccess = useIfHasBeenGivenAccess()
 
+  const {
+    autoRecoveryEnabled, setAutoRecoveryEnabled,
+    autoRecoverySaveTime, setAutoRecoverySaveTime
+  } = useOptions()
+
   const isPossible = AutoRecoveryFileSystem.canAutoRecover
 
-  const tryGrantAccess = useCallback(() => {
-    AutoRecoveryFileSystem.getOrCreateSystem()
-  }, [])
+  const buttonClicked = useCallback(() => {
+    if (isPossible && hasBeenGivenAccess === true) {
+      setAutoRecoveryEnabled(!autoRecoveryEnabled)
+      return
+    }
+    if (isPossible && hasBeenGivenAccess === false) {
+      AutoRecoveryFileSystem.getOrCreateSystem()
+    }
+  }, [isPossible, hasBeenGivenAccess, autoRecoveryEnabled, setAutoRecoveryEnabled])
+
+  const { setDialogBox } = useDialogBoxes()
+
+  const openRecoveries = useCallback(() => {
+    setDialogBox(() => <AutoRecoveriesDialogBox />)
+  }, [setDialogBox])
 
   return (
     <>
@@ -80,18 +99,43 @@ const AutoRecoverySection = () => {
       <p className={(isPossible ? "text-gray-900" : "text-red-500") + " text-xs mb-2"}>
         {isPossible ? "Manage the auto recovery process" : "Auto recovery is not supported on this browser"}
       </p>
+
       <button
-        onClick={isPossible && hasBeenGivenAccess === false ? tryGrantAccess : undefined}
+        onClick={openRecoveries}
+        className="bg-bluegreen-500 border-2 border-blue-500 dark:bg-blue-600 dark:hover:bg-blue-700 p-1 w-36"
+      >
+        Open Recoveries
+      </button>
+
+      {/* NGL, this button should be split up into two different components,
+          One for when we've been given access to the api (Enable | Disable)
+          and one for when we haven't been given access (Get Access | Not Possible)
+      */}
+      <button
+        onClick={buttonClicked}
         className={
-          (isPossible && hasBeenGivenAccess === true ? "bg-green-500 border-2 border-green-500 dark:bg-green-600 pointer-events-none" :
-            isPossible && hasBeenGivenAccess === false ? "bg-red-500 border-2 border-red-500 dark:bg-red-600 dark:hover:bg-red-700" :
+          (isPossible && hasBeenGivenAccess === true && autoRecoveryEnabled ? "bg-green-500 border-2 border-green-500 dark:bg-green-600 dark:hover:bg-green-700" :
+            isPossible && (hasBeenGivenAccess === false || !autoRecoveryEnabled) ? "bg-red-500 border-2 border-red-500 dark:bg-red-600 dark:hover:bg-red-700" :
               "bg-gray-500 border-2 border-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700")
-          + " p-1"
+          + " p-1 w-32"
         }
         disabled={!isPossible}
       >
-        {isPossible ? hasBeenGivenAccess === true ? "Access granted" : "Grant Access" : "Not possible"}
+        {isPossible ? hasBeenGivenAccess === true ? (autoRecoveryEnabled ? "Disable" : "Enable") : "Grant Access" : "Not possible"}
       </button>
+      <div className="flex flex-row mt-3 w-fit">
+        <div className="dark:text-white mr-3">Time between autosave:</div>
+        <div>
+          <NumericInput
+            background="bg-gray-200 dark:bg-gray-800"
+            value={autoRecoverySaveTime}
+            onChange={setAutoRecoverySaveTime}
+            min={1}
+            isPositiveInteger
+          />
+        </div>
+        <div className="dark:text-white ml-2">minute{autoRecoverySaveTime === 1 ? "" : "s"}</div>
+      </div>
       <UsageAndQuota />
 
     </>

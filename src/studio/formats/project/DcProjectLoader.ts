@@ -120,12 +120,14 @@ const wrapZipReadable = (zip: JSZip, name = "_root"): ReadableFolder => {
   }
 }
 
-export const loadDcProj = async (name: string, buffer: ArrayBuffer, writeable: WritableFile) => {
+export const loadDcProj = async (name: string, buffer: ArrayBuffer, writeable?: WritableFile) => {
   const zip = await JSZip.loadAsync(buffer)
   const project = await loadFolderProject(name, zip, false)
 
-  project.projectWritableFile = writeable
-  project.projectSaveType.value = "project"
+  if (writeable !== undefined) {
+    project.projectWritableFile = writeable
+    project.projectSaveType.value = "project"
+  }
 
   return project
 }

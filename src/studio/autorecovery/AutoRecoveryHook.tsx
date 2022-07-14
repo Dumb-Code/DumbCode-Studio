@@ -74,7 +74,8 @@ const useAutoRecoveryListener = () => {
     //Their autosave history is not filled up
     const checkAutoRecovery = async () => {
       const now = Date.now()
-      if (now - timeSinceLastSave.current > autoRecoverySaveTime) {
+      //autoRecoverySaveTime is in minutes, so we need to convert to ms
+      if (now - timeSinceLastSave.current > autoRecoverySaveTime * 60000) {
         timeSinceLastSave.current = now
 
         const blob = await writeDcProj(project)

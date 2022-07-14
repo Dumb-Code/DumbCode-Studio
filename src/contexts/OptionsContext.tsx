@@ -110,7 +110,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
   const [isSystemDark, setIsSystemDark] = useState(true)  //We want the dark theme to default true for SSG. This is overriden below.
   const [compactMode, setCompactMode] = useState(loadedOptions?.compactMode ?? false)
   const [autoRecoveryEnabled, setAutoRecoveryEnabled] = useState(loadedOptions?.autoRecoveryEnabled ?? true)
-  const [autoRecoverySaveTime, setAutoRecoverySaveTime] = useState(loadedOptions?.autoRecoverySaveTime ?? 600000) //10 minutes in ms
+  const [autoRecoverySaveTime, setAutoRecoverySaveTime] = useState(loadedOptions?.autoRecoverySaveTime ?? 10) //10 minutes in ms
 
   const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [loadedOptions?.keyCombos])
   const [selectedScreenshotAction, setScreenshotAction] = useState<ScreenshotActionType>(loadedOptions?.selectedScreenshotAction ?? "copy_to_clipboard")
