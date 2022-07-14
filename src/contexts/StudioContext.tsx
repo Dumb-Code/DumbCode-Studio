@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { StudioTabs } from '../containers/StudioContainer';
 import DcProject, { newProject } from '../studio/formats/project/DcProject';
 import { createThreeContext, ThreeJsContext } from './ThreeContext';
 
@@ -10,6 +11,12 @@ export type StudioContext = {
   hasProject: boolean
   getSelectedProject: () => DcProject
   selectProject: (project: DcProject) => void,
+
+  activeTab: Tab,
+  setActiveTab: (tab: Tab) => void
+
+  settingsOpen: boolean,
+  setSettingsOpen: (open: boolean) => void
 } & ThreeJsContext
 const CreatedContext = createContext<StudioContext | null>(null);
 export const useStudio = () => {
@@ -20,13 +27,23 @@ export const useStudio = () => {
   return context
 }
 
+export type Tab = {
+  name: string;
+  color: string;
+  component: () => JSX.Element;
+}
+
 const three = createThreeContext()
+
 
 export const StudioContextProvider = ({ children }: { children?: ReactNode }) => {
 
   const [projects, setProjects] = useState<DcProject[]>([])
   //NOT const, as we want to make sure that the selectedProject ALWAYS points to the correct project
   let [selectedProject, setSelectedProject] = useState<DcProject | null>(null)
+
+  const [activeTab, setActiveTab] = useState<Tab>(StudioTabs[0])
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   useEffect(() => {
     if (selectedProject === null) {
@@ -39,6 +56,8 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
 
   const context: StudioContext = {
     projects,
+    activeTab, setActiveTab,
+    settingsOpen, setSettingsOpen,
     addProject: project => {
       setProjects(projects.concat([project]))
       context.selectProject(project)

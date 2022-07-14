@@ -1,11 +1,11 @@
-import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, useEffect, useRef } from "react";
 import GithubAccountButton from "../components/GithubAccountButton";
 import { SVGSettings } from "../components/Icons";
 import CreatePortalContext from "../contexts/CreatePortalContext";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
 import ProjectPageContextProvider from "../contexts/ProjectPageContext";
 import PWAInstallButtonContext from "../contexts/PWAInstallButtonContext";
-import { StudioContextProvider, useStudio } from "../contexts/StudioContext";
+import { StudioContextProvider, Tab, useStudio } from "../contexts/StudioContext";
 import StudioPanelsContextProvider from "../contexts/StudioPanelsContext";
 import ToastContext from "../contexts/ToastContext";
 import TooltipContextProvider from "../contexts/TooltipContext";
@@ -28,13 +28,7 @@ if (typeof window !== "undefined") {
   window['THREE'] = require('three')
 }
 
-type Tab = {
-  name: string;
-  color: string;
-  component: () => JSX.Element;
-}
-
-const Tabs: Tab[] = [
+export const StudioTabs = [
   // { name: "options", titleComponent: () => <SVGSettings className="w-5 h-5 px-0.5" />, color: "bg-red-500", component: () => <Options />, extraClasses: "w-9 transform translate-y-1.5" },
   { name: "Project", color: "bg-purple-600 hover:bg-purple-700", component: () => <Project /> },
   { name: "Modeler", color: "bg-sky-600 hover:bg-sky-700", component: () => <Modeler /> },
@@ -42,7 +36,7 @@ const Tabs: Tab[] = [
   { name: "Texturer", color: "bg-green-500 hover:bg-green-600", component: () => <Texturer /> },
   { name: "Animator", color: "bg-yellow-500 hover:bg-yellow-600", component: () => <Animator /> },
   { name: "Showcase", color: "bg-orange-500 hover:bg-orange-600", component: () => <Showcase /> },
-]
+] as const
 
 const StudioContainer = () => {
   return (
@@ -82,18 +76,22 @@ export const useWhenAction = (action: "create_new_model" | "last_remote_repo_pro
   }, [action, fn])
 }
 
+
 const StudioApp = () => {
 
-  const [activeTab, setActiveTab] = useState(Tabs[0])
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const { hasProject, getSelectedProject, addProject } = useStudio()
+
+  const {
+    hasProject, getSelectedProject, addProject,
+    activeTab, setActiveTab,
+    settingsOpen, setSettingsOpen
+  } = useStudio()
   const { darkMode } = useOptions()
 
   useAutoRecovery()
 
   useWhenAction("create_new_model", () => {
     addProject(newProject())
-    setActiveTab(Tabs[1])
+    setActiveTab(StudioTabs[1])
   })
 
   useEffect(() => {
@@ -122,7 +120,8 @@ const StudioApp = () => {
   }, [addProject])
 
   const tabChanged = ((tab: Tab) => {
-    if (tab !== Tabs[0] && !hasProject) {
+    //Create a project if there is none
+    if (tab !== StudioTabs[0] && !hasProject) {
       getSelectedProject()
     }
     setSettingsOpen(false)
@@ -142,7 +141,7 @@ const StudioApp = () => {
             >
               <SVGSettings className="w-5 h-5 px-0.5" />
             </NavBarButton>
-            {Tabs.map(tab =>
+            {StudioTabs.map(tab =>
               <NavBarButton
                 key={tab.name}
                 color={tab.color}
