@@ -78,7 +78,7 @@ export const OpenedDialogBox = ({ title = "", width = "500px", height = "500px",
         onClose={useCallback(() => dialogBox.clear(), [dialogBox])}
         className={"fixed inset-0 " + (darkMode ? "dark" : "")}
       >
-        <div id="DialogCloseBoundry" className="px-4 py-4 text-center bg-black bg-opacity-80 dark:text-white h-full" onClick={e => e.currentTarget.id === "DialogCloseBoundry" && dialogBox.clear()}>
+        <div id="DialogCloseBoundry" className="px-4 py-4 flex justify-center items-center bg-black bg-opacity-80 dark:text-white h-full" onClick={e => e.currentTarget.id === "DialogCloseBoundry" && dialogBox.clear()}>
           <Dialog.Overlay />
           <div
             style={{ width, height }}
