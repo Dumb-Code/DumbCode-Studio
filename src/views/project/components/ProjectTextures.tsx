@@ -1,4 +1,3 @@
-import { PNG } from "pngjs"
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
@@ -24,7 +23,7 @@ const ProjectTextures = () => {
         getSelectedProject().textureManager.addGroup(new TextureGroup("New Group", false))
     }
 
-    const addTexture = (name?: string, img?: PNG) => {
+    const addTexture = (name?: string, img?: HTMLImageElement) => {
         getSelectedProject().textureManager.addTexture(name, img)
     }
 
@@ -380,7 +379,7 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
     const { addToast } = useToast()
 
     const saveTexture = async () => {
-        const name = await texture.textureWritableFile.write(texture.name.value + ".png", writeImgToBlob(texture.pixels.value))
+        const name = await texture.textureWritableFile.write(texture.name.value + ".png", writeImgToBlob(texture.element.value))
         texture.name.value = removeFileExtension(name)
         setIsTextureDirty(false)
         setSaveableFile(true)

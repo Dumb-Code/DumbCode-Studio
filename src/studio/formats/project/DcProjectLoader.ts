@@ -1,5 +1,4 @@
 import JSZip from "jszip";
-import { PNG } from "pngjs";
 import { createReadableFileExtended, WritableFile } from "../../files/FileTypes";
 import { SerializedUndoRedoHandler } from "../../undoredo/UndoRedoHandler";
 import { ReferenceImage } from "../../util/ReferenceImageHandler";
@@ -491,7 +490,7 @@ const getRefImagesData = async (folder: ReadableFolder): Promise<RefImgData> => 
   }
 }
 
-const getRefImages = async (folder: ReadableFolder, legacyImgNames: string[] | null): Promise<(PNG | null)[]> => {
+const getRefImages = async (folder: ReadableFolder, legacyImgNames: string[] | null): Promise<(HTMLImageElement | null)[]> => {
   return Promise.all((await getFileArrayIndex(folder, "png", legacyImgNames ?? undefined))
     .map(async (file) => file === null ? null : file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))))
   )
@@ -608,7 +607,7 @@ const writeTextures = async (project: DcProject, folderP: OrPromise<WriteableFol
 
   await Promise.all([
     dataFolder.file("data.json", JSON.stringify(textureData)),
-    ...textures.map((texture, index) => writeImg(folder, keepFilesNice ? texture.name.value : index, texture.pixels.value)),
+    ...textures.map((texture, index) => writeImg(folder, keepFilesNice ? texture.name.value : index, texture.element.value)),
     writeNameIndexFileIfNeeded(folder, textures.map(t => t.name.value))
   ])
 }
@@ -697,7 +696,7 @@ const folder = async (zip: ReadableFolder, fileName: string) => {
   return file
 }
 
-const writeImg = async (folder: WriteableFolder, name: string | number, img: HTMLImageElement | PNG) => {
+const writeImg = async (folder: WriteableFolder, name: string | number, img: HTMLImageElement) => {
   const blob = await writeImgToBlob(img)
   await folder.file(`${name}.png`, blob)
 }

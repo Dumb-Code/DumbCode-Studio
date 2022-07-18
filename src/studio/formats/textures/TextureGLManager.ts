@@ -4,7 +4,7 @@ export class TextureGLManager {
   static instance: TextureGLManager | null = null
 
   readonly canvas = document.createElement("canvas")
-  readonly gl = this.canvas.getContext("webgl", { premultipliedAlpha: true })!
+  readonly gl = this.canvas.getContext("webgl")!
 
   private readonly program = this.createProgram()
   private readonly buffers = this.createBuffers()
@@ -46,7 +46,6 @@ export class TextureGLManager {
     //Clear the canvas
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    document.body.appendChild(canvas)
 
     // Tell WebGL we want to use this program for all subsequent rendering
     gl.useProgram(program);
