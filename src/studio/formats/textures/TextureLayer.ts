@@ -20,12 +20,13 @@ export default class TextureLayer {
 
     const fileReader = new FileReader()
     return new Promise<string>((resolve, reject) => {
-      const blobStream = png.pack().pipe(BlobStream())
+      const blobStream = BlobStream()
       png.once("end", () => {
         fileReader.onload = () => resolve(fileReader.result as string)
         fileReader.onerror = reject
         fileReader.readAsDataURL(blobStream.toBlob("image/png"))
       })
+      png.pack().pipe(blobStream)
     })
   }
 
