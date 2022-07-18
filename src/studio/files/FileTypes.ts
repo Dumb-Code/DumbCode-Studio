@@ -34,7 +34,6 @@ export type WritableFile = {
 } & ListenableFile
 
 export const downloadBlob: WritableFile['write'] = async (name, blob) => {
-  console.log(name)
   const url = window.URL.createObjectURL(await blob);
   const a = document.createElement("a");
   a.href = url;
@@ -68,7 +67,6 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
             }
           }]
         })
-        console.log(picked)
         readable = createReadableFileExtended(picked)
         saveName = readable.name
         file = readable.asWritable()
