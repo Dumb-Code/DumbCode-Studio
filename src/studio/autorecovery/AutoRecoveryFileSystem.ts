@@ -125,6 +125,39 @@ export default class AutoRecoveryFileSystem {
     })
   }
 
+  static async getOldest<T extends boolean>(directory: FileSystemDirectoryEntry, isFiles: T) {
+    const files = await AutoRecoveryFileSystem.listFiles(directory, isFiles)
+    if (files.length === 0) {
+      return null
+    }
+    return files.sort((a, b) => a.name.localeCompare(b.name))[0]
+  }
+
+  static async deleteOldest() {
+    const directory = await AutoRecoveryFileSystem.getBaseDirectory()
+    if (directory === null) {
+      return false
+    }
+
+    const oldestsTopDir = await AutoRecoveryFileSystem.getOldest(directory, false)
+    if (oldestsTopDir === null) {
+      return false
+    }
+    const oldestSubdir = await AutoRecoveryFileSystem.getOldest(oldestsTopDir, false)
+    if (oldestSubdir === null) {
+      return false
+    }
+
+    const oldestFile = await AutoRecoveryFileSystem.getOldest(oldestSubdir, true)
+    if (oldestFile === null) {
+      return false
+    }
+
+    return new Promise<boolean>((resolve, reject) => {
+      oldestFile.remove(() => resolve(true), reject)
+    })
+  }
+
   static async getAllEntries() {
     const directory = await AutoRecoveryFileSystem.getBaseDirectory()
     if (directory === null) {

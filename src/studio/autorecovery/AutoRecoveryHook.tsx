@@ -69,23 +69,32 @@ const useAutoRecoveryListener = () => {
     }
     const project = getSelectedProject()
 
-    //We do the auto recovery listening when the mouse moves,
-    //or a key is pressed, so that if the user is afk and makes no changes,
-    //Their autosave history is not filled up
-    const checkAutoRecovery = async () => {
-      const now = Date.now()
-      //autoRecoverySaveTime is in minutes, so we need to convert to ms
-      if (now - timeSinceLastSave.current > autoRecoverySaveTime * 60000) {
-        timeSinceLastSave.current = now
-
-        const blob = await writeDcProj(project)
+    const performWrite = async (blob: Blob, now: number) => {
+      try {
         const file = await AutoRecoveryFileSystem.getFile(`${now}-${project.name.value}`)
 
         if (file !== null) {
           const writer = await new Promise<FileWriter>((resolve, reject) => file.createWriter(resolve, reject))
           writer.write(blob)
         }
+      } catch (e) {
+        //We've run out of space.
+        await AutoRecoveryFileSystem.deleteOldest()
+        await performWrite(blob, now)
+      }
+    }
 
+    //We do the auto recovery listening when the mouse moves,
+    //or a key is pressed, so that if the user is afk and makes no changes,
+    //Their autosave history is not filled up
+    const checkAutoRecovery = async () => {
+      const now = Date.now()
+      //autoRecoverySaveTime is in minutes, so we need to convert to ms
+      if (now - timeSinceLastSave.current > 1000) { //autoRecoverySaveTime * 60000
+        timeSinceLastSave.current = now
+
+        const blob = await writeDcProj(project)
+        await performWrite(blob, now)
       }
     }
     document.addEventListener("mousemove", checkAutoRecovery)
