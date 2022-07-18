@@ -61,7 +61,7 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
 
       const exportTexture = async (folderName: string, texture: Texture) => {
         if (textures.includes(project.textureManager.textures.value.indexOf(texture))) {
-          comitter.pushChange(`${baseFolder}/${folderName === '' ? '' : `${folderName}/`}${texture.name.value}.png`, await writeImgToBase64(texture.pixels.value), true)
+          comitter.pushChange(`${baseFolder}/${folderName === '' ? '' : `${folderName}/`}${texture.name.value}.png`, await writeImgToBase64(texture.element.value), true)
         }
       }
 
