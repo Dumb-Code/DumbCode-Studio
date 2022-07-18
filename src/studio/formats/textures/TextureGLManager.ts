@@ -1,4 +1,4 @@
-import TextureCanvas from './TextureCanvas';
+import TextureLayer from './TextureLayer';
 export class TextureGLManager {
 
   static instance: TextureGLManager | null = null
@@ -23,7 +23,7 @@ export class TextureGLManager {
   //as 2d canvas rendering uses premultiplied alpha
   //Therefore, this method should not be used for accurate results 
   //To get accurate results, look at `this.canvas`
-  render(textures: TextureCanvas[], options?: {
+  render(textures: TextureLayer[], options?: {
     dest?: HTMLCanvasElement
     premultiply?: boolean
     width?: number
@@ -89,7 +89,7 @@ export class TextureGLManager {
     }
   }
 
-  readTexture(texture: TextureCanvas) {
+  readTexture(texture: TextureLayer) {
     const { gl, framebuffer } = this
     // Bind the framebuffer and texture
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);

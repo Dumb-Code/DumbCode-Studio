@@ -9,8 +9,8 @@ import DcProject from '../project/DcProject';
 import { ListenableFile } from './../../files/FileTypes';
 import { LO, useListenableObject } from './../../util/ListenableObject';
 import { DCMCube, DCMModel } from './../model/DcmModel';
-import TextureCanvas from './TextureCanvas';
 import { TextureGLManager } from './TextureGLManager';
+import TextureLayer from './TextureLayer';
 
 export default class TextureManager {
   readonly project: DcProject
@@ -290,7 +290,7 @@ export class Texture {
 
   listenableFile: ListenableFileData | null = null
 
-  readonly canvas = new TextureCanvas()
+  readonly canvas = new TextureLayer()
 
   width: number
   height: number

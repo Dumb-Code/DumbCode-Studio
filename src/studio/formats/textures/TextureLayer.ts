@@ -1,7 +1,7 @@
 import BlobStream from 'blob-stream';
 import { PNG } from 'pngjs';
 import { TextureGLManager } from './TextureGLManager';
-export default class TextureCanvas {
+export default class TextureLayer {
 
   readonly manager = TextureGLManager.getInstance()
   readonly texture = this.manager.createTexture()
