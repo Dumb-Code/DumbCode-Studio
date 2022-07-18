@@ -1,3 +1,4 @@
+import { PNG } from 'pngjs';
 import { useEffect, useState } from 'react';
 import { SVGDownload, SVGSave } from '../../components/Icons';
 import FileChangeListener from './FileChangeListener';
@@ -132,10 +133,10 @@ export const readFileArrayBuffer = (file: ReadableFile | File) => {
 
 export const readFileToImg = async (file: ReadableFile | File) => {
   const url = await readFileDataUrl(file)
-  const img = document.createElement('img')
-  return new Promise<HTMLImageElement>(resolve => {
-    img.onload = () => resolve(img)
-    img.src = url
+  const png = new PNG()
+  return new Promise<PNG>(resolve => {
+    png.once('parsed', () => resolve(png))
+    png.parse(url)
   })
 }
 

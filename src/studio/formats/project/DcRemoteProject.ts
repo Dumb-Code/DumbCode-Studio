@@ -1,5 +1,6 @@
 import { ReferenceImage } from '../../util/ReferenceImageHandler';
 import { TextureGroup } from '../textures/TextureManager';
+import { imgSourceToElement } from './../../util/Utils';
 import { loadUnknownAnimation } from './../animations/DCALoader';
 import { loadModelUnknown } from './../model/DCMLoader';
 import { DCMModel } from './../model/DcmModel';
@@ -70,11 +71,7 @@ const loadIndividualTexture = async (repo: DcRemoteRepoContentGetterCounter, bas
 }
 
 const loadImg = async (content: string) => {
-  const img = document.createElement("img")
-  img.src = 'data:image/png;base64,' + content
-  await new Promise(resolve => img.onload = resolve)
-  img.onload = null
-  return img
+  return imgSourceToElement('data:image/png;base64,' + content)
 }
 
 const loadAllTextures = async (repo: DcRemoteRepoContentGetterCounter, entry: NonNullable<RemoteProjectEntry['texture']>, project: DcProject) => {

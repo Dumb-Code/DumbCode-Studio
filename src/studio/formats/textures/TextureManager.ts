@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { PNG } from 'pngjs';
+import { useCallback, useEffect, useMemo } from 'react';
 import { NearestFilter, Texture as ThreeTexture } from 'three';
 import { v4 as uuidv4 } from 'uuid';
 import { unsafe_getThreeContext } from '../../../contexts/StudioContext';
@@ -9,11 +10,15 @@ import DcProject from '../project/DcProject';
 import { ListenableFile } from './../../files/FileTypes';
 import { LO, useListenableObject } from './../../util/ListenableObject';
 import { DCMCube, DCMModel } from './../model/DcmModel';
+import TextureCanvas from './TextureCanvas';
+import { TextureGLManager } from './TextureGLManager';
 
 export default class TextureManager {
   readonly project: DcProject
 
-  readonly canvas: HTMLCanvasElement
+  readonly glManager = TextureGLManager.getInstance()
+
+  readonly canvas = document.createElement("canvas")
 
   defaultGroup: TextureGroup
   readonly selectedGroup: LO<TextureGroup>
@@ -35,8 +40,6 @@ export default class TextureManager {
 
     this.defaultGroup.textures.addPostListener(() => this.refresh())
     this.selectedGroup.addPostListener(() => this.refresh())
-
-    this.canvas = document.createElement("canvas")
   }
 
   async addFile(readable: ReadableFile) {
@@ -52,10 +55,10 @@ export default class TextureManager {
     texture.saveableFile.value = true
   }
 
-  addTexture(name?: string, element?: HTMLImageElement) {
+  addTexture(name?: string, element?: PNG) {
     this.stopRefresh = true
     const texture = new Texture(this, this.project.model, name, element)
-    texture.element.addListener(() => this.refresh())
+    texture.pixels.addListener(() => this.refresh())
     texture.needsSaving.addListener(v => this.project.projectNeedsSaving.value ||= v)
     this.textures.value = this.textures.value.concat([texture])
     this.defaultGroup.textures.value = [texture.identifier].concat(this.defaultGroup.textures.value)
@@ -134,7 +137,6 @@ export default class TextureManager {
     const maxTextureSize = unsafe_getThreeContext().renderer.capabilities.maxTextureSize
     const scale = maxTextureSize / Math.max(width, height);
 
-
     if (scale < 1) {
       width *= scale
       height *= scale
@@ -153,7 +155,10 @@ export default class TextureManager {
       ctx.clearRect(0, 0, width, height)
     }
 
-    textures.reverse().forEach(t => ctx.drawImage(t.canvas, 0, 0, width, height))
+    TextureGLManager.getInstance().render(textures.reverse().map(t => t.canvas), {
+      dest: canvas,
+      premultiply: true,
+    })
   }
 
   /**
@@ -277,27 +282,28 @@ export class TextureGroup {
 export class Texture {
   readonly identifier: string
   readonly name: LO<string>
-  readonly element: LO<HTMLImageElement>
+  //Deprecated
+  // readonly element: LO<HTMLImageElement>
 
   readonly saveableFile = new LO(false)
   readonly needsSaving = new LO(false)
   textureWritableFile = getUndefinedWritable("Texture File", ".png")
 
-
   listenableFile: ListenableFileData | null = null
 
-  canvas: HTMLCanvasElement
-  ctx: CanvasRenderingContext2D
+  readonly canvas = new TextureCanvas()
 
   width: number
   height: number
+  readonly pixels: LO<PNG>
+
   readonly hidden: LO<boolean>
 
   constructor(
     readonly manager: TextureManager,
-    model: DCMModel, name?: string, element?: HTMLImageElement) {
-    if ((name === undefined) !== (element === undefined)) {
-      throw new Error("Either name and element need to be defined, or none need to be.");
+    model: DCMModel, name?: string, pixels?: PNG) {
+    if ((name === undefined) !== (pixels === undefined)) {
+      throw new Error("Either name and pixels need to be defined, or none need to be.");
     }
 
     this.identifier = uuidv4()
@@ -305,49 +311,34 @@ export class Texture {
     this.width = model.textureWidth.value
     this.height = model.textureHeight.value
 
-    if (element === undefined) {
+    if (pixels === undefined) {
       this.name = new LO("New Texture")
-      element = document.createElement("img")
+      pixels = new PNG({
+        width: this.width,
+        height: this.height,
+      })
     } else {
       //We know that name is not undefined here
       this.name = new LO(name as string)
     }
 
-    this.element = new LO(element)
-    this.canvas = document.createElement("canvas")
+    this.pixels = new LO(pixels)
 
-    const ctx = this.canvas.getContext("2d")
-    if (ctx === null) throw new Error("Unable to create 2D context");
-    this.ctx = ctx
 
-    this.element.addAndRunListener((element) => {
-      if (element.naturalHeight !== 0 && element.naturalWidth !== 0) {
-        this.width = element.naturalWidth
-        this.height = element.naturalHeight
-      }
+    if (pixels.width !== 0 && pixels.height !== 0) {
+      this.width = pixels.width
+      this.height = pixels.height
+    }
 
-      //Why is this 0?
-      this.canvas.width = this.width
-      this.canvas.height = this.height
-
-      this.ctx.imageSmoothingEnabled = false
-
-      if (element.naturalHeight === 0 || element.naturalWidth === 0) {
-        this.ctx.fillStyle = "rgba(255, 255, 255, 1)"
-        this.ctx.fillRect(0, 0, this.width, this.height)
-      } else {
-        this.ctx.drawImage(element, 0, 0, this.width, this.height)
-      }
-    })
-
-    this.onCanvasChanged(false)
+    this.canvas.setBackground(pixels)
+    // this.onCanvasChanged(false)
 
 
     this.hidden = new LO<boolean>(false)
 
     const onDirty = () => this.needsSaving.value = true
     this.name.addListener(onDirty)
-    this.element.addListener(onDirty)
+    this.pixels.addListener(onDirty)
 
     this.startListeningToFile(this.textureWritableFile)
   }
@@ -365,7 +356,7 @@ export class Texture {
     this.listenableFile = listenable
     if (listenable !== null) {
       listenable.onChange = async (file) => {
-        this.element.value = await readFileToImg(file)
+        this.pixels.value = await readFileToImg(file)
         this.needsSaving.value = false
       }
     }
@@ -379,24 +370,31 @@ export class Texture {
   }
 
   onCanvasChanged(refresh: boolean) {
-    const value = new Image()
-    value.onload = () => this.element.value = value
-    value.src = this.canvas.toDataURL()
+    const value = new PNG()
+    value.data = Buffer.from(this.canvas.toDataURL())
+    if (refresh) {
+      this.canvas.setBackground(value)
+    }
   }
 }
 
 export const useTextureDomRef = <T extends HTMLElement>(texture: Texture, className?: string, modify?: (img: HTMLImageElement) => void) => {
-  const [img] = useListenableObject(texture.element)
+  const [pixels] = useListenableObject(texture.pixels)
+  const img = useMemo(() => document.createElement("img"), [])
+  useEffect(() => {
+    //Might not work: draw to canvas
+    const url = URL.createObjectURL(new Blob([pixels.data], { type: "image/png" }))
+    img.src = url
+    return () => {
+      URL.revokeObjectURL(url)
+    }
+  }, [pixels, img])
   const ref = useDomParent<T>(useCallback(() => {
-    //TODO: reuse img cloned?
-    const cloned = img.cloneNode() as HTMLImageElement
-    if (className !== undefined) {
-      cloned.className = className
-    }
+    img.className = className || ""
     if (modify) {
-      modify(cloned)
+      modify(img)
     }
-    return cloned
+    return img
   }, [className, modify, img]))
   return ref
 }

@@ -1,7 +1,9 @@
+import { PNG } from 'pngjs';
 import { useEffect } from 'react';
-import { DoubleSide, Group, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneBufferGeometry, Texture } from 'three';
+import { DataTexture, DoubleSide, Group, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneBufferGeometry } from 'three';
 import { ReadableFile } from '../files/FileTypes';
 import { useStudio } from './../../contexts/StudioContext';
+import { readFileToImg } from './../files/FileTypes';
 import { LO } from './ListenableObject';
 import { NumArray } from './NumArray';
 import { setIntersectType } from './ObjectClickedHook';
@@ -26,19 +28,8 @@ export default class ReferenceImageHandler {
   }
 
   uploadFile = async (readFile: ReadableFile) => {
-    const file = await readFile.asFile()
-    const reader = new FileReader()
-    reader.onload = () => {
-      const res = reader.result
-      if (typeof res === "string") {
-        const img = document.createElement("img")
-        img.onload = () => {
-          this.images.value = this.images.value.concat(new ReferenceImage(this, img, readFile.name))
-        }
-        img.src = res
-      }
-    }
-    reader.readAsDataURL(file)
+    const img = await readFileToImg(readFile)
+    this.images.value = this.images.value.concat(new ReferenceImage(this, img, readFile.name))
   }
 
   update = (object?: Object3D) => {
@@ -103,7 +94,7 @@ export class ReferenceImage {
 
   constructor(
     private readonly handler: ReferenceImageHandler,
-    readonly img: HTMLImageElement,
+    readonly img: PNG,
     name: string,
     opacity = 100,
     canSelect = true,
@@ -126,14 +117,14 @@ export class ReferenceImage {
     this.flipX = new LO(flipX)
     this.flipY = new LO(flipY)
 
-    const texture = new Texture(img)
+    const texture = new DataTexture(img.data, img.width, img.height)
     texture.needsUpdate = true
     texture.flipY = true
     texture.magFilter = NearestFilter
     texture.minFilter = NearestFilter
 
     //Get an element with maximum width/height of startSize
-    const aspect = img.naturalWidth / img.naturalHeight
+    const aspect = img.width / img.height
     const width = aspect > 1 ? startSize : startSize * aspect
     const height = aspect > 1 ? startSize / aspect : startSize
 

@@ -1,3 +1,5 @@
+import { PNG } from "pngjs"
+
 export const convertMapToRecord = <V>(map: Map<string, V>): Record<string, V> =>
   Array.from(map.entries()).reduce((dict, entry) => {
     dict[entry[0]] = entry[1]
@@ -9,17 +11,29 @@ export const convertRecordToMap = <V>(dict: Record<string, V>, map = new Map<str
 }
 
 export const imgSourceToElement = (src: string) => {
-  const img = document.createElement("img")
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    img.onload = () => resolve(img)
-    img.onerror = (e => reject(e))
-    img.src = src
+  const png = new PNG()
+  return new Promise<PNG>((resolve, reject) => {
+    png.once('parsed', () => resolve(png))
+    png.parse(src, (error, png) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(png)
+      }
+    })
   })
 }
 
-export const writeImgToBlob = async (img: HTMLImageElement): Promise<Blob> => fetch(img.src).then(res => res.blob())
+export const writeImgToBlob = async (img: PNG): Promise<Blob> => {
+  //DONT PACK, INSTEAD CREATE A NEW OBJECT THEN PACK IT
+  //Actually, make a test to see if packing changes img.data ?
+  img.pack()
+  const blob = new Blob([img.data], { type: 'image/png' })
 
-export const writeImgToBase64 = async (img: HTMLImageElement): Promise<string> => {
+  return blob
+}
+
+export const writeImgToBase64 = async (img: PNG): Promise<string> => {
   const blob = await writeImgToBlob(img)
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
