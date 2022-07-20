@@ -46,7 +46,7 @@ export class CubeSelectedHighlighter {
       data.pointer.position.setFromMatrixPosition(data.cube.cubeGroup.matrixWorld)
       let factor: number;
       if (camera instanceof OrthographicCamera) {
-        factor = (camera.top - camera.bottom) / camera.zoom;
+        factor = (camera.top - camera.bottom);
       } else {
         //Used to have the mesh get smaller as it gets further away.
         //The angleBetween and cos is used to make it the right size even when not at the center of the screen
