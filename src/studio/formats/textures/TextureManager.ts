@@ -9,11 +9,15 @@ import DcProject from '../project/DcProject';
 import { ListenableFile } from './../../files/FileTypes';
 import { LO, useListenableObject } from './../../util/ListenableObject';
 import { DCMCube, DCMModel } from './../model/DcmModel';
+import { TextureGLManager } from './TextureGLManager';
+import TextureLayer from './TextureLayer';
 
 export default class TextureManager {
   readonly project: DcProject
 
-  readonly canvas: HTMLCanvasElement
+  readonly glManager = TextureGLManager.getInstance()
+
+  readonly canvas = document.createElement("canvas")
 
   defaultGroup: TextureGroup
   readonly selectedGroup: LO<TextureGroup>
@@ -35,8 +39,6 @@ export default class TextureManager {
 
     this.defaultGroup.textures.addPostListener(() => this.refresh())
     this.selectedGroup.addPostListener(() => this.refresh())
-
-    this.canvas = document.createElement("canvas")
   }
 
   async addFile(readable: ReadableFile) {
@@ -134,7 +136,6 @@ export default class TextureManager {
     const maxTextureSize = unsafe_getThreeContext().renderer.capabilities.maxTextureSize
     const scale = maxTextureSize / Math.max(width, height);
 
-
     if (scale < 1) {
       width *= scale
       height *= scale
@@ -153,7 +154,10 @@ export default class TextureManager {
       ctx.clearRect(0, 0, width, height)
     }
 
-    textures.reverse().forEach(t => ctx.drawImage(t.canvas, 0, 0, width, height))
+    TextureGLManager.getInstance().render(textures.reverse().map(t => t.canvas), {
+      dest: canvas,
+      premultiply: true,
+    })
   }
 
   /**
@@ -286,8 +290,7 @@ export class Texture {
 
   listenableFile: ListenableFileData | null = null
 
-  canvas: HTMLCanvasElement
-  ctx: CanvasRenderingContext2D
+  readonly canvas = new TextureLayer()
 
   width: number
   height: number
@@ -305,20 +308,18 @@ export class Texture {
     this.width = model.textureWidth.value
     this.height = model.textureHeight.value
 
+    let needsRefreshing = false
     if (element === undefined) {
       this.name = new LO("New Texture")
-      element = document.createElement("img")
+      element = new Image()
+      needsRefreshing = true
     } else {
       //We know that name is not undefined here
       this.name = new LO(name as string)
     }
 
     this.element = new LO(element)
-    this.canvas = document.createElement("canvas")
 
-    const ctx = this.canvas.getContext("2d")
-    if (ctx === null) throw new Error("Unable to create 2D context");
-    this.ctx = ctx
 
     this.element.addAndRunListener((element) => {
       if (element.naturalHeight !== 0 && element.naturalWidth !== 0) {
@@ -326,21 +327,12 @@ export class Texture {
         this.height = element.naturalHeight
       }
 
-      //Why is this 0?
-      this.canvas.width = this.width
-      this.canvas.height = this.height
-
-      this.ctx.imageSmoothingEnabled = false
-
-      if (element.naturalHeight === 0 || element.naturalWidth === 0) {
-        this.ctx.fillStyle = "rgba(255, 255, 255, 1)"
-        this.ctx.fillRect(0, 0, this.width, this.height)
-      } else {
-        this.ctx.drawImage(element, 0, 0, this.width, this.height)
-      }
+      this.canvas.setBackground(element)
     })
 
-    this.onCanvasChanged(false)
+    if (needsRefreshing) {
+      this.onCanvasChanged(false)
+    }
 
 
     this.hidden = new LO<boolean>(false)
@@ -378,10 +370,10 @@ export class Texture {
     this.manager.deleteTexture(this)
   }
 
-  onCanvasChanged(refresh: boolean) {
+  async onCanvasChanged(refresh: boolean) {
     const value = new Image()
-    value.onload = () => this.element.value = value
-    value.src = this.canvas.toDataURL()
+    value.onload = () => refresh && (this.element.value = value)
+    value.src = await this.canvas.toDataURL()
   }
 }
 
