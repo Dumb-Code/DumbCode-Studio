@@ -705,7 +705,7 @@ export class DCMCube implements CubeParent {
 
 const material = new MeshStandardMaterial({
   color: 0x777777,
-  // transparent: true,
+  transparent: true,
   side: DoubleSide,
   alphaTest: 0.0001,
 })
