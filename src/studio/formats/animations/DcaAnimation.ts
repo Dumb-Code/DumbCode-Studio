@@ -175,13 +175,19 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
     this.time.addListener(value => {
 
       this.soundLayers.value.forEach(layer => layer.instances.value.forEach(instance => {
-        const timeOffset = value - instance.startTime.value
-        if (instance.sound !== null && instance.soundInstance !== null && timeOffset >= 0 && timeOffset < instance.sound.duration) {
-          if (!this.updatingTimeNaturally || instance.startTimeChanged) { //|| Math.abs(instance.soundInstance.seekForTime() - timeOffset) > 0.025
-            instance.soundInstance.seek(timeOffset)
-            instance.startTimeChanged = false
+        const timeOffset = value - instance.startTime.internalValue
+        if (instance.sound !== null && instance.soundInstance !== null) {
+          if (timeOffset >= 0 && timeOffset < instance.sound.duration) {
+            if (!this.updatingTimeNaturally || instance.startTimeChanged) {
+              instance.soundInstance.seek(timeOffset)
+              instance.startTimeChanged = false
+            }
+            instance.soundInstance.playing.value = this.playing.value
+          } else {
+            instance.soundInstance.playing.value = false
+            const clampedTime = Math.max(0, Math.min(instance.sound.duration, timeOffset))
+            instance.soundInstance.seek(clampedTime)
           }
-          instance.soundInstance.playing.value = this.playing.value
         }
       }))
     })
