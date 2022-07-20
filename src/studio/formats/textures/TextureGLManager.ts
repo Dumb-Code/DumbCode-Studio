@@ -85,7 +85,7 @@ export class TextureGLManager {
 
     if (dest !== undefined) {
       //Copy the rendered image to the canvas
-      dest.getContext("2d")!.drawImage(canvas, 0, 0, canvas.width, canvas.height)
+      dest.getContext("2d")!.drawImage(canvas, 0, 0, dest.width, dest.height)
     }
   }
 
