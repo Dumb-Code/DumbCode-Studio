@@ -10778,7 +10778,7 @@ textextensions@^3.2.0:
 
 three@Dumb-Code/three.js:
   version "0.142.0"
-  resolved "https://codeload.github.com/Dumb-Code/three.js/tar.gz/86e676d4bc1c15a5ccf7f14ca97f918e8f36618b"
+  resolved "https://codeload.github.com/Dumb-Code/three.js/tar.gz/ef0a7df364ebec4b5aafdb38833d4f86adcf6116"
 
 throat@^6.0.1:
   version "6.0.1"
