@@ -130,10 +130,13 @@ export default class TextureManager {
     }
 
     //Get the width/height to render. Gets the width/height needed for all textures to render fully
-    let width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
-    let height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
+    // let width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
+    // let height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
+    let width = Math.max(...textures.map(t => t.width))
+    let height = Math.max(...textures.map(t => t.height))
 
-    const maxTextureSize = unsafe_getThreeContext().renderer.capabilities.maxTextureSize
+
+    const maxTextureSize = unsafe_getThreeContext().renderer.capabilities.maxTextureSize / 2
     const scale = maxTextureSize / Math.max(width, height);
 
     if (scale < 1) {
