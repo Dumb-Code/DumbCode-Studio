@@ -86,7 +86,7 @@ const loadAllTextures = async (repo: DcRemoteRepoContentGetterCounter, entry: No
   }))
 
   const finishedGroups = await Promise.all(groupData.map(async (group) => {
-    const newGroup = new TextureGroup(group.group.groupName, group.group.isDefault ?? group.group.folderName === "")
+    const newGroup = new TextureGroup(project.textureManager, group.group.groupName, group.group.isDefault ?? group.group.folderName === "")
     const identifiers = await group.images.then(imgs => Promise.all(imgs.map(img => {
       if (img === null) {
         return null

@@ -26,12 +26,12 @@ export default class TextureManager {
   readonly activeTexture = new LO<Texture | null>(null)
   readonly textures = new LO<readonly Texture[]>([])
 
-  private stopRefresh = false
+  stopRefresh = false
 
   constructor(project: DcProject) {
     this.project = project
 
-    this.defaultGroup = new TextureGroup("Default", true)
+    this.defaultGroup = new TextureGroup(this, "Default", true)
     this.defaultGroup.folderName.addPreModifyListener((_new, _old, naughtyModifyValue) => naughtyModifyValue('')) //Default folder should always be empty
     this.defaultGroup.folderName.value = ''
     this.selectedGroup = new LO<TextureGroup>(this.defaultGroup)
@@ -249,7 +249,10 @@ export class TextureGroup {
   readonly unselectedTextures = new LO<readonly string[]>([])
   isDefault: boolean
 
-  constructor(name: string, isDefault: boolean) {
+  constructor(
+    readonly manager: TextureManager,
+    name: string, isDefault: boolean
+  ) {
     this.identifier = uuidv4()
     this.isDefault = isDefault
     this.name = new LO(name)
@@ -266,6 +269,8 @@ export class TextureGroup {
   }
 
   toggleTexture(texture: Texture, isInGroup: boolean, after?: string) {
+    this.manager.stopRefresh = true
+
     const isDraggingSelected = this.textures.value.includes(texture.identifier)
 
     const from = isDraggingSelected ? this.textures : this.unselectedTextures
@@ -275,6 +280,9 @@ export class TextureGroup {
     const newVal = [...to.value]
     newVal.splice(after === undefined ? to.value.length : to.value.indexOf(after), 0, texture.identifier)
     to.value = newVal
+
+    this.manager.stopRefresh = false
+    this.manager.refresh()
   }
 }
 

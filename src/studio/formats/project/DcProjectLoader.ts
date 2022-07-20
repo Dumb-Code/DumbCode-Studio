@@ -370,7 +370,7 @@ const loadTextures = async (folderP: OrPromise<ReadableFolder | null>, project: 
   }
 
   datas.groups.forEach(groupData => {
-    const group = new TextureGroup(groupData.name, groupData.isDefault ?? false);
+    const group = new TextureGroup(project.textureManager, groupData.name, groupData.isDefault ?? false);
     groupData.layerIDs.forEach(id => {
       const texture = textures[id]
       if (texture !== null) {

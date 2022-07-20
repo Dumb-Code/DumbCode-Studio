@@ -20,7 +20,8 @@ const ProjectTextures = () => {
     const { getSelectedProject, hasProject } = useStudio()
 
     const addGroup = () => {
-        getSelectedProject().textureManager.addGroup(new TextureGroup("New Group", false))
+        const manager = getSelectedProject().textureManager
+        manager.addGroup(new TextureGroup(manager, "New Group", false))
     }
 
     const addTexture = (name?: string, img?: HTMLImageElement) => {
@@ -191,11 +192,11 @@ const SelectableTextureList = ({ project, isSelected }: { project: DcProject, is
             .filter((texture): texture is Texture => texture !== undefined),
         [texturesToUse, textures])
 
-    const onDragOnto = (texture?: Texture) => {
+    const onDragOnto = () => {
         if (!context) {
             return
         }
-        context.dropTextureAt(texture, isSelected)
+        context.dropTextureAt(context.currentlyDragging ?? undefined, isSelected)
     }
 
     return (
@@ -229,7 +230,7 @@ const SelectableTextureList = ({ project, isSelected }: { project: DcProject, is
         >
             {selectedTextures
                 .map((t, i) =>
-                    <GroupTextureSwitchEntryContainer key={t.identifier} texture={t} selected={isSelected} droppedOnto={() => onDragOnto(t)} />
+                    <GroupTextureSwitchEntryContainer key={t.identifier} texture={t} selected={isSelected} />
                 )}
         </div>
     )
@@ -239,7 +240,7 @@ const SelectableTextureList = ({ project, isSelected }: { project: DcProject, is
 const heightClass = "h-[50px]"
 const maxWHeightClass = "max-w-[50px]"
 
-const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { texture: Texture, selected: boolean, droppedOnto: () => void }) => {
+const GroupTextureSwitchEntryContainer = ({ texture, selected }: { texture: Texture, selected: boolean }) => {
     const context = useContext(DraggableContext)
     const createPortal = useCreatePortal()
 
@@ -291,6 +292,14 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { 
                 e.stopPropagation()
                 e.preventDefault()
             }}
+            onDragEnter={e => {
+                if (!context || !context.currentlyDragging) {
+                    return
+                }
+                setIsDraggedOver(true)
+                e.stopPropagation()
+                e.preventDefault()
+            }}
             onDragLeave={e => {
                 //We don't want to listen to events from children
                 if (e.currentTarget.contains(e.nativeEvent.relatedTarget as any)) {
@@ -306,7 +315,9 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected, droppedOnto }: { 
                     return
                 }
                 setIsDraggedOver(false)
-                droppedOnto()
+                // This is handled in the parent onDropCapture
+                // droppedOnto()
+                // e.stopPropagation()
             }}
 
         >
