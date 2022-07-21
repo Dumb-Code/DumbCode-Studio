@@ -23,7 +23,6 @@ const VertexSnapping = (project: DcProject) => (addCommand: (command: Command) =
   //This occurs when you click on nothing while the vertex snapping is enabled.
   cubeManager.listeners.add(() => {
     if (active && cubeManager.mouseOverMesh === undefined) {
-      console.log("disabl")
       active = false
       pointTracker.disable()
       return true
@@ -34,7 +33,6 @@ const VertexSnapping = (project: DcProject) => (addCommand: (command: Command) =
   //When the selction changes while the command is active, if there isn't any selcted disable the command.
   cubeManager.selected.addListener(v => {
     if (active && v.length === 0) {
-      console.log("disabl")
       active = false
       pointTracker.disable()
     }
