@@ -155,7 +155,6 @@ export default class TextureManager {
     ctx.imageSmoothingEnabled = false
 
     //Draw white if no textures
-    console.log(textures, width, height)
     if (textures.length === 0) {
       ctx.fillStyle = `rgba(255, 255, 255, 1)`
       ctx.fillRect(0, 0, width, height)
