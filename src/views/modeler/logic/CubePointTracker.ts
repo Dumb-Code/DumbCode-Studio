@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { BoxBufferGeometry, Camera, EventDispatcher, Group, Mesh, MeshLambertMaterial, Object3D, OrthographicCamera, Vector3 } from "three";
+import { BoxBufferGeometry, Camera, EventDispatcher, Group, Mesh, MeshLambertMaterial, Object3D, Vector3 } from "three";
 import { setIntersectType } from '../../../studio/util/ObjectClickedHook';
 import SelectedCubeManager from "../../../studio/util/SelectedCubeManager";
+import { scaleMeshToCamera } from '../../../studio/util/Utils';
 import { useStudio } from './../../../contexts/StudioContext';
 import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
 import { setIntersectThrogh } from './../../../studio/util/ObjectClickedHook';
@@ -30,7 +31,6 @@ type TrackersForCube = {
 type Callback = (position: Vector3, point: TrackedPoint, cube: DCMCube) => void
 
 const tempPos = new Vector3()
-const tempPos2 = new Vector3()
 
 const _enableEvent = { type: 'enable' }
 const _disableEvent = { type: 'disable' }
@@ -161,22 +161,8 @@ export default class CubePointTracker extends EventDispatcher {
           tempPos.set(p.x * (dimension[0] + 2 * cg[0]) / 16, p.y * (dimension[1] + 2 * cg[1]) / 16, p.z * (dimension[2] + 2 * cg[2]) / 16).applyQuaternion(worldQuat)
           cubeMesh.getWorldPosition(p.mesh.position).add(tempPos)
 
+          scaleMeshToCamera(p.mesh, camera, 7)
 
-          let factor;
-
-          if (camera instanceof OrthographicCamera) {
-
-            factor = (camera.top - camera.bottom) / camera.zoom;
-
-          } else {
-            //Used to have the mesh get smaller as it gets further away.
-            //The angleBetween and cos is used to make it the right size even when not at the center of the screen
-            tempPos2.subVectors(p.mesh.position, tempPos.setFromMatrixPosition(camera.matrixWorld)).normalize();
-            let angleBetween = tempPos2.angleTo(camera.getWorldDirection(tempPos));
-            factor = p.mesh.position.distanceTo(tempPos.setFromMatrixPosition(camera.matrixWorld)) * Math.cos(angleBetween);
-          }
-
-          p.mesh.scale.set(1, 1, 1).multiplyScalar(factor / 7);
         })
       })
 

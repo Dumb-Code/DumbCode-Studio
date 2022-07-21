@@ -1,3 +1,5 @@
+import { Camera, Object3D, OrthographicCamera, Vector3 } from "three"
+
 export const convertMapToRecord = <V>(map: Map<string, V>): Record<string, V> =>
   Array.from(map.entries()).reduce((dict, entry) => {
     dict[entry[0]] = entry[1]
@@ -46,4 +48,23 @@ export const fitAreaWithinBounds = (width: number, height: number, areaWidth: nu
     height: height * ratio,
     ratio
   }
+}
+
+const tempPos = new Vector3()
+const tempPos2 = new Vector3()
+
+export const scaleMeshToCamera = (mesh: Object3D, camera: Camera, invFactor: number) => {
+  let factor;
+
+  if (camera instanceof OrthographicCamera) {
+    factor = (camera.top - camera.bottom);
+  } else {
+    //Used to have the mesh get smaller as it gets further away.
+    //The angleBetween and cos is used to make it the right size even when not at the center of the screen
+    tempPos2.subVectors(mesh.position, tempPos.setFromMatrixPosition(camera.matrixWorld)).normalize();
+    let angleBetween = tempPos2.angleTo(camera.getWorldDirection(tempPos));
+    factor = mesh.position.distanceTo(tempPos.setFromMatrixPosition(camera.matrixWorld)) * Math.cos(angleBetween);
+  }
+
+  mesh.scale.set(1, 1, 1).multiplyScalar(factor / invFactor);
 }

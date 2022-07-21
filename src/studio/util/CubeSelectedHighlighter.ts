@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { BoxBufferGeometry, Camera, EdgesGeometry, Group, LineBasicMaterial, LineSegments, Matrix4, Mesh, MeshBasicMaterial, OrthographicCamera, SphereBufferGeometry, Vector3 } from "three";
+import { BoxBufferGeometry, Camera, EdgesGeometry, Group, LineBasicMaterial, LineSegments, Matrix4, Mesh, MeshBasicMaterial, SphereBufferGeometry, Vector3 } from "three";
 import { useStudio } from "../../contexts/StudioContext";
 import { DCMCube, DCMModel } from './../formats/model/DcmModel';
+import { scaleMeshToCamera } from './Utils';
 
 const tempPos = new Vector3()
-const tempPos2 = new Vector3()
 
 
 const bufferBoxGeometry = new BoxBufferGeometry()
@@ -44,17 +44,7 @@ export class CubeSelectedHighlighter {
 
     this.cubeCache.forEach(data => {
       data.pointer.position.setFromMatrixPosition(data.cube.cubeGroup.matrixWorld)
-      let factor: number;
-      if (camera instanceof OrthographicCamera) {
-        factor = (camera.top - camera.bottom);
-      } else {
-        //Used to have the mesh get smaller as it gets further away.
-        //The angleBetween and cos is used to make it the right size even when not at the center of the screen
-        tempPos2.subVectors(data.pointer.position, tempPos.setFromMatrixPosition(camera.matrixWorld)).normalize();
-        let angleBetween = tempPos2.angleTo(camera.getWorldDirection(tempPos));
-        factor = data.pointer.position.distanceTo(tempPos.setFromMatrixPosition(camera.matrixWorld)) * Math.cos(angleBetween);
-      }
-      data.pointer.scale.set(1, 1, 1).multiplyScalar(factor / 3);
+      scaleMeshToCamera(data.pointer, camera, 3)
 
       data.cube.cubeMesh.matrixWorld.decompose(data.outline.position, data.outline.quaternion, tempPos)
       data.outline.rotation.setFromQuaternion(data.outline.quaternion)
