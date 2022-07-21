@@ -207,6 +207,12 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
     })
   }
 
+  ensureLayerExists(layerId: number) {
+    if (!this.keyframeLayers.value.some(l => l.layerId === layerId)) {
+      this.keyframeLayers.value = this.keyframeLayers.value.concat(new KeyframeLayerData(this, layerId))
+    }
+  }
+
   getUndoRedoHandler(): UndoRedoHandler<any> | undefined {
     return this.undoRedoHandler
   }
@@ -491,6 +497,10 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
     })
 
     this.setupKeyframeListeners()
+
+    this.layerId.addAndRunListener(layerId => {
+      this.animation.ensureLayerExists(layerId)
+    })
   }
 
   gumballGetPosition(cube: DCMCube): NumArray | undefined {
