@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BoxBufferGeometry, Camera, EventDispatcher, Group, Mesh, MeshLambertMaterial, Object3D, OrthographicCamera, Quaternion, Vector3 } from "three";
+import { BoxBufferGeometry, Camera, EventDispatcher, Group, Mesh, MeshLambertMaterial, Object3D, OrthographicCamera, Vector3 } from "three";
 import { setIntersectType } from '../../../studio/util/ObjectClickedHook';
 import SelectedCubeManager from "../../../studio/util/SelectedCubeManager";
 import { useStudio } from './../../../contexts/StudioContext';
@@ -19,13 +19,18 @@ type TrackedPoint = {
   y: number;
   z: number;
   mesh: Mesh<BoxBufferGeometry, MeshLambertMaterial>;
+  pickerMesh: Mesh<BoxBufferGeometry, MeshLambertMaterial>;
+}
+
+type TrackersForCube = {
+  group: Group;
+  points: TrackedPoint[];
 }
 
 type Callback = (position: Vector3, point: TrackedPoint, cube: DCMCube) => void
 
 const tempPos = new Vector3()
 const tempPos2 = new Vector3()
-const tempQuaterion = new Quaternion()
 
 const _enableEvent = { type: 'enable' }
 const _disableEvent = { type: 'disable' }
@@ -36,22 +41,27 @@ export default class CubePointTracker extends EventDispatcher {
   public normalColor = _defaultNormalColor
   public highlightColor = _defaultHighlightColor
 
-  private readonly points: TrackedPoint[] = []
-  private readonly pickerPoints: Mesh<BoxBufferGeometry, MeshLambertMaterial>[] = []
+  private readonly trackers: TrackersForCube[] = []
 
   private enabled = false
-  private cubeToPointTo: DCMCube | null = null
+  private cubesToPointTo: readonly DCMCube[] = []
   private intersected: Mesh<BoxBufferGeometry, MeshLambertMaterial> | null = null
-  private definedCube: DCMCube | null = null //The cube to go to, instead of the first selected one
   private callback: Callback | null = null
+
 
 
   constructor(
     private readonly selectedCubeManager: SelectedCubeManager,
     private readonly model: DCMModel,
-    group: Group,
+    private readonly group: Group,
   ) {
     super()
+  }
+
+  private createGroup() {
+    const group = new Group()
+    const points: TrackedPoint[] = []
+
     //The points go in the range [0, 0.5, 1], with x=0.5,y=0.5,z=0.5 skipped, as it would be the center
     for (let x = 0; x <= 1; x += 0.5) {
       for (let y = 0; y <= 1; y += 0.5) {
@@ -65,23 +75,28 @@ export default class CubePointTracker extends EventDispatcher {
           const material = _defaultMaterial.clone()
 
           const visualMesh = new Mesh(visualGeometry, material)
-          visualMesh.visible = false
           group.add(visualMesh)
 
           const pickerMesh = new Mesh(pickerGeometry, material)
-          pickerMesh.visible = false
           visualMesh.add(pickerMesh)
-          this.pickerPoints.push(pickerMesh)
 
+          material.color.setHex(this.normalColor)
+          material.needsUpdate = true
 
-          const point: TrackedPoint = { x, y, z, mesh: visualMesh }
+          const point: TrackedPoint = { x, y, z, mesh: visualMesh, pickerMesh }
           pickerMesh.userData._point = point
           setIntersectType(pickerMesh, "pointtracker", () => this.enabled)
           setIntersectThrogh(pickerMesh, true)
-          this.points.push(point)
+          points.push(point)
         }
       }
     }
+    group.visible = false
+    this.group.add(group)
+
+    const ret = { group, points }
+    this.trackers.push(ret)
+    return ret
   }
 
   onMouseUp() {
@@ -91,11 +106,11 @@ export default class CubePointTracker extends EventDispatcher {
     }
     if (this.enabled) {
       let intersected = this.intersected
-      const { cubeToPointTo, callback } = this
+      const { callback } = this
       this.disable()
-      if (intersected !== null && cubeToPointTo !== null && callback !== null) {
+      if (intersected !== null && intersected.userData._cube instanceof DCMCube && callback !== null) {
         if (intersected.parent !== null) {
-          callback(intersected.parent.position, intersected.userData._point, cubeToPointTo)
+          callback(intersected.parent.position, intersected.userData._point, intersected.userData._cube)
         }
       }
       return true
@@ -109,49 +124,60 @@ export default class CubePointTracker extends EventDispatcher {
     const mouseOverMesh = this.selectedCubeManager.mouseOverMesh
     const mouseOverCube = mouseOverMesh !== null ? this.selectedCubeManager.getCube(mouseOverMesh) : undefined
 
-    this.cubeToPointTo = null;
-    if (this.definedCube !== null) {
-      this.cubeToPointTo = this.definedCube
+    this.cubesToPointTo = []
+    if (selected.length !== 0) {
+      this.cubesToPointTo = this.model.identifListToCubes(selected)
     } else if (mouseOverCube !== undefined) {
-      this.cubeToPointTo = mouseOverCube
-    } else if (selected.length === 1) {
-      this.cubeToPointTo = this.model.identifierCubeMap.get(selected[0]) ?? null
+      this.cubesToPointTo = [mouseOverCube]
     }
 
-    if (this.enabled && this.cubeToPointTo !== null) {
-      const cube = this.cubeToPointTo
+    //Ensure there is enough trackers for the number of cubes to point to
+    while (this.trackers.length < this.cubesToPointTo.length) {
+      this.createGroup()
+    }
 
-      const group = cube.cubeMesh
+    //Hide the trackers that aren't used
+    for (let i = this.cubesToPointTo.length; i < this.trackers.length; i++) {
+      this.trackers[i].group.visible = false
+    }
 
+    if (this.enabled) {
       //For each point, set the mesh visible and set the xyz position to the selected (or defined) cube.
-      this.points.forEach(p => {
-        p.mesh.visible = true
+      this.cubesToPointTo.forEach((cube, index) => {
+        const { group: trackerGroup, points } = this.trackers[index]
+        trackerGroup.visible = true
 
-        //Gets the world position of where it should be
-        const dimension = cube.dimension.value
-        const cg = cube.cubeGrow.value
+        const cubeMesh = cube.cubeMesh
 
-        tempPos.set(p.x * (dimension[0] + 2 * cg[0]) / 16, p.y * (dimension[1] + 2 * cg[1]) / 16, p.z * (dimension[2] + 2 * cg[2]) / 16).applyQuaternion(group.getWorldQuaternion(tempQuaterion))
-        group.getWorldPosition(p.mesh.position).add(tempPos)
+        points.forEach(p => {
+          p.pickerMesh.userData._cube = cube
 
-        group.getWorldQuaternion(p.mesh.quaternion)
+          //Gets the world position of where it should be
+          const dimension = cube.dimension.value
+          const cg = cube.cubeGrow.value
+
+          const worldQuat = cubeMesh.getWorldQuaternion(p.mesh.quaternion)
+
+          tempPos.set(p.x * (dimension[0] + 2 * cg[0]) / 16, p.y * (dimension[1] + 2 * cg[1]) / 16, p.z * (dimension[2] + 2 * cg[2]) / 16).applyQuaternion(worldQuat)
+          cubeMesh.getWorldPosition(p.mesh.position).add(tempPos)
 
 
-        let factor;
+          let factor;
 
-        if (camera instanceof OrthographicCamera) {
+          if (camera instanceof OrthographicCamera) {
 
-          factor = (camera.top - camera.bottom) / camera.zoom;
+            factor = (camera.top - camera.bottom) / camera.zoom;
 
-        } else {
-          //Used to have the mesh get smaller as it gets further away.
-          //The angleBetween and cos is used to make it the right size even when not at the center of the screen
-          tempPos2.subVectors(p.mesh.position, tempPos.setFromMatrixPosition(camera.matrixWorld)).normalize();
-          let angleBetween = tempPos2.angleTo(camera.getWorldDirection(tempPos));
-          factor = p.mesh.position.distanceTo(tempPos.setFromMatrixPosition(camera.matrixWorld)) * Math.cos(angleBetween);
-        }
+          } else {
+            //Used to have the mesh get smaller as it gets further away.
+            //The angleBetween and cos is used to make it the right size even when not at the center of the screen
+            tempPos2.subVectors(p.mesh.position, tempPos.setFromMatrixPosition(camera.matrixWorld)).normalize();
+            let angleBetween = tempPos2.angleTo(camera.getWorldDirection(tempPos));
+            factor = p.mesh.position.distanceTo(tempPos.setFromMatrixPosition(camera.matrixWorld)) * Math.cos(angleBetween);
+          }
 
-        p.mesh.scale.set(1, 1, 1).multiplyScalar(factor / 7);
+          p.mesh.scale.set(1, 1, 1).multiplyScalar(factor / 7);
+        })
       })
 
       // //Raytrace under every helper point
@@ -182,24 +208,26 @@ export default class CubePointTracker extends EventDispatcher {
       }
     } else {
       //Not enabled. Hide the meshes
-      this.points.forEach(p => p.mesh.visible = false)
+      this.trackers.forEach(p => {
+        p.group.visible = false
+        p.points.forEach(p => p.pickerMesh.userData._cube = null)
+      })
     }
+
   }
 
-  enable(callback: Callback, normal = _defaultNormalColor, highlight = _defaultHighlightColor, definedCube: DCMCube | null = null) {
+  enable(callback: Callback, normal = _defaultNormalColor, highlight = _defaultHighlightColor) {
     this.enabled = true
-    this.definedCube = definedCube
     this.callback = callback
     this.normalColor = normal
     this.highlightColor = highlight
-    this.points.forEach(p => p.mesh.material.color.setHex(this.normalColor))
+    this.trackers.flatMap(t => t.points).forEach(p => p.mesh.material.color.setHex(this.normalColor))
     this.dispatchEvent(_enableEvent)
   }
 
   disable() {
     this.enabled = false
     this.callback = null
-    this.definedCube = null
     this.intersected = null
     this.dispatchEvent(_disableEvent)
   }
