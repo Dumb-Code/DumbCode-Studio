@@ -87,6 +87,10 @@ export default class TextureManager {
   }
 
   addGroup(...groups: TextureGroup[]) {
+    if (groups.length === 0) {
+      return
+    }
+
     this.stopRefresh = true
     groups.forEach(group => {
       group.needsSaving.addListener(v => this.project.projectNeedsSaving.value ||= v)
@@ -99,6 +103,7 @@ export default class TextureManager {
       this.defaultGroup = containedDefault
     }
     this.groups.value = this.groups.value.concat(...groups)
+    this.selectedGroup.value = groups[0]
     this.stopRefresh = false
     this.refresh()
   }
@@ -132,8 +137,8 @@ export default class TextureManager {
     //Get the width/height to render. Gets the width/height needed for all textures to render fully
     // let width = textures.map(t => t.width).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
     // let height = textures.map(t => t.height).reduce((a, c) => Math.abs(a * c) / this._gcd(a, c), 1)
-    let width = Math.max(...textures.map(t => t.width))
-    let height = Math.max(...textures.map(t => t.height))
+    let width = Math.max(...textures.map(t => t.width), 1)
+    let height = Math.max(...textures.map(t => t.height), 1)
 
 
     const maxTextureSize = unsafe_getThreeContext().renderer.capabilities.maxTextureSize / 2
@@ -150,6 +155,7 @@ export default class TextureManager {
     ctx.imageSmoothingEnabled = false
 
     //Draw white if no textures
+    console.log(textures, width, height)
     if (textures.length === 0) {
       ctx.fillStyle = `rgba(255, 255, 255, 1)`
       ctx.fillRect(0, 0, width, height)
@@ -319,11 +325,19 @@ export class Texture {
     this.width = model.textureWidth.value
     this.height = model.textureHeight.value
 
-    let needsRefreshing = false
     if (element === undefined) {
       this.name = new LO("New Texture")
       element = new Image()
-      needsRefreshing = true
+
+      const canvas = document.createElement("canvas")
+      canvas.width = this.width
+      canvas.height = this.height
+      const ctx = canvas.getContext("2d")!
+      ctx.fillStyle = "white"
+      ctx.fillRect(0, 0, this.width, this.height)
+      const newElement = new Image()
+      newElement.onload = () => this.element.value = newElement
+      newElement.src = canvas.toDataURL("image/png")
     } else {
       //We know that name is not undefined here
       this.name = new LO(name as string)
@@ -336,15 +350,9 @@ export class Texture {
       if (element.naturalHeight !== 0 && element.naturalWidth !== 0) {
         this.width = element.naturalWidth
         this.height = element.naturalHeight
+        this.canvas.setBackground(element)
       }
-
-      this.canvas.setBackground(element)
     })
-
-    if (needsRefreshing) {
-      this.onCanvasChanged(false)
-    }
-
 
     this.hidden = new LO<boolean>(false)
 

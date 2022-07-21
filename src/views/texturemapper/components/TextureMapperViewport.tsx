@@ -47,8 +47,10 @@ const TextureMapperViewport = () => {
         ctx.fillRect(0, 0, bounds.width, bounds.height)
 
         //Draw the image
-        ctx.drawImage(project.textureManager.canvas, 0, 0, bounds.width, bounds.height)
-
+        const canvas = project.textureManager.canvas
+        if (canvas.width > 0 && canvas.height > 0) {
+            ctx.drawImage(canvas, 0, 0, bounds.width, bounds.height)
+        }
         //Set the line width to be the inverse of the scale, so it stays the same size regardless of the zoom
         ctx.lineWidth = Math.min(1, 1 / ctx.getTransform().a)
 

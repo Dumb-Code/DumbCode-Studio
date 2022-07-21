@@ -7,7 +7,7 @@ import { StudioSound } from "../../../studio/formats/sounds/StudioSound"
 import { useListenableObject } from "../../../studio/util/ListenableObject"
 import { BasicProjectFileArea } from "./ProjectFileArea"
 
-const soundExtensions = [".wav", ".mp3", ".ogg"]
+export const supportedSoundExtensions = [".wav", ".mp3", ".ogg"]
 
 const ProjectSounds = () => {
   const { hasProject, getSelectedProject } = useStudio()
@@ -20,13 +20,13 @@ const ProjectSounds = () => {
 
   return (
     <BasicProjectFileArea
-      extensions={soundExtensions}
+      extensions={supportedSoundExtensions}
       onChange={uploadFile}
       title="Sounds"
       buttons={
         <ClickableInput
           onFile={uploadFile}
-          accept={soundExtensions}
+          accept={supportedSoundExtensions}
           multiple
           description="Sound Files"
           className="icon-button"

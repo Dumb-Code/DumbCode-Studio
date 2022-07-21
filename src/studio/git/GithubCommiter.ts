@@ -102,12 +102,12 @@ export default class GithubCommiter {
 
   private getCommitSha = async () => {
     this.message.value = `Getting Commit Head`
-    const branchHead = await this.octokit.repos.getBranch({
+    const branchHead = await this.octokit.git.getRef({
       owner: this.repo.owner,
       repo: this.repo.repo,
-      branch: this.repo.branch
+      ref: `heads/${this.repo.branch}`
     })
-    return branchHead.data.commit.sha
+    return branchHead.data.object.sha
   }
 
   private createFileChangedTree = () => {

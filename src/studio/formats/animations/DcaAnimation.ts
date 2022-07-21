@@ -175,6 +175,12 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
     this.time.addListener(value => {
 
       this.soundLayers.value.forEach(layer => layer.instances.value.forEach(instance => {
+        if (!this.playing.value) {
+          if (instance.soundInstance !== null) {
+            instance.soundInstance.playing.value = false
+          }
+          return
+        }
         const timeOffset = value - instance.startTime.internalValue
         if (instance.sound !== null && instance.soundInstance !== null) {
           if (timeOffset >= 0 && timeOffset < instance.sound.duration) {
@@ -182,7 +188,7 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
               instance.soundInstance.seek(timeOffset)
               instance.startTimeChanged = false
             }
-            instance.soundInstance.playing.value = this.playing.value
+            instance.soundInstance.playing.value = true
           } else {
             instance.soundInstance.playing.value = false
             const clampedTime = Math.max(0, Math.min(instance.sound.duration, timeOffset))

@@ -18,6 +18,7 @@ const RemoteProjectsDialogBox = ({ repo, editingRemote, onCommit, }: {
   const name = useValidatedInput(moreThanThree, editingRemote?.name)
   const model = useValidatedInput(moreThanThree, editingRemote?.model)
   const animationFolder = useValidatedInput(moreThanThree, editingRemote?.animationFolder)
+  const soundFolder = useValidatedInput(moreThanThree, editingRemote?.soundFolder)
   const textureFolder = useValidatedInput(emptyOrMoreThanThree, editingRemote?.texture?.baseFolder)
 
   const [deleteRemote, setDeleteRemote] = useState(false)
@@ -38,6 +39,7 @@ const RemoteProjectsDialogBox = ({ repo, editingRemote, onCommit, }: {
         name: name.value,
         model: model.value,
         animationFolder: animationFolder.value.length === 0 ? undefined : animationFolder.value,
+        soundFolder: soundFolder.value.length === 0 ? undefined : soundFolder.value,
         texture: textureFolder.value.length === 0 ? undefined : { baseFolder: textureFolder.value, groups: [] }
       }
     } else {
@@ -46,11 +48,12 @@ const RemoteProjectsDialogBox = ({ repo, editingRemote, onCommit, }: {
         name: name.value,
         model: model.value,
         animationFolder: animationFolder.value.length === 0 ? undefined : animationFolder.value,
+        soundFolder: soundFolder.value.length === 0 ? undefined : soundFolder.value,
         texture: textureFolder.value.length === 0 ? undefined : { baseFolder: textureFolder.value, groups: remote.texture?.groups ?? [] }
       }
     }
     onCommit(commiter, editingRemote, deleteRemote ? undefined : remote)
-  }, [editingRemote, isValid, name.value, model.value, animationFolder.value, textureFolder.value, onCommit, deleteRemote])
+  }, [editingRemote, isValid, name.value, model.value, animationFolder.value, textureFolder.value, soundFolder.value, onCommit, deleteRemote])
 
   return (
     <OpenedDialogBox width="1200px" height="800px" title={modifying ? "Create new remote Project" : "modify remote project"}>
@@ -60,6 +63,7 @@ const RemoteProjectsDialogBox = ({ repo, editingRemote, onCommit, }: {
           <EditingEntry name="Model Location" input={model} placeholder={`assets/models/entities/${name.value.toLowerCase()}/${name.value.toLowerCase()}.dcm`} />
           <EditingEntry name="Animations Folder" input={animationFolder} placeholder={`assets/Animations/entities/${name.value.toLowerCase()}/.dca`} />
           <EditingEntry name="Textures Folder" input={textureFolder} placeholder={`assets/textures/entities/${name.value.toLowerCase()}`} />
+          <EditingEntry name="Sounds Folder" input={soundFolder} placeholder={`assets/sounds/entities/${name.value.toLowerCase()}`} />
           <div className="flex-grow"></div>
           <GithubCommitBox deleteRemote={deleteRemote} setDeleteRemote={setDeleteRemote} repo={repo} processCommit={processCommit} onCommitFinished={clear} />
         </div>

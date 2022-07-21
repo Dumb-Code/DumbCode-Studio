@@ -6,6 +6,7 @@ import { writeDCAAnimationWithFormat } from "../studio/formats/animations/DCALoa
 import { writeModelWithFormat } from "../studio/formats/model/DCMLoader"
 import DcProject from "../studio/formats/project/DcProject"
 import { writeStudioRemote } from "../studio/formats/project/DcRemoteRepos"
+import { StudioSound } from "../studio/formats/sounds/StudioSound"
 import { Texture, TextureGroup } from "../studio/formats/textures/TextureManager"
 import GithubCommiter from "../studio/git/GithubCommiter"
 import { LO, useListenableObject } from "../studio/util/ListenableObject"
@@ -30,14 +31,23 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
       .map(({ index }) => index)
   )
 
+  const [sounds, setSounds] = useState<readonly number[]>(() =>
+    project.sounds.value
+      .map((sound, index) => ({ sound, index }))
+      // .filter(({ sound }) => sound.needsSaving.value) //TODO: add this when sound dirty is implimented
+      .map(({ index }) => index)
+  )
+
   const processCommit = useCallback(async (comitter: GithubCommiter) => {
     if (project.remoteLink === undefined) {
       return
     }
     const awaiters: Promise<any>[] = []
 
-
-    const { entry } = project.remoteLink
+    const entry = project.remoteLink.allData.projects.value.find(p => p.uuid === project.remoteUUID)
+    if (entry === undefined) {
+      return
+    }
     const mutable = entry as Mutable<typeof entry>
 
     if (model) {
@@ -53,6 +63,14 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
       }
       // comitter.removeRedundentDirectory(entry.animationFolder, name => name.endsWith('.dca'))
       project.animationTabs.animations.value.filter((_, index) => animations.includes(index)).forEach(animation => awaiters.push(exportAnimation(animation)))
+    }
+
+    if (entry.soundFolder !== undefined) {
+      const exportSounds = async (sound: StudioSound) => {
+        comitter.pushChange(`${entry.soundFolder}/${sound.name.value}.${sound.extension}`, await sound.getBase64(), true)
+      }
+      // comitter.removeRedundentDirectory(entry.animationFolder, name => name.endsWith('.wav') || name.endsWith('.ogg') || name.endsWith('.mp3')) //supportedSoundExtensions
+      project.sounds.value.filter((_, index) => sounds.includes(index)).forEach(sound => awaiters.push(exportSounds(sound)))
     }
 
     if (entry.texture !== undefined) {
@@ -123,7 +141,7 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
 
     writeStudioRemote(comitter, project.remoteLink.allData.projects.value)
 
-  }, [project, model, animations, textures])
+  }, [project, model, animations, textures, sounds])
 
   const { clear } = useOpenedDialogBoxes()
 
@@ -170,6 +188,20 @@ const PushToGithubDialogBox = ({ project }: { project: DcProject }) => {
           </div>
           <div className="h-full overflow-y-scroll studio-scrollbar pr-4">
             {project.textureManager.textures.value.map((texture, index) => <NumberedList key={index} nameLO={texture.name} list={textures} setList={setTextures} number={index} />)}
+          </div>
+        </div>
+
+        <div className="flex-grow px-4 pb-8 h-full">
+          <div className="font-bold mt-1 flex flex-row">
+            <Checkbox
+              value={sounds.length === project.sounds.value.length && project.sounds.value.length > 0}
+              setValue={v => setSounds(v ? project.sounds.value.map((_, index) => index) : [])}
+              extraText="All"
+            />
+            Sounds:
+          </div>
+          <div className="h-full overflow-y-scroll studio-scrollbar pr-4">
+            {project.sounds.value.map((sound, index) => <NumberedList key={index} nameLO={sound.name} list={sounds} setList={setSounds} number={index} />)}
           </div>
         </div>
       </div>

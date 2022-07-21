@@ -1,17 +1,24 @@
+import { supportedSoundExtensions } from '../../../views/project/components/ProjectSounds';
 import { ReferenceImage } from '../../util/ReferenceImageHandler';
 import { TextureGroup } from '../textures/TextureManager';
 import { imgSourceToElement } from './../../util/Utils';
 import { loadUnknownAnimation } from './../animations/DCALoader';
 import { loadModelUnknown } from './../model/DCMLoader';
 import { DCMModel } from './../model/DcmModel';
+import { StudioSound } from './../sounds/StudioSound';
 import DcProject from './DcProject';
 import { DcRemoteRepoContentGetterCounter, RemoteProjectEntry } from './DcRemoteRepos';
 
 export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, entry: RemoteProjectEntry) => {
   let animationPaths: { name: string; path: string; }[] = []
   if (entry.animationFolder) {
-    animationPaths = await getAllAnimationPaths(repo, entry.animationFolder)
+    animationPaths = await getAllFilePaths(repo, entry.animationFolder, ".dca")
     repo.addUnforseenRequests(animationPaths.length)
+  }
+  let soundPaths: { name: string; path: string; }[] = []
+  if (entry.soundFolder) {
+    soundPaths = await getAllFilePaths(repo, entry.soundFolder, ...supportedSoundExtensions)
+    repo.addUnforseenRequests(soundPaths.length)
   }
 
   const model = await loadRemoteModel(repo, entry)
@@ -35,12 +42,18 @@ export const loadRemoteProject = async (repo: DcRemoteRepoContentGetterCounter, 
     project.showcaseProperties.loadViewsFromJson(entry.showcaseViews)
   }
 
-  await Promise.all([textures, animations, referenceImages])
+  let sounds: Promise<any> | null = null
+  if (entry.soundFolder !== undefined) {
+    sounds = loadAllSounds(repo, soundPaths, project)
+  }
+
+  await Promise.all([textures, animations, referenceImages, sounds])
+
+  project.onProjectLoaded()
 
   project.remoteLink = {
     allData: repo.allData,
     repo: repo.repo,
-    entry
   }
   project.remoteUUID = entry.uuid
   return project
@@ -104,13 +117,13 @@ const loadAllTextures = async (repo: DcRemoteRepoContentGetterCounter, entry: No
   project.textureManager.addGroup(...finishedGroups)
 }
 
-const getAllAnimationPaths = async (repo: DcRemoteRepoContentGetterCounter, animationFolder: string) => {
+const getAllFilePaths = async (repo: DcRemoteRepoContentGetterCounter, animationFolder: string, ...extensions: string[]) => {
   const res = await repo.getContent(animationFolder)
   if (res.type !== "dir") {
     console.warn(animationFolder + " is not a folder, skipping")
     return []
   }
-  return res.files.filter(f => f.path.endsWith(".dca"))
+  return res.files.filter(f => extensions.some(e => f.name.endsWith(e)))
 }
 
 const loadAllAnimations = async (repo: DcRemoteRepoContentGetterCounter, animations: { name: string; path: string; }[], project: DcProject) => {
@@ -124,6 +137,20 @@ const loadAllAnimations = async (repo: DcRemoteRepoContentGetterCounter, animati
   }))
 
   loadedAnimations.forEach(t => t !== null && project.animationTabs.addAnimation(t))
+}
+
+const loadAllSounds = async (repo: DcRemoteRepoContentGetterCounter, soundPaths: { name: string; path: string; }[], project: DcProject) => {
+  const loadedSounds = await Promise.all(soundPaths.map(async (sound) => {
+    const content = await repo.getContent(sound.path, true)
+    if (content.type === "file") {
+      const arraybuffer = Buffer.from(content.content, 'base64').buffer
+      const blob = new Blob([arraybuffer])
+      return StudioSound.loadFromFile(blob, content.name)
+    }
+    return null
+  }))
+
+  project.sounds.value = loadedSounds.filter((s): s is StudioSound => s !== null)
 }
 
 const loadAllReferenceImages = async (project: DcProject, referenceImages: NonNullable<RemoteProjectEntry['referenceImages']>) => {
@@ -146,4 +173,5 @@ export const countTotalRequests = (project: RemoteProjectEntry) =>
   ) //texture
 
   + (project.animationFolder ? 1 : 0) //query the animation folder, we then add the amount of .dcas on.
+  + (project.soundFolder ? 1 : 0) //query the sound folder, we then add the amount of sound files on.
   ;

@@ -19,7 +19,7 @@ import UndoRedoHandler from './../../undoredo/UndoRedoHandler';
 import { CubeSelectedHighlighter } from './../../util/CubeSelectedHighlighter';
 import { StudioSound } from './../sounds/StudioSound';
 import { loadDcProj } from "./DcProjectLoader";
-import DcRemoteRepo, { RemoteProjectEntry, RemoteRepo } from './DcRemoteRepos';
+import DcRemoteRepo, { RemoteRepo } from './DcRemoteRepos';
 
 type UndoRedoDataType = {
   section_name: "root_name",
@@ -75,7 +75,6 @@ export default class DcProject {
   remoteLink?: {
     allData: DcRemoteRepo,
     repo: RemoteRepo
-    entry: RemoteProjectEntry
   }
   remoteUUID?: string
 
@@ -166,6 +165,10 @@ export default class DcProject {
         }
       }
     }
+  }
+
+  onProjectLoaded() {
+    this.animationTabs.animations.value.flatMap(a => a.soundLayers.value).forEach(s => s.findAllSounds())
   }
 }
 

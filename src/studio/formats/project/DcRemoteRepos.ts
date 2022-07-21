@@ -50,7 +50,7 @@ export const loadDcRemoteRepo = async (token: string, repo: RemoteRepo): Promise
   const getContent = (path: string) => octokit.rest.repos.getContent({
     owner: repo.owner,
     repo: repo.repo,
-    path,
+    path: path.replace(/\/$/, ''), //Remove trailing slash
     ref: repo.branch,
   }).catch(() => { }) //Ignore
 
@@ -141,6 +141,7 @@ export type RemoteProjectEntry = {
     }[]
   }
   readonly animationFolder?: string
+  readonly soundFolder?: string
   readonly referenceImages?: readonly {
     readonly name: string
     readonly opacity: number

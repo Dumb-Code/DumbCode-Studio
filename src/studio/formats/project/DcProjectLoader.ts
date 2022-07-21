@@ -154,6 +154,8 @@ export const loadFolderProject = async (name: string, zip: ReadableFolder, shoul
 
   await Promise.all(awaiters)
 
+  project.onProjectLoaded()
+
   dumbcodeHiddenFolder_read = null
 
   return project

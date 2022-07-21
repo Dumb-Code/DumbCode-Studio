@@ -6,8 +6,8 @@ export default class TextureLayer {
   readonly manager = TextureGLManager.getInstance()
   readonly texture = this.manager.createTexture()
 
-  width: number = 0
-  height: number = 0
+  width: number = 1
+  height: number = 1
 
   async toDataURL() {
     const data = this.manager.readTexture(this)

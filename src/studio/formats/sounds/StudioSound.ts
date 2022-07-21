@@ -57,6 +57,17 @@ export class StudioSound {
     return new Blob([await fetch(this.url).then(r => r.arrayBuffer())], { type: 'audio/' + this.extension })
   }
 
+  async getBase64() {
+    return new Promise<string>(async (resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        resolve((reader.result as string).split(',').pop()!); //We need to remove the 'data:/;base64,' part of the string
+      };
+      reader.readAsDataURL(await this.getBlob());
+    });
+  }
+
   static loadFromFile(file: Blob, name: string): StudioSound {
     const fileName = removeFileExtension(name)
     const extension = name.split('.').pop() ?? ""

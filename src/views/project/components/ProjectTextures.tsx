@@ -416,7 +416,7 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
         <div className={(selected ? "bg-green-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " ml-2 rounded-sm text-left pl-2 w-full h-[50px] flex flex-row pr-0.5"}
         >
             <div className={"table p-1 " + heightClass + " " + maxWHeightClass}>
-                <div ref={ref} className="table-cell align-middle pl-0">
+                <div ref={ref} className="table-cell align-middle pl-0 ">
                 </div>
             </div>
             <DblClickEditLO obj={texture.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />

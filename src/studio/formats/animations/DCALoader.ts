@@ -6,6 +6,7 @@ import { getZippedFile, OutputByType, ParseError } from "../model/DCMLoader";
 import DcProject from "../project/DcProject";
 import { NumArray } from './../../util/NumArray';
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from "./DcaAnimation";
+import DcaSoundLayer, { DcaSoundLayerInstance } from "./DcaSoundLayer";
 import { loadDCAAnimationOLD } from "./OldDcaLoader";
 
 export const loadUnknownAnimation = async (project: DcProject, name: string, buffer: ArrayBuffer) => {
@@ -62,6 +63,13 @@ const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayB
 
   convertRecordToMap(data.cubeNameOverrides ?? {}, animation.keyframeNameOverrides)
 
+  if (data.soundLayers !== undefined) {
+    animation.soundLayers.value = data.soundLayers.map(layer => {
+      const instances = layer.sounds.map(sound => new DcaSoundLayerInstance(project, sound.soundName, sound.start, sound.identifier))
+      return new DcaSoundLayer(animation, layer.name, instances, layer.locked, layer.visible)
+    })
+  }
+
   animation.isSkeleton.value = data.isSkeleton ?? false
 
   animation.undoRedoHandler.ignoreActions = false
@@ -97,10 +105,15 @@ export const writeDCAAnimationWithFormat = async <T extends keyof OutputByType>(
     cubeNameOverrides: convertMapToRecord(animation.keyframeNameOverrides),
     isSkeleton: animation.isSkeleton.value,
     soundLayers: animation.soundLayers.value.map(layer => ({
+      identifier: layer.identifier,
       sounds: layer.instances.value.map(sound => ({
+        identifier: sound.identifier,
         soundName: sound.soundName,
         start: sound.startTime.value,
       })),
+      name: layer.name.value,
+      locked: layer.locked.value,
+      visible: layer.visible.value,
     }))
   }
 
@@ -147,9 +160,14 @@ type ParsedLoopdataType = {
 
 type ParsedSoundLayerType = {
   sounds: ParsedSoundType[]
+  identifier: string
+  name: string
+  locked: boolean
+  visible: boolean
 }
 
 type ParsedSoundType = {
   soundName: string,
+  identifier: string,
   start: number,
 }
