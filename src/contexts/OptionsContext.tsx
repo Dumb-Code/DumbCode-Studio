@@ -52,6 +52,21 @@ export const useKeyCombos = () => {
 }
 
 type UnknownEventMatcherReturn<C extends KeyComboCategory> = Record<KeyComboKey<C>, (event: NeededEventData) => boolean>
+
+//Allows you to match an unknown event to a key combo
+//Unkown events are any events that have the ctrlKey, shiftKey and altKey modifiers. 
+//This is useful as it allows us to match keycombos to things like mouse clicks.
+//
+//Note that the keycombos used here must have `setCanIncludeCodes(false)`,
+//As the keycodes will not be available in the event. They ideally should also
+//have their scope limited to the category they are in, or nothing at all.
+//As they won't always be active, they'll only be active on a special event like
+//a mouse click on an object, or a scroll event on an element.
+//
+//Example:
+// const { copy } = useKeyComboUnknownEventMatcher("common")
+// We can then pass any event into copy: `event => copy(event) ? "Can Copy" : "Cannot Copy"`
+//
 export const useKeyComboUnknownEventMatcher = <C extends KeyComboCategory,>(category: C): UnknownEventMatcherReturn<C> => {
   const keyCombos = useKeyCombos()
   return useMemo(() => {
