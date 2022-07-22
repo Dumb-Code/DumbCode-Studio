@@ -163,7 +163,7 @@ export class ReferenceImage {
     this.mesh.userData['img'] = this
     this.handler.group.add(this.mesh)
 
-    this.opacity.addListener(v => {
+    this.opacity.addAndRunListener(v => {
       const val = v / 100
       this.normal.opacity = val
       this.highlight.opacity = val
