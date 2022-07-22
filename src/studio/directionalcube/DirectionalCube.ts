@@ -30,7 +30,7 @@ export class DirectionalCube {
   readonly raycaster = new Raycaster()
 
   readonly transitionClock = new Clock()
-  readonly transitionTime = 0.2;
+  readonly transitionTime = 0.25;
   readonly startTarget = new Vector3()
   readonly transitionTarget = new Vector3()
   readonly rotationQuat = new Quaternion()
@@ -38,11 +38,11 @@ export class DirectionalCube {
   startDistance = 0
   transitionDistance = 0
 
-
   readonly mainCube: Mesh<BoxBufferGeometry, MeshBasicMaterial[]>
   highlighedFace: number | null = null
 
   constructor() {
+    setTimeout
     if (DirectionalCube.instance) {
       throw new Error('DirectionalCube is a singleton')
     }
@@ -106,57 +106,72 @@ export class DirectionalCube {
     DirectionalCube.updateFaceColour(true)
   }
 
-  static onMouseUp(targetCamera: Camera, orbitControls: OrbitControls): boolean {
+  static isHovered() {
+    return DirectionalCube.getInstance().highlighedFace !== null
+  }
+
+  static performMouseClick(targetCamera: Camera, orbitControls: OrbitControls, singleClick: boolean) {
     const { highlighedFace } = DirectionalCube.getInstance()
     if (highlighedFace === null) {
       return false
     }
     switch (highlighedFace) {
       case 0:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 1, 0, 0)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 1, 0, 0, singleClick)
         break
       case 1:
-        DirectionalCube.startTransition(targetCamera, orbitControls, -1, 0, 0)
+        DirectionalCube.startTransition(targetCamera, orbitControls, -1, 0, 0, singleClick)
         break
       case 2:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 1, 0)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 1, 0, singleClick)
         break
       case 3:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 0, -1, 0)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 0, -1, 0, singleClick)
         break
       case 4:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 0, 1)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 0, 1, singleClick)
         break
       case 5:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 0, -1)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 0, -1, singleClick)
         break
     }
-    return true
   }
 
-  static startTransition(targetCamera: Camera, orbitControls: OrbitControls, x: number, y: number, z: number) {
+  static startTransition(targetCamera: Camera, orbitControls: OrbitControls, x: number, y: number, z: number, rotationOnly = true) {
     const instance = DirectionalCube.getInstance()
     const { startTarget, transitionClock, transitionTarget, rotationQuat, startOffset } = instance
     const startPosition = _tempVec.copy(targetCamera.position)
     startTarget.copy(orbitControls.target)
-
-    //If y is -1, then don't move the camera up 
-    //Otherwise, we want to look at the "center" of the model (0.5, 1.5, 0.5)
-    let yTarget = y < 0 ? 0 : 1.5
-
-    //Set transition position to be the distance between the current camera and 5*xyz
-    const endPosition = _tempVec2.set(x, y, z).multiplyScalar(5).add(tempVec3.set(0.5, yTarget, 0.5))
-    const endTarget = _tempVec3.set(0.5, yTarget, 0.5)
-
-    //As transition = end - start
-    transitionTarget.subVectors(endTarget, startTarget)
+    const startDistance = startPosition.distanceTo(startTarget)
 
     //The offsets from the target at the start and the end of the transition
     startOffset.subVectors(startPosition, startTarget).normalize()
-    const startDistance = startPosition.distanceTo(startTarget)
 
-    const endDistance = endPosition.distanceTo(endTarget)
-    const endOffset = endPosition.sub(endTarget).normalize()
+    let endDistance: number
+    let endOffset: Vector3
+    if (rotationOnly) {
+      //We want the end position to just be the target offset by xyz * distanceToTarget
+      endDistance = startDistance
+      endOffset = _tempVec2.set(x, y, z).multiplyScalar(startDistance).normalize()
+
+      //The target doesn't move
+      transitionTarget.set(0, 0, 0)
+
+    } else {
+      //If y is -1, then don't move the camera up 
+      //Otherwise, we want to look at the "center" of the model (0.5, 1.5, 0.5)
+      let yTarget = y < 0 ? 0 : 1.5
+
+      //Set transition position to be the distance between the current camera and 5*xyz
+      const endPosition = _tempVec2.set(x, y, z).multiplyScalar(5).add(tempVec3.set(0.5, yTarget, 0.5))
+      const endTarget = _tempVec3.set(0.5, yTarget, 0.5)
+
+      //As transition = end - start
+      transitionTarget.subVectors(endTarget, startTarget)
+
+      endDistance = endPosition.distanceTo(endTarget)
+      endOffset = endPosition.sub(endTarget).normalize()
+    }
 
     //We want to interpolate from startOffset to endOffset, going around a unit cirlce, then setting the distance to be 
     //The interpolation between startDistance and endDistance

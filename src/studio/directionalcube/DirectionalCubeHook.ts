@@ -21,6 +21,8 @@ export const useDirectionalCube = () => {
 
   useEffect(() => {
 
+    let singleClickTimout: NodeJS.Timeout | undefined;
+
     const onMouseMove = (event: MouseEvent) => {
       //Convert the mouse position to [-1, 1] of the bottom right segment of the canvas, where the diretional cube is
       const { width, height } = DirectionalCube.getInstance()
@@ -33,18 +35,50 @@ export const useDirectionalCube = () => {
       DirectionalCube.onMouseMove(x, y)
     }
 
-    const runOnMouseUp = () => DirectionalCube.onMouseUp(getCamera(), controls)
+    const onMouseDown = (event: MouseEvent) => {
+      if (!DirectionalCube.isHovered()) {
+        return
+      }
+
+      //This isn't null when we're performing a double click
+      if (singleClickTimout !== undefined) {
+        clearTimeout(singleClickTimout)
+        singleClickTimout = undefined
+        DirectionalCube.performMouseClick(getCamera(), controls, false)
+      } else {
+        //This is a single click
+        singleClickTimout = setTimeout(() => {
+          singleClickTimout = undefined
+          // DirectionalCube.performMouseClick(getCamera(), controls, true)
+        }, 200)
+
+        //By having the perform outside of the timeout, we don't have the weird delay
+        DirectionalCube.performMouseClick(getCamera(), controls, true)
+
+      }
+      event.stopImmediatePropagation()
+      event.stopPropagation()
+    }
+
+    //Ensure that stuff cannot be clicked through the directional cube
+    const stopMouseUpIfHovered = () => DirectionalCube.isHovered()
 
     const onFrame = () => {
       DirectionalCube.render(getCamera(), controls, renderer)
     }
     onRenderListeners.add(onFrame)
     renderer.domElement.addEventListener('mousemove', onMouseMove)
-    onMouseUp.addListener(0, runOnMouseUp)
+
+    //We want to capture, as we want to get it BEFORE other event listneres
+    renderer.domElement.addEventListener('mousedown', onMouseDown, { capture: true })
+
+    //Use a weight of 0 so it's the first event listener
+    onMouseUp.addListener(0, stopMouseUpIfHovered)
     return () => {
       onRenderListeners.delete(onFrame)
       renderer.domElement.removeEventListener('mousemove', onMouseMove)
-      onMouseUp.removeListener(runOnMouseUp)
+      renderer.domElement.removeEventListener('mousedown', onMouseDown, { capture: true })
+      onMouseUp.removeListener(stopMouseUpIfHovered)
     }
   }, [getCamera, controls, renderer, onRenderListeners, getSize, onMouseUp])
 }
