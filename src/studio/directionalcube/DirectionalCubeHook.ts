@@ -1,10 +1,13 @@
 import { useEffect, useMemo } from 'react';
 import { useKeyComboPressed } from '../../contexts/OptionsContext';
 import { useStudio } from "../../contexts/StudioContext";
+import { useKeyComboUnknownEventMatcher } from './../../contexts/OptionsContext';
 import { DirectionalCube } from './DirectionalCube';
 
 export const useDirectionalCube = () => {
   const { getCamera, renderer, onRenderListeners, getSize, onMouseUp, controls } = useStudio()
+
+  const { reset_camera_on_click: shouldResetCamera } = useKeyComboUnknownEventMatcher("camera_view")
 
   useKeyComboPressed(useMemo(() => ({
     camera_view: {
@@ -20,8 +23,6 @@ export const useDirectionalCube = () => {
   }), [getCamera, controls]))
 
   useEffect(() => {
-
-    let singleClickTimout: NodeJS.Timeout | undefined;
 
     const onMouseMove = (event: MouseEvent) => {
       //Convert the mouse position to [-1, 1] of the bottom right segment of the canvas, where the diretional cube is
@@ -39,23 +40,8 @@ export const useDirectionalCube = () => {
       if (!DirectionalCube.isHovered()) {
         return
       }
+      DirectionalCube.performMouseClick(getCamera(), controls, !shouldResetCamera(event))
 
-      //This isn't null when we're performing a double click
-      if (singleClickTimout !== undefined) {
-        clearTimeout(singleClickTimout)
-        singleClickTimout = undefined
-        DirectionalCube.performMouseClick(getCamera(), controls, false)
-      } else {
-        //This is a single click
-        singleClickTimout = setTimeout(() => {
-          singleClickTimout = undefined
-          // DirectionalCube.performMouseClick(getCamera(), controls, true)
-        }, 200)
-
-        //By having the perform outside of the timeout, we don't have the weird delay
-        DirectionalCube.performMouseClick(getCamera(), controls, true)
-
-      }
       event.stopImmediatePropagation()
       event.stopPropagation()
     }
@@ -80,5 +66,5 @@ export const useDirectionalCube = () => {
       renderer.domElement.removeEventListener('mousedown', onMouseDown, { capture: true })
       onMouseUp.removeListener(stopMouseUpIfHovered)
     }
-  }, [getCamera, controls, renderer, onRenderListeners, getSize, onMouseUp])
+  }, [getCamera, controls, renderer, onRenderListeners, getSize, onMouseUp, shouldResetCamera])
 }

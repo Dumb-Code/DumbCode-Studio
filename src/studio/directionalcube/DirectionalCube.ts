@@ -110,29 +110,29 @@ export class DirectionalCube {
     return DirectionalCube.getInstance().highlighedFace !== null
   }
 
-  static performMouseClick(targetCamera: Camera, orbitControls: OrbitControls, singleClick: boolean) {
+  static performMouseClick(targetCamera: Camera, orbitControls: OrbitControls, rotationOnly: boolean) {
     const { highlighedFace } = DirectionalCube.getInstance()
     if (highlighedFace === null) {
       return false
     }
     switch (highlighedFace) {
       case 0:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 1, 0, 0, singleClick)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 1, 0, 0, rotationOnly)
         break
       case 1:
-        DirectionalCube.startTransition(targetCamera, orbitControls, -1, 0, 0, singleClick)
+        DirectionalCube.startTransition(targetCamera, orbitControls, -1, 0, 0, rotationOnly)
         break
       case 2:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 1, 0, singleClick)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 1, 0, rotationOnly)
         break
       case 3:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 0, -1, 0, singleClick)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 0, -1, 0, rotationOnly)
         break
       case 4:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 0, 1, singleClick)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 0, 1, rotationOnly)
         break
       case 5:
-        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 0, -1, singleClick)
+        DirectionalCube.startTransition(targetCamera, orbitControls, 0, 0, -1, rotationOnly)
         break
     }
   }

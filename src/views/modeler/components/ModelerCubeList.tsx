@@ -4,7 +4,7 @@ import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import HorizontalDivider from '../../../components/HorizontalDivider';
 import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { useCreatePortal } from '../../../contexts/CreatePortalContext';
-import { useKeyComboPressed, useKeyCombos } from '../../../contexts/OptionsContext';
+import { useKeyComboPressed, useKeyComboUnknownEventMatcher } from '../../../contexts/OptionsContext';
 import { useStudio } from '../../../contexts/StudioContext';
 import { usePanelValue } from '../../../contexts/StudioPanelsContext';
 import { useTooltipRef } from '../../../contexts/TooltipContext';
@@ -488,7 +488,10 @@ const CubeListItem = ({
         }
     }, [beginDrag, finishDrag, cube, dragData?.cubes, mousePositionRef, updateDrag])
 
-    const keyCombos = useKeyCombos().modeler.combos
+    const {
+        drag_cube_only: dragCubeOnly,
+        drag_cubes_locally: dragCubesLocally,
+    } = useKeyComboUnknownEventMatcher("modeler")
 
     const canEdit = useContext(CanEditContext)
 
@@ -515,7 +518,7 @@ const CubeListItem = ({
                     cube.model.undoRedoHandler.startBatchActions()
 
                     const cubes = cube.selected.value ? cube.model.identifListToCubes(cube.model.selectedCubeManager.selected.value) : [cube]
-                    if (keyCombos.drag_cube_only.isContainedInUnknownEvent(e)) {
+                    if (dragCubeOnly(e)) {
                         cube.model.resetVisuals()
                         const lockers = cubes.flatMap(cube => {
                             const ret = cube.children.value.map(child => new CubeLocker(child))
@@ -528,7 +531,7 @@ const CubeListItem = ({
                         })
                         lockers.forEach(locker => locker.reconstruct())
                     }
-                    if (!keyCombos.drag_cubes_locally.isContainedInUnknownEvent(e)) {
+                    if (!dragCubesLocally(e)) {
                         cubes.forEach(cube => {
                             cube.pastedWorldMatrix = cube.cubeGroup.matrixWorld.toArray()
                         })
@@ -555,7 +558,7 @@ const CubeListItem = ({
                         beginDrag("takeover")
                     }
                     e.stopPropagation()
-                }, [cube, setDragData, beginDrag, keyCombos.drag_cube_only, keyCombos.drag_cubes_locally, canEdit])}
+                }, [cube, setDragData, beginDrag, dragCubeOnly, dragCubesLocally, canEdit])}
 
                 //Called when the element is stopped dragging
                 onDragEnd={useCallback((e: DragEvent) => {

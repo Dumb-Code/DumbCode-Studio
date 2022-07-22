@@ -45,6 +45,10 @@ const keyCombos = {
       right_view: new KeyCombo('Right View', "Moves the camera to view the Right of the model", 'Numpad6'),
       top_view: new KeyCombo('Top View', "Moves the camera to view the Top of the model", 'Numpad8'),
       bottom_view: new KeyCombo('Bottom View', "Moves the camera to view the Bottom of the model", 'Numpad2'),
+      reset_camera_on_click: new KeyCombo('Reset Camera on Click', "Resets the camera to the model's center when a directional cubes face is clicked", null, true)
+        .setCanBeNothing(true)
+        .setCanIncludeCodes(false)
+        .setScope(null),
     }
   },
 

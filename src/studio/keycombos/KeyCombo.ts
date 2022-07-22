@@ -22,7 +22,7 @@ export default class KeyCombo {
   private readonly defaultShift: boolean
   private readonly deafultAlt: boolean
 
-  public scope: string = "global"
+  public scope: string | null = "global"
   public validScopes: string[] = ["global"]
 
   private canBeNothing: boolean = false
@@ -61,7 +61,7 @@ export default class KeyCombo {
   }
 
 
-  setScope(scope: string) {
+  setScope(scope: string | null) {
     this.scope = scope
     return this
   }
@@ -211,7 +211,10 @@ export default class KeyCombo {
   }
 
   sharesScope(other: KeyCombo) {
-    return this.validScopes.includes(other.scope) || other.validScopes.includes(this.scope)
+    return (
+      (other.scope !== null && this.validScopes.includes(other.scope)) ||
+      (this.scope !== null && other.validScopes.includes(this.scope))
+    )
   }
 
   //Whether this keycombo "contains" the other keycombo
