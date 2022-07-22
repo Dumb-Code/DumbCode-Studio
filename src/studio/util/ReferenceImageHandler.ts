@@ -22,6 +22,10 @@ export default class ReferenceImageHandler {
     group: Group,
   ) {
     this.group = new Group()
+    //We override the render order, as the model is rendered with translucent textures,
+    //Thus it can render wrong. This is to prevent that as much as possible.
+    //https://cdn.discordapp.com/attachments/741335776473907320/999832740344119326/studiotest7.gif
+    this.group.renderOrder = 1
     group.add(this.group)
   }
 
