@@ -8,10 +8,8 @@ const tempVec4 = new Vector4()
 const _tempVec = new Vector3()
 const _tempVec2 = new Vector3()
 const _tempVec3 = new Vector3()
-const _tempVec4 = new Vector3()
 
 const _tempQuat = new Quaternion()
-const _tempQuat2 = new Quaternion()
 
 const identityQuat = new Quaternion()
 identityQuat.identity()
@@ -37,6 +35,9 @@ export class DirectionalCube {
   readonly startOffset = new Vector3()
   startDistance = 0
   transitionDistance = 0
+
+  startZoom = 0
+  transitionZoom = 0
 
   readonly mainCube: Mesh<BoxBufferGeometry, MeshBasicMaterial[]>
   highlighedFace: number | null = null
@@ -87,7 +88,7 @@ export class DirectionalCube {
   //X and Y are in the range [-1, 1], going over this scene
   static onMouseMove(x: number, y: number) {
     const instance = DirectionalCube.getInstance()
-    const { raycaster, camera, scene, mainCube } = instance
+    const { raycaster, camera, mainCube } = instance
 
     raycaster.setFromCamera(tempVec2.set(x, y), camera)
     const intersections = raycaster.intersectObject(mainCube)
@@ -147,6 +148,9 @@ export class DirectionalCube {
     //The offsets from the target at the start and the end of the transition
     startOffset.subVectors(startPosition, startTarget).normalize()
 
+    instance.startZoom = 1
+    instance.transitionZoom = 1
+
     let endDistance: number
     let endOffset: Vector3
     if (rotationOnly) {
@@ -171,6 +175,11 @@ export class DirectionalCube {
 
       endDistance = endPosition.distanceTo(endTarget)
       endOffset = endPosition.sub(endTarget).normalize()
+
+      if (targetCamera instanceof OrthographicCamera) {
+        instance.startZoom = targetCamera.zoom
+        instance.transitionZoom = 1 - instance.startZoom //1 is the end zoom target
+      }
     }
 
     //We want to interpolate from startOffset to endOffset, going around a unit cirlce, then setting the distance to be 
@@ -187,7 +196,7 @@ export class DirectionalCube {
   }
 
   static animateAt(cameraToFollow: Camera, orbitControls: OrbitControls, time: number) {
-    const { startTarget, transitionTarget, rotationQuat, startDistance, transitionDistance, startOffset } = DirectionalCube.getInstance()
+    const { startTarget, transitionTarget, rotationQuat, startDistance, transitionDistance, startOffset, startZoom, transitionZoom } = DirectionalCube.getInstance()
 
     const position = cameraToFollow.position.copy(startOffset)
 
@@ -198,6 +207,11 @@ export class DirectionalCube {
 
     orbitControls.target.copy(transitionTarget).multiplyScalar(time).add(startTarget)
     position.add(orbitControls.target)
+
+    if (cameraToFollow instanceof OrthographicCamera) {
+      cameraToFollow.zoom = startZoom + transitionZoom * time
+      cameraToFollow.updateProjectionMatrix()
+    }
 
     orbitControls.update()
   }
