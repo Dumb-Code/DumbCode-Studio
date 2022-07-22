@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Color } from "three";
-import KeyCombo from "../studio/keycombos/KeyCombo";
+import KeyCombo, { NeededEventData } from "../studio/keycombos/KeyCombo";
 import { KeyComboCategory, KeyComboKey, KeyComboMap, loadOrCreateKeyCombos, SavedKeyComboMap, updateClashes } from "../studio/keycombos/KeyCombos";
 import { ScreenshotActionType } from "../studio/screenshot/ScreenshotActions";
 import { useStudio } from "./StudioContext";
@@ -49,6 +49,27 @@ export const useOptions = () => {
 
 export const useKeyCombos = () => {
   return useOptions().keyCombos
+}
+
+type UnknownEventMatcherReturn<C extends KeyComboCategory> = Record<KeyComboKey<C>, (event: NeededEventData) => boolean>
+export const useKeyComboUnknownEventMatcher = <C extends KeyComboCategory,>(category: C): UnknownEventMatcherReturn<C> => {
+  const keyCombos = useKeyCombos()
+  return useMemo(() => {
+    const cat = keyCombos[category]
+    const combos = cat.combos as Record<string, KeyCombo>
+
+    //Go over every key, and add it to the accumulator 
+    return Object.keys(combos).reduce((acc, key) => {
+      const combo = combos[key]
+
+      //Set the callback in the accumulator
+      acc[key as KeyComboKey<C>] = (event: NeededEventData) => {
+        return combo.matchesUnknownEvent(event)
+      }
+
+      return acc
+    }, {} as UnknownEventMatcherReturn<C>)
+  }, [keyCombos, category])
 }
 
 export const useKeyComboPressed = (handlers: {
