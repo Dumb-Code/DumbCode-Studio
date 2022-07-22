@@ -15,6 +15,7 @@ export type ThreeJsContext = {
   raycaster: Raycaster,
   onMouseUp: IndexedEventHandler<React.MouseEvent>
   onFrameListeners: Set<(deltaTime: number) => void>,
+  onRenderListeners: Set<() => void>,
 
   setSize: (width: number, height: number) => void
   getSize: () => { width: number; height: number; }
@@ -105,6 +106,7 @@ export const createThreeContext = (): ThreeJsContext => {
   const clock = new Clock()
 
   const onFrameListeners = new Set<(deltaTime: number) => void>()
+  const onRenderListeners = new Set<() => void>()
 
   const setCameraType = (isPerspective: boolean) => {
     const currentlyIsPerspective = camera instanceof PerspectiveCamera
@@ -141,6 +143,8 @@ export const createThreeContext = (): ThreeJsContext => {
     if (overlay) {
       renderer.clearDepth()
       renderer.render(onTopScene, camera)
+
+      onRenderListeners.forEach(l => l())
     }
   }
 
@@ -148,7 +152,7 @@ export const createThreeContext = (): ThreeJsContext => {
 
   return {
     renderer, scene, onTopScene, controls, lightGroup, itemsGroup,
-    raycaster, onMouseUp, onFrameListeners, transformControls,
+    raycaster, onMouseUp, onFrameListeners, onRenderListeners, transformControls,
 
     getCamera: () => camera,
     setCameraType,
