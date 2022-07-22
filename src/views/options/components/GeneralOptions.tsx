@@ -133,7 +133,7 @@ const AutoRecoverySection = () => {
 }
 
 const UsageAndQuota = () => {
-  const [usage, quota, numFiles, refreshUsageAndQuota] = useUsageAndQuota()
+  const [usage, quota, numFiles] = useUsageAndQuota()
   const usageInMb = Math.round(usage / 1024 / 1024 * 100) / 100
   const quotaInMb = Math.round(quota / 1024 / 1024)
 
@@ -148,7 +148,6 @@ const UsageAndQuota = () => {
       description="You are about to delete all recovery data. This action cannot be undone. Are you sure you want to continue?"
       onYes={async () => {
         await AutoRecoveryFileSystem.deleteAll()
-        refreshUsageAndQuota()
       }}
     />)
   }
