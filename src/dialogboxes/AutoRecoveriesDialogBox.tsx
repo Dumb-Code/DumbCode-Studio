@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react"
 import { useStudio } from "../contexts/StudioContext"
-import { useAllEntries as useAllRecoveryEntries } from "../studio/autorecovery/AutoRecoveryFileSystem"
+import { AutoRecoveryFileType, useAllEntries as useAllRecoveryEntries } from "../studio/autorecovery/AutoRecoveryFileSystem"
 import { loadDcProj } from "../studio/formats/project/DcProjectLoader"
 import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes"
 
@@ -8,12 +8,13 @@ const AutoRecoveriesDialogBox = () => {
 
   const [entries] = useAllRecoveryEntries()
 
+  const arr = Array.from(entries).reverse()
   return (
     <OpenedDialogBox width="600px" height="600px" title="Auto Recoveries">
       <div className="flex flex-col justify-center h-full p-5">
         <div className="text-center dark:text-white font-semibold">Select an auto recovery to add load it</div>
         <div className="flex-grow h-0 overflow-x-hidden overflow-y-auto studio-scrollbar flex flex-col bg-gray-200 dark:bg-gray-700 m-3">
-          {entries.reverse().map((e, i) => <AutoRecoveryEntry key={i} entry={e} />)}
+          {arr.map((e, i) => <AutoRecoveryEntry key={i} entry={e} />)}
         </div>
       </div>
     </OpenedDialogBox >
@@ -21,7 +22,7 @@ const AutoRecoveriesDialogBox = () => {
 }
 
 
-const AutoRecoveryEntry = ({ entry }: { entry: FileSystemFileEntry }) => {
+const AutoRecoveryEntry = ({ entry }: { entry: AutoRecoveryFileType }) => {
   const [timeStr, ...restOfFileNameArr] = entry.name.split("-")
   const projectName = restOfFileNameArr.join("-")
 
@@ -31,8 +32,7 @@ const AutoRecoveryEntry = ({ entry }: { entry: FileSystemFileEntry }) => {
   const { addProject, setSettingsOpen } = useStudio()
 
   const onClick = useCallback(async () => {
-    const file = await new Promise<File>((resolve, reject) => entry.file(resolve, reject))
-    const project = await loadDcProj(`${projectName}-autorecovery`, await file.arrayBuffer())
+    const project = await loadDcProj(`${projectName}-autorecovery`, await entry.data.arrayBuffer())
     clear()
     setSettingsOpen(false)
     addProject(project)
