@@ -23,24 +23,12 @@ export class TextureGLManager {
   //as 2d canvas rendering uses premultiplied alpha
   //Therefore, this method should not be used for accurate results 
   //To get accurate results, look at `this.canvas`
-  render(textures: TextureLayer[], options?: {
-    dest?: HTMLCanvasElement
-    premultiply?: boolean
-    width?: number
-    height?: number
-  }) {
+  render(textures: TextureLayer[], dest: HTMLCanvasElement) {
     const { gl, program, buffers, canvas } = this
 
-    const { dest, premultiply, width, height } = options || {}
-
     //Ensure the viewport is the same size as the canvas
-    if (dest !== undefined) {
-      canvas.width = width || dest.width
-      canvas.height = height || dest.height
-    } else {
-      canvas.width = width || canvas.width
-      canvas.height = height || canvas.height
-    }
+    canvas.width = dest.width
+    canvas.height = dest.height
     gl.viewport(0, 0, canvas.width, canvas.height);
 
     //Clear the canvas
@@ -49,10 +37,6 @@ export class TextureGLManager {
 
     // Tell WebGL we want to use this program for all subsequent rendering
     gl.useProgram(program);
-
-
-    // Tell the shader if we want to premultiply the alpha
-    gl.uniform1i(gl.getUniformLocation(program, "u_premultiply"), premultiply ? 1 : 0);
 
     // Tell the shader we bound the texture to texture unit 0
     gl.uniform1i(gl.getUniformLocation(program, "u_texture"), 0);
@@ -83,7 +67,7 @@ export class TextureGLManager {
     })
 
 
-    if (dest !== undefined && canvas.width > 0 && canvas.height > 0) {
+    if (canvas.width > 0 && canvas.height > 0) {
       //Copy the rendered image to the canvas
       dest.getContext("2d")!.drawImage(canvas, 0, 0, dest.width, dest.height)
     }
@@ -177,13 +161,10 @@ export class TextureGLManager {
     const fragmentShader = this.loadShader(gl.FRAGMENT_SHADER, `
       precision mediump float;
       uniform sampler2D u_texture;
-      uniform bool u_premultiply;
       varying vec2 v_texCoord;
       void main() {
         vec4 colour = texture2D(u_texture, v_texCoord);
-        if (u_premultiply) {
-          colour.rgb *= colour.a;
-        }
+        colour.rgb *= colour.a; //We want to premultiply here, as the texture data should be unchanged
         gl_FragColor = colour;
       }`);
 

@@ -162,10 +162,7 @@ export default class TextureManager {
       ctx.clearRect(0, 0, width, height)
     }
 
-    TextureGLManager.getInstance().render(textures.reverse().map(t => t.canvas), {
-      dest: canvas,
-      premultiply: true,
-    })
+    TextureGLManager.getInstance().render(textures.reverse().map(t => t.canvas), canvas)
   }
 
   /**
