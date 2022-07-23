@@ -162,10 +162,19 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     if (this.batchActions) {
       this.endBatchActions("!Object Closed While Batching!")
     }
+
+    const index = this.index.value
+    const amountToClip = 100
+
+    const startInArray = index - amountToClip
+
+    //New array is 100 actions before the current index, plus all the current "undone" actions
+    const newArray = this.history.value.slice(Math.max(0, startInArray), this.history.value.length)
+
     return {
-      history: this.history.value,
+      history: newArray,
       silentActions: this.silentActions,
-      index: this.index.value
+      index: amountToClip + Math.min(startInArray, 0) //This is the new index in `newArray`. this.history[index] === newArray[newIndex]
     }
   }
 
