@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Object3D } from 'three';
+import { Intersection, Object3D } from 'three';
 import { useStudio } from './../../contexts/StudioContext';
 
 const validTypes = ["cube", "refimg", "pointtracker"] as const
@@ -21,29 +21,39 @@ export const setIntersectThrogh = (object: Object3D, through: boolean) => {
 export const useObjectUnderMouse = () => {
   const { renderer, getSelectedProject, getCamera, raycaster, onFrameListeners, onMouseUp } = useStudio()
   const project = getSelectedProject()
-  const { selectionGroup, selectedCubeManager, cubePointTracker, referenceImageHandler } = project
+  const { selectionGroup, overlaySelectionGroup, selectedCubeManager, cubePointTracker, referenceImageHandler } = project
   const mouseDownRef = useRef(false)
   const mouse = useRef({ x: 0, y: 0 })
   useEffect(() => {
     const onFrame = () => {
+      cubePointTracker.onFrame(getCamera())
+
       //If the mouse is down, or the mouse is outside the canvas viewspace, then ignore
       if (mouseDownRef.current || Math.abs(mouse.current.x) > 1 || Math.abs(mouse.current.y) > 1) {
         return
       }
-      const objects: Object3D[] = []
-      selectionGroup.traverse(o => {
-        const vis = o.userData[visibleKey]
-        if (o.userData[typeKey] && (vis === undefined || vis())) {
-          objects.push(o)
-        }
-      })
 
       raycaster.setFromCamera(mouse.current, getCamera())
-      const intersected = raycaster.intersectObjects(objects, false)
+      //We want the intersected list to be all the overlays, then all the normal objects
+      //Overlay objects should be defined as "passthrough", with setIntersectThrough(true)
+      const intersected: Intersection<Object3D>[] = [];
+
+      for (const group of [overlaySelectionGroup, selectionGroup]) {
+        const objects: Object3D[] = []
+        group.traverse(o => {
+          const vis = o.userData[visibleKey]
+          if (o.userData[typeKey] && (vis === undefined || vis())) {
+            objects.push(o)
+          }
+        })
+
+        intersected.push(...raycaster.intersectObjects(objects, false))
+      }
+
 
       if (intersected.length === 0) {
         selectedCubeManager.update(undefined)
-        cubePointTracker.update(getCamera(), undefined)
+        cubePointTracker.update(undefined)
         referenceImageHandler.update(undefined)
       } else {
         const intersectedData: Partial<Record<typeof validTypes[number], Object3D>> = {}
@@ -64,7 +74,7 @@ export const useObjectUnderMouse = () => {
         }
 
         selectedCubeManager.update(intersectedData.cube)
-        cubePointTracker.update(getCamera(), intersectedData.pointtracker)
+        cubePointTracker.update(intersectedData.pointtracker)
         referenceImageHandler.update(intersectedData.refimg)
       }
 
@@ -89,10 +99,11 @@ export const useObjectUnderMouse = () => {
     const mouseUpAnywhere = () => mouseDownRef.current = false
 
     const mouseUpCanvas = (e: React.MouseEvent) => {
-      selectedCubeManager.onMouseUpOnCanvas(project, e.ctrlKey)
-      cubePointTracker.onMouseUp()
-      referenceImageHandler.onMouseUp()
-      return false
+      const pointTrackerResult = cubePointTracker.onMouseUp()
+      if (!pointTrackerResult) {
+        selectedCubeManager.onMouseUpOnCanvas(project, e.ctrlKey)
+        referenceImageHandler.onMouseUp()
+      }
     }
 
     onFrameListeners.add(onFrame)
@@ -107,5 +118,5 @@ export const useObjectUnderMouse = () => {
       document.removeEventListener("pointerdown", mouseDown)
       document.removeEventListener("pointerup", mouseUpAnywhere, true)
     }
-  }, [cubePointTracker, getCamera, onFrameListeners, onMouseUp, project, raycaster, renderer, referenceImageHandler, selectedCubeManager, selectionGroup])
+  }, [cubePointTracker, getCamera, onFrameListeners, onMouseUp, project, raycaster, renderer, referenceImageHandler, selectedCubeManager, selectionGroup, overlaySelectionGroup])
 }

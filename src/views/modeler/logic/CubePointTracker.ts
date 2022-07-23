@@ -5,7 +5,7 @@ import SelectedCubeManager from "../../../studio/util/SelectedCubeManager";
 import { scaleMeshToCamera } from '../../../studio/util/Utils';
 import { useStudio } from './../../../contexts/StudioContext';
 import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
-import { setIntersectThrogh } from './../../../studio/util/ObjectClickedHook';
+import { setIntersectThrogh as setIntersectThrough } from './../../../studio/util/ObjectClickedHook';
 
 const _defaultNormalColor = 0x23284d
 const _defaultHighlightColor = 0x15c1d4
@@ -86,7 +86,7 @@ export default class CubePointTracker extends EventDispatcher {
           const point: TrackedPoint = { x, y, z, mesh: visualMesh, pickerMesh }
           pickerMesh.userData._point = point
           setIntersectType(pickerMesh, "pointtracker", () => this.enabled)
-          setIntersectThrogh(pickerMesh, true)
+          setIntersectThrough(pickerMesh, true)
           points.push(point)
         }
       }
@@ -102,7 +102,7 @@ export default class CubePointTracker extends EventDispatcher {
   onMouseUp() {
     //If we click on a cube, but not a point, ignore the click
     if (this.selectedCubeManager.mouseOverMesh !== null && this.intersected === null) {
-      return
+      return false
     }
     if (this.enabled) {
       let intersected = this.intersected
@@ -118,19 +118,7 @@ export default class CubePointTracker extends EventDispatcher {
     return false
   }
 
-  update(camera: Camera, intersectedObject?: Object3D) {
-    const selected = this.selectedCubeManager.selected.value
-
-    const mouseOverMesh = this.selectedCubeManager.mouseOverMesh
-    const mouseOverCube = mouseOverMesh !== null ? this.selectedCubeManager.getCube(mouseOverMesh) : undefined
-
-    this.cubesToPointTo = []
-    if (selected.length !== 0) {
-      this.cubesToPointTo = this.model.identifListToCubes(selected)
-    } else if (mouseOverCube !== undefined) {
-      this.cubesToPointTo = [mouseOverCube]
-    }
-
+  onFrame(camera: Camera) {
     //Ensure there is enough trackers for the number of cubes to point to
     while (this.trackers.length < this.cubesToPointTo.length) {
       this.createGroup()
@@ -142,6 +130,7 @@ export default class CubePointTracker extends EventDispatcher {
     }
 
     if (this.enabled) {
+
       //For each point, set the mesh visible and set the xyz position to the selected (or defined) cube.
       this.cubesToPointTo.forEach((cube, index) => {
         const { group: trackerGroup, points } = this.trackers[index]
@@ -165,6 +154,30 @@ export default class CubePointTracker extends EventDispatcher {
 
         })
       })
+    } else {
+      //Not enabled. Hide the meshes
+      this.trackers.forEach(p => {
+        p.group.visible = false
+        p.points.forEach(p => p.pickerMesh.userData._cube = null)
+      })
+    }
+
+  }
+
+  update(intersectedObject?: Object3D) {
+    const selected = this.selectedCubeManager.selected.value
+
+    const mouseOverMesh = this.selectedCubeManager.mouseOverMesh
+    const mouseOverCube = mouseOverMesh !== null ? this.selectedCubeManager.getCube(mouseOverMesh) : undefined
+
+    this.cubesToPointTo = []
+    if (selected.length !== 0) {
+      this.cubesToPointTo = this.model.identifListToCubes(selected)
+    } else if (mouseOverCube !== undefined) {
+      this.cubesToPointTo = [mouseOverCube]
+    }
+
+    if (this.enabled) {
 
       // //Raytrace under every helper point
       // this.pickerPoints.forEach(p => p.visible = true)
@@ -192,12 +205,6 @@ export default class CubePointTracker extends EventDispatcher {
         this.intersected.material.color.setHex(this.normalColor)
         this.intersected = null
       }
-    } else {
-      //Not enabled. Hide the meshes
-      this.trackers.forEach(p => {
-        p.group.visible = false
-        p.points.forEach(p => p.pickerMesh.userData._cube = null)
-      })
     }
 
   }
