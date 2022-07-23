@@ -148,8 +148,8 @@ export class DirectionalCube {
     //The offsets from the target at the start and the end of the transition
     startOffset.subVectors(startPosition, startTarget).normalize()
 
-    instance.startZoom = 1
-    instance.transitionZoom = 1
+    instance.startZoom = -1
+    instance.transitionZoom = -1
 
     let endDistance: number
     let endOffset: Vector3
@@ -208,7 +208,7 @@ export class DirectionalCube {
     orbitControls.target.copy(transitionTarget).multiplyScalar(time).add(startTarget)
     position.add(orbitControls.target)
 
-    if (cameraToFollow instanceof OrthographicCamera) {
+    if (cameraToFollow instanceof OrthographicCamera && startZoom !== -1 && transitionZoom !== -1) {
       cameraToFollow.zoom = startZoom + transitionZoom * time
       cameraToFollow.updateProjectionMatrix()
     }
