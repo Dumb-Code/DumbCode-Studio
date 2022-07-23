@@ -149,9 +149,16 @@ export const useUsageAndQuota = () => {
   const [numFiles, updateNumFiles] = useAllEntries()
 
   const updateQuotas = useCallback(async () => {
-    const { quota, usage } = await window.navigator.storage.estimate()
-    setQuota(quota ?? 0)
-    setUsage(usage ?? 0)
+
+    const { quota, usage, usageDetails } = await window.navigator.storage.estimate()
+    if (usageDetails && quota && usage) {
+      setQuota(quota - usageDetails.caches - usageDetails.serviceWorkerRegistrations)
+      setUsage(usageDetails.indexedDB)
+    } else {
+      setQuota(quota ?? 0)
+      setUsage(usage ?? 0)
+    }
+
     updateNumFiles()
 
   }, [updateNumFiles])
