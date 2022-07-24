@@ -156,6 +156,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     if (this.batchedActions.length !== 0) {
       this._PUSH(actionType, reason, this.batchedActions, chainState)
     }
+    this.batchedActions.length = 0
   }
 
   jsonRepresentation(): SerializedUndoRedoHandler {
