@@ -101,8 +101,7 @@ const ModelerCubeList = ({ canEdit = true }: { canEdit?: boolean }) => {
 
         project.undoRedoHandler.endBatchActions("_WEAK", HistoryActionTypes.Edit, "chainFirst")
         project.model.undoRedoHandler.endBatchActions(`${amount} Cube${amount === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove, "chainLast")
-        model.undoRedoHandler.endBatchActions("Cube Deleted", HistoryActionTypes.Remove)
-    }, [project.model, project.undoRedoHandler, model.undoRedoHandler, project.selectedCubeManager])
+    }, [project.model, project.undoRedoHandler, project.selectedCubeManager])
 
     //Deletes all the selected cubes, and all their children.
     const deleteCubesAndChildren = useCallback(() => {
