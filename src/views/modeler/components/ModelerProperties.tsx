@@ -58,11 +58,16 @@ const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<NumAr
     return <CubeInput
         title={title}
         value={value}
-        setValue={setValue}
+        setValue={v => {
+            setValue(v)
+            model.lockedCubes.reconstructLockedCubes()
+        }}
         onFocus={() => {
             model.undoRedoHandler.startBatchActions()
+            model.lockedCubes.createLockedCubesCache()
         }}
         onBlur={() => {
+            // model.lockedCubes.reconstructLockedCubes()
             model.undoRedoHandler.endBatchActions(`Cube ${title.toLowerCase()} edit`)
         }}
     />
@@ -85,9 +90,18 @@ const WrappedCubeInputRotation = ({ title, obj, model }: { title: string, obj?: 
     return <CubeRotationInput
         title={title.toUpperCase()}
         value={value}
-        setValue={setValue}
-        onFocus={() => model.undoRedoHandler.startBatchActions()}
-        onBlur={() => model.undoRedoHandler.endBatchActions(`Cube ${title} changed`)}
+        setValue={v => {
+            setValue(v)
+            model.lockedCubes.reconstructLockedCubes()
+        }}
+        onFocus={() => {
+            model.undoRedoHandler.startBatchActions()
+            model.lockedCubes.createLockedCubesCache()
+        }}
+        onBlur={() => {
+            // model.lockedCubes.reconstructLockedCubes()
+            model.undoRedoHandler.endBatchActions(`Cube ${title} changed`)
+        }}
     />
 }
 
