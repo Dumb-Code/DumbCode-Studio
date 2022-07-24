@@ -219,7 +219,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
   }
 
   modifySection<P extends keyof S['data'] & string>(section: S, property_name: P, value: S['data'][P], old_value: S['data'][P], silent: boolean, reason: string, actionType: HistoryActionTypes) {
-    section[property_name] = value
+    section.data[property_name] = value
     const action: ModifySectionAction<S> = {
       type: "modify",
       section_name: section.section_name,
