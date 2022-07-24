@@ -280,11 +280,16 @@ export const useModelerGumball = () => {
     //When the mouse is pressed down on the transform controls
     const mouseDownTransformControls = runWhenObjectSelected(() => {
       model.undoRedoHandler.startBatchActions()
-      model.lockedCubes.createLockedCubesCache()
+      const rotationPoint = gumball.object_transformMode.value === "translate" && gumball.object_position_type.value === 'rotation_point'
+      if (rotationPoint) {
+        model.lockedCubes.clearCubeLockers()
+      } else {
+        model.lockedCubes.createLockedCubesCache()
+      }
       gumball.startingCache.clear()
       getCubes().forEach(cube => {
         //If rotation point, then create a cube locker for the cube's offset and children
-        if (gumball.object_transformMode.value === "translate" && gumball.object_position_type.value === 'rotation_point') {
+        if (rotationPoint) {
           model.lockedCubes.addToLocker(cube, LockerType.OFFSET)
           cube.children.value.forEach(child => model.lockedCubes.addToLocker(child, LockerType.POSITION))
         }
