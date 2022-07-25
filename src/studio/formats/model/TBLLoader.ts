@@ -20,7 +20,7 @@ export let worldY = new Vector3(0, 1, 0)
  * @param {ArrayBuffer} data the arraybuffer containging the data
  * @returns {DCMModel} a converted model
  */
-export async function readTblFile(data: ArrayBuffer): Promise<DCMModel> {
+export async function readTblFile(data: ArrayBuffer): Promise<[DCMModel, string, number]> {
   let model = new DCMModel()
 
   model.undoRedoHandler.ignoreActions = true
@@ -49,7 +49,7 @@ export async function readTblFile(data: ArrayBuffer): Promise<DCMModel> {
   runInvertMath(model, null)
 
   model.undoRedoHandler.ignoreActions = false
-  return model
+  return [model, "tbl", json.projVersion]
 }
 
 type V4TBLCube = {

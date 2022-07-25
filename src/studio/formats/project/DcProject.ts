@@ -10,7 +10,7 @@ import ShowcaseProperties from "../../showcase/ShowcaseProperties";
 import ReferenceImageHandler from "../../util/ReferenceImageHandler";
 import { loadUnknownAnimation } from "../animations/DCALoader";
 import DcaTabs from '../animations/DcaTabs';
-import { loadModelUnknown } from "../model/DCMLoader";
+import { loadModelUnknownGetFileType } from "../model/DCMLoader";
 import { DCMModel } from '../model/DcmModel';
 import TextureManager from '../textures/TextureManager';
 import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
@@ -34,7 +34,7 @@ export default class DcProject {
   readonly showcaseProperties: ShowcaseProperties
 
   readonly model: DCMModel
-  readonly projectSaveType = new LO<"unknown" | "project" | "model">("unknown")
+  readonly projectSaveType = new LO<"unknown" | "project" | "model" | "old_model">("unknown")
   modelWritableFile = getUndefinedWritable("Model File", ".dcm")
 
   readonly projectNeedsSaving = new LO(false)
@@ -165,11 +165,14 @@ export const createProject = async (read: ReadableFile) => {
   if (file.name.endsWith(".dcproj")) {
     return await loadDcProj(removeFileExtension(file.name), await file.arrayBuffer(), read.asWritable())
   }
-  const model = await loadModelUnknown(file.arrayBuffer(), file.name)
+  const [model, type, version] = await loadModelUnknownGetFileType(file.arrayBuffer(), file.name)
   const project = new DcProject(removeFileExtension(file.name), model)
 
-  project.modelWritableFile = read.asWritable()
-  project.projectSaveType.value = "model"
+  if (type === "dcm") {
+    project.modelWritableFile = read.asWritable()
+    project.projectSaveType.value = version === 2 ? "model" : "old_model"
+  }
+
 
   return project
 }

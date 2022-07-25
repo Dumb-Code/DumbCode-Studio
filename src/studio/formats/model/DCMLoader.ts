@@ -4,18 +4,21 @@ import { DCMCube, DCMModel } from "./DcmModel";
 import { loadDCMModel } from "./OldDCMLoader";
 import { readTblFile } from "./TBLLoader";
 
-export const loadModelUnknown = async (arrayBuffer: ArrayBuffer | PromiseLike<ArrayBuffer>, name = "") => {
+export const loadModelUnknown = async (arrayBuffer: ArrayBuffer | PromiseLike<ArrayBuffer>, name = "") =>
+  (await loadModelUnknownGetFileType(arrayBuffer, name))[0]
+
+export const loadModelUnknownGetFileType = async (arrayBuffer: ArrayBuffer | PromiseLike<ArrayBuffer>, name = ""): Promise<readonly [DCMModel, string, number]> => {
   if (name.endsWith('.tbl')) {
     return readTblFile(await arrayBuffer)
   }
 
   try {
     //We need the await here, so any errors are thrown instead of passed down 
-    return await loadModel(await arrayBuffer)
+    return [await loadModel(await arrayBuffer), "dcm", 2] as const
   } catch (e) {
     if (e instanceof ParseError) {
       console.warn(e)
-      return loadDCMModel(arrayBuffer, name)
+      return loadDCMModel(arrayBuffer, name).then(model => [model, "dcm", 1] as const)
     } else {
       throw e
     }

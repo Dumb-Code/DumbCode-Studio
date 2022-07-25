@@ -397,6 +397,15 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
         addToast(`Saved texture as ${name}`, "success")
     }
 
+    const unlinkTexture = () => {
+        if (!saveable) {
+            return
+        }
+        texture.textureWritableFile.unlink?.()
+        setSaveableFile(false)
+        addToast(`Unlinked texture`, "success")
+    }
+
     const deleteTexture = async () => {
         texture.delete()
         addToast("Deleted texture", "success")
@@ -421,7 +430,10 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
             </div>
             <DblClickEditLO obj={texture.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
             <p className="flex flex-col text-white items-center justify-center">
-                <ButtonWithTooltip onClick={e => { saveTexture(); e.stopPropagation() }} className={iconClassName + " mb-1 "} tooltip={saveable ? "Save Texture" : "Download Texture"}>
+                <ButtonWithTooltip
+                    onClick={e => { saveTexture(); e.stopPropagation() }}
+                    onContextMenu={e => { unlinkTexture(); e.stopPropagation(); e.preventDefault() }}
+                    className={iconClassName + " mb-1 "} tooltip={saveable ? "Save Texture\nRight Click to unlink" : "Download Texture"}>
                     <SaveIcon className={"h-4 w-4 " + (isTextureDirty ? "text-red-500" : "")} />
                 </ButtonWithTooltip>
                 <ButtonWithTooltip

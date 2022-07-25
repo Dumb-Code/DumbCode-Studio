@@ -79,7 +79,7 @@ const AnimationEntries = ({ project }: { project: DcProject }) => {
 
 const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation }: { animation: DcaAnimation, selected: boolean, toggleAnimation: () => void, removeAnimation: () => void }) => {
     const [isAnimationDirty] = useListenableObject(animation.needsSaving)
-    const [isSaveable] = useListenableObject(animation.saveableFile)
+    const [isSaveable, setIsSaveable] = useListenableObject(animation.saveableFile)
     const [isSkeleton] = useListenableObject(animation.isSkeleton)
 
     const { addToast } = useToast()
@@ -101,6 +101,15 @@ const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation 
         }
     }
 
+    const unlinkAnimation = () => {
+        if (!saveable) {
+            return
+        }
+        animation.animationWritableFile.unlink?.()
+        setIsSaveable(false)
+        addToast(`Unlinked from file`, "success")
+    }
+
     const dialogBoxes = useDialogBoxes()
     const exportAsGif = useCallback(() => {
         dialogBoxes.setDialogBox(() => <ExportAnimationAsGifDialogBox animation={animation} />)
@@ -114,7 +123,10 @@ const AnimationEntry = ({ animation, selected, toggleAnimation, removeAnimation 
                 <DblClickEditLO obj={animation.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
                 <div className="mr-2 flex flex-row text-white">
                     {isSaveable && (
-                        <ButtonWithTooltip onClick={e => { saveAnimation(); e.stopPropagation() }} className={iconButtonClass + " mr-1 " + (isAnimationDirty ? " text-red-600 " : "")} tooltip={saveable ? "Save" : "Download"}>
+                        <ButtonWithTooltip
+                            onClick={e => { saveAnimation(); e.stopPropagation() }}
+                            onContextMenu={e => { unlinkAnimation(); e.stopPropagation(); e.preventDefault() }}
+                            className={iconButtonClass + " mr-1 " + (isAnimationDirty ? " text-red-600 " : "")} tooltip={saveable ? "Save\nRight Click to unlink" : "Download"}>
                             <SVGSave className="h-4 w-4" />
                         </ButtonWithTooltip>
                     )}

@@ -121,6 +121,12 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                 setIsProjectDirty(false)
                 setIsModelDirty(false)
                 addToast(`Saved dcproj as ${name}`, "success")
+            } else if (type === "old_model") {
+                const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeOldModel(project.model))
+                project.name.value = removeFileExtension(name)
+                setSaveType(type)
+                setIsModelDirty(false)
+                addToast(`Saved model (old format) as ${name}`, "success")
             }
 
         } catch (e) {
@@ -129,8 +135,11 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
         }
     }
 
-    const exportToOldDCM = async () => {
-        defaultWritable.write(project.name.value + ".dcm", writeOldModel(project.model))
+    const unlinkFromFile = () => {
+        setSaveType("unknown")
+        project.modelWritableFile.unlink?.()
+        project.projectWritableFile.unlink?.()
+        addToast("Unlinked from file", "success")
     }
 
     const exportToGLTF = async () => {
@@ -158,7 +167,6 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                     animation.project.model.resetVisuals()
                     const time = kf.startTime.value + kf.duration.value * pp.x
 
-                    console.log(time, pp.x)
                     animation.animateAt(time, true)
 
                     kf.position.forEach((_, name) => getAllCubesFor(name).forEach(cube => {
@@ -299,13 +307,20 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         </ButtonWithTooltip>
                     }
                     {linkedToFile &&
-                        <ButtonWithTooltip
-                            onClick={e => { saveModel(); e.stopPropagation() }}
-                            className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + ((saveType === "project" ? isProjectDirty : isModelDirty) ? " text-red-600 " : "")}
-                            tooltip="Save to file"
-                        >
-                            <SVGSave className="h-4 w-4 mr-1" />
-                        </ButtonWithTooltip>
+                        <>
+                            <ButtonWithTooltip
+                                onClick={e => { saveModel(); e.stopPropagation() }}
+                                onContextMenu={e => { unlinkFromFile(); e.stopPropagation(); e.preventDefault() }}
+                                className={iconButtonClass + " rounded pr-1 pl-2 py-0.5 my-0.5 mr-1 " + ((saveType === "project" ? isProjectDirty : isModelDirty) ? " text-red-600 " : "")}
+                                tooltip={`Save to file (${saveType === "project" ?
+                                    "Project" : saveType === "model" ?
+                                        "Model" : saveType === "old_model" ?
+                                            "Old Model" : "Unknown"
+                                    })\nRight Click to unlink`}
+                            >
+                                <SVGSave className="h-4 w-4 mr-1" />
+                            </ButtonWithTooltip>
+                        </>
                     }
                     <DownloadAsButton
                         Icon={SVGDownload}
@@ -315,7 +330,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         name={project.name.value}
                     >
                         <DownloadOption exportFunction={() => saveModel("model")} extension="dcm" />
-                        <DownloadOption exportFunction={exportToOldDCM} extension="dcm (old)" />
+                        <DownloadOption exportFunction={() => saveModel("old_model")} extension="dcm (old)" />
                         <DownloadOption exportFunction={exportToObj} extension="obj" />
                         <DownloadOption exportFunction={exportToGLTF} extension="gltf" />
                         <DownloadOption exportFunction={() => saveModel("project")} extension="dcproj" />

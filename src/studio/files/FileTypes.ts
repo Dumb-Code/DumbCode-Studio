@@ -49,7 +49,7 @@ export const defaultWritable: WritableFile = {
 }
 
 //Gets the writeable file for where nothing has been defined.
-export const getUndefinedWritable = (description: string, ...accept: string[]): WritableFile => {
+export const getUndefinedWritable = (description: string, ...accept: string[]): WritableFile & { unlink?: () => void } => {
   if (!FileSystemsAccessApi) {
     return defaultWritable
   }
@@ -78,7 +78,13 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
     },
     startListening: (listener) => {
       return listener.addFile(() => readable?.asFile())
+    },
+    unlink: () => {
+      saveName = null
+      file = null
+      readable = null
     }
+
   }
 }
 
