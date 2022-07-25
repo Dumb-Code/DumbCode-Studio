@@ -28,6 +28,8 @@ export default class KeyCombo {
   private canBeNothing: boolean = false
   private canIncludeCodes: boolean = true
 
+  private dontInferProps = false
+
   constructor(
     public readonly name: string,
     public readonly moreInfo: string,
@@ -47,6 +49,24 @@ export default class KeyCombo {
     this.deafultAlt = alt
 
     this.displayName = new LO(this.computeDisplayValue())
+  }
+
+  dontInfer() {
+    this.dontInferProps = true
+    return this
+  }
+
+  shouldInferProperties() {
+    return !this.dontInferProps
+  }
+
+  setOnSpecificUnknownEvent(eventName: string) {
+    return this
+      .dontInfer()
+      .setCanBeNothing(true)
+      .setCanIncludeCodes(false)
+      .withScopes([eventName])
+      .setScope(eventName)
   }
 
   setCanBeNothing(canBeNothing: boolean) {

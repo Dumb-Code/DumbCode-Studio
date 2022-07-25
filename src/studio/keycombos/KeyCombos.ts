@@ -45,10 +45,7 @@ const keyCombos = {
       right_view: new KeyCombo('Right View', "Moves the camera to view the Right of the model", 'Numpad6'),
       top_view: new KeyCombo('Top View', "Moves the camera to view the Top of the model", 'Numpad8'),
       bottom_view: new KeyCombo('Bottom View', "Moves the camera to view the Bottom of the model", 'Numpad2'),
-      reset_camera_on_click: new KeyCombo('Reset Camera on Click', "Resets the camera to the model's center when a directional cubes face is clicked", null, true)
-        .setCanBeNothing(true)
-        .setCanIncludeCodes(false)
-        .setScope(null),
+      reset_camera_on_click: new KeyCombo('Reset Camera on Click', "Resets the camera to the model's center when a directional cubes face is clicked", null, true).setOnSpecificUnknownEvent("camera_cube_click")
     }
   },
 
@@ -72,9 +69,11 @@ const keyCombos = {
       delete_and_children: new KeyCombo('Delete + Children', "Deletes the selected object and it's children.", 'Delete'),
       copy_only_selected: new KeyCombo('Copy No Children', "Copy only the selected cubes (no children)", "KeyC", true, true),
       paste_world_position: new KeyCombo('Paste as World', "Paste the cubes in the world position they were copied from", "KeyV", true, true),
-      drag_cube_only: new KeyCombo('Drag Cube Only', "In the cube list, dragging cubes will not move their children", null, true),
-      drag_cubes_locally: new KeyCombo('Drag Cubes Locally', "In the cube list, dragging cubes will preserve their local movements, but change their global transform ", null, false, false, true),
 
+      drag_cube_only: new KeyCombo('Drag Cube Only', "In the cube list, dragging cubes will not move their children", null, true)
+        .setOnSpecificUnknownEvent("cube_list_drag"),
+      drag_cubes_locally: new KeyCombo('Drag Cubes Locally', "In the cube list, dragging cubes will preserve their local movements, but change their global transform ", null, false, false, true)
+        .setOnSpecificUnknownEvent("cube_list_drag"),
     }
   },
 
@@ -126,7 +125,11 @@ for (const key of Object.keys(keyCombos)) {
   const category = stronglyTypedKeyCombo[key]
   const scopes = getScopeListFromCategory(key, category)
   for (const kb of Object.keys(category.combos)) {
-    const combo = category.combos[kb].withScopes(scopes).setScope(key)
+    const combo = category.combos[kb]
+    if (!combo.shouldInferProperties()) {
+      continue
+    }
+    combo.withScopes(scopes).setScope(key)
     if (category.canBeNothing !== undefined) {
       combo.setCanBeNothing(category.canBeNothing)
     }
