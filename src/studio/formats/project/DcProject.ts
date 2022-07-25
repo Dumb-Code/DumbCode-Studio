@@ -170,7 +170,7 @@ export const createProject = async (read: ReadableFile) => {
 
   if (type === "dcm") {
     project.modelWritableFile = read.asWritable()
-    project.projectSaveType.value = version === 2 ? "model" : "old_model"
+    project.projectSaveType.value = "model"
   }
 
 
