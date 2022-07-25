@@ -15,7 +15,7 @@ const OptionButton = ({ isSelected, toggle, disabled = false, forcedThemeDark, c
     <div className={forcedThemeDark ? "dark" : ""}>
       <button
         className={
-          `${"w-80"} pl-4 transition-colors duration-200 p-2 pr-4 rounded-md my-1 text-left flex flex-row ` +
+          `${width} pl-4 transition-colors duration-200 p-2 pr-4 rounded-md my-1 text-left flex flex-row ` +
           (isSelected ? `ring-2 ring-sky-500 bg-blue-500 ${choose("dark:hover:bg-blue-600 dark:border-blue-600", "hover:bg-blue-400 border-blue-400")}` :
             (
               disabled ?

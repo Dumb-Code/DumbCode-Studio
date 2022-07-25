@@ -1,3 +1,5 @@
+import { SVGProps } from 'react';
+import { SvgCopypaste, SVGDownload, SVGOpenLink, SVGUpload } from '../../components/Icons';
 import { downloadBlob } from '../files/FileTypes';
 export type ScreenshotActionType = "download" | "open_in_new_tab" | "copy_to_clipboard" | "upload_to_imgur"
 
@@ -29,8 +31,15 @@ export const ScreenshotActionMap: Record<ScreenshotActionType, ScreenshotAction>
 export const ScreenshotDesciptionMap: Record<ScreenshotActionType, string> = {
   download: "Downloaded",
   open_in_new_tab: "Opened in new tab",
-  copy_to_clipboard: "Copied to clipboard",
+  copy_to_clipboard: "Copy to clipboard",
   upload_to_imgur: "Uploaded to Imgur and copied URL to clipboard"
+}
+
+export const ScreenshotIconMap: Record<ScreenshotActionType, (props: SVGProps<SVGSVGElement>) => JSX.Element> = {
+  download: SVGDownload,
+  open_in_new_tab: SVGOpenLink,
+  copy_to_clipboard: SvgCopypaste,
+  upload_to_imgur: SVGUpload
 }
 
 export const AllScreenshotActionTypes = Object.keys(ScreenshotActionMap) as ScreenshotActionType[]

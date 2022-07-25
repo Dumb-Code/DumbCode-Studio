@@ -8,7 +8,7 @@ import AutoRecoveriesDialogBox from "../../../dialogboxes/AutoRecoveriesDialogBo
 import ConfirmActionDialogBox from "../../../dialogboxes/ConfirmActionDialogBox"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import AutoRecoveryFileSystem, { useUsageAndQuota } from "../../../studio/autorecovery/AutoRecoveryFileSystem"
-import { AllScreenshotActionTypes, ScreenshotDesciptionMap } from "../../../studio/screenshot/ScreenshotActions"
+import { AllScreenshotActionTypes, ScreenshotDesciptionMap, ScreenshotIconMap } from "../../../studio/screenshot/ScreenshotActions"
 import OptionButton from "./OptionButton"
 
 const GeneralOptions = () => {
@@ -45,11 +45,17 @@ const GeneralOptions = () => {
       <p className="text-gray-900 text-xs font-semibold mt-5">SCREENSHOT ACTIONS</p>
       <p className="text-gray-900 text-xs mb-2">Allows you to customize the way screenshots or showcase tab exports are saved.</p>
       <div className="flex flex-col w-fit">
-        {AllScreenshotActionTypes.map(action => (
-          <OptionButton key={action} isSelected={selectedScreenshotAction === action} toggle={() => setScreenshotAction(action)}>
-            {ScreenshotDesciptionMap[action]}
-          </OptionButton>
-        ))}
+        {AllScreenshotActionTypes.map(action => {
+          const Icon = ScreenshotIconMap[action]
+          return (
+            <OptionButton key={action} width="w-[400px]" isSelected={selectedScreenshotAction === action} toggle={() => setScreenshotAction(action)}>
+              <div className="w-full h-full flex items-center">
+                <Icon className="w-4 h-4 mr-2 -ml-2" />
+                {ScreenshotDesciptionMap[action]}
+              </div>
+            </OptionButton>
+          )
+        })}
       </div>
       <SelectedCubesSection />
       <AutoRecoverySection />
