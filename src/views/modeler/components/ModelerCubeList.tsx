@@ -770,11 +770,34 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
 
     const canEdit = useContext(CanEditContext)
 
-    const [visible, setVisible] = useListenableObject(cube.visible);
-    const [locked, setLocked] = useListenableObject(cube.locked);
+    const [visible] = useListenableObject(cube.visible);
+    const [locked] = useListenableObject(cube.locked);
+
+    const {
+        cube_list_apply_to_children: applyToChildren,
+        cube_list_apply_to_selected: applyToSelected,
+    } = useKeyComboUnknownEventMatcher("modeler")
+
+    const setRecursiveFactory = (setter: (cube: DCMCube, value: boolean) => void) => (value: boolean, event: ReactMouseEvent) => {
+
+        setter(cube, value)
+
+        if (applyToSelected(event)) {
+            cube.model.identifListToCubes(selectedCubeManager.selected.value).forEach(c => setter(c, value))
+        }
+
+        if (applyToChildren(event)) {
+            cube.traverse(c => setter(c, value))
+        }
+
+        event.preventDefault()
+        event.stopPropagation()
+    }
+    const setVisible = setRecursiveFactory((cube, value) => cube.visible.value = value)
+    const setLocked = setRecursiveFactory((cube, value) => cube.locked.value = value)
 
     const [hovering, setHovering] = useListenableObject(cube.mouseHover)
-    const [selected, setSelected] = useListenableObject(cube.selected)
+    const [selected] = useListenableObject(cube.selected)
     const [hideChildren, setHideChildren] = useListenableObject(cube.hideChildren)
 
 
@@ -825,15 +848,15 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
                     <div className="flex flex-row text-white m-0 p-0">
                         {
                             locked ?
-                                <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setLocked(false)}><SVGLocked className="h-4 w-4" /></button>
+                                <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={e => setLocked(false, e)}><SVGLocked className="h-4 w-4" /></button>
                                 :
-                                <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={() => setLocked(true)}><SVGUnlocked className="h-4 w-4" /></button>
+                                <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={e => setLocked(true, e)}><SVGUnlocked className="h-4 w-4" /></button>
                         }
                         {
                             visible ?
-                                <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={() => setVisible(false)}><SVGEye className="h-4 w-4" /></button>
+                                <button className="dark:bg-gray-800 bg-gray-500 dark:hover:bg-black hover:bg-gray-600 rounded px-1 py-1 mr-1" onClick={e => setVisible(false, e)}><SVGEye className="h-4 w-4" /></button>
                                 :
-                                <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={() => setVisible(true)}><SVGEyeOff className="h-4 w-4" /></button>
+                                <button className="bg-red-800 hover:bg-red-600 rounded px-1 py-1 mr-1" onClick={e => setVisible(true, e)}><SVGEyeOff className="h-4 w-4" /></button>
                         }
                     </div>
                 )}

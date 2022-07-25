@@ -74,6 +74,11 @@ const keyCombos = {
         .setOnSpecificUnknownEvent("cube_list_drag"),
       drag_cubes_locally: new KeyCombo('Drag Cubes Locally', "In the cube list, dragging cubes will preserve their local movements, but change their global transform ", null, false, false, true)
         .setOnSpecificUnknownEvent("cube_list_drag"),
+
+      cube_list_apply_to_selected: new KeyCombo('Apply cube list action to selected', "Applies the action (visibility/locked) to the selected cubes", null, true)
+        .setOnSpecificUnknownEvent("cube_list_action_selected"),
+      cube_list_apply_to_children: new KeyCombo('Apply cube list action to children', "Applies the action (visibility/locked) to the selected cubes and their children recursivly.", null, false, true)
+        .setOnSpecificUnknownEvent("cube_list_action_children"),
     }
   },
 
