@@ -27,7 +27,7 @@ const ModelerProperties = () => {
                 <div className="w-full grid grid-cols-2 px-2 pt-1">
                     <WrappedCubeName obj={firstSelected?.name} model={model} />
                     <WrappedCubeInputDimensions title="Dimensions" obj={firstSelected?.dimension} model={model} />
-                    <WrappedCubeInput title="Positions" obj={firstSelected?.position} model={model} />
+                    <WrappedCubeInput title="Positions" obj={firstSelected?.position} model={model} lockedCubes />
                     <WrappedCubeInput title="Offset" obj={firstSelected?.offset} model={model} />
                     <WrappedCubeInput title="Cube Grow" obj={firstSelected?.cubeGrow} model={model} />
                 </div>
@@ -53,18 +53,22 @@ const WrappedCubeName = ({ obj, model }: { obj?: LO<string>, model: DCMModel }) 
     )
 }
 
-const WrappedCubeInput = ({ title, obj, model }: { title: string, obj?: LO<NumArray>, model: DCMModel }) => {
+const WrappedCubeInput = ({ title, obj, model, lockedCubes = false }: { title: string, obj?: LO<NumArray>, model: DCMModel, lockedCubes?: boolean }) => {
     const [value, setValue] = useListenableObjectNullable(obj)
     return <CubeInput
         title={title}
         value={value}
         setValue={v => {
             setValue(v)
-            model.lockedCubes.reconstructLockedCubes()
+            if (lockedCubes) {
+                model.lockedCubes.reconstructLockedCubes()
+            }
         }}
         onFocus={() => {
             model.undoRedoHandler.startBatchActions()
-            model.lockedCubes.createLockedCubesCache()
+            if (lockedCubes) {
+                model.lockedCubes.createLockedCubesCache()
+            }
         }}
         onBlur={() => {
             // model.lockedCubes.reconstructLockedCubes()
