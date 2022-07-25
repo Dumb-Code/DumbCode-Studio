@@ -121,7 +121,7 @@ export const useAnimatorGumball = (consumer: AnimatorGumballConsumer | null) => 
         case "translateIK":
           transformControls.mode = "translate"
           transformControls.attach(gumball.gumballIK.anchor)
-          gumball.gumballIK.begin(selectedCubes.current, ikAnchorCubes(), ikDirection())
+          gumball.gumballIK.begin(animation, selectedCubes.current, ikAnchorCubes(), ikDirection())
           break
         default:
           transformControls.mode = mode
@@ -181,19 +181,19 @@ export const useAnimatorGumball = (consumer: AnimatorGumballConsumer | null) => 
         gumball.moveToSelected(val)
       }
       if (gumball.mode.value === "object" && gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, ikAnchorCubes(), ikDirection())
+        gumball.gumballIK.begin(animation, selectedCubes.current, ikAnchorCubes(), ikDirection())
       }
       updateTransformControlsVisability({})
     }
 
     const updateIKAnchors = (val: readonly string[]) => {
       if (gumball.mode.value === "object" && gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, val, ikDirection())
+        gumball.gumballIK.begin(animation, selectedCubes.current, val, ikDirection())
       }
     }
     const updateIKDirection = (direction: "upwards" | "downwards") => {
       if (gumball.mode.value === "object" && gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, ikAnchorCubes(), direction)
+        gumball.gumballIK.begin(animation, selectedCubes.current, ikAnchorCubes(), direction)
       }
     }
 
@@ -254,7 +254,7 @@ export const useAnimatorGumball = (consumer: AnimatorGumballConsumer | null) => 
       const kf = selectedKfs
       const cubes = selectedCubes.current
       if (gumball.object_transformMode.value === "translateIK") {
-        gumball.gumballIK.begin(selectedCubes.current, ikAnchorCubes(), ikDirection())
+        gumball.gumballIK.begin(animation, selectedCubes.current, ikAnchorCubes(), ikDirection())
 
         return
       }

@@ -53,11 +53,12 @@ export class AnimatorGumballIK {
     this.helperGroup.add(this.lineHelper)
   }
 
-  begin(cubes: readonly DCMCube[], anchorCubes: readonly string[], direction: "upwards" | "downwards") {
+  begin(animation: AnimatorGumballConsumer, cubes: readonly DCMCube[], anchorCubes: readonly string[], direction: "upwards" | "downwards") {
     this.end() //todo: conditional - only call this if we need to 
     if (cubes.length !== 1) {
       return
     }
+    animation.renderForGumball()
     this.ikDirection = direction === "upwards" ? "move_cube_from_root" : "move_root_from_cube"
     const selected = cubes[0]
 
@@ -157,7 +158,6 @@ export class AnimatorGumballIK {
       return AnimatorGumballIK.applyBoneToCube(bone, data)
     })
 
-
     if (this.ikDirection === "move_cube_from_root") {
       const selectParent = selected.cubeGroup.parent as any
       if (!selectParent) {
@@ -168,6 +168,8 @@ export class AnimatorGumballIK {
       const quat = selectParent.getWorldQuaternion(worldQuat).invert().multiply(this.startingWorldRot)
       tempEuler.setFromQuaternion(quat)
 
+      console.log(tempEuler.x, tempEuler.y, tempEuler.z)
+      console.log(changedData)
       keyframe.wrapToSetValue(() => {
         keyframe.setRotationAbsoluteAnimated(selected,
           tempEuler.x * 180 / Math.PI,
