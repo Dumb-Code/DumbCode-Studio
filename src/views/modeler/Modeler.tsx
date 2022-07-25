@@ -55,7 +55,7 @@ const Modeler = () => {
             <div className="grid-in-command border dark:border-black border-white"><CommandInputBar command={project.commandRoot} /></div>
             <div className="grid-in-sidebar min-h-0 border dark:border-black border-white"><ModelerSidebar /></div>
             <div className="grid-in-shortcuts border dark:border-black border-white"><ModelerShortcuts /></div>
-            <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
+            <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas selectedCubeHandlerUndoRedo={project.model.undoRedoHandler} /></div>
             <div className="grid-in-gumball border dark:border-black border-white"><ModelerGumballPropertiesBar /></div>
             <div className="grid-in-info border dark:border-black border-white"><InfoBar undoRedo={project.model.undoRedoHandler} /></div>
         </div>

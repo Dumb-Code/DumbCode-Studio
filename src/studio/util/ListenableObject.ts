@@ -157,7 +157,41 @@ export class LO<T> {
     right.addListener(newVal => lo.value = mapper(left.internalValue, newVal))
     return lo
   }
+}
 
+
+export const useChangingDelegateListenableObject = <T>(source: LO<T> | undefined, target: LO<T>, defaultValue?: T) => {
+  useEffect(() => {
+    if (source === undefined) {
+      if (defaultValue !== undefined) {
+        target.value = defaultValue
+      }
+      return
+    }
+    if (source.value !== target.value) {
+      target.value = source.value
+    }
+    let isSetting = false
+
+    const createDelegateListener = <T>(other: LO<T>) => (val: T) => {
+      if (!isSetting) {
+        isSetting = true
+        other.value = val
+        isSetting = false
+      }
+    }
+
+    const sourceListener = createDelegateListener(target)
+    const targetListener = createDelegateListener(source)
+
+    source.addListener(sourceListener)
+    target.addListener(targetListener)
+
+    return () => {
+      source.removeListener(sourceListener)
+      target.removeListener(targetListener)
+    }
+  }, [source, target])
 }
 
 export const useListenableObjectNullable = <T>(obj: LO<T> | undefined, deps: DependencyList = []): [T | undefined, (val: T) => void] => {

@@ -81,7 +81,6 @@ const ModelerCubeList = ({ canEdit = true }: { canEdit?: boolean }) => {
 
     //Deletes all the selected cubes, but keeps their children. Moves the children to be the siblings of this cube.
     const deleteCubesKeepChildren = useCallback(() => {
-        project.undoRedoHandler.startBatchActions()
         project.model.undoRedoHandler.startBatchActions()
         const cubes = project.model.identifListToCubes(project.selectedCubeManager.selected.value)
         let amount = 0;
@@ -99,15 +98,13 @@ const ModelerCubeList = ({ canEdit = true }: { canEdit?: boolean }) => {
             cube.fullyDelete()
         })
 
-        project.undoRedoHandler.endBatchActions("_WEAK", HistoryActionTypes.Edit, "chainFirst")
-        project.model.undoRedoHandler.endBatchActions(`${amount} Cube${amount === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove, "chainLast")
-    }, [project.model, project.undoRedoHandler, project.selectedCubeManager])
+        project.model.undoRedoHandler.endBatchActions(`${amount} Cube${amount === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove)
+    }, [project.model, project.selectedCubeManager])
 
     //Deletes all the selected cubes, and all their children.
     const deleteCubesAndChildren = useCallback(() => {
         const cubes = project.model.identifListToCubes(project.selectedCubeManager.selected.value)
 
-        project.undoRedoHandler.startBatchActions()
         project.model.undoRedoHandler.startBatchActions()
         let amount = 0;
         cubes.forEach(cube => {
@@ -119,8 +116,7 @@ const ModelerCubeList = ({ canEdit = true }: { canEdit?: boolean }) => {
             cube.parent.deleteChild(cube)
             cube.fullyDelete()
         })
-        project.undoRedoHandler.endBatchActions("_WEAK", HistoryActionTypes.Edit, "chainFirst")
-        project.model.undoRedoHandler.endBatchActions(`${amount} Cube${amount === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove, "chainLast")
+        project.model.undoRedoHandler.endBatchActions(`${amount} Cube${amount === 1 ? "" : "s"} Deleted`, HistoryActionTypes.Remove)
 
         project.selectedCubeManager.selected.value.forEach(identifier => {
             const cube = project.model.identifierCubeMap.get(identifier)

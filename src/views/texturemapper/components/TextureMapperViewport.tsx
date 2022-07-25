@@ -179,7 +179,7 @@ const TextureMapperViewport = () => {
     }, [project])
 
     return (
-        <SplitViewport otherName="Texture Mapper">
+        <SplitViewport otherName="Texture Mapper" selectedCubeHandlerUndoRedo={project.model.textureCoordinates.undoRedoHandler}>
             <TransformCanvas
                 redraw={redraw}
                 onMouseMove={onMouseMove}

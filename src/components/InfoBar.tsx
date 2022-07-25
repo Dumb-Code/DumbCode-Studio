@@ -4,6 +4,7 @@ import { useKeyComboPressed } from '../contexts/OptionsContext';
 import { useStudio } from '../contexts/StudioContext';
 import { DCMCube } from '../studio/formats/model/DcmModel';
 import { TextureGroup } from '../studio/formats/textures/TextureManager';
+import SelectedCubeUndoRedoHandler from '../studio/undoredo/SelectedCubeUndoRedoHandler';
 import UndoRedoHandler from '../studio/undoredo/UndoRedoHandler';
 import { useListenableMap, useListenableObject, useListenableObjectNullable } from '../studio/util/ListenableObject';
 import { useTextureGroupSelect } from '../studio/util/StudioHooks';
@@ -11,7 +12,7 @@ import Dropup, { DropupItem } from './Dropup';
 import { SVGCube, SVGEye, SVGGrid, SVGLocked, SVGRedo, SVGUndo } from './Icons';
 import { ButtonWithTooltip } from './Tooltips';
 
-const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
+const InfoBar = ({ undoRedo }: { undoRedo?: SelectedCubeUndoRedoHandler<any> }) => {
 
     const { getSelectedProject, toggleGrid, toggleBox } = useStudio()
     const project = getSelectedProject()
@@ -24,16 +25,16 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
 
     useKeyComboPressed(useMemo(() => ({
         common: {
-            undo: () => undoRedo !== undefined && UndoRedoHandler.undo(undoRedo, project.undoRedoHandler),
-            redo: () => undoRedo !== undefined && UndoRedoHandler.redo(undoRedo, project.undoRedoHandler),
+            undo: () => undoRedo !== undefined && UndoRedoHandler.undo(undoRedo),
+            redo: () => undoRedo !== undefined && UndoRedoHandler.redo(undoRedo),
         },
-    }), [undoRedo, project]))
+    }), [undoRedo]))
 
     const selectAllCubes = () => {
         project.selectedCubeManager.keepCurrentCubes = true
-        project.undoRedoHandler.startBatchActions()
+        undoRedo?.startBatchActions()
         project.selectedCubeManager.selected.value = selectedCubeIdentifs
-        project.undoRedoHandler.endBatchActions(`Cubes Selected`)
+        undoRedo?.endBatchActions(`Cubes Selected`)
         project.selectedCubeManager.keepCurrentCubes = false
     }
 
@@ -53,14 +54,11 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
 
     const selectAllChildrenCubes = () => {
         project.selectedCubeManager.keepCurrentCubes = true
-        project.undoRedoHandler.startBatchActions()
+        undoRedo?.startBatchActions()
         childrenOfSelectedCubes.forEach(cube => cube.selected.value = true)
-        project.undoRedoHandler.endBatchActions(`Cubes Selected`)
+        undoRedo?.endBatchActions(`Cubes Selected`)
         project.selectedCubeManager.keepCurrentCubes = false
     }
-
-    const [canProjectUndo] = useListenableObject(project.undoRedoHandler.canUndo)
-    const [canProjectRedo] = useListenableObject(project.undoRedoHandler.canRedo)
 
     const [canUndo] = useListenableObjectNullable(undoRedo?.canUndo)
     const [canRedo] = useListenableObjectNullable(undoRedo?.canRedo)
@@ -85,11 +83,11 @@ const InfoBar = ({ undoRedo }: { undoRedo?: UndoRedoHandler<any> }) => {
             }
             <div className="flex-grow"></div>
 
-            <ButtonWithTooltip onClick={() => UndoRedoHandler.undo(undoRedo, project.undoRedoHandler)} className={"dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 " + ((canUndo || canProjectUndo) ? "dark:text-white text-black" : "text-gray-500")} tooltip="Undo the last operation">
+            <ButtonWithTooltip onClick={() => UndoRedoHandler.undo(undoRedo)} className={"dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 " + ((canUndo) ? "dark:text-white text-black" : "text-gray-500")} tooltip="Undo the last operation">
                 <SVGUndo className="h-3 w-3 mr-1" />
             </ButtonWithTooltip>
 
-            <ButtonWithTooltip onClick={() => UndoRedoHandler.redo(undoRedo, project.undoRedoHandler)} className={"dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 " + ((canRedo || canProjectRedo) ? "dark:text-white text-black" : "text-gray-500")} tooltip="Redo the last undo">
+            <ButtonWithTooltip onClick={() => UndoRedoHandler.redo(undoRedo)} className={"dark:bg-gray-900 bg-gray-400 dark:hover:bg-gray-800 hover:bg-gray-500 rounded pr-1 pl-2 py-1 my-0.5 mr-1 " + ((canRedo) ? "dark:text-white text-black" : "text-gray-500")} tooltip="Redo the last undo">
                 <SVGRedo className="h-3 w-3 mr-1" />
             </ButtonWithTooltip>
         </div>

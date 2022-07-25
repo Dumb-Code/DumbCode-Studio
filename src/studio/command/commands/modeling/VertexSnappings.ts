@@ -77,8 +77,7 @@ const VertexSnapping = (project: DcProject) => (addCommand: (command: Command) =
         //Deselect everything and click on the original cube.
         cube.selected.value = true
 
-        project.undoRedoHandler.endBatchActions("_WEAK", HistoryActionTypes.Edit, "chainFirst")
-        project.model.undoRedoHandler.endBatchActions(`Vertex Snap Command`, HistoryActionTypes.Command, "chainLast")
+        project.model.undoRedoHandler.endBatchActions(`Vertex Snap Command`, HistoryActionTypes.Command)
       }, 0x662141)
     }
 
@@ -97,13 +96,11 @@ const VertexSnapping = (project: DcProject) => (addCommand: (command: Command) =
       cube.cubeGroup.getWorldPosition(worldPosVector)
 
       cube.model.undoRedoHandler.startBatchActions()
-      project.undoRedoHandler.startBatchActions()
       phase2(cube)
     } else {
       //Enable the point tracker to get the source point to move.
       pointTracker.enable((p, _, c) => {
         c.model.undoRedoHandler.startBatchActions()
-        project.undoRedoHandler.startBatchActions()
 
         project.model.identifierCubeMap.forEach(v => {
           if (v.selected.value) {

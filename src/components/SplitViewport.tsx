@@ -1,8 +1,9 @@
 import { ReactNode, useState } from "react"
+import SelectedCubeUndoRedoHandler from "../studio/undoredo/SelectedCubeUndoRedoHandler"
 import StudioCanvas from "./StudioCanvas"
 
 
-export const SplitViewport = ({ children, otherName }: { children: ReactNode, otherName: string }) => {
+export const SplitViewport = ({ children, otherName, selectedCubeHandlerUndoRedo }: { children: ReactNode, otherName: string, selectedCubeHandlerUndoRedo?: SelectedCubeUndoRedoHandler<any> }) => {
 
   const [showModel, setShowModel] = useState(true)
   const [showOther, setShowOther] = useState(true)
@@ -13,7 +14,7 @@ export const SplitViewport = ({ children, otherName }: { children: ReactNode, ot
         {showModel && (
           <div className="w-full border-r dark:border-black border-white border-b group">
             <button className="transition-opacity opacity-0 group-hover:opacity-100 dark:bg-gray-900 bg-gray-300 absolute z-10 w-20 rounded-br dark:text-gray-400 text-black pr-1" onDoubleClick={() => setShowOther(!showOther)}>Model</button>
-            <StudioCanvas />
+            <StudioCanvas selectedCubeHandlerUndoRedo={selectedCubeHandlerUndoRedo} />
           </div>
         )}
         {showOther && (

@@ -19,7 +19,6 @@ let dumbcodeHiddenFolder_write: WriteableFolder | null = null
 
 
 type ModelDataJson = {
-  projectHistory: SerializedUndoRedoHandler,
   modelHistory: SerializedUndoRedoHandler,
   showcaseViews?: JsonShowcaseView[],
 }
@@ -169,7 +168,6 @@ const loadProjectData = async (fileP: OrPromise<ReadableFile | null>, project: D
     return
   }
   const json = JSON.parse(await file.async("text")) as ModelDataJson
-  project.undoRedoHandler.loadFromJson(json.projectHistory)
   project.model.undoRedoHandler.loadFromJson(json.modelHistory)
 
   if (json.showcaseViews !== undefined) {
@@ -556,7 +554,6 @@ const writeFolderProject = async (projet: DcProject, folder: WriteableFolder, sh
 const writeProjectData = async (project: DcProject, folder: WriteableFolder) => {
   const data: ModelDataJson = {
     modelHistory: project.model.undoRedoHandler.jsonRepresentation(),
-    projectHistory: project.undoRedoHandler.jsonRepresentation(),
     showcaseViews: project.showcaseProperties.exportViewsToJson(),
   }
   const dataFolder = await getDataRootFolderWriteable(folder)

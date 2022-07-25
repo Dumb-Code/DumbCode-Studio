@@ -4,6 +4,7 @@ import { drawProgressionPointGraph, GraphType } from '../../../views/animator/lo
 import { readFromClipboard, writeToClipboard } from '../../clipboard/Clipboard';
 import { convertClipboardToKeyframe, KeyframeClipboardType, writeKeyframeForClipboard } from '../../clipboard/KeyframeClipboardType';
 import { getUndefinedWritable } from '../../files/FileTypes';
+import SelectedCubeUndoRedoHandler from '../../undoredo/SelectedCubeUndoRedoHandler';
 import UndoRedoHandler from '../../undoredo/UndoRedoHandler';
 import DcProject from '../project/DcProject';
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
@@ -74,7 +75,7 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
 
   private readonly onDirty = () => this.needsSaving.value = true
 
-  readonly undoRedoHandler = new UndoRedoHandler<UndoRedoDataType>(
+  readonly undoRedoHandler = new SelectedCubeUndoRedoHandler<UndoRedoDataType>(
     (s, d) => this.onAddSection(s, d),
     s => this.onRemoveSection(s),
     (s, p, v) => this.onModifySection(s, p, v),

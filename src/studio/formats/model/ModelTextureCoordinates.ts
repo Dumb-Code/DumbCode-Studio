@@ -1,4 +1,5 @@
-import UndoRedoHandler, { SectionHandle } from "../../undoredo/UndoRedoHandler";
+import SelectedCubeUndoRedoHandler from "../../undoredo/SelectedCubeUndoRedoHandler";
+import { SectionHandle } from "../../undoredo/UndoRedoHandler";
 import { LO } from "../../util/ListenableObject";
 import { NumArray } from "../../util/NumArray";
 import { DCMModel } from "./DcmModel";
@@ -23,7 +24,7 @@ export class ModelTextureCoordinates {
 
 
 
-  readonly undoRedoHandler = new UndoRedoHandler<TextureMapperUndoRedoType>(
+  readonly undoRedoHandler = new SelectedCubeUndoRedoHandler<TextureMapperUndoRedoType>(
     (s, d) => this.onAddSection(s, d),
     s => this.onRemoveSection(s),
     (s, p, v) => this.onModifySection(s, p, v),

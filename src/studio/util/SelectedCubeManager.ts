@@ -2,8 +2,9 @@ import { useEffect } from 'react';
 import { Event, Mesh, Object3D, Vector2 } from 'three';
 import { useStudio } from '../../contexts/StudioContext';
 import DcProject from '../formats/project/DcProject';
+import SelectedCubeUndoRedoHandler from '../undoredo/SelectedCubeUndoRedoHandler';
 import { DCMCube, DCMModel } from './../formats/model/DcmModel';
-import { LO } from './ListenableObject';
+import { LO, useChangingDelegateListenableObject } from './ListenableObject';
 export default class SelectedCubeManager {
   disabled = false
   public readonly mouse = new Vector2()
@@ -17,6 +18,8 @@ export default class SelectedCubeManager {
   keepCurrentCubes = false
 
   isSettingCubeSelected = false
+
+  activeUndoRedoHandler?: SelectedCubeUndoRedoHandler<any>
 
   constructor(
     private readonly model: DCMModel
@@ -65,10 +68,10 @@ export default class SelectedCubeManager {
     //  - if ctrl is pressed, select THIS cube, and keep the other cubes
     //  - else, we only select THIS cube
     if (cube.selected.value) {
-      project.undoRedoHandler.startBatchActions()
+      this.activeUndoRedoHandler?.startBatchActions()
       if (ctrlPressed || this.selected.value.length === 1) {
         cube.selected.value = false
-        project.undoRedoHandler.endBatchActions(`Cube Deselected`)
+        this.activeUndoRedoHandler?.endBatchActions(`Cube Deselected`)
       } else {
         //If other cubes are selected too
         //Using `setSelected` won't do anything, as it's already selected.
@@ -78,9 +81,9 @@ export default class SelectedCubeManager {
       }
     } else {
       this.keepCurrentCubes = ctrlPressed
-      project.undoRedoHandler.startBatchActions()
+      this.activeUndoRedoHandler?.startBatchActions()
       cube.selected.value = true
-      project.undoRedoHandler.endBatchActions(`Cube Selected`)
+      this.activeUndoRedoHandler?.endBatchActions(`Cube Selected`)
       this.keepCurrentCubes = false
     }
     return true
@@ -163,12 +166,28 @@ export default class SelectedCubeManager {
 
 }
 
-export const useSelectedCubeManager = () => {
+export const useSelectedCubeManager = (undoRedoHandler?: SelectedCubeUndoRedoHandler<any>) => {
   const { renderer, getSelectedProject, onFrameListeners, raycaster, getCamera, onMouseUp, transformControls } = useStudio()
 
   const dom = renderer.domElement
   const project = getSelectedProject()
   const { selectedCubeManager: cubeManager, model } = project
+
+  useEffect(() => {
+    if (undoRedoHandler) {
+      cubeManager.activeUndoRedoHandler = undoRedoHandler
+    }
+    return () => {
+      cubeManager.activeUndoRedoHandler = undefined
+    }
+  }, [undoRedoHandler, cubeManager])
+
+  //Link together the active undoredo cube selection handler and the cube manager selection handler
+  useChangingDelegateListenableObject(
+    undoRedoHandler?.selectedCubes,
+    cubeManager.selected,
+    []
+  )
 
   useEffect(() => {
     //When the transform controls are in use, block this

@@ -15,31 +15,15 @@ import { DCMModel } from '../model/DcmModel';
 import TextureManager from '../textures/TextureManager';
 import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
 import { CommandRoot } from './../../command/CommandRoot';
-import UndoRedoHandler from './../../undoredo/UndoRedoHandler';
 import { CubeSelectedHighlighter } from './../../util/CubeSelectedHighlighter';
 import { StudioSound } from './../sounds/StudioSound';
 import { loadDcProj } from "./DcProjectLoader";
 import DcRemoteRepo, { RemoteRepo } from './DcRemoteRepos';
 
-type UndoRedoDataType = {
-  section_name: "root_name",
-  data: {
-    selected_cubes: string[]
-  }
-}
-
 export default class DcProject {
   readonly identifier: string
 
   readonly fileChangeListener = new FileChangeListener()
-
-  readonly undoRedoHandler: UndoRedoHandler<UndoRedoDataType> = new UndoRedoHandler(
-    () => { throw new Error("Tried to add root section") },
-    () => { throw new Error("Tried to remove root section") },
-    (_section, property, value) => this._section.applyModification(property, value)
-  )
-
-  readonly _section = this.undoRedoHandler.createNewSection("root_name")
 
   readonly name: LO<string>
   readonly group = new Group()
@@ -101,8 +85,6 @@ export default class DcProject {
 
     this.animatorCommandRoot = createAnimatorCommandRoot(this)
     this.animatorCommandRoot.addHelpCommand()
-
-    this.selectedCubeManager.selected.applyToSection(this._section, "selected_cubes")
 
     this.model.needsSaving.addListener(v => this.projectNeedsSaving.value ||= v)
   }

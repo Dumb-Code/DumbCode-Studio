@@ -2,13 +2,14 @@ import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Matrix4, Matrix4
 import { v4 as uuidv4 } from "uuid";
 import { readFromClipboard, writeToClipboard } from "../../clipboard/Clipboard";
 import { writeCubesForClipboard } from "../../clipboard/CubeClipboardType";
+import SelectedCubeUndoRedoHandler from "../../undoredo/SelectedCubeUndoRedoHandler";
 import CubeLocker, { LockerType } from "../../util/CubeLocker";
 import LockedCubes from "../../util/LockedCubes";
 import { NumArray } from "../../util/NumArray";
 import SelectedCubeManager from "../../util/SelectedCubeManager";
 import DcProject from '../project/DcProject';
 import { readCubesForClipboard } from './../../clipboard/CubeClipboardType';
-import UndoRedoHandler, { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
+import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { LO, LOMap } from './../../util/ListenableObject';
 import { setIntersectType } from './../../util/ObjectClickedHook';
 import { ModelTextureCoordinates } from './ModelTextureCoordinates';
@@ -73,7 +74,7 @@ type UndoRedoDataType = {
 export class DCMModel implements CubeParent {
 
   parentProject?: DcProject
-  readonly undoRedoHandler = new UndoRedoHandler<UndoRedoDataType>(
+  readonly undoRedoHandler = new SelectedCubeUndoRedoHandler<UndoRedoDataType>(
     (s, d) => this.onAddSection(s, d),
     s => this.onRemoveSection(s),
     (s, p, v) => this.onModifySection(s, p, v),

@@ -51,6 +51,8 @@ const Animator = () => {
         }
     }, [project, onFrameListeners])
 
+    const selectedCubeHandlerUndoRedo = animation?.undoRedoHandler
+
     if (skeletonMode) {
         return (
             <div
@@ -63,7 +65,7 @@ const Animator = () => {
             >
                 <div className="grid-in-tabs border dark:border-black border-white overflow-hidden"><WrappedAnimatorTabBar /></div>
                 <div className="grid-in-properties border dark:border-black h-full border-white"><AnimatorSkeletonProperties /></div>
-                <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
+                <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas selectedCubeHandlerUndoRedo={selectedCubeHandlerUndoRedo} /></div>
                 <div className="grid-in-scrub border dark:border-black border-white"><AnimatorScrubBar animation={animation} /></div>
             </div>
         )
@@ -82,7 +84,7 @@ const Animator = () => {
             <div className="grid-in-tabs border dark:border-black border-white overflow-hidden"><WrappedAnimatorTabBar /></div>
             <div className="grid-in-properties border dark:border-black h-full border-white"><AnimatorProperties /></div>
             <div className="grid-in-tools border dark:border-black border-white"><AnimatorShortcuts /></div>
-            <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas /></div>
+            <div className="grid-in-canvas border dark:border-black border-white"><StudioCanvas selectedCubeHandlerUndoRedo={selectedCubeHandlerUndoRedo} /></div>
             <div className="grid-in-scrub border dark:border-black border-white"><AnimatorScrubBar animation={animation} /></div>
             <div className="grid-in-timeline border dark:border-black border-white"><AnimatorTimeline /></div>
             <div className="grid-in-gumball border dark:border-black border-white"><AnimatorGumballPropertiesBar consumer={animation} /></div>

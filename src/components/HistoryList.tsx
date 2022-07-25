@@ -1,33 +1,19 @@
 import { useCallback, useMemo } from "react";
 import { useStudio } from "../contexts/StudioContext";
 import UndoRedoHandler, { ActionBatch, HistoryActionIcons } from "../studio/undoredo/UndoRedoHandler";
-import { useListenableObject, useListenableObjectNullable } from "../studio/util/ListenableObject";
+import { useListenableObjectNullable } from "../studio/util/ListenableObject";
 import CollapsableSidebarPannel from "./CollapsableSidebarPannel";
 
 
 const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<any> }) => {
     const { getSelectedProject } = useStudio()
-    const project = getSelectedProject()
 
-    const [projectHistory] = useListenableObject(project.undoRedoHandler.history)
     const [history] = useListenableObjectNullable(undoRedoHandler?.history)
 
-    const [projectIndex] = useListenableObject(project.undoRedoHandler.index)
     const [index] = useListenableObjectNullable(undoRedoHandler?.index)
 
-    const head = UndoRedoHandler.getHead(undoRedoHandler, project.undoRedoHandler)
+    const head = UndoRedoHandler.getHead(undoRedoHandler)
 
-    const mapToMeta = (index: number, batchs: readonly ActionBatch<any>[]) => batchs.map((batch, i) => ({
-        batch,
-        undone: index < i,
-        selected: batch === head
-    })).filter(({ batch }) => batch.chainState !== "chainFirst")
-
-
-    const historyWithMeta = mapToMeta(index ?? 0, history ?? [])
-    const projectHistoryWithMeta = mapToMeta(projectIndex, projectHistory)
-
-    const joined = historyWithMeta.concat(projectHistoryWithMeta).sort((a, b) => a.batch.time - b.batch.time)
 
     const makeBatchHead = useCallback((batch: ActionBatch<any>) => {
         if (head === null) {
@@ -35,15 +21,17 @@ const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<an
             return
         }
         const isUndo = batch.time < head.time
-        while (UndoRedoHandler.getHead(undoRedoHandler, project.undoRedoHandler) !== batch) {
-            (isUndo ? UndoRedoHandler.undo : UndoRedoHandler.redo)(undoRedoHandler, project.undoRedoHandler)
+        while (UndoRedoHandler.getHead(undoRedoHandler) !== batch) {
+            (isUndo ? UndoRedoHandler.undo : UndoRedoHandler.redo)(undoRedoHandler)
         }
-    }, [head, undoRedoHandler, project.undoRedoHandler])
+    }, [head, undoRedoHandler])
 
     return (
         <CollapsableSidebarPannel title="HISTORY LIST" heightClassname="h-96" panelName="history_list">
             <div className="overflow-y-scroll h-96 studio-scrollbar px-1 mr-0.5 mt-1 flex flex-col-reverse">
-                {joined.map((item, i) => <HistoryItem key={i} batch={item.batch} undone={item.undone} selected={item.selected} makeBatchHead={makeBatchHead} />)}
+                {index !== undefined && history !== undefined &&
+                    history.map((item, i) => <HistoryItem key={i} batch={item} undone={index < i} selected={i === index} makeBatchHead={makeBatchHead} />)
+                }
             </div>
         </CollapsableSidebarPannel>
     )

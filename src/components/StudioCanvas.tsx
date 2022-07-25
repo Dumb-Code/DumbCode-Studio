@@ -3,6 +3,7 @@ import { useKeyComboPressed } from "../contexts/OptionsContext";
 import { useStudio } from "../contexts/StudioContext";
 import { useDirectionalCube } from "../studio/directionalcube/DirectionalCubeHook";
 import { useScreenshotHook } from "../studio/screenshot/ScreenshotHook";
+import SelectedCubeUndoRedoHandler from "../studio/undoredo/SelectedCubeUndoRedoHandler";
 import { useSelectedCubeHighlighter } from "../studio/util/CubeSelectedHighlighter";
 import { useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
@@ -60,8 +61,8 @@ export const NonSelectableCanvas = (props: HTMLAttributes<HTMLDivElement>) => {
   )
 }
 
-const StudioCanvas = () => {
-  useSelectedCubeManager()
+const StudioCanvas = ({ selectedCubeHandlerUndoRedo }: { selectedCubeHandlerUndoRedo?: SelectedCubeUndoRedoHandler<any> }) => {
+  useSelectedCubeManager(selectedCubeHandlerUndoRedo)
   useSelectedCubeHighlighter()
   useDirectionalCube()
 

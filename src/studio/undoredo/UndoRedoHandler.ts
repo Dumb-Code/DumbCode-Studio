@@ -81,13 +81,6 @@ export type Action<S extends UndoRedoSection> = AddSectionAction<S> | RemoveSect
 
 export type HistoryActionIcon = { Icon: (props: SVGProps<SVGSVGElement>) => JSX.Element }
 
-//Used to chain actions from different undohandlers together.
-//When deleting a cube, you first have to deselect, then delete. This is two different handlers
-type ActionChainState =
-  "chainFirst" | //The first action in a chain
-  "chainLast" |  //The last action in a chain
-  "none"         //There is no chain
-
 //Only add to this, chaning the order of existing ones will break undo/redo handlers loaded from .dcproj
 export enum HistoryActionTypes {
   Command, Transformation, Add,
@@ -109,7 +102,6 @@ export type ActionBatch<S extends UndoRedoSection> = {
   time: number,
   actionType: HistoryActionTypes
   reason: string
-  chainState: ActionChainState
   actions: Action<S>[]
 }
 
@@ -151,10 +143,10 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     this.batchedActions = []
   }
 
-  endBatchActions(reason: string, actionType = HistoryActionTypes.Edit, chainState?: ActionChainState) {
+  endBatchActions(reason: string, actionType = HistoryActionTypes.Edit) {
     this.batchActions = false
     if (this.batchedActions.length !== 0) {
-      this._PUSH(actionType, reason, this.batchedActions, chainState)
+      this._PUSH(actionType, reason, this.batchedActions)
     }
     this.batchedActions.length = 0
   }
@@ -242,7 +234,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     this._PUSH(actionType, reason, [action])
   }
 
-  private _PUSH(actionType: HistoryActionTypes, reason: string, actions: Action<S>[], chainState: ActionChainState = "none") {
+  private _PUSH(actionType: HistoryActionTypes, reason: string, actions: Action<S>[]) {
     if (this.ignoreActions) {
       return
     }
@@ -258,7 +250,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
     actions = this.flatten(actions)
 
     const newArr = this.history.value.slice(0, this.index.value + 1)
-    newArr.push({ actionType, reason, actions, chainState, time: Date.now() + (chainState === "chainLast" ? 0.5 : 0) })
+    newArr.push({ actionType, reason, actions, time: Date.now() })
     this.history.value = newArr
     this.index.value++
   }
@@ -344,13 +336,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       return
     }
     const sorted = mappedHandlers.sort((a, b) => b.time - a.time) //Reverse
-    const action = sorted[0].handler.undo()
-    if (action?.chainState === "chainLast") {
-      const nextAction = UndoRedoHandler.getHead(...handlers)
-      if (nextAction?.chainState === "chainFirst") {
-        sorted[1].handler.undo()
-      }
-    }
+    sorted[0].handler.undo()
   }
 
   private undoAction(act: Action<S>) {
@@ -394,13 +380,7 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       return
     }
     const sorted = mappedHandlers.sort((a, b) => a.time - b.time)
-    const action = sorted[0].handler.redo()
-    if (action?.chainState === "chainFirst") {
-      const nextAction = UndoRedoHandler.getHeadOffset(1, ...handlers)
-      if (nextAction?.chainState === "chainLast") {
-        sorted[1].handler.redo()
-      }
-    }
+    sorted[0].handler.redo()
   }
 
   redoAction(act: Action<S>) {
