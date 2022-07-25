@@ -167,7 +167,7 @@ const CommandFlags = ({ activeCommand, parsedFlags }: { activeCommand: Command, 
     <>
       <p>Command Flags</p>
       <div className="ml-2">
-        {flags.map((f, i) => <p key={i} className={parsedFlags.includes(f.name) ? "font-bold" : ""}>{f.name}: {f.desc}</p>)}
+        {flags.map((f, i) => <p key={i} className={parsedFlags.includes(f.name) ? "font-bold" : ""}>-{f.name}: {f.desc}</p>)}
       </div>
     </>
   )
