@@ -1,4 +1,5 @@
 import { useState } from "react"
+import OptionButton from "./OptionButton"
 
 const LanguageOptions = () => {
 
@@ -10,16 +11,8 @@ const LanguageOptions = () => {
 
             <p className="text-gray-900 text-xs font-semibold">LANGUAGE SELECTION</p>
             <p className="text-gray-900 text-xs mb-2">Allows you to pick your most familliar language.</p>
-            <LanguageButton name="English (US)" selected={language === "english"} setLanguage={() => setLanguage("english")} />
-            <LanguageButton name="English (EU)" selected={language === "englishwrong"} setLanguage={() => setLanguage("englishwrong")} />
-        </div>
-    )
-}
-
-const LanguageButton = ({ name, selected, setLanguage }: { name: string, selected: boolean, setLanguage: () => void }) => {
-    return (
-        <div>
-            <button className={(!selected || "ring-2 ring-sky-500") + " dark:bg-gray-800 bg-gray-300 rounded w-80 dark:text-white text-black font-semibold p-2 text-left pl-4 my-1"} onClick={() => setLanguage()}>{name}</button>
+            <OptionButton isSelected={language === "english"} toggle={() => setLanguage("english")}>English (US)</OptionButton>
+            <OptionButton isSelected={language === "englishwrong"} toggle={() => setLanguage("englishwrong")}>English (EU)</OptionButton>
         </div>
     )
 }

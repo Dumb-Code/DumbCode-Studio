@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from "react"
-import { SVGCheck } from "../../../components/Icons"
 import NumericInput from "../../../components/NumericInput"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useOptions } from "../../../contexts/OptionsContext"
@@ -10,6 +9,7 @@ import ConfirmActionDialogBox from "../../../dialogboxes/ConfirmActionDialogBox"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import AutoRecoveryFileSystem, { useUsageAndQuota } from "../../../studio/autorecovery/AutoRecoveryFileSystem"
 import { AllScreenshotActionTypes, ScreenshotDesciptionMap } from "../../../studio/screenshot/ScreenshotActions"
+import OptionButton from "./OptionButton"
 
 const GeneralOptions = () => {
   const isChrome = useMemo(() => "chrome" in window, [])
@@ -46,17 +46,9 @@ const GeneralOptions = () => {
       <p className="text-gray-900 text-xs mb-2">Allows you to customize the way screenshots or showcase tab exports are saved.</p>
       <div className="flex flex-col w-fit">
         {AllScreenshotActionTypes.map(action => (
-          <button
-            key={action}
-            className={
-              "p-2 pr-4 rounded-md my-1 text-left flex flex-row " +
-              (selectedScreenshotAction === action ? "border-2 border-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600" : "border-2 dark:border-gray-800 dark:bg-gray-800 bg-gray-300 dark-hover:dark:bg-gray-600 hover:bg-gray-200 ")
-            }
-            onClick={() => setScreenshotAction(action)}
-          >
-            {(selectedScreenshotAction === action ? <SVGCheck className="dark:text-black text-white h-6 w-6 rounded-full bg-green-600 mr-2" /> : <div className="h-6 w-6 rounded-full bg-gray-500 border-2 border-gray-300 mr-2"></div>)}
+          <OptionButton key={action} isSelected={selectedScreenshotAction === action} toggle={() => setScreenshotAction(action)}>
             {ScreenshotDesciptionMap[action]}
-          </button>
+          </OptionButton>
         ))}
       </div>
 

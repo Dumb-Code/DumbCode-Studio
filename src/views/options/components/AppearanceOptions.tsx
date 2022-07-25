@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
 import { useOptions } from "../../../contexts/OptionsContext";
+import OptionButton from "./OptionButton";
 
 const AppearanceOptions = () => {
     const { isSystemDark, theme, setTheme, compactMode, setCompactMode } = useOptions()
@@ -23,36 +23,6 @@ const AppearanceOptions = () => {
                 <OptionButton isSelected={false} disabled toggle={() => console.log("normal")}>Compact Mode</OptionButton>
             </div>
         </div>
-    )
-}
-
-const OptionButton = ({ isSelected, toggle, disabled = false, forcedThemeDark, children }: { isSelected: boolean, toggle: () => void, disabled?: boolean, children: ReactNode, forcedThemeDark?: boolean }) => {
-    const choose = (dark: string, light: string) => {
-        if (forcedThemeDark === true) {
-            return dark
-        } else if (forcedThemeDark === false) {
-            return light
-        }
-        return `${dark} ${light}`
-    }
-    return (
-        <div className={forcedThemeDark ? "dark" : ""}>
-            <button
-                className={
-                    (isSelected ? "ring-2 ring-sky-500" : "") +
-                    " transition-colors duration-200 rounded w-80 font-semibold p-2 text-left pl-4 my-1 " +
-                    (
-                        disabled ?
-                            `${choose("dark:bg-gray-600", "bg-gray-400")} ${choose("dark:text-gray-800", "text-gray-600")} cursor-not-allowed` :
-                            `${choose("dark:bg-gray-800", "bg-gray-300")} ${choose("dark:text-white", "text-black")}`
-                        // Do We really need to `choose` for dark theme?
-                    )}
-                onClick={toggle}
-            >
-                {children}
-            </button>
-        </div>
-
     )
 }
 
