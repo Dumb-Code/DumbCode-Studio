@@ -12,7 +12,7 @@ import { NumArray } from "../../../studio/util/NumArray"
 
 
 const AnimatorSkeletalExport = ({ animation, cube }: { animation: DcaAnimation | null, cube?: DCMCube }) => {
-  const [nameOverride, setNameOverride, deleteOverride] = useListenableObjectInMapNullable(animation?.keyframeNameOverrides, cube?.identifier, [animation, cube])
+  const [nameOverride, setNameOverride, deleteOverride] = useListenableObjectInMapNullable(animation?.keyframeNameOverrides, cube?.identifier)
   const [overridesOnly, setOverridesOnly] = useListenableObjectNullable(animation?.nameOverridesOnly)
 
   const inputKeyPressed = (e: KeyboardEvent) => {

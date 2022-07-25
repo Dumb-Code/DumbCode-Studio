@@ -10,7 +10,7 @@ const GithubCommitBox = ({ deleteRemote, setDeleteRemote, repo, processCommit, o
   const [description, setDescription] = useState("")
 
   const [currentCommit, setCurrentCommit] = useState<GithubCommiter | null>(null)
-  const [commitMsg] = useListenableObjectNullable(currentCommit?.message, [currentCommit])
+  const [commitMsg] = useListenableObjectNullable(currentCommit?.message)
 
   const [token] = useGithubAccessToken()
 

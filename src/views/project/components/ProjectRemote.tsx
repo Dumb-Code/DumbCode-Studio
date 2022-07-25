@@ -59,7 +59,7 @@ const ProjectRemoteIsAuthenticated = ({ githubToken }: { githubToken: string }) 
     const dialogBoxes = useDialogBoxes()
     const [repos, setLastUsed, saveOnChange] = useRecentGithubRemoteProjects()
     const [selectedRepo, setSelectedRepo] = useState<RemoteRepo | null>(loadedRepo?.repo ?? null)
-    const [projects, setProjects] = useListenableObjectNullable(loadedRepo?.projects, [loadedRepo])
+    const [projects, setProjects] = useListenableObjectNullable(loadedRepo?.projects)
     const [loadElementIfPossible, setLoadElementIfPossible] = useState(-1)
 
     const { projects: openedProjects, selectProject } = useStudio()

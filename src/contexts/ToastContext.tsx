@@ -95,8 +95,8 @@ const ToastContext = ({ children }: { children: ReactNode }) => {
 }
 
 const ToastEntry = ({ toast, index }: { toast: ToastObject, index: number }) => {
-  const [fadingOut, setFadingOut] = useListenableObject(toast.fadingOut, [toast])
-  const [animatedUp, setAnimatedUp] = useListenableObject(toast.animatedUp, [toast])
+  const [fadingOut, setFadingOut] = useListenableObject(toast.fadingOut)
+  const [animatedUp, setAnimatedUp] = useListenableObject(toast.animatedUp)
 
   const essentialIndex = animatedUp ? index : -1
 

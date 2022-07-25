@@ -74,7 +74,7 @@ const DirectionalLightSection = () => {
     view.addLight()
   }, [view])
 
-  const [selectedName, setSelectedName] = useListenableObjectNullable(selectedLight?.name, [selectedLight])
+  const [selectedName, setSelectedName] = useListenableObjectNullable(selectedLight?.name)
   const [shadow, setShadow] = useListenableObjectNullable(selectedLight?.shadow)
 
   const dialogBoxes = useDialogBoxes()

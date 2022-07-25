@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */ // -- we want to use exhaustive deps (or do we)
-import { DependencyList, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { HistoryActionTypes, SectionHandle, UndoRedoSection } from '../undoredo/UndoRedoHandler';
 
 type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
@@ -159,7 +158,10 @@ export class LO<T> {
   }
 }
 
-
+//Links the source to the target.
+//When the soure changes, the target changes, and vice versa.
+//If copyToSourceInsteadOfTargetOnChange, then at the start the source copies the target. Otherwise the target copies the source.
+//If there is no source, then `defaultValue` is used.
 export const useChangingDelegateListenableObject = <T>(source: LO<T> | undefined, target: LO<T>, defaultValue?: T, copyToSourceInsteadOfTargetOnChange = false) => {
   useEffect(() => {
     if (source === undefined) {
@@ -195,10 +197,10 @@ export const useChangingDelegateListenableObject = <T>(source: LO<T> | undefined
       source.removeListener(sourceListener)
       target.removeListener(targetListener)
     }
-  }, [source, target])
+  }, [source, target, defaultValue, copyToSourceInsteadOfTargetOnChange])
 }
 
-export const useListenableObjectNullable = <T>(obj: LO<T> | undefined, deps: DependencyList = []): [T | undefined, (val: T) => void] => {
+export const useListenableObjectNullable = <T>(obj: LO<T> | undefined): [T | undefined, (val: T) => void] => {
   const [state, setState] = useState<T | undefined>(() => obj?.internalValue)
   useEffect(() => {
     if (obj === undefined) {
@@ -211,24 +213,24 @@ export const useListenableObjectNullable = <T>(obj: LO<T> | undefined, deps: Dep
     const listener = (t: T) => setState(() => t)
     obj.addListener(listener)
     return () => obj.removeListener(listener)
-  }, [state, setState, obj, ...deps])
+  }, [state, setState, obj])
   return [
     state,
     useCallback(val => {
       if (obj !== undefined) {
         obj.value = val
       }
-    }, [obj, ...deps])
+    }, [obj])
   ]
 }
 
-export const useListenableObjectToggle = (obj: LO<boolean>, deps: DependencyList = []): [boolean, (val?: boolean) => void] => {
-  const [value, setValue] = useListenableObject(obj, deps)
-  const toggle = useCallback(() => setValue(!value), [value])
+export const useListenableObjectToggle = (obj: LO<boolean>): [boolean, (val?: boolean) => void] => {
+  const [value, setValue] = useListenableObject(obj)
+  const toggle = useCallback(() => setValue(!value), [value, setValue])
   return [value, toggle]
 }
 
-export const useListenableObject = <T>(obj: LO<T>, deps: DependencyList = []): [T, (val: T) => void] => {
+export const useListenableObject = <T>(obj: LO<T>): [T, (val: T) => void] => {
   const [state, setState] = useState(() => obj.internalValue)
   useEffect(() => {
     if (state !== obj.internalValue) {
@@ -237,6 +239,6 @@ export const useListenableObject = <T>(obj: LO<T>, deps: DependencyList = []): [
     const listener = (t: T) => setState(() => t)
     obj.addListener(listener)
     return () => obj.removeListener(listener)
-  }, [state, setState, obj, ...deps])
-  return [state, useCallback(val => obj.value = val, [obj, ...deps])]
+  }, [state, setState, obj])
+  return [state, useCallback(val => obj.value = val, [obj])]
 }

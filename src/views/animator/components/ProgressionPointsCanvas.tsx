@@ -11,7 +11,7 @@ type DraggedStartData = {
 };
 export const ProgressionPointsCanvas = ({ keyframe }: { keyframe: DcaKeyframe | null; }) => {
   const radius = 7.5;
-  const [points, setPoints] = useListenableObjectNullable(keyframe?.progressionPoints, [keyframe]);
+  const [points, setPoints] = useListenableObjectNullable(keyframe?.progressionPoints);
 
   const [hoveredPoint, setHoveredPoint] = useState<ProgressionPoint | null>(null);
 

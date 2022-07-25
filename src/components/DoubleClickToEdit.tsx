@@ -104,6 +104,6 @@ export const DblClickEditLO = (props:
     obj: LO<string>
   } & DivExtended
 ) => {
-  const [text, setText] = useListenableObject(props.obj, [props])
+  const [text, setText] = useListenableObject(props.obj)
   return <DblClickEditInternal {...props} text={text} callback={setText} />
 }

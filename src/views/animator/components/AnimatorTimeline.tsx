@@ -34,7 +34,12 @@ const AnimatorTimeline = () => {
     }
     return (
         <div onClick={onBackgroundClicked} className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full pt-2 overflow-x-hidden overflow-y-scroll studio-scrollbar">
-            {animation !== null && <AnimationLayers animation={animation} />}
+            {animation !== null ?
+                <AnimationLayers animation={animation} /> :
+                <div className="w-full h-full flex justify-center items-center text-gray-400 dark:text-gray-600">
+                    No Animation Selected
+                </div>
+            }
         </div>
     )
 }

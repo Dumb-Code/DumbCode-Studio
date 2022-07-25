@@ -198,11 +198,11 @@ const TextureMapperViewport = () => {
 }
 
 const TextureMapperVisualCube = ({ cube, textureWidth, textureHeight }: { cube: DCMCube, textureWidth: number, textureHeight: number }) => {
-    const [children] = useListenableObject(cube.children, [cube])
-    const [textureOffset] = useListenableObject(cube.textureOffset, [cube])
-    const [dimension] = useListenableObject(cube.dimension, [cube])
-    const [hovered] = useListenableObject(cube.mouseHover, [cube])
-    const [selected] = useListenableObject(cube.selected, [cube])
+    const [children] = useListenableObject(cube.children)
+    const [textureOffset] = useListenableObject(cube.textureOffset)
+    const [dimension] = useListenableObject(cube.dimension)
+    const [hovered] = useListenableObject(cube.mouseHover)
+    const [selected] = useListenableObject(cube.selected)
 
     const redraw = useCallback<RedrawCallback>((width, height, ctx) => {
         TextureManager.drawCubeToCanvas(cube, width, height, ctx, true, textureWidth, textureHeight, textureOffset, dimension, hovered, selected)

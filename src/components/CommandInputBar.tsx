@@ -20,14 +20,14 @@ const CommandInputBar = ({ command }: { command?: CommandRoot }) => {
   const [logHistory] = useListenableObjectNullable(command?.logHistory)
 
   const [commandBuilder] = useListenableObjectNullable(command?.commandBuilder)
-  const [commandBuilderError] = useListenableObjectNullable(commandBuilder?.commandBuilderError, [commandBuilder])
-  const [commandBuilderText] = useListenableObjectNullable(commandBuilder?.commandBuilderText, [commandBuilder])
-  const [commandBuilderValueText] = useListenableObjectNullable(commandBuilder?.commandBuilderValueText, [commandBuilder])
+  const [commandBuilderError] = useListenableObjectNullable(commandBuilder?.commandBuilderError)
+  const [commandBuilderText] = useListenableObjectNullable(commandBuilder?.commandBuilderText)
+  const [commandBuilderValueText] = useListenableObjectNullable(commandBuilder?.commandBuilderValueText)
 
   const [lastCommandErrorOutput] = useListenableObjectNullable(command?.lastCommandErrorOutput)
 
   const [onFrameCallback] = useListenableObjectNullable(command?.onFrameCallback)
-  const [onBuilderFrameCallback] = useListenableObjectNullable(commandBuilder?.onFrameCallback, [commandBuilder])
+  const [onBuilderFrameCallback] = useListenableObjectNullable(commandBuilder?.onFrameCallback)
 
   const parsedArguments = currentArgumentMap ? Object.keys(currentArgumentMap) : []
 

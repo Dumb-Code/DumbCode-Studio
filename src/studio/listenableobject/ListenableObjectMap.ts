@@ -1,6 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */ // -- we want to use exhaustive deps (or do we)
-
-import { DependencyList, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { HistoryActionTypes, SectionHandle, UndoRedoSection } from '../undoredo/UndoRedoHandler';
 import { ValueOrGetter, _getOrRun } from './ListenableObject';
 
@@ -163,7 +161,7 @@ export class LOMap<K, V> extends Map<K, V> {
 }
 
 
-export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K, deps: DependencyList = []): [V | undefined, (val: V) => void, () => void] => {
+export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K): [V | undefined, (val: V) => void, () => void] => {
   const [state, setState] = useState(obj.get(key));
   useEffect(() => {
     const v = obj.get(key);
@@ -173,15 +171,15 @@ export const useListenableObjectInMap = <K, V>(obj: LOMap<K, V>, key: K, deps: D
     const listener = (v?: V) => setState(() => v);
     obj.addListener(key, listener);
     return () => obj.removeListener(key, listener);
-  }, [state, setState, obj, key, ...deps]);
+  }, [state, setState, obj, key]);
   return [
     state,
-    useCallback(val => obj.set(key, val), [obj, key, ...deps]),
-    useCallback(() => obj.delete(key), [obj, key, ...deps])
+    useCallback(val => obj.set(key, val), [obj, key]),
+    useCallback(() => obj.delete(key), [obj, key])
   ];
 };
 
-export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: K, deps: DependencyList = []): [V | undefined, (val: V) => void, () => void] => {
+export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: K): [V | undefined, (val: V) => void, () => void] => {
   const [state, setState] = useState(obj !== undefined && key !== undefined ? obj.get(key) : undefined);
   useEffect(() => {
     if (obj === undefined || key === undefined) {
@@ -195,19 +193,19 @@ export const useListenableObjectInMapNullable = <K, V>(obj?: LOMap<K, V>, key?: 
     const listener = (v?: V) => setState(() => v);
     obj.addListener(key, listener);
     return () => obj.removeListener(key, listener);
-  }, [state, setState, obj, key, ...deps]);
+  }, [state, setState, obj, key]);
   return [
     state,
     useCallback(val => {
       if (obj !== undefined && key !== undefined) {
         obj.set(key, val);
       }
-    }, [obj, key, ...deps]),
+    }, [obj, key]),
     useCallback(() => {
       if (obj !== undefined && key !== undefined) {
         obj.delete(key);
       }
-    }, [obj, key, ...deps])
+    }, [obj, key])
   ];
 };
 
@@ -220,7 +218,7 @@ const isMapEqual = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
   return equal
 }
 //Is readonly
-export const useListenableMap = <K, V>(obj: LOMap<K, V>, deps: DependencyList = []): Map<K, V> => {
+export const useListenableMap = <K, V>(obj: LOMap<K, V>): Map<K, V> => {
   const [state, setState] = useState<Map<K, V>>(() => new Map(obj))
   useEffect(() => {
     if (!isMapEqual(state, obj)) {
@@ -231,7 +229,7 @@ export const useListenableMap = <K, V>(obj: LOMap<K, V>, deps: DependencyList = 
     return () => {
       obj.removeGlobalListener(listener)
     }
-  }, [state, setState, obj, ...deps])
+  }, [state, setState, obj])
   return state
 }
 
