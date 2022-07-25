@@ -96,6 +96,14 @@ export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => Rea
   const mousePosition = useRef<{ x: number, y: number }>({ x: -1, y: -1 })
   const timeoutRef = useRef<NodeJS.Timeout>()
 
+  const isBeingUsed = useRef(false)
+
+  useEffect(() => () => {
+    if (isBeingUsed.current) {
+      tooltip.clearTooltip()
+    }
+  }, [tooltip])
+
   useEffect(() => {
     if (TooltipElement === null) {
       return
@@ -108,6 +116,7 @@ export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => Rea
       }
       timeoutRef.current = setTimeout(() => {
         tooltip.setTooltip(TooltipElement, mousePosition.current.x, mousePosition.current.y)
+        isBeingUsed.current = true
       }, delay)
       e.preventDefault()
       e.stopPropagation()
@@ -115,6 +124,7 @@ export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => Rea
 
     const mouseLeave = (e: MouseEvent) => {
       tooltip.clearTooltip()
+      isBeingUsed.current = false
       if (timeoutRef.current !== undefined) {
         clearTimeout(timeoutRef.current)
         timeoutRef.current = undefined
