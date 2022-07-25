@@ -3,7 +3,8 @@ import CubeInput from "../../../components/CubeInput";
 import CubeRotationInput from "../../../components/CubeRotationInput";
 import { useStudio } from "../../../contexts/StudioContext";
 import { DCMModel } from "../../../studio/formats/model/DcmModel";
-import { LO, useListenableMap, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject";
+import { useListenableMap } from "../../../studio/listenableobject/ListenableObjectMap";
 import { NumArray } from "../../../studio/util/NumArray";
 
 const ModelerProperties = () => {

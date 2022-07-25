@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { LO } from "../../util/ListenableObject";
+import { LO } from "../../listenableobject/ListenableObject";
 import DcProject from '../project/DcProject';
 import { StudioSound } from '../sounds/StudioSound';
 import StudioSoundInstance from '../sounds/StudioSoundInstance';

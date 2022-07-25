@@ -1,5 +1,5 @@
 import DcProject from '../formats/project/DcProject';
-import { LO } from '../util/ListenableObject';
+import { LO } from '../listenableobject/ListenableObject';
 import { DCMCube } from './../formats/model/DcmModel';
 import { HistoryActionTypes } from './../undoredo/UndoRedoHandler';
 import { EnumOrEmptyArgument } from './Argument';

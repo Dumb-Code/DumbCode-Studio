@@ -15,7 +15,7 @@ import DcProject from "../../../studio/formats/project/DcProject";
 import { countTotalRequests, loadRemoteProject } from "../../../studio/formats/project/DcRemoteProject";
 import DcRemoteRepo, { DcRemoteRepoContentGetterCounter, loadDcRemoteRepo, RemoteProjectEntry, RemoteRepo, remoteRepoEqual, writeStudioRemote } from "../../../studio/formats/project/DcRemoteRepos";
 import GithubCommiter from "../../../studio/git/GithubCommiter";
-import { useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject";
 import { useGithubAccessToken } from "../../../studio/util/LocalStorageHook";
 import WrapNoSSR from "../../../studio/util/NoSSR";
 import { removeRecentGithubRemoteProject, useRecentGithubRemoteProjects } from "../../../studio/util/RemoteProjectsManager";

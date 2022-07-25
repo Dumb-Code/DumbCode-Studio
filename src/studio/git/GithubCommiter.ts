@@ -1,5 +1,5 @@
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
-import { LO } from '../util/ListenableObject';
+import { LO } from '../listenableobject/ListenableObject';
 import { RemoteRepo } from './../formats/project/DcRemoteRepos';
 
 class RedundentFilesDirectory {

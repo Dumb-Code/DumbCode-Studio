@@ -11,7 +11,7 @@ import { downloadBlob, FileSystemsAccessApi, ReadableFile } from "../../../studi
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeDCAAnimation } from "../../../studio/formats/animations/DCALoader"
 import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
-import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 import DownloadAsButton, { DownloadOption } from "./DownloadAsButton"
 import { BasicProjectFileArea } from "./ProjectFileArea"
 

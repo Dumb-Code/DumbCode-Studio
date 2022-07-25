@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGPlus } from "../../../components/Icons"
-import { LO, useListenableObject } from "../../../studio/util/ListenableObject"
+import { LO, useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 
 type TabType = {
     identifier: string,

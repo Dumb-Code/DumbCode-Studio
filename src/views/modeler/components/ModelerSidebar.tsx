@@ -1,6 +1,6 @@
 import HistoryList from "../../../components/HistoryList";
 import { useStudio } from "../../../contexts/StudioContext";
-import { useListenableObject } from "../../../studio/util/ListenableObject";
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject";
 import ModelerCubeList from "./ModelerCubeList";
 import ModelerProperties from "./ModelerProperties";
 import ModelerReferenceImageEdit from "./ModelerReferenceImageEdit";

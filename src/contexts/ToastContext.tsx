@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useLayoutEffect, useMemo, useState } from "react"
 import { v4 } from "uuid"
-import { LO, useListenableObject } from "../studio/util/ListenableObject"
+import { LO, useListenableObject } from "../studio/listenableobject/ListenableObject"
 import { useCreatePortal } from "./CreatePortalContext"
 
 //Info IS used btw

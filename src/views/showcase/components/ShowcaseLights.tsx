@@ -8,9 +8,9 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes"
 import ShowcaseLightSavedPresetsDialogBox from "../../../dialogboxes/ShowcaseLightSavedPresets"
+import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject"
 import { ShowcaseLight } from "../../../studio/showcase/ShowcaseLight"
 import ShowcaseProperties from "../../../studio/showcase/ShowcaseProperties"
-import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject"
 
 const ShowcaseLights = () => {
   return (

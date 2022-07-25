@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useListenableObject } from './ListenableObject';
+import { useListenableObject } from '../listenableobject/ListenableObject';
 import { useStudio } from './../../contexts/StudioContext';
 
 export const useTextureGroupSelect = () => {

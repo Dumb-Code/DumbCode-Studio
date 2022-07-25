@@ -8,7 +8,7 @@ import { useStudio } from "../../../contexts/StudioContext";
 import { usePanelValue } from "../../../contexts/StudioPanelsContext";
 import { useToast } from "../../../contexts/ToastContext";
 import TextureManager from "../../../studio/formats/textures/TextureManager";
-import { useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { useListenableObject, useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject";
 import { imgSourceToElement } from "../../../studio/util/Utils";
 import ModelerCubeList from "../../modeler/components/ModelerCubeList";
 import { GridDisplayModes } from "./TextureMapperViewport";

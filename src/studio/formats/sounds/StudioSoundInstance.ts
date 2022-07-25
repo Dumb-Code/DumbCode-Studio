@@ -1,4 +1,4 @@
-import { LO } from './../../util/ListenableObject';
+import { LO } from '../../listenableobject/ListenableObject';
 import { StudioSound } from './StudioSound';
 
 export default class StudioSoundInstance {

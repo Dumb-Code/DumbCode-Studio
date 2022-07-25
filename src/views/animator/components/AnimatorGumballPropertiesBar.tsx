@@ -3,7 +3,7 @@ import Dropup, { DropupItem } from "../../../components/Dropup";
 import { ButtonList, GumballButton, GumballToggle } from "../../../components/GumballComponents";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
 import AnimatorGumballConsumer from "../../../studio/formats/animations/AnimatorGumballConsumer";
-import { useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { useListenableObject, useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject";
 import { AnimatorGumball, useAnimatorGumball } from "../logic/AnimatorGumball";
 
 const AnimatorGumballPropertiesBar = ({ consumer }: { consumer: AnimatorGumballConsumer | null | undefined }) => {

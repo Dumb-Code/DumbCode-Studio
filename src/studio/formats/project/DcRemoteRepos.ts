@@ -1,6 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import GithubCommiter from "../../git/GithubCommiter";
-import { LO } from "../../util/ListenableObject";
+import { LO } from "../../listenableobject/ListenableObject";
 import { NumArray } from './../../util/NumArray';
 import { JsonShowcaseView } from './../showcase/JsonShowcaseView';
 

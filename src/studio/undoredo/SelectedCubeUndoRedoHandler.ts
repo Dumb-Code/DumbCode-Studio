@@ -1,4 +1,4 @@
-import { LO } from "../util/ListenableObject"
+import { LO } from "../listenableobject/ListenableObject"
 import UndoRedoHandler, { SectionHandle, UndoRedoSection } from "./UndoRedoHandler"
 
 type SelectedCubeItem = {

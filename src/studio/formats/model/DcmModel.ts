@@ -2,6 +2,8 @@ import { BoxBufferGeometry, BufferAttribute, DoubleSide, Group, Matrix4, Matrix4
 import { v4 as uuidv4 } from "uuid";
 import { readFromClipboard, writeToClipboard } from "../../clipboard/Clipboard";
 import { writeCubesForClipboard } from "../../clipboard/CubeClipboardType";
+import { LO } from '../../listenableobject/ListenableObject';
+import { LOMap } from "../../listenableobject/ListenableObjectMap";
 import SelectedCubeUndoRedoHandler from "../../undoredo/SelectedCubeUndoRedoHandler";
 import CubeLocker, { LockerType } from "../../util/CubeLocker";
 import LockedCubes from "../../util/LockedCubes";
@@ -10,7 +12,6 @@ import SelectedCubeManager from "../../util/SelectedCubeManager";
 import DcProject from '../project/DcProject';
 import { readCubesForClipboard } from './../../clipboard/CubeClipboardType';
 import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
-import { LO, LOMap } from './../../util/ListenableObject';
 import { setIntersectType } from './../../util/ObjectClickedHook';
 import { ModelTextureCoordinates } from './ModelTextureCoordinates';
 

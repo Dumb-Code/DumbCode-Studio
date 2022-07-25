@@ -1,9 +1,10 @@
 import { v4 } from 'uuid';
 import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from '../formats/animations/AnimatorGumballConsumer';
 import { DCMCube } from '../formats/model/DcmModel';
+import { LO } from '../listenableobject/ListenableObject';
+import { LOMap } from "../listenableobject/ListenableObjectMap";
 import { unsafe_getThreeContext } from './../../contexts/StudioContext';
 import { AnimatorGumball } from './../../views/animator/logic/AnimatorGumball';
-import { LO, LOMap } from './../util/ListenableObject';
 import { NumArray } from './../util/NumArray';
 import { ShowcaseLight } from './ShowcaseLight';
 import ShowcaseProperties from './ShowcaseProperties';

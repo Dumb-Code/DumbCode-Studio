@@ -2,7 +2,7 @@ import { MouseEvent, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useStudio } from "../contexts/StudioContext";
 import { Command } from "../studio/command/Command";
 import { CommandRoot, ParsedArgument } from "../studio/command/CommandRoot";
-import { useListenableObjectNullable } from "../studio/util/ListenableObject";
+import { useListenableObjectNullable } from "../studio/listenableobject/ListenableObject";
 import { SVGTerminal } from "./Icons";
 
 const CommandInputBar = ({ command }: { command?: CommandRoot }) => {

@@ -6,7 +6,8 @@ import { downloadBlob } from "../../../studio/files/FileTypes"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { writeDCAAnimation } from "../../../studio/formats/animations/DCALoader"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
-import { useListenableObjectInMapNullable, useListenableObjectNullable } from "../../../studio/util/ListenableObject"
+import { useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject"
+import { useListenableObjectInMapNullable } from "../../../studio/listenableobject/ListenableObjectMap"
 import { NumArray } from "../../../studio/util/NumArray"
 
 

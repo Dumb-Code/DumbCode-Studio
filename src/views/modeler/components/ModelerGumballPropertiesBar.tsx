@@ -3,7 +3,7 @@ import Dropup, { DropupItem } from "../../../components/Dropup";
 import { ButtonList, GumballButton, GumballToggle } from "../../../components/GumballComponents";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
-import { useListenableObject } from "../../../studio/util/ListenableObject";
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject";
 import ReferenceImageHandler from "../../../studio/util/ReferenceImageHandler";
 import { ModelerGumball } from "../logic/ModelerGumball";
 

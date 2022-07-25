@@ -1,7 +1,7 @@
 import { Dispatch, FormEvent, SetStateAction, useCallback, useMemo, useState } from "react"
 import { RemoteRepo } from "../studio/formats/project/DcRemoteRepos"
 import GithubCommiter from "../studio/git/GithubCommiter"
-import { useListenableObjectNullable } from "../studio/util/ListenableObject"
+import { useListenableObjectNullable } from "../studio/listenableobject/ListenableObject"
 import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
 import Checkbox from "./Checkbox"
 

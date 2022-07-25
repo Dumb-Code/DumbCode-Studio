@@ -3,10 +3,10 @@ import { Euler, Event, Matrix4, Object3D, Quaternion, Vector3 } from 'three';
 import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from '../../../studio/formats/animations/AnimatorGumballConsumer';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
 import DcProject from '../../../studio/formats/project/DcProject';
+import { LO } from '../../../studio/listenableobject/ListenableObject';
 import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
-import { LO } from './../../../studio/util/ListenableObject';
 import { NumArray } from './../../../studio/util/NumArray';
 import { AnimatorGumballIK } from './AnimatorGumballIK';
 

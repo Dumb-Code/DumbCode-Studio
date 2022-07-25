@@ -4,7 +4,7 @@ import NumericInput from "../../../components/NumericInput";
 import { ButtonWithTooltip } from "../../../components/Tooltips";
 import { useKeyComboPressed, useKeyCombos } from "../../../contexts/OptionsContext";
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation";
-import { useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { useListenableObject, useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject";
 
 const AnimatorScrubBar = ({ animation }: { animation: DcaAnimation | null }) => {
     const [isHovering, setIsHovering] = useState(false)

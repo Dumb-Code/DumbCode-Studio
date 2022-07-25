@@ -1,6 +1,6 @@
 import { ChangeEvent } from "react"
 import { KeyframeLayerData } from "../studio/formats/animations/DcaAnimation"
-import { useListenableObject } from "../studio/util/ListenableObject"
+import { useListenableObject } from "../studio/listenableobject/ListenableObject"
 import { OpenedDialogBox } from "./DialogBoxes"
 
 const defined = "defined"

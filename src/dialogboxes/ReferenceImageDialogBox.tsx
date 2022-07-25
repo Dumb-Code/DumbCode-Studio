@@ -4,7 +4,7 @@ import { DblClickEditLO } from "../components/DoubleClickToEdit"
 import { SVGTrash, SVGUpload } from "../components/Icons"
 import Toggle from "../components/Toggle"
 import { useStudio } from "../contexts/StudioContext"
-import { useListenableObject } from "../studio/util/ListenableObject"
+import { useListenableObject } from "../studio/listenableobject/ListenableObject"
 import { ReferenceImage } from "../studio/util/ReferenceImageHandler"
 import { OpenedDialogBox, _unsafe_setDialogBox } from "./DialogBoxes"
 

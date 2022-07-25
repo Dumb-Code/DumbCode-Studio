@@ -1,6 +1,6 @@
 import { Euler, Matrix4, Quaternion, Vector3 } from 'three';
 import { DCMCube } from '../../../formats/model/DcmModel';
-import { LO } from "../../../util/ListenableObject";
+import { LO } from "../../../listenableobject/ListenableObject";
 import { AxisArgument, EnumArgument } from '../../Argument';
 import { Command } from "../../Command";
 

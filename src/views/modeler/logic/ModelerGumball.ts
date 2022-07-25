@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Euler, Event, Group, Matrix4, Object3D, Quaternion, Vector3 } from 'three';
-import { LO } from '../../../studio/util/ListenableObject';
+import { LO, useListenableObject } from '../../../studio/listenableobject/ListenableObject';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
 import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
 import { HistoryActionTypes } from './../../../studio/undoredo/UndoRedoHandler';
 import { LockerType } from './../../../studio/util/CubeLocker';
-import { useListenableObject } from './../../../studio/util/ListenableObject';
 import { NumArray } from './../../../studio/util/NumArray';
 import CubePointTracker from './CubePointTracker';
 

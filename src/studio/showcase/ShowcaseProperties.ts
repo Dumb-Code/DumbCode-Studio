@@ -2,7 +2,7 @@ import { AmbientLight, Group, Mesh, PlaneGeometry, ShadowMapType, ShadowMaterial
 import { unsafe_getThreeContext } from '../../contexts/StudioContext';
 import ShowcaseGumball from '../../views/showcase/logic/ShowcaseGumball';
 import DcProject from '../formats/project/DcProject';
-import { LO } from '../util/ListenableObject';
+import { LO } from '../listenableobject/ListenableObject';
 import { JsonShowcaseView, jsonToView, viewToJson } from './../formats/showcase/JsonShowcaseView';
 import { ShowcaseLight } from './ShowcaseLight';
 import ShowcaseView from './ShowcaseView';

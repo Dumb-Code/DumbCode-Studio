@@ -12,9 +12,9 @@ import { KeyframeClipboardType } from "../../../studio/clipboard/KeyframeClipboa
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
 import DcaSoundLayer, { DcaSoundLayerInstance } from "../../../studio/formats/animations/DcaSoundLayer";
 import { StudioSound } from "../../../studio/formats/sounds/StudioSound";
+import { useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/listenableobject/ListenableObject";
 import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef";
-import { useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/util/ListenableObject";
 import { AnimationLayerButton, AnimationTimelineLayer, blockPerSecond, width } from "./AnimatorTimelineLayer";
 
 //This whole thing is gross, messy and complicated.

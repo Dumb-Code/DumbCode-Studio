@@ -3,9 +3,9 @@ import { Event, Mesh, Object3D, Vector2 } from 'three';
 import { useOptions } from '../../contexts/OptionsContext';
 import { useStudio } from '../../contexts/StudioContext';
 import DcProject from '../formats/project/DcProject';
+import { LO, useChangingDelegateListenableObject } from '../listenableobject/ListenableObject';
 import SelectedCubeUndoRedoHandler from '../undoredo/SelectedCubeUndoRedoHandler';
 import { DCMCube, DCMModel } from './../formats/model/DcmModel';
-import { LO, useChangingDelegateListenableObject } from './ListenableObject';
 export default class SelectedCubeManager {
   disabled = false
   public readonly mouse = new Vector2()

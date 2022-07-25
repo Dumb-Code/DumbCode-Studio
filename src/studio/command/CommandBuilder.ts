@@ -1,4 +1,4 @@
-import { LO } from "../util/ListenableObject";
+import { LO } from "../listenableobject/ListenableObject";
 import { ArgumentHandler } from "./Argument";
 import { Command, CommandValues } from "./Command";
 import { CommandParseError } from './CommandParseError';

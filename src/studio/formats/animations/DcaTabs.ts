@@ -1,5 +1,5 @@
+import { LO } from '../../listenableobject/ListenableObject';
 import DcProject from '../project/DcProject';
-import { LO } from './../../util/ListenableObject';
 import DcaAnimation from "./DcaAnimation";
 
 export default class DcaTabs {

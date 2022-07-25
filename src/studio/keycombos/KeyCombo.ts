@@ -1,5 +1,5 @@
 import { KeyboardEvent as ReactKeyboardEvent } from "react";
-import { LO } from "../util/ListenableObject";
+import { LO } from "../listenableobject/ListenableObject";
 import { SavedKeyCombo } from './KeyCombos';
 
 const forbiddenKeys = ["ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight", "ContextMenu"]

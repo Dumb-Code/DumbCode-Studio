@@ -1,5 +1,5 @@
 import { DetailedHTMLProps, HTMLAttributes, useRef, useState } from "react";
-import { LO, useListenableObject } from "../studio/util/ListenableObject";
+import { LO, useListenableObject } from "../studio/listenableobject/ListenableObject";
 
 type DivExtended = {
   className?: string,

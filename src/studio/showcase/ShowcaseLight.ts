@@ -1,6 +1,6 @@
 import { CameraHelper, DirectionalLight } from 'three';
 import { v4 } from 'uuid';
-import { LO } from "../util/ListenableObject";
+import { LO } from "../listenableobject/ListenableObject";
 import { NumArray } from '../util/NumArray';
 
 export class ShowcaseLight {

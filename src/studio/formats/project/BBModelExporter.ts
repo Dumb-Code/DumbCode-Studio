@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { LO } from '../../util/ListenableObject';
+import { LO } from '../../listenableobject/ListenableObject';
 import DcaAnimation from '../animations/DcaAnimation';
 import DcaTabs from '../animations/DcaTabs';
 import TextureManager from '../textures/TextureManager';

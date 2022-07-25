@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useStudio } from "../contexts/StudioContext";
+import { useListenableObjectNullable } from "../studio/listenableobject/ListenableObject";
 import UndoRedoHandler, { ActionBatch, HistoryActionIcons } from "../studio/undoredo/UndoRedoHandler";
-import { useListenableObjectNullable } from "../studio/util/ListenableObject";
 import CollapsableSidebarPannel from "./CollapsableSidebarPannel";
 
 

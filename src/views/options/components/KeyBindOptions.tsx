@@ -4,7 +4,7 @@ import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useOptions } from "../../../contexts/OptionsContext"
 import KeyCombo from "../../../studio/keycombos/KeyCombo"
 import { KeyComboCategory } from "../../../studio/keycombos/KeyCombos"
-import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 
 const KeyBindOptions = () => {
     const { keyCombos, keyCombosChanged } = useOptions()

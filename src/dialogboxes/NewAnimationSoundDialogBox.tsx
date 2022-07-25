@@ -1,7 +1,7 @@
 import StudioSoundPlayableEntry from "../components/StudioSoundPlayableEntry"
 import DcaSoundLayer, { DcaSoundLayerInstance } from "../studio/formats/animations/DcaSoundLayer"
 import { StudioSound } from "../studio/formats/sounds/StudioSound"
-import { useListenableObject } from "../studio/util/ListenableObject"
+import { useListenableObject } from "../studio/listenableobject/ListenableObject"
 import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes"
 
 const NewAnimationSoundDialogBox = ({ layer }: { layer: DcaSoundLayer }) => {

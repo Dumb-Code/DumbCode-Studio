@@ -9,7 +9,7 @@ import { writeStudioRemote } from "../studio/formats/project/DcRemoteRepos"
 import { StudioSound } from "../studio/formats/sounds/StudioSound"
 import { Texture, TextureGroup } from "../studio/formats/textures/TextureManager"
 import GithubCommiter from "../studio/git/GithubCommiter"
-import { LO, useListenableObject } from "../studio/util/ListenableObject"
+import { LO, useListenableObject } from "../studio/listenableobject/ListenableObject"
 import { Mutable, writeImgToBase64 } from "../studio/util/Utils"
 import { OpenedDialogBox, useOpenedDialogBoxes } from "./DialogBoxes"
 

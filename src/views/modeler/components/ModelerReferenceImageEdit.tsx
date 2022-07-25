@@ -4,7 +4,7 @@ import CubeRotationInput from "../../../components/CubeRotationInput";
 import NumericInput from '../../../components/NumericInput';
 import Toggle from "../../../components/Toggle";
 import { DCMModel } from "../../../studio/formats/model/DcmModel";
-import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject";
 import { NumArray } from '../../../studio/util/NumArray';
 import { ReferenceImage, useReferenceImageTransform } from "../../../studio/util/ReferenceImageHandler";
 

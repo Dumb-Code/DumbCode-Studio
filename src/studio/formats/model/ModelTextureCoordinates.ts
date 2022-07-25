@@ -1,6 +1,6 @@
+import { LO } from "../../listenableobject/ListenableObject";
 import SelectedCubeUndoRedoHandler from "../../undoredo/SelectedCubeUndoRedoHandler";
 import { SectionHandle } from "../../undoredo/UndoRedoHandler";
-import { LO } from "../../util/ListenableObject";
 import { NumArray } from "../../util/NumArray";
 import { DCMModel } from "./DcmModel";
 

@@ -4,7 +4,7 @@ import StudioSoundPlayableEntry from "../../../components/StudioSoundPlayableEnt
 import { useStudio } from "../../../contexts/StudioContext"
 import { ReadableFile } from "../../../studio/files/FileTypes"
 import { StudioSound } from "../../../studio/formats/sounds/StudioSound"
-import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 import { BasicProjectFileArea } from "./ProjectFileArea"
 
 export const supportedSoundExtensions = [".wav", ".mp3", ".ogg"]

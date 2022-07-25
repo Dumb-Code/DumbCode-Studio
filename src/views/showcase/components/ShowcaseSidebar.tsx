@@ -1,6 +1,6 @@
 import HistoryList from "../../../components/HistoryList"
 import { useStudio } from "../../../contexts/StudioContext"
-import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 import { AnimatorIKProperties } from "../../animator/components/AnimatorProperties"
 import ShowcaseLights from "./ShowcaseLights"
 import ShowcaseScreenshot from "./ShowcaseScreenshot"

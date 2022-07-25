@@ -1,5 +1,5 @@
+import { LO } from "../../listenableobject/ListenableObject";
 import UndoRedoHandler from "../../undoredo/UndoRedoHandler";
-import { LO } from "../../util/ListenableObject";
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
 import { NumArray } from './../../util/NumArray';
 import { DCMCube } from './../model/DcmModel';

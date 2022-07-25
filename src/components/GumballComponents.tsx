@@ -1,6 +1,6 @@
 import { Switch } from "@headlessui/react";
 import { PropsWithChildren } from "react";
-import { LO, useListenableObjectNullable } from "../studio/util/ListenableObject";
+import { LO, useListenableObjectNullable } from "../studio/listenableobject/ListenableObject";
 
 export const GumballToggle = ({ children, toggle }: PropsWithChildren<{ toggle?: LO<boolean> }>) => {
     const [gumballEnabled, enableGumball] = useListenableObjectNullable(toggle)

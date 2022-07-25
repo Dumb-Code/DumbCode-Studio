@@ -5,8 +5,8 @@ import { createAnimatorCommandRoot } from "../../command/commands/animator/Anima
 import { createModelingCommandRoot } from "../../command/commands/modeling/ModelingCommands";
 import FileChangeListener from "../../files/FileChangeListener";
 import { getUndefinedWritable, ReadableFile, readFileArrayBuffer } from '../../files/FileTypes';
+import { LO } from '../../listenableobject/ListenableObject';
 import ShowcaseProperties from "../../showcase/ShowcaseProperties";
-import { LO } from '../../util/ListenableObject';
 import ReferenceImageHandler from "../../util/ReferenceImageHandler";
 import { loadUnknownAnimation } from "../animations/DCALoader";
 import DcaTabs from '../animations/DcaTabs';

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { Mesh, MeshLambertMaterial, Object3D, SphereBufferGeometry } from "three";
 import { useStudio } from "../../../contexts/StudioContext";
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject";
 import ShowcaseProperties from "../../../studio/showcase/ShowcaseProperties";
-import { useListenableObject } from "../../../studio/util/ListenableObject";
 
 export default class ShowcaseGumball {
   readonly transformAnchor = new Object3D()

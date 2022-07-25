@@ -5,8 +5,8 @@ import { useStudio } from "../../../contexts/StudioContext"
 import { usePanelValue } from "../../../contexts/StudioPanelsContext"
 import { DCMCube } from "../../../studio/formats/model/DcmModel"
 import TextureManager from "../../../studio/formats/textures/TextureManager"
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler"
-import { useListenableObject } from "../../../studio/util/ListenableObject"
 import { fitAreaWithinBounds } from "../../../studio/util/Utils"
 
 export const GridDisplayModes = ["hidden", "shown", "fade"] as const

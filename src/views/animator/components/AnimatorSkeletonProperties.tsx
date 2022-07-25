@@ -3,7 +3,8 @@ import CubeSelectionInputButton from "../../../components/CubeSelectionInputButt
 import { SvgArrowRight } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
-import { useListenableObject, useListenableObjectInMap } from "../../../studio/util/ListenableObject"
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
+import { useListenableObjectInMap } from "../../../studio/listenableobject/ListenableObjectMap"
 import { NumArray } from "../../../studio/util/NumArray"
 
 const AnimatorSkeletonProperties = () => {

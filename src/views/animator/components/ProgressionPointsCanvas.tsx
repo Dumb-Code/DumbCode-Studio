@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import TransformCanvas, { CanvasMouseCallbackEvent, CanvasPoint, RedrawCallback } from "../../../components/TransformCanvas";
 import { DcaKeyframe, ProgressionPoint } from "../../../studio/formats/animations/DcaAnimation";
-import { useListenableObjectNullable } from "../../../studio/util/ListenableObject";
+import { useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject";
 
 type DraggedStartData = {
   point: ProgressionPoint;

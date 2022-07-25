@@ -1,6 +1,6 @@
 import { SVGProps } from 'react';
 import { SvgArrows, SvgEdit, SVGEye, SVGLocked, SVGPlus, SVGTerminal, SVGTrash } from "../../components/Icons";
-import { LO } from './../util/ListenableObject';
+import { LO } from '../listenableobject/ListenableObject';
 
 // Undos and redos work as following.
 // Definitions:

@@ -4,12 +4,13 @@ import { drawProgressionPointGraph, GraphType } from '../../../views/animator/lo
 import { readFromClipboard, writeToClipboard } from '../../clipboard/Clipboard';
 import { convertClipboardToKeyframe, KeyframeClipboardType, writeKeyframeForClipboard } from '../../clipboard/KeyframeClipboardType';
 import { getUndefinedWritable } from '../../files/FileTypes';
+import { LO } from '../../listenableobject/ListenableObject';
+import { LOMap } from "../../listenableobject/ListenableObjectMap";
 import SelectedCubeUndoRedoHandler from '../../undoredo/SelectedCubeUndoRedoHandler';
 import UndoRedoHandler from '../../undoredo/UndoRedoHandler';
 import DcProject from '../project/DcProject';
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
 import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
-import { LO, LOMap } from './../../util/ListenableObject';
 import { NumArray } from './../../util/NumArray';
 import { DCMCube } from './../model/DcmModel';
 import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from './AnimatorGumballConsumer';

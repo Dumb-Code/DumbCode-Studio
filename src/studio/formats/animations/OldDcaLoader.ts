@@ -1,4 +1,5 @@
-import { LO, LOMap } from '../../util/ListenableObject';
+import { LO } from '../../listenableobject/ListenableObject';
+import { LOMap } from "../../listenableobject/ListenableObjectMap";
 import { StudioBuffer } from '../../util/StudioBuffer';
 import { DCMCube, DCMModel } from '../model/DcmModel';
 import DcProject from '../project/DcProject';

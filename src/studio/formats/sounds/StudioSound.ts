@@ -1,7 +1,7 @@
 import { Howl } from 'howler';
 import { v4 } from 'uuid';
+import { LO } from '../../listenableobject/ListenableObject';
 import { removeFileExtension } from '../project/DcProject';
-import { LO } from './../../util/ListenableObject';
 
 const CANVAS_HEIGHT = 30
 const BAR_WIDTH = 2 //px

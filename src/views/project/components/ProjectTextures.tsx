@@ -9,7 +9,7 @@ import { useToast } from "../../../contexts/ToastContext"
 import { FileSystemsAccessApi, ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
 import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
-import { useListenableObject } from "../../../studio/util/ListenableObject"
+import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 import { writeImgToBlob } from "../../../studio/util/Utils"
 import { ProjectFileAreaBase, ProjectFileAreaHeader } from "./ProjectFileArea"
 
