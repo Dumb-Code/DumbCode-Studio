@@ -28,6 +28,9 @@ export type OptionsContext = {
 
   autoRecoverySaveTime: number
   setAutoRecoverySaveTime: (val: number) => void
+
+  unifiedSelectedCubes: boolean
+  setUnifiedSelectedCubes: (val: boolean) => void
 }
 
 type SavedOptions = {
@@ -37,6 +40,7 @@ type SavedOptions = {
   readonly selectedScreenshotAction: ScreenshotActionType
   readonly autoRecoveryEnabled: boolean,
   readonly autoRecoverySaveTime: number,
+  readonly unifiedSelectedCubes: boolean
 }
 
 export const useOptions = () => {
@@ -147,6 +151,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
   const [compactMode, setCompactMode] = useState(loadedOptions?.compactMode ?? false)
   const [autoRecoveryEnabled, setAutoRecoveryEnabled] = useState(loadedOptions?.autoRecoveryEnabled ?? true)
   const [autoRecoverySaveTime, setAutoRecoverySaveTime] = useState(loadedOptions?.autoRecoverySaveTime ?? 10) //10 minutes in ms
+  const [unifiedSelectedCubes, setUnifiedSelectedCubes] = useState(loadedOptions?.unifiedSelectedCubes ?? false)
 
   const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [loadedOptions?.keyCombos])
   const [selectedScreenshotAction, setScreenshotAction] = useState<ScreenshotActionType>(loadedOptions?.selectedScreenshotAction ?? "copy_to_clipboard")
@@ -160,6 +165,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       compactMode,
       autoRecoveryEnabled,
       autoRecoverySaveTime,
+      unifiedSelectedCubes,
       keyCombos: Object.keys(keyCombos).reduce((obj, c) => {
         const category = c as KeyComboCategory
         const keyCat = keyCombos[category].combos as Record<string, KeyCombo>
@@ -174,7 +180,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       selectedScreenshotAction: selectedScreenshotAction
     }
     localStorage.setItem("studio_options", JSON.stringify(data))
-  }, [compactMode, keyCombos, theme, selectedScreenshotAction, autoRecoveryEnabled, autoRecoverySaveTime])
+  }, [compactMode, keyCombos, theme, selectedScreenshotAction, autoRecoveryEnabled, autoRecoverySaveTime, unifiedSelectedCubes])
   useEffect(() => saveOptions(), [saveOptions])
 
 
@@ -222,6 +228,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       keyCombos, keyCombosChanged,
       autoRecoveryEnabled, setAutoRecoveryEnabled,
       autoRecoverySaveTime, setAutoRecoverySaveTime,
+      unifiedSelectedCubes, setUnifiedSelectedCubes,
     }}>
       {children}
     </Context.Provider>

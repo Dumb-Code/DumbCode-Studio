@@ -51,11 +51,31 @@ const GeneralOptions = () => {
           </OptionButton>
         ))}
       </div>
-
+      <SelectedCubesSection />
       <AutoRecoverySection />
 
 
     </div>
+  )
+}
+
+const SelectedCubesSection = () => {
+  const { unifiedSelectedCubes, setUnifiedSelectedCubes } = useOptions()
+  return (
+    <>
+      <p className="text-gray-900 text-xs font-semibold mt-5">SELECTED CUBES</p>
+      <p className="text-gray-900 text-xs mb-2">
+        Manage whether the selected cubes are per project, or per tab.
+      </p>
+      <div className="flex flex-col w-fit">
+        <OptionButton isSelected={unifiedSelectedCubes} toggle={() => setUnifiedSelectedCubes(true)}>
+          Per Project
+        </OptionButton>
+        <OptionButton isSelected={!unifiedSelectedCubes} toggle={() => setUnifiedSelectedCubes(false)}>
+          Per Tab
+        </OptionButton>
+      </div>
+    </>
   )
 }
 

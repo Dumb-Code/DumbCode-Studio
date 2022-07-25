@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Event, Mesh, Object3D, Vector2 } from 'three';
+import { useOptions } from '../../contexts/OptionsContext';
 import { useStudio } from '../../contexts/StudioContext';
 import DcProject from '../formats/project/DcProject';
 import SelectedCubeUndoRedoHandler from '../undoredo/SelectedCubeUndoRedoHandler';
@@ -173,6 +174,8 @@ export const useSelectedCubeManager = (undoRedoHandler?: SelectedCubeUndoRedoHan
   const project = getSelectedProject()
   const { selectedCubeManager: cubeManager, model } = project
 
+  const { unifiedSelectedCubes } = useOptions()
+
   useEffect(() => {
     if (undoRedoHandler) {
       cubeManager.activeUndoRedoHandler = undoRedoHandler
@@ -186,7 +189,8 @@ export const useSelectedCubeManager = (undoRedoHandler?: SelectedCubeUndoRedoHan
   useChangingDelegateListenableObject(
     undoRedoHandler?.selectedCubes,
     cubeManager.selected,
-    []
+    [],
+    unifiedSelectedCubes,
   )
 
   useEffect(() => {

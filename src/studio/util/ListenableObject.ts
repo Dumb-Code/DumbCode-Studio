@@ -160,16 +160,20 @@ export class LO<T> {
 }
 
 
-export const useChangingDelegateListenableObject = <T>(source: LO<T> | undefined, target: LO<T>, defaultValue?: T) => {
+export const useChangingDelegateListenableObject = <T>(source: LO<T> | undefined, target: LO<T>, defaultValue?: T, copyToSourceInsteadOfTargetOnChange = false) => {
   useEffect(() => {
     if (source === undefined) {
-      if (defaultValue !== undefined) {
+      if (defaultValue !== undefined && !copyToSourceInsteadOfTargetOnChange) {
         target.value = defaultValue
       }
       return
     }
     if (source.value !== target.value) {
-      target.value = source.value
+      if (copyToSourceInsteadOfTargetOnChange) {
+        source.value = target.value
+      } else {
+        target.value = source.value
+      }
     }
     let isSetting = false
 
