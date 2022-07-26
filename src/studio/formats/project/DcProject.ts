@@ -17,6 +17,7 @@ import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
 import { CommandRoot } from './../../command/CommandRoot';
 import { CubeSelectedHighlighter } from './../../util/CubeSelectedHighlighter';
 import { StudioSound } from './../sounds/StudioSound';
+import { importBBProject } from "./BBModelImporter";
 import { loadDcProj } from "./DcProjectLoader";
 import DcRemoteRepo, { RemoteRepo } from './DcRemoteRepos';
 
@@ -164,6 +165,9 @@ export const createProject = async (read: ReadableFile) => {
   const file = await read.asFile()
   if (file.name.endsWith(".dcproj")) {
     return await loadDcProj(removeFileExtension(file.name), await file.arrayBuffer(), read.asWritable())
+  }
+  if (file.name.endsWith(".bbmodel")) {
+    return await importBBProject(removeFileExtension(file.name), await file.arrayBuffer())
   }
   const [model, type, version] = await loadModelUnknownGetFileType(file.arrayBuffer(), file.name)
   const project = new DcProject(removeFileExtension(file.name), model)

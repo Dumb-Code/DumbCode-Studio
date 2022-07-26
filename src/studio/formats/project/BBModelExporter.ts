@@ -8,7 +8,7 @@ import { DCMCube, DCMModel } from './../model/DcmModel';
 import { TextureGroup } from './../textures/TextureManager';
 import DcProject from "./DcProject";
 
-type BBModelFormat = {
+export type BBModelFormat = {
   meta: MetaData,
   name: string;
   geometry_name: "Model";
@@ -18,7 +18,7 @@ type BBModelFormat = {
   timeline_setups: never[];
   resolution: { width: number, height: number }
   elements: CubeElement[]
-  outliner: BoneElement[]
+  outliner: (BoneElement | string)[]
   textures: TextureElement[]
   animations: AnimationElement[]
 }
@@ -30,7 +30,7 @@ type MetaData = {
   box_uv: true;
 }
 
-type CubeElement = {
+export type CubeElement = {
   name: string
   type: "cube"
   rescale: boolean
@@ -39,6 +39,7 @@ type CubeElement = {
   to: NumArray
   autouv: number
   color: number
+  inflate?: number
   origin: NumArray
   rotation?: NumArray
   uv_offset?: NumArray<2>
@@ -58,7 +59,7 @@ type CubeElementFace = {
   texture: number
 }
 
-type BoneElement = {
+export type BoneElement = {
   name: string,
   origin: NumArray,
   rotation?: NumArray,
@@ -434,6 +435,11 @@ const getCubePosition = (cube: DCMCube, positionCache: WorldPositionCache): NumA
   //This then needs to be used as an offset of the parent?
 
   //However, this is not even true, and the below works for some reason
+  //Okay so I figured it out.
+  //The position is always in world position. It's the rotation around the parent's pivot point
+  //However rotation is passed down to children. Therefore the position is just all the parents
+  //local positions added up
+  //
   const position = cube.position.value
   const parent = cube.parent
   if (!(parent instanceof DCMCube)) {
