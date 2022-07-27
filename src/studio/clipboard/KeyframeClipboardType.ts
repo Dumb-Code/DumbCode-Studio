@@ -55,7 +55,7 @@ export const writeKeyframeForClipboard = (kf: DcaKeyframe): KeyframeClipboardTyp
   model.resetVisuals()
   kf.animation.animateAt(kf.startTime.value + kf.duration.value)
 
-  const definedRotation = writeDefinedMap(model, kf.rotation, cube => cube.cubeGroup.rotation, cube => cube.rotation.value)
+  const definedRotation = writeDefinedMap(model, kf.rotation, cube => cube.cubeGroup.rotation, cube => cube.rotation.value, 180 / Math.PI)
   const definedPosition = writeDefinedMap(model, kf.position, cube => cube.cubeGroup.position, cube => cube.position.value)
   const definedCubeGrow = writeDefinedMap(model, kf.cubeGrow, cube => cube.cubeGrowGroup.position, cube => cube.cubeGrow.value, -1)
 
@@ -100,7 +100,7 @@ const convertDefinedDataToAdditional = (animation: DcaAnimation, item: KeyframeC
 
 
   return {
-    rotation: convertDefinedMapToAdditional(model, item.definedData.rotation, cube => cube.cubeGroup.rotation, cube => cube.rotation.value),
+    rotation: convertDefinedMapToAdditional(model, item.definedData.rotation, cube => cube.cubeGroup.rotation, cube => cube.rotation.value, 180 / Math.PI),
     position: convertDefinedMapToAdditional(model, item.definedData.position, cube => cube.cubeGroup.position, cube => cube.position.value),
     cubeGrow: convertDefinedMapToAdditional(model, item.definedData.cubeGrow, cube => cube.cubeGrowGroup.position, cube => cube.cubeGrow.value, -1),
   }
