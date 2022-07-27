@@ -1,3 +1,5 @@
+import { Euler, Quaternion } from "three";
+import CubeLocker from "../../util/CubeLocker";
 import { DCMCube, DCMModel } from "../model/DcmModel";
 import { NumArray } from './../../util/NumArray';
 import { BBModelFormat, BoneElement, CubeElement } from "./BBModelExporter";
@@ -5,6 +7,9 @@ import DcProject from "./DcProject";
 
 const DECODER = new TextDecoder('utf-8')
 
+const tempEuler = new Euler()
+const tempQuat = new Quaternion()
+const tempQuat2 = new Quaternion()
 
 export const importBBProject = async (name: string, arrayBuffer: ArrayBuffer): Promise<DcProject> => {
   const json: BBModelFormat = JSON.parse(DECODER.decode(arrayBuffer))
@@ -87,6 +92,7 @@ const importBBModel = async (data: BBModelFormat): Promise<DCMModel> => {
       const firstCubeChild = elem.children.find((e): e is string => typeof e === 'string')
 
       let cube: DCMCube
+      let rotation: NumArray = [0, 0, 0]
       if (firstCubeChild === undefined) {
         cube = new DCMCube(elem.name, [0, 0, 0], elem.origin, [0, 0, 0], elem.rotation ?? [0, 0, 0], [0, 0], false, [0, 0, 0], [], model, elem.uuid)
       } else {
@@ -95,7 +101,10 @@ const importBBModel = async (data: BBModelFormat): Promise<DCMModel> => {
           throw new Error(`Could not find cube with uuid ${elem}`)
         }
 
-        cube = convertToCube(cubeElement, parentPosition, elem.name, elem.uuid, elem.origin, elem.rotation)
+        cube = convertToCube(cubeElement, parentPosition, elem.name, elem.uuid, elem.origin, elem.rotation ?? [0, 0, 0])
+        if (cubeElement.rotation) {
+          rotation = cubeElement.rotation
+        }
       }
 
       const parentPos = [
@@ -104,6 +113,23 @@ const importBBModel = async (data: BBModelFormat): Promise<DCMModel> => {
         parentPosition[2] + cube.position.value[2]
       ] as const
       cube.children.value = elem.children.filter(e => e !== firstCubeChild).map((e) => consumeOutlier(e, parentPos)).filter((e): e is DCMCube => e !== null)
+
+      tempQuat.setFromEuler(tempEuler.set(cube.rotation.value[0] * Math.PI / 180, cube.rotation.value[1] * Math.PI / 180, cube.rotation.value[2] * Math.PI / 180, 'ZYX'))
+      tempQuat2.setFromEuler(tempEuler.set(rotation[0] * Math.PI / 180, rotation[1] * Math.PI / 180, rotation[2] * Math.PI / 180, 'ZYX'))
+
+      const result = tempQuat.multiply(tempQuat2)
+      tempEuler.setFromQuaternion(result, 'ZYX')
+
+      cube.updateMatrixWorld()
+      const lockers: CubeLocker[] = cube.children.value.map(c => new CubeLocker(c))
+      cube.rotation.value = [
+        tempEuler.x * 180 / Math.PI,
+        tempEuler.y * 180 / Math.PI,
+        tempEuler.z * 180 / Math.PI,
+      ]
+      cube.updateMatrixWorld()
+      lockers.forEach(l => l.reconstruct())
+
       return cube
     }
   }
