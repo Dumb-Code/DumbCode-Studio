@@ -6,15 +6,34 @@ import KeyCombo from "../../../../../studio/keycombos/KeyCombo"
 import { KeyComboCategory, unsafe_getKeyCombos } from "../../../../../studio/keycombos/KeyCombos"
 import { useListenableObject } from "../../../../../studio/listenableobject/ListenableObject"
 import { OptionCategorySection } from "../../OptionCategories"
+import { useOptionSearchContext } from "../../OptionSearchContext"
 
 const KeyBindSection = (category: KeyComboCategory): OptionCategorySection => {
   const cat = unsafe_getKeyCombos()[category]
-  const combos = cat.combos as Record<string, KeyCombo>
+  const combos = Object.values(cat.combos)
   return {
     title: cat.name,
     description: cat.desc,
-    component: () => <>{Object.keys(combos).map(kb => <KeyBindOption key={kb} keyCombo={combos[kb]} />)}</>
+    shouldRender: blockedBySearch => combos.filter(kb => !blockedBySearch(kb.name)).length > 0,
+    additionalText: combos.map(combo => combo.name).join(" "),
+    component: () => <AllKeyBindOptions category={category} />,
   }
+}
+
+const AllKeyBindOptions = ({ category }: { category: KeyComboCategory }) => {
+  const { keyCombos } = useOptions()
+  const { blockedBySearch } = useOptionSearchContext()
+  const combos = Object.values(keyCombos[category].combos)
+  return (
+    <>
+      {combos
+        .filter(kb => !blockedBySearch(kb.name))
+        .map((kb, i) =>
+          <KeyBindOption key={i} keyCombo={kb} />
+        )
+      }
+    </>
+  )
 }
 
 const KeyBindOption = ({ keyCombo }: { keyCombo: KeyCombo }) => {
@@ -26,10 +45,12 @@ const KeyBindOption = ({ keyCombo }: { keyCombo: KeyCombo }) => {
 
   const isInvalid = clashes.length !== 0 || !keyCombo.isNothingValid()
 
+  const { Highlight } = useOptionSearchContext()
+
   return (
     <div className="flex flex-row w-full">
       <div className="dark:bg-gray-800 bg-gray-300 m-0.5 rounded-l p-1 text-black dark:text-gray-400 pl-3 w-3/4 flex flex-row">
-        {keyCombo.name}
+        <Highlight str={keyCombo.name} />
         <ButtonWithTooltip className="w-5 -mt-1" tooltip={keyCombo.moreInfo}>
           <SVGInfoBubble className="w-4 h-4 mt-1 ml-2" />
         </ButtonWithTooltip>

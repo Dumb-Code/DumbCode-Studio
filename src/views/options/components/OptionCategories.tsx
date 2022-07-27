@@ -21,6 +21,8 @@ export type OptionCategory = {
 export type OptionCategorySection = {
   title: string
   description?: string
+  additionalText?: string;
+  shouldRender?: (blockedBySearch: (str: string) => boolean) => boolean;
   component: () => JSX.Element
 }
 
@@ -53,7 +55,7 @@ export const OptionCategories: Record<string, OptionCategory> = {
   keyBindOptions: {
     shortName: "Key Binds",
     title: "Key Bindings",
-    sections: unsafe_getKeyComboCategories().map(KeyBindSection)
+    sections: unsafe_getKeyComboCategories().map(KeyBindSection),
   },
   linksToOurStuff: {
     shortName: "Links",
@@ -61,5 +63,6 @@ export const OptionCategories: Record<string, OptionCategory> = {
     sections: LinksToOurStuff
   }
 }
+
 
 export const OptionCategoryKeys: string[] = Object.keys(OptionCategories);

@@ -7,7 +7,7 @@ enum Scope {
 }
 const keyCombos = {
   common: {
-    name: "COMMON SHORTCUT BINDINGS",
+    name: "Common Shortcut Bindings",
     desc: "Key bindings that apply all across the studio.",
     combos: {
       copy: new KeyCombo('Copy', "Copies the field value", 'KeyC'),
@@ -22,7 +22,7 @@ const keyCombos = {
   },
 
   input_multipliers: {
-    name: "INPUT MULTIPLIERS",
+    name: "Input Multipliers",
     desc: "Key bindings that apply when editing an input field.",
     scope: Scope.THIS,
     canBeNothing: true,
@@ -36,7 +36,7 @@ const keyCombos = {
   },
 
   camera_view: {
-    name: "CAMERA VIEW BINDINGS",
+    name: "Camera View Bindings",
     desc: "Key bindings that apply all across the studio.",
     combos: {
       front_view: new KeyCombo('Front View', "Moves the camera to view the Front of the model", 'Numpad5', false),
@@ -50,7 +50,7 @@ const keyCombos = {
   },
 
   camera_rotation: {
-    name: "CAMERA ROTATION BINDINGS",
+    name: "Camera Rotation Bindings",
     desc: "Key bindings that apply all across the studio.",
     combos: {
       rotate_view_left: new KeyCombo('Rotate View Left', "Rotates the camera slightly Left", 'Numpad4', false),
@@ -61,7 +61,7 @@ const keyCombos = {
   },
 
   modeler: {
-    name: "MODELER BINDINGS",
+    name: "Modeler Bindings",
     desc: "Key bindings that apply to the modeler.",
     scope: Scope.THIS_AND_GLOBAL,
     combos: {
@@ -83,7 +83,7 @@ const keyCombos = {
   },
 
   animator: {
-    name: "ANIMATOR BINDINGS",
+    name: "Animator Bindings",
     desc: "Key bindings that apply to the animator.",
     scope: Scope.THIS_AND_GLOBAL,
     combos: {

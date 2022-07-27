@@ -2,11 +2,11 @@ import { createContext, ReactNode, useCallback, useContext, useMemo } from "reac
 
 type ContextType = {
   Highlight: (props: { str?: string }) => JSX.Element
-  isContainedInSearch: (str: string) => boolean
+  blockedBySearch: (str: string) => boolean
 }
 const Context = createContext<ContextType>({
   Highlight: ({ str }) => <>{str}</>,
-  isContainedInSearch: () => false
+  blockedBySearch: () => false
 });
 
 
@@ -50,39 +50,34 @@ const OptionSearchContext = ({ search, children }: { search: string, children: R
     if (str === undefined) {
       return <>{str}</>;
     }
-    console.log(str)
     const parts = splitString(str);
     return (
       <>
-        {parts.map((part, index) =>
-          part.highlight ?
-            <StringHighlightPart key={index} string={part.string} /> :
-            part.string
-        )}
+        {parts.map((part, index) => <StringHighlightComponent key={index} part={part} />)}
       </>
     );
   }, [splitString]);
 
-  const isContainedInSearch = useCallback((str: string) => {
+  const blockedBySearch = useCallback((str: string) => {
     if (searchTerms === undefined) {
       return false;
     }
     const lower = str.toLocaleLowerCase();
-    return searchTerms.some(term => lower.includes(term));
+    return !searchTerms.some(term => lower.includes(term));
   }, [searchTerms]);
 
   return (
-    <Context.Provider value={{ Highlight, isContainedInSearch }}>
+    <Context.Provider value={{ Highlight, blockedBySearch }}>
       {children}
     </Context.Provider>
   )
 }
 
 
-const StringHighlightPart = ({ string }: { string: string }) => {
+const StringHighlightComponent = ({ part }: { part: StringHighlightPart }) => {
   return (
-    <span className="text-blue-500 bg-yellow-400">
-      {string}
+    <span className={`${part.highlight ? "text-blue-500 bg-yellow-400" : ""} whitespace-pre`}>
+      {part.string}
     </span>
   )
 }

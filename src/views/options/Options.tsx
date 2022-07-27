@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react"
 import { useGitCommitMessage } from "../../contexts/ServersideContext"
 import { OptionCategories, OptionCategory, OptionCategoryKeys, OptionCategorySection } from "./components/OptionCategories"
-import OptionSearchContext from "./components/OptionSearchContext"
+import OptionSearchContext, { useOptionSearchContext } from "./components/OptionSearchContext"
 import OptionSection from "./components/OptionSection"
 
 type DisplayType = {
@@ -83,15 +83,25 @@ const SearchedOptionCategory = ({ search }: { search: string }) => {
             .map(str => str.toLocaleLowerCase())
             .map(str => (input: string) => input.includes(str))
 
+        //The weight is how many of the search (split by " ") are in the input. 
+        //Note that this is how many unique search terms, not the total number of search terms.
         const getWeight = (input?: string) => input === undefined ? 0 : searchFilters.filter(filter => filter(input)).length
 
         return OptionCategoryKeys.flatMap(key => OptionCategories[key].sections)
-            .map(section => ({ section, weight: Math.max(getWeight(section.title.toLowerCase()), getWeight(section.description?.toLowerCase())) }))
+            .map(section => ({
+                section,
+                weight: Math.max(
+                    getWeight(section.title.toLowerCase()),
+                    getWeight(section.description?.toLowerCase()),
+                    getWeight(section.additionalText?.toLowerCase())
+                )
+            }))
             .filter(section => section.weight > 0)
             .sort((a, b) => b.weight - a.weight)
             .map(section => section.section)
 
     }, [search])
+
 
     return searchResults.length === 0 ? (
         <div className="flex flex-col items-center">
@@ -105,9 +115,10 @@ const SearchedOptionCategory = ({ search }: { search: string }) => {
 }
 
 const OptionSections = ({ sections, search }: { sections: readonly OptionCategorySection[], search?: string }) => {
+    const { blockedBySearch } = useOptionSearchContext()
     return (
         <>
-            {sections.map(section => (
+            {sections.filter(section => section.shouldRender === undefined || section.shouldRender(blockedBySearch)).map(section => (
                 <OptionSection key={section.title} title={section.title} search={search} description={section.description}>
                     <section.component />
                 </OptionSection>

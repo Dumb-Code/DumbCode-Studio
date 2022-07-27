@@ -19,7 +19,7 @@ const OptionButton = ({ isSelected, toggle, disabled = false, forcedThemeDark, c
           (isSelected ? `ring-2 ring-sky-500 bg-blue-500 ${choose("dark:hover:bg-blue-600 dark:border-blue-600", "hover:bg-blue-400 border-blue-400")}` :
             (
               disabled ?
-                `${choose("dark:bg-gray-600 dark:text-gray-800", "bg-gray-400 text-gray-600")} cursor-not-allowed` :
+                `${choose("dark:bg-gray-700 dark:text-gray-800", "bg-gray-400 text-gray-600")} cursor-not-allowed` :
                 choose("dark:bg-gray-800 dark:text-white dark:hover:bg-gray-900", "bg-gray-300 text-black hover:bg-gray-400")
             )
           )
