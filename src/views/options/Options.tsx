@@ -22,7 +22,7 @@ const Options = () => {
     const gitCommitMessage = useGitCommitMessage()
 
     const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const data = e.target.value.trim()
+        const data = e.target.value
         if (data.length === 0) {
             setOptionDisplay({ type: "category", data: lastUsedCategory.current })
         } else {
@@ -49,13 +49,17 @@ const Options = () => {
                 </div>
             </div>
             <div className="w-3/4 h-full flex flex-col overflow-hidden dark:bg-gray-600 bg-gray-100 p-6">
-                <div className="flex flex-row items-center dark:text-gray-400 text-gray-600">
+                <div className="flex flex-row items-center text-black">
                     Search:
-                    <input onChange={onInputChange} className="flex-grow py-1 px-2 ml-2 rounded dark:bg-gray-500 bg-gray-400 outline-none" />
+                    <input
+                        className="flex-grow py-1 px-2 ml-2 rounded dark:bg-gray-500 bg-gray-400 outline-none"
+                        value={optionDisplay.type === "search" ? optionDisplay.data : ""}
+                        onChange={onInputChange}
+                    />
                 </div>
                 <div className="flex-grow min-h-0 overflow-auto studio-scrollbar mt-5">
                     {optionDisplay.type === "search" ?
-                        <SearchedOptionCategory search={optionDisplay.data} /> :
+                        <SearchedOptionCategory search={optionDisplay.data.trim()} /> :
                         <NonSearchedOptionCategory optionCategory={OptionCategories[optionDisplay.data]} />
                     }
                 </div>
