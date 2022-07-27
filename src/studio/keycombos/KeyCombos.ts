@@ -181,3 +181,6 @@ export type SavedKeyComboMap = {
     [combo: string]: SavedKeyCombo
   }
 }
+
+export const unsafe_getKeyCombos = () => keyCombos
+export const unsafe_getKeyComboCategories = () => Object.keys(keyCombos) as KeyComboCategory[]

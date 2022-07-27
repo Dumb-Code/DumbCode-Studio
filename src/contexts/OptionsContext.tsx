@@ -45,7 +45,7 @@ type SavedOptions = {
 
 export const useOptions = () => {
   const context = useContext(Context)
-  if (context == null) {
+  if (context === null) {
     throw new Error(`useOptions must be used within a OptionsContextProvider`)
   }
   return context
