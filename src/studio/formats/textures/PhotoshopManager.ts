@@ -12,10 +12,6 @@ export const saveToPhotoshopFile = async (group: TextureGroup) => {
     height,
     children: textures.map<Layer>(t => ({
       name: t.name.value,
-      top: 0,
-      left: 0,
-      bottom: 250,
-      right: 250,
       imageData: new ImageData(resizeTexture(t.canvas.manager.readTexture(t.canvas), t.width, t.height, width, height), width, height, {}),
     })).reverse()
   }
