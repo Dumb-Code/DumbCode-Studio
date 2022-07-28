@@ -3,7 +3,6 @@ import TextureLayer from './TextureLayer';
 import { Texture } from './TextureManager';
 
 export const writeToPhotoshopObject = (texture: Texture): Psd => {
-  console.trace("write")
   return {
     name: texture.name.value,
     width: texture.width,
