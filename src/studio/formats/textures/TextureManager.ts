@@ -48,17 +48,17 @@ export default class TextureManager {
     const file = await readable.asFile()
     const [img, psd] = await this.loadTextureFromFile(file)
 
-    const texture = this.addTexture(removeFileExtension(readable.name), img)
-    if (psd === null) {
-      await this.linkFile(readable, texture)
-    } else {
-      await texture.setPhotoshopFile(readable.asWritable())
-    }
+    const texture = this.addTexture(removeFileExtension(readable.name), img, psd ?? undefined)
+    await this.linkFile(readable, texture)
   }
 
   async linkFile(readable: ReadableFile, texture: Texture) {
-    texture.setTextureFile(readable.asWritable())
-    texture.saveableFile.value = true
+    if (texture.psdData.value === null) {
+      await texture.setTextureFile(readable.asWritable())
+      texture.saveableFile.value = true
+    } else {
+      await texture.setPhotoshopFile(readable.asWritable())
+    }
   }
 
   async loadTextureFromFile(file: File): Promise<[HTMLImageElement, Psd | null]> {
@@ -71,6 +71,7 @@ export default class TextureManager {
   addTexture(name?: string, element?: HTMLImageElement, psd?: Psd): Texture {
     this.stopRefresh = true
     const texture = new Texture(this, this.project.model, name, element)
+    texture.psdData.value = psd ?? null
     texture.element.addListener(() => this.refresh())
     texture.needsSaving.addListener(v => this.project.projectNeedsSaving.value ||= v)
     this.textures.value = this.textures.value.concat([texture])
@@ -109,7 +110,7 @@ export default class TextureManager {
     groups.forEach(group => {
       group.needsSaving.addListener(v => this.project.projectNeedsSaving.value ||= v)
       group.textures.addPostListener(() => this.refresh())
-      group.unselectedTextures.value = this.defaultGroup.textures.value
+      group.unselectedTextures.value = this.defaultGroup.textures.value.filter(t => !group.textures.value.includes(t))
     })
     const containedDefault = groups.find(groups => groups.isDefault)
     if (containedDefault) {

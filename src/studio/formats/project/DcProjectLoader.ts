@@ -6,7 +6,9 @@ import { imgSourceToElement, writeImgToBlob } from "../../util/Utils";
 import { loadUnknownAnimation, writeDCAAnimation } from "../animations/DCALoader";
 import { loadModelUnknown, writeModel } from "../model/DCMLoader";
 import { DCMCube } from "../model/DcmModel";
+import { loadFromPsdFile, saveToPhotoshopFile } from "../textures/PhotoshopManager";
 import { TextureGroup } from "../textures/TextureManager";
+import { wrapFolder } from './../../files/FileTypes';
 import { NumArray } from './../../util/NumArray';
 import { KeyframeLayerData } from './../animations/DcaAnimation';
 import { JsonShowcaseView } from './../showcase/JsonShowcaseView';
@@ -45,6 +47,7 @@ type WriteableFolder = {
   file: (name: string, content: OrPromise<Blob | string>) => OrPromise<void>
   folder: (name: string) => OrPromise<WriteableFolder>
   name: string
+  asHandle?: (name: string) => Promise<FileSystemFileHandle>
 }
 
 type OrPromise<T> = T | Promise<T>
@@ -101,6 +104,7 @@ const createWriteableFolder = (handle: FileSystemDirectoryHandle, name = "_root"
       const folder = await handle.getDirectoryHandle(name, { create: true })
       return createWriteableFolder(folder, folder.name)
     },
+    asHandle: (name: string) => handle.getFileHandle(name),
     name: name,
   }
 }
@@ -132,7 +136,10 @@ export const loadDcProj = async (name: string, buffer: ArrayBuffer, writeable?: 
 }
 
 export const loadDcFolder = async (folder: FileSystemDirectoryHandle) => {
-  return loadFolderProject(folder.name, createReadableFolder(folder), true)
+  const project = await loadFolderProject(folder.name, createReadableFolder(folder), true)
+  project.projectWriteableFolder = wrapFolder(folder)
+  project.projectSaveType.value = "folder_project"
+  return project
 }
 
 export const loadFolderProject = async (name: string, zip: ReadableFolder, shouldKeepFilesNice: boolean) => {
@@ -353,11 +360,11 @@ const loadTextures = async (folderP: OrPromise<ReadableFolder | null>, project: 
     getTexturesData(folder)
   ])
 
-  const textures = imgs.map(({ img, handle }, index) => {
+  const textures = imgs.map(({ img, psd, handle }, index) => {
     if (img === null) {
       return null
     }
-    const texture = project.textureManager.addTexture(datas.texture_names[index], img)
+    const texture = project.textureManager.addTexture(datas.texture_names[index], img, psd)
     if (handle !== undefined) {
       project.textureManager.linkFile(createReadableFileExtended(handle), texture)
     }
@@ -373,7 +380,7 @@ const loadTextures = async (folderP: OrPromise<ReadableFolder | null>, project: 
     const group = new TextureGroup(project.textureManager, groupData.name, groupData.isDefault ?? false);
     groupData.layerIDs.forEach(id => {
       const texture = textures[id]
-      if (texture !== null) {
+      if (texture !== null && texture !== undefined) {
         group.toggleTexture(texture, true)
       }
     }, true)
@@ -382,11 +389,24 @@ const loadTextures = async (folderP: OrPromise<ReadableFolder | null>, project: 
 }
 
 const getTexturesArray = async (folder: ReadableFolder) => {
-  return Promise.all((await getFileArray(folder, "png"))
-    .map(async (file) => ({
-      img: file === null ? null : await file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))),
-      handle: file?.asHandle?.()
-    }))
+  return Promise.all((await getFileArray(folder, "psd", "png"))
+    .map(async (file) => {
+      let img: HTMLImageElement | null = null
+      if (file === null) {
+        return { img, handle: undefined }
+      }
+      if (file.name.endsWith(".psd")) {
+        const [img, psd] = await loadFromPsdFile(await file.async("arraybuffer"))
+        return {
+          img, psd,
+          handle: file.asHandle?.()
+        }
+      }
+      return {
+        img: await file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))),
+        handle: file.asHandle?.()
+      }
+    })
   )
 }
 
@@ -491,7 +511,7 @@ const getRefImagesData = async (folder: ReadableFolder): Promise<RefImgData> => 
 }
 
 const getRefImages = async (folder: ReadableFolder, legacyImgNames: string[] | null): Promise<(HTMLImageElement | null)[]> => {
-  return Promise.all((await getFileArrayIndex(folder, "png", legacyImgNames ?? undefined))
+  return Promise.all((await getFileArrayIndex(folder, legacyImgNames ?? undefined, "png"))
     .map(async (file) => file === null ? null : file.async('blob').then(texture => imgSourceToElement(URL.createObjectURL(texture))))
   )
 }
@@ -606,7 +626,29 @@ const writeTextures = async (project: DcProject, folderP: OrPromise<WriteableFol
 
   await Promise.all([
     dataFolder.file("data.json", JSON.stringify(textureData)),
-    ...textures.map((texture, index) => writeImg(folder, keepFilesNice ? texture.name.value : index, texture.element.value)),
+    ...textures.map((texture, index) => {
+      const name = keepFilesNice ? texture.name.value : index
+
+      const png = texture.psdData.value === null
+      const extension = png ? "png" : "psd"
+      if (png === null) {
+        writeImg(folder, name, texture.element.value)
+      } else {
+        const blob = saveToPhotoshopFile(texture)
+        folder.file(`${name}.psd`, blob)
+      }
+      const handle = folder.asHandle?.(`${name}.${extension}`)
+      if (handle !== undefined) {
+        handle.then(async (file) => {
+          const readable = createReadableFileExtended(file)
+          if (png) {
+            texture.setTextureFile(readable.asWritable())
+          } else {
+            texture.setPhotoshopFile(readable.asWritable())
+          }
+        })
+      }
+    }),
     writeNameIndexFileIfNeeded(folder, textures.map(t => t.name.value))
   ])
 }
@@ -660,19 +702,28 @@ const writeSound = async (folder: WriteableFolder, name: string | number, sound:
 
 // --- Utils
 
-const getFileArray = (folder: ReadableFolder, extension: string) => getFileArrayIndex(folder, extension)
+const getFileArray = (folder: ReadableFolder, ...extensions: string[]) => getFileArrayIndex(folder, undefined, ...extensions)
 
-const getFileArrayIndex = async (folder: ReadableFolder, extension: string | null, nameOverrides?: string[]) => {
+const getFileForNameAndExtensions = async (folder: ReadableFolder, name: string, ...extensions: string[]) => {
+  for (const extension of extensions) {
+    const file = await folder.file(`${name}.${extension}`)
+    if (file !== null) {
+      return file
+    }
+  }
+  return folder.file(`${name}`)
+}
+
+const getFileArrayIndex = async (folder: ReadableFolder, nameOverrides?: string[], ...extensions: string[]) => {
   const names = nameOverrides ?? await getNameIndexFileIfNeeded(folder)
 
-  const ext = extension === null ? "" : "." + extension
 
   if (names !== undefined) {
-    const files = await Promise.all(names.map(async (name) => await folder.file(`${name}${ext}`)))
+    const files = await Promise.all(names.map(async (name) => await getFileForNameAndExtensions(folder, name, ...extensions)))
     return files
   } else {
     const files: ReadableFile[] = []
-    for (let index = 0, file: OrPromise<ReadableFile | null> = null; (file = await folder.file(`${index}${ext}`)) !== null; index++) {
+    for (let index = 0, file: OrPromise<ReadableFile | null> = null; (file = await getFileForNameAndExtensions(folder, `${index}`, ...extensions)) !== null; index++) {
       files.push(file)
     }
     return files

@@ -33,6 +33,11 @@ export type WritableFile = {
   write: (name: string, blob: Blob | PromiseLike<Blob>, types?: FilePickerAcceptType[]) => Promise<string>
 } & ListenableFile
 
+export type OpenableFolder = {
+  open: () => Promise<FileSystemDirectoryHandle>
+  unlink?: () => void
+}
+
 export const downloadBlob: WritableFile['write'] = async (name, blob) => {
   const url = window.URL.createObjectURL(await blob);
   const a = document.createElement("a");
@@ -89,6 +94,30 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
     },
     getName: () => saveName ?? undefined
 
+  }
+}
+
+export const wrapFolder = (folder: FileSystemDirectoryHandle): OpenableFolder => {
+  return {
+    open: async () => folder
+  }
+}
+
+export const getUndefinedFolder = (): OpenableFolder => {
+  if (!FileSystemsAccessApi) {
+    throw new Error("No file system access API available, cannot open folder.")
+  }
+  let folder: FileSystemDirectoryHandle | null = null
+  return {
+    open: async () => {
+      if (folder === null) {
+        folder = await window.showDirectoryPicker()
+      }
+      return folder
+    },
+    unlink: () => {
+      folder = null
+    }
   }
 }
 
