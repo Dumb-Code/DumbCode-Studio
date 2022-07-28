@@ -10,6 +10,7 @@ import { usePanelValue } from '../../../contexts/StudioPanelsContext';
 import { useTooltipRef } from '../../../contexts/TooltipContext';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
 import { useListenableObject } from '../../../studio/listenableobject/ListenableObject';
+import { useListenableObjectInMap } from '../../../studio/listenableobject/ListenableObjectMap';
 import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import CubeLocker from '../../../studio/util/CubeLocker';
 import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
@@ -796,22 +797,39 @@ const CubeItemEntry = ({ cube, selectedCubeManager, dragState, isDragging, hasCh
     const [selected] = useListenableObject(cube.selected)
     const [hideChildren, setHideChildren] = useListenableObject(cube.hideChildren)
 
+    const [name] = useListenableObject(cube.name)
+
+    const [otherCubes] = useListenableObjectInMap(cube.model.cubeMap, name)
+    const sharedName = useMemo(() => (otherCubes?.length ?? 1) > 1, [otherCubes])
+
 
     if (visible && !locked) {
         itemBackgroundColor = "text-white "
         if (selected) {
             itemBackgroundColor += "bg-sky-500 hover:bg-sky-400"
-        } else if (hovering && !isDragging) {
+        } else if (sharedName) {
+            itemBackgroundColor += "bg-red-300 hover:bg-red-100"
+        } if (hovering && !isDragging) {
             itemBackgroundColor += "bg-red-600"
         } else {
             itemBackgroundColor += "dark:bg-gray-700 bg-gray-400"
         }
     } else {
-        itemBackgroundColor = locked ? "dark:bg-gray-500 bg-gray-100 bg-opacity-30 text-gray-400 rounded" : "bg-gray-700 bg-opacity-40 text-gray-500 rounded"
+        itemBackgroundColor = locked ? "bg-opacity-30 text-gray-400 " : "bg-opacity-40 text-gray-500 "
+        if (sharedName) {
+            itemBackgroundColor += "bg-red-100"
+        } else if (locked) {
+            itemBackgroundColor += "dark:bg-gray-500 bg-gray-100"
+        } else {
+            itemBackgroundColor += "bg-gray-700"
+        }
     }
+
+    const tooltipRef = useTooltipRef<HTMLDivElement>(() => sharedName ? "Cube's name is not unique" : null)
 
     return (
         <div
+            ref={tooltipRef}
             onPointerEnter={() => setHovering(true)}
             onPointerLeave={() => setHovering(false)}
             onClick={e => {
