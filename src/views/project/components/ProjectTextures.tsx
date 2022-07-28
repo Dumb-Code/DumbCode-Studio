@@ -1,13 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGDownload, SVGPlus, SVGUpload } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useCreatePortal } from "../../../contexts/CreatePortalContext"
+import { useOptions } from "../../../contexts/OptionsContext"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useToast } from "../../../contexts/ToastContext"
 import { FileSystemsAccessApi, ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
 import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
+import { saveToPhotoshopFile } from "../../../studio/formats/textures/PhotoshopManager"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
 import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 import { writeImgToBlob } from "../../../studio/util/Utils"
@@ -85,12 +87,40 @@ const GroupList = ({ project }: { project: DcProject }) => {
 }
 
 const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureGroup, selected: boolean, onClick: () => void, removeGroup: () => void }) => {
+
+    const { photoshopEnabled } = useOptions()
+
+    const iconClassName = (
+        selected ?
+            "bg-green-600 hover:bg-green-700" :
+            "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black"
+    ) + " rounded pr-2 pl-2 py-0.5 my-0.5 "
+
     return (
         <div onClick={onClick} className={(selected ? "bg-green-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " my-1 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row"}>
             <DblClickEditLO obj={group.name} disabled={group.isDefault} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
             <p className="mr-2 flex flex-row text-white">
-                <ButtonWithTooltip className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded pr-2 pl-2 py-0.5 my-0.5 " + (group.isDefault ? '' : 'mr-1')} tooltip="Download Group"><SVGDownload className="h-4 w-4" /></ButtonWithTooltip>
-                {!group.isDefault && <ButtonWithTooltip onClick={e => { removeGroup(); e.stopPropagation() }} className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"} tooltip="Remove Group"><SVGCross className="h-4 w-4 group-hover:text-red-500" /></ButtonWithTooltip>}
+                {photoshopEnabled &&
+                    <ButtonWithTooltip
+                        onClick={() => saveToPhotoshopFile(group)}
+                        className={iconClassName + " mr-1"}
+                        tooltip="Download As Photoshop">
+                        <SvgPhotoshop className="h-4 w-4" />
+                    </ButtonWithTooltip>
+                }
+                <ButtonWithTooltip
+                    className={iconClassName + (group.isDefault ? '' : 'mr-1')}
+                    tooltip="Download Group">
+                    <SVGDownload className="h-4 w-4" />
+                </ButtonWithTooltip>
+                {!group.isDefault &&
+                    <ButtonWithTooltip
+                        onClick={e => { removeGroup(); e.stopPropagation() }}
+                        className={iconClassName + "group"}
+                        tooltip="Remove Group">
+                        <SVGCross className="h-4 w-4 group-hover:text-red-500" />
+                    </ButtonWithTooltip>
+                }
             </p>
         </div>
     )

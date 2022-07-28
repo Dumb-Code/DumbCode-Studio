@@ -80,7 +80,7 @@ export class TextureGLManager {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.texture, 0);
 
     // Read the contents of the framebuffer
-    const data = new Uint8Array(texture.width * texture.height * 4);
+    const data = new Uint8ClampedArray(texture.width * texture.height * 4);
     gl.readPixels(0, 0, texture.width, texture.height, gl.RGBA, gl.UNSIGNED_BYTE, data);
 
     // Unbind the framebuffer

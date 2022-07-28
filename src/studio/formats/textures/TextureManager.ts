@@ -254,6 +254,9 @@ export class TextureGroup {
   readonly unselectedTextures = new LO<readonly string[]>([])
   isDefault: boolean
 
+  readonly photoshopSaved = getUndefinedWritable("Photoshop File", ".psd")
+  photoshopSavedListener: ListenableFileData | null = null
+
   constructor(
     readonly manager: TextureManager,
     name: string, isDefault: boolean
@@ -271,6 +274,14 @@ export class TextureGroup {
     this.folderName.addListener(onDirty)
     this.textures.addListener(onDirty)
     this.unselectedTextures.addListener(onDirty)
+
+    const data = this.photoshopSaved.startListening(this.manager.project.fileChangeListener)
+    if (data !== null) {
+      data.then(d => {
+        this.photoshopSavedListener = d
+        d.onChange = file => console.log("Photoshop file changed", file)
+      })
+    }
   }
 
   toggleTexture(texture: Texture, isInGroup: boolean, after?: string) {
@@ -288,6 +299,11 @@ export class TextureGroup {
 
     this.manager.stopRefresh = false
     this.manager.refresh()
+  }
+
+  //TODO: hook this up
+  dispose() {
+    this.photoshopSavedListener?.dispose()
   }
 }
 
