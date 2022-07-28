@@ -28,7 +28,7 @@ export default class ShowcaseProperties {
 
   private readonly lightGroup = new Group()
 
-  readonly lightsCallback = (lights: ShowcaseLight[]) => {
+  readonly lightsCallback = (lights: readonly ShowcaseLight[]) => {
     this.lightGroup.clear()
     const mapSize = this.previewShadowMapSize.value
     lights.forEach(light => {
