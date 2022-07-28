@@ -2,9 +2,9 @@ import { useEffect, useRef } from "react"
 import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
+import { useListenableObject } from "../../studio/listenableobject/ListenableObject"
 import { ShowcaseLight } from "../../studio/showcase/ShowcaseLight"
 import ShowcaseView from "../../studio/showcase/ShowcaseView"
-import { useListenableObject } from "../../studio/listenableobject/ListenableObject"
 import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import AnimatorGumballPropertiesBar from "../animator/components/AnimatorGumballPropertiesBar"
 import AnimatorTabBar from "../animator/components/AnimatorTabBar"
@@ -35,7 +35,6 @@ const Showcase = () => {
       if (light) {
         scene.add(light.cameraHelper)
       }
-
     }
 
     const updatePosition = (position = view.cameraPosition.value) => {
@@ -54,6 +53,7 @@ const Showcase = () => {
       controls.update()
     }
 
+    const onControlsStart = () => view.undoRedoHandler.startBatchActions()
     const onControlsChange = () => {
       const camera = getCamera()
       hasCameraAlreadyUpdated.current = true
@@ -62,12 +62,25 @@ const Showcase = () => {
       hasCameraAlreadyUpdated.current = false
     }
 
+    let moveTimeout: NodeJS.Timeout | null = null
+    const onControlsEnd = () => {
+      //We need to batch the movement of the camera, as stuff like scrolling is done at each individual mouse event
+      if (moveTimeout !== null) {
+        clearTimeout(moveTimeout)
+      }
+      moveTimeout = setTimeout(() => view.undoRedoHandler.endBatchActions("Camera moved"), 200)
+    }
+
+    controls.addEventListener('start', onControlsStart)
     controls.addEventListener('change', onControlsChange)
+    controls.addEventListener('end', onControlsEnd)
     view.cameraPosition.addAndRunListener(updatePosition)
     view.cameraTarget.addAndRunListener(updateTarget)
     view.selectedLight.addAndRunListener(updateSelectedLight)
     return () => {
+      controls.removeEventListener('start', onControlsStart)
       controls.removeEventListener('change', onControlsChange)
+      controls.removeEventListener('end', onControlsEnd)
       view.cameraPosition.removeListener(updatePosition)
       view.cameraTarget.removeListener(updateTarget)
       view.selectedLight.removeListener(updateSelectedLight)
@@ -121,7 +134,7 @@ const Showcase = () => {
           createNew={newView}
         /></div>
       <div className="grid-in-canvas border dark:border-black border-white min-h-0"><StudioCanvas /></div>
-      <div className="grid-in-info border dark:border-black border-white"><InfoBar /></div>
+      <div className="grid-in-info border dark:border-black border-white"><InfoBar undoRedo={view.undoRedoHandler} /></div>
       <div className="grid-in-gumball border dark:border-black border-white"><AnimatorGumballPropertiesBar consumer={view} /></div>
       <div className="grid-in-sidebar border dark:border-black border-white"><ShowcaseSidebar /></div>
     </div>

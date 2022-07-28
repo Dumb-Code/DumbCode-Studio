@@ -50,7 +50,7 @@ export const viewToAmbientLight = (view: ShowcaseView): JsonShowcaseView['ambien
   intensity: view.ambientLightIntensity.value
 })
 
-export const viewToLights = (lights: ShowcaseLight[]): JsonShowcaseView['lights'] => lights.map(light => ({
+export const viewToLights = (lights: readonly ShowcaseLight[]): JsonShowcaseView['lights'] => lights.map(light => ({
   identifier: light.identifier,
   name: light.name.value,
   colour: light.colour.value,
@@ -60,22 +60,27 @@ export const viewToLights = (lights: ShowcaseLight[]): JsonShowcaseView['lights'
 }))
 
 export const jsonToView = (properties: ShowcaseProperties, showcase: JsonShowcaseView): ShowcaseView => {
-  return new ShowcaseView(
+  const view = new ShowcaseView(
     properties,
     showcase.identifier,
     showcase.name,
     showcase.ambientLight.colour,
     showcase.ambientLight.intensity,
-    jsonLightToShowcaseLight(showcase.lights),
+    [],
     loadToMap(showcase.pose.position),
     loadToMap(showcase.pose.rotation),
     showcase.camera.position,
     showcase.camera.target
   )
+  view.undoRedoHandler.ignoreActions = true
+  jsonLightToShowcaseLight(showcase.lights, view)
+  view.undoRedoHandler.ignoreActions = false
+  return view
 }
 
-export const jsonLightToShowcaseLight = (lights: JsonShowcaseView['lights']): ShowcaseLight[] => {
+export const jsonLightToShowcaseLight = (lights: JsonShowcaseView['lights'], view: ShowcaseView): ShowcaseLight[] => {
   return lights.map(light => new ShowcaseLight(
+    view,
     light.identifier,
     light.name,
     light.colour,

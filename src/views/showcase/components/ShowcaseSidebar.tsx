@@ -14,7 +14,7 @@ const ShowcaseSidebar = () => {
       <AnimatorIKProperties animation={view} />
       <ShowcaseScreenshot />
       <ShowcaseLights />
-      <HistoryList />
+      <HistoryList undoRedoHandler={view.undoRedoHandler} />
     </div>
   )
 }

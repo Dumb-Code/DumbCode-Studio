@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Event, Mesh, Object3D, Vector2 } from 'three';
 import { useOptions } from '../../contexts/OptionsContext';
 import { useStudio } from '../../contexts/StudioContext';
@@ -189,7 +189,7 @@ export const useSelectedCubeManager = (undoRedoHandler?: SelectedCubeUndoRedoHan
   useChangingDelegateListenableObject(
     undoRedoHandler?.selectedCubes,
     cubeManager.selected,
-    [],
+    useMemo(() => [], []),
     unifiedSelectedCubes,
   )
 

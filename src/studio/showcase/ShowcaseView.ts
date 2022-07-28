@@ -3,11 +3,46 @@ import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from '../formats
 import { DCMCube } from '../formats/model/DcmModel';
 import { LO } from '../listenableobject/ListenableObject';
 import { LOMap } from "../listenableobject/ListenableObjectMap";
+import SelectedCubeUndoRedoHandler from '../undoredo/SelectedCubeUndoRedoHandler';
+import UndoRedoHandler, { SectionHandle } from '../undoredo/UndoRedoHandler';
 import { unsafe_getThreeContext } from './../../contexts/StudioContext';
 import { AnimatorGumball } from './../../views/animator/logic/AnimatorGumball';
 import { NumArray } from './../util/NumArray';
 import { ShowcaseLight } from './ShowcaseLight';
 import ShowcaseProperties from './ShowcaseProperties';
+
+const view_position = "pos_"
+const view_rotation = "rot_"
+
+type UndoRedoDataType = {
+  section_name: "root_data",
+  data: {
+    name: string,
+    ambientLightColour: string,
+    ambientLightIntensity: number,
+    cameraPosition: NumArray,
+    cameraTarget: NumArray,
+
+    lights: readonly string[]
+    selectedLight?: string,
+
+    [k: `${typeof view_position}${string}`]: NumArray
+    [k: `${typeof view_rotation}${string}`]: NumArray
+  }
+} | {
+  section_name: `light_${string}`
+  data: {
+    identifier: string, //Unchanging
+    name: string,
+    colour: string,
+    intensity: number,
+    direction: NumArray,
+    shadow: boolean
+  }
+}
+
+export type LightSectionType = SectionHandle<UndoRedoDataType, UndoRedoDataType & { section_name: `light_${string}` }>
+
 
 export default class ShowcaseView extends AnimatorGumballConsumer {
 
@@ -16,7 +51,8 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
   readonly ambientLightColour: LO<string>
   readonly ambientLightIntensity: LO<number>
 
-  readonly lights: LO<ShowcaseLight[]>
+  readonly allLights = new Map<string, ShowcaseLight>()
+  readonly lights: LO<readonly ShowcaseLight[]>
   readonly selectedLight = new LO<ShowcaseLight | null>(null)
 
   readonly animatorGumball: AnimatorGumball
@@ -26,6 +62,14 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
 
   readonly cameraPosition: LO<NumArray>
   readonly cameraTarget: LO<NumArray>
+
+  readonly undoRedoHandler = new SelectedCubeUndoRedoHandler<UndoRedoDataType>(
+    (s, d) => this.onAddSection(s, d),
+    s => this.onRemoveSection(s),
+    (s, p, v) => this.onModifySection(s, p, v),
+  )
+
+  private readonly _section = this.undoRedoHandler.createNewSection("root_data")
 
 
   readonly constantPart = LO.combine(
@@ -48,7 +92,7 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
     name = 'New View',
     ambientLightColour = "#ffffff",
     ambientLightIntensity = 1,
-    lights: ShowcaseLight[] = [],
+    lights: readonly ShowcaseLight[] = [],
     position: Map<string, NumArray> = new Map(),
     rotation: Map<string, NumArray> = new Map(),
     cameraPosition: NumArray | null = null,
@@ -56,26 +100,76 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
   ) {
     super()
 
-    this.name = new LO(name)
-    this.ambientLightColour = new LO(ambientLightColour)
-    this.ambientLightIntensity = new LO(ambientLightIntensity)
-    this.lights = new LO(lights)
-    this.position = new LOMap(position)
-    this.rotation = new LOMap(rotation)
+    this.name = new LO(name).applyToSection(this._section, "name")
+    this.ambientLightColour = new LO(ambientLightColour).applyToSection(this._section, "ambientLightColour")
+    this.ambientLightIntensity = new LO(ambientLightIntensity).applyToSection(this._section, "ambientLightIntensity")
+    this.lights = new LO(lights).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.identifListToLights(s), "lights")
+    this.position = LOMap.applyToSectionStringKey(new LOMap(position), this._section, view_position, false, "Position Changed")
+    this.rotation = LOMap.applyToSectionStringKey(new LOMap(rotation), this._section, view_rotation, false, "Rotation Changed")
+
+    this.selectedLight.applyMappedToSection(this._section, c => c ? c.identifier : undefined, s => s ? this.allLights.get(s) ?? null : null, "selectedLight")
 
     const ctx = unsafe_getThreeContext()
     const camPosition = ctx.getCamera().position
     const camTarget = ctx.controls.target
 
-    this.cameraPosition = new LO(cameraPosition ?? [camPosition.x, camPosition.y, camPosition.z])
-    this.cameraTarget = new LO(cameraTarget ?? [camTarget.x, camTarget.y, camTarget.z])
+    this.cameraPosition = new LO(cameraPosition ?? [camPosition.x, camPosition.y, camPosition.z] as const).applyToSection(this._section, "cameraPosition")
+    this.cameraTarget = new LO(cameraTarget ?? [camTarget.x, camTarget.y, camTarget.z] as const).applyToSection(this._section, "cameraTarget")
 
     this.animatorGumball = new AnimatorGumball(this.properties.project)
   }
 
+  identifListToLights(lights: readonly string[]): readonly ShowcaseLight[] {
+    return lights.map(c => this.allLights.get(c)).map((c, i) => {
+      if (!c) throw new Error("Light Was not found. " + lights[i])
+      return c
+    })
+  }
 
-  addLight(light = new ShowcaseLight()) {
-    this.lights.value = [...this.lights.value, light]
+  onAddSection<K extends UndoRedoDataType['section_name']>(section: K, data: any) {
+    if (section === "root_data") {
+      return
+    }
+    const {
+      identifier, name, colour,
+      direction, intensity, shadow
+    } = data as (UndoRedoDataType & { section_name: `light_${string}` })['data']
+
+    this.allLights.set(identifier, new ShowcaseLight(
+      this, identifier, name, colour, intensity, direction, shadow
+    ))
+  }
+
+  onRemoveSection(section: string) {
+    if (section === "root_data") {
+      return
+    }
+    const identif = section.substring("light_".length, section.length)
+    const light = this.allLights.get(identif)
+    if (!light) {
+      throw new Error("Tried to remove light that could not be found " + identif);
+    }
+    light.fullyDelete()
+  }
+
+  onModifySection(section_name: string, property_name: string, value: any) {
+    if (section_name === "root_data") {
+      this._section.applyModification(property_name, value)
+    } else {
+      const identif = section_name.substring("light_".length, section_name.length)
+      const light = this.allLights.get(identif)
+      if (!light) {
+        throw new Error("Tried to modify a light that could not be found " + identif);
+      }
+      light._section?.applyModification(property_name, value)
+    }
+  }
+
+
+  addLight() {
+    this.undoRedoHandler.startBatchActions()
+    this.lights.value = [...this.lights.value, new ShowcaseLight(this)]
+    this.undoRedoHandler.endBatchActions("Light Added")
   }
 
   removeLight(light: ShowcaseLight) {
@@ -118,6 +212,10 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
 
   getSingleSelectedPart(): LO<AnimatorGumballConsumerPart | null> {
     return this.constantPart as any //TODO: fix the cast here
+  }
+
+  getUndoRedoHandler(): UndoRedoHandler<any> | undefined {
+    return this.undoRedoHandler
   }
 
 }

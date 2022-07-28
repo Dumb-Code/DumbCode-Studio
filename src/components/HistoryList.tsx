@@ -1,13 +1,10 @@
 import { useCallback, useMemo } from "react";
-import { useStudio } from "../contexts/StudioContext";
 import { useListenableObjectNullable } from "../studio/listenableobject/ListenableObject";
 import UndoRedoHandler, { ActionBatch, HistoryActionIcons } from "../studio/undoredo/UndoRedoHandler";
 import CollapsableSidebarPannel from "./CollapsableSidebarPannel";
 
 
 const HistoryList = ({ undoRedoHandler }: { undoRedoHandler?: UndoRedoHandler<any> }) => {
-    const { getSelectedProject } = useStudio()
-
     const [history] = useListenableObjectNullable(undoRedoHandler?.history)
 
     const [index] = useListenableObjectNullable(undoRedoHandler?.index)
