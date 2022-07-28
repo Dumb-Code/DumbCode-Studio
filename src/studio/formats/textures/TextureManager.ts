@@ -1,3 +1,4 @@
+import { Psd } from 'ag-psd';
 import { useCallback } from 'react';
 import { NearestFilter, Texture as ThreeTexture } from 'three';
 import { v4 as uuidv4 } from 'uuid';
@@ -6,9 +7,10 @@ import { getUndefinedWritable, ListenableFileData, ReadableFile, readFileToImg, 
 import { LO, useListenableObject } from '../../listenableobject/ListenableObject';
 import { useDomParent } from '../../util/DomParentRef';
 import { fitAreaWithinBounds } from '../../util/Utils';
-import DcProject from '../project/DcProject';
-import { ListenableFile } from './../../files/FileTypes';
+import DcProject, { removeFileExtension } from '../project/DcProject';
+import { ListenableFile, readFileArrayBuffer } from './../../files/FileTypes';
 import { DCMCube, DCMModel } from './../model/DcmModel';
+import { loadFromPsdFile } from './PhotoshopManager';
 import { TextureGLManager } from './TextureGLManager';
 import TextureLayer from './TextureLayer';
 
@@ -18,6 +20,7 @@ export default class TextureManager {
   readonly glManager = TextureGLManager.getInstance()
 
   readonly canvas = document.createElement("canvas")
+  readonly numberTimesRefreshed = new LO<number>(0)
 
   defaultGroup: TextureGroup
   readonly selectedGroup: LO<TextureGroup>
@@ -43,10 +46,14 @@ export default class TextureManager {
 
   async addFile(readable: ReadableFile) {
     const file = await readable.asFile()
-    const img = await readFileToImg(file)
+    const [img, psd] = await this.loadTextureFromFile(file)
 
-    const texture = this.addTexture(readable.name, img)
-    this.linkFile(readable, texture)
+    const texture = this.addTexture(removeFileExtension(readable.name), img)
+    if (psd === null) {
+      await this.linkFile(readable, texture)
+    } else {
+      await texture.setPhotoshopFile(readable.asWritable())
+    }
   }
 
   async linkFile(readable: ReadableFile, texture: Texture) {
@@ -54,7 +61,14 @@ export default class TextureManager {
     texture.saveableFile.value = true
   }
 
-  addTexture(name?: string, element?: HTMLImageElement) {
+  async loadTextureFromFile(file: File): Promise<[HTMLImageElement, Psd | null]> {
+    if (file.name.endsWith(".psd")) {
+      return loadFromPsdFile(await readFileArrayBuffer(file))
+    }
+    return [await readFileToImg(file), null]
+  }
+
+  addTexture(name?: string, element?: HTMLImageElement, psd?: Psd): Texture {
     this.stopRefresh = true
     const texture = new Texture(this, this.project.model, name, element)
     texture.element.addListener(() => this.refresh())
@@ -126,6 +140,8 @@ export default class TextureManager {
     tex.minFilter = NearestFilter;
 
     this.project.setTexture(tex)
+
+    this.numberTimesRefreshed.value++
   }
 
   static writeToCanvas(textures: Texture[], canvas: HTMLCanvasElement) {
@@ -254,9 +270,6 @@ export class TextureGroup {
   readonly unselectedTextures = new LO<readonly string[]>([])
   isDefault: boolean
 
-  readonly photoshopSaved = getUndefinedWritable("Photoshop File", ".psd")
-  photoshopSavedListener: ListenableFileData | null = null
-
   constructor(
     readonly manager: TextureManager,
     name: string, isDefault: boolean
@@ -275,13 +288,6 @@ export class TextureGroup {
     this.textures.addListener(onDirty)
     this.unselectedTextures.addListener(onDirty)
 
-    const data = this.photoshopSaved.startListening(this.manager.project.fileChangeListener)
-    if (data !== null) {
-      data.then(d => {
-        this.photoshopSavedListener = d
-        d.onChange = file => console.log("Photoshop file changed", file)
-      })
-    }
   }
 
   toggleTexture(texture: Texture, isInGroup: boolean, after?: string) {
@@ -300,11 +306,6 @@ export class TextureGroup {
     this.manager.stopRefresh = false
     this.manager.refresh()
   }
-
-  //TODO: hook this up
-  dispose() {
-    this.photoshopSavedListener?.dispose()
-  }
 }
 
 export class Texture {
@@ -315,9 +316,13 @@ export class Texture {
   readonly saveableFile = new LO(false)
   readonly needsSaving = new LO(false)
   textureWritableFile = getUndefinedWritable("Texture File", ".png")
+  textureListenableFile: ListenableFileData | null = null
 
+  photoshopWriteableFile = getUndefinedWritable("Photoshop File", ".psd")
+  photoshopListenableFile: ListenableFileData | null = null
 
-  listenableFile: ListenableFileData | null = null
+  readonly psdData = new LO<Psd | null>(null)
+
 
   readonly canvas = new TextureLayer()
 
@@ -372,31 +377,45 @@ export class Texture {
     this.name.addListener(onDirty)
     this.element.addListener(onDirty)
 
-    this.startListeningToFile(this.textureWritableFile)
+    this.startListeningToFile(this.textureWritableFile, true)
+    this.startListeningToFile(this.photoshopWriteableFile, false)
   }
 
   async setTextureFile(file: WritableFile) {
     this.textureWritableFile = file
-    this.startListeningToFile(file)
+    this.startListeningToFile(file, true)
   }
 
-  private async startListeningToFile(file: ListenableFile) {
+  async setPhotoshopFile(file: WritableFile) {
+    this.photoshopWriteableFile = file
+    this.startListeningToFile(file, false)
+  }
+
+  private async startListeningToFile(file: ListenableFile, isTextureFile: boolean) {
+    const listenableData = isTextureFile ? this.textureListenableFile : this.photoshopListenableFile
+
     const listenable = await file.startListening(this.manager.project.fileChangeListener)
-    if (this.listenableFile !== null) {
-      this.listenableFile.dispose()
+    if (listenableData !== null) {
+      listenableData.dispose()
     }
-    this.listenableFile = listenable
+    if (isTextureFile) {
+      this.textureListenableFile = listenable
+    } else {
+      this.photoshopListenableFile = listenable
+    }
     if (listenable !== null) {
       listenable.onChange = async (file) => {
-        this.element.value = await readFileToImg(file)
+        const [img, psd] = await this.manager.loadTextureFromFile(file)
+        this.element.value = img
+        this.psdData.value = psd
         this.needsSaving.value = false
       }
     }
   }
 
   delete() {
-    if (this.listenableFile !== null) {
-      this.listenableFile.dispose()
+    if (this.textureListenableFile !== null) {
+      this.textureListenableFile.dispose()
     }
     this.manager.deleteTexture(this)
   }

@@ -1,6 +1,9 @@
 import BlobStream from 'blob-stream';
 import { PNG } from 'pngjs';
 import { TextureGLManager } from './TextureGLManager';
+
+type TexImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement;
+
 export default class TextureLayer {
 
   readonly manager = TextureGLManager.getInstance()
@@ -30,7 +33,7 @@ export default class TextureLayer {
     })
   }
 
-  setBackground(src: HTMLImageElement) {
+  setBackground(src: TexImageSource) {
     this.width = src.width
     this.height = src.height
 

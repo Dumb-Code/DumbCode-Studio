@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { HistoryActionTypes, SectionHandle, UndoRedoSection } from '../undoredo/UndoRedoHandler';
 
-type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
+export type FieldsFor<DataType, FieldType> = { [K in keyof DataType]: DataType[K] extends FieldType ? K : never }[keyof DataType]
 
 export type ValueOrGetter<T, R> = R | ((val: T | undefined) => R)
 

@@ -1,38 +1,36 @@
-import { Layer, Psd, writePsd } from 'ag-psd';
-import { downloadBlob } from '../../files/FileTypes';
-import { TextureGroup } from './TextureManager';
+import { Psd, readPsd, writePsd } from 'ag-psd';
+import TextureLayer from './TextureLayer';
+import { Texture } from './TextureManager';
 
-export const saveToPhotoshopFile = async (group: TextureGroup) => {
-  const textures = group.textures.value.map(t => group.manager.findTexture(t))
+export const saveToPhotoshopFile = (texture: Texture): Blob => {
 
-  const width = Math.max(...textures.map(t => t.width), 1)
-  const height = Math.max(...textures.map(t => t.height), 1)
   const data: Psd = {
-    width,
-    height,
-    children: textures.map<Layer>(t => ({
-      name: t.name.value,
-      imageData: new ImageData(resizeTexture(t.canvas.manager.readTexture(t.canvas), t.width, t.height, width, height), width, height, {}),
-    })).reverse()
+    name: texture.name.value,
+    width: texture.width,
+    height: texture.height,
+    children: [{
+      name: texture.name.value,
+      imageData: new ImageData(texture.canvas.manager.readTexture(texture.canvas), texture.width, texture.height)
+    }]
   }
 
   const arrayBuffer = writePsd(data, {})
-  downloadBlob("test.psd", new Blob([arrayBuffer], { type: "image/psd" }))
+  return new Blob([arrayBuffer], { type: "image/psd" })
 }
 
-const resizeTexture = (from: Uint8ClampedArray, fromWidth: number, fromHeight: number, toWidth: number, toHeight: number) => {
-  const to = new Uint8ClampedArray(toWidth * toHeight * 4)
-  for (let y = 0; y < toHeight; y++) {
-    for (let x = 0; x < toWidth; x++) {
-      const fromX = Math.floor(x * fromWidth / toWidth)
-      const fromY = Math.floor(y * fromHeight / toHeight)
-      const fromIndex = (fromY * fromWidth + fromX) * 4
-      const toIndex = (y * toWidth + x) * 4
-      to[toIndex] = from[fromIndex]
-      to[toIndex + 1] = from[fromIndex + 1]
-      to[toIndex + 2] = from[fromIndex + 2]
-      to[toIndex + 3] = from[fromIndex + 3]
-    }
+export const loadFromPsdFile = async (arrayBuffer: ArrayBuffer): Promise<[HTMLImageElement, Psd]> => {
+  const psd = readPsd(arrayBuffer, { useImageData: true })
+
+  if (!psd.imageData) {
+    return Promise.reject("No image data found in PSD file")
   }
-  return to
+  const textureLayer = new TextureLayer()
+  textureLayer.setBackground(psd.imageData)
+  const dataUrl = await textureLayer.toDataURL()
+  const image = new Image()
+  return new Promise<[HTMLImageElement, Psd]>((resolve, reject) => {
+    image.onload = () => resolve([image, psd])
+    image.onerror = reject
+    image.src = dataUrl
+  })
 }
