@@ -20,7 +20,7 @@ export type JsonShowcaseView = {
     readonly position: NumArray,
     readonly target: NumArray
   }
-  readonly lights: {
+  readonly lights: readonly {
     readonly identifier: string,
     readonly name: string,
     readonly colour: string,

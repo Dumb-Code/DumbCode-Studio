@@ -66,7 +66,7 @@ const ShowcaseLightSavedPresets = ({ view }: { view: ShowcaseView }) => {
   const loadPreset = (present: LightingPreset) => {
     setAmbientLightColour(present.ambientLighting.colour)
     setAmbientLightIntensity(present.ambientLighting.intensity)
-    setLights(jsonLightToShowcaseLight(present.lights))
+    setLights(jsonLightToShowcaseLight(present.lights, view))
     view.selectedLight.value = null
   }
 
