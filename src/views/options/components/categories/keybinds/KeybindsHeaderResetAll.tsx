@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import React, { useCallback } from "react"; //For some reason we need to import react here?
 import { SVGUndo } from "../../../../../components/Icons"
 import { ButtonWithTooltip } from "../../../../../components/Tooltips"
 import { useOptions } from "../../../../../contexts/OptionsContext"
