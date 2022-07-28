@@ -41,8 +41,8 @@ const writeDefinedMap = (
 ): KfMapData => {
   return Array.from(elements.keys())
     .map(cubeName => model.cubeMap.get(cubeName))
-    .filter((set): set is Set<DCMCube> => set !== undefined)
-    .flatMap(set => Array.from(set))
+    .filter((set): set is readonly DCMCube[] => set !== undefined)
+    .flat()
     .reduce((data, cube) => {
       const element = elementGetter(cube)
       const original = originalElementGetter(cube)
@@ -114,8 +114,8 @@ const convertDefinedMapToAdditional = (
 ) => {
   return Object.keys(elements)
     .map(cubeName => model.cubeMap.get(cubeName))
-    .filter((set): set is Set<DCMCube> => set !== undefined)
-    .flatMap(set => Array.from(set))
+    .filter((set): set is readonly DCMCube[] => set !== undefined)
+    .flat()
     .reduce((data, cube) => {
       const currentValue = elementGetter(cube)
       const originalValue = originalElementGetter(cube)

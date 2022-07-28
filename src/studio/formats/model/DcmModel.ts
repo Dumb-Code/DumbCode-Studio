@@ -84,7 +84,7 @@ export class DCMModel implements CubeParent {
 
   readonly author = new LO("???").applyToSection(this._section, "author")
 
-  readonly cubeMap: Map<string, Set<DCMCube>> = new Map()
+  readonly cubeMap: LOMap<string, readonly DCMCube[]> = new LOMap()
   readonly identifierCubeMap = new LOMap<string, DCMCube>()
   readonly children = new LO<readonly DCMCube[]>([]).applyMappedToSection(this._section, c => c.map(a => a.identifier) as readonly string[], s => this.identifListToCubes(s), "root")
 
@@ -278,6 +278,13 @@ export class DCMModel implements CubeParent {
     this.children.value.forEach(child => child.resetVisuals())
   }
 
+  _deleteNameFromMap(cube: DCMCube, name: string) {
+    const old = this.cubeMap.get(name)
+    if (old !== undefined) {
+      this.cubeMap.set(name, old.filter(c => c !== cube))
+    }
+  }
+
   // cloneModel() {
   //   let model = new DCMModel()
 
@@ -381,7 +388,7 @@ export class DCMCube implements CubeParent {
 
     this.name.addListener((newValue, oldValue) => {
       this.model.parentProject?.renameCube(oldValue, newValue)
-      this.model.cubeMap.get(oldValue)?.delete(this)
+      this.model._deleteNameFromMap(this, oldValue)
       this.pushNameToModel(newValue)
     })
 
@@ -495,11 +502,10 @@ export class DCMCube implements CubeParent {
 
   pushNameToModel(name = this.name.value) {
     if (name !== this.name.value) {
-      this.model.cubeMap.get(this.name.value)?.delete(this)
+      this.model._deleteNameFromMap(this, this.name.value)
     }
-    const set = this.model.cubeMap.get(name) ?? new Set()
-    set.add(this)
-    this.model.cubeMap.set(name, set)
+    const arr = this.model.cubeMap.get(name) ?? []
+    this.model.cubeMap.set(name, arr.concat(this))
   }
 
   createGroup() {
@@ -540,7 +546,7 @@ export class DCMCube implements CubeParent {
     this.cubeGroup.remove()
     this._section?.remove("Cube Deleted")
     this.model.identifierCubeMap.delete(this.identifier)
-    this.model.cubeMap.get(this.name.value)?.delete(this)
+    this.model._deleteNameFromMap(this, this.name.value)
     this.destroyed = true
     //TODO: dispose of geometries?
   }

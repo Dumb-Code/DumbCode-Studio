@@ -118,8 +118,6 @@ export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => Rea
         tooltip.setTooltip(TooltipElement, mousePosition.current.x, mousePosition.current.y)
         isBeingUsed.current = true
       }, delay)
-      e.preventDefault()
-      e.stopPropagation()
     }
 
     const mouseLeave = (e: MouseEvent) => {
@@ -129,27 +127,23 @@ export const useTooltipRef = <T extends HTMLElement,>(TooltipElement: (() => Rea
         clearTimeout(timeoutRef.current)
         timeoutRef.current = undefined
       }
-      e.preventDefault()
-      e.stopPropagation()
     }
 
     const mouseMove = (e: MouseEvent) => {
       mousePosition.current = { x: e.clientX, y: e.clientY }
-      e.preventDefault()
-      e.stopPropagation()
     }
 
     const current = ref.current
     if (current !== null) {
-      current.addEventListener('mouseenter', mouseEnter)
-      current.addEventListener('mouseleave', mouseLeave)
-      current.addEventListener('mousemove', mouseMove)
+      current.addEventListener('mouseenter', mouseEnter, true)
+      current.addEventListener('mouseleave', mouseLeave, true)
+      current.addEventListener('mousemove', mouseMove, true)
     }
     return () => {
       if (current !== null) {
-        current.removeEventListener('mouseenter', mouseEnter)
-        current.removeEventListener('mouseenter', mouseLeave)
-        current.removeEventListener('mousemove', mouseMove)
+        current.removeEventListener('mouseenter', mouseEnter, true)
+        current.removeEventListener('mouseenter', mouseLeave, true)
+        current.removeEventListener('mousemove', mouseMove, true)
       }
       if (timeoutRef.current !== undefined) {
         clearTimeout(timeoutRef.current)

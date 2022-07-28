@@ -110,7 +110,7 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
         ) {
           partMap.forEach((value, key) => {
             const s = map.get(key)
-            if (s === undefined || s.size === 0) {
+            if (s === undefined || s.length === 0) {
               return
             }
             //Just get the first cube. There should be only one anyway.
@@ -154,7 +154,7 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
         //Just get the first cube. There should be only one anyway.
         //Maybe log if theres more than 1?
         const set = map.get(key)
-        if (set !== undefined && set.size !== 0) {
+        if (set !== undefined && set.length !== 0) {
           const rot = Array.from(set)[0].cubeGroup?.rotation
           if (rot !== undefined) {
             kf.rotation.set(key, [
@@ -170,7 +170,7 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
         //Just get the first cube. There should be only one anyway.
         //Maybe log if theres more than 1?
         const set = map.get(key)
-        if (set !== undefined && set.size !== 0) {
+        if (set !== undefined && set.length !== 0) {
           const pos = Array.from(set)[0].cubeGroup?.position
           if (pos !== undefined) {
             kf.position.set(key, [

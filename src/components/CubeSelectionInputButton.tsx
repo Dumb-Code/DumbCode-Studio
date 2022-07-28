@@ -63,7 +63,7 @@ const CubeSelectionInputButton = ({ cube, setCube, setErrorMessage, allowInfered
     setTypedCubename(value)
     const cubesWithName = project.model.cubeMap.get(value)
     if (cubesWithName) {
-      if (cubesWithName.size === 1) {
+      if (cubesWithName.length === 1) {
         cubesWithName.forEach(c => setCube(c))
         setErrorMessage?.("")
       } else {
