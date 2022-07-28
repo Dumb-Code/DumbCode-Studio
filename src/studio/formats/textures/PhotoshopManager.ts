@@ -23,7 +23,7 @@ export const saveToPhotoshopFile = (texture: Texture): Blob => {
 }
 
 export const loadFromPsdFile = async (arrayBuffer: ArrayBuffer): Promise<[HTMLImageElement, Psd]> => {
-  const psd = readPsd(arrayBuffer, { useImageData: true, logDevFeatures: true, logMissingFeatures: true })
+  const psd = readPsd(arrayBuffer, { useImageData: true })
 
   if (!psd.imageData) {
     return Promise.reject("No image data found in PSD file")

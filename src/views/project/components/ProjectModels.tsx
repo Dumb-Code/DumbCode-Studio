@@ -52,6 +52,7 @@ const ProjectModels = () => {
         <BasicProjectFileArea
             extensions={modelExtensions}
             onChange={file => createProject(file).then(addProject)}
+            onFolderChange={folder => loadDcFolder(folder).then(addProject)}
             title="Models"
             buttons={
                 <>
