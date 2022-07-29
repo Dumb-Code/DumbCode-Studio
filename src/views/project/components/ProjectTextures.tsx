@@ -1,19 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGDownload, SVGPlus, SVGUpload } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useCreatePortal } from "../../../contexts/CreatePortalContext"
+import { useOptions } from "../../../contexts/OptionsContext"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useToast } from "../../../contexts/ToastContext"
 import { FileSystemsAccessApi, ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
 import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
+import { saveToPhotoshopFile } from "../../../studio/formats/textures/PhotoshopManager"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
 import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 import { writeImgToBlob } from "../../../studio/util/Utils"
 import { ProjectFileAreaBase, ProjectFileAreaHeader } from "./ProjectFileArea"
 
-const imageExtensions = [".png", ".jpeg", ".gif"]
+const imageExtensions = [".png", ".jpeg", ".gif", ".psd"]
 
 
 const ProjectTextures = () => {
@@ -85,12 +87,31 @@ const GroupList = ({ project }: { project: DcProject }) => {
 }
 
 const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureGroup, selected: boolean, onClick: () => void, removeGroup: () => void }) => {
+
+
+    const iconClassName = (
+        selected ?
+            "bg-green-600 hover:bg-green-700" :
+            "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black"
+    ) + " rounded pr-2 pl-2 py-0.5 my-0.5 "
+
     return (
         <div onClick={onClick} className={(selected ? "bg-green-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " my-1 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row"}>
             <DblClickEditLO obj={group.name} disabled={group.isDefault} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
             <p className="mr-2 flex flex-row text-white">
-                <ButtonWithTooltip className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded pr-2 pl-2 py-0.5 my-0.5 " + (group.isDefault ? '' : 'mr-1')} tooltip="Download Group"><SVGDownload className="h-4 w-4" /></ButtonWithTooltip>
-                {!group.isDefault && <ButtonWithTooltip onClick={e => { removeGroup(); e.stopPropagation() }} className={(selected ? "bg-green-600 hover:bg-green-700" : "dark:bg-gray-800 bg-gray-300 dark:hover:bg-gray-900 hover:bg-gray-400 dark:text-white text-black") + " rounded pr-2 pl-2 py-0.5 my-0.5 group"} tooltip="Remove Group"><SVGCross className="h-4 w-4 group-hover:text-red-500" /></ButtonWithTooltip>}
+                <ButtonWithTooltip
+                    className={iconClassName + (group.isDefault ? '' : 'mr-1')}
+                    tooltip="Download Group">
+                    <SVGDownload className="h-4 w-4" />
+                </ButtonWithTooltip>
+                {!group.isDefault &&
+                    <ButtonWithTooltip
+                        onClick={e => { removeGroup(); e.stopPropagation() }}
+                        className={iconClassName + "group"}
+                        tooltip="Remove Group">
+                        <SVGCross className="h-4 w-4 group-hover:text-red-500" />
+                    </ButtonWithTooltip>
+                }
             </p>
         </div>
     )
@@ -384,8 +405,13 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected }: { texture: Text
 const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, selected: boolean }) => {
     const ref = useTextureDomRef<HTMLDivElement>(texture, undefined, useCallback((img: HTMLImageElement) => img.draggable = false, []))
 
+    const { photoshopEnabled } = useOptions()
+
     const [isTextureDirty, setIsTextureDirty] = useListenableObject(texture.needsSaving)
     const [saveableFile, setSaveableFile] = useListenableObject(texture.saveableFile)
+
+    const [psdData] = useListenableObject(texture.psdData)
+    const hasSavedToPhotoshop = photoshopEnabled && psdData !== null
 
     const { addToast } = useToast()
 
@@ -394,6 +420,19 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
         texture.name.value = removeFileExtension(name)
         setIsTextureDirty(false)
         setSaveableFile(true)
+        addToast(`Saved texture as ${name}`, "success")
+    }
+
+    const saveAsPhotoshop = async () => {
+        if (hasSavedToPhotoshop) {
+            const name = texture.photoshopWriteableFile.getName?.()
+            addToast(`Texture already linked to Photoshop ${name === undefined ? '' : `(${name})`}`, "error")//\nRight click to remove
+            return
+        }
+        const name = await texture.photoshopWriteableFile.write(texture.name.value + ".psd", saveToPhotoshopFile(texture))
+        texture.name.value = removeFileExtension(name)
+        setIsTextureDirty(false)
+        setSaveableFile(false)
         addToast(`Saved texture as ${name}`, "success")
     }
 
@@ -429,13 +468,24 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
                 </div>
             </div>
             <DblClickEditLO obj={texture.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
-            <p className="flex flex-col text-white items-center justify-center">
-                <ButtonWithTooltip
-                    onClick={e => { saveTexture(); e.stopPropagation() }}
-                    onContextMenu={e => { unlinkTexture(); e.stopPropagation(); e.preventDefault() }}
-                    className={iconClassName + " mb-1 "} tooltip={saveable ? "Save Texture\nRight Click to unlink" : "Download Texture"}>
-                    <SaveIcon className={"h-4 w-4 " + (isTextureDirty ? "text-red-500" : "")} />
-                </ButtonWithTooltip>
+            <div className="flex flex-col text-white items-center justify-center">
+                <p className="flex flex-row text-white">
+                    {photoshopEnabled &&
+                        <ButtonWithTooltip
+                            onClick={saveAsPhotoshop}
+                            className={iconClassName + " mr-1"}
+                            tooltip="Download As Photoshop"
+                        >
+                            <SvgPhotoshop className="h-4 w-4" />
+                        </ButtonWithTooltip>
+                    }
+                    <ButtonWithTooltip
+                        onClick={e => { saveTexture(); e.stopPropagation() }}
+                        onContextMenu={e => { unlinkTexture(); e.stopPropagation(); e.preventDefault() }}
+                        className={iconClassName + " mb-1 "} tooltip={saveable ? "Save Texture\nRight Click to unlink" : "Download Texture"}>
+                        <SaveIcon className={"h-4 w-4 " + (isTextureDirty ? "text-red-500" : "")} />
+                    </ButtonWithTooltip>
+                </p>
                 <ButtonWithTooltip
                     onClick={e => { deleteTexture(); e.stopPropagation() }}
                     className={iconClassName}
@@ -443,7 +493,7 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
                 >
                     <SVGCross className="h-4 w-4 group-hover:text-red-500" />
                 </ButtonWithTooltip>
-            </p>
+            </div>
         </div>
     )
 }

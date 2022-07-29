@@ -21,6 +21,11 @@ const TextureMapperViewport = () => {
     const [textureWidth] = useListenableObject(project.model.textureWidth)
     const [textureHeight] = useListenableObject(project.model.textureHeight)
 
+    //NumTimesTextureRefreshed is the number of times the main canvas has been redrawn.
+    //The main reason for this is to make sure that when the canvas changes from a file change, 
+    //We can re-render it. Ideally, the TextureManager canvas would be immutable, but alas, it is not.
+    const [numTimesTextureRefreshed] = useListenableObject(project.textureManager.numberTimesRefreshed)
+
     const [root] = useListenableObject(project.model.children)
 
     const cubeMoveRef = useRef<{
@@ -55,7 +60,8 @@ const TextureMapperViewport = () => {
         ctx.lineWidth = Math.min(1, 1 / ctx.getTransform().a)
 
         //Draw the grid
-        if (gridType !== "hidden") {
+        //Using numTimesTextureRefreshed is a hack to stop compiler warnings about unused variables
+        if (gridType !== "hidden" && numTimesTextureRefreshed > -1) {
             const opacityAt100 = 5
             const opacityAt0 = 20
 
@@ -85,7 +91,7 @@ const TextureMapperViewport = () => {
         ctx.rect(0, 0, bounds.width, bounds.height);
         ctx.stroke();
 
-    }, [project, textureWidth, textureHeight, gridType])
+    }, [project, textureWidth, textureHeight, gridType, numTimesTextureRefreshed]) //Inlcude numTimesTextureRefreshed to force a re-render when the canvas changes hack
 
 
     const transformMousePosition = useCallback((point: CanvasPoint, width: number, height: number) => {
@@ -177,7 +183,6 @@ const TextureMapperViewport = () => {
             setHandled()
         }
     }, [project])
-
     return (
         <SplitViewport otherName="Texture Mapper" selectedCubeHandlerUndoRedo={project.model.textureCoordinates.undoRedoHandler}>
             <TransformCanvas

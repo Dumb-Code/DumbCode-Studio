@@ -52,6 +52,7 @@ const ProjectModels = () => {
         <BasicProjectFileArea
             extensions={modelExtensions}
             onChange={file => createProject(file).then(addProject)}
+            onFolderChange={folder => loadDcFolder(folder).then(addProject)}
             title="Models"
             buttons={
                 <>
@@ -109,12 +110,16 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
     const saveModel = async (type = saveType) => {
         try {
             if (type === "model") {
+                project.projectWritableFile.unlink?.()
+                project.projectWriteableFolder.unlink?.()
                 const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeModel(project.model))
                 project.name.value = removeFileExtension(name)
                 setSaveType(type)
                 setIsModelDirty(false)
                 addToast(`Saved model as ${name}`, "success")
             } else if (type === "project") {
+                project.modelWritableFile.unlink?.()
+                project.projectWriteableFolder.unlink?.()
                 const name = await project.projectWritableFile.write(project.name.value + ".dcproj", await writeDcProj(project))
                 project.name.value = removeFileExtension(name)
                 setSaveType(type)
@@ -122,11 +127,34 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                 setIsModelDirty(false)
                 addToast(`Saved dcproj as ${name}`, "success")
             } else if (type === "old_model") {
+                project.projectWritableFile.unlink?.()
+                project.projectWriteableFolder.unlink?.()
                 const name = await project.modelWritableFile.write(project.name.value + ".dcm", writeOldModel(project.model))
                 project.name.value = removeFileExtension(name)
                 setSaveType(type)
                 setIsModelDirty(false)
                 addToast(`Saved model (old format) as ${name}`, "success")
+            } else if (type === "folder_project") {
+                project.modelWritableFile.unlink?.()
+                project.projectWritableFile.unlink?.()
+                if (!fileSystemsAccess) {
+                    addToast("File System Access API Not Available", "error")
+                    return
+                }
+                try {
+                    const folder = await project.projectWriteableFolder.open()
+                    await writeDcFolder(project, folder)
+                    project.name.value = folder.name
+                    setSaveType(type)
+                    setIsProjectDirty(false)
+                    setIsModelDirty(false)
+                    addToast(`Exported to Folder ${folder.name}`, "success")
+                } catch (e) {
+                    console.error(e)
+                    addToast("Error Picking Folder", "error")
+                    return
+                }
+
             }
 
         } catch (e) {
@@ -268,24 +296,6 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
 
     const fileSystemsAccess = useFileSystemAccessApi()
 
-    const exportToFolder = async () => {
-        if (!fileSystemsAccess) {
-            addToast("File System Access API Not Available", "error")
-            return
-        }
-
-        try {
-            const folder = await window.showDirectoryPicker()
-            await writeDcFolder(project, folder)
-            addToast(`Exported to Folder ${folder.name}`, "success")
-        } catch (e) {
-            console.error(e)
-            addToast("Error Picking Folder", "error")
-            return
-        }
-
-    }
-
     const linkedToFile = saveType !== "unknown" && FileSystemsAccessApi
 
     const isRemote = project.remoteLink !== undefined
@@ -335,7 +345,7 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
                         <DownloadOption exportFunction={exportToGLTF} extension="gltf" />
                         <DownloadOption exportFunction={() => saveModel("project")} extension="dcproj" />
                         <DownloadOption exportFunction={exportToBBModel} extension="bbmodel" />
-                        {fileSystemsAccess && <DownloadOption exportFunction={exportToFolder} extension="&nbsp;as folder" dot="" />}
+                        {fileSystemsAccess && <DownloadOption exportFunction={() => saveModel("folder_project")} extension="&nbsp;as folder" dot="" />}
                     </DownloadAsButton>
                     <ButtonWithTooltip
                         onClick={e => { removeProject(); e.stopPropagation() }}

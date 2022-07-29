@@ -15,6 +15,7 @@ import { DCMModel } from '../model/DcmModel';
 import TextureManager from '../textures/TextureManager';
 import { ModelerGumball } from './../../../views/modeler/logic/ModelerGumball';
 import { CommandRoot } from './../../command/CommandRoot';
+import { getUndefinedFolder } from './../../files/FileTypes';
 import { CubeSelectedHighlighter } from './../../util/CubeSelectedHighlighter';
 import { StudioSound } from './../sounds/StudioSound';
 import { importBBProject } from "./BBModelImporter";
@@ -35,11 +36,13 @@ export default class DcProject {
   readonly showcaseProperties: ShowcaseProperties
 
   readonly model: DCMModel
-  readonly projectSaveType = new LO<"unknown" | "project" | "model" | "old_model">("unknown")
+  readonly projectSaveType = new LO<"unknown" | "project" | "folder_project" | "model" | "old_model">("unknown")
   modelWritableFile = getUndefinedWritable("Model File", ".dcm")
 
   readonly projectNeedsSaving = new LO(false)
   projectWritableFile = getUndefinedWritable("Project File", ".dcproj")
+
+  projectWriteableFolder = getUndefinedFolder()
 
 
   readonly textureManager: TextureManager

@@ -4,6 +4,7 @@ import LinkedGithubAccount from "./categories/account/LinkedGithubAccount";
 import CompactModeSelection from "./categories/appearance/CompactModeSelection";
 import ThemeSelection from "./categories/appearance/ThemeSelection";
 import AutoRecovery from "./categories/general/AutoRecovery";
+import PhotoshopEnabled from "./categories/general/PhotoshopEnabled";
 import PWAInstall from "./categories/general/PWAInstall";
 import ScreenshotAction from "./categories/general/ScreenshotAction";
 import SelectedCubesSection from "./categories/general/SelectedCubes";
@@ -30,7 +31,7 @@ export const OptionCategories: Record<string, OptionCategory> = {
   general: {
     shortName: "General",
     title: "General Options",
-    sections: [PWAInstall, ScreenshotAction, SelectedCubesSection, AutoRecovery],
+    sections: [PWAInstall, ScreenshotAction, SelectedCubesSection, AutoRecovery, PhotoshopEnabled],
   },
   appearance: {
     shortName: "Appearance",

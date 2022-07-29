@@ -2,12 +2,13 @@ import { ReactNode } from "react"
 import { ReadableFile } from "../../../studio/files/FileTypes"
 import { useFileUpload } from "../../../studio/files/FileUploadBox"
 
-export const ProjectFileAreaBase = ({ extensions, onChange, children }: {
+export const ProjectFileAreaBase = ({ extensions, onChange, children, onFolderChange }: {
   extensions: string[],
   onChange: (file: ReadableFile) => void,
+  onFolderChange?: (folder: FileSystemDirectoryHandle) => void,
   children?: ReactNode,
 }) => {
-  const [ref, isDragging] = useFileUpload<HTMLDivElement>(extensions, onChange)
+  const [ref, isDragging] = useFileUpload<HTMLDivElement>(extensions, onChange, onFolderChange)
   return (
     <div className="flex flex-col h-full">
       <div ref={ref} className={`rounded-sm ${isDragging ? 'bg-red-800' : 'dark:bg-gray-800 bg-gray-100'} flex flex-col overflow-hidden flex-grow h-0`}>
@@ -30,15 +31,16 @@ export const ProjectFileAreaHeader = ({ title, children }: {
     </div>
   )
 }
-export const BasicProjectFileArea = ({ title, extensions, onChange, children, buttons }: {
+export const BasicProjectFileArea = ({ title, extensions, onChange, onFolderChange, children, buttons }: {
   title: string,
   extensions: string[],
   onChange: (file: ReadableFile) => void,
+  onFolderChange?: (folder: FileSystemDirectoryHandle) => void,
   children?: ReactNode,
   buttons?: ReactNode,
 }) => {
   return (
-    <ProjectFileAreaBase extensions={extensions} onChange={onChange}>
+    <ProjectFileAreaBase extensions={extensions} onChange={onChange} onFolderChange={onFolderChange}>
       <ProjectFileAreaHeader title={title}>
         {buttons}
       </ProjectFileAreaHeader>

@@ -3,7 +3,8 @@ import { createReadableFile, createReadableFileExtended, FileSystemsAccessApi, R
 
 export const useFileUpload = <T extends HTMLElement,>(
   extensions: string[],
-  onChange: (file: ReadableFile) => void
+  onChange: (file: ReadableFile) => void,
+  onFolderChange?: (folder: FileSystemDirectoryHandle) => void,
 ): [RefObject<T>, boolean] => {
   const ref = useRef<T>(null)
   const [dragging, setDragging] = useState(false)
@@ -45,6 +46,9 @@ export const useFileUpload = <T extends HTMLElement,>(
             if (handle instanceof FileSystemFileHandle && validName(handle.name)) {
               onChange(createReadableFileExtended(handle as FileSystemFileHandle))
             }
+            if (handle instanceof FileSystemDirectoryHandle) [
+              onFolderChange?.(handle as FileSystemDirectoryHandle)
+            ]
           }
 
           for (let i = 0; i < items.length; i++) {
@@ -79,7 +83,7 @@ export const useFileUpload = <T extends HTMLElement,>(
         currentRef.removeEventListener('drop', onDrop)
       }
     }
-  }, [extensions, onChange])
+  }, [extensions, onChange, onFolderChange])
 
   return [ref, dragging]
 }

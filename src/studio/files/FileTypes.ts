@@ -30,8 +30,13 @@ export type ReadableFile = {
 } & ListenableFile
 
 export type WritableFile = {
-  write: (name: string, blob: Blob | PromiseLike<Blob>) => Promise<string>
+  write: (name: string, blob: Blob | PromiseLike<Blob>, types?: FilePickerAcceptType[]) => Promise<string>
 } & ListenableFile
+
+export type OpenableFolder = {
+  open: () => Promise<FileSystemDirectoryHandle>
+  unlink?: () => void
+}
 
 export const downloadBlob: WritableFile['write'] = async (name, blob) => {
   const url = window.URL.createObjectURL(await blob);
@@ -49,7 +54,10 @@ export const defaultWritable: WritableFile = {
 }
 
 //Gets the writeable file for where nothing has been defined.
-export const getUndefinedWritable = (description: string, ...accept: string[]): WritableFile & { unlink?: () => void } => {
+export const getUndefinedWritable = (description: string, ...accept: string[]): WritableFile & {
+  unlink?: () => void,
+  getName?: () => string | undefined
+} => {
   if (!FileSystemsAccessApi) {
     return defaultWritable
   }
@@ -57,10 +65,10 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
   let file: WritableFile | null = null
   let readable: ReadableFile | null = null
   return {
-    write: async (name, blob) => {
+    write: async (name, blob, types) => {
       if (file === null) {
         const picked = await window.showSaveFilePicker({
-          types: [{
+          types: types ?? [{
             description,
             accept: {
               "custom/dumbcode": accept
@@ -83,8 +91,33 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
       saveName = null
       file = null
       readable = null
-    }
+    },
+    getName: () => saveName ?? undefined
 
+  }
+}
+
+export const wrapFolder = (folder: FileSystemDirectoryHandle): OpenableFolder => {
+  return {
+    open: async () => folder
+  }
+}
+
+export const getUndefinedFolder = (): OpenableFolder => {
+  if (!FileSystemsAccessApi) {
+    throw new Error("No file system access API available, cannot open folder.")
+  }
+  let folder: FileSystemDirectoryHandle | null = null
+  return {
+    open: async () => {
+      if (folder === null) {
+        folder = await window.showDirectoryPicker()
+      }
+      return folder
+    },
+    unlink: () => {
+      folder = null
+    }
   }
 }
 
