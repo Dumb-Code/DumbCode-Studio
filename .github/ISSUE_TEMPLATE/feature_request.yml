@@ -17,13 +17,13 @@ body:
       label: What Studio tabs does this request concern?
       description: You may select more than one.
       options:
-        - Settings/Configuration
-        - Project
-        - Modeler
-        - Mapper
-        - Texturer
-        - Animator
-        - Showcase
+        - label: Settings/Configuration
+        - label: Project
+        - label: Modeler
+        - label: Mapper
+        - label: Texturer
+        - label: Animator
+        - label: Showcase
     validations:
       required: true
   - type: dropdown
