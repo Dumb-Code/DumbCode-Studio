@@ -23,44 +23,41 @@ body:
       required: true
   - type: checkboxes
     id: browsers
-    value: browsers
     attributes:
       label: What browsers have you tested on?
       description: You may select more than one.
       options:
-        - Firefox
-        - Chrome
-        - Safari
-        - Microsoft Edge
-        - Other
+        - label: Firefox
+        - label: Chrome
+        - label: Safari
+        - label: Microsoft Edge
+        - label: Other
     validations:
       required: true
   - type: checkboxes
     id: operating-systems
-    value: browsers
     attributes:
       label: What operating system are you using?
       description: You may select more than one.
       options:
-        - Windows
-        - MacOS
-        - Linux
+        - label: Windows
+        - label: MacOS
+        - label: Linux
     validations:
       required: true
   - type: checkboxes
     id: tabs
-    value: browsers
     attributes:
       label: What Studio tabs does this issue concern?
       description: You may select more than one.
       options:
-        - Settings/Configuration
-        - Project
-        - Modeler
-        - Mapper
-        - Texturer
-        - Animator
-        - Showcase
+        - label: Settings/Configuration
+        - label: Project
+        - label: Modeler
+        - label: Mapper
+        - label: Texturer
+        - label: Animator
+        - label: Showcase
     validations:
       required: true
   - type: markdown
