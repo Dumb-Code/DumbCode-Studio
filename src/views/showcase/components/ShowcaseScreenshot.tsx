@@ -29,7 +29,7 @@ const ShowcaseScreenshot = () => {
   }
 
   return (
-    <CollapsableSidebarPannel title="SCREENSHOT" heightClassname="h-48" panelName="showcase_screenshot">
+    <CollapsableSidebarPannel title="SCREENSHOT" heightClassname="h-52 pt-3" panelName="showcase_screenshot">
       <ScreenshotButton resolution="Current Resolution" onClick={runScreenshot} />
       <ScreenshotButton resolution="1080 × 1920" onClick={screenshowWithResolution(1080, 1920)} />
       <ScreenshotButton resolution="3840 × 2160 (4K)" onClick={screenshowWithResolution(3840, 2160)} />
