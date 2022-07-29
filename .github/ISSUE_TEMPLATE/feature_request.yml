@@ -1,0 +1,63 @@
+name: Feature Request
+about: Give us an idea to help improve the software.
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes: 
+      value: | 
+        Thanks for taking the time to help us by filling out this bug report!
+  - type: markdown
+    attributes: 
+      value: | 
+        Before describing your issue please help us by describing where this issue happened in the following sections
+  - type: checkboxes
+    id: sections
+    attributes:
+      label: What sections of the studio does this request concern?
+      description: You may select more than one.
+      options:
+        - label: Settings/Configurability
+        - label: Project Page
+        - label: Modler
+        - label: Texture Mapper
+        - label: Texturer
+        - label: Animator
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: What type of feature request is this
+      options:
+        - Improvement to existing feature
+        - New feature
+    validations:
+      required: true
+  - type: markdown
+    attributes: 
+      value: | 
+        Now lets get to the part where you can actually tell us what you want.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Describe what problem this feature would solve
+      description: "A detailed explination as to why you feel this feature would be useful to people."
+    validations:
+      required: true
+  - type: textarea
+    id: bestsolution
+    attributes:
+      label: Describe what you think would be the best solution to this problem
+      description: "A clear and consice proposal that describes how you think your feature should be implemented."
+    validations:
+      required: true
+  - type: textarea
+    id: other
+    attributes:
+      label: Describe alternatives you've considered
+      description: "There is often more than one way to solve a problem. If you've considered other solutions, please describe them here. Bonus points if you explain why they're not as good as your other option"
+  - type: textarea
+    id: additional
+    attributes:
+      label: Give us any additional information you think would be useful
+      description: "If there is anything else you can provide to help us make your experience better in this area, let us know here!"
