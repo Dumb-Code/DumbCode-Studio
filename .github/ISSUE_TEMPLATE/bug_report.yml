@@ -1,0 +1,107 @@
+name: Bug Report
+description: Create a Bug Report to help us Improve the Studio
+title: "[Bug]: "
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to help us by filling out this bug report!
+  - type: markdown
+    attributes:
+      value: |
+        Before describing your issue to us, help us by describing where the issue happened in the following sections.
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version
+      description: What version of the Studio are you running?
+      options:
+        - Beta (dev.dumbcode.net)
+        - Release (studio.dumbcode.net)
+    validations:
+      required: true
+  - type: checkboxes
+    id: browsers
+    attributes:
+      label: What browsers have you tested on?
+      description: You may select more than one.
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: operating-systems
+    attributes:
+      label: What operating system are you using?
+      description: You may select more than one.
+      options:
+        - Windows
+        - MacOS
+        - Linux
+    validations:
+      required: true
+  - type: checkboxes
+    id: tabs
+    attributes:
+      label: What Studio tabs does this issue concern?
+      description: You may select more than one.
+      options:
+        - Settings/Configuration
+        - Project
+        - Modeler
+        - Mapper
+        - Texturer
+        - Animator
+        - Showcase
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Now let's get to the part where you actually tell us what went wrong.
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: "How do you trigger this bug? Please walk us through it step by step."
+      value: |
+        1.
+        2.
+        3.
+        ...
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: expectation
+    attributes:
+      label: Describe what you EXPECTED to happen.
+      description: Tell us what you expected to happen when you carried out the previous steps.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: reality
+    attributes:
+      label: Describe what happened instead.
+      description: Tell us what happened instead when you carried out the previous steps.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional Info
+      description: Give us any other info that you think would be helpful in us tracking down and fixing the bug
+      render: text

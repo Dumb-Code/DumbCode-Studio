@@ -1,0 +1,70 @@
+name: Feature Request
+description: Have a great idea to help us improve the functionality of the Studio? Let us know!
+title: "[Feature]: "
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to help us by filling out this feature request!
+  - type: markdown
+    attributes:
+      value: |
+        Before describing your idea to us, help us categorize your request in the following sections.
+  - type: checkboxes
+    id: tabs
+    attributes:
+      label: What Studio tabs does this request concern?
+      description: You may select more than one.
+      options:
+        - Settings/Configuration
+        - Project
+        - Modeler
+        - Mapper
+        - Texturer
+        - Animator
+        - Showcase
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of Request
+      description: Is this request an improvement on an existing feature or an idea for a new feature?
+      options:
+        - Improvement on Existing Feature
+        - Idea for New Feature
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Now let's get to the part where you actually tell us what your idea is.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Describe what this idea intends to solve.
+      description: Tell us who this feature is for and in what scenarios you would use it.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Best Solution.
+      description: Tell us what you think the best solution to this issue would be, include as much detail as needed to explain clearly.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Considerations
+      description: Let us know what other solutions you have considered and why they're not as good as your preferred solution.
+      render: text
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional Info
+      description: If there is anything else you can provide to help us make your experience better in this area, let us know here!
+      render: text
