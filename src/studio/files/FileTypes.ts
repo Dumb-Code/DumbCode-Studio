@@ -105,7 +105,10 @@ export const wrapFolder = (folder: FileSystemDirectoryHandle): OpenableFolder =>
 
 export const getUndefinedFolder = (): OpenableFolder => {
   if (!FileSystemsAccessApi) {
-    throw new Error("No file system access API available, cannot open folder.")
+    return {
+      open: () => { throw new Error("No file system access API available, cannot open folder.") },
+      unlink: () => { }
+    }
   }
   let folder: FileSystemDirectoryHandle | null = null
   return {
