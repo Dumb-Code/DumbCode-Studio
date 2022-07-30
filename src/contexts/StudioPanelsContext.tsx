@@ -31,9 +31,9 @@ export type StudioPanelsContext = {
 
   texture_layers: PanelValue<boolean>
 
-  ambient_light: PanelValue<boolean>
-  object_lights: PanelValue<boolean>
-  shadows: PanelValue<boolean>
+  showcase_ambient_light: PanelValue<boolean>
+  showcase_object_lights: PanelValue<boolean>
+  showcase_shadows: PanelValue<boolean>
   showcase_screenshot: PanelValue<boolean>
   showcase_imagesettings: PanelValue<boolean>
 }
@@ -73,9 +73,9 @@ const StudioPanelsContextProvider = ({ children }: PropsWithChildren<{}>) => {
   useValueGetterSetter(context, "texture_mapper_settings", true)
   useValueGetterSetter(context, "texture_layers", true)
   useValueGetterSetter(context, "texture_grid_type", "fade")
-  useValueGetterSetter(context, "ambient_light", true)
-  useValueGetterSetter(context, "object_lights", true)
-  useValueGetterSetter(context, "shadows", true)
+  useValueGetterSetter(context, "showcase_ambient_light", true)
+  useValueGetterSetter(context, "showcase_object_lights", true)
+  useValueGetterSetter(context, "showcase_shadows", true)
   useValueGetterSetter(context, "showcase_screenshot", true)
   useValueGetterSetter(context, "showcase_imagesettings", true)
   return (

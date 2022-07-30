@@ -15,13 +15,13 @@ import ShowcaseProperties from "../../../studio/showcase/ShowcaseProperties"
 const ShowcaseLights = () => {
   return (
     <>
-      <CollapsableSidebarPannel title="AMBIENT LIGHT" heightClassname="h-auto" panelName="ambient_light">
+      <CollapsableSidebarPannel title="AMBIENT LIGHT" heightClassname="h-auto" panelName="showcase_ambient_light">
         <AmbientLightSection />
       </CollapsableSidebarPannel>
-      <CollapsableSidebarPannel title="DIRECTIONAL LIGHTS" heightClassname="h-auto" panelName="object_lights">
+      <CollapsableSidebarPannel title="DIRECTIONAL LIGHTS" heightClassname="h-auto" panelName="showcase_object_lights">
         <DirectionalLightSection />
       </CollapsableSidebarPannel>
-      <CollapsableSidebarPannel title="SHADOWS" heightClassname="h-auto" panelName="shadows">
+      <CollapsableSidebarPannel title="SHADOWS" heightClassname="h-auto" panelName="showcase_shadows">
         <ShadowSection />
       </CollapsableSidebarPannel>
     </>
