@@ -67,10 +67,10 @@ module.exports = {
         "scrub properties"
       ],
       "showcase": [
-        'tabs sidebar',
-        'canvas sidebar',
-        'gumball sidebar',
-        'info sidebar'
+        'effects canvas sidebar',
+        'effects tabs sidebar',
+        'effects gumball sidebar',
+        'effects info sidebar'
       ]
     },
   },

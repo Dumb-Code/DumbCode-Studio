@@ -37,12 +37,12 @@ const TextureProperties = () => {
 
     return (
         <CollapsableSidebarPannel title="TEXTURE PROPERTIES" heightClassname="h-auto" panelName="texture_mapper_properties">
-            <div className="flex flex-row py-1">
-                <div className="mx-1">
+            <div className="flex flex-row py-1 pb-5">
+                <div className="mx-1 h-6">
                     <p className="dark:text-gray-400 text-black text-xs">WIDTH</p>
                     <NumericInput value={width} onChange={setWidth} isPositiveInteger />
                 </div>
-                <div className="mx-1">
+                <div className="mx-1 h-6">
                     <p className="dark:text-gray-400 text-black  text-xs">HEIGHT</p>
                     <NumericInput value={height} onChange={setHeight} isPositiveInteger />
                 </div>
@@ -122,11 +122,11 @@ const TextureMapElementProperties = () => {
                         <Checkbox value={mirrored} setValue={setMirrored} />
                     </div>
                 </div>
-                <div className="mx-1">
+                <div className="mx-1 h-6">
                     <p className="dark:text-gray-400 text-black  text-xs">X OFFSET</p>
                     <NumericInput value={offset === undefined ? null : offset[0]} onChange={onChange(0)} isPositiveInteger />
                 </div>
-                <div className="mx-1">
+                <div className="mx-1 h-6">
                     <p className="dark:text-gray-400 text-black  text-xs">Y OFFSET</p>
                     <NumericInput value={offset === undefined ? null : offset[1]} onChange={onChange(1)} isPositiveInteger />
                 </div>

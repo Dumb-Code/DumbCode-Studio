@@ -1,20 +1,18 @@
-import HistoryList from "../../../components/HistoryList"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
-import { AnimatorIKProperties } from "../../animator/components/AnimatorProperties"
-import ShowcaseScreenshot from "./ShowcaseScreenshot"
+import ShowcaseLights from "./ShowcaseLights"
+import ShowcaseViewSettings from "./ShowcaseViewSettings"
 
-const ShowcaseSidebar = () => {
+const ShowcaseEffects = () => {
   const { getSelectedProject } = useStudio()
   const project = getSelectedProject()
   const [view] = useListenableObject(project.showcaseProperties.selectedView)
   return (
     <div className="dark:bg-gray-800 bg-gray-200 flex flex-col overflow-hidden h-full">
-      <AnimatorIKProperties animation={view} />
-      <ShowcaseScreenshot />
-      <HistoryList undoRedoHandler={view.undoRedoHandler} />
+      <ShowcaseViewSettings />
+      <ShowcaseLights />
     </div>
   )
 }
 
-export default ShowcaseSidebar
+export default ShowcaseEffects

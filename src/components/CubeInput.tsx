@@ -24,7 +24,7 @@ const CubeInput = ({ title, value, setValue, lock, positiveInteger, onBlur, onFo
     return (
         <div className="flex-grow">
             <div className="flex flex-row">
-                <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow">{title}</p>
+                <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow uppercase">{title}</p>
                 {lock === undefined ||
                     <button className={(isLocked ? "bg-red-600" : "dark:bg-gray-900 bg-white") + " text-xs rounded mr-1 h-4 w-4 p-0.5 text-white"} onClick={() => setLocked(!isLocked)}>
                         {isLocked ? <SVGLocked /> : <SVGUnlocked />}

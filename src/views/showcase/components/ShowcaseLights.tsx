@@ -1,8 +1,8 @@
-import { ReactNode, useCallback } from "react"
+import { useCallback } from "react"
 import Checkbox from "../../../components/Checkbox"
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGPlus, SVGSave } from "../../../components/Icons"
+import { SVGPlus, SVGSave, SVGTrash } from "../../../components/Icons"
 import NumericInput from "../../../components/NumericInput"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
@@ -14,11 +14,17 @@ import ShowcaseProperties from "../../../studio/showcase/ShowcaseProperties"
 
 const ShowcaseLights = () => {
   return (
-    <CollapsableSidebarPannel title="LIGHTS" heightClassname="h-[32rem]" panelName="showcase_lights">
-      <AmbientLightSection />
-      <DirectionalLightSection />
-      <ShadowSection />
-    </CollapsableSidebarPannel>
+    <>
+      <CollapsableSidebarPannel title="AMBIENT LIGHT" heightClassname="h-auto" panelName="ambient_light">
+        <AmbientLightSection />
+      </CollapsableSidebarPannel>
+      <CollapsableSidebarPannel title="DIRECTIONAL LIGHTS" heightClassname="h-auto" panelName="object_lights">
+        <DirectionalLightSection />
+      </CollapsableSidebarPannel>
+      <CollapsableSidebarPannel title="SHADOWS" heightClassname="h-auto" panelName="shadows">
+        <ShadowSection />
+      </CollapsableSidebarPannel>
+    </>
   )
 }
 
@@ -35,16 +41,16 @@ const ShadowSection = () => {
 
 
   return (
-    <Section title="Shadow">
-      <div className="flex flex-row">
-        Preview Shadow Quality: <input type="range" value={current} min={0} max={maxMapSizePow2} onInput={e => setShadowMapSize(Math.pow(2, e.currentTarget.valueAsNumber))} />
+    <div>
+      <div className="px-2 py-1">
+        <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow uppercase">Shadow Quality</p>
+        <input type="range" value={current} min={0} max={maxMapSizePow2} onInput={e => setShadowMapSize(Math.pow(2, e.currentTarget.valueAsNumber))} />
       </div>
-      <div className="flex flex-row">
-        Floor Shadow Opacity: <input type="range" step={0.01} value={floorOpacity} min={0} max={1} onInput={e => setFloorOpacity(e.currentTarget.valueAsNumber)} />
+      <div className="px-2 py-1">
+        <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow uppercase">Floor Shadow Opacity</p>
+        <input type="range" step={0.01} value={floorOpacity} min={0} max={1} onInput={e => setFloorOpacity(e.currentTarget.valueAsNumber)} />
       </div>
-
-
-    </Section>
+    </div>
   )
 }
 
@@ -55,9 +61,9 @@ const AmbientLightSection = () => {
   const [veiw] = useListenableObject(showcase.selectedView)
 
   return (
-    <Section title="Ambient Light">
+    <div className="px-2 py-1">
       <ColourEditEntry colour={veiw.ambientLightColour} intensity={veiw.ambientLightIntensity} />
-    </Section>
+    </div>
   )
 }
 
@@ -83,31 +89,46 @@ const DirectionalLightSection = () => {
   }, [dialogBoxes, view])
 
   return (
-    <Section title="Directional Lights" buttons={
-      <>
+    <div>
+      {
+        selectedName ?
+          <div>
+            <div className="px-2 pb-1 flex flex-row">
+              <div>
+                <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow uppercase mr-2">Enabled</p>
+                <div className="pl-4"><Checkbox value={shadow} setValue={setShadow} /></div>
+              </div>
+              <div className="flex-grow">
+                <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow uppercase">Name</p>
+                <input className="h-6 w-full bg-gray-300 dark:bg-gray-700 text-black dark:text-white text-xs pl-1" disabled={selectedLight === null} value={selectedName === undefined ? '' : selectedName} onChange={e => setSelectedName(e.currentTarget.value)} />
+              </div>
+            </div>
+            <div className="px-2 pb-1 ">
+              <ColourEditEntry colour={selectedLight?.colour} intensity={selectedLight?.intensity} />
+            </div>
+          </div>
+          :
+          <div className="h-[78px] bg-gray-700 rounded-md m-2 text-center text-gray-500 pt-6">
+            No Light Selected
+          </div>
+      }
+      <div className="px-2">
+        <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow uppercase">Lights</p>
         <ButtonWithTooltip tooltip="Presets" onClick={openDialog}>
-          <SVGSave className="w-4 h-4" />
+        <div className="bg-blue-500 px-1 hover:bg-blue-600 h-6 flex-shrink-0 flex flex-row rounded m-1 cursor-pointer group">
+            <SVGSave className="text-white group-hover:text-white h-4 w-4 mt-1" />
+          </div>
         </ButtonWithTooltip>
         <ButtonWithTooltip tooltip="Add Light" onClick={addLight}>
-          <SVGPlus className="w-4 h-4" />
+          <div className="bg-green-500 px-1 hover:bg-green-600 h-6 flex-shrink-0 flex flex-row rounded m-1 cursor-pointer group">
+            <SVGPlus className="text-white group-hover:text-white h-4 w-4 mt-1" />
+          </div>
         </ButtonWithTooltip>
-      </>
-
-    }>
-      <div className="flex flex-row">
-        <ColourEditEntry colour={selectedLight?.colour} intensity={selectedLight?.intensity} />
+        <div className="overflow-x-hidden w-full">
+          {lights.map(light => <DirectionalLightEntry key={light.identifier} showcase={showcase} light={light} />)}
+        </div>
       </div>
-      <div className="flex flex-row">
-        Name: <input className="h-8 bg-gray-500 text-black dark:text-white" disabled={selectedLight === null} value={selectedName === undefined ? '' : selectedName} onChange={e => setSelectedName(e.currentTarget.value)} />
-      </div>
-      <div>
-        <Checkbox value={shadow} setValue={setShadow} extraText="Enabled" />
-
-      </div>
-      <div className="h-32 overflow-x-hidden overflow-y-scroll studio-scrollbar">
-        {lights.map(light => <DirectionalLightEntry key={light.identifier} showcase={showcase} light={light} />)}
-      </div>
-    </Section>
+    </div>
   )
 }
 
@@ -123,27 +144,16 @@ const DirectionalLightEntry = ({ showcase, light }: { showcase: ShowcaseProperti
 
   return (
     <div
-      className={className + " my-1 cursor-pointer h-8 mr-5 flex items-center"}
+      className={className + " my-1 cursor-pointer h-8 flex items-center w-full rounded-md"}
       onClick={() => setSelected(selected === light ? null : light)}
     >
-      <DblClickEditLO obj={light.name} className="flex-grow dark:text-white" inputClassName="h-8 bg-gray-500 text-black dark:text-white" textClassName="pl-3 w-full" />
-      <div className="h-2/3 aspect-1 rounded-full mr-2" style={{
+      <div className="h-2/3 aspect-1 rounded-full ml-1.5 mt-0.5" style={{
         backgroundColor: color
       }} />
-    </div>
-  )
-}
-
-const Section = ({ title, children, buttons }: { title: string, children: ReactNode, buttons?: ReactNode }) => {
-  return (
-    <div className="flex flex-col dark:text-white ml-2 mt-5 first:mt-0">
-      <div className="flex flex-row">
-        <div className="font-semibold">{title}</div>
-        {buttons}
-      </div>
-      <div className="flex flex-col">
-        {children}
-      </div>
+      <DblClickEditLO obj={light.name} className="flex-grow dark:text-white" inputClassName="h-8 bg-gray-500 text-black dark:text-white" textClassName="pl-2 w-full" />
+      <button className="group bg-gray-700 rounded-md p-1 mr-0.5 hover:bg-red-500">
+        <SVGTrash className="h-5 w-5 text-gray-400 group-hover:text-red-700" />
+      </button>
     </div>
   )
 }
@@ -153,16 +163,18 @@ const ColourEditEntry = ({ colour, intensity }: { colour?: LO<string>, intensity
   const [intensityVal, setIntensity] = useListenableObjectNullable(intensity)
 
   return (
-    <>
-      <div className="flex flex-row">
-        Color:
+    <div className="flex flex-row gap-2">
+      <div>
+        <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow uppercase">Color</p>
         <input disabled={colour === undefined} type="color" value={colourVal ?? '#ffffff'} onChange={e => setColour(e.currentTarget.value)} />
       </div>
-      <div className="flex flex-row">
-        Intensity:
-        <NumericInput value={intensityVal} onChange={setIntensity} min={0} />
+      <div>
+        <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow uppercase">Intensity</p>
+        <div className="h-6">
+          <NumericInput value={intensityVal} onChange={setIntensity} min={0} />
+        </div>
       </div>
-    </>
+    </div>
   )
 }
 
