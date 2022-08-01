@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { AmbientLight, BoxBufferGeometry, Camera, Clock, Color, CylinderBufferGeometry, DirectionalLight, Group, Matrix4, Mesh, MeshBasicMaterial, MeshLambertMaterial, Object3D, OrthographicCamera, PerspectiveCamera, Raycaster, REVISION, Scene, WebGLRenderer } from "three";
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/js/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
 import { useStudio } from './StudioContext';

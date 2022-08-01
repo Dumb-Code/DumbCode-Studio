@@ -2,10 +2,10 @@ import { Psd } from 'ag-psd';
 import { useCallback } from 'react';
 import { NearestFilter, Texture as ThreeTexture } from 'three';
 import { v4 as uuidv4 } from 'uuid';
-import { unsafe_getThreeContext } from '../../../contexts/StudioContext';
 import { getUndefinedWritable, ListenableFileData, ReadableFile, readFileToImg, WritableFile } from '../../files/FileTypes';
 import { LO, useListenableObject } from '../../listenableobject/ListenableObject';
 import { useDomParent } from '../../util/DomParentRef';
+import UnsafeOperations from '../../util/UnsafeOperations';
 import { fitAreaWithinBounds } from '../../util/Utils';
 import DcProject, { removeFileExtension } from '../project/DcProject';
 import { ListenableFile, readFileArrayBuffer } from './../../files/FileTypes';
@@ -158,7 +158,7 @@ export default class TextureManager {
     let height = Math.max(...textures.map(t => t.height), 1)
 
 
-    const maxTextureSize = unsafe_getThreeContext().renderer.capabilities.maxTextureSize / 2
+    const maxTextureSize = UnsafeOperations._unsafe_getThreeContext().renderer.capabilities.maxTextureSize / 2
     const scale = maxTextureSize / Math.max(width, height);
 
     if (scale < 1) {

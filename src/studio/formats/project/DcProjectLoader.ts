@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import { createReadableFileExtended, WritableFile } from "../../files/FileTypes";
+import { ReferenceImage } from "../../referenceimages/ReferenceImageHandler";
 import { SerializedUndoRedoHandler } from "../../undoredo/UndoRedoHandler";
-import { ReferenceImage } from "../../util/ReferenceImageHandler";
 import { imgSourceToElement, writeImgToBlob } from "../../util/Utils";
 import { loadUnknownAnimation, writeDCAAnimation } from "../animations/DCALoader";
 import { loadModelUnknown, writeModel } from "../model/DCMLoader";

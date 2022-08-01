@@ -5,7 +5,7 @@ import { LO } from '../listenableobject/ListenableObject';
 import { LOMap } from "../listenableobject/ListenableObjectMap";
 import SelectedCubeUndoRedoHandler from '../undoredo/SelectedCubeUndoRedoHandler';
 import UndoRedoHandler, { SectionHandle } from '../undoredo/UndoRedoHandler';
-import { unsafe_getThreeContext } from './../../contexts/StudioContext';
+import UnsafeOperations from '../util/UnsafeOperations';
 import { AnimatorGumball } from './../../views/animator/logic/AnimatorGumball';
 import { NumArray } from './../util/NumArray';
 import { ShowcaseLight } from './ShowcaseLight';
@@ -109,7 +109,7 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
 
     this.selectedLight.applyMappedToSection(this._section, c => c ? c.identifier : undefined, s => s ? this.allLights.get(s) ?? null : null, "selectedLight")
 
-    const ctx = unsafe_getThreeContext()
+    const ctx = UnsafeOperations._unsafe_getThreeContext()
     const camPosition = ctx.getCamera().position
     const camTarget = ctx.controls.target
 

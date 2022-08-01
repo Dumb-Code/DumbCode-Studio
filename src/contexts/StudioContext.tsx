@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { StudioTabs } from '../containers/StudioContainer';
 import DcProject, { newProject } from '../studio/formats/project/DcProject';
+import UnsafeOperations from '../studio/util/UnsafeOperations';
 import { createThreeContext, ThreeJsContext } from './ThreeContext';
 
 export type StudioContext = {
@@ -116,4 +117,4 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
   )
 }
 
-export const unsafe_getThreeContext = () => three
+UnsafeOperations._unsafe_getThreeContext = () => three

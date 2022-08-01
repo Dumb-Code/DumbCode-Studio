@@ -2,6 +2,7 @@ import { Dialog, Transition } from "@headlessui/react"
 import React, { Fragment, PropsWithChildren, useCallback, useContext, useEffect, useState } from "react"
 import { SVGCross } from "../components/Icons"
 import { useOptions } from "../contexts/OptionsContext"
+import UnsafeOperations from "../studio/util/UnsafeOperations"
 
 type DialogContextType = {
   setDialogBox: (val: () => JSX.Element) => void
@@ -19,7 +20,8 @@ const OpenedDialogContext = React.createContext<OpenedDialogContextType>({
 
 type JSXSetter = (val: () => JSX.Element) => void
 let currentSetter: JSXSetter | null = null
-export const _unsafe_setDialogBox: JSXSetter = val => currentSetter?.(val)
+
+UnsafeOperations._unsafe_setDialogBox = val => currentSetter?.(val)
 
 const DialogBoxes = ({ children }: PropsWithChildren<{}>) => {
   const [ElementFunc, setElementFunc] = useState<null | (() => JSX.Element)>(null)

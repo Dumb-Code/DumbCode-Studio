@@ -1,5 +1,5 @@
+import UnsafeOperations from "../../../util/UnsafeOperations";
 import { Command } from "../../Command";
-import { _unsafe_OpenReferenceImage } from './../../../../dialogboxes/ReferenceImageDialogBox';
 
 const ReferenceImageCommand = (addCommand: (command: Command) => void) => {
   addCommand(new Command(
@@ -8,7 +8,7 @@ const ReferenceImageCommand = (addCommand: (command: Command) => void) => {
     {},
     context => {
       if (!context.dummy) {
-        _unsafe_OpenReferenceImage()
+        UnsafeOperations._unsafe_OpenReferenceImage()
       }
       return undefined
     }

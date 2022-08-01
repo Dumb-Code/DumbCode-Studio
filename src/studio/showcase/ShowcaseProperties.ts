@@ -1,8 +1,8 @@
 import { AmbientLight, Group, Mesh, PlaneGeometry, ShadowMapType, ShadowMaterial } from 'three';
-import { unsafe_getThreeContext } from '../../contexts/StudioContext';
 import ShowcaseGumball from '../../views/showcase/logic/ShowcaseGumball';
 import DcProject from '../formats/project/DcProject';
 import { LO } from '../listenableobject/ListenableObject';
+import UnsafeOperations from '../util/UnsafeOperations';
 import { JsonShowcaseView, jsonToView, viewToJson } from './../formats/showcase/JsonShowcaseView';
 import { ShowcaseLight } from './ShowcaseLight';
 import ShowcaseView from './ShowcaseView';
@@ -41,7 +41,7 @@ export default class ShowcaseProperties {
   readonly ambientLightIntensityCallback = (i: number) => this.ambientLight.intensity = i
 
   readonly shadowTypeCallback = (value: ShadowMapType) => {
-    const ctx = unsafe_getThreeContext()
+    const ctx = UnsafeOperations._unsafe_getThreeContext()
     ctx.renderer.shadowMap.type = value
   }
 

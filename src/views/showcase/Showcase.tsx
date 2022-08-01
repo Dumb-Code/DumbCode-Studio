@@ -10,7 +10,7 @@ import AnimatorGumballPropertiesBar from "../animator/components/AnimatorGumball
 import ShowcaseEffects from "./components/ShowcaseEffects"
 import ShowcaseSidebar from "./components/ShowcaseSidebar"
 import ShowcaseViewBar from "./components/ShowcaseViewBar"
-import { useShowcaseGumball } from "./logic/ShowcaseGumball"
+import { useShowcaseGumball } from "./logic/ShowcaseGumballHook"
 
 const Showcase = () => {
   const { scene, lightGroup, itemsGroup, getSelectedProject, onFrameListeners, renderer, controls, getCamera } = useStudio()
