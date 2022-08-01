@@ -1,3 +1,4 @@
+import { Vector3 } from 'three';
 import { v4 } from 'uuid';
 import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from '../formats/animations/AnimatorGumballConsumer';
 import { DCMCube } from '../formats/model/DcmModel';
@@ -13,6 +14,9 @@ import ShowcaseProperties from './ShowcaseProperties';
 
 const view_position = "pos_"
 const view_rotation = "rot_"
+
+
+const unitVec3 = new Vector3()
 
 type UndoRedoDataType = {
   section_name: "root_data",
@@ -109,9 +113,14 @@ export default class ShowcaseView extends AnimatorGumballConsumer {
 
     this.selectedLight.applyMappedToSection(this._section, c => c ? c.identifier : undefined, s => s ? this.allLights.get(s) ?? null : null, "selectedLight")
 
-    const ctx = UnsafeOperations._unsafe_getThreeContext()
-    const camPosition = ctx.getCamera().position
-    const camTarget = ctx.controls.target
+    let camPosition = unitVec3
+    let camTarget = unitVec3
+
+    if (UnsafeOperations._unsafe_hasThreeContext()) {
+      const ctx = UnsafeOperations._unsafe_getThreeContext()
+      camPosition = ctx.getCamera().position
+      camTarget = ctx.controls.target
+    }
 
     this.cameraPosition = new LO(cameraPosition ?? [camPosition.x, camPosition.y, camPosition.z] as const).applyToSection(this._section, "cameraPosition")
     this.cameraTarget = new LO(cameraTarget ?? [camTarget.x, camTarget.y, camTarget.z] as const).applyToSection(this._section, "cameraTarget")

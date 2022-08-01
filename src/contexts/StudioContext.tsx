@@ -117,4 +117,5 @@ export const StudioContextProvider = ({ children }: { children?: ReactNode }) =>
   )
 }
 
+UnsafeOperations._unsafe_hasThreeContext = () => true
 UnsafeOperations._unsafe_getThreeContext = () => three

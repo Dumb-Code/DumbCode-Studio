@@ -17,9 +17,7 @@ import TextureLayer from './TextureLayer';
 export default class TextureManager {
   readonly project: DcProject
 
-  readonly glManager = TextureGLManager.getInstance()
-
-  readonly canvas = document.createElement("canvas")
+  readonly canvas = typeof window === "undefined" ? null! : document.createElement("canvas")
   readonly numberTimesRefreshed = new LO<number>(0)
 
   defaultGroup: TextureGroup

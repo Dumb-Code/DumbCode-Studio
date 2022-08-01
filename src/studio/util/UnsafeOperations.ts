@@ -11,7 +11,8 @@ const UnsafeOperations = {
     throw new Error("_unsafe_OpenReferenceImage has not been set")
   },
 
-  //Set in StudioContext
+  //Both set in StudioContext
+  _unsafe_hasThreeContext: () => false,
   _unsafe_getThreeContext: (): ThreeJsContext => {
     throw new Error("_unsafe_getThreeContext has not been set");
   }
