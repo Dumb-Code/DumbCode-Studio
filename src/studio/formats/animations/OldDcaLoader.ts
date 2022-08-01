@@ -2,8 +2,10 @@ import { LO } from '../../listenableobject/ListenableObject';
 import { LOMap } from "../../listenableobject/ListenableObjectMap";
 import { StudioBuffer } from '../../util/StudioBuffer';
 import { DCMCube, DCMModel } from '../model/DcmModel';
+import { runInvertMath, runMirrorMath } from '../model/TBLLoader';
 import DcProject from '../project/DcProject';
 import { NumArray } from './../../util/NumArray';
+import { worldPos, worldX, worldY } from './../model/TBLLoader';
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from './DcaAnimation';
 
 const compilerWarningsRemove = (_: any) => { }
@@ -99,7 +101,18 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
   //If the keyframe version is <= 3, then the keyframe data is a list of points for the animation to follow.
   //The following code is to convert that list of points into a list of changes.
   if (version <= 3) {
-    const map = model.cubeMap
+
+    const clone = alreadyFlipped ? model : model.cloneModel()
+    clone.modelGroup.updateMatrix()
+    clone.modelGroup.updateMatrixWorld(true)
+
+    if (!alreadyFlipped) {
+      runInvertMath(clone)
+      runMirrorMath(worldPos, worldY, null, clone)
+      runMirrorMath(worldPos, worldX, null, clone)
+    }
+
+    const map = clone.cubeMap
     //At version 3, we have the keyframe data being subtracted from the default.
     if (version === 3) {
       keyframes.forEach(kf => {
@@ -132,8 +145,8 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
     //Sort the keyframes, and animate at the start time
     let sorted = [...keyframes].sort((a, b) => a.startTime.value - b.startTime.value)
     sorted.forEach((kf, index) => {
-      model.resetVisuals()
-      keyframes.forEach(_kf => _kf.animate(kf.startTime.value))
+      clone.resetVisuals()
+      keyframes.forEach(_kf => _kf.animate(kf.startTime.value, clone))
 
       //If the next keyframe start time is before this end point, then it'll get cut off.
       //The following code is to account to that and change `step` to be between 0-1 to where it gets cut off. 
@@ -200,11 +213,13 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
   if (version <= 5) {
     keyframes.forEach(keyframe => {
       keyframe.rotation.forEach((arr, key) => {
-        keyframe.rotation.set(key, [
-          arr[0] - 360 * Math.sign(arr[0]),
-          arr[1] - 360 * Math.sign(arr[0]),
-          arr[2] - 360 * Math.sign(arr[0])
-        ])
+        const mutArr: [number, number, number] = [arr[0], arr[1], arr[2]]
+        for (let i = 0; i < 3; i++) {
+          while (Math.abs(arr[i]) > 180) {
+            mutArr[i] -= 360 * Math.sign(arr[i])
+          }
+        }
+        keyframe.rotation.set(key, mutArr)
       })
     })
   }

@@ -54,7 +54,7 @@ export const loadDCMModel = async (arrayBuffer: ArrayBuffer | PromiseLike<ArrayB
         model.modelGroup.updateMatrix()
         model.modelGroup.updateMatrixWorld(true)
 
-        // runInvertMath(model)        
+        // runInvertMath(model)
     }
     return model
 }

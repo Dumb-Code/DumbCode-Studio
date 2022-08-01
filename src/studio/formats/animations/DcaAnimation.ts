@@ -12,7 +12,7 @@ import DcProject from '../project/DcProject';
 import { AnimatorGumball } from './../../../views/animator/logic/AnimatorGumball';
 import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
 import { NumArray } from './../../util/NumArray';
-import { DCMCube } from './../model/DcmModel';
+import { DCMCube, DCMModel } from './../model/DcmModel';
 import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from './AnimatorGumballConsumer';
 import DcaSoundLayer from './DcaSoundLayer';
 
@@ -748,7 +748,7 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
     ])
   }
 
-  animate(time: number) {
+  animate(time: number, target?: DCMModel) {
     if (this.skip) {
       return
     }
@@ -761,7 +761,7 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
     if (ticks > 1) {
       ticks = 1
     }
-    this.animatePercentage(this.getProgressionValue(ticks))
+    this.animatePercentage(this.getProgressionValue(ticks), target)
   }
 
   getProgressionValue(basePercentage: number) {
@@ -778,12 +778,13 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
     return basePercentage //Shouldn't happen. There should always be at least the first and last progression point
   }
 
-  forCubesByName(name: string, forEach: (cube: DCMCube) => void) {
+  forCubesByName(name: string, target: DCMModel | undefined, forEach: (cube: DCMCube) => void) {
+    const model = target ?? this.project.model
     if (this.animation.isSkeleton.value) {
       const identifs = this.animation.reverseKeyframeNameOverrides.get(name)
       if (identifs) {
         identifs.forEach(id => {
-          const cube = this.project.model.identifierCubeMap.get(id)
+          const cube = model.identifierCubeMap.get(id)
           if (cube) {
             forEach(cube)
           }
@@ -791,23 +792,23 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
       }
     } else if (this.animation.nameOverridesOnly.value) {
       this.animation.keyframeNameOverrides.forEach((_, identif) => {
-        const cube = this.project.model.identifierCubeMap.get(identif)
+        const cube = model.identifierCubeMap.get(identif)
         if (cube && cube.name.value === name) {
           forEach(cube)
         }
       })
     } else {
-      const set = this.project.model.cubeMap.get(name)
+      const set = model.cubeMap.get(name)
       if (set) {
         set.forEach(c => forEach(c))
       }
     }
   }
 
-  animatePercentage(percentageDone: number) {
+  animatePercentage(percentageDone: number, target?: DCMModel) {
     //Animate the rotation
     this.rotation.forEach((values, key) => {
-      this.forCubesByName(key, ({ cubeGroup: cube }) => {
+      this.forCubesByName(key, target, ({ cubeGroup: cube }) => {
         if (cube) {
           let m = percentageDone * Math.PI / 180
           cube.rotation.set(cube.rotation.x + values[0] * m, cube.rotation.y + values[1] * m, cube.rotation.z + values[2] * m)
@@ -817,7 +818,7 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
 
     //Animate the position
     this.position.forEach((values, key) => {
-      this.forCubesByName(key, ({ cubeGroup: cube }) => {
+      this.forCubesByName(key, target, ({ cubeGroup: cube }) => {
         if (cube) {
           cube.position.set(cube.position.x + values[0] * percentageDone, cube.position.y + values[1] * percentageDone, cube.position.z + values[2] * percentageDone)
         }
@@ -826,7 +827,7 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
 
     //Animate the cube grow
     this.cubeGrow.forEach((values, key) => {
-      this.forCubesByName(key, (cube) => {
+      this.forCubesByName(key, target, (cube) => {
         let cm = cube.cubeMesh
         let cgg = cube.cubeGrowGroup
 

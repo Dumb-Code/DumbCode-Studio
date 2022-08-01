@@ -197,7 +197,7 @@ const tempCubeOldBase = new Vector3()
 const tempCubeNewBase0 = new Vector3()
 const tempCubeNewBase1 = new Vector3()
 
-function runMirrorMath(worldPos: Vector3, normal: Vector3, cubes: DCMCube[] | null, tbl: DCMModel) {
+export function runMirrorMath(worldPos: Vector3, normal: Vector3, cubes: DCMCube[] | null, tbl: DCMModel) {
   tbl.resetVisuals()
   if (cubes == null) {
     cubes = []
@@ -365,10 +365,10 @@ function runMirrorMath(worldPos: Vector3, normal: Vector3, cubes: DCMCube[] | nu
   // }
 }
 
-function runInvertMath(model: DCMModel, rawCubes: DCMCube[] | null) {
+export function runInvertMath(model: DCMModel, rawCubes?: DCMCube[] | null) {
   let everySingleCube: DCMCube[] = []
   model.traverseAll(cube => everySingleCube.push(cube))
-  const cubes = rawCubes === null ? everySingleCube : rawCubes
+  const cubes = rawCubes === null || rawCubes === undefined ? everySingleCube : rawCubes
 
   let allCubes: {
     isWrong?: boolean

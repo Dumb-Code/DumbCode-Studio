@@ -285,17 +285,17 @@ export class DCMModel implements CubeParent {
     }
   }
 
-  // cloneModel() {
-  //   let model = new DCMModel()
+  cloneModel() {
+    let model = new DCMModel()
 
-  //   model.author.value = this.author.value
-  //   model.textureWidth.value = this.textureWidth.value
-  //   model.textureHeight.value = this.textureHeight.value
+    model.author.value = this.author.value
+    model.textureWidth.value = this.textureWidth.value
+    model.textureHeight.value = this.textureHeight.value
 
-  //   model.children.value = this.children.value.map(c => c.cloneCube(model))
+    model.children.value = this.children.value.map(c => c.cloneCube(model))
 
-  //   return model
-  // }
+    return model
+  }
 }
 
 type CubeSectionType = SectionHandle<UndoRedoDataType, UndoRedoDataType & { section_name: `cube_${string}` }>
