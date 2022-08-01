@@ -4,8 +4,8 @@ import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from '../../../s
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
 import DcProject from '../../../studio/formats/project/DcProject';
 import { LO } from '../../../studio/listenableobject/ListenableObject';
+import SelectedCubeManager from '../../../studio/selections/SelectedCubeManager';
 import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
-import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
 import { NumArray } from './../../../studio/util/NumArray';
 import { AnimatorGumballIK } from './AnimatorGumballIK';

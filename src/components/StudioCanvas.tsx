@@ -3,9 +3,9 @@ import { useKeyComboPressed } from "../contexts/OptionsContext";
 import { useStudio } from "../contexts/StudioContext";
 import { useDirectionalCube } from "../studio/directionalcube/DirectionalCubeHook";
 import { useScreenshotHook } from "../studio/screenshot/ScreenshotHook";
+import { useSelectedCubeManager } from "../studio/selections/SelectedCubeManagerHook";
 import SelectedCubeUndoRedoHandler from "../studio/undoredo/SelectedCubeUndoRedoHandler";
 import { useSelectedCubeHighlighter } from "../studio/util/CubeSelectedHighlighter";
-import { useSelectedCubeManager } from "../studio/util/SelectedCubeManager";
 
 export const RawCanvas = ({ autoChangeSize = true, ...props }: HTMLAttributes<HTMLDivElement> & { autoChangeSize?: boolean }) => {
   const { renderer, setSize } = useStudio()

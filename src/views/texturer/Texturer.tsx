@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import InfoBar from "../../components/InfoBar"
 import { useStudio } from "../../contexts/StudioContext"
-import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
+import { useObjectUnderMouse } from "../../studio/selections/ObjectClickedHook"
 import TexturerProperties from "./components/TexturerProperties"
 import TexturerSidebar from "./components/TexturerSidebar"
 import TexturerTools from "./components/TexturerTools"

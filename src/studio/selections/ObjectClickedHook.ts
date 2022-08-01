@@ -1,22 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Intersection, Object3D } from 'three';
-import { useStudio } from './../../contexts/StudioContext';
-
-const validTypes = ["cube", "refimg", "pointtracker"] as const
-const typeKey = "dumbcode_intersect_type"
-const intersectThrough = "dumbcode_intersect_through"
-const visibleKey = "dumbcode_visible_key"
-
-export const setIntersectType = (object: Object3D, type: typeof validTypes[number], enabled?: () => boolean) => {
-  object.userData[typeKey] = type
-  if (enabled) {
-    object.userData[visibleKey] = enabled
-  }
-}
-
-export const setIntersectThrogh = (object: Object3D, through: boolean) => {
-  object.userData[intersectThrough] = through
-}
+import { useStudio } from '../../contexts/StudioContext';
+import { getIntersectThrough, getIntersectType, hasIntersectTypeAndIsVisible, PartialObject3DMap } from './ObjectClickedDataHandler';
 
 export const useObjectUnderMouse = () => {
   const { renderer, getSelectedProject, getCamera, raycaster, onFrameListeners, onMouseUp } = useStudio()
@@ -41,8 +26,7 @@ export const useObjectUnderMouse = () => {
       for (const group of [overlaySelectionGroup, selectionGroup]) {
         const objects: Object3D[] = []
         group.traverse(o => {
-          const vis = o.userData[visibleKey]
-          if (o.userData[typeKey] && (vis === undefined || vis())) {
+          if (hasIntersectTypeAndIsVisible(o)) {
             objects.push(o)
           }
         })
@@ -56,11 +40,11 @@ export const useObjectUnderMouse = () => {
         cubePointTracker.update(undefined)
         referenceImageHandler.update(undefined)
       } else {
-        const intersectedData: Partial<Record<typeof validTypes[number], Object3D>> = {}
+        const intersectedData: PartialObject3DMap = {}
 
         for (const i of intersected) {
           const object = i.object
-          const type = object.userData[typeKey]
+          const type = getIntersectType(object)
           if (type === "cube" && intersectedData.cube === undefined) {
             intersectedData.cube = object
           } else if (type === "refimg" && intersectedData.refimg === undefined) {
@@ -68,7 +52,7 @@ export const useObjectUnderMouse = () => {
           } else if (type === "pointtracker" && intersectedData.pointtracker === undefined) {
             intersectedData.pointtracker = object
           }
-          if (!object.userData[intersectThrough]) {
+          if (!getIntersectThrough(object)) {
             break
           }
         }

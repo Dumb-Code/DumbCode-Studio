@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneBufferGeometry, Texture } from 'three';
 import { ReadableFile } from '../files/FileTypes';
 import { LO } from '../listenableobject/ListenableObject';
+import { setIntersectType } from '../selections/ObjectClickedDataHandler';
 import { useStudio } from './../../contexts/StudioContext';
 import { NumArray } from './NumArray';
-import { setIntersectType } from './ObjectClickedHook';
 export default class ReferenceImageHandler {
 
   readonly group: Group

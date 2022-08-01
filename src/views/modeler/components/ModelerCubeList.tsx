@@ -11,9 +11,9 @@ import { useTooltipRef } from '../../../contexts/TooltipContext';
 import { DCMCube, DCMModel } from '../../../studio/formats/model/DcmModel';
 import { useListenableObject } from '../../../studio/listenableobject/ListenableObject';
 import { useListenableObjectInMap } from '../../../studio/listenableobject/ListenableObjectMap';
+import SelectedCubeManager from '../../../studio/selections/SelectedCubeManager';
 import { HistoryActionTypes } from '../../../studio/undoredo/UndoRedoHandler';
 import CubeLocker from '../../../studio/util/CubeLocker';
-import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
 
 const CanEditContext = createContext(false)
 

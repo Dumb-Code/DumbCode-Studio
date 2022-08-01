@@ -4,15 +4,15 @@ import { readFromClipboard, writeToClipboard } from "../../clipboard/Clipboard";
 import { writeCubesForClipboard } from "../../clipboard/CubeClipboardType";
 import { LO } from '../../listenableobject/ListenableObject';
 import { LOMap } from "../../listenableobject/ListenableObjectMap";
+import { setIntersectType } from "../../selections/ObjectClickedDataHandler";
+import SelectedCubeManager from "../../selections/SelectedCubeManager";
 import SelectedCubeUndoRedoHandler from "../../undoredo/SelectedCubeUndoRedoHandler";
 import CubeLocker, { LockerType } from "../../util/CubeLocker";
 import LockedCubes from "../../util/LockedCubes";
 import { NumArray } from "../../util/NumArray";
-import SelectedCubeManager from "../../util/SelectedCubeManager";
 import DcProject from '../project/DcProject';
 import { readCubesForClipboard } from './../../clipboard/CubeClipboardType';
 import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
-import { setIntersectType } from './../../util/ObjectClickedHook';
 import { ModelTextureCoordinates } from './ModelTextureCoordinates';
 
 const tempVector = new Vector3()

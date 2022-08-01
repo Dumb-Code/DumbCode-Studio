@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Euler, Event, Group, Matrix4, Object3D, Quaternion, Vector3 } from 'three';
 import { LO, useListenableObject } from '../../../studio/listenableobject/ListenableObject';
-import SelectedCubeManager from '../../../studio/util/SelectedCubeManager';
+import SelectedCubeManager from '../../../studio/selections/SelectedCubeManager';
 import { useStudio } from './../../../contexts/StudioContext';
 import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
 import { HistoryActionTypes } from './../../../studio/undoredo/UndoRedoHandler';
