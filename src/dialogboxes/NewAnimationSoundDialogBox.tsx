@@ -19,7 +19,7 @@ const NewAnimationSoundDialogBox = ({ layer }: { layer: DcaSoundLayer }) => {
     <OpenedDialogBox width="800px" height="800px" title="New Animation Sound">
       <div className="flex flex-col p-5 h-full">
         <div className="font-semibold mb-5">Pick Sound:</div>
-        <div className="flex flex-col flex-grow bg-gray-200  dark:bg-gray-700">
+        <div className="flex flex-col flex-grow bg-gray-200 overflow-y-scroll dark:bg-gray-700">
           {allSounds.map(s => (
             <div
               onClick={() => pickSound(s)}
