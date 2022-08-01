@@ -4,6 +4,7 @@ import DcProject, { newProject } from '../studio/formats/project/DcProject';
 import { createThreeContext, ThreeJsContext } from './ThreeContext';
 
 export type StudioContext = {
+
   projects: DcProject[],
   addProject: (project: DcProject) => void,
   removeProject: (project: DcProject) => void,
