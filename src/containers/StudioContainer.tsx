@@ -21,13 +21,6 @@ import Showcase from "../views/showcase/Showcase";
 import TextureMapper from "../views/texturemapper/Texturemapper";
 import Texturer from "../views/texturer/Texturer";
 
-//Fix an issue with FIK
-if (typeof window !== "undefined") {
-  //@ts-expect-error
-  window['FIK'] = require('@aminere/fullik')
-  window['THREE'] = require('three')
-}
-
 export const StudioTabs = [
   // { name: "options", titleComponent: () => <SVGSettings className="w-5 h-5 px-0.5" />, color: "bg-red-500", component: () => <Options />, extraClasses: "w-9 transform translate-y-1.5" },
   { name: "Project", color: "bg-purple-600 hover:bg-purple-700", component: () => <Project /> },

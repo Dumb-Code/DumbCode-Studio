@@ -1,4 +1,4 @@
-import { Bone3D, Chain3D, Structure3D, V3 } from "@aminere/fullik";
+import { Bone3D, Chain3D, Structure3D, V3 } from "fullik";
 import { Euler, Quaternion, Vector3 } from "three";
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import DcaAnimation, { DcaKeyframe, ProgressionPoint } from "../../../studio/formats/animations/DcaAnimation";

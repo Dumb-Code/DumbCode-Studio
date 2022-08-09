@@ -12,6 +12,9 @@ export class TextureGLManager {
   private readonly framebuffer = this.gl.createFramebuffer()
 
   static getInstance() {
+    if (typeof window === "undefined") {
+      throw new Error("Can't get instance in node")
+    }
     if (TextureGLManager.instance === null) {
       TextureGLManager.instance = new TextureGLManager()
     }

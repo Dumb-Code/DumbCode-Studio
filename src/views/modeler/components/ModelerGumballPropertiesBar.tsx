@@ -4,7 +4,7 @@ import { ButtonList, GumballButton, GumballToggle } from "../../../components/Gu
 import { useStudio } from "../../../contexts/StudioContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
 import { useListenableObject } from "../../../studio/listenableobject/ListenableObject";
-import ReferenceImageHandler from "../../../studio/util/ReferenceImageHandler";
+import ReferenceImageHandler from "../../../studio/referenceimages/ReferenceImageHandler";
 import { ModelerGumball } from "../logic/ModelerGumball";
 
 const ModelerGumballPropertiesBar = () => {
