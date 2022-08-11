@@ -678,7 +678,9 @@ export class DCMCube implements CubeParent {
       heightU *= -1
     }
 
-    const off = 0.001
+    //Prevent small 1px gaps between faces
+    const offW = 0.01 / tw
+    const offH = 0.01 / th
 
     let uMin = (u + offU) / tw
     let vMin = (v + offV) / th
@@ -686,19 +688,19 @@ export class DCMCube implements CubeParent {
     let vMax = (v + offV + heightV) / th
 
     if (uMin < uMax) {
-      uMin += off
-      uMax -= off
+      uMin += offW
+      uMax -= offW
     } else {
-      uMin -= off
-      uMax += off
+      uMin -= offW
+      uMax += offW
     }
 
     if (vMin < vMax) {
-      vMin += off
-      vMax -= off
+      vMin += offH
+      vMax -= offH
     } else {
-      vMin -= off
-      vMax += off
+      vMin -= offH
+      vMax += offH
     }
 
     this.uvBuffer.set([
