@@ -10,9 +10,9 @@ import { fitAreaWithinBounds } from '../../util/Utils';
 import DcProject, { removeFileExtension } from '../project/DcProject';
 import { ListenableFile, readFileArrayBuffer } from './../../files/FileTypes';
 import { DCMCube, DCMModel } from './../model/DcmModel';
-import { loadFromPsdFile } from './PhotoshopManager';
 import { TextureGLManager } from './TextureGLManager';
 import TextureLayer from './TextureLayer';
+import { loadFromPsdFile } from './TexturePhotoshopManager';
 
 export default class TextureManager {
   readonly project: DcProject
@@ -267,6 +267,9 @@ export class TextureGroup {
   readonly folderName: LO<string>
   readonly textures = new LO<readonly string[]>([])
   readonly unselectedTextures = new LO<readonly string[]>([])
+
+  readonly psdData = new LO<Psd | null>(null)
+
   isDefault: boolean
 
   constructor(
