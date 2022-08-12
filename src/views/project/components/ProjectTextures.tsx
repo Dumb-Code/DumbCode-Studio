@@ -9,6 +9,7 @@ import { useStudio } from "../../../contexts/StudioContext"
 import { useToast } from "../../../contexts/ToastContext"
 import { FileSystemsAccessApi, ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
 import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
+import { saveGroupToPhotoshopFile } from "../../../studio/formats/textures/GroupPhotoshopManager"
 import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats/textures/TextureManager"
 import { saveToPhotoshopFile } from "../../../studio/formats/textures/TexturePhotoshopManager"
 import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
@@ -88,6 +89,17 @@ const GroupList = ({ project }: { project: DcProject }) => {
 
 const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureGroup, selected: boolean, onClick: () => void, removeGroup: () => void }) => {
 
+    const { photoshopEnabled } = useOptions()
+
+    const { addToast } = useToast()
+
+    const saveToPhotoshopFile = useCallback(async () => {
+        if (!photoshopEnabled) {
+            return
+        }
+        const name = await group.psdFile.write(`${group.name.value}.psd`, saveGroupToPhotoshopFile(group))
+        addToast(`Saved ${name}`, "success")
+    }, [group, photoshopEnabled, addToast])
 
     const iconClassName = (
         selected ?
@@ -99,6 +111,11 @@ const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureG
         <div onClick={onClick} className={(selected ? "bg-green-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " my-1 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row"}>
             <DblClickEditLO obj={group.name} disabled={group.isDefault} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
             <p className="mr-2 flex flex-row text-white">
+                {photoshopEnabled &&
+                    <ButtonWithTooltip onClick={saveToPhotoshopFile} className={iconClassName + " mr-1"} tooltip="Save to Photoshop">
+                        <SvgPhotoshop className="h-4 w-4" />
+                    </ButtonWithTooltip>
+                }
                 <ButtonWithTooltip
                     className={iconClassName + (group.isDefault ? '' : 'mr-1')}
                     tooltip="Download Group">

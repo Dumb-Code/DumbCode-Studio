@@ -28,15 +28,22 @@ export const loadFromPsdFile = async (arrayBuffer: ArrayBuffer): Promise<[HTMLIm
     return Promise.reject("No image data found in PSD file")
   }
 
-  const textureLayer = new TextureLayer()
   //If the number of channels is 3 and we have one children, it's probaly because we wrote this psd.
   //Therefore, due to fucky wucky stuff, we can't read the main image data, but we can just read the first child, as 
   //we assume that we wrote it
-  textureLayer.setBackground(psd.channels === 3 && psd.children?.length === 1 ? psd.children[0].imageData ?? psd.imageData : psd.imageData)
+  const imgData = psd.channels === 3 && psd.children?.length === 1 ? psd.children[0].imageData ?? psd.imageData : psd.imageData
+
+  const img = await imageDataToHTMLElement(imgData)
+  return [img, psd]
+}
+
+export const imageDataToHTMLElement = async (imgData: ImageData): Promise<HTMLImageElement> => {
+  const textureLayer = new TextureLayer()
+  textureLayer.setBackground(imgData)
   const dataUrl = await textureLayer.toDataURL()
-  const image = new Image()
-  return new Promise<[HTMLImageElement, Psd]>((resolve, reject) => {
-    image.onload = () => resolve([image, psd])
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
     image.onerror = reject
     image.src = dataUrl
   })

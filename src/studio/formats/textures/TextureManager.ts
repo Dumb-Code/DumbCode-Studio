@@ -10,6 +10,7 @@ import { fitAreaWithinBounds } from '../../util/Utils';
 import DcProject, { removeFileExtension } from '../project/DcProject';
 import { ListenableFile, readFileArrayBuffer } from './../../files/FileTypes';
 import { DCMCube, DCMModel } from './../model/DcmModel';
+import { loadGroupFromPsdFile } from './GroupPhotoshopManager';
 import { TextureGLManager } from './TextureGLManager';
 import TextureLayer from './TextureLayer';
 import { loadFromPsdFile } from './TexturePhotoshopManager';
@@ -270,6 +271,9 @@ export class TextureGroup {
 
   readonly psdData = new LO<Psd | null>(null)
 
+  psdFile = getUndefinedWritable("Photoshop file", ".psd")
+  psdFileData: ListenableFileData | null = null
+
   isDefault: boolean
 
   constructor(
@@ -290,6 +294,23 @@ export class TextureGroup {
     this.textures.addListener(onDirty)
     this.unselectedTextures.addListener(onDirty)
 
+    this.setPsdFile(this.psdFile)
+  }
+
+  setPsdFile = async (file: WritableFile) => {
+    this.psdFile = file
+
+    if (this.psdFileData !== null) {
+      this.psdFileData.dispose()
+    }
+    this.psdFileData = await file.startListening(this.manager.project.fileChangeListener)
+    if (this.psdFileData !== null) {
+      this.psdFileData.onChange = async file => {
+        UnsafeOperations._unsafe_AddToast(`${file.name} has changed. Reloading...`, "info")
+        const psd = await loadGroupFromPsdFile(await file.arrayBuffer(), this)
+        this.psdData.value = psd
+      }
+    }
   }
 
   toggleTexture(texture: Texture, isInGroup: boolean, after?: string) {
@@ -407,6 +428,7 @@ export class Texture {
     }
     if (listenable !== null) {
       listenable.onChange = async (file) => {
+        UnsafeOperations._unsafe_AddToast(`${file.name} has changed. Reloading...`, "info")
         const [img, psd] = await this.manager.loadTextureFromFile(file)
         this.element.value = img
         this.psdData.value = psd

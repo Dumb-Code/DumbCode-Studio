@@ -1,5 +1,6 @@
 import { Layer, Psd, readPsd, writePsd } from 'ag-psd';
 import { Texture, TextureGroup } from './TextureManager';
+import { imageDataToHTMLElement } from './TexturePhotoshopManager';
 
 export const writeGroupToPhotoshopObject = (group: TextureGroup): Psd => {
   const textures = group.textures.value.map(t => group.manager.findTexture(t))
@@ -25,27 +26,108 @@ export const saveGroupToPhotoshopFile = (group: TextureGroup): Blob => {
   return new Blob([arrayBuffer], { type: "image/psd" })
 }
 
+const combinePixel = (src: Uint8ClampedArray, dest: Uint8ClampedArray, srcIndex: number, destIndex: number) => {
+  const r1 = src[srcIndex] / 255
+  const g1 = src[srcIndex + 1] / 255
+  const b1 = src[srcIndex + 2] / 255
+  const a1 = src[srcIndex + 3] / 255
+
+  const r2 = dest[destIndex] / 255
+  const g2 = dest[destIndex + 1] / 255
+  const b2 = dest[destIndex + 2] / 255
+  const a2 = dest[destIndex + 3] / 255
+
+  const r = (1 - a1) * r1 + a1 * r2
+  const g = (1 - a1) * g1 + a1 * g2
+  const b = (1 - a1) * b1 + a1 * b2
+  const a = (1 - a1) * a1 + a1 * a2
+
+  //TODO: for some reason the source is always black. TODO: look into this
+  dest[destIndex] = Math.floor(r * 255)
+  dest[destIndex + 1] = Math.floor(g * 255)
+  dest[destIndex + 2] = Math.floor(b * 255)
+  dest[destIndex + 3] = Math.floor(a * 255)
+}
+
+const addOntoLayer = (dest: ImageData, src: ImageData, left: number, top: number) => {
+  for (let y = 0; y < src.height; y++) {
+    for (let x = 0; x < src.width; x++) {
+      const srcIndex = (y * src.width + x) * 4
+      const destIndex = ((y + top) * dest.width + (x + left)) * 4
+      combinePixel(src.data, dest.data, srcIndex, destIndex)
+    }
+  }
+}
+
+type OffsetImageData = {
+  data: ImageData,
+  left: number,
+  top: number
+}
+
+const gatherAllImgDatas = (layer: Layer, left = 0, top = 0) => {
+  const images: OffsetImageData[] = []
+  if (layer.imageData) {
+    images.push({
+      data: layer.imageData,
+      left: left + (layer.left ?? 0),
+      top: top + (layer.top ?? 0)
+    })
+  }
+  if (layer.children) {
+    for (const child of layer.children) {
+      images.push(...gatherAllImgDatas(child, layer.left ?? 0, layer.top ?? 0))
+    }
+  }
+  return images
+}
+
+const combine = (images: OffsetImageData[], psd: Psd, width: number, height: number) => {
+  const dest = new ImageData(psd.width, psd.height)
+  for (const image of images) {
+    addOntoLayer(dest, image.data, image.left, image.top)
+  }
+  return dest
+}
+const createImgData = (layer: Layer, psd: Psd, width: number, height: number) => {
+  const images = gatherAllImgDatas(layer)
+  if (images.length === 0) {
+    return new ImageData(width, height)
+  }
+
+  return combine(images, psd, width, height)
+}
+
 export const loadGroupFromPsdFile = async (arrayBuffer: ArrayBuffer, group: TextureGroup) => {
   const psd = readPsd(arrayBuffer, { useImageData: true })
 
   if (!psd.children) {
-    return Promise.reject("No children found in PSD file")
+    return psd
   }
+
 
   const textures = group.textures.value.map(t => group.manager.findTexture(t))
 
   const managedTextures: Texture[] = []
 
-  psd.children.forEach((child) => {
+  const promises = psd.children.map(async (child) => {
     const texture = textures.find(t => t.name.value.toLowerCase() === child.name?.toLowerCase() && managedTextures.indexOf(t) === -1)
-    if (!texture || !child.imageData) {
+    if (!texture) {
       return
     }
-    texture.canvas.setBackground(child.imageData)
+    const imgData = createImgData(child, psd, texture.width, texture.height)
+    texture.element.value = await imageDataToHTMLElement(imgData)
   })
+
+  await Promise.all(promises)
+
+  return psd
 }
 
 const resizeTexture = (from: Uint8ClampedArray, fromWidth: number, fromHeight: number, toWidth: number, toHeight: number) => {
+  if (fromWidth === toWidth && fromHeight === toHeight) {
+    return from
+  }
   const to = new Uint8ClampedArray(toWidth * toHeight * 4)
   for (let y = 0; y < toHeight; y++) {
     for (let x = 0; x < toWidth; x++) {
