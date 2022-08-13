@@ -2,6 +2,7 @@ import Image from "next/image";
 import { createContext, MouseEvent as ReactMouseEvent, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { SvgArrows, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGSettings, SVGUnlocked } from "../../../components/Icons";
 import { useCreatePortal } from "../../../contexts/CreatePortalContext";
+import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useToast } from "../../../contexts/ToastContext";
 import { useTooltipRef } from "../../../contexts/TooltipContext";
@@ -426,6 +427,8 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
         dialogBox.setDialogBox(() => <KeyframeLayerDialogBox layer={layer} />)
     }
 
+    const { largeKeyframesEnabled, setLargeKeyframesEnabled } = useOptions();
+
     return (
         <AnimationTimelineLayer
             animation={animation}
@@ -433,7 +436,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
             deleteLayer={deleteKeyframeLayer}
             getDuration={getDuration}
             getStartTime={getStartTime}
-            getHeight={maxLayer => maxLayer <= 2 ? 1.5 : 1.5 + ((maxLayer - 2) * .75)}
+            getHeight={maxLayer => maxLayer <= 2 ? (largeKeyframesEnabled ? 3 : 1.5) : (largeKeyframesEnabled ? 3 : 1.5) + ((maxLayer - 2) * (largeKeyframesEnabled ? 1.5 : .75))}
             containerProps={draggingRef => ({
                 onMouseMoveCapture: e => { //We need to listen on capture, as we need to capture the event BEFORE it reaches the keyframe and is cancled.
                     if (draggingRef.current !== null) {
@@ -592,6 +595,8 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
         return () => removeListener(updateRefStyle)
     }, [addAndRunListener, removeListener, updateRefStyle])
 
+    const { largeKeyframesEnabled, setLargeKeyframesEnabled } = useOptions();
+
     return (
         <div
             ref={keyframeHandleRef}
@@ -603,7 +608,7 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, ho
             className={"h-3 absolute group select-none " + (isLocked ? "pointer-events-none" : "cursor-pointer")}
         >
             <div
-                className={"h-1 mt-1 mb-1 " + (isLocked ? "bg-gray-500" : (selected ? " bg-red-200 group-hover:bg-white" : `${layerColor} ${hoverColor}`))}
+                className={(largeKeyframesEnabled ? "h-3 rounded-full" : "h-1") + " mt-1 mb-1 " + (isLocked ? "bg-gray-500" : (selected ? " bg-red-200 group-hover:bg-white" : `${layerColor} ${hoverColor}`))}
             >
 
             </div>

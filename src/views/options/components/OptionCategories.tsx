@@ -1,4 +1,5 @@
 import { unsafe_getKeyComboCategories } from "../../../studio/keycombos/KeyCombos";
+import LargeKeyframes from "./categories/accessibility/LargeKeyframes";
 import ReducedAnimations from "./categories/accessibility/ReducedAnimations";
 import LinkedGithubAccount from "./categories/account/LinkedGithubAccount";
 import CompactModeSelection from "./categories/appearance/CompactModeSelection";
@@ -51,7 +52,7 @@ export const OptionCategories: Record<string, OptionCategory> = {
   accessibility: {
     shortName: "Accessibility",
     title: "Accessibility Options",
-    sections: [ReducedAnimations]
+    sections: [ReducedAnimations, LargeKeyframes]
   },
   keyBindOptions: {
     shortName: "Key Binds",
