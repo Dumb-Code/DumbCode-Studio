@@ -19,7 +19,7 @@ export const SplitViewport = ({ children, otherName, selectedCubeHandlerUndoRedo
         )}
         {showOther && (
           <div className=" dark:bg-gray-700 bg-gray-200 w-full border-l dark:border-black border-white group">
-            <button className="dark:bg-gray-900 bg-gray-300 absolute z-10 px-4 rounded-br dark:text-gray-400 text-black pr-1" onDoubleClick={() => setShowModel(!showModel)}>{otherName}</button>
+            <button className="dark:bg-gray-900 bg-gray-300 absolute z-10 px-4 rounded-br dark:text-gray-400 text-black" onDoubleClick={() => setShowModel(!showModel)}>{otherName}</button>
             {children}
           </div>
         )}
