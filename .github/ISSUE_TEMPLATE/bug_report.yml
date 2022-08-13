@@ -27,11 +27,11 @@ body:
       label: What browsers have you tested on?
       multiple: true
       options:
-        - label: Firefox
-        - label: Chrome
-        - label: Safari
-        - label: Microsoft Edge
-        - label: Other
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+        - Other
     validations:
       required: true
   - type: dropdown
@@ -40,9 +40,9 @@ body:
       label: What operating system are you using?
       multiple: true
       options:
-        - label: Windows
-        - label: MacOS
-        - label: Linux
+        - Windows
+        - MacOS
+        - Linux
     validations:
       required: true
   - type: dropdown
@@ -51,13 +51,13 @@ body:
       label: What Studio tabs does this issue concern?
       multiple: true
       options:
-        - label: Settings/Configuration
-        - label: Project
-        - label: Modeler
-        - label: Mapper
-        - label: Texturer
-        - label: Animator
-        - label: Showcase
+        - Settings/Configuration
+        - Project
+        - Modeler
+        - Mapper
+        - Texturer
+        - Animator
+        - Showcase
     validations:
       required: true
   - type: markdown
