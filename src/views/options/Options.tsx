@@ -33,7 +33,7 @@ const Options = () => {
     return (
         <div className="flex flex-row h-full">
             <div className="flex flex-col w-1/4 dark:bg-gray-800 bg-gray-200 pt-8 items-end">
-                <p className="dark:text-black text-gray-600 font-semibold text-xs w-44 pl-2 mb-1">APP SETTINGS</p>
+                <p className="dark:text-gray-400 text-black font-semibold text-xs w-44 pl-2 mb-1">APP SETTINGS</p>
                 {OptionCategoryKeys.map(tab =>
                     <OptionsPageButton
                         key={tab}
