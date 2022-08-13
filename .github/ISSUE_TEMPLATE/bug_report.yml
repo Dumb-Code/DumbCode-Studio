@@ -21,11 +21,11 @@ body:
         - Release (studio.dumbcode.net)
     validations:
       required: true
-  - type: checkboxes
+  - type: dropdown
     id: browsers
     attributes:
       label: What browsers have you tested on?
-      description: You may select more than one.
+      multiple: true
       options:
         - label: Firefox
         - label: Chrome
@@ -34,22 +34,22 @@ body:
         - label: Other
     validations:
       required: true
-  - type: checkboxes
+  - type: dropdown
     id: operating-systems
     attributes:
       label: What operating system are you using?
-      description: You may select more than one.
+      multiple: true
       options:
         - label: Windows
         - label: MacOS
         - label: Linux
     validations:
       required: true
-  - type: checkboxes
+  - type: dropdown
     id: tabs
     attributes:
       label: What Studio tabs does this issue concern?
-      description: You may select more than one.
+      multiple: true
       options:
         - label: Settings/Configuration
         - label: Project

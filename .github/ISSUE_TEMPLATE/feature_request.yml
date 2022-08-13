@@ -11,11 +11,11 @@ body:
     attributes:
       value: |
         Before describing your idea to us, help us categorize your request in the following sections.
-  - type: checkboxes
+  - type: dropdown
     id: tabs
     attributes:
       label: What Studio tabs does this request concern?
-      description: You may select more than one.
+      multiple: true
       options:
         - label: Settings/Configuration
         - label: Project
