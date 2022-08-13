@@ -17,14 +17,14 @@ const NewAnimationSoundDialogBox = ({ layer }: { layer: DcaSoundLayer }) => {
 
   return (
     <OpenedDialogBox width="800px" height="800px" title="New Animation Sound">
-      <div className="flex flex-col p-5 h-full">
+      <div className="flex flex-col p-4 h-full">
         <div className="font-semibold mb-5">Pick Sound:</div>
-        <div className="flex flex-col flex-grow bg-gray-200 overflow-y-scroll dark:bg-gray-700">
+        <div className="flex flex-col flex-grow overflow-y-scroll studio-scrollbar">
           {allSounds.map(s => (
             <div
               onClick={() => pickSound(s)}
               key={s.identifier}
-              className="hover:bg-blue-500  dark:hover:bg-blue-700 mt-2 first:mt-0 p-1"
+              className="mt-2 first:mt-0 pr-4"
             >
               <StudioSoundPlayableEntry sound={s} />
             </div>

@@ -21,7 +21,7 @@ const KeyframeLayerDialogBox = ({ layer }: { layer: KeyframeLayerData }) => {
   }
 
   return (
-    <OpenedDialogBox width="800px" height="800px" title="Reference Images">
+    <OpenedDialogBox width="800px" height="800px" title="Layer Settings">
       <div className="flex flex-row items-center">
         <div className="mx-2">Keyframe Layer Mode:</div>
         <select onChange={onSelectChange} defaultValue={isDefined ? defined : addative} className="dark:bg-gray-700">
