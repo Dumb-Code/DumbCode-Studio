@@ -193,7 +193,7 @@ const TextureMapperViewport = () => {
                 onMouseMoveGlobally={onMouseMoveGlobally}
                 onMouseUpGlobally={onMouseUpGlobally}
                 computeOffset={computeOffset}
-                backgroundStyle="hsl(0, 0%, 10%)"
+                backgroundStyle="hsl(0, 0%, 15%)"
                 defaultScaleOut={1.1}
             >
                 {root.map(cube => <TextureMapperVisualCube key={cube.identifier} cube={cube} textureWidth={textureWidth} textureHeight={textureHeight} />)}
