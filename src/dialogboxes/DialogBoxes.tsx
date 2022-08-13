@@ -3,6 +3,7 @@ import React, { Fragment, PropsWithChildren, useCallback, useContext, useEffect,
 import { SVGCross } from "../components/Icons"
 import { useOptions } from "../contexts/OptionsContext"
 import UnsafeOperations from "../studio/util/UnsafeOperations"
+import ReferenceImageDialogBox from "./ReferenceImageDialogBox"
 
 type DialogContextType = {
   setDialogBox: (val: () => JSX.Element) => void
@@ -22,6 +23,8 @@ type JSXSetter = (val: () => JSX.Element) => void
 let currentSetter: JSXSetter | null = null
 
 UnsafeOperations._unsafe_setDialogBox = val => currentSetter?.(val)
+UnsafeOperations._unsafe_OpenReferenceImage = () => currentSetter?.(() => <ReferenceImageDialogBox />)
+
 
 const DialogBoxes = ({ children }: PropsWithChildren<{}>) => {
   const [ElementFunc, setElementFunc] = useState<null | (() => JSX.Element)>(null)

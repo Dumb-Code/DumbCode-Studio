@@ -1,12 +1,10 @@
 import type { ThreeJsContext } from './../../contexts/ThreeContext';
 const UnsafeOperations = {
 
-  //Set in DialogBoxes
+  //Both set in DialogBoxes
   _unsafe_setDialogBox: (val: () => JSX.Element): void => {
     throw new Error("_unsafe_setDialogBox is not set")
   },
-
-  //Set in ReferenceImageDialogBox.ts
   _unsafe_OpenReferenceImage: (): void => {
     throw new Error("_unsafe_OpenReferenceImage has not been set")
   },

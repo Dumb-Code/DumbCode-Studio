@@ -6,7 +6,6 @@ import Toggle from "../components/Toggle"
 import { useStudio } from "../contexts/StudioContext"
 import { useListenableObject } from "../studio/listenableobject/ListenableObject"
 import { ReferenceImage } from "../studio/referenceimages/ReferenceImageHandler"
-import UnsafeOperations from "../studio/util/UnsafeOperations"
 import { OpenedDialogBox } from "./DialogBoxes"
 
 const imageExtensions = [".png", ".jpeg", ".gif"]
@@ -72,7 +71,5 @@ const ReferenceImageEntry = ({ image }: { image: ReferenceImage }) => {
     </div>
   )
 }
-
-UnsafeOperations._unsafe_OpenReferenceImage = () => UnsafeOperations._unsafe_setDialogBox(() => <ReferenceImageDialogBox />)
 
 export default ReferenceImageDialogBox
