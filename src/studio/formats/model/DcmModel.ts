@@ -4,15 +4,15 @@ import { readFromClipboard, writeToClipboard } from "../../clipboard/Clipboard";
 import { writeCubesForClipboard } from "../../clipboard/CubeClipboardType";
 import { LO } from '../../listenableobject/ListenableObject';
 import { LOMap } from "../../listenableobject/ListenableObjectMap";
+import { setIntersectType } from "../../selections/ObjectClickedDataHandler";
+import SelectedCubeManager from "../../selections/SelectedCubeManager";
 import SelectedCubeUndoRedoHandler from "../../undoredo/SelectedCubeUndoRedoHandler";
 import CubeLocker, { LockerType } from "../../util/CubeLocker";
 import LockedCubes from "../../util/LockedCubes";
 import { NumArray } from "../../util/NumArray";
-import SelectedCubeManager from "../../util/SelectedCubeManager";
 import DcProject from '../project/DcProject';
 import { readCubesForClipboard } from './../../clipboard/CubeClipboardType';
 import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHandler';
-import { setIntersectType } from './../../util/ObjectClickedHook';
 import { ModelTextureCoordinates } from './ModelTextureCoordinates';
 
 const tempVector = new Vector3()
@@ -678,7 +678,9 @@ export class DCMCube implements CubeParent {
       heightU *= -1
     }
 
-    const off = 0.001
+    //Prevent small 1px gaps between faces
+    const offW = 0.01 / tw
+    const offH = 0.01 / th
 
     let uMin = (u + offU) / tw
     let vMin = (v + offV) / th
@@ -686,19 +688,19 @@ export class DCMCube implements CubeParent {
     let vMax = (v + offV + heightV) / th
 
     if (uMin < uMax) {
-      uMin += off
-      uMax -= off
+      uMin += offW
+      uMax -= offW
     } else {
-      uMin -= off
-      uMax += off
+      uMin -= offW
+      uMax += offW
     }
 
     if (vMin < vMax) {
-      vMin += off
-      vMax -= off
+      vMin += offH
+      vMax -= offH
     } else {
-      vMin -= off
-      vMax += off
+      vMin -= offH
+      vMax += offH
     }
 
     this.uvBuffer.set([

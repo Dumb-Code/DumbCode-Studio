@@ -4,12 +4,12 @@ import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
-import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
+import { useObjectUnderMouse } from "../../studio/selections/ObjectClickedHook"
 import ModelerGumballPropertiesBar from "./components/ModelerGumballPropertiesBar"
 import ModelerShortcuts from "./components/ModelerShortcuts"
 import ModelerSidebar from "./components/ModelerSidebar"
-import { usePointTracking } from "./logic/CubePointTracker"
-import { useModelerGumball } from "./logic/ModelerGumball"
+import { usePointTracking } from "./logic/CubePointTrackerHook"
+import { useModelerGumball } from "./logic/ModelerGumballHook"
 
 const Modeler = () => {
     const { getSelectedProject, onFrameListeners } = useStudio()

@@ -3,14 +3,14 @@ import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useStudio } from "../../contexts/StudioContext"
 import { useListenableObject } from "../../studio/listenableobject/ListenableObject"
+import { useObjectUnderMouse } from "../../studio/selections/ObjectClickedHook"
 import { ShowcaseLight } from "../../studio/showcase/ShowcaseLight"
 import ShowcaseView from "../../studio/showcase/ShowcaseView"
-import { useObjectUnderMouse } from "../../studio/util/ObjectClickedHook"
 import AnimatorGumballPropertiesBar from "../animator/components/AnimatorGumballPropertiesBar"
 import ShowcaseEffects from "./components/ShowcaseEffects"
 import ShowcaseSidebar from "./components/ShowcaseSidebar"
 import ShowcaseViewBar from "./components/ShowcaseViewBar"
-import { useShowcaseGumball } from "./logic/ShowcaseGumball"
+import { useShowcaseGumball } from "./logic/ShowcaseGumballHook"
 
 const Showcase = () => {
   const { scene, lightGroup, itemsGroup, getSelectedProject, onFrameListeners, renderer, controls, getCamera } = useStudio()

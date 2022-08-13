@@ -1,11 +1,8 @@
-import { useEffect } from 'react';
 import { BoxBufferGeometry, Camera, EventDispatcher, Group, Mesh, MeshLambertMaterial, Object3D, Vector3 } from "three";
-import { setIntersectType } from '../../../studio/util/ObjectClickedHook';
-import SelectedCubeManager from "../../../studio/util/SelectedCubeManager";
+import { setIntersectThrough, setIntersectType } from '../../../studio/selections/ObjectClickedDataHandler';
+import SelectedCubeManager from "../../../studio/selections/SelectedCubeManager";
 import { scaleMeshToCamera } from '../../../studio/util/Utils';
-import { useStudio } from './../../../contexts/StudioContext';
 import { DCMCube, DCMModel } from './../../../studio/formats/model/DcmModel';
-import { setIntersectThrogh as setIntersectThrough } from './../../../studio/util/ObjectClickedHook';
 
 const _defaultNormalColor = 0x23284d
 const _defaultHighlightColor = 0x15c1d4
@@ -226,28 +223,3 @@ export default class CubePointTracker extends EventDispatcher {
   }
 }
 
-export const usePointTracking = () => {
-  const { onMouseUp, onFrameListeners, getSelectedProject, raycaster } = useStudio()
-  const { cubePointTracker, modelerGumball } = getSelectedProject()
-
-  useEffect(() => {
-    const onEnableEvent = () => {
-      const reasons = modelerGumball.blockedReasons.value
-      if (!reasons.includes("point_tracker")) {
-        modelerGumball.blockedReasons.value = modelerGumball.blockedReasons.value.concat("point_tracker")
-      }
-    }
-    const onDisableEvent = () => {
-      const reasons = modelerGumball.blockedReasons.value
-      if (reasons.includes("point_tracker")) {
-        modelerGumball.blockedReasons.value = modelerGumball.blockedReasons.value.filter(v => v !== "point_tracker")
-      }
-    }
-    cubePointTracker.addEventListener("enable", onEnableEvent)
-    cubePointTracker.addEventListener("disable", onDisableEvent)
-    return () => {
-      cubePointTracker.removeEventListener("enable", onEnableEvent)
-      cubePointTracker.removeEventListener("disable", onDisableEvent)
-    }
-  }, [onMouseUp, cubePointTracker, onFrameListeners, raycaster, modelerGumball])
-}

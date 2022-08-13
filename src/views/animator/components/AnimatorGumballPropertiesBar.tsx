@@ -4,7 +4,8 @@ import { ButtonList, GumballButton, GumballToggle } from "../../../components/Gu
 import { useTooltipRef } from "../../../contexts/TooltipContext";
 import AnimatorGumballConsumer from "../../../studio/formats/animations/AnimatorGumballConsumer";
 import { useListenableObject, useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject";
-import { AnimatorGumball, useAnimatorGumball } from "../logic/AnimatorGumball";
+import { AnimatorGumball } from "../logic/AnimatorGumball";
+import { useAnimatorGumball } from "../logic/AnimatorGumballHook";
 
 const AnimatorGumballPropertiesBar = ({ consumer }: { consumer: AnimatorGumballConsumer | null | undefined }) => {
     //We want to force a refresh on useAnimatorGumball as little as possible

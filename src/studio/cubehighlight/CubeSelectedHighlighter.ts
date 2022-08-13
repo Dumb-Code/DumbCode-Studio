@@ -1,8 +1,6 @@
-import { useEffect } from 'react';
 import { BoxBufferGeometry, Camera, EdgesGeometry, Group, LineBasicMaterial, LineSegments, Matrix4, Mesh, MeshBasicMaterial, SphereBufferGeometry, Vector3 } from "three";
-import { useStudio } from "../../contexts/StudioContext";
-import { DCMCube, DCMModel } from './../formats/model/DcmModel';
-import { scaleMeshToCamera } from './Utils';
+import { DCMCube, DCMModel } from '../formats/model/DcmModel';
+import { scaleMeshToCamera } from '../util/Utils';
 
 const tempPos = new Vector3()
 
@@ -92,15 +90,3 @@ export class CubeSelectedHighlighter {
 
 }
 
-export const useSelectedCubeHighlighter = () => {
-  const { getSelectedProject, onFrameListeners, getCamera } = useStudio()
-  const project = getSelectedProject()
-
-  useEffect(() => {
-    const onFrame = () => project.cubeHighlighter.onFrame(getCamera())
-    onFrameListeners.add(onFrame)
-    return () => {
-      onFrameListeners.delete(onFrame)
-    }
-  }, [project, getCamera, onFrameListeners])
-}

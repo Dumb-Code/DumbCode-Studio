@@ -1,5 +1,5 @@
 import { supportedSoundExtensions } from '../../../views/project/components/ProjectSounds';
-import { ReferenceImage } from '../../util/ReferenceImageHandler';
+import { ReferenceImage } from '../../referenceimages/ReferenceImageHandler';
 import { TextureGroup } from '../textures/TextureManager';
 import { imgSourceToElement } from './../../util/Utils';
 import { loadUnknownAnimation } from './../animations/DCALoader';

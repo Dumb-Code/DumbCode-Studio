@@ -1,4 +1,4 @@
-import { Bone3D, Chain3D, Structure3D, V3 } from "@aminere/fullik";
+import { Bone3D, Chain3D, Structure3D, V3 } from "fullik";
 import { BoxGeometry, BufferAttribute, BufferGeometry, Euler, Group, Line, LineBasicMaterial, Mesh, MeshLambertMaterial, Object3D, Quaternion, Vector3 } from 'three';
 import AnimatorGumballConsumer, { AnimatorGumballConsumerPart } from "../../../studio/formats/animations/AnimatorGumballConsumer";
 import { CubeParent, DCMCube } from './../../../studio/formats/model/DcmModel';

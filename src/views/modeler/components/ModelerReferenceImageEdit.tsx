@@ -5,8 +5,9 @@ import NumericInput from '../../../components/NumericInput';
 import Toggle from "../../../components/Toggle";
 import { DCMModel } from "../../../studio/formats/model/DcmModel";
 import { LO, useListenableObject, useListenableObjectNullable } from "../../../studio/listenableobject/ListenableObject";
+import { ReferenceImage } from "../../../studio/referenceimages/ReferenceImageHandler";
+import { useReferenceImageTransform } from "../../../studio/referenceimages/ReferenceImageHandlerHook";
 import { NumArray } from '../../../studio/util/NumArray';
-import { ReferenceImage, useReferenceImageTransform } from "../../../studio/util/ReferenceImageHandler";
 
 const ModelerReferenceImageEdit = ({ model, image }: { model: DCMModel, image: ReferenceImage }) => {
 
