@@ -1,16 +1,23 @@
 import { GetStaticPaths, GetStaticProps } from "next";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from 'next-mdx-remote/serialize';
+import Test from "../../../../components/docs/Test";
 import { Doc, getAllDocFiles } from "../../../../lib/docs/DocsFileManager";
 import parseDoc from "../../../../lib/docs/parseDoc";
 import SupportedLanguages, { SupportedLanguage } from "../../../../lib/lang/SupportedLanguages";
 
 type Props = {
-  content: Doc //TODO render the doc
+  content: Doc<MDXRemoteSerializeResult>
 }
 
 type PathProps = {
   lang: SupportedLanguage; //Does not matter if the language is supported
   category: string;
   slug: string;
+}
+
+const Components = {
+  Test
 }
 
 const DocPage = ({ content }: Props) => {
@@ -24,7 +31,7 @@ const DocPage = ({ content }: Props) => {
             <h1>Title: {s.name}</h1>
             <h1>Needs Translating: {s.language === s.wantedLanguage ? "No" : "Yes"}</h1>
             <div className="border-b border-black pt-2">
-              {s.content}
+              <MDXRemote {...s.content} components={Components} />
             </div>
           </div>
         ))}
@@ -41,9 +48,24 @@ export const getStaticProps: GetStaticProps<Props, PathProps> = async (context) 
 
   const file = await parseDoc(category, slug, lang);
 
+
+  const renderedDoc: Doc<MDXRemoteSerializeResult> = {
+    name: file.name,
+    description: file.description,
+    sections: await Promise.all(file.sections.map(async (s) => {
+      const content = await serialize(s.content);
+      return {
+        name: s.name,
+        language: s.language,
+        wantedLanguage: s.wantedLanguage,
+        content
+      }
+    }))
+  }
+
   return {
     props: {
-      content: file
+      content: renderedDoc
     },
   }
 }

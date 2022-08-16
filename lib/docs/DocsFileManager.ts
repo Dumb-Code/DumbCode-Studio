@@ -6,17 +6,18 @@ import { isSupportedLanguage, SupportedLanguage } from './../lang/SupportedLangu
 //Slug and language are done automatically
 export const DocHeaderKeysToCheck: (keyof DocHeader)[] = ["name", "description"];
 
+//There are perhaps too many types here...
 export type DocHeader = {
   name: string;
   description: string;
 }
 export type DocHeaderFile = Partial<Record<SupportedLanguage, DocHeader>> & { 'en': DocHeader };
 
-export type Doc = DocHeader & {
-  sections: DocSection[];
+export type Doc<S = string> = DocHeader & {
+  sections: DocSection<S>[];
 }
-export type DocSection = {
-  content: string,
+export type DocSection<S = string> = {
+  content: S,
   name: string,
   language: SupportedLanguage,
   wantedLanguage: SupportedLanguage,

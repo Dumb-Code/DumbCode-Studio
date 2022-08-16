@@ -1,4 +1,4 @@
-const SupportedLanguages = ["en", "de"] as const
+const SupportedLanguages = ["en", "de", "fr"] as const
 
 export type SupportedLanguage = typeof SupportedLanguages[number]
 
