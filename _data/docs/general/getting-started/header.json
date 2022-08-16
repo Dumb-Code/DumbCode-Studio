@@ -1,0 +1,10 @@
+{
+  "en": {
+    "name": "Testing",
+    "description": "Testing"
+  },
+  "de": {
+    "name": "Testing (in Deutsch)",
+    "description": "Test (in Deutsch)"
+  }
+}

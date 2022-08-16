@@ -7,7 +7,7 @@ const nextConfig = withPWA({
     domains: ['avatars.githubusercontent.com']
   },
   eslint: {
-    dirs: ['pages', 'src'],
+    dirs: ['pages', 'src', 'lib', 'tests'],
   },
   pwa: {
     dest: "public",
