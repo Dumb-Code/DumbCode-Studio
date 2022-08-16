@@ -14,6 +14,8 @@ export type DocHeader = {
 export type DocHeaderFile = Partial<Record<SupportedLanguage, DocHeader>> & { 'en': DocHeader };
 
 export type Doc<S = string> = DocHeader & {
+  headerWantedLanguage: SupportedLanguage;
+  headerLanguage: SupportedLanguage;
   sections: DocSection<S>[];
 }
 export type DocSection<S = string> = {

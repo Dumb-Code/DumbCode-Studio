@@ -11,10 +11,13 @@ const parseDoc = async (category: string, slug: string, preferredLang: Supported
     readAllDocFiles(category, slug, preferredLang)
   ] as const)
 
+  const hasLang = headerFile[preferredLang] !== undefined;
   const header = headerFile[preferredLang] ?? headerFile['en'];
 
   return {
     ...header,
+    headerWantedLanguage: preferredLang,
+    headerLanguage: hasLang ? preferredLang : 'en',
     sections: allFiles,
   }
 }

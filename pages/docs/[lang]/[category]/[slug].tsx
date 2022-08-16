@@ -26,6 +26,7 @@ const DocPage = ({ content }: Props) => {
       <>
         <div>Name: {content.name}</div>
         <div>Description: {content.description}</div>
+        <div>Header Needs Translating: {content.headerLanguage === content.headerWantedLanguage ? "No" : "Yes"}</div>
         {content.sections.map((s, i) => (
           <div key={i} className="border-t border-black mt-5">
             <h1>Title: {s.name}</h1>
@@ -48,11 +49,11 @@ export const getStaticProps: GetStaticProps<Props, PathProps> = async (context) 
 
   const file = await parseDoc(category, slug, lang);
 
+  const { sections, ...otherProps } = file
 
   const renderedDoc: Doc<MDXRemoteSerializeResult> = {
-    name: file.name,
-    description: file.description,
-    sections: await Promise.all(file.sections.map(async (s) => {
+    ...otherProps,
+    sections: await Promise.all(sections.map(async (s) => {
       const content = await serialize(s.content);
       return {
         name: s.name,
