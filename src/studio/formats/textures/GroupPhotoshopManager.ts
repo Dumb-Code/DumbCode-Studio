@@ -67,6 +67,9 @@ type OffsetImageData = {
 
 const gatherAllImgDatas = (layer: Layer, left = 0, top = 0) => {
   const images: OffsetImageData[] = []
+  if (layer.hidden) {
+    return images
+  }
   if (layer.imageData) {
     images.push({
       data: layer.imageData,
