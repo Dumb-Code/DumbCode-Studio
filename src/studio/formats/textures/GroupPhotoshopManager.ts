@@ -27,22 +27,22 @@ export const saveGroupToPhotoshopFile = (group: TextureGroup): Blob => {
 }
 
 const combinePixel = (src: Uint8ClampedArray, dest: Uint8ClampedArray, srcIndex: number, destIndex: number) => {
-  const r1 = src[srcIndex] / 255
-  const g1 = src[srcIndex + 1] / 255
-  const b1 = src[srcIndex + 2] / 255
   const a1 = src[srcIndex + 3] / 255
+  const r1 = src[srcIndex] / 255 * a1
+  const g1 = src[srcIndex + 1] / 255 * a1
+  const b1 = src[srcIndex + 2] / 255 * a1
 
-  const r2 = dest[destIndex] / 255
-  const g2 = dest[destIndex + 1] / 255
-  const b2 = dest[destIndex + 2] / 255
   const a2 = dest[destIndex + 3] / 255
+  const r2 = dest[destIndex] / 255 * a2
+  const g2 = dest[destIndex + 1] / 255 * a2
+  const b2 = dest[destIndex + 2] / 255 * a2
 
-  const r = (1 - a1) * r1 + a1 * r2
-  const g = (1 - a1) * g1 + a1 * g2
-  const b = (1 - a1) * b1 + a1 * b2
-  const a = (1 - a1) * a1 + a1 * a2
+  //Blend the pixels together. The rgb values are not premultipled
+  const r = r1 + r2 * (1 - a1)
+  const g = g1 + g2 * (1 - a1)
+  const b = b1 + b2 * (1 - a1)
+  const a = a1 + a2 * (1 - a1)
 
-  //TODO: for some reason the source is always black. TODO: look into this
   dest[destIndex] = Math.floor(r * 255)
   dest[destIndex + 1] = Math.floor(g * 255)
   dest[destIndex + 2] = Math.floor(b * 255)
