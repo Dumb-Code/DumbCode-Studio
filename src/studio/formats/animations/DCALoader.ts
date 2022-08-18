@@ -14,7 +14,7 @@ export const loadUnknownAnimation = async (project: DcProject, name: string, buf
     return await loadDCAAnimation(project, name, buffer)
   } catch (e) {
     if (e instanceof ParseError) {
-      console.warn(e)
+      // console.warn(e)
       return await loadDCAAnimationOLD(project, name, new StudioBuffer(buffer))
     } else {
       throw e
