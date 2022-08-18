@@ -298,6 +298,7 @@ export class TextureGroup {
   }
 
   setPsdFile = async (file: WritableFile) => {
+    this.psdFile.unlink?.()
     this.psdFile = file
 
     if (this.psdFileData !== null) {
@@ -307,10 +308,14 @@ export class TextureGroup {
     if (this.psdFileData !== null) {
       this.psdFileData.onChange = async file => {
         UnsafeOperations._unsafe_AddToast(`${file.name} has changed. Reloading...`, "info")
-        const psd = await loadGroupFromPsdFile(await file.arrayBuffer(), this)
-        this.psdData.value = psd
+        await this.onPsdFileChanged(file)
       }
     }
+  }
+
+  async onPsdFileChanged(file: File) {
+    const psd = await loadGroupFromPsdFile(await file.arrayBuffer(), this)
+    this.psdData.value = psd
   }
 
   toggleTexture(texture: Texture, isInGroup: boolean, after?: string) {
@@ -405,11 +410,13 @@ export class Texture {
   }
 
   async setTextureFile(file: WritableFile) {
+    this.textureWritableFile.unlink?.()
     this.textureWritableFile = file
     this.startListeningToFile(file, true)
   }
 
   async setPhotoshopFile(file: WritableFile) {
+    this.photoshopWriteableFile.unlink?.()
     this.photoshopWriteableFile = file
     this.startListeningToFile(file, false)
   }
@@ -429,12 +436,16 @@ export class Texture {
     if (listenable !== null) {
       listenable.onChange = async (file) => {
         UnsafeOperations._unsafe_AddToast(`${file.name} has changed. Reloading...`, "info")
-        const [img, psd] = await this.manager.loadTextureFromFile(file)
-        this.element.value = img
-        this.psdData.value = psd
-        this.needsSaving.value = false
+        await this.onTextureFileChange(file)
       }
     }
+  }
+
+  async onTextureFileChange(file: File) {
+    const [img, psd] = await this.manager.loadTextureFromFile(file)
+    this.element.value = img
+    this.psdData.value = psd
+    this.needsSaving.value = false
   }
 
   delete() {

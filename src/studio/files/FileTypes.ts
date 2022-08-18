@@ -31,6 +31,7 @@ export type ReadableFile = {
 
 export type WritableFile = {
   write: (name: string, blob: Blob | PromiseLike<Blob>, types?: FilePickerAcceptType[]) => Promise<string>
+  asReadable: () => ReadableFile | null
 } & ListenableFile
 
 export type OpenableFolder = {
@@ -50,13 +51,14 @@ export const downloadBlob: WritableFile['write'] = async (name, blob) => {
 
 export const defaultWritable: WritableFile = {
   write: async (name, blob) => downloadBlob(name, await blob),
-  startListening: () => null
+  startListening: () => null,
+  asReadable: () => null,
 }
 
 //Gets the writeable file for where nothing has been defined.
 export const getUndefinedWritable = (description: string, ...accept: string[]): WritableFile & {
   unlink?: () => void,
-  getName?: () => string | undefined
+  getName?: () => string | undefined,
 } => {
   if (!FileSystemsAccessApi) {
     return defaultWritable
@@ -92,8 +94,8 @@ export const getUndefinedWritable = (description: string, ...accept: string[]): 
       file = null
       readable = null
     },
-    getName: () => saveName ?? undefined
-
+    getName: () => saveName ?? undefined,
+    asReadable: () => readable,
   }
 }
 
@@ -135,7 +137,7 @@ export const createReadableFile = (file: File): ReadableFile => {
 export const createReadableFileExtended = (handle: FileSystemFileHandle): ReadableFile => {
   const startListening: ListenableFile['startListening'] = listener => listener.addFile(() => handle.getFile())
 
-  return {
+  const readableFile: ReadableFile = {
     asFile: () => handle.getFile(),
     asWritable: () => {
       return {
@@ -145,12 +147,15 @@ export const createReadableFileExtended = (handle: FileSystemFileHandle): Readab
           await writable.close()
           return handle.name
         },
-        startListening
+        startListening,
+        asReadable: () => readableFile,
       }
     },
     name: handle.name,
     startListening
   }
+
+  return readableFile
 }
 
 

@@ -1,12 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { createContext, SVGProps, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGUpload } from "../../../components/Icons"
+import { SVGChain, SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGRedo, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useCreatePortal } from "../../../contexts/CreatePortalContext"
 import { useOptions } from "../../../contexts/OptionsContext"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useToast } from "../../../contexts/ToastContext"
+import { getFilesFromClick } from "../../../studio/files/FileInputClick"
 import { FileSystemsAccessApi, ReadableFile, SaveIcon } from "../../../studio/files/FileTypes"
 import DcProject, { removeFileExtension } from "../../../studio/formats/project/DcProject"
 import { saveGroupToPhotoshopFile } from "../../../studio/formats/textures/GroupPhotoshopManager"
@@ -14,9 +15,13 @@ import { Texture, TextureGroup, useTextureDomRef } from "../../../studio/formats
 import { saveToPhotoshopFile } from "../../../studio/formats/textures/TexturePhotoshopManager"
 import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 import { writeImgToBlob } from "../../../studio/util/Utils"
+import ProjectContextMenu, { ProjectContextMenuOption } from "./ProjectContextMenu"
 import { ProjectFileAreaBase, ProjectFileAreaHeader } from "./ProjectFileArea"
 
 const imageExtensions = [".png", ".jpeg", ".gif", ".psd"]
+
+const TEXTURES_PHOTOSHOP_CONTEXT = "studio-project-textures-photoshop-textures-save-as"
+const GROUP_PHOTOSHOP_CONTEXT = "studio-project-textures-photoshop-groups-save-as"
 
 
 const ProjectTextures = () => {
@@ -101,6 +106,45 @@ const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureG
         addToast(`Saved ${name}`, "success")
     }, [group, photoshopEnabled, addToast])
 
+    const openFromPhotoshop = useCallback(async () => {
+        if (!photoshopEnabled) {
+            return
+        }
+        getFilesFromClick({
+            description: "Select Photoshop file",
+            accept: [".psd"],
+            onFile: async (file) => {
+                group.setPsdFile(file.asWritable())
+                group.onPsdFileChanged(await file.asFile())
+            }
+        })
+    }, [photoshopEnabled, group])
+
+    const [psdData, setPsdData] = useListenableObject(group.psdData)
+    const savedToPhotoshop = FileSystemsAccessApi && psdData !== null
+
+
+    const unlinkPhotoshop = () => {
+        if (!savedToPhotoshop || !photoshopEnabled) {
+            return
+        }
+        group.psdFile?.unlink?.()
+        group.psdFileData?.dispose()
+        group.psdFileData = null
+        setPsdData(null)
+        addToast("Unlinked Photoshop file", "success")
+    }
+
+    const refreshPhotoshop = async () => {
+        if (!savedToPhotoshop || !photoshopEnabled) {
+            return
+        }
+        const file = group.psdFile.asReadable()
+        if (file) {
+            group.onPsdFileChanged(await file.asFile())
+        }
+    }
+
     const iconClassName = (
         selected ?
             "bg-green-600 hover:bg-green-700" :
@@ -110,12 +154,16 @@ const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureG
     return (
         <div onClick={onClick} className={(selected ? "bg-green-500" : "dark:bg-gray-700 bg-gray-200 dark:text-white text-black") + " my-1 ml-2 rounded-sm h-8 text-left pl-2 w-full flex flex-row"}>
             <DblClickEditLO obj={group.name} disabled={group.isDefault} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
-            <p className="mr-2 flex flex-row text-white">
-                {photoshopEnabled &&
-                    <ButtonWithTooltip onClick={saveToPhotoshopFile} className={iconClassName + " mr-1"} tooltip="Save to Photoshop">
-                        <SvgPhotoshop className="h-4 w-4" />
-                    </ButtonWithTooltip>
-                }
+            <div className="mr-2 flex flex-row text-white">
+                <SaveOrReadAsPhotoshop
+                    iconButtonClass={iconClassName + " mr-1"}
+                    menuId={GROUP_PHOTOSHOP_CONTEXT + group.identifier}
+                    save={saveToPhotoshopFile}
+                    read={openFromPhotoshop}
+                    refresh={savedToPhotoshop ? refreshPhotoshop : undefined}
+                    unlink={savedToPhotoshop ? unlinkPhotoshop : undefined}
+                    big
+                />
                 <ButtonWithTooltip
                     className={iconClassName + (group.isDefault ? '' : 'mr-1')}
                     tooltip="Download Group">
@@ -129,7 +177,7 @@ const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureG
                         <SVGCross className="h-4 w-4 group-hover:text-red-500" />
                     </ButtonWithTooltip>
                 }
-            </p>
+            </div>
         </div>
     )
 }
@@ -453,6 +501,17 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
         addToast(`Saved texture as ${name}`, "success")
     }
 
+    const readFromPhotoshop = async () => {
+        getFilesFromClick({
+            description: "Select Photoshop file",
+            accept: [".psd"],
+            onFile: async (file) => {
+                texture.setPhotoshopFile(file.asWritable())
+                texture.onTextureFileChange(await file.asFile())
+            }
+        })
+    }
+
     const unlinkTexture = () => {
         if (!saveable) {
             return
@@ -460,6 +519,24 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
         texture.textureWritableFile.unlink?.()
         setSaveableFile(false)
         addToast(`Unlinked texture`, "success")
+    }
+
+    const unlinkPhotoshop = () => {
+        if (!hasSavedToPhotoshop) {
+            return
+        }
+        texture.photoshopWriteableFile.unlink?.()
+        addToast(`Unlinked texture from Photoshop`, "success")
+    }
+
+    const refreshPhotoshop = async () => {
+        if (!hasSavedToPhotoshop || !photoshopEnabled) {
+            return
+        }
+        const file = texture.photoshopWriteableFile.asReadable()
+        if (file) {
+            texture.onTextureFileChange(await file.asFile())
+        }
     }
 
     const deleteTexture = async () => {
@@ -486,15 +563,16 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
             </div>
             <DblClickEditLO obj={texture.name} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full bg-gray-500 text-black" />
             <div className="flex flex-col text-white items-center justify-center">
-                <p className="flex flex-row text-white">
+                <div className="flex flex-row text-white">
                     {photoshopEnabled &&
-                        <ButtonWithTooltip
-                            onClick={saveAsPhotoshop}
-                            className={iconClassName + " mr-1"}
-                            tooltip="Download As Photoshop"
-                        >
-                            <SvgPhotoshop className="h-4 w-4" />
-                        </ButtonWithTooltip>
+                        <SaveOrReadAsPhotoshop
+                            iconButtonClass={iconClassName + " mr-1"}
+                            menuId={TEXTURES_PHOTOSHOP_CONTEXT + texture.identifier}
+                            save={saveAsPhotoshop}
+                            read={readFromPhotoshop}
+                            refresh={hasSavedToPhotoshop ? refreshPhotoshop : undefined}
+                            unlink={hasSavedToPhotoshop ? unlinkPhotoshop : undefined}
+                        />
                     }
                     <ButtonWithTooltip
                         onClick={e => { saveTexture(); e.stopPropagation() }}
@@ -502,7 +580,7 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
                         className={iconClassName + " mb-1 "} tooltip={saveable ? "Save Texture\nRight Click to unlink" : "Download Texture"}>
                         <SaveIcon className={"h-4 w-4 " + (isTextureDirty ? "text-red-500" : "")} />
                     </ButtonWithTooltip>
-                </p>
+                </div>
                 <ButtonWithTooltip
                     onClick={e => { deleteTexture(); e.stopPropagation() }}
                     className={iconClassName}
@@ -512,6 +590,43 @@ const GroupTextureSwitchEntry = ({ texture, selected }: { texture: Texture, sele
                 </ButtonWithTooltip>
             </div>
         </div>
+    )
+}
+
+const SaveOrReadAsPhotoshop = ({ menuId, iconButtonClass, save, read, unlink, refresh, big = false }: {
+    big?: boolean, menuId: string, iconButtonClass: string,
+    save: () => void, read: () => void,
+    unlink?: () => void, refresh?: () => void
+}) => {
+    const { photoshopEnabled } = useOptions()
+    if (!photoshopEnabled) {
+        return null
+    }
+    return (
+        <ProjectContextMenu
+            menuId={menuId}
+            title="Photoshop Management"
+            Icon={SvgPhotoshop}
+            buttonClassName={iconButtonClass + " mr-1"}
+            iconClassName={big ? "h-4 w-4 my-1" : "h-4 w-4"}
+            tooltip="Save/Link As Photoshop"
+        >
+            <SaveOrOpenAsPhotoshopEntry click={save} title="Save As Photoshop" Icon={SVGDownload} />
+            <SaveOrOpenAsPhotoshopEntry click={read} title="Read From Photoshop" Icon={SVGChain} />
+            {refresh && <SaveOrOpenAsPhotoshopEntry click={refresh} title="Refresh From Photoshop" Icon={SVGRedo} />}
+            {unlink && <SaveOrOpenAsPhotoshopEntry click={unlink} title="Unlink From Photoshop" Icon={SVGCross} />}
+        </ProjectContextMenu>
+    )
+}
+
+const SaveOrOpenAsPhotoshopEntry = ({ click, title, Icon }: { click: () => void, title: string, Icon: (props: SVGProps<SVGSVGElement>) => JSX.Element }) => {
+    return (
+        <ProjectContextMenuOption onClick={click}>
+            <div className="text-gray-500 flex flex-row items-center">
+                <Icon className="text-white h-4 w-4" />
+                <span className="ml-2">{title}</span>
+            </div>
+        </ProjectContextMenuOption>
     )
 }
 

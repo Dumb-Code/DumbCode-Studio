@@ -108,7 +108,6 @@ export const loadGroupFromPsdFile = async (arrayBuffer: ArrayBuffer, group: Text
     return psd
   }
 
-
   const textures = group.textures.value.map(t => group.manager.findTexture(t))
 
   const managedTextures: Texture[] = []
