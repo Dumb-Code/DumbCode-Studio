@@ -1,7 +1,7 @@
 import { createContext, SVGProps, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGChain, SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGRedo, SVGUpload } from "../../../components/Icons"
+import { SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGRedo, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useCreatePortal } from "../../../contexts/CreatePortalContext"
 import { useOptions } from "../../../contexts/OptionsContext"
@@ -612,7 +612,7 @@ const SaveOrReadAsPhotoshop = ({ menuId, iconButtonClass, save, read, unlink, re
             tooltip="Save/Link As Photoshop"
         >
             <SaveOrOpenAsPhotoshopEntry click={save} title="Save As Photoshop" Icon={SVGDownload} />
-            <SaveOrOpenAsPhotoshopEntry click={read} title="Read From Photoshop" Icon={SVGChain} />
+            <SaveOrOpenAsPhotoshopEntry click={read} title="Read From Photoshop" Icon={SVGUpload} />
             {refresh && <SaveOrOpenAsPhotoshopEntry click={refresh} title="Refresh From Photoshop" Icon={SVGRedo} />}
             {unlink && <SaveOrOpenAsPhotoshopEntry click={unlink} title="Unlink From Photoshop" Icon={SVGCross} />}
         </ProjectContextMenu>
