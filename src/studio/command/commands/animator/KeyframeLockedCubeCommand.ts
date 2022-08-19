@@ -6,9 +6,11 @@ import DcaAnimation, { DcaKeyframe } from './../../../formats/animations/DcaAnim
 import { DCMCube } from './../../../formats/model/DcmModel';
 import { HistoryActionTypes } from './../../../undoredo/UndoRedoHandler';
 import { LockerType } from './../../../util/CubeLocker';
+import { NumArray } from './../../../util/NumArray';
 import { Command } from './../../Command';
 
 const tempVec = new Vector3()
+const tempVec2 = new Vector3()
 const tempQuat = new Quaternion()
 const tempEuler = new Euler()
 
@@ -82,8 +84,10 @@ const KeyframeLockedCubeCommand = (addCommand: (command: Command) => void) => {
 type CapturedData = {
   cube: DCMCube,
   worldMatrix: Matrix4,
-  position: number[];
-  rotation: number[];
+  meshWorldMatrix: Matrix4,
+  position: NumArray;
+  rotation: NumArray;
+  cubeGrow: NumArray;
 }
 
 export const captureCube = (cube: DCMCube): CapturedData => {
@@ -91,11 +95,16 @@ export const captureCube = (cube: DCMCube): CapturedData => {
   const quat = tempQuat.copy(cube.cubeGroup.quaternion)
   tempEuler.setFromQuaternion(quat, "ZYX")
   const locker = new CubeLocker(cube)
+
+  const cubeGrow = tempVec2.copy(cube.cubeGrowGroup.position).multiplyScalar(-1)
+
   return {
     cube,
     worldMatrix: locker.worldMatrix,
+    meshWorldMatrix: cube.cubeMesh.matrixWorld,
     position: [pos.x, pos.y, pos.z],
     rotation: [tempEuler.x * 180 / Math.PI, tempEuler.y * 180 / Math.PI, tempEuler.z * 180 / Math.PI],
+    cubeGrow: [cubeGrow.x, cubeGrow.y, cubeGrow.z]
   }
 }
 

@@ -16,6 +16,7 @@ import { HistoryActionTypes, SectionHandle } from './../../undoredo/UndoRedoHand
 import { ModelTextureCoordinates } from './ModelTextureCoordinates';
 
 const tempVector = new Vector3()
+const tempVector2 = new Vector3()
 const tempQuaterion = new Quaternion()
 const tempMatrix = new Matrix4()
 
@@ -551,15 +552,14 @@ export class DCMCube implements CubeParent {
     //TODO: dispose of geometries?
   }
 
-  getWorldPosition(xDelta: number, yDelta: number, zDelta: number, vector = new Vector3()) {
-    const dims = this.dimension.value
-    const cg = this.cubeGrow.value
-    let w = dims[0] + cg[0] * 2 + 0.0001
-    let h = dims[1] + cg[1] * 2 + 0.0001
-    let d = dims[2] + cg[2] * 2 + 0.0001
-    tempVector.set(xDelta * w / 16, yDelta * h / 16, zDelta * d / 16).applyQuaternion(this.cubeMesh.getWorldQuaternion(tempQuaterion))
-    this.cubeMesh.getWorldPosition(vector).add(tempVector)
-    return vector
+  getWorldPosition(xDelta: number, yDelta: number, zDelta: number, vector?: Vector3) {
+    this.cubeMesh.updateWorldMatrix(true, false)
+    return getWorldPositionForCube(
+      this.dimension.value, this.cubeGrow.value,
+      this.cubeMesh.getWorldQuaternion(tempQuaterion),
+      this.cubeMesh.getWorldPosition(tempVector2), //Don't use tempVector (1), as its used further down
+      xDelta, yDelta, zDelta, vector
+    )
   }
 
   addChild(child: DCMCube) {
@@ -741,4 +741,13 @@ export class ProjectMaterials {
 
     this.export = exportMaterial.clone()
   }
+}
+
+export const getWorldPositionForCube = (dims: NumArray, cg: NumArray, meshWorldQuat: Quaternion, meshWorldPos: Vector3, xDelta: number, yDelta: number, zDelta: number, vector = new Vector3()) => {
+  let w = dims[0] + cg[0] * 2 + 0.0001
+  let h = dims[1] + cg[1] * 2 + 0.0001
+  let d = dims[2] + cg[2] * 2 + 0.0001
+  tempVector.set(xDelta * w / 16, yDelta * h / 16, zDelta * d / 16).applyQuaternion(meshWorldQuat)
+  vector.copy(meshWorldPos).add(tempVector)
+  return vector
 }
