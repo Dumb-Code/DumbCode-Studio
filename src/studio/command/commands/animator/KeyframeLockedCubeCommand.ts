@@ -83,6 +83,7 @@ const KeyframeLockedCubeCommand = (addCommand: (command: Command) => void) => {
 
 type CapturedData = {
   cube: DCMCube,
+  parentWorldMatrix: Matrix4,
   worldMatrix: Matrix4,
   meshWorldMatrix: Matrix4,
   position: NumArray;
@@ -100,6 +101,7 @@ export const captureCube = (cube: DCMCube): CapturedData => {
 
   return {
     cube,
+    parentWorldMatrix: cube.cubeGroup.parent?.matrixWorld!, //Bruh moment if there is no parent
     worldMatrix: locker.worldMatrix,
     meshWorldMatrix: cube.cubeMesh.matrixWorld,
     position: [pos.x, pos.y, pos.z],

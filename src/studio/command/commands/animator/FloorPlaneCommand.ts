@@ -76,12 +76,11 @@ const FloorPlaneCommand = (addCommand: (command: Command) => void) => {
           )
 
           underY.forEach(data => {
-            data.worldMatrix.decompose(tempVec, tempQuat, tempVec2)
-
-            const upVectorLocal = tempVec.set(0, -data.y, 0)
-            const upVector = upVectorLocal.applyQuaternion(tempQuat)
-
-            newKeyframe.position.set(data.cube.name.value, [upVector.x * 16, upVector.y * 16, upVector.z * 16])
+            //Using data.worldMatrix, we want to get the world up vector in the cube's local space.
+            data.parentWorldMatrix.decompose(tempVec, tempQuat, tempVec2)
+            const up = tempVec2.set(0, 1, 0)
+            const localUp = up.applyQuaternion(tempQuat.invert()).multiplyScalar(-data.y * 16)
+            newKeyframe.position.set(data.cube.name.value, [localUp.x, localUp.y, localUp.z])
           })
         }
 
