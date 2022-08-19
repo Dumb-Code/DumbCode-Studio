@@ -1,6 +1,6 @@
 import { HTMLProps, ReactNode, RefObject, useCallback, useContext, useEffect, useRef, useState } from "react"
 import { SVGTrash } from "../../../components/Icons"
-import { useOptions } from "../../../contexts/OptionsContext"
+import { useKeyComboUnknownEventMatcher, useOptions } from "../../../contexts/OptionsContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef"
 import { ScrollZoomContext } from "./AnimatorTimeline"
@@ -96,6 +96,12 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
     }, [animation])
   )
 
+  const {
+    horizontal_scroll: horizontal,
+    vertical_scroll: vertical,
+    zoom
+  } = useKeyComboUnknownEventMatcher("scroll_and_zoom")
+
   //We need to subscribe to 'wheel' manually, as by default react does it passively.
   useEffect(() => {
     const current = draggingRef.current
@@ -105,9 +111,11 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
       }
       const modifier = 1.05
       if (e.deltaY !== 0) {
-        if (e.ctrlKey) {
+        if (horizontal(e)) {
           animation.scroll.value = Math.max(animation.scroll.value + e.deltaY, 0)
-        } else {
+        }
+
+        if (zoom(e)) {
           const val = e.deltaY < 0 ? 1 / modifier : modifier
 
           const newPixelsPerSecond = width * blockPerSecond * animation.zoom.value * val
@@ -125,8 +133,12 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
           animation.zoom.value *= val
         }
       }
-      e.stopPropagation()
-      e.preventDefault()
+
+      //If vertical scroll, then we want to propergate the event upwards, as to trigger a scroll down
+      if (!vertical(e)) {
+        e.stopPropagation()
+        e.preventDefault()
+      }
     }
     if (current !== null) {
       current.addEventListener('wheel', callback)
@@ -136,7 +148,7 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
         current.removeEventListener('wheel', callback)
       }
     }
-  }, [animation.zoom, draggingRef, animation.scroll, getPixelsPerSecond])
+  }, [animation.zoom, draggingRef, animation.scroll, getPixelsPerSecond, horizontal, vertical, zoom])
 
   const timeMarkerRef = useDraggbleRef<HTMLDivElement, number>(
     useCallback(() => {
