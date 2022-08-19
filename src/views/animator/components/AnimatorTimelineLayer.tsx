@@ -116,7 +116,7 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
         }
 
         if (zoom(e)) {
-          const val = e.deltaY < 0 ? 1 / modifier : modifier
+          const val = e.deltaY > 0 ? 1 / modifier : modifier
 
           const newPixelsPerSecond = width * blockPerSecond * animation.zoom.value * val
 
