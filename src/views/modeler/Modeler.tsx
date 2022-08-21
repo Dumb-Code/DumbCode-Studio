@@ -12,7 +12,7 @@ import { usePointTracking } from "./logic/CubePointTrackerHook"
 import { useModelerGumball } from "./logic/ModelerGumballHook"
 
 const Modeler = () => {
-    const { getSelectedProject, onFrameListeners } = useStudio()
+    const { getSelectedProject, onPostFrameListeners } = useStudio()
     const project = getSelectedProject()
 
     useKeyComboPressed(useMemo(() => ({
@@ -35,11 +35,11 @@ const Modeler = () => {
         const onFrame = () => {
             project.model.resetVisuals()
         }
-        onFrameListeners.add(onFrame)
+        onPostFrameListeners.add(onFrame)
         return () => {
-            onFrameListeners.delete(onFrame)
+            onPostFrameListeners.delete(onFrame)
         }
-    }, [project, onFrameListeners])
+    }, [project, onPostFrameListeners])
 
     return (
         <div className="h-full grid grid-areas-modeling"

@@ -8,7 +8,7 @@ import TextureMapperViewport from "./components/TextureMapperViewport"
 
 
 const TextureMapper = () => {
-    const { getSelectedProject, onFrameListeners } = useStudio()
+    const { getSelectedProject, onPostFrameListeners } = useStudio()
     const project = getSelectedProject()
 
 
@@ -18,9 +18,9 @@ const TextureMapper = () => {
         const onFrame = () => {
             project.model.resetVisuals()
         }
-        onFrameListeners.add(onFrame)
+        onPostFrameListeners.add(onFrame)
         return () => {
-            onFrameListeners.delete(onFrame)
+            onPostFrameListeners.delete(onFrame)
         }
     })
 
