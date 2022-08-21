@@ -16,7 +16,7 @@ import AnimatorTimeline from "./components/AnimatorTimeline"
 
 const Animator = () => {
 
-    const { getSelectedProject, onFrameListeners } = useStudio()
+    const { getSelectedProject, onPostFrameListeners } = useStudio()
     const project = getSelectedProject()
 
     const [animation] = useListenableObject(project.animationTabs.selectedAnimation)
@@ -45,11 +45,11 @@ const Animator = () => {
                 selected.animate(deltaTime)
             }
         }
-        onFrameListeners.add(onFrame)
+        onPostFrameListeners.add(onFrame)
         return () => {
-            onFrameListeners.delete(onFrame)
+            onPostFrameListeners.delete(onFrame)
         }
-    }, [project, onFrameListeners])
+    }, [project, onPostFrameListeners])
 
     const selectedCubeHandlerUndoRedo = animation?.undoRedoHandler
 

@@ -13,7 +13,7 @@ import ShowcaseViewBar from "./components/ShowcaseViewBar"
 import { useShowcaseGumball } from "./logic/ShowcaseGumballHook"
 
 const Showcase = () => {
-  const { scene, lightGroup, itemsGroup, getSelectedProject, onFrameListeners, renderer, controls, getCamera } = useStudio()
+  const { scene, lightGroup, itemsGroup, getSelectedProject, onPostFrameListeners, renderer, controls, getCamera } = useStudio()
   const project = getSelectedProject()
 
   const [allViews, setViews] = useListenableObject(project.showcaseProperties.views)
@@ -101,7 +101,7 @@ const Showcase = () => {
     const onFrame = () => {
       view.renderForGumball()
     }
-    onFrameListeners.add(onFrame)
+    onPostFrameListeners.add(onFrame)
 
     return () => {
       scene.add(lightGroup)
@@ -109,9 +109,9 @@ const Showcase = () => {
       scene.remove(project.showcaseProperties.group)
       renderer.shadowMap.enabled = false
 
-      onFrameListeners.delete(onFrame)
+      onPostFrameListeners.delete(onFrame)
     }
-  }, [view, scene, lightGroup, itemsGroup, project, renderer, onFrameListeners])
+  }, [view, scene, lightGroup, itemsGroup, project, renderer, onPostFrameListeners])
 
   const newView = () => {
     const view = new ShowcaseView(project.showcaseProperties)

@@ -220,9 +220,9 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   }
 
   renderForGumball(): void {
-    this.project.model.resetVisuals()
     const kf = this.singleSelectedKeyframe.value
     if (kf !== null) {
+      this.project.model.resetVisuals()
       this.animateAt(kf.startTime.value + kf.duration.value)
       this.project.model.updateMatrixWorld(true)
     }
