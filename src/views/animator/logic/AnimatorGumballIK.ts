@@ -168,8 +168,6 @@ export class AnimatorGumballIK {
       const quat = selectParent.getWorldQuaternion(worldQuat).invert().multiply(this.startingWorldRot)
       tempEuler.setFromQuaternion(quat)
 
-      console.log(tempEuler.x, tempEuler.y, tempEuler.z)
-      console.log(changedData)
       keyframe.wrapToSetValue(() => {
         keyframe.setRotationAbsoluteAnimated(selected,
           tempEuler.x * 180 / Math.PI,
