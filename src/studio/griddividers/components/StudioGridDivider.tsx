@@ -1,6 +1,7 @@
 import { MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import { MoveableDividerArea } from "../DividerArea";
 
+//The divider for a grid
 const StudioGridDivider = ({ divider }: { divider: MoveableDividerArea }) => {
   const side = divider.moveableData.moveableSide
   const horizontal = side === "left" || side === "right"
@@ -9,6 +10,7 @@ const StudioGridDivider = ({ divider }: { divider: MoveableDividerArea }) => {
 
   const mouseStart = useRef({ x: 0, y: 0 })
 
+  //Clamps the value between the divider specified range
   const clampNewValue = useCallback((newValue: number) => {
     const { from, to } = divider.moveableData
     return Math.min(Math.max(newValue, from), to)
@@ -21,11 +23,15 @@ const StudioGridDivider = ({ divider }: { divider: MoveableDividerArea }) => {
     const areaValue = divider.moveableData.areaValueNum
     const startValue = areaValue.value
 
+    //When the mouse moves anywhere, update the value of the area
+    //By the difference between the current mouse position and the start position
     const onMouseMoveGlobally = (e: MouseEvent) => {
       const { clientX, clientY } = e
       const delta = horizontal ? mouseStart.current.x - clientX : mouseStart.current.y - clientY
       areaValue.value = clampNewValue(startValue + delta)
     }
+
+    //When the mouse is released, stop dragging
     const onMouseUpGlobally = (e: MouseEvent) => {
       setIsDragging(false)
     }
@@ -38,6 +44,7 @@ const StudioGridDivider = ({ divider }: { divider: MoveableDividerArea }) => {
     }
   }, [setIsDragging, isDragging, horizontal, divider.moveableData.areaValueNum, clampNewValue])
 
+  //When the dragging begins, we need to store the position of the mouse
   const beginDragging = (e: ReactMouseEvent) => {
     mouseStart.current = { x: e.clientX, y: e.clientY }
     setIsDragging(true)
@@ -45,6 +52,7 @@ const StudioGridDivider = ({ divider }: { divider: MoveableDividerArea }) => {
     e.preventDefault()
   }
 
+  //Different class depending on what side the divider is on
   let className = ""
   if (side === "left") {
     className = "-translate-x-1/2 left-0"

@@ -1,8 +1,6 @@
 import { HTMLProps } from "react";
 
-type Props = HTMLProps<HTMLDivElement> & {
-  area: string
-}
+//A factory function to create a component that can be used to create a grid
 const StudioGridDivFactory = (area: string) => {
   const value = (props: HTMLProps<HTMLDivElement>) => {
     return (
