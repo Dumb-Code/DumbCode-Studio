@@ -38,12 +38,6 @@ module.exports = {
         'model sounds texture',
         'remote remote texture'
       ],
-      'modeling': [
-        'command command sidebar',
-        'shortcuts canvas sidebar',
-        'gumball gumball sidebar',
-        'info info sidebar'
-      ],
       'mapper': [
         'tools canvas layers',
         'info info layers'
