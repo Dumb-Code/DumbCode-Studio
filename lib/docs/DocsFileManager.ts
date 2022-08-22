@@ -35,7 +35,7 @@ export type DocsFileSection = {
   language: SupportedLanguage
 }
 
-const BASE_DIR = join(process.cwd(), "_data/docs");
+const BASE_DIR = join(process.cwd(), "docs");
 const EXTENSION = '.mdx';
 
 const getSupportedLanguages = async (category: string, slug: string, section: string): Promise<SupportedLanguage[]> => {
