@@ -176,6 +176,9 @@ export const createThreeContext = (): ThreeJsContext => {
       cameraO.top = height / 2
       cameraO.bottom = height / -2
       cameraO.updateProjectionMatrix()
+
+      renderSingleFrame()
+
     },
 
     getSize: () => {
