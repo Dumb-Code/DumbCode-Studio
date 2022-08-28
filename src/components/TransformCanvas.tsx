@@ -1,4 +1,5 @@
 import { createContext, MouseEvent as ReactMouseEvent, PropsWithChildren, SVGProps, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useKeyComboUnknownEventMatcher } from '../contexts/OptionsContext';
 import { SVGUndo } from './Icons';
 import { ButtonWithTooltip } from './Tooltips';
 
@@ -212,18 +213,34 @@ const TransformCanvas = ({
     setHandled()
   }, [])
 
+  const {
+    horizontal_scroll: horizontal,
+    vertical_scroll: vertical,
+    zoom
+  } = useKeyComboUnknownEventMatcher("scroll_and_zoom")
 
   const onWheelDefault = useCallback<CanvasMouseCallbackEvent<WheelEvent>>(({ originalMouse, event, setHandled }) => {
-    const point = draggingPoints.current !== undefined ? draggingPoints.current : originalMouse
+    if (zoom(event)) {
+      const point = draggingPoints.current !== undefined ? draggingPoints.current : originalMouse
 
-    const matrix = new DOMMatrix()
-    matrix.translateSelf(point.x, point.y)
-    matrix.scaleSelf(event.deltaY < 0 ? 1.1 : (1 / 1.1))
-    matrix.translateSelf(-point.x, -point.y)
-    mulMatrix(matrix)
-
+      const matrix = new DOMMatrix()
+      matrix.translateSelf(point.x, point.y)
+      matrix.scaleSelf(event.deltaY < 0 ? 1.1 : (1 / 1.1))
+      matrix.translateSelf(-point.x, -point.y)
+      mulMatrix(matrix)
+    }
+    if (horizontal(event)) {
+      const matrix = new DOMMatrix()
+      matrix.translateSelf(-event.deltaY / 5, 0)
+      mulMatrix(matrix)
+    }
+    if (vertical(event)) {
+      const matrix = new DOMMatrix()
+      matrix.translateSelf(0, -event.deltaY / 5)
+      mulMatrix(matrix)
+    }
     setHandled()
-  }, [mulMatrix])
+  }, [mulMatrix, horizontal, vertical, zoom])
 
 
   useEffect(() => {
