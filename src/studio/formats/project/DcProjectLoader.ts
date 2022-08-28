@@ -117,6 +117,12 @@ const wrapZipReadable = (zip: JSZip, name = "_root"): ReadableFolder => {
       if (folder === null) {
         return null
       }
+      //Only return this folder if theres a file inside it (could be in a subfolder)
+      const shouldExist = Object.values(zip.files)
+        .some(file => !file.dir && file.name.startsWith((folder as any).root))
+      if (!shouldExist) {
+        return null
+      }
       return wrapZipReadable(folder, name)
     },
     name: name
@@ -125,7 +131,7 @@ const wrapZipReadable = (zip: JSZip, name = "_root"): ReadableFolder => {
 
 export const loadDcProj = async (name: string, buffer: ArrayBuffer, writeable?: WritableFile) => {
   const zip = await JSZip.loadAsync(buffer)
-  const project = await loadFolderProject(name, zip, false)
+  const project = await loadFolderProject(name, wrapZipReadable(zip), false)
 
   if (writeable !== undefined) {
     project.projectWritableFile = writeable
@@ -154,9 +160,9 @@ export const loadFolderProject = async (name: string, zip: ReadableFolder, shoul
 
   awaiters.push(loadProjectData((await getDataRootFolderReadable(zip)).file("data.json"), project))
   awaiters.push(loadTextures(zip.folder("textures"), project))
-  awaiters.push(loadAnimations(zip.folder("animations"), project))
-  awaiters.push(loadRefImages(zip.folder("ref_images"), project))
-  awaiters.push(loadSounds(zip.folder("sounds"), project))
+  // awaiters.push(loadAnimations(zip.folder("animations"), project))
+  // awaiters.push(loadRefImages(zip.folder("ref_images"), project))
+  // awaiters.push(loadSounds(zip.folder("sounds"), project))
 
   await Promise.all(awaiters)
 

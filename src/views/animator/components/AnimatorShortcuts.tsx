@@ -1,5 +1,5 @@
 import { CommandContextProvider, CommandShortcutIcon } from "../../../components/CommandShortcutIcons";
-import { SVGCube, SVGLocked, SvgLoopback } from "../../../components/Icons";
+import { SVGCube, SVGGrid, SVGLocked, SvgLoopback } from "../../../components/Icons";
 import { useStudio } from "../../../contexts/StudioContext";
 
 const AnimatorShortcuts = () => {
@@ -11,6 +11,7 @@ const AnimatorShortcuts = () => {
                 <CommandShortcutIcon icon={SvgLoopback} command="loopBack" description="allows you apply transformations needed to the currently selected keyframe to move cubes back to the positions defined by the end of the next selected keyframe" />
                 <CommandShortcutIcon icon={SVGLocked} command="lockedcubekf" description="Create keyframes parallel to the selected keyframes, locking the selected cubes in place" />
                 <CommandShortcutIcon icon={SVGCube} command="tempparentkf" description="Create keyframes parallel to the selected keyframes, applying the temp parenting" />
+                <CommandShortcutIcon icon={SVGGrid} command="floorplane" description="Create keyframes parallel to the selected keyframes, forcing the selected cubes above the floor plane" />
             </div>
         </CommandContextProvider>
     )

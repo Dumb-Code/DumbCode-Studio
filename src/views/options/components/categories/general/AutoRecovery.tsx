@@ -30,7 +30,7 @@ const AutoRecoveryComponent = () => {
     <>
       <button
         onClick={openRecoveries}
-        className="bg-bluegreen-500 border-2 border-blue-500 dark:bg-blue-600 dark:hover:bg-blue-700 p-1 w-36"
+        className="bg-blue-500 dark:hover:bg-blue-700 pl-4 transition-colors duration-200 p-2 pr-4 rounded-md my-1 text-center flex flex-row w-80"
       >
         Open Recoveries
       </button>
@@ -38,13 +38,14 @@ const AutoRecoveryComponent = () => {
       <button
         onClick={buttonClicked}
         className={
-          (autoRecoveryEnabled ? "bg-green-500 border-2 border-green-500 dark:bg-green-600 dark:hover:bg-green-700" :
-            "bg-red-500 border-2 border-red-500 dark:bg-red-600 dark:hover:bg-red-700")
-          + " p-1 w-32"
+          (autoRecoveryEnabled ? "bg-green-500 ring-2 ring-inset ring-green-500 dark:bg-green-600 dark:hover:bg-green-700" :
+            "bg-red-500 border-red-500 dark:bg-red-600 dark:hover:bg-red-700")
+          + " pl-4 transition-colors duration-200 p-2 pr-4 rounded-md my-1 text-center flex flex-row w-80"
         }
       >
-        {autoRecoveryEnabled ? "Disable" : "Enable"}
+        {autoRecoveryEnabled ? "Enabled" : "Disabled"}
       </button>
+
       <div className="flex flex-row mt-3 w-fit">
         <div className="dark:text-white mr-3">Time between autosave:</div>
         <div>

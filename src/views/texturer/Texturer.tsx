@@ -8,7 +8,7 @@ import TexturerTools from "./components/TexturerTools"
 import { TexturerViewport } from "./components/TexturerViewport"
 
 const Texturer = () => {
-    const { getSelectedProject, onFrameListeners } = useStudio()
+    const { getSelectedProject, onPostFrameListeners } = useStudio()
     const project = getSelectedProject()
 
     useObjectUnderMouse()
@@ -17,9 +17,9 @@ const Texturer = () => {
         const onFrame = () => {
             project.model.resetVisuals()
         }
-        onFrameListeners.add(onFrame)
+        onPostFrameListeners.add(onFrame)
         return () => {
-            onFrameListeners.delete(onFrame)
+            onPostFrameListeners.delete(onFrame)
         }
     })
     return (

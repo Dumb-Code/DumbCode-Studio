@@ -31,11 +31,17 @@ const StudioSoundPlayableEntry = ({ sound }: { sound: StudioSound; }) => {
   };
 
 
-  const src = useMemo(() => isLoaded ? StudioSound.drawVisualization(instance.sound, 'red', visualizerWidth, visualizerHeight) : null, [instance, isLoaded])
+  const src = useMemo(() => isLoaded ? StudioSound.drawVisualization(instance.sound, 'black', visualizerWidth, visualizerHeight) : null, [instance, isLoaded])
+
+  const iconButtonClass = "bg-orange-700 hover:bg-orange-800 rounded pr-1 pl-2 py-0.5 my-0.5 mr-1"
 
   return (
-    <div className="flex flex-row w-full mt-4 first:mt-0 bg-blend-normal">
-      <div className="flex-grow min-w-0 break-words">{name}</div>
+    <div className="bg-orange-600 hover:bg-orange-500 w-full first:mt-0 bg-blend-normal mb-2 rounded-sm h-8 text-left pl-2 flex flex-row ml-2 pr-4 cursor-pointer">
+      <div className="flex-grow min-w-0 break-words pt-1 text-black">{name}</div>
+      {src !== null &&
+        <ButtonWithTooltip tooltip={isPlaying ? "Pause" : "Play"} className={iconButtonClass} onClick={e => { setIsPlaying(!isPlaying); e.stopPropagation() }}>
+          <Icon className="h-5 w-5 -ml-1" />
+        </ButtonWithTooltip>}
       <div className={"relative flex-shrink-0 ml-2 " + className}>
         {src !== null ?
           <>
@@ -44,10 +50,6 @@ const StudioSoundPlayableEntry = ({ sound }: { sound: StudioSound; }) => {
           </> :
           <div className="text-gray-500">Loading...</div>}
       </div>
-      {src !== null &&
-        <ButtonWithTooltip tooltip={isPlaying ? "Pause" : "Play"} className="icon-button ml-2" onClick={e => { setIsPlaying(!isPlaying); e.stopPropagation() }}>
-          <Icon className="h-5 w-5 -ml-1" />
-        </ButtonWithTooltip>}
     </div>
   );
 };
@@ -75,7 +77,7 @@ const PlaybackOverlay = ({ instance }: { instance: StudioSoundInstance; }) => {
     };
   }, [instance, playing]);
 
-  const src = useMemo(() => StudioSound.drawVisualization(instance.sound, 'green', visualizerWidth, visualizerHeight), [instance])
+  const src = useMemo(() => StudioSound.drawVisualization(instance.sound, 'white', visualizerWidth, visualizerHeight), [instance])
 
   return (
     <div ref={ref} className="absolute left-0 top-0 w-full h-full pointer-events-none ">

@@ -48,7 +48,7 @@ const SoundsEntries = () => {
   const project = getSelectedProject()
   const [sounds] = useListenableObject(project.sounds)
   return (
-    <div className="flex flex-col overflow-y-scroll w-full">
+    <div className="flex flex-col w-full pr-2 overflow-x-hidden">
       {sounds.map(s => <StudioSoundPlayableEntry key={s.identifier} sound={s} />)}
     </div>
   )

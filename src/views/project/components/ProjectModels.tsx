@@ -3,7 +3,7 @@ import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter'
 import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter'
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SvgCopypaste, SVGCross, SVGDownload, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
+import { SvgCopypaste, SVGCross, SVGDownload, SVGGithub, SVGLink, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useToast } from "../../../contexts/ToastContext"
@@ -305,7 +305,22 @@ const ModelEntry = ({ project, selected, changeModel, removeProject }: { project
     return (
         <div>
             <div className={(selected ? "bg-sky-500" : "dark:bg-gray-700 bg-gray-200 text-black dark:text-white") + " mb-2 rounded-sm h-8 text-left pl-2 flex flex-row ml-2"} onClick={changeModel}>
-                <DblClickEditLO obj={project.name} disabled={linkedToFile} className="flex-grow m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full dark:bg-gray-500 text-black" />
+                <DblClickEditLO obj={project.name} disabled={linkedToFile} className="m-auto mr-5 truncate text-left " inputClassName="p-0 w-full h-full dark:bg-gray-500 text-black" />
+                {linkedToFile &&
+                    <ButtonWithTooltip tooltip={"This Model is Linked to a File, you cannot rename linked files."} >
+                        <div className="w-4 h-4 mt-1.5 -translate-x-3">
+                            <SVGLink className="" />
+                        </div>
+                    </ButtonWithTooltip>
+                }
+                {isRemote &&
+                    <ButtonWithTooltip tooltip={"This Model is a Remote Project"} >
+                        <div className="w-4 h-4 mt-1 -translate-x-3">
+                            <SVGGithub className="" />
+                        </div>
+                    </ButtonWithTooltip>
+                }
+                <div className="flex-grow"></div>
                 <div className="pt-0 mr-2 text-white flex flex-row">
                     {isRemote &&
                         <ButtonWithTooltip

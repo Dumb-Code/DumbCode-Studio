@@ -1,13 +1,14 @@
 import { unsafe_getKeyComboCategories } from "../../../studio/keycombos/KeyCombos";
+import LargeKeyframes from "./categories/accessibility/LargeKeyframes";
 import ReducedAnimations from "./categories/accessibility/ReducedAnimations";
-import LinkedGithubAccount from "./categories/account/LinkedGithubAccount";
 import CompactModeSelection from "./categories/appearance/CompactModeSelection";
 import ThemeSelection from "./categories/appearance/ThemeSelection";
 import AutoRecovery from "./categories/general/AutoRecovery";
-import PhotoshopEnabled from "./categories/general/PhotoshopEnabled";
 import PWAInstall from "./categories/general/PWAInstall";
 import ScreenshotAction from "./categories/general/ScreenshotAction";
 import SelectedCubesSection from "./categories/general/SelectedCubes";
+import LinkedGithubAccount from "./categories/integrations/LinkedGithubAccount";
+import PhotoshopEnabled from "./categories/integrations/PhotoshopEnabled";
 import KeyBindSection from "./categories/keybinds/KeyBindSection";
 import SelectLanguage from "./categories/language/SelectLanguage";
 import LinksToOurStuff from "./categories/links/LinksToOurStuff";
@@ -31,7 +32,7 @@ export const OptionCategories: Record<string, OptionCategory> = {
   general: {
     shortName: "General",
     title: "General Options",
-    sections: [PWAInstall, ScreenshotAction, SelectedCubesSection, AutoRecovery, PhotoshopEnabled],
+    sections: [PWAInstall, ScreenshotAction, SelectedCubesSection, AutoRecovery],
   },
   appearance: {
     shortName: "Appearance",
@@ -39,9 +40,9 @@ export const OptionCategories: Record<string, OptionCategory> = {
     sections: [ThemeSelection, CompactModeSelection]
   },
   account: {
-    shortName: "Linked Accounts",
-    title: "Linked Account Options",
-    sections: [LinkedGithubAccount]
+    shortName: "Integrations",
+    title: "Integration Options",
+    sections: [LinkedGithubAccount, PhotoshopEnabled]
   },
   language: {
     shortName: "Language",
@@ -51,7 +52,7 @@ export const OptionCategories: Record<string, OptionCategory> = {
   accessibility: {
     shortName: "Accessibility",
     title: "Accessibility Options",
-    sections: [ReducedAnimations]
+    sections: [ReducedAnimations, LargeKeyframes]
   },
   keyBindOptions: {
     shortName: "Key Binds",

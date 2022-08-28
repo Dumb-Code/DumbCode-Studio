@@ -1,4 +1,4 @@
-import { createContext, SVGProps, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { createContext, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGRedo, SVGUpload } from "../../../components/Icons"
@@ -185,6 +185,7 @@ const GroupEntry = ({ group, selected, onClick, removeGroup }: { group: TextureG
 type DraggableContextType = {
     startDragging: (texture: Texture) => void
     currentlyDragging: Texture | null,
+    currentlyDraggedOver: MutableRefObject<Texture | null>,
     droppedOntoLocation?: { x: number, y: number, width?: number }
     setDroppedOntoLocation: ({ x, y, width }: { x: number, y: number, width?: number }) => void
     dropTextureAt: (texture: Texture | undefined, isSelected: boolean) => void
@@ -217,9 +218,12 @@ const TextureLists = ({ project }: { project: DcProject }) => {
         setNumTimesRefreshed(numTimesRefresh + 1)
     }
 
+    const currentlyDraggedOver = useRef<Texture | null>(null)
+
     const contextType: DraggableContextType = {
         startDragging: setDraggingTexture,
         currentlyDragging: draggingTexture,
+        currentlyDraggedOver,
         dropTextureAt,
         droppedOntoLocation: droppedOntoLocationRef.current,
         setDroppedOntoLocation: val => droppedOntoLocationRef.current = val,
@@ -282,7 +286,7 @@ const SelectableTextureList = ({ project, isSelected }: { project: DcProject, is
         if (!context) {
             return
         }
-        context.dropTextureAt(context.currentlyDragging ?? undefined, isSelected)
+        context.dropTextureAt(context.currentlyDraggedOver.current ?? undefined, isSelected)
     }
 
     return (
@@ -374,6 +378,7 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected }: { texture: Text
                 if (!context || !context.currentlyDragging) {
                     return
                 }
+                context.currentlyDraggedOver.current = texture
                 setIsDraggedOver(true)
                 e.stopPropagation()
                 e.preventDefault()
@@ -382,11 +387,15 @@ const GroupTextureSwitchEntryContainer = ({ texture, selected }: { texture: Text
                 if (!context || !context.currentlyDragging) {
                     return
                 }
+                context.currentlyDraggedOver.current = texture
                 setIsDraggedOver(true)
                 e.stopPropagation()
                 e.preventDefault()
             }}
             onDragLeave={e => {
+                if (context) {
+                    context.currentlyDraggedOver.current = texture
+                }
                 //We don't want to listen to events from children
                 if (e.currentTarget.contains(e.nativeEvent.relatedTarget as any)) {
                     return

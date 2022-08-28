@@ -34,17 +34,21 @@ export type OptionsContext = {
 
   photoshopEnabled: boolean
   setPhotoshopEnabled: (val: boolean) => void
+
+  largeKeyframesEnabled: boolean
+  setLargeKeyframesEnabled: (val: boolean) => void
 }
 
 type SavedOptions = {
   readonly theme: ThemeSetting,
   readonly compactMode: boolean,
-  readonly keyCombos: SavedKeyComboMap
-  readonly selectedScreenshotAction: ScreenshotActionType
+  readonly keyCombos: SavedKeyComboMap,
+  readonly selectedScreenshotAction: ScreenshotActionType,
   readonly autoRecoveryEnabled: boolean,
   readonly autoRecoverySaveTime: number,
-  readonly unifiedSelectedCubes: boolean
-  readonly photoshopEnabled: boolean
+  readonly unifiedSelectedCubes: boolean,
+  readonly photoshopEnabled: boolean,
+  readonly largeKeyframesEnabled: boolean
 }
 
 export const useOptions = () => {
@@ -157,6 +161,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
   const [autoRecoverySaveTime, setAutoRecoverySaveTime] = useState(loadedOptions?.autoRecoverySaveTime ?? 10) //10 minutes in ms
   const [unifiedSelectedCubes, setUnifiedSelectedCubes] = useState(loadedOptions?.unifiedSelectedCubes ?? false)
   const [photoshopEnabled, setPhotoshopEnabled] = useState(loadedOptions?.photoshopEnabled ?? false)
+  const [largeKeyframesEnabled, setLargeKeyframesEnabled] = useState(loadedOptions?.largeKeyframesEnabled ?? false)
 
   const keyCombos = useMemo(() => loadOrCreateKeyCombos(loadedOptions?.keyCombos), [loadedOptions?.keyCombos])
   const [selectedScreenshotAction, setScreenshotAction] = useState<ScreenshotActionType>(loadedOptions?.selectedScreenshotAction ?? "copy_to_clipboard")
@@ -172,6 +177,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       autoRecoverySaveTime,
       unifiedSelectedCubes,
       photoshopEnabled,
+      largeKeyframesEnabled,
       keyCombos: Object.keys(keyCombos).reduce((obj, c) => {
         const category = c as KeyComboCategory
         const keyCat = keyCombos[category].combos as Record<string, KeyCombo>
@@ -186,7 +192,7 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       selectedScreenshotAction: selectedScreenshotAction
     }
     localStorage.setItem("studio_options", JSON.stringify(data))
-  }, [compactMode, keyCombos, theme, selectedScreenshotAction, autoRecoveryEnabled, autoRecoverySaveTime, unifiedSelectedCubes, photoshopEnabled])
+  }, [compactMode, keyCombos, theme, selectedScreenshotAction, autoRecoveryEnabled, autoRecoverySaveTime, unifiedSelectedCubes, photoshopEnabled, largeKeyframesEnabled])
   useEffect(() => saveOptions(), [saveOptions])
 
 
@@ -235,7 +241,8 @@ export const OptionsContextProvider = ({ children }: { children?: ReactNode }) =
       autoRecoveryEnabled, setAutoRecoveryEnabled,
       autoRecoverySaveTime, setAutoRecoverySaveTime,
       unifiedSelectedCubes, setUnifiedSelectedCubes,
-      photoshopEnabled, setPhotoshopEnabled
+      photoshopEnabled, setPhotoshopEnabled,
+      largeKeyframesEnabled, setLargeKeyframesEnabled
     }}>
       {children}
     </Context.Provider>
