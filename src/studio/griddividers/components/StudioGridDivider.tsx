@@ -67,7 +67,7 @@ const StudioGridDivider = ({ divider }: { divider: MoveableDividerArea }) => {
 
   return (
     <div
-      className={`absolute bg-black ${className} ` + (horizontal ? "h-full w-2" : "w-full h-2")}
+      className={`absolute transition-opacity ${className} ` + (horizontal ? "h-full w-2 cursor-col-resize" : "w-full h-2 cursor-row-resize")}
       style={{
         gridArea: divider.moveableData.area.gridName,
       }}
