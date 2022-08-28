@@ -5,7 +5,7 @@ import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
 import StudioGrid from "../../studio/griddividers/components/StudioGrid"
-import StudioGridDiv from "../../studio/griddividers/components/StudioGridDiv"
+import StudioGridArea from "../../studio/griddividers/components/StudioGridArea"
 import DividerArea from "../../studio/griddividers/DividerArea"
 import GridArea from "../../studio/griddividers/GridArea"
 import GridSchema from "../../studio/griddividers/GridSchema"
@@ -69,31 +69,31 @@ const Modeler = () => {
     }, [project, onPostFrameListeners])
 
     return (
-        <StudioGrid schema={schema}>
+        <StudioGrid schema={schema} key={project.identifier}>
 
-            <StudioGridDiv area={command}>
+            <StudioGridArea area={command}>
                 <CommandInputBar command={project.commandRoot} />
-            </StudioGridDiv>
+            </StudioGridArea>
 
-            <StudioGridDiv area={sidebar}>
+            <StudioGridArea area={sidebar}>
                 <ModelerSidebar />
-            </StudioGridDiv>
+            </StudioGridArea>
 
-            <StudioGridDiv area={shortcuts}>
+            <StudioGridArea area={shortcuts}>
                 <ModelerShortcuts />
-            </StudioGridDiv>
+            </StudioGridArea>
 
-            <StudioGridDiv area={canvas}>
+            <StudioGridArea area={canvas}>
                 <StudioCanvas selectedCubeHandlerUndoRedo={project.model.undoRedoHandler} />
-            </StudioGridDiv>
+            </StudioGridArea>
 
-            <StudioGridDiv area={gumball}>
+            <StudioGridArea area={gumball}>
                 <ModelerGumballPropertiesBar />
-            </StudioGridDiv>
+            </StudioGridArea>
 
-            <StudioGridDiv area={info}>
+            <StudioGridArea area={info}>
                 <InfoBar undoRedo={project.model.undoRedoHandler} />
-            </StudioGridDiv>
+            </StudioGridArea>
 
         </StudioGrid>
     )

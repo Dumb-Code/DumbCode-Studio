@@ -2,7 +2,7 @@ import { HTMLProps } from "react"
 import { GridArea } from "../GridArea"
 
 //A factory function to create a component that can be used to create a grid
-const StudioGridDiv = ({ area, ...props }: HTMLProps<HTMLDivElement> & { area: GridArea }) => {
+const StudioGridArea = ({ area, ...props }: HTMLProps<HTMLDivElement> & { area: GridArea }) => {
 
   return (
     <div
@@ -16,4 +16,4 @@ const StudioGridDiv = ({ area, ...props }: HTMLProps<HTMLDivElement> & { area: G
   )
 }
 
-export default StudioGridDiv
+export default StudioGridArea

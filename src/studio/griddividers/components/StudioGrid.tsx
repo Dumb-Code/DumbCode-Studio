@@ -26,7 +26,7 @@ const StudioGrid = ({ schema, children }: { schema: GridSchema, children?: React
   }, [schema]);
 
   return (
-    <div className="h-full grid relative"
+    <div className="h-full grid relative overflow-hidden"
       style={{
         gridTemplateAreas: computedTemplateAreas,
         gridTemplateColumns: templateColumns,
