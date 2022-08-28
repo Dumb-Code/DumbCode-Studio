@@ -1,4 +1,4 @@
-import { createContext, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { createContext, MutableRefObject, SVGProps, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
 import { SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGRedo, SVGUpload } from "../../../components/Icons"
