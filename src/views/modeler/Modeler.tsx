@@ -4,7 +4,7 @@ import InfoBar from "../../components/InfoBar"
 import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
-import StudioGrid from "../../studio/griddividers/components/StudioGrid"
+import StudioGridRaw from "../../studio/griddividers/components/StudioGrid"
 import StudioGridArea from "../../studio/griddividers/components/StudioGridArea"
 import DividerArea from "../../studio/griddividers/DividerArea"
 import GridArea from "../../studio/griddividers/GridArea"
@@ -69,7 +69,7 @@ const Modeler = () => {
     }, [project, onPostFrameListeners])
 
     return (
-        <StudioGrid schema={schema} key={project.identifier}>
+        <StudioGridRaw schema={schema} key={project.identifier}>
 
             <StudioGridArea area={command}>
                 <CommandInputBar command={project.commandRoot} />
@@ -95,7 +95,7 @@ const Modeler = () => {
                 <InfoBar undoRedo={project.model.undoRedoHandler} />
             </StudioGridArea>
 
-        </StudioGrid>
+        </StudioGridRaw>
     )
 }
 

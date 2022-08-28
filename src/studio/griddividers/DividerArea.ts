@@ -23,8 +23,8 @@ export type DividerArea = {
 export type MoveableDividerArea = Required<DividerArea>
 
 //Create a constant and 'auto' grid area
-const constant = (value: number): DividerArea => ({
-  areaValue: LO.createReadonly(`${value}px`),
+const constant = (value: number | string, units = "px"): DividerArea => ({
+  areaValue: LO.createReadonly(`${value}${units}`),
 });
 const auto = (): DividerArea => ({
   areaValue: LO.createReadonly("auto"),
@@ -58,16 +58,19 @@ export type GridAreas = {
 //A weak divider is a way to make creating the areas easier.
 //Instead of DividerArea.constant(42) you can just use 42.
 //Instead of DividerArea.auto() you can just use "auto".
-type WeakDividerArea = number | 'auto' | DividerArea
+type WeakDividerArea = number | 'auto' | `${number}%` | DividerArea
 
 //Convert from the weak area to a regular area
-// [42, 'auto'] -> [DividerArea.constant(42), DividerArea.auto()]
+// [42, 'auto', '32%'] -> [DividerArea.constant(42), DividerArea.auto(), DividerArea.constant(32, '%')]
 const convertFromWeak = (area: WeakDividerArea): DividerArea => {
   if (typeof area === "number") {
     return constant(area);
   }
   if (area === "auto") {
     return auto();
+  }
+  if (typeof area === "string") {
+    return constant(area, "")
   }
   return area;
 }

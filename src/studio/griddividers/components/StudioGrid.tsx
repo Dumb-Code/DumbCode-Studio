@@ -1,9 +1,9 @@
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ForwardedRef, forwardRef, HTMLProps, useCallback, useEffect, useMemo, useState } from "react";
 import { MoveableDividerArea } from "../DividerArea";
 import { GridSchema } from "../GridSchema";
 import StudioGridDivider from "./StudioGridDivider";
 
-const StudioGrid = ({ schema, children }: { schema: GridSchema, children?: ReactNode }) => {
+const StudioGridRaw = ({ schema, children, ...props }: HTMLProps<HTMLDivElement> & { schema: GridSchema }, ref: ForwardedRef<HTMLDivElement>) => {
 
   //Converts the `schema.grid.areas` into a grid of those area names
   //This should never really change, but it's a good idea to keep it in a hook
@@ -26,8 +26,12 @@ const StudioGrid = ({ schema, children }: { schema: GridSchema, children?: React
   }, [schema]);
 
   return (
-    <div className="h-full grid relative overflow-hidden"
+    <div
+      ref={ref}
+      {...props}
+      className={"h-full grid relative overflow-hidden " + (props.className ?? "")}
       style={{
+        ...props.style,
         gridTemplateAreas: computedTemplateAreas,
         gridTemplateColumns: templateColumns,
         gridTemplateRows: templateRows,
@@ -39,8 +43,9 @@ const StudioGrid = ({ schema, children }: { schema: GridSchema, children?: React
       ))}
     </div>
   )
-
 }
+
+const StudioGrid = forwardRef(StudioGridRaw);
 
 //A hook to take in a schema and an axis and return the value of that axis
 //Also listens for changes to the axis and updates the value when they occur
@@ -78,4 +83,4 @@ const useChangeableAxisValue = (schema: GridSchema, axis: "columns" | "rows") =>
   return area
 }
 
-export default StudioGrid;
+export default StudioGrid

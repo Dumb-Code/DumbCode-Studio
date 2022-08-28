@@ -4,7 +4,7 @@ import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
 import DcaAnimation from "../../studio/formats/animations/DcaAnimation"
-import StudioGrid from "../../studio/griddividers/components/StudioGrid"
+import StudioGridRaw from "../../studio/griddividers/components/StudioGrid"
 import StudioGridArea from "../../studio/griddividers/components/StudioGridArea"
 import DividerArea from "../../studio/griddividers/DividerArea"
 import GridArea from "../../studio/griddividers/GridArea"
@@ -99,7 +99,7 @@ const Animator = () => {
 
     if (skeletonMode) {
         return (
-            <StudioGrid
+            <StudioGridRaw
                 key={project.identifier}
                 schema={skeletonSchema}
             >
@@ -120,12 +120,12 @@ const Animator = () => {
                     <AnimatorScrubBar animation={animation} />
                 </StudioGridArea>
 
-            </StudioGrid>
+            </StudioGridRaw>
         )
     }
 
     return (
-        <StudioGrid
+        <StudioGridRaw
             key={project.identifier}
             schema={normalSchema}
         >
@@ -161,7 +161,7 @@ const Animator = () => {
                 <InfoBar undoRedo={animation?.undoRedoHandler} />
             </StudioGridArea>
 
-        </StudioGrid>
+        </StudioGridRaw>
     )
 }
 

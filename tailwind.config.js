@@ -32,41 +32,6 @@ module.exports = {
       purple: colors.purple,
       blue: colors.blue,
     },
-    gridTemplateAreas: {
-      'project': [
-        'model animation texture',
-        'model sounds texture',
-        'remote remote texture'
-      ],
-      'mapper': [
-        'tools canvas layers',
-        'info info layers'
-      ],
-      'texture': [
-        'tools canvas layers',
-        'properties properties layers',
-        'info info layers',
-      ],
-      'animator': [
-        'tabs tabs properties',
-        'tools canvas properties',
-        'scrub scrub properties',
-        'timeline timeline properties',
-        'gumball gumball properties',
-        'info info properties'
-      ],
-      "animator-skeleton": [
-        "tabs properties",
-        "canvas properties",
-        "scrub properties"
-      ],
-      "showcase": [
-        'effects canvas sidebar',
-        'effects tabs sidebar',
-        'effects gumball sidebar',
-        'effects info sidebar'
-      ]
-    },
   },
   darkMode: 'class', // or 'media' or 'class'
   plugins: [
