@@ -28,7 +28,7 @@ const StudioGridDivider = ({ divider }: { divider: MoveableDividerArea }) => {
     const onMouseMoveGlobally = (e: MouseEvent) => {
       const { clientX, clientY } = e
       const delta = horizontal ? mouseStart.current.x - clientX : mouseStart.current.y - clientY
-      areaValue.value = clampNewValue(startValue + delta)
+      areaValue.value = clampNewValue(startValue + delta * (side === "right" ? -1 : 1)) //Right is inverted. Makes sense. Not sure why bottom isn't ¯\_(ツ)_/¯
     }
 
     //When the mouse is released, stop dragging
@@ -42,7 +42,7 @@ const StudioGridDivider = ({ divider }: { divider: MoveableDividerArea }) => {
       document.removeEventListener("mousemove", onMouseMoveGlobally)
       document.removeEventListener("mouseup", onMouseUpGlobally)
     }
-  }, [setIsDragging, isDragging, horizontal, divider.moveableData.areaValueNum, clampNewValue])
+  }, [setIsDragging, isDragging, horizontal, divider.moveableData.areaValueNum, clampNewValue, side])
 
   //When the dragging begins, we need to store the position of the mouse
   const beginDragging = (e: ReactMouseEvent) => {
