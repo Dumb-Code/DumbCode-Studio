@@ -13,7 +13,7 @@ import DialogBoxes from "../dialogboxes/DialogBoxes";
 import { useAutoRecovery } from "../studio/autorecovery/AutoRecoveryHook";
 import { createReadableFileExtended } from "../studio/files/FileTypes";
 import { createProject, newProject } from "../studio/formats/project/DcProject";
-import useNoDefaultKeypresses from "../studio/util/DisableUnwantedKeybinds";
+import useNoDefaultKeypresses from "../studio/util/DisableUnwantedKeyup";
 import Animator from "../views/animator/Animator";
 import Modeler from "../views/modeler/Modeler";
 import Options from "../views/options/Options";
