@@ -38,7 +38,6 @@ module.exports = {
     require('@tailwindcss/typography'),
     require('@tailwindcss/forms'),
     require('@tailwindcss/aspect-ratio'),
-    require('@savvywombat/tailwindcss-grid-areas'),
     require('tailwind-scrollbar'),
   ],
 }
