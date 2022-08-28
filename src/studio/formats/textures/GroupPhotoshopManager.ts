@@ -38,10 +38,10 @@ const combinePixel = (src: Uint8ClampedArray, dest: Uint8ClampedArray, srcIndex:
   const b2 = dest[destIndex + 2] / 255 * a2
 
   //Blend the pixels together. The rgb values are premultipled above.
-  const r = r1 + r2 * (1 - a1)
-  const g = g1 + g2 * (1 - a1)
-  const b = b1 + b2 * (1 - a1)
   const a = a1 + a2 * (1 - a1)
+  const r = (r1 + r2 * (1 - a1)) / a
+  const g = (g1 + g2 * (1 - a1)) / a
+  const b = (b1 + b2 * (1 - a1)) / a
 
   dest[destIndex] = Math.floor(r * 255)
   dest[destIndex + 1] = Math.floor(g * 255)
