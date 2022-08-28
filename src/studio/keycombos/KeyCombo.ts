@@ -27,6 +27,7 @@ export default class KeyCombo {
 
   private canBeNothing: boolean = false
   private canIncludeCodes: boolean = true
+  private additionalKey: string | null = null
 
   private dontInferProps = false
 
@@ -80,6 +81,11 @@ export default class KeyCombo {
     return this
   }
 
+  setAdditionalKey(key: string) {
+    this.additionalKey = key
+    return this
+  }
+
 
   setScope(scope: string | null) {
     this.scope = scope
@@ -111,6 +117,10 @@ export default class KeyCombo {
 
     if (this.code.value !== null) {
       combos.push(this.computeKeyCodeValue(this.code.value))
+    }
+
+    if (this.additionalKey !== null) {
+      combos.push(this.additionalKey)
     }
 
     return combos.length === 0 ? "<NOTHING>" : combos.join(" + ")

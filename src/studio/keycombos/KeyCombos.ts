@@ -17,7 +17,20 @@ const keyCombos = {
       repeat_previous_command: new KeyCombo('Repeat Previous Command', "Repeats the last command run by the user", 'Space', false),
       screenshot: new KeyCombo('Screenshot', "Captures a screenshot of the current view", 'F2', false),
       screenshot_only_model: new KeyCombo('Screenshot Only The Model', "Captures a screenshot of only the current model", 'F2', true),
+    }
+  },
 
+  scroll_and_zoom: {
+    name: "Scroll and Zoom",
+    desc: "Key bindings for scrolling and zooming. Applied to texture maps, progression points and the keyframe board.",
+    additionalKey: "Mouse Wheel",
+    scope: Scope.THIS,
+    canBeNothing: true,
+    canIncludeCodes: false,
+    combos: {
+      vertical_scroll: new KeyCombo('Vertical Scroll', "Scrolls the view vertically", null, false),
+      horizontal_scroll: new KeyCombo('Horizontal Scroll', "Scrolls the view horizontally", null),
+      zoom: new KeyCombo('Zoom', "Zooms the view", null, false, false, true),
     }
   },
 
@@ -107,6 +120,7 @@ type KeyComboMapSchema = {
     scope?: Scope,
     canBeNothing?: boolean,
     canIncludeCodes?: boolean,
+    additionalKey?: string,
     combos: {
       [key: string]: KeyCombo
     }
@@ -140,6 +154,9 @@ for (const key of Object.keys(keyCombos)) {
     }
     if (category.canIncludeCodes !== undefined) {
       combo.setCanIncludeCodes(category.canIncludeCodes)
+    }
+    if (category.additionalKey !== undefined) {
+      combo.setAdditionalKey(category.additionalKey)
     }
   }
 }
