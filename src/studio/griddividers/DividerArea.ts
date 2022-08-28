@@ -61,6 +61,7 @@ export type GridAreas = {
 type WeakDividerArea = number | 'auto' | DividerArea
 
 //Convert from the weak area to a regular area
+// [42, 'auto'] -> [DividerArea.constant(42), DividerArea.auto()]
 const convertFromWeak = (area: WeakDividerArea): DividerArea => {
   if (typeof area === "number") {
     return constant(area);

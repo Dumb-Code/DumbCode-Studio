@@ -5,6 +5,7 @@ import StudioCanvas from "../../components/StudioCanvas"
 import { useKeyComboPressed } from "../../contexts/OptionsContext"
 import { useStudio } from "../../contexts/StudioContext"
 import StudioGrid from "../../studio/griddividers/components/StudioGrid"
+import StudioGridDiv from "../../studio/griddividers/components/StudioGridDiv"
 import DividerArea from "../../studio/griddividers/DividerArea"
 import GridArea from "../../studio/griddividers/GridArea"
 import GridSchema from "../../studio/griddividers/GridSchema"
@@ -69,13 +70,31 @@ const Modeler = () => {
 
     return (
         <StudioGrid schema={schema}>
-            {/* The boreders are to visulize where everything is. */}
-            <command.div ><CommandInputBar command={project.commandRoot} /></command.div>
-            <sidebar.div ><ModelerSidebar /></sidebar.div>
-            <shortcuts.div><ModelerShortcuts /></shortcuts.div>
-            <canvas.div><StudioCanvas selectedCubeHandlerUndoRedo={project.model.undoRedoHandler} /></canvas.div>
-            <gumball.div><ModelerGumballPropertiesBar /></gumball.div>
-            <info.div ><InfoBar undoRedo={project.model.undoRedoHandler} /></info.div>
+
+            <StudioGridDiv area={command}>
+                <CommandInputBar command={project.commandRoot} />
+            </StudioGridDiv>
+
+            <StudioGridDiv area={sidebar}>
+                <ModelerSidebar />
+            </StudioGridDiv>
+
+            <StudioGridDiv area={shortcuts}>
+                <ModelerShortcuts />
+            </StudioGridDiv>
+
+            <StudioGridDiv area={canvas}>
+                <StudioCanvas selectedCubeHandlerUndoRedo={project.model.undoRedoHandler} />
+            </StudioGridDiv>
+
+            <StudioGridDiv area={gumball}>
+                <ModelerGumballPropertiesBar />
+            </StudioGridDiv>
+
+            <StudioGridDiv area={info}>
+                <InfoBar undoRedo={project.model.undoRedoHandler} />
+            </StudioGridDiv>
+
         </StudioGrid>
     )
 }

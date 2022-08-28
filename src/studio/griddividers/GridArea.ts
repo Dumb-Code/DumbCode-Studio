@@ -1,15 +1,11 @@
-import { HTMLProps } from "react"
-import StudioGridDivFactory from "./components/StudioGridDivFactory"
 
 //Represents a grid area in the grid.
 //The `div` function is to create the div for the grid area.
 export type GridArea = {
   gridName: string
-  div: (props: HTMLProps<HTMLDivElement>) => JSX.Element
 }
 const area = (name: string): GridArea => ({
-  gridName: name,
-  div: StudioGridDivFactory(name)
+  gridName: name
 })
 
 //Represents the cells of a grid. 
