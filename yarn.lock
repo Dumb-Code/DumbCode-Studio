@@ -1990,13 +1990,6 @@
   resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.1.4.tgz#0c8b74c50f29ee44f423f7416829c0bf8bb5eb27"
   integrity sha512-LwzQKA4vzIct1zNZzBmRKI9QuNpLgTQMEjsQLf3BXuGYb3QPTP4Yjf6mkdX+X1mYttZ808QpOwAzZjv28kq7DA==
 
-"@savvywombat/tailwindcss-grid-areas@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@savvywombat/tailwindcss-grid-areas/-/tailwindcss-grid-areas-2.1.0.tgz#8d9214ec17fd92b13de43bcfa70fcc6bfe774894"
-  integrity sha512-zELlncpf0x7rYElUkRZOGBoanmIOcMwXJ6/ZAiHXLKjlKVAFhHvDxOE6yCQVb38suE7gPWTwGNkYLhagt3xlsg==
-  dependencies:
-    lodash "^4.17.21"
-
 "@sinclair/typebox@^0.24.1":
   version "0.24.28"
   resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.24.28.tgz#15aa0b416f82c268b1573ab653e4413c965fe794"
