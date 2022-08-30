@@ -112,7 +112,7 @@ const AnimatorScrubBar = ({ animation }: { animation: DcaAnimation | null }) => 
     return (
         <div className="flex flex-col items-center justify-end h-full dark:bg-gray-800 bg-white">
             <div className="flex-grow relative w-full">
-                <div className="absolute -bottom-3 left-0 right-0 flex flex-row w-full">
+                <div className="absolute bottom-0 left-0 right-0 flex flex-row w-full">
                     <div className="flex-grow"></div>
                     <ButtonWithTooltip tooltip={`Stop Animation (${stopName})`} onClick={onStop} className="z-10 dark:bg-gray-900 bg-gray-200 px-1 rounded-tl-md pt-1 dark:text-gray-400 text-black hover:text-red-500 border-l-2 border-t-2 dark:border-black border-white">
                         <SVGStop className="h-6 w-6" />
