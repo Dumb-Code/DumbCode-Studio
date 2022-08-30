@@ -5,6 +5,8 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import IndexedEventHandler from '../studio/util/WeightedEventHandler';
 import { useStudio } from './StudioContext';
 
+type FrameListeners = Set<(deltaTime: number) => void>
+
 export type ThreeJsContext = {
   scene: Scene,
   onTopScene: Scene,
@@ -14,7 +16,8 @@ export type ThreeJsContext = {
   controls: OrbitControls,
   raycaster: Raycaster,
   onMouseUp: IndexedEventHandler<React.MouseEvent>
-  onFrameListeners: Set<(deltaTime: number) => void>,
+  onFrameListeners: FrameListeners,
+  onPostFrameListeners: FrameListeners,
   onRenderListeners: Set<() => void>,
 
   setSize: (width: number, height: number) => void
@@ -106,6 +109,7 @@ export const createThreeContext = (): ThreeJsContext => {
   const clock = new Clock()
 
   const onFrameListeners = new Set<(deltaTime: number) => void>()
+  const onPostFrameListeners = new Set<(deltaTime: number) => void>()
   const onRenderListeners = new Set<() => void>()
 
   const setCameraType = (isPerspective: boolean) => {
@@ -134,6 +138,7 @@ export const createThreeContext = (): ThreeJsContext => {
   const onFrame = () => {
     const deltaTime = clock.getDelta()
     onFrameListeners.forEach(l => l(deltaTime))
+    onPostFrameListeners.forEach(l => l(deltaTime))
 
     renderSingleFrame()
   }
@@ -152,7 +157,8 @@ export const createThreeContext = (): ThreeJsContext => {
 
   return {
     renderer, scene, onTopScene, controls, lightGroup, itemsGroup,
-    raycaster, onMouseUp, onFrameListeners, onRenderListeners, transformControls,
+    raycaster, onMouseUp, onFrameListeners, onPostFrameListeners,
+    onRenderListeners, transformControls,
 
     getCamera: () => camera,
     setCameraType,
@@ -170,6 +176,9 @@ export const createThreeContext = (): ThreeJsContext => {
       cameraO.top = height / 2
       cameraO.bottom = height / -2
       cameraO.updateProjectionMatrix()
+
+      renderSingleFrame()
+
     },
 
     getSize: () => {

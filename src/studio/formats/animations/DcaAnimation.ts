@@ -220,9 +220,9 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   }
 
   renderForGumball(): void {
-    this.project.model.resetVisuals()
     const kf = this.singleSelectedKeyframe.value
     if (kf !== null) {
+      this.project.model.resetVisuals()
       this.animateAt(kf.startTime.value + kf.duration.value)
       this.project.model.updateMatrixWorld(true)
     }
@@ -770,7 +770,7 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
       let point = progressionPoints[i]
       let next = progressionPoints[i + 1]
 
-      if (basePercentage >= point.x && basePercentage < next.x) {
+      if (basePercentage >= point.x && basePercentage <= next.x) {
         let interpolateBetweenAmount = (basePercentage - point.x) / (next.x - point.x)
         return 1 - (point.y + (next.y - point.y) * interpolateBetweenAmount)
       }

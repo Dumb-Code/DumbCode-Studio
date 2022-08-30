@@ -215,7 +215,7 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
       keyframe.rotation.forEach((arr, key) => {
         const mutArr: [number, number, number] = [arr[0], arr[1], arr[2]]
         for (let i = 0; i < 3; i++) {
-          while (Math.abs(arr[i]) > 180) {
+          while (Math.abs(mutArr[i]) > 180) {
             mutArr[i] -= 360 * Math.sign(arr[i])
           }
         }
@@ -240,6 +240,16 @@ export const repairKeyframes = (model: DCMModel, version: number, keyframes: Dca
       keyframe.rotation.forEach((arr, name) => {
         keyframe.rotation.set(name, [-arr[0], -arr[1], arr[2]])
       })
+    })
+  }
+
+  //Fix issues with progresion points
+  if (version >= 3) {
+    keyframes.forEach(keyframe => {
+      //Filter out all the non required progression points that share the same coords as required points.
+      const required = keyframe.progressionPoints.value.filter(p => p.required)
+      keyframe.progressionPoints.value = keyframe.progressionPoints.value.filter(p =>
+        p.required || !required.some(r => r.x === p.x && r.y === p.y))
     })
   }
 }
