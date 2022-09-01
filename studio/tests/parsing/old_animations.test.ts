@@ -6,7 +6,8 @@ import DcaAnimation, { ProgressionPoint } from './../../src/studio/formats/anima
 import { NumArray } from './../../src/studio/util/NumArray';
 
 
-const FILE_PREFIX = "tests/parsing/old_animations";
+
+const FILE_PREFIX = "studio/tests/parsing/old_animations";
 const TEST_PROJECT_NAME_PREFIX = 'test_project_old_animations_'
 
 const loadFile = async (name: string) => {

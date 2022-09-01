@@ -1,3 +1,32 @@
 {
-  "private": true
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "prepare": "husky install",
+    "precommit": "cd .",
+    "precommit:studio": "cd studio && yarn precommit --cwd ..",
+    "precommit:docs": "cd docs && yarn precommit --cwd ..",
+    "install": "concurrently npm:install:*",
+    "install:studio": "cd studio && yarn install",
+    "install:docs": "cd docs && yarn install",
+    "studio": "cd studio && yarn dev",
+    "docs": "cd docs && yarn dev"
+  },
+  "devDependencies": {
+    "husky": "^8.0.1",
+    "jest": "^29.0.1",
+    "jest-27-expect-message": "^1.1.0"
+  },
+  "jest": {
+    "projects": [
+      "<rootDir>/studio/",
+      "<rootDir>/docs/"
+    ],
+    "setupFilesAfterEnv": [
+      "jest-27-expect-message"
+    ]
+  },
+  "dependencies": {
+    "concurrently": "^7.3.0"
+  }
 }

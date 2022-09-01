@@ -24,11 +24,11 @@ const nextConfig = withPWA({
 
       {
         source: '/docs',
-        destination: `${DOCS_URL}/docs`,
+        destination: `${process.env.DOCS_URL}/docs`,
       },
       {
         source: '/docs/:path*',
-        destination: `${DOCS_URL}/docs/:path*`,
+        destination: `${process.env.DOCS_URL}/docs/:path*`,
       },
     ]
   },

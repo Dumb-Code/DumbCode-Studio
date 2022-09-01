@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { SvgPoweredByVercel } from '../../studio/src/components/Icons';
 
 const Footer = () => {
+  const test = "test";
   return (
     <footer className="footer bg-gray-900 xl:px-60 lg:px-20 px-0 py-20">
       <div className="grid grid-flow-row md:grid-cols-4 px-4 md:px-20 lg:grid-cols-7 gap-y-10 gap-x-10 lg:gap-x-2">
