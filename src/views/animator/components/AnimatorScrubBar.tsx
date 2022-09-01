@@ -112,18 +112,18 @@ const AnimatorScrubBar = ({ animation }: { animation: DcaAnimation | null }) => 
     return (
         <div className="flex flex-col items-center justify-end h-full dark:bg-gray-800 bg-white">
             <div className="flex-grow relative w-full">
-                <div className="absolute -bottom-3 left-0 right-0 flex flex-row w-full">
+                <div className="absolute bottom-0 left-0 right-0 flex flex-row w-full">
                     <div className="flex-grow"></div>
-                    <ButtonWithTooltip tooltip={`Stop Animation (${stopName})`} onClick={onStop} className="dark:bg-gray-900 bg-gray-200 px-1 rounded-tl-md pt-1 dark:text-gray-400 text-black hover:text-red-500 border-l-2 border-t-2 dark:border-black border-white">
+                    <ButtonWithTooltip tooltip={`Stop Animation (${stopName})`} onClick={onStop} className="z-10 dark:bg-gray-900 bg-gray-200 px-1 rounded-tl-md pt-1 dark:text-gray-400 text-black hover:text-red-500 border-l-2 border-t-2 dark:border-black border-white">
                         <SVGStop className="h-6 w-6" />
                     </ButtonWithTooltip>
-                    <ButtonWithTooltip tooltip={`${isPlaying ? "Pause" : "Play"} Animation (${pauseName})`} onClick={onToggle} className="dark:bg-gray-900 bg-gray-200 px-2 dark:text-white text-gray-900 hover:text-sky-500 border-t-2 dark:border-black border-white">
+                    <ButtonWithTooltip tooltip={`${isPlaying ? "Pause" : "Play"} Animation (${pauseName})`} onClick={onToggle} className="z-10 dark:bg-gray-900 bg-gray-200 px-2 dark:text-white text-gray-900 hover:text-sky-500 border-t-2 dark:border-black border-white">
                         {isPlaying
                             ? <SVGPause className="h-8 w-8" />
                             : <SVGPlay className="h-8 w-8" />
                         }
                     </ButtonWithTooltip>
-                    <ButtonWithTooltip tooltip={`Restart Animation (${resetName})`} onClick={onRestart} className="dark:bg-gray-900 bg-gray-200 px-1 rounded-tr-md pt-1 dark:text-gray-400 text-black hover:text-yellow-400 border-r-2 border-t-2 dark:border-black border-white">
+                    <ButtonWithTooltip tooltip={`Restart Animation (${resetName})`} onClick={onRestart} className="z-10 dark:bg-gray-900 bg-gray-200 px-1 rounded-tr-md pt-1 dark:text-gray-400 text-black hover:text-yellow-400 border-r-2 border-t-2 dark:border-black border-white">
                         <SVGRestart className="h-6 w-6" />
                     </ButtonWithTooltip>
                     <div className="flex-grow"></div>
