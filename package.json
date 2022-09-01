@@ -3,9 +3,9 @@
   "scripts": {
     "test": "jest",
     "prepare": "husky install",
-    "precommit": "cd .",
-    "precommit:studio": "cd studio && yarn precommit --cwd ..",
-    "precommit:docs": "cd docs && yarn precommit --cwd ..",
+    "precommit": "yarn precommit:studio && yarn precommit:docs",
+    "precommit:studio": "cd studio && yarn precommit",
+    "precommit:docs": "cd docs && yarn precommit",
     "install": "concurrently npm:install:*",
     "install:studio": "cd studio && yarn install",
     "install:docs": "cd docs && yarn install",
