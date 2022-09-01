@@ -113,7 +113,7 @@ export const loadGroupFromPsdFile = async (arrayBuffer: ArrayBuffer, group: Text
   const managedTextures: Texture[] = []
 
   const promises = psd.children.map(async (child) => {
-    const texture = textures.find(t => t.name.value.toLowerCase() === child.name?.toLowerCase() && managedTextures.indexOf(t) === -1)
+    const texture = textures.find(t => t.name.value.trim().toLowerCase() === child.name?.trim()?.toLowerCase() && managedTextures.indexOf(t) === -1)
     if (!texture) {
       return
     }
