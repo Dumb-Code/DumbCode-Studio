@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useLayoutEffect, useMemo, useState } from "react"
 import { v4 } from "uuid"
 import { LO, useListenableObject } from "../studio/listenableobject/ListenableObject"
+import UnsafeOperations from "../studio/util/UnsafeOperations"
 import { useCreatePortal } from "./CreatePortalContext"
 
 //Info IS used btw
@@ -71,6 +72,8 @@ const ToastContext = ({ children }: { children: ReactNode }) => {
       obj.fadingOut.value = true
     }, duration)
   }, [])
+
+  UnsafeOperations._unsafe_AddToast = addToast
 
   // // Uncomment this to test the toasts
   // useEffect(() => {

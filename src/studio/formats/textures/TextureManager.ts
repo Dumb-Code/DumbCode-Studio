@@ -10,9 +10,10 @@ import { fitAreaWithinBounds } from '../../util/Utils';
 import DcProject, { removeFileExtension } from '../project/DcProject';
 import { ListenableFile, readFileArrayBuffer } from './../../files/FileTypes';
 import { DCMCube, DCMModel } from './../model/DcmModel';
-import { loadFromPsdFile } from './PhotoshopManager';
+import { loadGroupFromPsdFile } from './GroupPhotoshopManager';
 import { TextureGLManager } from './TextureGLManager';
 import TextureLayer from './TextureLayer';
+import { loadFromPsdFile } from './TexturePhotoshopManager';
 
 export default class TextureManager {
   readonly project: DcProject
@@ -267,6 +268,12 @@ export class TextureGroup {
   readonly folderName: LO<string>
   readonly textures = new LO<readonly string[]>([])
   readonly unselectedTextures = new LO<readonly string[]>([])
+
+  readonly psdData = new LO<Psd | null>(null)
+
+  psdFile = getUndefinedWritable("Photoshop file", ".psd")
+  psdFileData: ListenableFileData | null = null
+
   isDefault: boolean
 
   constructor(
@@ -287,6 +294,28 @@ export class TextureGroup {
     this.textures.addListener(onDirty)
     this.unselectedTextures.addListener(onDirty)
 
+    this.setPsdFile(this.psdFile)
+  }
+
+  setPsdFile = async (file: WritableFile) => {
+    this.psdFile.unlink?.()
+    this.psdFile = file
+
+    if (this.psdFileData !== null) {
+      this.psdFileData.dispose()
+    }
+    this.psdFileData = await file.startListening(this.manager.project.fileChangeListener)
+    if (this.psdFileData !== null) {
+      this.psdFileData.onChange = async file => {
+        UnsafeOperations._unsafe_AddToast(`${file.name} has changed. Reloading...`, "info")
+        await this.onPsdFileChanged(file)
+      }
+    }
+  }
+
+  async onPsdFileChanged(file: File) {
+    const psd = await loadGroupFromPsdFile(await file.arrayBuffer(), this)
+    this.psdData.value = psd
   }
 
   toggleTexture(texture: Texture, isInGroup: boolean, after?: string) {
@@ -381,11 +410,13 @@ export class Texture {
   }
 
   async setTextureFile(file: WritableFile) {
+    this.textureWritableFile.unlink?.()
     this.textureWritableFile = file
     this.startListeningToFile(file, true)
   }
 
   async setPhotoshopFile(file: WritableFile) {
+    this.photoshopWriteableFile.unlink?.()
     this.photoshopWriteableFile = file
     this.startListeningToFile(file, false)
   }
@@ -404,12 +435,17 @@ export class Texture {
     }
     if (listenable !== null) {
       listenable.onChange = async (file) => {
-        const [img, psd] = await this.manager.loadTextureFromFile(file)
-        this.element.value = img
-        this.psdData.value = psd
-        this.needsSaving.value = false
+        UnsafeOperations._unsafe_AddToast(`${file.name} has changed. Reloading...`, "info")
+        await this.onTextureFileChange(file)
       }
     }
+  }
+
+  async onTextureFileChange(file: File) {
+    const [img, psd] = await this.manager.loadTextureFromFile(file)
+    this.element.value = img
+    this.psdData.value = psd
+    this.needsSaving.value = false
   }
 
   delete() {
