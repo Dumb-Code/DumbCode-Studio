@@ -23,7 +23,6 @@
     "gif.js": "^0.2.0",
     "howler": "^2.2.3",
     "jszip": "^3.9.1",
-    "next-mdx-remote": "^4.1.0",
     "next": "12.2.5",
     "next-pwa": "^5.5.4",
     "pngjs": "^6.0.0",

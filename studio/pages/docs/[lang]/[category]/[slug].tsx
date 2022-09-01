@@ -4,9 +4,9 @@ import { serialize } from 'next-mdx-remote/serialize';
 import Navbar from "../../../../../docs/components/docs/Navbar";
 import Test from "../../../../../docs/components/docs/Test";
 import Footer from "../../../../../docs/components/Footer";
-import parseDoc from "../../../../../docs/lib/docs/parseDoc";
 import { Doc, getAllDocFiles } from "../../../../../docs/lib/DocsFileManager";
 import SupportedLanguages, { SupportedLanguage } from "../../../../../docs/lib/SupportedLanguages";
+import parseDoc from "../../../../../lib/docs/parseDoc";
 import { SVGSearch } from "../../../../src/components/Icons";
 
 type Props = {
