@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { SvgPoweredByVercel } from '../../src/components/Icons';
+import { SvgPoweredByVercel } from '../../studio/src/components/Icons';
 
 const Footer = () => {
   return (

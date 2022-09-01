@@ -6,6 +6,10 @@ import { isSupportedLanguage, SupportedLanguage } from './SupportedLanguages';
 //Slug and language are done automatically
 export const DocHeaderKeysToCheck: (keyof DocHeader)[] = ["name", "description"];
 
+const BASE_DIR = join(process.cwd(), "_data");
+const EXTENSION = '.mdx';
+
+
 //There are perhaps too many types here...
 export type DocHeader = {
   name: string;
@@ -34,9 +38,6 @@ export type DocsFileSection = {
   name: string,
   language: SupportedLanguage
 }
-
-const BASE_DIR = join(process.cwd(), "docs");
-const EXTENSION = '.mdx';
 
 const getSupportedLanguages = async (category: string, slug: string, section: string): Promise<SupportedLanguage[]> => {
   //Read the files at `${BASE_DIR}/${category}/${slug}

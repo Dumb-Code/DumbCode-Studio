@@ -1,6 +1,6 @@
 import { readFile } from "fs/promises";
-import { SupportedLanguage } from "../SupportedLanguages";
 import { Doc, DocHeaderFile, DocSection, getAllSections, getDocsFilePath, getHeaderFilePath } from "./DocsFileManager";
+import { SupportedLanguage } from "./SupportedLanguages";
 
 
 

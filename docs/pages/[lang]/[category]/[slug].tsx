@@ -1,13 +1,13 @@
 import { GetStaticPaths, GetStaticProps } from "next";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from 'next-mdx-remote/serialize';
-import Navbar from "../../../../../docs/components/docs/Navbar";
-import Test from "../../../../../docs/components/docs/Test";
-import Footer from "../../../../../docs/components/Footer";
-import { Doc, getAllDocFiles } from "../../../../../docs/lib/DocsFileManager";
-import SupportedLanguages, { SupportedLanguage } from "../../../../../docs/lib/SupportedLanguages";
-import parseDoc from "../../../../../lib/docs/parseDoc";
-import { SVGSearch } from "../../../../src/components/Icons";
+import { SVGSearch } from "../../../../studio/src/components/Icons";
+import Footer from "../../../components/Footer";
+import Navbar from "../../../components/Navbar";
+import Test from "../../../components/Test";
+import { Doc, getAllDocFiles } from "../../../lib/DocsFileManager";
+import parseDoc from "../../../lib/parseDoc";
+import SupportedLanguages, { SupportedLanguage } from "../../../lib/SupportedLanguages";
 
 type Props = {
   content: Doc<MDXRemoteSerializeResult>
