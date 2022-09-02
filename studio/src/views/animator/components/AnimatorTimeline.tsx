@@ -1,6 +1,6 @@
+import { SvgArrows, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGSettings, SVGUnlocked } from "@dumbcode/shared/icons";
 import Image from "next/image";
 import { createContext, MouseEvent as ReactMouseEvent, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { SvgArrows, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGSettings, SVGUnlocked } from "../../../components/Icons";
 import { useCreatePortal } from "../../../contexts/CreatePortalContext";
 import { useOptions } from "../../../contexts/OptionsContext";
 import { useStudio } from "../../../contexts/StudioContext";

@@ -1,5 +1,5 @@
+import { SvgCopypaste, SvgImage, SvgSnap } from "@dumbcode/shared/icons";
 import { CommandContextProvider, CommandShortcutIcon, CommandShortcutIconWithSubCommands } from "../../../components/CommandShortcutIcons";
-import { SvgCopypaste, SvgImage, SvgSnap } from "../../../components/Icons";
 import { useStudio } from "../../../contexts/StudioContext";
 
 const ModelerShortcuts = () => {

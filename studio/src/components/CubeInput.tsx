@@ -1,6 +1,6 @@
+import { SVGLocked, SVGUnlocked } from "@dumbcode/shared/icons";
 import { useState } from 'react';
 import { NumArray } from '../studio/util/NumArray';
-import { SVGLocked, SVGUnlocked } from './Icons';
 import NumericInput from './NumericInput';
 
 const axis = [

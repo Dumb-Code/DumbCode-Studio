@@ -1,7 +1,7 @@
+import { SVGCube } from "@dumbcode/shared/icons"
 import { useEffect, useState } from "react"
 import { useStudio } from "../contexts/StudioContext"
 import { DCMCube } from "../studio/formats/model/DcmModel"
-import { SVGCube } from "./Icons"
 
 const CubeSelectionInputButton = ({ cube, setCube, setErrorMessage, allowInferedSelection = false }: {
   cube: DCMCube | null,

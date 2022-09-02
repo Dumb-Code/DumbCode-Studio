@@ -1,6 +1,6 @@
+import { SVGChevronDown } from "@dumbcode/shared/icons";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment, PropsWithChildren } from "react";
-import { SVGChevronDown } from "./Icons";
 
 export default function Dropup({ title, header, children, right = false, className = "", headerClassName = "" }:
     PropsWithChildren<{ title: string, header: string, right?: boolean, className?: string, headerClassName?: string }>

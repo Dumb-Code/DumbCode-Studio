@@ -1,5 +1,5 @@
+import { SvgCopypaste, SVGDownload, SVGOpenLink, SVGUpload } from "@dumbcode/shared/icons";
 import { SVGProps } from 'react';
-import { SvgCopypaste, SVGDownload, SVGOpenLink, SVGUpload } from '../../components/Icons';
 import { downloadBlob } from '../files/FileTypes';
 export type ScreenshotActionType = "download" | "open_in_new_tab" | "copy_to_clipboard" | "upload_to_imgur"
 

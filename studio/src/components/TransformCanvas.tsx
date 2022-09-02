@@ -1,6 +1,6 @@
+import { SVGUndo } from "@dumbcode/shared/icons";
 import { createContext, MouseEvent as ReactMouseEvent, PropsWithChildren, SVGProps, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useKeyComboUnknownEventMatcher } from '../contexts/OptionsContext';
-import { SVGUndo } from './Icons';
 import { ButtonWithTooltip } from './Tooltips';
 
 export type CanvasPoint = { readonly x: number, readonly y: number }

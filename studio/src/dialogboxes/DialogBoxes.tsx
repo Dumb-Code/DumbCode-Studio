@@ -1,6 +1,6 @@
+import { SVGCross } from "@dumbcode/shared/icons"
 import { Dialog, Transition } from "@headlessui/react"
 import React, { Fragment, PropsWithChildren, useCallback, useContext, useEffect, useState } from "react"
-import { SVGCross } from "../components/Icons"
 import { useOptions } from "../contexts/OptionsContext"
 import UnsafeOperations from "../studio/util/UnsafeOperations"
 import ReferenceImageDialogBox from "./ReferenceImageDialogBox"

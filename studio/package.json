@@ -10,6 +10,7 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
+    "@dumbcode/shared": "../shared",
     "@headlessui/react": "^1.4.1",
     "@octokit/rest": "^18.12.0",
     "@tailwindcss/aspect-ratio": "^0.4.0",

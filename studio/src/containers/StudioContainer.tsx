@@ -1,6 +1,6 @@
+import { SVGSettings } from "@dumbcode/shared/icons";
 import { PropsWithChildren, useEffect, useRef } from "react";
 import GithubAccountButton from "../components/GithubAccountButton";
-import { SVGSettings } from "../components/Icons";
 import CreatePortalContext from "../contexts/CreatePortalContext";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
 import ProjectPageContextProvider from "../contexts/ProjectPageContext";

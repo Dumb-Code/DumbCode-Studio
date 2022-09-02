@@ -1,5 +1,5 @@
+import { SVGTrash } from "@dumbcode/shared/icons"
 import { HTMLProps, ReactNode, RefObject, useCallback, useContext, useEffect, useRef, useState } from "react"
-import { SVGTrash } from "../../../components/Icons"
 import { useKeyComboUnknownEventMatcher, useOptions } from "../../../contexts/OptionsContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef"

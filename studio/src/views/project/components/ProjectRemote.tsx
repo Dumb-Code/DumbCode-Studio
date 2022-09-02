@@ -1,8 +1,8 @@
+import { SVGCross, SvgEdit, SVGTrash } from "@dumbcode/shared/icons";
 import { Octokit } from "@octokit/rest";
 import Image from "next/image";
 import { MouseEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import GithubAccountButton from "../../../components/GithubAccountButton";
-import { SVGCross, SvgEdit, SVGTrash } from "../../../components/Icons";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { ButtonWithTooltip } from "../../../components/Tooltips";
 import { useWhenAction } from "../../../containers/StudioContainer";

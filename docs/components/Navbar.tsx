@@ -1,7 +1,7 @@
+import { SvgDiscord, SvgGithub } from "@dumbcode/shared/icons";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { SvgDiscord, SvgGithub } from "../../studio/src/components/Icons";
 
 const logo = '/images/brand/logo.svg'
 

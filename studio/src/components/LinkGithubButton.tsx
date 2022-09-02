@@ -1,5 +1,5 @@
+import { SVGGithub } from "@dumbcode/shared/icons"
 import { useGithubClientId } from "../contexts/ServersideContext"
-import { SVGGithub } from "./Icons"
 
 const LinkGithubButton = () => {
 

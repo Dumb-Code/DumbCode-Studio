@@ -1,5 +1,5 @@
+import { SVGDownload, SVGSave } from "@dumbcode/shared/icons";
 import { useEffect, useState } from 'react';
-import { SVGDownload, SVGSave } from '../../components/Icons';
 import FileChangeListener from './FileChangeListener';
 
 export const FileSystemsAccessApi = typeof window !== "undefined" && window.showOpenFilePicker !== undefined

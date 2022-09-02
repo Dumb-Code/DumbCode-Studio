@@ -1,9 +1,9 @@
+import { SvgCopypaste, SVGCross, SVGDownload, SVGGithub, SVGLink, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "@dumbcode/shared/icons"
 import { AnimationClip, KeyframeTrack, Material } from "three"
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter'
 import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter'
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SvgCopypaste, SVGCross, SVGDownload, SVGGithub, SVGLink, SVGPlus, SVGPushGithub, SVGSave, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useToast } from "../../../contexts/ToastContext"

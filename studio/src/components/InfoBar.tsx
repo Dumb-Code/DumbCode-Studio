@@ -1,3 +1,4 @@
+import { SVGCube, SVGEye, SVGGrid, SVGLocked, SVGRedo, SVGUndo } from "@dumbcode/shared/icons";
 import { useMemo } from 'react';
 import { MeshBasicMaterial, MeshStandardMaterial } from 'three';
 import { useKeyComboPressed } from '../contexts/OptionsContext';
@@ -10,7 +11,6 @@ import SelectedCubeUndoRedoHandler from '../studio/undoredo/SelectedCubeUndoRedo
 import UndoRedoHandler from '../studio/undoredo/UndoRedoHandler';
 import { useTextureGroupSelect } from '../studio/util/StudioHooks';
 import Dropup, { DropupItem } from './Dropup';
-import { SVGCube, SVGEye, SVGGrid, SVGLocked, SVGRedo, SVGUndo } from './Icons';
 import { ButtonWithTooltip } from './Tooltips';
 
 const InfoBar = ({ undoRedo }: { undoRedo?: SelectedCubeUndoRedoHandler<any> }) => {

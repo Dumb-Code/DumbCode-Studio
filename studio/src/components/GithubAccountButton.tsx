@@ -1,3 +1,4 @@
+import { SVGOpenLink } from "@dumbcode/shared/icons"
 import { Menu, Transition } from "@headlessui/react"
 import Image from "next/image"
 import { Fragment } from "react"
@@ -5,7 +6,6 @@ import { useGithubClientId } from "../contexts/ServersideContext"
 import { useFetchGithubUserDetails } from "../studio/util/FetchHooks"
 import { useGithubAccessToken } from "../studio/util/LocalStorageHook"
 import WrapNoSSR from "../studio/util/NoSSR"
-import { SVGOpenLink } from "./Icons"
 import LinkGithubButton from "./LinkGithubButton"
 
 const GithubAccountButton = () => {

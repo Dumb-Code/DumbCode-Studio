@@ -1,5 +1,5 @@
+import { SVGUpload } from "@dumbcode/shared/icons"
 import ClickableInput from "../../../components/ClickableInput"
-import { SVGUpload } from "../../../components/Icons"
 import StudioSoundPlayableEntry from "../../../components/StudioSoundPlayableEntry"
 import { useStudio } from "../../../contexts/StudioContext"
 import { ReadableFile } from "../../../studio/files/FileTypes"

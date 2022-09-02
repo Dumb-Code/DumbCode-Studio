@@ -1,8 +1,8 @@
+import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from "@dumbcode/shared/icons";
 import { createContext, Dispatch, DragEvent, MouseEvent as ReactMouseEvent, MutableRefObject, PropsWithChildren, RefObject, SetStateAction, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import CollapsableSidebarPannel from '../../../components/CollapsableSidebarPannel';
 import { DblClickEditLO } from '../../../components/DoubleClickToEdit';
 import HorizontalDivider from '../../../components/HorizontalDivider';
-import { SVGChevronDown, SVGCube, SVGEye, SVGEyeOff, SVGLocked, SVGPlus, SVGTrash, SVGUnlocked } from '../../../components/Icons';
 import { useCreatePortal } from '../../../contexts/CreatePortalContext';
 import { useKeyComboPressed, useKeyComboUnknownEventMatcher } from '../../../contexts/OptionsContext';
 import { useStudio } from '../../../contexts/StudioContext';

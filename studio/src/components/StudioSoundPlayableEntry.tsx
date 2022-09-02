@@ -1,9 +1,9 @@
+import { SVGPause, SVGPlay } from "@dumbcode/shared/icons";
 import Image from "next/image";
 import { useEffect, useMemo, useRef } from "react";
 import { StudioSound } from "../studio/formats/sounds/StudioSound";
 import StudioSoundInstance from "../studio/formats/sounds/StudioSoundInstance";
 import { useListenableObject } from "../studio/listenableobject/ListenableObject";
-import { SVGPause, SVGPlay } from "./Icons";
 import { ButtonWithTooltip } from "./Tooltips";
 
 const visualizerWidth = 200

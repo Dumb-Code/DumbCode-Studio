@@ -1,7 +1,7 @@
+import { SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGRedo, SVGUpload } from "@dumbcode/shared/icons"
 import { createContext, MutableRefObject, SVGProps, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGDownload, SvgPhotoshop, SVGPlus, SVGRedo, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useCreatePortal } from "../../../contexts/CreatePortalContext"
 import { useOptions } from "../../../contexts/OptionsContext"

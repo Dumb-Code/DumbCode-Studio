@@ -1,5 +1,5 @@
+import { SvgArrows, SvgEdit, SVGEye, SVGLocked, SVGPlus, SVGTerminal, SVGTrash } from "@dumbcode/shared/icons";
 import { SVGProps } from 'react';
-import { SvgArrows, SvgEdit, SVGEye, SVGLocked, SVGPlus, SVGTerminal, SVGTrash } from "../../components/Icons";
 import { LO } from '../listenableobject/ListenableObject';
 
 // Undos and redos work as following.

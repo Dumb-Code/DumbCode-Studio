@@ -8,7 +8,11 @@
     "precommit:docs": "cd docs && yarn precommit",
     "install": "concurrently npm:install:*",
     "install:studio": "cd studio && yarn install",
+    "install:shared": "cd shared && yarn install",
     "install:docs": "cd docs && yarn install",
+    "update-shared": "concurrently npm:update-shared:*",
+    "update-shared:studio": "cd studio && yarn upgrade @dumbcode/shared",
+    "update-shared:docs": "cd docs && yarn upgrade @dumbcode/shared",
     "studio": "cd studio && yarn dev",
     "docs": "cd docs && yarn dev"
   },

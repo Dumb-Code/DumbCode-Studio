@@ -1,5 +1,5 @@
+import { SVGCube, SVGGrid, SVGLocked, SvgLoopback } from "@dumbcode/shared/icons";
 import { CommandContextProvider, CommandShortcutIcon } from "../../../components/CommandShortcutIcons";
-import { SVGCube, SVGGrid, SVGLocked, SvgLoopback } from "../../../components/Icons";
 import { useStudio } from "../../../contexts/StudioContext";
 
 const AnimatorShortcuts = () => {

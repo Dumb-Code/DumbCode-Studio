@@ -1,7 +1,7 @@
+import { SVGChevronDown, SVGOpenLink, SVGSearch, SVGTick } from "@dumbcode/shared/icons"
 import { Listbox, Transition } from "@headlessui/react"
 import Image from "next/image"
 import { Fragment, useEffect, useState } from "react"
-import { SVGChevronDown, SVGOpenLink, SVGSearch, SVGTick } from "../components/Icons"
 import PagedFetchResult from "../components/PagedFetchResult"
 import { useFetchGithubUserDetails } from "../studio/util/FetchHooks"
 import { useGithubAccessToken } from "../studio/util/LocalStorageHook"

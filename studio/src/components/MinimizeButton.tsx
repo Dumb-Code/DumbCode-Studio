@@ -1,4 +1,4 @@
-import { SVGMinus, SVGPlus } from "./Icons";
+import { SVGMinus, SVGPlus } from "@dumbcode/shared/icons";
 
 export const MinimizeButton = ({ active, toggle }: { active: boolean, toggle: (val: boolean) => void }) => {
     return (

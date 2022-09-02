@@ -10,6 +10,7 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
+    "@dumbcode/shared": "../shared",
     "lint-staged": "^13.0.3",
     "next": "12.2.5",
     "next-mdx-remote": "^4.1.0",

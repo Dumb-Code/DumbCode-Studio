@@ -1,9 +1,9 @@
-import React, { useCallback } from "react"; //For some reason we need to import react here?
-import { SVGUndo } from "../../../../../components/Icons"
-import { ButtonWithTooltip } from "../../../../../components/Tooltips"
-import { useOptions } from "../../../../../contexts/OptionsContext"
-import KeyCombo from "../../../../../studio/keycombos/KeyCombo"
-import { KeyComboCategory } from "../../../../../studio/keycombos/KeyCombos"
+import { SVGUndo } from "@dumbcode/shared/icons";
+import { useCallback } from "react"; //For some reason we need to import react here?
+import { ButtonWithTooltip } from "../../../../../components/Tooltips";
+import { useOptions } from "../../../../../contexts/OptionsContext";
+import KeyCombo from "../../../../../studio/keycombos/KeyCombo";
+import { KeyComboCategory } from "../../../../../studio/keycombos/KeyCombos";
 
 const KeybindsHeaderResetAll = () => {
 

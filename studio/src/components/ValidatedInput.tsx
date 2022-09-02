@@ -1,5 +1,5 @@
+import { SVGCheck, SVGCross } from "@dumbcode/shared/icons";
 import { FormEvent, InputHTMLAttributes, useCallback, useMemo, useState } from "react";
-import { SVGCheck, SVGCross } from "./Icons";
 
 export type ValidatedInputType = {
   readonly value: string;

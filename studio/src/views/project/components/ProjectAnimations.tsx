@@ -1,7 +1,7 @@
+import { SVGCross, SVGDownload, SVGPlus, SVGSave, SVGUpload } from "@dumbcode/shared/icons"
 import { useCallback } from "react"
 import ClickableInput from "../../../components/ClickableInput"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGDownload, SVGPlus, SVGSave, SVGUpload } from "../../../components/Icons"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
 import { useToast } from "../../../contexts/ToastContext"

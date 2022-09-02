@@ -1,6 +1,6 @@
+import { SVGCross, SVGPlus } from "@dumbcode/shared/icons"
 import { useEffect, useRef } from "react"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGCross, SVGPlus } from "../../../components/Icons"
 import { LO, useListenableObject } from "../../../studio/listenableobject/ListenableObject"
 
 type TabType = {

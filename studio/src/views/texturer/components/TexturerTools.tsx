@@ -1,5 +1,5 @@
+import { SvgBrush, SvgFillcube, SvgFillface, SvgPencil } from "@dumbcode/shared/icons";
 import { CommandShortcutIcon } from "../../../components/CommandShortcutIcons";
-import { SvgBrush, SvgFillcube, SvgFillface, SvgPencil } from "../../../components/Icons";
 
 const TexturerTools = () => {
     return (

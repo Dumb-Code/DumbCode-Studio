@@ -1,5 +1,5 @@
+import { SVGCross, SVGInfoBubble } from "@dumbcode/shared/icons"
 import { useState } from "react"
-import { SVGCross, SVGInfoBubble } from "../../../../../components/Icons"
 import { ButtonWithTooltip } from "../../../../../components/Tooltips"
 import { useOptions } from "../../../../../contexts/OptionsContext"
 import KeyCombo from "../../../../../studio/keycombos/KeyCombo"

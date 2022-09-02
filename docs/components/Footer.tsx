@@ -1,5 +1,5 @@
+import { SvgPoweredByVercel } from "@dumbcode/shared/icons";
 import Link from 'next/link';
-import { SvgPoweredByVercel } from '../../studio/src/components/Icons';
 
 const Footer = () => {
   const test = "test";

@@ -1,5 +1,5 @@
+import { SvgArrange } from "@dumbcode/shared/icons";
 import { CommandShortcutIcon } from "../../../components/CommandShortcutIcons";
-import { SvgArrange } from "../../../components/Icons";
 
 const TexturerTools = () => {
     return (

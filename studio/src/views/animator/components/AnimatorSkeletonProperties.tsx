@@ -1,6 +1,6 @@
+import { SvgArrowRight } from "@dumbcode/shared/icons"
 import { useEffect, useMemo, useState } from "react"
 import CubeSelectionInputButton from "../../../components/CubeSelectionInputButton"
-import { SvgArrowRight } from "../../../components/Icons"
 import { useStudio } from "../../../contexts/StudioContext"
 import DcaAnimation from "../../../studio/formats/animations/DcaAnimation"
 import { useListenableObject } from "../../../studio/listenableobject/ListenableObject"

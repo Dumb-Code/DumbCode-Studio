@@ -1,8 +1,8 @@
+import { SVGPlus, SVGSave, SVGTrash } from "@dumbcode/shared/icons"
 import { useCallback } from "react"
 import Checkbox from "../../../components/Checkbox"
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel"
 import { DblClickEditLO } from "../../../components/DoubleClickToEdit"
-import { SVGPlus, SVGSave, SVGTrash } from "../../../components/Icons"
 import NumericInput from "../../../components/NumericInput"
 import { ButtonWithTooltip } from "../../../components/Tooltips"
 import { useStudio } from "../../../contexts/StudioContext"
@@ -115,7 +115,7 @@ const DirectionalLightSection = () => {
       <div className="px-2">
         <p className="ml-1 dark:text-gray-400 text-black text-xs flex-grow uppercase">Lights</p>
         <ButtonWithTooltip tooltip="Presets" onClick={openDialog}>
-        <div className="bg-blue-500 px-1 hover:bg-blue-600 h-6 flex-shrink-0 flex flex-row rounded m-1 cursor-pointer group">
+          <div className="bg-blue-500 px-1 hover:bg-blue-600 h-6 flex-shrink-0 flex flex-row rounded m-1 cursor-pointer group">
             <SVGSave className="text-white group-hover:text-white h-4 w-4 mt-1" />
           </div>
         </ButtonWithTooltip>

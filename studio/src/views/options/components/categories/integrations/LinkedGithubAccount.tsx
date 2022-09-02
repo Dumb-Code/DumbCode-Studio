@@ -1,4 +1,4 @@
-import { SVGOpenLink } from "../../../../../components/Icons"
+import { SVGOpenLink } from "@dumbcode/shared/icons"
 import LinkGithubButton from "../../../../../components/LinkGithubButton"
 import { useGithubClientId } from "../../../../../contexts/ServersideContext"
 import { useFetchGithubUserDetails } from "../../../../../studio/util/FetchHooks"

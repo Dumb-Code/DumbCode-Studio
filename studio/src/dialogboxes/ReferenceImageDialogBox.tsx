@@ -1,7 +1,7 @@
+import { SVGTrash, SVGUpload } from "@dumbcode/shared/icons"
 import Image from "next/image"
 import ClickableInput from "../components/ClickableInput"
 import { DblClickEditLO } from "../components/DoubleClickToEdit"
-import { SVGTrash, SVGUpload } from "../components/Icons"
 import Toggle from "../components/Toggle"
 import { useStudio } from "../contexts/StudioContext"
 import { useListenableObject } from "../studio/listenableobject/ListenableObject"

@@ -1,5 +1,5 @@
+import { SVGPause, SVGPlay, SVGRestart, SVGStop } from "@dumbcode/shared/icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SVGPause, SVGPlay, SVGRestart, SVGStop } from "../../../components/Icons";
 import NumericInput from "../../../components/NumericInput";
 import { ButtonWithTooltip } from "../../../components/Tooltips";
 import { useKeyComboPressed, useKeyCombos } from "../../../contexts/OptionsContext";

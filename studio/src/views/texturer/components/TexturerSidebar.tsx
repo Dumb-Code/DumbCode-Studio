@@ -1,7 +1,7 @@
+import { SVGEye, SVGLocked } from "@dumbcode/shared/icons";
 import CollapsableSidebarPannel from "../../../components/CollapsableSidebarPannel";
 import Dropdown, { DropdownItem } from "../../../components/Dropdown";
 import HistoryList from "../../../components/HistoryList";
-import { SVGEye, SVGLocked } from "../../../components/Icons";
 
 const TexturerSidebar = () => {
     return (

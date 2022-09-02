@@ -1,7 +1,7 @@
+import { SVGSearch } from "@dumbcode/shared/icons";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from 'next-mdx-remote/serialize';
-import { SVGSearch } from "../../../../studio/src/components/Icons";
 import Footer from "../../../components/Footer";
 import Navbar from "../../../components/Navbar";
 import Test from "../../../components/Test";
