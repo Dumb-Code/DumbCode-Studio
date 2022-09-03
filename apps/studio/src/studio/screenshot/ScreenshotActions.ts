@@ -16,7 +16,7 @@ export const ScreenshotActionMap: Record<ScreenshotActionType, ScreenshotAction>
     const response = await fetch("https://api.imgur.com/3/image", {
       method: "POST",
       headers: {
-        Authorization: `Client-ID 1b01948f72fbc4f`
+        Authorization: `Client-ID ${process.env.NEXT_PUBLIC_IMGUR_TOKEN}`
       },
       body: formData
     })
