@@ -13,6 +13,7 @@
     "studio#build": {
       "dependsOn": [
         "^build",
+        "$NEXT_PUBLIC_IMGUR_TOKEN",
         "$DOCS_URL",
         "$GITHUB_CLIENT_ID",
         "$GITHUB_CLIENT_SECRET",
