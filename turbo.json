@@ -1,0 +1,31 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
+    },
+    "studio#build": {
+      "dependsOn": [
+        "^build",
+        "$DOCS_URL",
+        "$GITHUB_CLIENT_ID",
+        "$GITHUB_CLIENT_SECRET",
+        "$VERCEL_GIT_COMMIT_SHA",
+        "$VERCEL_GIT_COMMIT_MESSAGE",
+        "$VERCEL_GIT_COMMIT_AUTHOR_NAME"
+      ]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "dev": {
+      "cache": false
+    }
+  }
+}
