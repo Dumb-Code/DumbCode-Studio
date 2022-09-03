@@ -19,21 +19,21 @@ module.exports = withPlugins([
     skipWaiting: true,
   },
 
-  async rewrites() {
-    return [
-      {
-        source: '/:path*',
-        destination: `/:path*`,
-      },
+  rewrites: [
+    {
+      source: '/:path*',
+      destination: `/:path*`,
+    },
 
-      {
-        source: '/docs',
-        destination: `${process.env.DOCS_URL}/docs-from-studio`,
-      },
-      {
-        source: '/docs/:path*',
-        destination: `${process.env.DOCS_URL}/docs-from-studio/:path*`,
-      },
-    ]
-  },
+    {
+      "__comment": "This will only be ran on dev. Production will use the vercel.json rewrites",
+      source: '/docs',
+      destination: `http://localhost:3001/docs`,
+    },
+    {
+      source: '/docs/:path*',
+      destination: `http://localhost:3001/docs/:path`,
+    },
+  ]
+
 })

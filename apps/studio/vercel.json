@@ -1,5 +1,11 @@
 {
   "github": {
     "silent": true
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/docs",
+      "destination": "https://dumbcode-studio-docs.vercel.app/docs"
+    }
+  ]
 }
