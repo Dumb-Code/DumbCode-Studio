@@ -23,16 +23,16 @@ const parseDoc = async (category: string, slug: string, preferredLang: Supported
 }
 
 const readHeader = async (category: string, slug: string): Promise<DocHeaderFile> => {
-  const file = await readFile(getHeaderFilePath(category, slug))
+  const file = await readFile(await getHeaderFilePath(category, slug))
   return JSON.parse(file.toString())
 }
 
 const readAllDocFiles = async (category: string, slug: string, preferredLang: SupportedLanguage): Promise<DocSection[]> => {
   const sectionFiles = await getAllSections(category, slug, preferredLang);
-  const sections = sectionFiles.map(section =>
-    readFile(getDocsFilePath(category, slug, section.name, section.language))
+  const sections = sectionFiles.map(async section =>
+    readFile(await getDocsFilePath(category, slug, section.name, section.language))
       .then<DocSection>(file => ({
-        name: section.name,
+        name: section.unprefixed,
         language: section.language,
         wantedLanguage: preferredLang,
         content: file.toString(),

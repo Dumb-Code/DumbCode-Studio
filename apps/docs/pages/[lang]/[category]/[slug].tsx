@@ -127,8 +127,8 @@ export const getStaticPaths: GetStaticPaths<PathProps> = async () => {
       docFiles.map(docFile => ({
         params: {
           lang: lang,
-          category: docFile.category,
-          slug: docFile.slug
+          category: docFile.unprefixed.category,
+          slug: docFile.unprefixed.slug
         },
       }))
     ),

@@ -8,7 +8,7 @@ export const DocHeaderKeysToCheck: (keyof DocHeader)[] = ["name", "description"]
 
 const BASE_DIR = join(process.cwd(), "_data");
 const EXTENSION = '.mdx';
-
+const ORDERING_PREFIX = /^\d+-/ //Allows the folders/files to be ordered by prefixing them with a number, e.g. 01-Getting-Started
 
 //There are perhaps too many types here...
 export type DocHeader = {
@@ -32,10 +32,15 @@ export type DocSection<S = string> = {
 export type DocsFile = {
   category: string;
   slug: string;
+  unprefixed: {
+    category: string;
+    slug: string;
+  }
 }
 
 export type DocsFileSection = {
   name: string,
+  unprefixed: string,
   language: SupportedLanguage
 }
 
@@ -61,15 +66,19 @@ const getLangOrEnglishSection = async (category: string, slug: string, section: 
   const language = supportedLanguages.includes(preferredLang) ? preferredLang : 'en';
   return {
     name: section,
+    unprefixed: section.replace(ORDERING_PREFIX, ''),
     language,
   }
 }
 
 export const getAllSections = async (category: string, slug: string, preferredLang: SupportedLanguage): Promise<DocsFileSection[]> => {
-  const sectionNames = await readdir(`${BASE_DIR}/${category}/${slug}`)
+  const fullCategory = await getUnprefixedFilePath('', category);
+  const fullSlug = await getUnprefixedFilePath(fullCategory, slug);
+
+  const sectionNames = await readdir(`${BASE_DIR}/${fullCategory}/${fullSlug}`)
   const sections = sectionNames
     .filter(section => section !== 'header.json')
-    .map(section => getLangOrEnglishSection(category, slug, section, preferredLang));
+    .map(section => getLangOrEnglishSection(fullCategory, fullSlug, section, preferredLang));
   return Promise.all(sections);
 }
 
@@ -78,6 +87,10 @@ const getDocFile = async (category: string, slug: string): Promise<DocsFile> => 
   return {
     category,
     slug,
+    unprefixed: {
+      category: category.replace(ORDERING_PREFIX, ''),
+      slug: slug.replace(ORDERING_PREFIX, ''),
+    }
   };
 }
 
@@ -93,11 +106,24 @@ export const getAllDocFiles = async (): Promise<DocsFile[]> => {
   return allDocFiles.flat();
 }
 
-export const getHeaderFilePath = (category: string, slug: string): string => {
-  return `${BASE_DIR}/${category}/${slug}/header.json`;
+const getUnprefixedFilePath = async (base: string, search: string) => {
+  const entries = await readdir(`${BASE_DIR}${base.length !== 0 ? `/${base}` : ''}`);
+  const fullEntry = entries.find(c => c === search || c.replace(ORDERING_PREFIX, '') === search);
+  if (!fullEntry) {
+    throw new Error(`Category ${fullEntry} not found`);
+  }
+  return fullEntry;
 }
 
-export const getDocsFilePath = (category: string, slug: string, section: string, language: SupportedLanguage): string => {
-  return `${BASE_DIR}/${category}/${slug}/${section}/${language}${EXTENSION}`;
+export const getHeaderFilePath = async (category: string, slug: string): Promise<string> => {
+  const fullCategory = await getUnprefixedFilePath('', category);
+  const fullSlug = await getUnprefixedFilePath(fullCategory, slug);
+  return `${BASE_DIR}/${fullCategory}/${fullSlug}/header.json`;
+}
+
+export const getDocsFilePath = async (category: string, slug: string, section: string, language: SupportedLanguage): Promise<string> => {
+  const fullCategory = await getUnprefixedFilePath('', category);
+  const fullSlug = await getUnprefixedFilePath(fullCategory, slug);
+  return `${BASE_DIR}/${fullCategory}/${fullSlug}/${section}/${language}${EXTENSION}`;
 }
 
