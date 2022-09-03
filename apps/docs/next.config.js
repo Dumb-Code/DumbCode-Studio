@@ -2,5 +2,5 @@ const withTM = require("next-transpile-modules")(["@dumbcode/shared"]);
 
 module.exports = withTM({
   reactStrictMode: true,
-  basePath: "/docs",
+  basePath: "/docs-from-studio",
 });
