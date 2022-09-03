@@ -1,13 +1,12 @@
 import { readFile } from 'fs/promises';
+import { join } from 'path';
 import { loadUnknownAnimation } from "../../src/studio/formats/animations/DCALoader";
 import { loadModelUnknown } from "../../src/studio/formats/model/DCMLoader";
 import DcProject from "../../src/studio/formats/project/DcProject";
 import DcaAnimation, { ProgressionPoint } from './../../src/studio/formats/animations/DcaAnimation';
 import { NumArray } from './../../src/studio/util/NumArray';
 
-
-
-const FILE_PREFIX = "studio/tests/parsing/old_animations";
+const FILE_PREFIX = join(process.cwd(), "tests", "parsing", "old_animations");
 const TEST_PROJECT_NAME_PREFIX = 'test_project_old_animations_'
 
 const loadFile = async (name: string) => {
