@@ -146,7 +146,7 @@ export class LOMap<K, V> extends Map<K, V> {
     return map.applyToSection(section, propertyPrefix, silent, s => s, s => s, reason, action);
   }
 
-  static extractSectionDataToMap<D, SK_PREFIX extends string, MK>(data: D, key: SK_PREFIX, keyMapper: (key: string) => MK) {
+  static extractSectionDataToMap<D extends object, SK_PREFIX extends string, MK>(data: D, key: SK_PREFIX, keyMapper: (key: string) => MK) {
     type SK = `${SK_PREFIX}${string}` & keyof D;
     const map = new Map<MK, D[SK]>();
     Object.keys(data)
