@@ -46,7 +46,15 @@ const NumericInput = ({
     const num = clampValue(isPositiveInteger ? parseInt(string) : parseFloat(string))
     return isNaN(num) ? defaultValue : num
   }, [isPositiveInteger, defaultValue, clampValue])
-  const numToString = useCallback((value: number | null | undefined) => value?.toFixed(isPositiveInteger ? 0 : 2) ?? "", [isPositiveInteger])
+  const numToString = useCallback((value: number | null | undefined) => {
+    if (value === null || value === undefined) {
+      return ""
+    }
+    if (value === 0) {
+      value = 0; //This is to prevent -0 from showing up
+    }
+    return value.toFixed(isPositiveInteger ? 0 : 2)
+  }, [isPositiveInteger])
 
   const [typedValue, setTypedValue] = useState(numToString(value))
   const [isFocused, setIsFocused] = useState(false)
