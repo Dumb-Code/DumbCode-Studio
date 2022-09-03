@@ -59,7 +59,7 @@ export const useOptions = () => {
   return context
 }
 
-export const useKeyCombos = () => {
+export const useKeyCombos = (): KeyComboMap => {
   return useOptions().keyCombos
 }
 
