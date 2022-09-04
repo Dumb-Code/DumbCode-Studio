@@ -644,17 +644,6 @@ const LoopingMarker = ({ lo }: { lo: LO<number> }) => {
     const [entry, setEntry] = useListenableObject(lo)
     const { getPixelsPerSecond, getScroll, addAndRunListener, removeListener } = useContext(ScrollZoomContext)
 
-    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
-        if (ref.current !== null) {
-            ref.current.style.left = `${entry * pixelsPerSecond - scroll}px`
-        }
-    }, [entry, getPixelsPerSecond, getScroll])
-
-    useEffect(() => {
-        addAndRunListener(updateRefStyle)
-        return () => removeListener(updateRefStyle)
-    }, [addAndRunListener, removeListener, updateRefStyle])
-
     const ref = useDraggbleRef<HTMLDivElement, number>(
         useCallback(() => entry, [entry]),
         useCallback(({ dx, initial }) => {
@@ -662,6 +651,17 @@ const LoopingMarker = ({ lo }: { lo: LO<number> }) => {
         }, [setEntry, getPixelsPerSecond]),
         useCallback(() => { }, [])
     )
+
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (ref.current !== null) {
+            ref.current.style.left = `${entry * pixelsPerSecond - scroll}px`
+        }
+    }, [entry, getPixelsPerSecond, getScroll, ref])
+
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
 
     return (
         <div

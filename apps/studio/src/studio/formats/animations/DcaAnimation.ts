@@ -102,6 +102,8 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   displayTimeMatch: boolean = true
 
   readonly loopData: KeyframeLoopData
+  readonly shouldContinueLooping = new LO(false)
+
   readonly keyframeLayers = new LO<readonly KeyframeLayerData[]>([], this.onDirty)
 
   readonly scroll = new LO(0, this.onDirty)
