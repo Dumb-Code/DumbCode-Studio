@@ -13,7 +13,7 @@ import { KeyframeClipboardType } from "../../../studio/clipboard/KeyframeClipboa
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
 import DcaSoundLayer, { DcaSoundLayerInstance } from "../../../studio/formats/animations/DcaSoundLayer";
 import { StudioSound } from "../../../studio/formats/sounds/StudioSound";
-import { useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/listenableobject/ListenableObject";
+import { LO, useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/listenableobject/ListenableObject";
 import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef";
 import { AnimationLayerButton, AnimationTimelineLayer, blockPerSecond, width } from "./AnimatorTimelineLayer";
@@ -188,6 +188,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     return (
         <ScrollZoomContext.Provider value={context}>
             <>
+                <LoopingProperties animation={animation} />
                 {soundLayers.map(layer => <SoundLayer key={layer.identifier} animation={animation} soundLayer={layer} />)}
                 {keyframesByLayers.map(({ layer, keyframes }) => <AnimationLayer key={layer.layerId} animation={animation} keyframes={keyframes} layer={layer} />)}
                 <div className="flex flex-row">
@@ -623,6 +624,80 @@ const LayerButton = ({ addLayer, text }: { addLayer: (e: ReactMouseEvent) => voi
             <p className="text-xs mr-2">{text}</p>
         </button>
     );
+}
+
+const LoopingProperties = ({ animation }: { animation: DcaAnimation }) => {
+    const [exists] = useListenableObject(animation.loopData.exists)
+
+    return (
+        <div className="h-2 -mt-1 mb-1 ml-[288px] mr-[34px] overflow-hidden relative">
+            {exists && <>
+                <LoopingMarker lo={animation.loopData.start} />
+                <LoopingMarker lo={animation.loopData.end} />
+                <LoopingRange animation={animation} />
+            </>}
+        </div>
+    )
+}
+
+const LoopingMarker = ({ lo }: { lo: LO<number> }) => {
+    const [entry, setEntry] = useListenableObject(lo)
+    const { getPixelsPerSecond, getScroll, addAndRunListener, removeListener } = useContext(ScrollZoomContext)
+
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (ref.current !== null) {
+            ref.current.style.left = `${entry * pixelsPerSecond - scroll}px`
+        }
+    }, [entry, getPixelsPerSecond, getScroll])
+
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
+
+    const ref = useDraggbleRef<HTMLDivElement, number>(
+        useCallback(() => entry, [entry]),
+        useCallback(({ dx, initial }) => {
+            setEntry(Math.max(initial + dx / getPixelsPerSecond(), 0))
+        }, [setEntry, getPixelsPerSecond]),
+        useCallback(() => { }, [])
+    )
+
+    return (
+        <div
+            ref={ref}
+            className="h-full w-2 absolute bg-blue-500 z-10"
+        >
+        </div>
+    )
+}
+
+const LoopingRange = ({ animation }: { animation: DcaAnimation }) => {
+    const [start] = useListenableObject(animation.loopData.start)
+    const [end] = useListenableObject(animation.loopData.end)
+
+    const { getPixelsPerSecond, getScroll, addAndRunListener, removeListener } = useContext(ScrollZoomContext)
+    const ref = useRef<HTMLDivElement>(null)
+
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (ref.current !== null) {
+            ref.current.style.left = `${start * pixelsPerSecond - scroll}px`
+            ref.current.style.width = `${(end - start) * pixelsPerSecond}px`
+        }
+    }, [start, end, getPixelsPerSecond, getScroll])
+
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
+
+    return (
+        <div
+            ref={ref}
+            className="h-full w-2 absolute bg-blue-200"
+        >
+        </div>
+    )
 }
 
 export default AnimatorTimeline;

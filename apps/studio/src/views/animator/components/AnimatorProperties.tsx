@@ -160,21 +160,23 @@ const AnimatorKeyframeProperties = ({ animation }: { animation: DcaAnimation | n
     return (
         <CollapsableSidebarPannel title="KEYFRAME PROPERTIES" heightClassname="h-16" panelName="animator_kf">
             <div className="w-full grid grid-cols-2 px-2 pt-1">
-                <TitledField title="KEYFRAME START" lo={singleSelectedKeyframe?.startTime} />
-                <TitledField title="KEYFRAME LENGTH" lo={singleSelectedKeyframe?.duration} />
+                <TitledField animation={animation} title="KEYFRAME START" lo={singleSelectedKeyframe?.startTime} />
+                <TitledField animation={animation} title="KEYFRAME LENGTH" lo={singleSelectedKeyframe?.duration} />
             </div>
         </CollapsableSidebarPannel>
     )
 }
 
 const AnimatorLoopingProperties = ({ animation }: { animation: DcaAnimation | null }) => {
+    const loopData = animation?.loopData
+    const [exists] = useListenableObjectNullable(loopData?.exists)
     return (
         <CollapsableSidebarPannel title="LOOPING PROPERTIES" heightClassname="h-16" panelName="animator_looping">
             <div className="w-full flex flex-row px-2 pt-1">
-                <LoopCheck title="LOOP" />
-                <TitledField title="START" />
-                <TitledField title="END" />
-                <TitledField title="TIME" />
+                <LoopCheck title="LOOP" lo={loopData?.exists} />
+                <TitledField animation={animation} title="START" lo={exists ? loopData?.start : undefined} />
+                <TitledField animation={animation} title="END" lo={exists ? loopData?.end : undefined} />
+                <TitledField animation={animation} title="TIME" lo={exists ? loopData?.duration : undefined} />
             </div>
         </CollapsableSidebarPannel>
     )
@@ -278,13 +280,14 @@ const AnimatorProgressionProperties = ({ animation }: { animation: DcaAnimation 
     )
 }
 
-const LoopCheck = ({ title }: { title: string }) => {
+const LoopCheck = ({ title, lo }: { title: string, lo?: LO<boolean> }) => {
+    const [value, setValue] = useListenableObjectNullable(lo)
     return (
         <div>
             <p className="ml-1 text-black dark:text-gray-400 text-xs">{title}</p>
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7 mt-1">
-                    <Checkbox value={false} setValue={e => console.log("set value" + e)} />
+                    <Checkbox value={value ?? false} setValue={setValue} />
                 </div>
             </div>
         </div>
@@ -339,7 +342,7 @@ const IKCheck = ({ title, animation }: { title: string, animation: AnimatorGumba
     )
 }
 
-const TitledField = ({ title, lo }: { title: string, lo?: LO<number> }) => {
+const TitledField = ({ animation, title, lo }: { animation: DcaAnimation | null, title: string, lo?: LO<number> }) => {
     const [value, setValue] = useListenableObjectNullable(lo)
     return (
         <div>
@@ -347,6 +350,8 @@ const TitledField = ({ title, lo }: { title: string, lo?: LO<number> }) => {
             <div className="flex flex-col p-1">
                 <div className="mb-1 h-7">
                     <NumericInput
+                        startBatchActions={() => animation && animation.undoRedoHandler.startBatchActions()}
+                        endBatchActions={() => animation && animation.undoRedoHandler.endBatchActions(`${title} Changed`)}
                         value={value}
                         onChange={val => (val < 0) ? setValue(0) : setValue(val)}
                     />

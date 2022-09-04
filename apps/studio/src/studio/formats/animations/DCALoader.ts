@@ -56,10 +56,10 @@ const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayB
 
   animation.keyframes.value = data.keyframes.map(kf => readKeyframe(animation, kf))
 
-  animation.keyframeData.exits.value = data.loopData.exists
-  animation.keyframeData.start.value = data.loopData.start
-  animation.keyframeData.end.value = data.loopData.end
-  animation.keyframeData.duration.value = data.loopData.duration
+  animation.loopData.exits.value = data.loopData.exists
+  animation.loopData.start.value = data.loopData.start
+  animation.loopData.end.value = data.loopData.end
+  animation.loopData.duration.value = data.loopData.duration
 
   convertRecordToMap(data.cubeNameOverrides ?? {}, animation.keyframeNameOverrides)
 
@@ -97,10 +97,10 @@ export const writeDCAAnimationWithFormat = async <T extends keyof OutputByType>(
     name: animation.name.value,
     keyframes: animation.keyframes.value.map(kf => writeKeyframe(kf)),
     loopData: {
-      exists: animation.keyframeData.exits.value,
-      start: animation.keyframeData.start.value,
-      end: animation.keyframeData.end.value,
-      duration: animation.keyframeData.duration.value,
+      exists: animation.loopData.exits.value,
+      start: animation.loopData.start.value,
+      end: animation.loopData.end.value,
+      duration: animation.loopData.duration.value,
     },
     cubeNameOverrides: convertMapToRecord(animation.keyframeNameOverrides),
     isSkeleton: animation.isSkeleton.value,
