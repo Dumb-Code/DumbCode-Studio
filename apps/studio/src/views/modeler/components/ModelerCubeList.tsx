@@ -717,7 +717,11 @@ const CubeList = ({ model, selectedCubeManager }: { model: DCMModel, selectedCub
             }
         }
         document.addEventListener("dragover", mouseMove, true)
-        return () => document.removeEventListener("dragover", mouseMove, true)
+        document.addEventListener("mousemove", mouseMove, true)
+        return () => {
+            document.removeEventListener("dragover", mouseMove, true)
+            document.removeEventListener("mousemove", mouseMove, true)
+        }
     }, [updateDrag, dragData])
 
 
