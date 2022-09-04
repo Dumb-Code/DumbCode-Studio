@@ -77,7 +77,7 @@ const Animator = () => {
             delete_layer: () => animation !== null && animation.deleteKeyframesLayers(),
             paste_keyframes_defined: () => animation !== null && animation.pasteKeyframes(true),
         }
-    }), [animation]))
+    }), [animation]), { blurActiveElement: false })
 
     useObjectUnderMouse()
 

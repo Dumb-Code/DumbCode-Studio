@@ -52,7 +52,7 @@ const Modeler = () => {
             copy_only_selected: () => project.model.copyCubes(false),
             paste_world_position: () => project.model.pasteCubes(true),
         }
-    }), [project]))
+    }), [project]), { blurActiveElement: false })
 
     useObjectUnderMouse()
     useModelerGumball()
