@@ -65,7 +65,7 @@ const ProjectTextures = () => {
                 </ClickableInput>
             </ProjectFileAreaHeader>
             <div className="flex flex-row overflow-hidden h-full w-full">
-                {hasProject && <TextureLists project={getSelectedProject()} />}
+                {hasProject && <TextureListsContainer project={getSelectedProject()} />}
             </div>
         </ProjectFileAreaBase>
     )
@@ -194,8 +194,18 @@ const DraggableContext = createContext<DraggableContextType | null>(null)
 
 const emptySpan = (typeof window !== "undefined" && document.createElement("span")) as HTMLSpanElement
 
-const TextureLists = ({ project }: { project: DcProject }) => {
+const TextureListsContainer = ({ project }: { project: DcProject }) => {
     const [selectedGroup] = useListenableObject(project.textureManager.selectedGroup)
+    return (
+        <TextureLists
+            key={selectedGroup.identifier}
+            project={project}
+            selectedGroup={selectedGroup}
+        />
+    )
+}
+
+const TextureLists = ({ project, selectedGroup }: { project: DcProject, selectedGroup: TextureGroup }) => {
 
     const [draggingTexture, setDraggingTexture] = useState<Texture | null>(null)
 
