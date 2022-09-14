@@ -159,7 +159,7 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
     useCallback(() => animation.isDraggingTimeline = false, [animation])
   )
 
-  const timeRef = useRef(animation.time.value)
+  const timeRef = useRef(animation.displayTime.value)
 
 
   const updateAndSetLeft = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
@@ -178,13 +178,13 @@ export const AnimationTimelineLayer = <T extends HasIdentif,>({ animation, keyfr
       timeRef.current = time
       updateAndSetLeft()
     }
-    animation.time.addListener(timeCallback)
+    animation.displayTime.addListener(timeCallback)
 
     return () => {
       removeListener(updateAndSetLeft)
-      animation.time.removeListener(timeCallback)
+      animation.displayTime.removeListener(timeCallback)
     }
-  }, [addAndRunListener, removeListener, timeMarkerRef, animation.time, getPixelsPerSecond, getScroll, updateAndSetLeft])
+  }, [addAndRunListener, removeListener, timeMarkerRef, animation.displayTime, getPixelsPerSecond, getScroll, updateAndSetLeft])
 
   const containerPropsValue = containerProps?.(draggingRef)
 

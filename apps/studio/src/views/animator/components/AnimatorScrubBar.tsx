@@ -85,13 +85,13 @@ const AnimatorScrubBar = ({ animation }: { animation: DcaAnimation | null }) => 
         if (!isPlaying && animation?.time.value === 0) {
             setShouldContinueLooping(true)
         }
-    }, [isPlaying, setPlaying])
+    }, [isPlaying, setPlaying, animation?.time?.value, setShouldContinueLooping])
 
     const onRestart = useCallback(() => {
         setTimeAt(0)
         setPlaying(true)
         setShouldContinueLooping(true)
-    }, [setTimeAt, setPlaying])
+    }, [setTimeAt, setPlaying, setShouldContinueLooping])
 
     const onStop = useCallback(() => {
         setTimeAt(0)

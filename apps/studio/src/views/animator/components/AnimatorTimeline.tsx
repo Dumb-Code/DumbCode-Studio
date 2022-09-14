@@ -412,7 +412,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
 
         animation.selectedKeyframes.value.forEach(kf => kf.selected.value = false)
         kf.selected.value = true
-        kf.startTime.value = animation.time.value
+        kf.startTime.value = animation.displayTime.value
         animation.undoRedoHandler.endBatchActions("Created Keyframe", HistoryActionTypes.Add)
     }
 
