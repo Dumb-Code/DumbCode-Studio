@@ -56,7 +56,7 @@ const loadDCAAnimation = async (project: DcProject, name: string, buffer: ArrayB
 
   animation.keyframes.value = data.keyframes.map(kf => readKeyframe(animation, kf))
 
-  animation.loopData.exits.value = data.loopData.exists
+  animation.loopData.exists.value = data.loopData.exists
   animation.loopData.start.value = data.loopData.start
   animation.loopData.end.value = data.loopData.end
   animation.loopData.duration.value = data.loopData.duration
@@ -97,7 +97,7 @@ export const writeDCAAnimationWithFormat = async <T extends keyof OutputByType>(
     name: animation.name.value,
     keyframes: animation.keyframes.value.map(kf => writeKeyframe(kf)),
     loopData: {
-      exists: animation.loopData.exits.value,
+      exists: animation.loopData.exists.value,
       start: animation.loopData.start.value,
       end: animation.loopData.end.value,
       duration: animation.loopData.duration.value,

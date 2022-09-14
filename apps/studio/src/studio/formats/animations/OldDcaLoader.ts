@@ -27,7 +27,7 @@ export const loadDCAAnimationOLD = (project: DcProject, name: string, buffer: St
     animation.loopData.start.value = buffer.readNumber()
     animation.loopData.end.value = buffer.readNumber()
     animation.loopData.duration.value = buffer.readNumber()
-    animation.loopData.exits.value = true
+    animation.loopData.exists.value = true
   }
   //Read the keyframes
   const keyframes: DcaKeyframe[] = []
