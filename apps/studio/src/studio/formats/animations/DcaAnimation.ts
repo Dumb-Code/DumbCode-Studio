@@ -148,7 +148,7 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
       }
     })
 
-    this.loopingKeyframe = new DcaKeyframe(this.project, this);
+    this.loopingKeyframe = new DcaKeyframe(this.project, this, v4(), -1);
 
     this.loopData.exists.applyToSection(this._section, "loop_exists").addListener(this.onDirty)
     this.loopData.exists.addPostListener(() => this.onKeyframeChanged())
@@ -244,7 +244,7 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   }
 
   ensureLayerExists(layerId: number) {
-    if (!this.keyframeLayers.value.some(l => l.layerId === layerId)) {
+    if (layerId >= 0 && !this.keyframeLayers.value.some(l => l.layerId === layerId)) {
       this.keyframeLayers.value = this.keyframeLayers.value.concat(new KeyframeLayerData(this, layerId))
     }
   }
