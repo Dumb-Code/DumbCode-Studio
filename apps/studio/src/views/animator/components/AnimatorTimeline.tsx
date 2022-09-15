@@ -188,7 +188,8 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     return (
         <ScrollZoomContext.Provider value={context}>
             <>
-                <LoopingProperties animation={animation} />
+                <TimelineLabels animation={animation} />
+                {animation.loopData.exists && <LoopingProperties animation={animation} />}
                 {soundLayers.map(layer => <SoundLayer key={layer.identifier} animation={animation} soundLayer={layer} />)}
                 {keyframesByLayers.map(({ layer, keyframes }) => <AnimationLayer key={layer.layerId} animation={animation} keyframes={keyframes} layer={layer} />)}
                 <div className="flex flex-row">
@@ -199,6 +200,62 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
                 <PastedKeyframePortal animation={animation} pastedKeyframes={pastedKeyframes} hoveredLayer={hoveredLayer} />
             </>
         </ScrollZoomContext.Provider>
+    )
+}
+
+
+const TimelineLabels = ({ animation }: { animation: DcaAnimation }) => {
+    const [exists] = useListenableObject(animation.loopData.exists)
+
+    return (
+        <div className={(exists ? "mb-1 -translate-y-2" : "-mb-2 -translate-y-1") + " h-3.5 ml-[288px] mr-[34px] overflow-hidden relative"}>
+            <TimelineLabel pos={new LO<number>(0 / 10)} value={0} />
+            <TimelineLabel pos={new LO<number>(1 / 10)} value={1} />
+            <TimelineLabel pos={new LO<number>(2 / 10)} value={2} />
+            <TimelineLabel pos={new LO<number>(3 / 10)} value={3} />
+            <TimelineLabel pos={new LO<number>(4 / 10)} value={4} />
+            <TimelineLabel pos={new LO<number>(5 / 10)} value={5} />
+            <TimelineLabel pos={new LO<number>(6 / 10)} value={6} />
+            <TimelineLabel pos={new LO<number>(7 / 10)} value={7} />
+            <TimelineLabel pos={new LO<number>(8 / 10)} value={8} />
+            <TimelineLabel pos={new LO<number>(9 / 10)} value={9} />
+            <TimelineLabel pos={new LO<number>(10 / 10)} value={10} />
+            <TimelineLabel pos={new LO<number>(11 / 10)} value={11} />
+            <TimelineLabel pos={new LO<number>(12 / 10)} value={12} />
+            <TimelineLabel pos={new LO<number>(13 / 10)} value={13} />
+            <TimelineLabel pos={new LO<number>(14 / 10)} value={14} />
+            <TimelineLabel pos={new LO<number>(15 / 10)} value={15} />
+        </div>
+    )
+}
+
+const TimelineLabel = ({ pos, value }: { pos: LO<number>, value: number }) => {
+    const [entry, setEntry] = useListenableObject(pos)
+    const { getPixelsPerSecond, getScroll, addAndRunListener, removeListener } = useContext(ScrollZoomContext)
+
+    const ref = useDraggbleRef<HTMLDivElement, number>(
+        useCallback(() => entry, [entry]),
+        useCallback(({ dx, initial }) => {
+            setEntry(Math.max(initial + dx / getPixelsPerSecond(), 0))
+        }, [setEntry, getPixelsPerSecond]),
+        useCallback(() => { }, [])
+    )
+
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (ref.current !== null) {
+            ref.current.style.left = `${entry * pixelsPerSecond - scroll}px`
+        }
+    }, [entry, getPixelsPerSecond, getScroll, ref])
+
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
+
+    return (
+        <div ref={ref} className="h-full text-xs absolute dark:text-gray-400 text-black z-20">
+            {value}
+        </div>
     )
 }
 
@@ -630,7 +687,7 @@ const LoopingProperties = ({ animation }: { animation: DcaAnimation }) => {
     const [exists] = useListenableObject(animation.loopData.exists)
 
     return (
-        <div className="h-2 -mt-1 mb-1 ml-[288px] mr-[34px] overflow-hidden relative">
+        <div className="h-4 -mt-4 translate-y-2 mb-1 ml-[288px] mr-[34px] overflow-hidden relative">
             {exists && <>
                 <LoopingMarker lo={animation.loopData.start} />
                 <LoopingMarker lo={animation.loopData.end} />
@@ -664,11 +721,7 @@ const LoopingMarker = ({ lo }: { lo: LO<number> }) => {
     }, [addAndRunListener, removeListener, updateRefStyle])
 
     return (
-        <div
-            ref={ref}
-            className="h-full w-2 absolute bg-blue-500 z-10"
-        >
-        </div>
+        <div ref={ref} className="h-3 w-3 absolute bg-blue-500 z-10 rotate-45 -mt-0.5 -ml-[6.5px]" />
     )
 }
 
@@ -694,7 +747,7 @@ const LoopingRange = ({ animation }: { animation: DcaAnimation }) => {
     return (
         <div
             ref={ref}
-            className="h-full w-2 absolute bg-blue-200"
+            className="h-2 w-2 absolute bg-blue-200"
         >
         </div>
     )
