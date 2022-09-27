@@ -1,6 +1,7 @@
 import DcProject from '../../../formats/project/DcProject';
 import { CommandRoot } from './../../CommandRoot';
 import ArrayCommands from './ArrayCommands';
+import CopyPasteCommand from './CopyPasteCommands';
 import ReferenceImageCommand from './ReferenceImageCommand';
 import VertexSnapping from './VertexSnappings';
 
@@ -10,6 +11,7 @@ export const createModelingCommandRoot = (project: DcProject) => {
   root.addCommand(ArrayCommands)
   root.addCommand(VertexSnapping(project))
   root.addCommand(ReferenceImageCommand)
+  root.addCommand(CopyPasteCommand)
 
   return root
 }

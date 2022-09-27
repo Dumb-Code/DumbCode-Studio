@@ -210,10 +210,12 @@ export class DCMModel implements CubeParent {
   pasteCubes(worldPosition: boolean) {
     const cubes = readFromClipboard("cube")
     if (cubes !== null) {
+      const pasted = readCubesForClipboard(this, cubes)
       this.children.dontUpdateSection = true
-      this.children.value = this.children.value.concat(readCubesForClipboard(this, cubes))
+      this.children.value = this.children.value.concat(pasted)
       this.children.dontUpdateSection = false
       this.pastedInWorld = worldPosition
+      return pasted
     }
   }
 

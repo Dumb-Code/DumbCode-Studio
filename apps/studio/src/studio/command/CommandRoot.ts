@@ -104,9 +104,8 @@ export class CommandRoot {
 
     this.avaliableCommands.value = s === "" ? [] : avaliable
 
-    const splitSpace = s.split(" ")
     const cmd = this._findCommandAndArgs(splitStr(s))
-    if (splitSpace.length > 1 && !(cmd instanceof CommandParseError)) {
+    if (!(cmd instanceof CommandParseError)) {
       const { command, args, flags } = cmd
       this.activeCommand.value = command
       if (command !== null) {
