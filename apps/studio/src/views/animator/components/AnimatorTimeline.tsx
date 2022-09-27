@@ -69,7 +69,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     const [pastedKeyframes, setPastedKeyframes] = useListenableObject(animation.pastedKeyframes)
 
     const [hoveredLayer, setHoveredLayer] = useState<number | null>(null)
-    const [hoveredLayerClientX, setHoveredLayerClientX] = useState<number | null>(null)
+    const hoveredLayerClientX = useRef<number | null>(null)
 
     const [soundLayers, setSoundLayers] = useListenableObject(animation.soundLayers)
 
@@ -149,7 +149,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
 
     const setHoveredLayerAndPosition = useCallback((layer: number | null, clientX: number | null) => {
         setHoveredLayer(layer)
-        setHoveredLayerClientX(clientX)
+        hoveredLayerClientX.current = clientX
     }, [])
 
     const context = useMemo(() => ({
@@ -162,14 +162,14 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     }), [addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef, setHoveredLayerAndPosition])
 
     useEffect(() => {
-        if (pastedKeyframes !== null && pastedKeyframes.length !== 0 && hoveredLayer !== null && hoveredLayerClientX !== null) {
+        if (pastedKeyframes !== null && pastedKeyframes.length !== 0 && hoveredLayer !== null && hoveredLayerClientX.current !== null) {
             const first = pastedKeyframes.reduce((prev, cur) => prev.start < cur.start ? prev : cur)
             const firstId = first.originalLayerId
             const firstStart = first.originalStart
 
             const maxLayer = Math.max(...layers.map(layer => layer.layerId))
 
-            const hoveredLayerStart = (hoveredLayerClientX - getScroll()) / getPixelsPerSecond()
+            const hoveredLayerStart = (hoveredLayerClientX.current - getScroll()) / getPixelsPerSecond()
 
             const newValue = pastedKeyframes.map(kft => ({
                 ...kft,
@@ -183,7 +183,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
                 setPastedKeyframes(newValue)
             }
         }
-    }, [pastedKeyframes, hoveredLayer, hoveredLayerClientX, getPixelsPerSecond, getScroll, layers, setPastedKeyframes])
+    }, [pastedKeyframes, hoveredLayer, getPixelsPerSecond, getScroll, layers, setPastedKeyframes])
 
     return (
         <ScrollZoomContext.Provider value={context}>
