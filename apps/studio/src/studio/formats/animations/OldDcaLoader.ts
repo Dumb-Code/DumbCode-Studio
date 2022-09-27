@@ -1,8 +1,9 @@
 import { LO } from '../../listenableobject/ListenableObject';
 import { LOMap } from "../../listenableobject/ListenableObjectMap";
+import { runInvertMath } from '../../math/InvertMath';
+import { runMirrorMath } from '../../math/MirrorMath';
 import { StudioBuffer } from '../../util/StudioBuffer';
 import { DCMCube, DCMModel } from '../model/DcmModel';
-import { runInvertMath, runMirrorMath } from '../model/TBLLoader';
 import DcProject from '../project/DcProject';
 import { NumArray } from './../../util/NumArray';
 import { worldPos, worldX, worldY } from './../model/TBLLoader';
