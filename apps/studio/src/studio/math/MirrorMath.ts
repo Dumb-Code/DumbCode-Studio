@@ -111,6 +111,12 @@ export function runMirrorMath(worldPos: Vector3, normal: Vector3, cubes: DCMCube
     })
   })
 
+  //End data cache is the result of the cube properties after the math has been applied.
+  let endDataCache = new Map<DCMCube, {
+    position: NumArray;
+    rotation: NumArray;
+    offset: NumArray;
+  }>()
   totalCubesToApplyTo.forEach(data => {
     let cube = data.cube
     if (data.type === 1) {
@@ -144,7 +150,13 @@ export function runMirrorMath(worldPos: Vector3, normal: Vector3, cubes: DCMCube
       let toMove = toMove0.add(toMove1).applyMatrix4(inverseRotation).multiplyScalar(8) //8 = 16 /2
       cube.updateOffset([cube.offset.value[0] + toMove.x, cube.offset.value[1] + toMove.y, cube.offset.value[2] + toMove.z])
     }
+    endDataCache.set(cube, {
+      position: cube.position.value,
+      rotation: cube.rotation.value,
+      offset: cube.offset.value,
+    })
   })
+  return endDataCache
   // //If it's a dummy, we need to reset the visuals and return the command result cache.
   // if (dummy === true) {
   //   let resetVisuals = (visualOnly: boolean) => {
