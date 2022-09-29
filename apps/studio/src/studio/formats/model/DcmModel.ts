@@ -311,6 +311,7 @@ export class DCMCube implements CubeParent {
 
   readonly mouseHover = new LO(false)
   readonly selected: LO<boolean>
+  readonly affected: LO<boolean>
   readonly hideChildren: LO<boolean>
 
   readonly visible: LO<boolean>
@@ -353,6 +354,7 @@ export class DCMCube implements CubeParent {
     applyToSectionNow = true,
     hideChildren = false,
     visible = true,
+    affected = false,
     locked = false
   ) {
 
@@ -369,6 +371,7 @@ export class DCMCube implements CubeParent {
     this.model = model
 
     this.selected = LO.createOneWayDelegateListener(model.selectedCubeManager.selected, selected => selected.includes(this.identifier))//.applyToSection(this._section, "selected", false, value => value ? "Cube Selected" : "Cube Deselected")
+    this.affected = new LO(affected, onDirty)
     this.hideChildren = new LO(hideChildren, onDirty)
     this.visible = new LO(visible, onDirty)
     this.locked = new LO(locked, onDirty)
@@ -424,6 +427,12 @@ export class DCMCube implements CubeParent {
           this.model.parentProject.selectedCubeManager.onCubeUnSelected(this)
         }
         this.updateMaterials({ selected: isSelected })
+      }
+    })
+
+    this.affected.addListener(isAffected => {
+      if (this.model.materials !== undefined && this.cubeMesh !== undefined && this.model.parentProject !== undefined) {
+        this.updateMaterials({ affected: isAffected })
       }
     })
 
@@ -491,13 +500,17 @@ export class DCMCube implements CubeParent {
     }
   }
 
-  updateMaterials({ selected = this.selected.value, hovering = this.mouseHover.value }) {
+  updateMaterials({ selected = this.selected.value, hovering = this.mouseHover.value, affected = this.affected.value }) {
     if (selected) {
       this.cubeMesh.material = this.model.materials.selected
     } else if (hovering) {
       this.cubeMesh.material = this.model.materials.highlight
     } else {
       this.cubeMesh.material = this.model.materials.normal
+    }
+    //Able to overwrite other materials.
+    if (affected) { 
+      this.cubeMesh.material = this.model.materials.affected
     }
   }
 
@@ -727,6 +740,7 @@ export class ProjectMaterials {
   readonly normal: MeshStandardMaterial
   readonly highlight: MeshStandardMaterial
   readonly selected: MeshStandardMaterial
+  readonly affected: MeshStandardMaterial
 
   readonly export: MeshBasicMaterial
 
@@ -738,6 +752,9 @@ export class ProjectMaterials {
 
     this.selected = material.clone()
     this.selected.emissive.setHex(0x000066)
+
+    this.affected = material.clone()
+    this.affected.emissive.setHex()
 
     this.export = exportMaterial.clone()
   }
