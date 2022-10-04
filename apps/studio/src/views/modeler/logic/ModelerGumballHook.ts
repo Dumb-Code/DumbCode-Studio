@@ -95,9 +95,7 @@ export const useModelerGumball = () => {
         cube.position.addPostListener(onCubeValuesChange);
         cube.rotation.addPostListener(onCubeValuesChange);
       });
-      if (gumball.transformAnchor.userData.dcmCube) { 
-        gumball.transformAnchor.userData.dcmCube = selectedCubes.current.length === 1 ? selectedCubes.current[0] : undefined;
-      }
+      gumball.transformAnchor.userData.dcmCube = selectedCubes.current.length === 1 ? selectedCubes.current[0] : undefined;
       if (gumball.gumball_auto_move.value) {
         gumball.moveGumballToSelected({ selected: val });
       }
