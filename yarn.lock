@@ -12508,8 +12508,8 @@ textextensions@^3.2.0:
   integrity sha512-mk82dS8eRABNbeVJrEiN5/UMSCliINAuz8mkUwH4SwslkNP//gbEzlWNS5au0z5Dpx40SQxzqZevZkn+WYJ9Dw==
 
 three@Dumb-Code/three.js:
-  version "0.142.0"
-  resolved "https://codeload.github.com/Dumb-Code/three.js/tar.gz/7c80ca3659f39d102c8b7375c9b1c3d04f76e58a"
+  version "0.145.0"
+  resolved "https://codeload.github.com/Dumb-Code/three.js/tar.gz/3e17a4d90b5f41c93868281f01dcf9122db5a5c4"
 
 throat@^6.0.1:
   version "6.0.1"
