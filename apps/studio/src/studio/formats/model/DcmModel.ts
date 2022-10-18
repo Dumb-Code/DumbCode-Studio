@@ -505,12 +505,10 @@ export class DCMCube implements CubeParent {
       this.cubeMesh.material = this.model.materials.selected
     } else if (hovering) {
       this.cubeMesh.material = this.model.materials.highlight
+    } else if (affected) {
+      this.cubeMesh.material = this.model.materials.affected
     } else {
       this.cubeMesh.material = this.model.materials.normal
-    }
-    //Able to overwrite other materials.
-    if (affected) { 
-      this.cubeMesh.material = this.model.materials.affected
     }
   }
 
@@ -754,7 +752,7 @@ export class ProjectMaterials {
     this.selected.emissive.setHex(0x000066)
 
     this.affected = material.clone()
-    this.affected.emissive.setHex()
+    this.affected.emissive.setHex(0x02631C)
 
     this.export = exportMaterial.clone()
   }

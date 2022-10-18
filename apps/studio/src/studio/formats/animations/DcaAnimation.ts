@@ -870,19 +870,6 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
 
     return keyframe
   }
-
-  getAffectedCubes(keyframe: DcaKeyframe) { 
-    const rotKeys = new Set(keyframe.rotation);
-    const posKeys = new Set(keyframe.position);
-    const cubKeys = new Set(keyframe.cubeGrow);
-
-    const allKeys = new Set();
-    rotKeys.forEach(elem => allKeys.add(elem[0]))
-    posKeys.forEach(elem => allKeys.add(elem[0]))
-    cubKeys.forEach(elem => allKeys.add(elem[0]))
-
-    return Array.of(allKeys);
-  }
 }
 export class KeyframeLayerData {
 

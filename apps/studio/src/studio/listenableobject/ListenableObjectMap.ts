@@ -85,10 +85,17 @@ export class LOMap<K, V> extends Map<K, V> {
   }
 
   addGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.globalListeners.add(func);
+  addAndRunGlobalListener(func: (changedKeys: MapChangedKeys<K, V>[]) => void) {
+    this.globalListeners.add(func);
+    func(Array.from(this.entries()).map(([key, value]) => ({ key, value, oldValue: undefined })));
+  }
   removeGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.globalListeners.delete(func);
 
-
   addPreGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.preGlobalListeners.add(func);
+  addAndRunPreGlobalListener(func: (changedKeys: MapChangedKeys<K, V>[]) => void) {
+    this.preGlobalListeners.add(func);
+    func(Array.from(this.entries()).map(([key, value]) => ({ key, value, oldValue: undefined })));
+  }
   removePreGlobalListener = (func: (changedKeys: MapChangedKeys<K, V>[]) => void) => this.preGlobalListeners.delete(func);
 
   addListener(key: K, func: (newValue: V | undefined, oldValue: V | undefined) => void) {

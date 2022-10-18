@@ -95,6 +95,8 @@ const Animator = () => {
         }
     }, [project, onPostFrameListeners])
 
+    useAffectedKeyframeHighlight(animation);
+
     const selectedCubeHandlerUndoRedo = animation?.undoRedoHandler
 
     if (skeletonMode) {
@@ -182,6 +184,40 @@ const WrappedAnimatorTabBar = () => {
         selected={selectedProject.animationTabs.selectedAnimation}
         createNew={createNewAnimation}
     />
+}
+
+const useAffectedKeyframeHighlight = (animation: DcaAnimation | null) => {
+    const [selectedKeyframes] = useListenableObjectNullable(animation?.selectedKeyframes)
+
+    useEffect(() => {
+        if (selectedKeyframes === undefined || animation === null) {
+            return
+        }
+        const listener = (entries: { key: string }[]) => {
+            entries.forEach(name => {
+                const cubes = animation.project.model.cubeMap.get(name.key)
+                if (cubes !== undefined) {
+                    cubes.forEach(c => c.affected.value = true)
+                }
+            })
+        };
+
+        selectedKeyframes.forEach(keyframe => {
+            keyframe.position.addAndRunGlobalListener(listener)
+            keyframe.rotation.addAndRunGlobalListener(listener)
+            keyframe.cubeGrow.addAndRunGlobalListener(listener)
+        })
+
+        return () => {
+            selectedKeyframes.forEach(keyframe => {
+                keyframe.position.removeGlobalListener(listener)
+                keyframe.rotation.removeGlobalListener(listener)
+                keyframe.cubeGrow.removeGlobalListener(listener)
+            });
+            animation.project.model.gatherAllCubes().forEach(cube => cube.affected.value = false)
+        }
+
+    }, [selectedKeyframes, animation])
 }
 
 export default Animator;

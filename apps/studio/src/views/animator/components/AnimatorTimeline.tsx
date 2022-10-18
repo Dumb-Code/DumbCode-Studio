@@ -12,7 +12,6 @@ import NewAnimationSoundDialogBox from "../../../dialogboxes/NewAnimationSoundDi
 import { KeyframeClipboardType } from "../../../studio/clipboard/KeyframeClipboardType";
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
 import DcaSoundLayer, { DcaSoundLayerInstance } from "../../../studio/formats/animations/DcaSoundLayer";
-import { DCMModel } from "../../../studio/formats/model/DcmModel";
 import { StudioSound } from "../../../studio/formats/sounds/StudioSound";
 import { useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/listenableobject/ListenableObject";
 import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
@@ -28,7 +27,6 @@ const AnimatorTimeline = () => {
     const selectedProject = getSelectedProject()
 
     const [animation] = useListenableObject(selectedProject.animationTabs.selectedAnimation)
-    const [model] = useListenableObject(selectedProject.animationTabs.selectedProject)
     const onBackgroundClicked = () => {
         if (!animation) {
             return
@@ -38,7 +36,7 @@ const AnimatorTimeline = () => {
     return (
         <div onClick={onBackgroundClicked} className="rounded-sm dark:bg-gray-800 bg-gray-200 h-full pt-2 overflow-x-hidden overflow-y-scroll studio-scrollbar">
             {animation !== null ?
-                <AnimationLayers animation={animation} model={model} /> :
+                <AnimationLayers animation={animation} /> :
                 <div className="w-full h-full flex justify-center items-center text-gray-400 dark:text-gray-600">
                     No Animation Selected
                 </div>
@@ -65,7 +63,7 @@ export const ScrollZoomContext = createContext<{
     setHoveredLayerAndPosition: () => { },
 })
 
-const AnimationLayers = ({ animation, model }: { animation: DcaAnimation, model: DCMModel }) => {
+const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     const [layers, setLayers] = useListenableObject(animation.keyframeLayers)
     const [keyframes] = useListenableObject(animation.keyframes)
     const [pastedKeyframes, setPastedKeyframes] = useListenableObject(animation.pastedKeyframes)
@@ -191,7 +189,7 @@ const AnimationLayers = ({ animation, model }: { animation: DcaAnimation, model:
         <ScrollZoomContext.Provider value={context}>
             <>
                 {soundLayers.map(layer => <SoundLayer key={layer.identifier} animation={animation} soundLayer={layer} />)}
-                {keyframesByLayers.map(({ layer, keyframes }) => <AnimationLayer key={layer.layerId} animation={animation} keyframes={keyframes} layer={layer} model={model} />)}
+                {keyframesByLayers.map(({ layer, keyframes }) => <AnimationLayer key={layer.layerId} animation={animation} keyframes={keyframes} layer={layer} />)}
                 <div className="flex flex-row">
                     <LayerButton text="Transformation Layer" addLayer={addLayer} />
                     <LayerButton text="Sound Layer" addLayer={addSoundLayer} />
@@ -390,7 +388,7 @@ const getStartTime = (kf: DcaKeyframe | KeyframeClipboardType) => kf instanceof 
 const getDuration = (kf: DcaKeyframe | KeyframeClipboardType) => kf instanceof DcaKeyframe ? kf.duration.value : kf.duration
 
 
-const AnimationLayer = ({ animation, keyframes, layer, model }: { animation: DcaAnimation, keyframes: (DcaKeyframe | KeyframeClipboardType)[], layer: KeyframeLayerData, model: DCMModel }) => {
+const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimation, keyframes: (DcaKeyframe | KeyframeClipboardType)[], layer: KeyframeLayerData }) => {
     const [name, setName] = useListenableObject(layer.name)
     const [visible, toggleVisible] = useListenableObjectToggle(layer.visible)
     const [locked, toggleLocked] = useListenableObjectToggle(layer.locked)
@@ -474,7 +472,7 @@ const AnimationLayer = ({ animation, keyframes, layer, model }: { animation: Dca
             }
         >
             {kf => kf instanceof DcaKeyframe ?
-                <KeyFrame key={kf.identifier} layerColor={color} hoverColor={hoverColor} keyframe={kf} model={model} /> :
+                <KeyFrame key={kf.identifier} layerColor={color} hoverColor={hoverColor} keyframe={kf} /> :
                 <KeyframeFromClipboard key={kf.identifier} layerColor={color} hoverColor={hoverColor} keyframe={kf} />
             }
         </AnimationTimelineLayer >
@@ -519,7 +517,7 @@ const KeyframeFromClipboard = ({ layerColor, hoverColor, keyframe }: { layerColo
     )
 }
 
-const KeyFrame = ({ layerColor, hoverColor, keyframe, model }: { layerColor: string, hoverColor: string, keyframe: DcaKeyframe, model: DCMModel }) => {
+const KeyFrame = ({ layerColor, hoverColor, keyframe }: { layerColor: string, hoverColor: string, keyframe: DcaKeyframe }) => {
     const [start] = useListenableObject(keyframe.startTime)
     const [length] = useListenableObject(keyframe.duration)
     const [selected, setSelected] = useListenableObject(keyframe.selected)
@@ -580,12 +578,6 @@ const KeyFrame = ({ layerColor, hoverColor, keyframe, model }: { layerColor: str
                         setSelected(true)
                     }
                 }
-                selectedKeyframes.forEach(kf => {
-                    model.gatherAllCubes().forEach(element => element.affected.value = false)
-                    kf.getAffectedCubes().forEach(element => {
-                        model.gatherAllCubes().filter(cube => cube.name == element).forEach(element => element.affected.value = true)
-                    });
-                });
             }
         }, [keyframe, selected, getDraggingKeyframeRef, setSelected]),
         true
