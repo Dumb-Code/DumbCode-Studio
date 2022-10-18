@@ -752,7 +752,7 @@ export class ProjectMaterials {
     this.selected.emissive.setHex(0x000066)
 
     this.affected = material.clone()
-    this.affected.emissive.setHex(0x02631C)
+    this.affected.emissive.setHex(0x00FF00)
 
     this.export = exportMaterial.clone()
   }
