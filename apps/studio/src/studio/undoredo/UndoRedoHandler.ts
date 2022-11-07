@@ -218,6 +218,9 @@ export default class UndoRedoHandler<S extends UndoRedoSection> {
       section_name: section.section_name,
       property_name, value, old_value
     }
+    if (!this.batchActions && reason === "Cube Position Edit") {
+      console.trace("Cube Position Edit: ", value, old_value)
+    }
     if (silent) {
       this.silentActions.push(action)
     } else {
