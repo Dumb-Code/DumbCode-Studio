@@ -24,10 +24,10 @@ export const loadDCAAnimationOLD = (project: DcProject, name: string, buffer: St
 
   //Read the loop data
   if (version >= 9 && buffer.readBool()) {
-    animation.keyframeData.start.value = buffer.readNumber()
-    animation.keyframeData.end.value = buffer.readNumber()
-    animation.keyframeData.duration.value = buffer.readNumber()
-    animation.keyframeData.exits.value = true
+    animation.loopData.start.value = buffer.readNumber()
+    animation.loopData.end.value = buffer.readNumber()
+    animation.loopData.duration.value = buffer.readNumber()
+    animation.loopData.exists.value = true
   }
   //Read the keyframes
   const keyframes: DcaKeyframe[] = []

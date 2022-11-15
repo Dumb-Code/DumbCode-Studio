@@ -31,3 +31,8 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+# gen
+sw.js
+sw.js.map
+workbox-*.*

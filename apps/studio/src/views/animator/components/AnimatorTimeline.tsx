@@ -13,7 +13,7 @@ import { KeyframeClipboardType } from "../../../studio/clipboard/KeyframeClipboa
 import DcaAnimation, { DcaKeyframe, KeyframeLayerData } from "../../../studio/formats/animations/DcaAnimation";
 import DcaSoundLayer, { DcaSoundLayerInstance } from "../../../studio/formats/animations/DcaSoundLayer";
 import { StudioSound } from "../../../studio/formats/sounds/StudioSound";
-import { useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/listenableobject/ListenableObject";
+import { LO, useListenableObject, useListenableObjectNullable, useListenableObjectToggle } from "../../../studio/listenableobject/ListenableObject";
 import { HistoryActionTypes } from "../../../studio/undoredo/UndoRedoHandler";
 import { useDraggbleRef } from "../../../studio/util/DraggableElementRef";
 import { AnimationLayerButton, AnimationTimelineLayer, blockPerSecond, width } from "./AnimatorTimelineLayer";
@@ -69,7 +69,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     const [pastedKeyframes, setPastedKeyframes] = useListenableObject(animation.pastedKeyframes)
 
     const [hoveredLayer, setHoveredLayer] = useState<number | null>(null)
-    const [hoveredLayerClientX, setHoveredLayerClientX] = useState<number | null>(null)
+    const hoveredLayerClientX = useRef<number | null>(null)
 
     const [soundLayers, setSoundLayers] = useListenableObject(animation.soundLayers)
 
@@ -149,7 +149,7 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
 
     const setHoveredLayerAndPosition = useCallback((layer: number | null, clientX: number | null) => {
         setHoveredLayer(layer)
-        setHoveredLayerClientX(clientX)
+        hoveredLayerClientX.current = clientX
     }, [])
 
     const context = useMemo(() => ({
@@ -162,14 +162,14 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
     }), [addAndRunListener, removeListener, getPixelsPerSecond, getScroll, getDraggingKeyframeRef, setHoveredLayerAndPosition])
 
     useEffect(() => {
-        if (pastedKeyframes !== null && pastedKeyframes.length !== 0 && hoveredLayer !== null && hoveredLayerClientX !== null) {
+        if (pastedKeyframes !== null && pastedKeyframes.length !== 0 && hoveredLayer !== null && hoveredLayerClientX.current !== null) {
             const first = pastedKeyframes.reduce((prev, cur) => prev.start < cur.start ? prev : cur)
             const firstId = first.originalLayerId
             const firstStart = first.originalStart
 
             const maxLayer = Math.max(...layers.map(layer => layer.layerId))
 
-            const hoveredLayerStart = (hoveredLayerClientX - getScroll()) / getPixelsPerSecond()
+            const hoveredLayerStart = (hoveredLayerClientX.current - getScroll()) / getPixelsPerSecond()
 
             const newValue = pastedKeyframes.map(kft => ({
                 ...kft,
@@ -183,11 +183,13 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
                 setPastedKeyframes(newValue)
             }
         }
-    }, [pastedKeyframes, hoveredLayer, hoveredLayerClientX, getPixelsPerSecond, getScroll, layers, setPastedKeyframes])
+    }, [pastedKeyframes, hoveredLayer, getPixelsPerSecond, getScroll, layers, setPastedKeyframes])
 
     return (
         <ScrollZoomContext.Provider value={context}>
             <>
+                <TimelineLabels animation={animation} />
+                {animation.loopData.exists && <LoopingProperties animation={animation} />}
                 {soundLayers.map(layer => <SoundLayer key={layer.identifier} animation={animation} soundLayer={layer} />)}
                 {keyframesByLayers.map(({ layer, keyframes }) => <AnimationLayer key={layer.layerId} animation={animation} keyframes={keyframes} layer={layer} />)}
                 <div className="flex flex-row">
@@ -198,6 +200,62 @@ const AnimationLayers = ({ animation }: { animation: DcaAnimation }) => {
                 <PastedKeyframePortal animation={animation} pastedKeyframes={pastedKeyframes} hoveredLayer={hoveredLayer} />
             </>
         </ScrollZoomContext.Provider>
+    )
+}
+
+
+const TimelineLabels = ({ animation }: { animation: DcaAnimation }) => {
+    const [exists] = useListenableObject(animation.loopData.exists)
+
+    return (
+        <div className={(exists ? "mb-1 -translate-y-2" : "-mb-2 -translate-y-1") + " h-3.5 ml-[288px] mr-[34px] overflow-hidden relative"}>
+            <TimelineLabel pos={new LO<number>(0 / 10)} value={0} />
+            <TimelineLabel pos={new LO<number>(1 / 10)} value={1} />
+            <TimelineLabel pos={new LO<number>(2 / 10)} value={2} />
+            <TimelineLabel pos={new LO<number>(3 / 10)} value={3} />
+            <TimelineLabel pos={new LO<number>(4 / 10)} value={4} />
+            <TimelineLabel pos={new LO<number>(5 / 10)} value={5} />
+            <TimelineLabel pos={new LO<number>(6 / 10)} value={6} />
+            <TimelineLabel pos={new LO<number>(7 / 10)} value={7} />
+            <TimelineLabel pos={new LO<number>(8 / 10)} value={8} />
+            <TimelineLabel pos={new LO<number>(9 / 10)} value={9} />
+            <TimelineLabel pos={new LO<number>(10 / 10)} value={10} />
+            <TimelineLabel pos={new LO<number>(11 / 10)} value={11} />
+            <TimelineLabel pos={new LO<number>(12 / 10)} value={12} />
+            <TimelineLabel pos={new LO<number>(13 / 10)} value={13} />
+            <TimelineLabel pos={new LO<number>(14 / 10)} value={14} />
+            <TimelineLabel pos={new LO<number>(15 / 10)} value={15} />
+        </div>
+    )
+}
+
+const TimelineLabel = ({ pos, value }: { pos: LO<number>, value: number }) => {
+    const [entry, setEntry] = useListenableObject(pos)
+    const { getPixelsPerSecond, getScroll, addAndRunListener, removeListener } = useContext(ScrollZoomContext)
+
+    const ref = useDraggbleRef<HTMLDivElement, number>(
+        useCallback(() => entry, [entry]),
+        useCallback(({ dx, initial }) => {
+            setEntry(Math.max(initial + dx / getPixelsPerSecond(), 0))
+        }, [setEntry, getPixelsPerSecond]),
+        useCallback(() => { }, [])
+    )
+
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (ref.current !== null) {
+            ref.current.style.left = `${entry * pixelsPerSecond - scroll}px`
+        }
+    }, [entry, getPixelsPerSecond, getScroll, ref])
+
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
+
+    return (
+        <div ref={ref} className="h-full text-xs absolute dark:text-gray-400 text-black z-20">
+            {value}
+        </div>
     )
 }
 
@@ -411,7 +469,7 @@ const AnimationLayer = ({ animation, keyframes, layer }: { animation: DcaAnimati
 
         animation.selectedKeyframes.value.forEach(kf => kf.selected.value = false)
         kf.selected.value = true
-        kf.startTime.value = animation.time.value
+        kf.startTime.value = animation.displayTime.value
         animation.undoRedoHandler.endBatchActions("Created Keyframe", HistoryActionTypes.Add)
     }
 
@@ -623,6 +681,76 @@ const LayerButton = ({ addLayer, text }: { addLayer: (e: ReactMouseEvent) => voi
             <p className="text-xs mr-2">{text}</p>
         </button>
     );
+}
+
+const LoopingProperties = ({ animation }: { animation: DcaAnimation }) => {
+    const [exists] = useListenableObject(animation.loopData.exists)
+
+    return (
+        <div className="h-4 -mt-4 translate-y-2 mb-1 ml-[288px] mr-[34px] overflow-hidden relative">
+            {exists && <>
+                <LoopingMarker lo={animation.loopData.start} />
+                <LoopingMarker lo={animation.loopData.end} />
+                <LoopingRange animation={animation} />
+            </>}
+        </div>
+    )
+}
+
+const LoopingMarker = ({ lo }: { lo: LO<number> }) => {
+    const [entry, setEntry] = useListenableObject(lo)
+    const { getPixelsPerSecond, getScroll, addAndRunListener, removeListener } = useContext(ScrollZoomContext)
+
+    const ref = useDraggbleRef<HTMLDivElement, number>(
+        useCallback(() => entry, [entry]),
+        useCallback(({ dx, initial }) => {
+            setEntry(Math.max(initial + dx / getPixelsPerSecond(), 0))
+        }, [setEntry, getPixelsPerSecond]),
+        useCallback(() => { }, [])
+    )
+
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (ref.current !== null) {
+            ref.current.style.left = `${entry * pixelsPerSecond - scroll}px`
+        }
+    }, [entry, getPixelsPerSecond, getScroll, ref])
+
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
+
+    return (
+        <div ref={ref} className="h-3 w-3 absolute bg-blue-500 z-10 rotate-45 -mt-0.5 -ml-[6.5px]" />
+    )
+}
+
+const LoopingRange = ({ animation }: { animation: DcaAnimation }) => {
+    const [start] = useListenableObject(animation.loopData.start)
+    const [end] = useListenableObject(animation.loopData.end)
+
+    const { getPixelsPerSecond, getScroll, addAndRunListener, removeListener } = useContext(ScrollZoomContext)
+    const ref = useRef<HTMLDivElement>(null)
+
+    const updateRefStyle = useCallback((scroll = getScroll(), pixelsPerSecond = getPixelsPerSecond()) => {
+        if (ref.current !== null) {
+            ref.current.style.left = `${start * pixelsPerSecond - scroll}px`
+            ref.current.style.width = `${(end - start) * pixelsPerSecond}px`
+        }
+    }, [start, end, getPixelsPerSecond, getScroll])
+
+    useEffect(() => {
+        addAndRunListener(updateRefStyle)
+        return () => removeListener(updateRefStyle)
+    }, [addAndRunListener, removeListener, updateRefStyle])
+
+    return (
+        <div
+            ref={ref}
+            className="h-2 w-2 absolute bg-blue-200"
+        >
+        </div>
+    )
 }
 
 export default AnimatorTimeline;

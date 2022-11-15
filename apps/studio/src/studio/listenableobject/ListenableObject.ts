@@ -36,7 +36,7 @@ export class LO<T> {
     private postListeners: Set<Listener<T>> = new Set(),
   ) {
     if (defaultCallback) {
-      this.listners.add(defaultCallback)
+      this.postListeners.add(defaultCallback)
     }
     this.internalValue = _value;
   }

@@ -1,4 +1,4 @@
-import { SVGPause, SVGPlay, SVGRestart, SVGStop } from "@dumbcode/shared/icons";
+import { SVGLink, SVGPause, SVGPlay, SVGRestart, SVGStop } from "@dumbcode/shared/icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import NumericInput from "../../../components/NumericInput";
 import { ButtonWithTooltip } from "../../../components/Tooltips";
@@ -21,6 +21,8 @@ const AnimatorScrubBar = ({ animation }: { animation: DcaAnimation | null }) => 
     const value = valueGiven ?? 0
     const [maxGiven] = useListenableObjectNullable(animation?.maxTime)
     const max = maxGiven ?? 1
+
+    const [shouldContinueLooping, setShouldContinueLooping] = useListenableObjectNullable(animation?.shouldContinueLooping)
 
     const ref = useRef<HTMLDivElement>(null)
 
@@ -80,17 +82,25 @@ const AnimatorScrubBar = ({ animation }: { animation: DcaAnimation | null }) => 
 
     const onToggle = useCallback(() => {
         setPlaying(!isPlaying)
-    }, [isPlaying, setPlaying])
+        if (!isPlaying && animation?.time.value === 0) {
+            setShouldContinueLooping(true)
+        }
+    }, [isPlaying, setPlaying, animation?.time?.value, setShouldContinueLooping])
 
     const onRestart = useCallback(() => {
         setTimeAt(0)
         setPlaying(true)
-    }, [setTimeAt, setPlaying])
+        setShouldContinueLooping(true)
+    }, [setTimeAt, setPlaying, setShouldContinueLooping])
 
     const onStop = useCallback(() => {
         setTimeAt(0)
         setPlaying(false)
     }, [setTimeAt, setPlaying])
+
+    const toggleLooping = () => {
+        setShouldContinueLooping(!shouldContinueLooping)
+    }
 
     useKeyComboPressed(
         useMemo(() => ({
@@ -108,6 +118,8 @@ const AnimatorScrubBar = ({ animation }: { animation: DcaAnimation | null }) => 
     const [stopName] = useListenableObject(keycombos.stop_animation.displayName)
     const [pauseName] = useListenableObject(keycombos.pause_or_play.displayName)
     const [resetName] = useListenableObject(keycombos.restart_animation.displayName)
+    const [loopingName] = useListenableObject(keycombos.toggle_looping.displayName)
+
 
     return (
         <div className="flex flex-col items-center justify-end h-full dark:bg-gray-800 bg-white">
@@ -123,8 +135,12 @@ const AnimatorScrubBar = ({ animation }: { animation: DcaAnimation | null }) => 
                             : <SVGPlay className="h-8 w-8" />
                         }
                     </ButtonWithTooltip>
-                    <ButtonWithTooltip tooltip={`Restart Animation (${resetName})`} onClick={onRestart} className="z-10 dark:bg-gray-900 bg-gray-200 px-1 rounded-tr-md pt-1 dark:text-gray-400 text-black hover:text-yellow-400 border-r-2 border-t-2 dark:border-black border-white">
+                    <ButtonWithTooltip tooltip={`Restart Animation (${resetName})`} onClick={onRestart} className="z-10 dark:bg-gray-900 bg-gray-200 px-1 pt-1 dark:text-gray-400 text-black hover:text-yellow-400 border-t-2 dark:border-black border-white">
                         <SVGRestart className="h-6 w-6" />
+                    </ButtonWithTooltip>
+                    <ButtonWithTooltip tooltip={`Toggle Looping (${loopingName})`} onClick={toggleLooping}
+                        className={"z-10 dark:bg-gray-900 bg-gray-200 px-1 rounded-tr-md pt-1 border-r-2 border-t-2 dark:border-black border-white " + (shouldContinueLooping ? "text-blue-500" : "dark:text-gray-400 text-black")}>
+                        <SVGLink className="h-6 w-6" />
                     </ButtonWithTooltip>
                     <div className="flex-grow"></div>
                 </div>
