@@ -367,6 +367,8 @@ const convertCube = (cube: DCMCube, positionCache: WorldPositionCache): CubeElem
   const offset = _cloneArr(cube.offset)
   const dimension = _cloneArr(cube.dimension)
 
+  let cubeGrow = cube.cubeGrow.value;
+
   const from = plusArr(position, offset)
   return {
     name: `${cube.name.value}_cube`,
@@ -376,6 +378,7 @@ const convertCube = (cube: DCMCube, positionCache: WorldPositionCache): CubeElem
     to: plusArr(from, dimension),
     autouv: 0,
     color: 1,
+    inflate: (cubeGrow[0] + cubeGrow[1] + cubeGrow[2]) / 3,
     origin: [0, 0, 0],
     uv_offset: _cloneArr(cube.textureOffset),
     faces: {
