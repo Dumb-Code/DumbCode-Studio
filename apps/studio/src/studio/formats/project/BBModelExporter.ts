@@ -375,10 +375,10 @@ const convertCube = (cube: DCMCube, positionCache: WorldPositionCache): CubeElem
     rescale: false,
     locked: false,
     from: from,
-    to: plusArr(from, dimension),
+    to: plusArr(from, plusArr(dimension, cubeGrow)),
     autouv: 0,
     color: 1,
-    inflate: (cubeGrow[0] + cubeGrow[1] + cubeGrow[2]) / 3,
+    inflate: 0,
     origin: [0, 0, 0],
     uv_offset: _cloneArr(cube.textureOffset),
     faces: {
