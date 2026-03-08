@@ -1,4 +1,3 @@
-import { Euler, Quaternion, Vector3 } from 'three';
 import { v4 } from 'uuid';
 import { drawProgressionPointGraph, GraphType } from '../../../views/animator/logic/ProgressionPointGraph';
 import { readFromClipboard, writeToClipboard } from '../../clipboard/Clipboard';
@@ -21,11 +20,6 @@ const kfmap_position = "pos_"
 const kfmap_rotation = "rot_"
 const kfmap_cubegrow = "cg_"
 
-const tempVec = new Vector3()
-const tempQuat = new Quaternion()
-const tempEuler = new Euler()
-
-let debug = false
 
 type RootDataSectionType = {
   section_name: "root_data",
@@ -36,7 +30,13 @@ type RootDataSectionType = {
     keyframe_layers: readonly { layerId: number }[],
     propertiesMode: "local" | "global",
     time: number,
-    [k: `${typeof skeletal_export_named}_${string}`]: string
+
+    loop_exists: boolean,
+    loop_start: number,
+    loop_end: number,
+    loop_duration: number,
+
+    [k: `${typeof skeletal_export_named}_${string}`]: string,
   }
 }
 
@@ -99,9 +99,12 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   readonly displayTime = new LO(0, this.onDirty)
   readonly maxTime = new LO(1, this.onDirty)
   readonly playing = new LO(false, this.onDirty)
-  displayTimeMatch: boolean = true
 
-  readonly keyframeData: KeyframeLoopData
+  readonly loopData: KeyframeLoopData
+  readonly loopingKeyframe: DcaKeyframe;
+  readonly shouldContinueLooping = new LO(false)
+  isCurrentlyLooping = false
+
   readonly keyframeLayers = new LO<readonly KeyframeLayerData[]>([], this.onDirty)
 
   readonly scroll = new LO(0, this.onDirty)
@@ -137,11 +140,42 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
 
     this.name = new LO(name, this.onDirty).applyToSection(this._section, "name")
     this.project = project
-    this.keyframeData = new KeyframeLoopData()
+    this.loopData = new KeyframeLoopData()
     this.animatorGumball = new AnimatorGumball(project)
     this.time.addListener(value => {
-      if (this.displayTimeMatch) {
+      if (!this.isCurrentlyLooping) {
         this.displayTime.value = value
+      }
+    })
+
+    this.loopingKeyframe = new DcaKeyframe(this.project, this, v4(), -1);
+
+    this.loopData.exists.applyToSection(this._section, "loop_exists").addListener(this.onDirty)
+    this.loopData.exists.addPostListener(() => this.onKeyframeChanged())
+
+    this.loopData.start.applyToSection(this._section, "loop_start").addListener(this.onDirty)
+    this.loopData.start.addPostListener(() => this.onKeyframeChanged())
+
+    this.loopData.end.applyToSection(this._section, "loop_end").addListener(this.onDirty)
+    this.loopData.end.addPostListener(() => this.onKeyframeChanged())
+
+    this.loopData.duration.applyToSection(this._section, "loop_duration").addListener(this.onDirty)
+    this.loopData.duration.addPostListener(() => this.onKeyframeChanged())
+
+
+    this.loopData.start.addPreModifyListener((value, _, naughtyModifyValue) => {
+      if (value > this.loopData.end.value) {
+        const end = this.loopData.end.value
+        this.loopData.end.value = value
+        naughtyModifyValue(end)
+      }
+    })
+
+    this.loopData.end.addPreModifyListener((value, _, naughtyModifyValue) => {
+      if (value < this.loopData.start.value) {
+        const start = this.loopData.start.value
+        this.loopData.start.value = value
+        naughtyModifyValue(start)
       }
     })
 
@@ -210,7 +244,7 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   }
 
   ensureLayerExists(layerId: number) {
-    if (!this.keyframeLayers.value.some(l => l.layerId === layerId)) {
+    if (layerId >= 0 && !this.keyframeLayers.value.some(l => l.layerId === layerId)) {
       this.keyframeLayers.value = this.keyframeLayers.value.concat(new KeyframeLayerData(this, layerId))
     }
   }
@@ -310,12 +344,37 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   }
 
   animate(delta: number) {
+    let time = this.time.value + delta;
     if (this.playing.value) {
+      if (this.loopData.exists.value) {
+        const loopStart = this.loopData.start.value
+        const loopEnd = this.loopData.end.value
+        const loopDuration = this.loopData.duration.value
+
+        if (time >= loopEnd && (this.isCurrentlyLooping || this.shouldContinueLooping.value)) {
+          //If the ticks are after the looping end + the looping duration, then set the ticks back.
+          if (time - delta >= loopEnd + loopDuration) {
+            this.time.value = time = loopStart + time - (loopEnd + loopDuration)
+            this.isCurrentlyLooping = false
+          } else {
+            //Animate all the keyframes at the end, and animate the looping keyframe in reverse.
+            const percentDone = (time - loopEnd) / loopDuration;
+            this.displayTime.value = loopEnd + (loopStart - loopEnd) * percentDone
+            this.loopingKeyframe.animate(time - loopEnd)
+            time = loopEnd;
+            this.isCurrentlyLooping = true
+          }
+
+        }
+      } else {
+        this.isCurrentlyLooping = false
+      }
+
       this.updatingTimeNaturally = true
       this.time.value += delta
       this.updatingTimeNaturally = false
+
     }
-    const time = this.time.value
     const skipForced = this.isDraggingTimeline || this.playing.value
     this.animateAt(skipForced ? time : (this.forceAnimationTime ?? time))
   }
@@ -392,14 +451,79 @@ export default class DcaAnimation extends AnimatorGumballConsumer {
   cloneAnimation() {
     const animation = new DcaAnimation(this.project, this.name.value)
 
-    animation.keyframeData.exits.value = this.keyframeData.exits.value
-    animation.keyframeData.start.value = this.keyframeData.start.value
-    animation.keyframeData.end.value = this.keyframeData.end.value
-    animation.keyframeData.duration.value = this.keyframeData.duration.value
+    animation.loopData.exists.value = this.loopData.exists.value
+    animation.loopData.start.value = this.loopData.start.value
+    animation.loopData.end.value = this.loopData.end.value
+    animation.loopData.duration.value = this.loopData.duration.value
 
     animation.keyframes.value = this.keyframes.value.map(kf => kf.cloneBasics(animation))
 
     return animation
+  }
+
+  onKeyframeChanged(keyframe?: DcaKeyframe) {
+    if (keyframe === this.loopingKeyframe) {
+      return
+    }
+    this.needsSaving.value = true
+
+    this.loopingKeyframe.rotation.clear()
+    this.loopingKeyframe.position.clear()
+    this.loopingKeyframe.cubeGrow.clear()
+
+    this.project.model.resetVisuals()
+    this.animateAt(this.loopData.start.value)
+    const dataStart = this.captureModel()
+
+    this.project.model.resetVisuals()
+    this.animateAt(this.loopData.end.value)
+    const dataEnd = this.captureModel()
+
+    const subArrays = (a: NumArray, b: NumArray) => [
+      a[0] - b[0],
+      a[1] - b[1],
+      a[2] - b[2],
+    ] as const
+
+    this.project.model.identifierCubeMap.forEach((cube, identifier) => {
+      const start = dataStart[identifier]
+      const end = dataEnd[identifier]
+      if (start !== undefined && end !== undefined) {
+        this.loopingKeyframe.rotation.set(cube.name.value, subArrays(start.rotation, end.rotation))
+        this.loopingKeyframe.position.set(cube.name.value, subArrays(start.position, end.position))
+        this.loopingKeyframe.cubeGrow.set(cube.name.value, subArrays(start.cubeGrow, end.cubeGrow))
+      }
+    })
+
+    console.log(this.loopingKeyframe)
+
+    this.loopingKeyframe.duration.value = this.loopData.duration.value
+  }
+
+  private captureModel() {
+    const data: Record<string, Record<"rotation" | "position" | "cubeGrow", NumArray>> = {}
+
+    Array.from(this.project.model.identifierCubeMap.values()).forEach(cube => {
+      data[cube.identifier] = {
+        rotation: [
+          cube.cubeGroup.rotation.x,
+          cube.cubeGroup.rotation.y,
+          cube.cubeGroup.rotation.z,
+        ],
+        position: [
+          cube.cubeGroup.position.x,
+          cube.cubeGroup.position.y,
+          cube.cubeGroup.position.z,
+        ],
+        cubeGrow: [
+          cube.cubeGrowGroup.position.x,
+          cube.cubeGrowGroup.position.y,
+          cube.cubeGrowGroup.position.z,
+        ],
+      }
+    })
+
+    return data
   }
 
 }
@@ -411,7 +535,7 @@ export class DcaKeyframe extends AnimatorGumballConsumerPart {
   readonly animation: DcaAnimation
   readonly _section: SectionHandle<UndoRedoDataType, KeyframeSectionType>
 
-  private readonly onDirty = () => this.animation.needsSaving.value = true
+  private readonly onDirty = () => this.animation.onKeyframeChanged(this)
 
   readonly startTime: LO<number>
   readonly duration: LO<number>
@@ -888,7 +1012,7 @@ export class KeyframeLayerData {
     locked = false,
     definedMode = false
   ) {
-    const onDirty = () => parentAnimation.needsSaving.value = true
+    const onDirty = () => parentAnimation.onKeyframeChanged()
     this._section = parentAnimation.undoRedoHandler.createNewSection(`layer_${this.layerId}` as `layer_0`) //layer_0 is to trick the compiler to knowing that layer_{layerid} a number 
     this._section.modifyFirst("layerId", this.layerId, () => { throw new Error("Tried to modify layerId") })
 
@@ -916,7 +1040,7 @@ export class KeyframeLayerData {
 }
 
 export class KeyframeLoopData {
-  readonly exits = new LO(false)
+  readonly exists = new LO(false)
   readonly start = new LO<number>(0)
   readonly end = new LO<number>(0)
   readonly duration = new LO<number>(0)

@@ -11,7 +11,7 @@ const CreatePortalContext = ({ children }: PropsWithChildren<{}>) => {
   const { darkMode } = useOptions()
   return (
     <Context.Provider value={node => overlay.current === null ? null : createPortal(node, overlay.current)}>
-      <div ref={overlay} className={"absolute z-10 pointer-events-none overflow-hidden h-full w-full " + (darkMode ? "dark" : "")}></div>
+      <div ref={overlay} className={"absolute z-30 pointer-events-none overflow-hidden h-full w-full " + (darkMode ? "dark" : "")}></div>
       {children}
     </Context.Provider>
   )

@@ -108,6 +108,7 @@ const keyCombos = {
       pause_or_play: new KeyCombo('Pause/Play', "Pause or play the animation", 'Space', false),
       restart_animation: new KeyCombo('Restart Animation', "Restart the animation", 'Space', true),
       stop_animation: new KeyCombo('Stop Animation', "Stop the animation", 'Space', false, true),
+      toggle_looping: new KeyCombo('Toggle Looping', "Toggle looping", 'L', true),
     }
   },
 }

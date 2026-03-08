@@ -143,7 +143,7 @@ export default class DcProject {
       if (animaion.isSkeleton.value) {
         continue
       }
-      for (let keyframe of animaion.keyframes.value) {
+      for (let keyframe of [animaion.loopingKeyframe, ...animaion.keyframes.value]) {
         for (let map of [keyframe.position, keyframe.rotation, keyframe.cubeGrow]) {
           const value = map.get(oldName)
           if (value !== undefined) {
