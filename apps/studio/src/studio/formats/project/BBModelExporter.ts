@@ -469,13 +469,13 @@ const getCubeFace = (cube: DCMCube, dimension: NumArray, textureOffset: NumArray
 
   switch (face) {
     case 0: // north
-      uv = [u + d + w + d, v + d, u + d + w + d + w, v + d + h]
+      uv = [u + d, v + d, u + d + w, v + d + h]
       break
     case 1: // east
       uv = [u, v + d, u + d, v + d + h]
       break
     case 2: // south
-      uv = [u + d, v + d, u + d + w, v + d + h]
+      uv = [u + d + w + d, v + d, u + d + w + d + w, v + d + h]
       break
     case 3: // west
       uv = [u + d + w, v + d, u + d + w + d, v + d + h]
