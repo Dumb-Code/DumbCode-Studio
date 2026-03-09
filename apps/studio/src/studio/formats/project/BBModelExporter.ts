@@ -27,7 +27,7 @@ type MetaData = {
   format_version: "4.0";
   creation_time: number;
   model_format: "bedrock";
-  box_uv: true;
+  box_uv: false;
 }
 
 export type CubeElement = {
@@ -42,7 +42,6 @@ export type CubeElement = {
   inflate?: number
   origin: NumArray
   rotation?: NumArray
-  uv_offset?: NumArray<2>
   faces: {
     north: CubeElementFace
     east: CubeElementFace
@@ -152,7 +151,7 @@ const createBasicModelData = (): Pick<BBModelFormat,
   meta: {
     format_version: '4.0',
     creation_time: Math.floor(Date.now() / 1000),
-    box_uv: true,
+    box_uv: false,
     model_format: "bedrock",
   } as const,
   geometry_name: "Model",
@@ -365,6 +364,7 @@ const convertCubeAndBone = (dcmCube: DCMCube, cubes: CubeElement[], boneAcceptor
 const convertCube = (cube: DCMCube, positionCache: WorldPositionCache): CubeElement => {
   const position = getCubePosition(cube, positionCache)
   const offset = _cloneArr(cube.offset)
+  const textureOffset = _cloneArr(cube.textureOffset)
   const dimension = _cloneArr(cube.dimension)
 
   let cubeGrow = cube.cubeGrow.value;
@@ -380,14 +380,13 @@ const convertCube = (cube: DCMCube, positionCache: WorldPositionCache): CubeElem
     color: 1,
     inflate: 0,
     origin: [0, 0, 0],
-    uv_offset: _cloneArr(cube.textureOffset),
     faces: {
-      north: getCubeFace(cube, 0),
-      east: getCubeFace(cube, 0),
-      south: getCubeFace(cube, 0),
-      west: getCubeFace(cube, 0),
-      up: getCubeFace(cube, 0),
-      down: getCubeFace(cube, 0),
+      north: getCubeFace(cube, dimension, textureOffset, 0),
+      east: getCubeFace(cube, dimension, textureOffset, 1),
+      south: getCubeFace(cube, dimension, textureOffset, 2),
+      west: getCubeFace(cube, dimension, textureOffset, 3),
+      up: getCubeFace(cube, dimension, textureOffset, 4),
+      down: getCubeFace(cube, dimension, textureOffset, 5),
     },
     type: "cube",
     uuid: v4()
@@ -458,10 +457,42 @@ const getCubePosition = (cube: DCMCube, positionCache: WorldPositionCache): NumA
   ] as const
 }
 
-const getCubeFace = (cube: DCMCube, face: number): CubeElementFace => ({
-  texture: 0,
-  uv: [0, 0, 1, 1]
-})
+const getCubeFace = (cube: DCMCube, dimension: NumArray, textureOffset: NumArray<2>, face: number): CubeElementFace => {
+  const w = Math.round(dimension[0])
+  const h = Math.round(dimension[1])
+  const d = Math.round(dimension[2])
+
+  const u = Math.round(textureOffset[0])
+  const v = Math.round(textureOffset[1])
+
+  let uv: [number, number, number, number] = [0, 0, 1, 1]
+
+  switch (face) {
+    case 0: // north
+      uv = [u + d + w + d, v + d, u + d + w + d + w, v + d + h]
+      break
+    case 1: // east
+      uv = [u, v + d, u + d, v + d + h]
+      break
+    case 2: // south
+      uv = [u + d, v + d, u + d + w, v + d + h]
+      break
+    case 3: // west
+      uv = [u + d + w, v + d, u + d + w + d, v + d + h]
+      break
+    case 4: // up
+      uv = [u + d, v, u + d + w, v + d]
+      break
+    case 5: // down
+      uv = [u + d + w, v, u + d + w + w, v + d]
+      break
+  }
+
+  return {
+    texture: 0,
+    uv
+  }
+}
 
 const plusArr = (arr1: NumArray, arr2: NumArray): NumArray => {
   return [
