@@ -374,7 +374,7 @@ const convertCube = (cube: DCMCube, positionCache: WorldPositionCache): CubeElem
     name: `${cube.name.value}_cube`,
     rescale: false,
     locked: false,
-    from: from,
+    from: minusArray(from, cubeGrow),
     to: plusArr(from, plusArr(dimension, cubeGrow)),
     autouv: 0,
     color: 1,
@@ -468,6 +468,14 @@ const plusArr = (arr1: NumArray, arr2: NumArray): NumArray => {
     arr1[0] + arr2[0],
     arr1[1] + arr2[1],
     arr1[2] + arr2[2],
+  ]
+}
+
+const minusArray = (arr1: NumArray, arr2: NumArray): NumArray => {
+  return [
+    arr1[0] - arr2[0],
+    arr1[1] - arr2[1],
+    arr1[2] - arr2[2],
   ]
 }
 
