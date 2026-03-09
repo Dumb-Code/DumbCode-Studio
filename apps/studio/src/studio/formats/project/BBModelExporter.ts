@@ -481,7 +481,7 @@ const getCubeFace = (cube: DCMCube, dimension: NumArray, textureOffset: NumArray
       uv = [u + d + w, v + d, u + d + w + d, v + d + h]
       break
     case 4: // up
-      uv = [u + d, v, u + d + w, v + d]
+      uv = [u + d, v + d, u + d + w, v]
       break
     case 5: // down
       uv = [u + d + w, v, u + d + w + w, v + d]
