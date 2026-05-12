@@ -135,15 +135,22 @@ export const listClients = () => {
   return [...state.clients.values()].sort((a, b) => b.lastSeenAt - a.lastSeenAt).map(publicClient)
 }
 
-const getActiveClient = () => {
-  pruneClients()
-  const candidates = [...state.clients.values()].filter(client => client.visible)
-  if (candidates.length === 0) return null
-  return candidates.sort((a, b) => {
+const sortActiveClients = (candidates: ClientState[]) =>
+  candidates.sort((a, b) => {
     if (a.focused !== b.focused) return a.focused ? -1 : 1
     if (a.lastFocusedAt !== b.lastFocusedAt) return b.lastFocusedAt - a.lastFocusedAt
     return b.lastSeenAt - a.lastSeenAt
   })[0]
+
+const getActiveClient = () => {
+  pruneClients()
+  const visible = [...state.clients.values()].filter(client => client.visible)
+  if (visible.length > 0) {
+    return sortActiveClients(visible)
+  }
+  const any = [...state.clients.values()]
+  if (any.length === 0) return null
+  return sortActiveClients(any)
 }
 
 export const registerClient = (id: string, secret: string, userAgent?: string, visible = true, focused = true) => {
