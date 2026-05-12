@@ -259,6 +259,35 @@ export default class TextureManager {
     ctx.fillRect(u + ud, v + vd, uw, vh)
   }
 
+  static getCubeFacePixelRects(cube: DCMCube): readonly { readonly x: number; readonly y: number; readonly w: number; readonly h: number }[] {
+    const textureWidth = cube.model.textureWidth.value
+    const textureHeight = cube.model.textureHeight.value
+    const bounds = fitAreaWithinBounds(textureWidth, textureHeight, textureWidth, textureHeight)
+    const su = textureWidth / bounds.width
+    const sv = textureHeight / bounds.height
+    const textureOffset = cube.textureOffset.value
+    const dimension = cube.dimension.value
+    const u = textureOffset[0] / su
+    const v = textureOffset[1] / sv
+    const w = dimension[0]
+    const h = dimension[1]
+    const d = dimension[2]
+    const uw = w / su
+    const ud = d / su
+    const vh = h / sv
+    const vd = d / sv
+    const sideA = { x: u, y: v + vd, w: ud, h: vh }
+    const sideB = { x: u + ud + uw, y: v + vd, w: ud, h: vh }
+    const topA = { x: u + ud, y: v, w: uw, h: vd }
+    const topB = { x: u + ud + uw, y: v, w: uw, h: vd }
+    const bodyA = { x: u + ud + uw + ud, y: v + vd, w: uw, h: vh }
+    const bodyB = { x: u + ud, y: v + vd, w: uw, h: vh }
+    const mirrored = cube.textureMirrored.value
+    return mirrored
+      ? [sideB, sideA, topA, topB, bodyA, bodyB]
+      : [sideA, sideB, topA, topB, bodyA, bodyB]
+  }
+
 }
 
 export class TextureGroup {
@@ -460,6 +489,97 @@ export class Texture {
     value.onload = () => refresh && (this.element.value = value)
     value.src = await this.canvas.toDataURL()
   }
+}
+
+const isTextureImageReady = (el: HTMLImageElement) => el.complete && el.naturalWidth > 0 && el.naturalHeight > 0
+
+const waitForTextureImage = (texture: Texture) =>
+  new Promise<void>((resolve, reject) => {
+    let current: HTMLImageElement | null = null
+    let finished = false
+
+    const cleanupImage = () => {
+      if (current === null) return
+      current.removeEventListener("load", onLoad)
+      current.removeEventListener("error", onError)
+      current = null
+    }
+    const finish = (callback: () => void) => {
+      if (finished) return
+      finished = true
+      cleanupImage()
+      texture.element.removeListener(onElementChanged)
+      callback()
+    }
+    const onLoad = () => {
+      if (current !== null && isTextureImageReady(current)) {
+        finish(resolve)
+      }
+    }
+    const onError = () => finish(() => reject(new Error("Texture image failed to load")))
+    const watch = (el: HTMLImageElement) => {
+      cleanupImage()
+      if (isTextureImageReady(el)) {
+        finish(resolve)
+        return
+      }
+      current = el
+      current.addEventListener("load", onLoad)
+      current.addEventListener("error", onError)
+    }
+    const onElementChanged = (el: HTMLImageElement) => watch(el)
+
+    texture.element.addListener(onElementChanged)
+    watch(texture.element.value)
+  })
+
+/** Raster-fill cube face UV regions on a bitmap texture and refresh the 3D material. */
+export const paintCubeFacesOntoRasterTexture = async (
+  manager: TextureManager,
+  texture: Texture,
+  cube: DCMCube,
+  rgba: readonly [number, number, number, number],
+  faceIndexes: readonly number[] | undefined,
+): Promise<{ facesPainted: number; rects: { x: number; y: number; w: number; h: number }[] }> => {
+  await waitForTextureImage(texture)
+  const el = texture.element.value
+  const canvas = document.createElement("canvas")
+  canvas.width = el.naturalWidth
+  canvas.height = el.naturalHeight
+  if (canvas.width === 0 || canvas.height === 0) {
+    throw new Error("Texture has zero width or height")
+  }
+  const ctx = canvas.getContext("2d")
+  if (ctx === null) {
+    throw new Error("Unable to get 2D canvas context")
+  }
+  ctx.imageSmoothingEnabled = false
+  ctx.drawImage(el, 0, 0)
+  const rects = TextureManager.getCubeFacePixelRects(cube)
+  const faces = faceIndexes === undefined || faceIndexes.length === 0 ? ([0, 1, 2, 3, 4, 5] as const) : faceIndexes
+  const alpha = rgba[3] / 255
+  ctx.fillStyle = `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${alpha})`
+  const painted: { x: number; y: number; w: number; h: number }[] = []
+  for (const i of faces) {
+    const r = rects[i]
+    if (r === undefined) {
+      throw new Error(`Face index ${i} is out of range (valid: 0-5)`)
+    }
+    ctx.fillRect(Math.floor(r.x), Math.floor(r.y), Math.max(1, Math.ceil(r.w)), Math.max(1, Math.ceil(r.h)))
+    painted.push({ x: r.x, y: r.y, w: r.w, h: r.h })
+  }
+  await new Promise<void>((resolve, reject) => {
+    const out = new Image()
+    out.onload = () => {
+      texture.element.value = out
+      texture.needsSaving.value = true
+      manager.refresh()
+      resolve()
+    }
+    out.onerror = () => reject(new Error("Failed to decode painted texture"))
+    out.src = canvas.toDataURL("image/png")
+  })
+  return { facesPainted: faces.length, rects: painted }
 }
 
 export const useTextureDomRef = <T extends HTMLElement>(texture: Texture, className?: string, modify?: (img: HTMLImageElement) => void) => {

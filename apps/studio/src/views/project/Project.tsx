@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { useWhenAction } from '../../containers/StudioContainer'
+import { useWhenAction } from '../../studio/util/UseWhenAction'
 import { useProjectPageContext } from '../../contexts/ProjectPageContext'
 import StudioGridRaw from '../../studio/griddividers/components/StudioGrid'
 import StudioGridArea from '../../studio/griddividers/components/StudioGridArea'

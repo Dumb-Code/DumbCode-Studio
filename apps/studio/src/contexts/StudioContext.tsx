@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { StudioTabs } from '../containers/StudioContainer';
+import { StudioTabs } from '../studio/StudioTabs';
 import DcProject, { newProject } from '../studio/formats/project/DcProject';
 import UnsafeOperations from '../studio/util/UnsafeOperations';
 import { createThreeContext, ThreeJsContext } from './ThreeContext';
