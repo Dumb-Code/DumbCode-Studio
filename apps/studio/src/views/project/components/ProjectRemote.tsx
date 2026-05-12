@@ -5,7 +5,7 @@ import { MouseEvent, RefObject, useCallback, useEffect, useMemo, useRef, useStat
 import GithubAccountButton from "../../../components/GithubAccountButton";
 import { MinimizeButton } from "../../../components/MinimizeButton";
 import { ButtonWithTooltip } from "../../../components/Tooltips";
-import { useWhenAction } from "../../../containers/StudioContainer";
+import { useWhenAction } from "../../../studio/util/UseWhenAction";
 import { useProjectPageContext } from "../../../contexts/ProjectPageContext";
 import { useStudio } from "../../../contexts/StudioContext";
 import { useDialogBoxes } from "../../../dialogboxes/DialogBoxes";

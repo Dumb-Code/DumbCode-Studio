@@ -1,8 +1,8 @@
-import { createContext, PropsWithChildren, ReactNode, ReactPortal, useContext, useRef } from "react";
+import { createContext, PropsWithChildren, ReactNode, useContext, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useOptions } from "./OptionsContext";
 
-type CreatePortalContext = (children: ReactNode) => ReactPortal | null
+type CreatePortalContext = (node: ReactNode) => ReturnType<typeof createPortal> | null;
 
 const Context = createContext<CreatePortalContext | null>(null)
 

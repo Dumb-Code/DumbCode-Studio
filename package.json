@@ -13,7 +13,10 @@
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare": "husky install",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "mcp:build": "yarn workspace dumbcode-studio-mcp build",
+    "mcp:start": "yarn workspace dumbcode-studio-mcp start",
+    "mcp:dev": "yarn workspace dumbcode-studio-mcp dev"
   },
   "devDependencies": {
     "@dumbcode/eslint-config-custom": "*",
@@ -25,5 +28,9 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "packageManager": "yarn@1.22.15"
+  "packageManager": "yarn@1.22.15",
+  "resolutions": {
+    "@types/react": "18.0.17",
+    "@types/react-dom": "18.0.6"
+  }
 }

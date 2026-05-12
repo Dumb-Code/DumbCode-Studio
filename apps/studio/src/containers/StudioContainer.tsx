@@ -1,5 +1,5 @@
 import { SVGSettings } from "@dumbcode/shared/icons";
-import { PropsWithChildren, useEffect, useRef } from "react";
+import { PropsWithChildren, useEffect } from "react";
 import GithubAccountButton from "../components/GithubAccountButton";
 import CreatePortalContext from "../contexts/CreatePortalContext";
 import { OptionsContextProvider, useOptions } from "../contexts/OptionsContext";
@@ -10,27 +10,14 @@ import StudioPanelsContextProvider from "../contexts/StudioPanelsContext";
 import ToastContext from "../contexts/ToastContext";
 import TooltipContextProvider from "../contexts/TooltipContext";
 import DialogBoxes from "../dialogboxes/DialogBoxes";
+import { StudioTabs } from "../studio/StudioTabs";
 import { useAutoRecovery } from "../studio/autorecovery/AutoRecoveryHook";
+import McpStudioBridge from "../studio/mcp/McpStudioBridge";
 import { createReadableFileExtended } from "../studio/files/FileTypes";
 import { createProject, newProject } from "../studio/formats/project/DcProject";
 import useNoDefaultKeypresses from "../studio/util/DisableUnwantedKeyup";
-import Animator from "../views/animator/Animator";
-import Modeler from "../views/modeler/Modeler";
+import { useWhenAction } from "../studio/util/UseWhenAction";
 import Options from "../views/options/Options";
-import Project from "../views/project/Project";
-import Showcase from "../views/showcase/Showcase";
-import TextureMapper from "../views/texturemapper/Texturemapper";
-import Texturer from "../views/texturer/Texturer";
-
-export const StudioTabs = [
-  // { name: "options", titleComponent: () => <SVGSettings className="w-5 h-5 px-0.5" />, color: "bg-red-500", component: () => <Options />, extraClasses: "w-9 transform translate-y-1.5" },
-  { name: "Project", color: "bg-purple-600 hover:bg-purple-700", component: () => <Project /> },
-  { name: "Modeler", color: "bg-sky-600 hover:bg-sky-700", component: () => <Modeler /> },
-  { name: "Mapper", color: "bg-teal-500 hover:bg-teal-600", component: () => <TextureMapper /> },
-  { name: "Texturer", color: "bg-green-500 hover:bg-green-600", component: () => <Texturer /> },
-  { name: "Animator", color: "bg-yellow-500 hover:bg-yellow-600", component: () => <Animator /> },
-  { name: "Showcase", color: "bg-orange-500 hover:bg-orange-600", component: () => <Showcase /> },
-] as const
 
 const StudioContainer = () => {
   return (
@@ -43,7 +30,10 @@ const StudioContainer = () => {
                 <ToastContext>
                   <TooltipContextProvider>
                     <DialogBoxes>
-                      <StudioApp />
+                      <>
+                        <McpStudioBridge />
+                        <StudioApp />
+                      </>
                     </DialogBoxes>
                   </TooltipContextProvider>
                 </ToastContext>
@@ -55,21 +45,6 @@ const StudioContainer = () => {
     </PWAInstallButtonContext>
   );
 };
-
-export const useWhenAction = (action: "create_new_model" | "last_remote_repo_project", fn: () => void) => {
-  const handled = useRef(false);
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return
-    }
-    const urlAction = new URLSearchParams(window.location.search).get("action");
-    if (action === urlAction && !handled.current) {
-      fn()
-      handled.current = true
-    }
-  }, [action, fn])
-}
-
 
 const StudioApp = () => {
 
