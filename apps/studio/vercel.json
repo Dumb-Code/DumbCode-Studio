@@ -1,4 +1,6 @@
 {
+  "framework": "nextjs",
+  "outputDirectory": ".next",
   "github": {
     "silent": true
   },
